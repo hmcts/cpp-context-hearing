@@ -1,0 +1,56 @@
+#%RAML 0.8
+title: Hearing Query view
+baseUri: http://localhost:8080/hearing-query-view/query/view/rest/hearing
+protocols: [ HTTP, HTTPS ]
+                       
+/cases/{caseid}/hearings:
+  uriParameters:
+        caseid:
+          description: ID of case to get
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.query.hearings+json
+            name: hearing.query.hearings
+        ...
+      queryParameters:
+        fromdate:
+          description: Specifies the hearing from date i.e. localhost:8888/cases/xxx-xxx/hearings?fromdate=2016-01-01
+          type: string
+          example: 2016-01-01
+          required : false
+        hearingtype:
+          description: Specifies the hearing type i.e. /cases/{caseid}/hearings?fromdate=2016-01-01&hearingtype=PTP
+          type: string
+          example: PTP
+          required : false
+      responses:
+            200:
+                description: OK        
+                body: 
+                  application/vnd.hearing.query.hearings+json:
+                    example:  !include json/hearing.query.hearings.json
+                    schema:  !include  json/schema/hearing.query.hearings.json
+
+/hearings/{hearingid}:
+  uriParameters:
+        hearingid:
+          description: ID of hearing to get
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.query.hearing+json
+            name: hearing.query.hearing
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.query.hearing+json:
+                    example:  !include json/hearing.query.hearing.json
+                    schema:  !include  json/schema/hearing.query.hearing.json
+

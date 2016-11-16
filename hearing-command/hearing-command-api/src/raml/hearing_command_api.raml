@@ -1,0 +1,45 @@
+#%RAML 0.8
+title: Hearing Command API
+version: 1.0
+baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
+
+/hearings/listhearing:
+  displayName: Services pertaining to Hearing.
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.command.list-hearing+json
+            name: hearing.command.list-hearing
+        ...
+      body:
+        application/vnd.hearing.command.list-hearing+json:
+            example: 
+             !include json/hearing.command.list-hearing.json
+             
+            schema: 
+             !include json/schema/hearing.command.list-hearing.json
+              
+      responses:
+            202:
+                description: OK        
+
+/hearings/vacatehearing:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.command.vacate-hearing+json
+            name: hearing.command.vacate-hearing
+        ...
+      body:
+        application/vnd.hearing.command.vacate-hearing+json:
+            example: 
+             !include json/hearing.command.vacate-hearing.json
+            schema: 
+             !include json/schema/hearing.command.vacate-hearing.json
+              
+      responses:
+            202:
+                description: OK
+

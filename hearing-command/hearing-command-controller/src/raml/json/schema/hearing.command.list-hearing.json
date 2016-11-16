@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "type": "string"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "hearingType": {
+      "type": "string"
+    },
+    "courtCentreName": {
+      "type": "string"
+    },
+    "dateOfSending": {
+      "type": "string"
+    },
+    "duration": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "hearingId",
+    "caseId",
+    "hearingType",
+    "courtCentreName",
+    "dateOfSending",
+    "duration"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "hearingId": "RANDOM_HEARING_ID" ,
+  "caseId": "RANDOM_CASE_ID",
+  "hearingType": "TRIAL",
+  "courtCentreName": "Liverpool",
+  "dateOfSending": "2016-05-11",
+  "duration" : 1
+}

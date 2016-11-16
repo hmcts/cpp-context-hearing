@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>uk.gov.moj.cpp.common</groupId>
+		<artifactId>service-parent-pom</artifactId>
+		<version>2.0.40</version>
+	</parent>
+
+	<groupId>uk.gov.moj.cpp.hearing</groupId>
+	<artifactId>hearing-parent</artifactId>
+	<version>2.0.50-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Hearing services application</name>
+	<description>A applications for hearing service.</description>
+	<properties>
+		<cpp-common-test-utils.version>0.1.0</cpp-common-test-utils.version>
+		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.report.export.path>sonar-report.json</sonar.report.export.path>
+		<sonar.scm.provider>git</sonar.scm.provider>
+		<openejb.version>7.0.0-M3</openejb.version>
+		<cpp.framework.action.mapping.enabled>true</cpp.framework.action.mapping.enabled>
+	</properties>
+	<modules>
+		<module>hearing-query</module>
+		<module>hearing-viewstore</module>
+		<module>hearing-command</module>
+		<module>hearing-domain</module>
+		<module>hearing-event</module>
+		<module>hearing-integration-test</module>
+		<module>hearing-performance-test</module>
+	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>external.atlassian.jgitflow</groupId>
+				<artifactId>jgitflow-maven-plugin</artifactId>
+				<version>1.0-m5.1</version>
+				<configuration>
+					<flowInitContext>
+						<masterBranchName>dev/hearing-release</masterBranchName>
+						<developBranchName>master</developBranchName>
+						<featureBranchPrefix>dev/hearing-feature-</featureBranchPrefix>
+						<releaseBranchPrefix>dev/hearing-release-</releaseBranchPrefix>
+						<hotfixBranchPrefix>dev/hearing-hotfix-</hotfixBranchPrefix>
+						<versionTagPrefix>hearing-tag-</versionTagPrefix>
+					</flowInitContext>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<enableSshAgent>true</enableSshAgent>
+					<pushReleases>true</pushReleases>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+
+</project>

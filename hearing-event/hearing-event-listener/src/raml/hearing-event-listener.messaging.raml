@@ -1,0 +1,14 @@
+#%RAML 0.8
+title: API Using media type in the URL
+baseUri: message://event/listener/message/hearing
+
+version: v1
+/hearing.event:
+  post:
+    body:
+        application/vnd.hearing.events.hearing-listed+json:
+            schema: !include json/schema/hearing.events.hearing-listed.json
+            example: !include json/hearing.events.hearing-listed.json
+        application/vnd.hearing.events.hearing-vacated+json:
+            schema: !include json/schema/hearing.events.hearing-vacated.json
+            example: !include json/hearing.events.hearing-vacated.json

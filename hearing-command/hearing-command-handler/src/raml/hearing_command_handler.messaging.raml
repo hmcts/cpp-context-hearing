@@ -1,0 +1,14 @@
+#%RAML 0.8
+title: Hearing Command handler
+version: 1.0
+baseUri:  message://command/handler/message/hearing
+
+/hearing.handler.command:
+  post:
+      body:
+        application/vnd.hearing.command.list-hearing+json:
+            example: !include json/hearing.command.list-hearing.json
+            schema:  !include json/schema/hearing.command.list-hearing.json
+        application/vnd.hearing.command.vacate-hearing+json:
+            example: !include json/hearing.command.vacate-hearing.json
+            schema:  !include json/schema/hearing.command.vacate-hearing.json
