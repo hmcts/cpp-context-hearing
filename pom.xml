@@ -33,28 +33,33 @@
 		<module>hearing-performance-test</module>
 	</modules>
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>external.atlassian.jgitflow</groupId>
-				<artifactId>jgitflow-maven-plugin</artifactId>
-				<version>1.0-m5.1</version>
-				<configuration>
-					<flowInitContext>
-						<masterBranchName>dev/hearing-release</masterBranchName>
-						<developBranchName>master</developBranchName>
-						<featureBranchPrefix>dev/hearing-feature-</featureBranchPrefix>
-						<releaseBranchPrefix>dev/hearing-release-</releaseBranchPrefix>
-						<hotfixBranchPrefix>dev/hearing-hotfix-</hotfixBranchPrefix>
-						<versionTagPrefix>hearing-tag-</versionTagPrefix>
-					</flowInitContext>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<enableSshAgent>true</enableSshAgent>
-					<pushReleases>true</pushReleases>
-				</configuration>
-			</plugin>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>external.atlassian.jgitflow</groupId>
+                    <artifactId>jgitflow-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
-		</plugins>
-	</build>
-
-
+        <plugins>
+            <plugin>
+                <groupId>external.atlassian.jgitflow</groupId>
+                <artifactId>jgitflow-maven-plugin</artifactId>
+                <configuration>
+                    <flowInitContext>
+                        <masterBranchName>dev/hearing-release</masterBranchName>
+                        <developBranchName>master</developBranchName>
+                        <featureBranchPrefix>dev/hearing-feature-</featureBranchPrefix>
+                        <releaseBranchPrefix>dev/hearing-release-</releaseBranchPrefix>
+                        <hotfixBranchPrefix>dev/hearing-hotfix-</hotfixBranchPrefix>
+                        <versionTagPrefix>hearing-tag-</versionTagPrefix>
+                    </flowInitContext>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <enableSshAgent>true</enableSshAgent>
+                    <pushReleases>true</pushReleases>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
