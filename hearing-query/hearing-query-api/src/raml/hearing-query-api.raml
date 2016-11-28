@@ -54,3 +54,20 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.query.hearing.json
                     schema:  !include  json/schema/hearing.query.hearing.json
 
+/__test:
+  uriParameters:
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.query.test+json
+            name: hearing.query.test
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.query.test+json:
+                    example:  !include json/hearing.query.test.json
+                    schema:  !include  json/schema/hearing.query.test.json
+
