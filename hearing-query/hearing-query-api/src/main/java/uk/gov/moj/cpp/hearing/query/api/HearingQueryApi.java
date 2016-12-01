@@ -26,4 +26,9 @@ public class HearingQueryApi {
         return requester.request(query);
     }
 
+    @Handles("hearing.query.test")
+    public JsonEnvelope test(final JsonEnvelope query) {
+        return query;
+    }
+
 }
