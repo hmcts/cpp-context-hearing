@@ -1,73 +1,64 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import uk.gov.moj.cpp.hearing.domain.HearingStatusEnum;
-import uk.gov.moj.cpp.hearing.domain.HearingTypeEnum;
-/**
- * Hearing entity
- * @author hshaik
- * 
- */
+
 @Entity
 @Table(name = "Hearing")
-public class Hearing {  
+public class Hearing {
 
     @Id
     @Column(name = "hearingid", unique = true, nullable = false)
     private UUID hearingId;
 
-    @Column
-    private UUID caseId;
-
-    @Enumerated(EnumType.STRING)
-    private HearingTypeEnum hearingType;
 
     @Column(name = "startdate")
-    private LocalDate startDate;
+    private LocalDate startdate;
 
-    @Column(nullable = false, name = "duration")
+    @Column(name = "starttime")
+    private LocalTime startTime;
+
+    @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "courtCentreName")
+    @Column(name = "roomname")
+    private String roomName;
+
+    @Column(name = "hearingtype")
+    private String hearingType;
+
+    @Column(name = "courtcentrename")
     private String courtCentreName;
 
-    @Enumerated(EnumType.STRING)
-    private HearingStatusEnum status;
-    
-    public UUID getCaseId() {
-        return caseId;
+    @Column(name = "started_at")
+    private ZonedDateTime startedAt;
+
+    @Column(name = "ended_at")
+    private ZonedDateTime endedAt;
+
+    public LocalDate getStartdate() {
+        return startdate;
     }
 
-    public void setCaseId(UUID caseId) {
-        this.caseId = caseId;
+    public void setStartdate(LocalDate startdate) {
+        this.startdate = startdate;
     }
 
-    public HearingTypeEnum getHearingType() {
-        return hearingType;
-    }
-
-    public void setHearingType(HearingTypeEnum hearingType) {
-        this.hearingType = hearingType;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public UUID geHearingtId() {
+    public UUID geHearingId() {
         return hearingId;
     }
 
@@ -83,6 +74,14 @@ public class Hearing {
         this.duration = duration;
     }
 
+    public String getRoomName() {
+        return roomName;
+    }
+
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
     public String getCourtCentreName() {
         return courtCentreName;
     }
@@ -91,12 +90,36 @@ public class Hearing {
         this.courtCentreName = courtCentreName;
     }
 
-    public HearingStatusEnum getStatus() {
-        return status;
+    public String getHearingType() {
+        return hearingType;
     }
 
-    public void setStatus(HearingStatusEnum status) {
-        this.status = status;
+    public void setHearingType(String hearingType) {
+        this.hearingType = hearingType;
+    }
+
+    public void setStartedAt(ZonedDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public ZonedDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public ZonedDateTime getEndedAt() {
+        return endedAt;
+    }
+
+    public void setEndedAt(ZonedDateTime endedAt) {
+        this.endedAt = endedAt;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
     }
 
 }

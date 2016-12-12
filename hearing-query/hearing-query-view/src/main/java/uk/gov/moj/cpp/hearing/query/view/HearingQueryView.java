@@ -1,12 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.json.Json;
-
 import uk.gov.justice.services.common.converter.ListToJsonArrayConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -16,15 +11,22 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonString;
+
 @ServiceComponent(Component.QUERY_VIEW)
 public class HearingQueryView {
 
-    static final String FIELD_CASE_ID = "caseid";
-    static final String FIELD_HEARING_ID = "hearingid";
-    static final String FIELD_FROM_DATE = "fromdate";
-    static final String FIELD_HEARING_TYPE = "hearingtype";
-    static final String NAME_RESPONSE_HEARING_LIST = "hearing.query.case-hearings-response";
-    static final String NAME_RESPONSE_HEARING = "hearing.query.hearing-response";
+    static final String FIELD_HEARING_ID = "hearingId";
+    static final String FIELD_START_DATE = "startDate";
+    static final String NAME_RESPONSE_HEARING_LIST = "hearing.get.hearing-by-startdate-response";
+    static final String NAME_RESPONSE_HEARING = "hearing.get.hearing-response";
 
     @Inject
     private Requester requester;
@@ -38,26 +40,24 @@ public class HearingQueryView {
     @Inject
     private Enveloper enveloper;
 
-    @Handles("hearing.query.hearings")
+    @Handles("hearing.get.hearing-by-startdate")
     public JsonEnvelope findHearings(final JsonEnvelope envelope) {
-        Optional<UUID> caseId = JsonObjects.getUUID(envelope.payloadAsJsonObject(), FIELD_CASE_ID);
-        Optional<String> fromDate =
-                        JsonObjects.getString(envelope.payloadAsJsonObject(), FIELD_FROM_DATE);
-        Optional<String> hearingType =
-                        JsonObjects.getString(envelope.payloadAsJsonObject(), FIELD_HEARING_TYPE);
-
+        Optional<JsonString> startDate =
+                JsonObjects.getJsonString(envelope.payloadAsJsonObject(), FIELD_START_DATE);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
+        LocalDate localDate = LocalDate.parse(startDate.get().getChars(),formatter);
         return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING_LIST)
-                        .apply(Json.createObjectBuilder().add("hearings",
-                                        helperService.convert(hearingService.getHearingsForCase(
-                                                        caseId.get(), fromDate, hearingType)))
-                                        .build());
+                .apply(Json.createObjectBuilder().add("hearings",
+                        helperService.convert(hearingService.getHearingsByStartDate(
+                                localDate)))
+                        .build());
     }
 
-    @Handles("hearing.query.hearing")
+    @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope envelope) {
         Optional<UUID> hearingId =
-                        JsonObjects.getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
+                JsonObjects.getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
         return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING)
-                        .apply(hearingService.getHearingById(hearingId.get()));
+                .apply(hearingService.getHearingById(hearingId.get()));
     }
 }

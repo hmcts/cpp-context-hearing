@@ -1,45 +1,72 @@
 #%RAML 0.8
-title: Hearing Command API
+title: Hearing API
 version: 1.0
 baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
 
-/hearings/listhearing:
-  displayName: Services pertaining to Hearing.
+/hearings/{hearingId}:
+  displayName: Hearing
   post:
       description: |
         ...
         (mapping):
-            requestType: application/vnd.hearing.command.list-hearing+json
-            name: hearing.command.list-hearing
+            requestType: application/vnd.hearing.initiate-hearing+json
+            name: hearing.initiate-hearing
+        (mapping):
+            requestType: application/vnd.hearing.allocate-court+json
+            name: hearing.allocate-court
+         (mapping):
+             requestType: application/vnd.hearing.book-room+json
+             name: hearing.book-room
+         (mapping):
+             requestType: application/vnd.hearing.add-case+json
+             name: hearing.add-case
+        (mapping):
+             requestType: application/vnd.hearing.start+json
+             name: hearing.start
+        (mapping):
+            requestType: application/vnd.hearing.end+json
+            name: hearing.end
+        (mapping):
+            requestType: application/vnd.hearing.add-prosecution-counsel+json
+            name: hearing.add-prosecution-counsel
         ...
       body:
-        application/vnd.hearing.command.list-hearing+json:
-            example: 
-             !include json/hearing.command.list-hearing.json
-             
-            schema: 
-             !include json/schema/hearing.command.list-hearing.json
-              
-      responses:
-            202:
-                description: OK        
+        application/vnd.hearing.initiate-hearing+json:
+            example:
+             !include json/hearing.initiate-hearing.json
+            schema:
+             !include json/schema/hearing.initiate-hearing.json
+        application/vnd.hearing.allocate-court+json:
+            example:
+             !include json/hearing.allocate-court.json
+            schema:
+             !include json/schema/hearing.allocate-court.json
+        application/vnd.hearing.book-room+json:
+            example:
+             !include json/hearing.book-room.json
+            schema:
+             !include json/schema/hearing.book-room.json
+        application/vnd.hearing.add-case+json:
+            example:
+             !include json/hearing.add-case.json
+            schema:
+             !include json/schema/hearing.add-case.json
+        application/vnd.hearing.start+json:
+            example:
+             !include json/hearing.start.json
+            schema:
+             !include json/schema/hearing.start.json
+        application/vnd.hearing.end+json:
+            example:
+             !include json/hearing.end.json
+            schema:
+             !include json/schema/hearing.end.json
+        application/vnd.hearing.add-prosecution-counsel+json:
+            example:
+             !include json/hearing.add-prosecution-counsel.json
+            schema:
+             !include json/schema/hearing.add-prosecution-counsel.json
 
-/hearings/vacatehearing:
-  post:
-      description: |
-        ...
-        (mapping):
-            requestType: application/vnd.hearing.command.vacate-hearing+json
-            name: hearing.command.vacate-hearing
-        ...
-      body:
-        application/vnd.hearing.command.vacate-hearing+json:
-            example: 
-             !include json/hearing.command.vacate-hearing.json
-            schema: 
-             !include json/schema/hearing.command.vacate-hearing.json
-              
       responses:
             202:
                 description: OK
-

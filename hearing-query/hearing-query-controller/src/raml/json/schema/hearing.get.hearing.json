@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "type": "string"
+    },
+    "startDate": {
+      "type": "string"
+    },
+    "startTime": {
+      "type": "string"
+    },
+    "hearingType":{
+      "type": "string"
+    },
+    "duration": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "hearingId",
+    "startDate",
+    "startTime",
+    "hearingType",
+    "duration"
+  ]
+}

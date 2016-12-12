@@ -1,0 +1,48 @@
+#%RAML 0.8
+title: Hearing Query API
+baseUri: http://localhost:8080/hearing-notepad-parsing-service/query/api/rest/result
+protocols: [ HTTP, HTTPS ]
+                       
+/definition:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.notepad.parse-result-definition+json
+            name: hearing.notepad.parse-result-definition
+        ...
+      queryParameters:
+        originalText:
+          description: originalText unformmated text
+          type: string
+          required: true
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.notepad.parse-result-definition+json:
+                    example:  !include json/hearing.notepad.parse-result-definition.json
+                    schema:  !include  json/schema/hearing.notepad.parse-result-definition.json
+
+/prompt:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.notepad.parse-result-prompt+json
+            name: hearing.notepad.parse-result-prompt
+        ...
+      queryParameters:
+        resultCode:
+          description: resultCode
+          type: string
+          required: true
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.notepad.parse-result-prompt+json:
+                    example:  !include json/hearing.notepad.parse-result-prompt.json
+                    schema:  !include  json/schema/hearing.notepad.parse-result-prompt.json

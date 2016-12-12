@@ -3,8 +3,15 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDate;
-import java.util.UUID;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
+import uk.gov.moj.cpp.hearing.persist.HearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
+
+import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import javax.json.JsonObject;
 
@@ -14,15 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.HearingTypeEnum;
-import uk.gov.moj.cpp.hearing.domain.event.HearingListed;
-import uk.gov.moj.cpp.hearing.domain.event.HearingVacated;
-import uk.gov.moj.cpp.hearing.event.listener.converter.HearingListedToHearingConverter;
-import uk.gov.moj.cpp.hearing.persist.HearingRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
 
@@ -30,7 +28,7 @@ public class HearingEventListenerTest {
 	private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
 	@Mock
-	private HearingListedToHearingConverter hearingListedToHearingConverter;
+	private HearingEventsToHearingConverter hearingEventsToHearingConverter;
 
 	@Mock
 	private HearingRepository hearingRepository;
@@ -39,10 +37,8 @@ public class HearingEventListenerTest {
 	private JsonEnvelope envelope;
 
 	@Mock
-	private HearingListed hearingListed;
+	private HearingInitiated hearingInitiated;
 	
-	@Mock
-	private HearingVacated hearingVacated;
 
 	@Mock
 	private Hearing hearing;
@@ -52,31 +48,20 @@ public class HearingEventListenerTest {
 
 
 	@InjectMocks
-	private HearingListedEventListener peopleEventListener;
+	private HearingEventListener peopleEventListener;
 
 	@Test
-	public void shouldHandleHearingListedEvent() throws Exception {
+	public void shouldHandleHearingCreatedEvent() throws Exception {
 
 		when(envelope.payloadAsJsonObject()).thenReturn(payload);
-		when(jsonObjectToObjectConverter.convert(payload, HearingListed.class)).thenReturn(hearingListed);
-		when(hearingListed.getStartDateOfHearing()).thenReturn(LocalDate.now());
-		when(hearingListed.getDuration()).thenReturn(1);
-		when(hearingListed.getCourtCentreName()).thenReturn("courtCentreName");
-		when(hearingListed.getHearingType()).thenReturn(HearingTypeEnum.PTP);
-		when(hearingListedToHearingConverter.convert(hearingListed)).thenReturn(hearing);
-		peopleEventListener.hearingListed(envelope);
+		when(jsonObjectToObjectConverter.convert(payload, HearingInitiated.class)).thenReturn(hearingInitiated);
+		when(hearingInitiated.getStartDateTime()).thenReturn(ZonedDateTime.now());
+		when(hearingInitiated.getDuration()).thenReturn(1);
+		when(hearingRepository.getByHearingId(hearing.geHearingId())).thenReturn(Optional.empty());
+		when(hearingEventsToHearingConverter.convert(hearingInitiated)).thenReturn(hearing);
+		peopleEventListener.hearingInitiated(envelope);
 		verify(hearingRepository).save(hearing);
 
 	}
-	
-	@Test
-	public void shouldHandleHearingVacatedEvent() throws Exception {
 
-		when(envelope.payloadAsJsonObject()).thenReturn(payload);
-		when(payload.getString("hearingId")).thenReturn("6daefec6-5f78-4109-82d9-1e60544a6c01");
-		when(hearingRepository.findByHearingId(UUID.fromString("6daefec6-5f78-4109-82d9-1e60544a6c01"))).thenReturn(hearing);
-		peopleEventListener.hearingVacated(envelope);
-		verify(hearingRepository).save(hearing);
-
-	}
 }

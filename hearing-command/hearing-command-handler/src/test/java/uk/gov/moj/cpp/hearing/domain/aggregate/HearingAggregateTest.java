@@ -1,30 +1,29 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.domain.HearingTypeEnum;
-import uk.gov.moj.cpp.hearing.domain.command.ListHearing;
-import uk.gov.moj.cpp.hearing.domain.command.VacateHearing;
-import uk.gov.moj.cpp.hearing.domain.event.HearingListed;
-import uk.gov.moj.cpp.hearing.domain.event.HearingVacated;
+import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-import java.time.LocalDate;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.junit.Before;
+import org.junit.Test;
 
 public class HearingAggregateTest {
 
@@ -35,176 +34,82 @@ public class HearingAggregateTest {
         hearingAggregate = new HearingAggregate();
     }
 
+
     @Test
-    public void shouldNotListHearingForAlreadyListed() {
+    public void shouldCreateHearing() {
         // given
         UUID hearingId = randomUUID();
         // and
-        HearingListed hearingListed = createHearingListed(hearingId);
-        // and
-        hearingAggregate.apply(hearingListed);
-        // and
-        ListHearing listHearing = createListHearing(hearingId);
+        InitiateHearing initiateHearing = createHearing(hearingId);
 
         // when
-        final Stream<Object> stream = hearingAggregate.listHearing(listHearing);
-
-        // then
-        assertThat(stream.findAny().isPresent(), is(false));
-    }
-
-    @Test
-    public void shouldNotListHearingForAlreadyVacated() {
-        // given
-        UUID hearingId = randomUUID();
-        // and
-        HearingVacated hearingVacated = createHearingVacated(hearingId);
-        // and
-        hearingAggregate.apply(hearingVacated);
-        // and
-        ListHearing listHearing = createListHearing(hearingId);
-
-        // when
-        final Stream<Object> stream = hearingAggregate.listHearing(listHearing);
-
-        // then
-        assertThat(stream.findAny().isPresent(), is(false));
-    }
-
-    @Test
-    public void shouldListHearingFromNoState() {
-        // given
-        UUID hearingId = randomUUID();
-        // and
-        ListHearing listHearing = createListHearing(hearingId);
-
-        // when
-        final Stream<Object> stream = hearingAggregate.listHearing(listHearing);
+        final Stream<Object> stream = hearingAggregate.initiateHearing(initiateHearing);
 
 
         // then
         Optional<Object> optional = stream.findFirst();
         assertThat(optional.isPresent(), is(true));
         // and
-        HearingListed hearingListed = (HearingListed) optional.get();
+        HearingInitiated hearingInitiated = (HearingInitiated) optional.get();
         // and
-        assertThat(hearingListed, isFrom(listHearing));
+        assertThat(hearingInitiated, isFrom(initiateHearing));
     }
+
 
     @Test
-    public void shouldNotVacateHearingForNotListedHearing() {
-        // given
-        UUID hearingId = randomUUID();
-        // and
-        HearingVacated hearingVacated = createHearingVacated(hearingId);
-        // and
-        hearingAggregate.apply(hearingVacated);
-        // and
-        VacateHearing vacateHearing = createVacateHearing(hearingId);
+    public void shouldAddProsecutionCounselToAHearing() {
+        final UUID hearingId = randomUUID();
+        final UUID attendeeId = randomUUID();
+        final UUID personId = randomUUID();
+        final String status = STRING.next();
 
-        // when
-        final Stream<Object> stream = hearingAggregate.vacateHearing(vacateHearing);
+        final Stream<Object> stream = hearingAggregate.addProsecutionCounsel(hearingId, attendeeId,
+                personId, status);
 
-        // then
-        assertThat(stream.findAny().isPresent(), is(false));
+        final Optional<Object> optional = stream.findFirst();
+        assertTrue(optional.isPresent());
+
+        final ProsecutionCounselAdded prosecutionCounselAdded = (ProsecutionCounselAdded) optional.get();
+        assertThat(prosecutionCounselAdded.getHearingId(), is(hearingId));
+        assertThat(prosecutionCounselAdded.getAttendeeId(), is(attendeeId));
+        assertThat(prosecutionCounselAdded.getPersonId(), is(personId));
+        assertThat(prosecutionCounselAdded.getStatus(), is(status));
     }
 
-    @Test
-    public void shouldVacateHearingForListedHearing() {
-        // given
-        UUID hearingId = randomUUID();
-        // and
-        HearingListed hearingListed = createHearingListed(hearingId);
-        // and
-        hearingAggregate.apply(hearingListed);
-        // and
-        VacateHearing vacateHearing = createVacateHearing(hearingId);
-
-        // when
-        final Stream<Object> stream = hearingAggregate.vacateHearing(vacateHearing);
-
-        // then
-        Optional<Object> optional = stream.findFirst();
-        assertThat(optional.isPresent(), is(true));
-        // and
-        HearingVacated hearingVacated = (HearingVacated) optional.get();
-        // and
-        assertThat(hearingVacated, isFrom(vacateHearing));
-
-    }
-    private VacateHearing createVacateHearing(UUID hearingId) {
-        return new VacateHearing(hearingId);
-    }
-
-    private HearingVacated createHearingVacated(UUID hearingId) {
-        return new HearingVacated(hearingId);
-    }
-
-    private HearingListed createHearingListed(UUID hearingId) {
+    private InitiateHearing createHearing(UUID hearingId) {
         UUID caseId = randomUUID();
-        HearingTypeEnum hearingType = values(HearingTypeEnum.values()).next();
-        String courtCentreName = STRING.next();
-        LocalDate startDateOfHearing = PAST_LOCAL_DATE.next();
+        ZonedDateTime startDateOfHearing = ZonedDateTime.now();
         Integer duration = INTEGER.next();
-        return new HearingListed(hearingId, caseId, hearingType, courtCentreName, startDateOfHearing, duration);
+        return new InitiateHearing(hearingId, startDateOfHearing, duration, "TRAIL");
     }
 
-    private ListHearing createListHearing(UUID hearingId) {
-        UUID caseId = randomUUID();
-        HearingTypeEnum hearingType = values(HearingTypeEnum.values()).next();
-        String courtCentreName = STRING.next();
-        LocalDate startDateOfHearing = PAST_LOCAL_DATE.next();
-        Integer duration = INTEGER.next();
-        return new ListHearing(hearingId, caseId, hearingType, courtCentreName, startDateOfHearing, duration);
-    }
-
-
-    private Matcher<HearingListed> isFrom(final ListHearing listHearing) {
-        return new TypeSafeDiagnosingMatcher<HearingListed>() {
+    private Matcher<HearingInitiated> isFrom(final InitiateHearing initiateHearing) {
+        return new TypeSafeDiagnosingMatcher<HearingInitiated>() {
 
             @Override
             public void describeTo(Description description) {
-                description.appendText(listHearing.toString());
+                description.appendText(initiateHearing.toString());
             }
 
             @Override
-            protected boolean matchesSafely(HearingListed hearingListed, Description description) {
+            protected boolean matchesSafely(HearingInitiated hearingInitiated, Description description) {
                 boolean returnStatus = true;
 
-                if (!Objects.equals(listHearing.getHearingId(), hearingListed.getHearingId())) {
-                    description.appendText(format("HearingId Mismatch:listHearing:%s, hearingListed%s",
-                            listHearing.getHearingId(), hearingListed.getHearingId()));
+                if (!Objects.equals(initiateHearing.getHearingId(), hearingInitiated.getHearingId())) {
+                    description.appendText(format("HearingId Mismatch:initiateHearing:%s, hearingInitiated%s",
+                            initiateHearing.getHearingId(), hearingInitiated.getHearingId()));
                     returnStatus = false;
                 }
 
-                if (!Objects.equals(listHearing.getCaseId(), hearingListed.getCaseId())) {
-                    description.appendText(format("CaseId Mismatch:listHearing:%s, hearingListed%s",
-                            listHearing.getCaseId(), hearingListed.getCaseId()));
+                if (!Objects.equals(initiateHearing.getDuration(), hearingInitiated.getDuration())) {
+                    description.appendText(format("Duration Mismatch:initiateHearing:%s, hearingInitiated%s",
+                            initiateHearing.getDuration(), hearingInitiated.getDuration()));
                     returnStatus = false;
                 }
 
-                if (!Objects.equals(listHearing.getCourtCentreName(), hearingListed.getCourtCentreName())) {
-                    description.appendText(format("CourtCentreName Mismatch:listHearing:%s, hearingListed%s",
-                            listHearing.getCourtCentreName(), hearingListed.getCourtCentreName()));
-                    returnStatus = false;
-                }
-
-                if (!Objects.equals(listHearing.getDuration(), hearingListed.getDuration())) {
-                    description.appendText(format("Duration Mismatch:listHearing:%s, hearingListed%s",
-                            listHearing.getDuration(), hearingListed.getDuration()));
-                    returnStatus = false;
-                }
-
-
-                if (!Objects.equals(listHearing.getHearingType(), hearingListed.getHearingType())) {
-                    description.appendText(format("HearingType Mismatch:listHearing:%s, hearingListed%s",
-                            listHearing.getHearingType(), hearingListed.getHearingType()));
-                    returnStatus = false;
-                }
-
-                if (!Objects.equals(listHearing.getStartDateOfHearing(), hearingListed.getStartDateOfHearing())) {
-                    description.appendText(format("StartDateOfHearing Mismatch:listHearing:%s, hearingListed%s",
-                            listHearing.getStartDateOfHearing(), hearingListed.getStartDateOfHearing()));
+                if (!Objects.equals(initiateHearing.getStartDateTime(), hearingInitiated.getStartDateTime())) {
+                    description.appendText(format("StartDateOfHearing Mismatch:initiateHearing:%s, hearingInitiated%s",
+                            initiateHearing.getStartDateTime(), hearingInitiated.getStartDateTime()));
                     returnStatus = false;
                 }
 
@@ -213,26 +118,4 @@ public class HearingAggregateTest {
         };
     }
 
-    private Matcher<HearingVacated> isFrom(final VacateHearing vacateHearing) {
-        return new TypeSafeDiagnosingMatcher<HearingVacated>() {
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(vacateHearing.toString());
-            }
-
-            @Override
-            protected boolean matchesSafely(HearingVacated hearingVacated, Description description) {
-                boolean returnStatus = true;
-
-                if (!Objects.equals(vacateHearing.getHearingId(), hearingVacated.getHearingId())) {
-                    description.appendText(format("HearingId Mismatch:vacateHearing:%s, hearingVacated%s",
-                            vacateHearing.getHearingId(), hearingVacated.getHearingId()));
-                    returnStatus = false;
-                }
-
-                return returnStatus;
-            }
-        };
-    }
 }

@@ -4,9 +4,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.services.common.converter.ListToJsonArrayConverter;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -19,12 +25,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.services.common.converter.ListToJsonArrayConverter;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
-import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -72,26 +72,24 @@ public class HearingQueryViewTest {
     @Test
     public void shouldFindHearings() {
         UUID caseId = UUID.randomUUID();
-        String now = LocalDate.now().toString();
+        LocalDate now = LocalDate.now();
+        //String ISO_8601 = "yyyy-MM-dd";
         JsonObject jsonObject = Json.createObjectBuilder()
-                        .add(HearingQueryView.FIELD_CASE_ID, caseId.toString())
-                        .add(HearingQueryView.FIELD_FROM_DATE, now)
-                        .add(HearingQueryView.FIELD_HEARING_TYPE, "PTP").build();
+                .add(HearingQueryView.FIELD_START_DATE, DateTimeFormatter.ISO_DATE.format(now)).build();
         when(query.payloadAsJsonObject()).thenReturn(jsonObject);
 
-        when(hearingService.getHearingsForCase(caseId, Optional.of(now), Optional.of("PTP")))
-                        .thenReturn(hearings);
+        when(hearingService.getHearingsByStartDate(now)).thenReturn(hearings);
 
         JsonArray arrayOfHearings =
-                        Json.createArrayBuilder().add(Json.createObjectBuilder().build()).build();
+                Json.createArrayBuilder().add(Json.createObjectBuilder().build()).build();
 
         when(helperService.convert(hearings)).thenReturn(arrayOfHearings);
 
         when(enveloper.withMetadataFrom(query, HearingQueryView.NAME_RESPONSE_HEARING_LIST))
-                        .thenReturn(function);
+                .thenReturn(function);
 
         when(function.apply(Json.createObjectBuilder().add("hearings", arrayOfHearings).build()))
-                        .thenReturn(responceJson);
+                .thenReturn(responceJson);
 
         assertThat(hearingsQueryView.findHearings(query), equalTo(responceJson));
     }
@@ -101,17 +99,16 @@ public class HearingQueryViewTest {
         UUID hearingId = UUID.randomUUID();
         String now = LocalDate.now().toString();
         JsonObject jsonObject =
-                        Json.createObjectBuilder()
-                                        .add(HearingQueryView.FIELD_HEARING_ID,
-                                                        hearingId.toString())
-                                        .add(HearingQueryView.FIELD_FROM_DATE, now)
-                                        .add(HearingQueryView.FIELD_HEARING_TYPE, "PTP").build();
+                Json.createObjectBuilder()
+                        .add(HearingQueryView.FIELD_HEARING_ID,
+                                hearingId.toString())
+                        .add(HearingQueryView.FIELD_START_DATE, now).build();
         when(query.payloadAsJsonObject()).thenReturn(jsonObject);
 
         when(hearingService.getHearingById(hearingId)).thenReturn(hearingView);
 
         when(enveloper.withMetadataFrom(query, HearingQueryView.NAME_RESPONSE_HEARING))
-                        .thenReturn(function);
+                .thenReturn(function);
 
         when(function.apply(hearingView)).thenReturn(responceJson);
 

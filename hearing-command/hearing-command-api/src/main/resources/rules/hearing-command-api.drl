@@ -1,0 +1,70 @@
+package uk.gov.moj.cpp.accesscontrol;
+
+import uk.gov.moj.cpp.accesscontrol.drools.Outcome;
+import uk.gov.moj.cpp.accesscontrol.drools.Action;
+import java.util.Arrays;
+
+global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
+
+rule "Command - API - Action - hearing.initiate-hearing"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.initiate-hearing");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.allocate-court"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.allocate-court");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.book-room"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.book-room");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.add-case"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-case");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.start"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.start");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.end"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.end");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.add-prosecution-counsel"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-prosecution-counsel");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

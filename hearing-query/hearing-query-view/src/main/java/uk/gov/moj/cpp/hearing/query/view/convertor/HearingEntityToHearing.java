@@ -9,14 +9,17 @@ public class HearingEntityToHearing {
     }
 
     public static HearingView convert(Hearing hearing) {
-        final HearingView hearingVo = new HearingView();
-        hearingVo.setHearingId(hearing.geHearingtId().toString());
-        hearingVo.setCaseId(hearing.getCaseId().toString());
-        hearingVo.setDuration(hearing.getDuration());
-        hearingVo.setHearingType(hearing.getHearingType().toString());
-        hearingVo.setStartDate(hearing.getStartDate());
-        hearingVo.setCourtCentreName(hearing.getCourtCentreName());
-        return hearingVo;
+        final HearingView hearingView = new HearingView();
+        hearingView.setHearingId(hearing.geHearingId().toString());
+        hearingView.setDuration(hearing.getDuration());
+        hearingView.setStartDate(hearing.getStartdate());
+        hearingView.setStartTime(hearing.getStartTime());
+        hearingView.setCourtCentreName(hearing.getCourtCentreName());
+        hearingView.setRoomName(hearing.getRoomName());
+        hearingView.setStartedAt(hearing.getStartedAt());
+        hearingView.setEndedAt(hearing.getEndedAt());
+        hearingView.setHearingType(hearing.getHearingType());
+        return hearingView;
     }
 
 }
