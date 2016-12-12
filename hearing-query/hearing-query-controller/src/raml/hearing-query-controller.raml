@@ -1,57 +1,49 @@
 #%RAML 0.8
-title: Hearing Query COntroller
+title: Hearing Controller API
 baseUri: http://localhost:8080/hearing-query-controller/query/controller/rest/hearing
 protocols: [ HTTP, HTTPS ]
-                       
-/cases/{caseid}/hearings:
-  uriParameters:
-        caseid:
-          description: ID of case to get
-          type: string
-  get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.query.hearings+json
-            name: hearing.query.hearings
-        ...
-      queryParameters:
-        fromdate:
-          description: Specifies the hearing from date i.e. localhost:8888/cases/xxx-xxx/hearings?fromdate=2016-01-01
-          type: string
-          example: 2016-01-01
-          required : false
-        hearingtype:
-          description: Specifies the hearing type i.e. /cases/{caseid}/hearings?fromdate=2016-01-01&hearingtype=PTP
-          type: string
-          example: PTP
-          required : false
-      responses:
-            200:
-                description: OK        
-                body: 
-                  application/vnd.hearing.query.hearings+json:
-                    example:  !include json/hearing.query.hearings.json
-                    schema:  !include  json/schema/hearing.query.hearings.json
 
-/hearings/{hearingid}:
+/hearings/{hearingId}:
   uriParameters:
-        hearingid:
+        hearingId:
           description: ID of hearing to get
           type: string
   get:
       description: |
         ...
         (mapping):
-            responseType: application/vnd.hearing.query.hearing+json
-            name: hearing.query.hearing
+            responseType: application/vnd.hearing.get.hearing+json
+            name: hearing.get.hearing
         ...
       responses:
             200:
                 description: OK
                 body:
-                  application/vnd.hearing.query.hearing+json:
-                    example:  !include json/hearing.query.hearing.json
-                    schema:  !include  json/schema/hearing.query.hearing.json
+                  application/vnd.hearing.get.hearing+json:
+                    example:  !include json/hearing.get.hearing.json
+                    schema:  !include  json/schema/hearing.get.hearing.json
 
+
+/hearings:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearing-by-startdate+json
+            name: hearing.get.hearing-by-startdate
+        ...
+      queryParameters:
+        startDate:
+          description: startDate of hearing
+          type: string
+          required: true
+
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearing-by-startdate+json:
+                    example:  !include json/hearing.get.hearings.json
+                    schema:  !include  json/schema/hearing.get.hearings.json
 

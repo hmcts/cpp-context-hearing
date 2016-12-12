@@ -3,7 +3,7 @@
 	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-	<changeSet author="hshaik " id="hearing-1">
+	<changeSet author="ccr" id="hearing-1">
 		<createTable tableName="hearing">
 			<column name="hearingid" type="UUID">
 				<constraints nullable="false" />
@@ -19,7 +19,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="hshaik " id="2">
+	<changeSet author="ccr " id="2">
 		<addPrimaryKey columnNames="hearingid" constraintName="hearing_pkey"
 			tableName="hearing" />
 	</changeSet>

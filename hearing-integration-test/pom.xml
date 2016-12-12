@@ -24,6 +24,15 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>uk.gov.justice.services</groupId>
+			<artifactId>core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>uk.gov.justice.services</groupId>
+			<artifactId>test-utils-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>uk.gov.moj.cpp.common.test</groupId>
 			<artifactId>cpp-common-test-utils-core</artifactId>
 			<version>${cpp-common-test-utils.version}</version>

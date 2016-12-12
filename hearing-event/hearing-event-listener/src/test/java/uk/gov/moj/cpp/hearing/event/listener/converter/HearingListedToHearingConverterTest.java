@@ -3,37 +3,36 @@ package uk.gov.moj.cpp.hearing.event.listener.converter;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
-import java.time.LocalDate;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
+
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.gov.moj.cpp.hearing.domain.HearingTypeEnum;
-import uk.gov.moj.cpp.hearing.domain.event.HearingListed;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-
 public class HearingListedToHearingConverterTest {
 
-	private HearingListed event;
-	private HearingListedToHearingConverter convertor;
+	private HearingInitiated event;
+	private HearingEventsToHearingConverter convertor;
 	private final UUID HEARING_ID = UUID.randomUUID();
 	private final UUID CASE_ID = UUID.randomUUID();
-	private static final LocalDate startDateOfHearing = LocalDate.now();
+	private static final ZonedDateTime START_DATE_OF_HEARING = ZonedDateTime.now();
+	private static final LocalTime NOT_BEFORE = LocalTime.now();
 
 	@Before
 	public void setup() {
-		event = new HearingListed(HEARING_ID, CASE_ID, HearingTypeEnum.PTP, "courtCentreName", startDateOfHearing, 1);
-		convertor = new HearingListedToHearingConverter();
+		event = new HearingInitiated(HEARING_ID, START_DATE_OF_HEARING, 1,"TRAIL");
+		convertor = new HearingEventsToHearingConverter();
 	}
 
 	@Test
 	public void shouldConvertToHearing() {
 		Hearing hearing = convertor.convert(event);
-		assertThat(hearing.geHearingtId(), is(HEARING_ID));
-		assertThat(hearing.getCaseId(), is(CASE_ID));
-		assertThat(hearing.getHearingType(), is(HearingTypeEnum.PTP));
-		assertThat(hearing.getStartDate(), is(startDateOfHearing));
+		assertThat(hearing.geHearingId(), is(HEARING_ID));
+		assertThat(hearing.getStartdate(), is(START_DATE_OF_HEARING.toLocalDate()));
 		assertThat(hearing.getDuration(), is(1));
 	}
 

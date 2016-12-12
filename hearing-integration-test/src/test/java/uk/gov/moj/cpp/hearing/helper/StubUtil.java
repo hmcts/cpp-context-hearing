@@ -33,6 +33,9 @@ public class StubUtil {
 
 	}
 
-	
+	public static void main(String a[]){
+
+	}
+
 
 }

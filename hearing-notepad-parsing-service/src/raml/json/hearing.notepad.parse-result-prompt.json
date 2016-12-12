@@ -1,0 +1,56 @@
+{
+  "originalText": "imp sus 2yr",
+  "parts": [
+    {
+      "text": "imp",
+      "resultChoices": [
+        {
+          "code": "1",
+          "label": "Imprisonment",
+          "type": "RESULT",
+          "synonyms": [
+            "imp",
+            "impr",
+            "impris"
+          ]
+        },
+        {
+          "code": "2",
+          "label": "Suspended sentence order - imprisonment",
+          "type": "RESULT",
+          "synonyms": [
+            "sus",
+            "susp",
+            "sus imp",
+            "imp sus"
+          ]
+        }
+      ]
+    },
+    {
+      "text": "sus",
+      "resultChoices": [
+        {
+          "code": "2",
+          "label": "Suspended sentence order - imprisonment",
+          "type": "RESULT",
+          "synonyms": [
+            "sus",
+            "susp",
+            "sus imp",
+            "imp sus"
+          ]
+        }
+      ]
+    },
+    {
+      "text": "2yr",
+      "resultChoices": [
+        {
+          "type": "TEXT",
+          "synonyms": []
+        }
+      ]
+    }
+  ]
+}

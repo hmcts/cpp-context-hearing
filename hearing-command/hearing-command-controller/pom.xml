@@ -21,7 +21,11 @@
 		</dependency>
 
 		<!-- Test Dependencies -->
-
+		<dependency>
+			<groupId>uk.gov.justice.services</groupId>
+			<artifactId>test-utils-core</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

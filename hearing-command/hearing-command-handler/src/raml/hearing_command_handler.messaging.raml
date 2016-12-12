@@ -6,9 +6,30 @@ baseUri:  message://command/handler/message/hearing
 /hearing.handler.command:
   post:
       body:
-        application/vnd.hearing.command.list-hearing+json:
-            example: !include json/hearing.command.list-hearing.json
-            schema:  !include json/schema/hearing.command.list-hearing.json
-        application/vnd.hearing.command.vacate-hearing+json:
-            example: !include json/hearing.command.vacate-hearing.json
-            schema:  !include json/schema/hearing.command.vacate-hearing.json
+        application/vnd.hearing.initiate-hearing+json:
+            example: !include json/hearing.initiate-hearing.json
+            schema:  !include json/schema/hearing.initiate-hearing.json
+
+        application/vnd.hearing.allocate-court+json:
+            example: !include json/hearing.allocate-court.json
+            schema:  !include json/schema/hearing.allocate-court.json
+
+        application/vnd.hearing.book-room+json:
+            example: !include json/hearing.book-room.json
+            schema:  !include json/schema/hearing.book-room.json
+
+        application/vnd.hearing.start+json:
+            example: !include json/hearing.start.json
+            schema:  !include json/schema/hearing.start.json
+
+        application/vnd.hearing.end+json:
+            example: !include json/hearing.end.json
+            schema:  !include json/schema/hearing.end.json
+
+        application/vnd.hearing.add-case+json:
+            example: !include json/hearing.add-case.json
+            schema:  !include json/schema/hearing.add-case.json
+
+        application/vnd.hearing.add-prosecution-counsel+json:
+            example: !include json/hearing.add-prosecution-counsel.json
+            schema:  !include json/schema/hearing.add-prosecution-counsel.json
