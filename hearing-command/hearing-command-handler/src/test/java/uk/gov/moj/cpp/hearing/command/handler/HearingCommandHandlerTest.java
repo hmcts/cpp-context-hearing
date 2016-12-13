@@ -18,6 +18,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.getJsonNumber;
+import static uk.gov.justice.services.messaging.JsonObjects.getJsonString;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -127,7 +128,7 @@ public class HearingCommandHandlerTest {
         // and
         assertThat(resultMetadata.name(), is(HEARING_LISTED_EVENT));
         // and
-       // assertThat(resultPayload, isFrom(initiateHearing));
+        assertThat(resultPayload, isFrom(initiateHearing));
 
     }
 
@@ -224,10 +225,15 @@ public class HearingCommandHandlerTest {
                             initiateHearing.getDuration(), getJsonNumber(resultPayload, "duration").get().intValue()));
                     returnStatus = false;
                 }
+                if (!Objects.equals(initiateHearing.getHearingType(), getJsonString(resultPayload, "hearingType").get().getString())) {
+                    description.appendText(format("HearingType Mismatch:initiateHearing:%s, hearingType %s",
+                            initiateHearing.getHearingType(), getJsonString(resultPayload, "hearingType").get().getString()));
+                    returnStatus = false;
+                }
 
                 if (!Objects.equals(ZonedDateTimes.toString(initiateHearing.getStartDateTime()), getString(resultPayload, "startDateTime").get())) {
                     description.appendText(format("StartDateOfHearing Mismatch:initiateHearing:%s, hearingListed%s",
-                            initiateHearing.getStartDateTime(), getString(resultPayload, "startDateOfHearing").get()));
+                            initiateHearing.getStartDateTime(), getString(resultPayload, "startDateTime").get()));
                     returnStatus = false;
                 }
 

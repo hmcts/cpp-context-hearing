@@ -83,11 +83,9 @@ public class ValidateHearingEventRamlConfigAndHandlesActionTest {
                 .scan()
                 .getNamesOfClassesWithAnnotation(Event.class);
 
-        List<String> eventsName = new ArrayList<>();
         for (String className : namesOfClassesWithAnnotation) {
             Class classZ = Class.forName(className);
             Event handles = (Event) classZ.getAnnotation(Event.class);
-            eventsName.add(handles.value());
             assertThat(className +" event name missing in the RAML ",true, is(ramlActionNames.contains(handles.value())));
         }
     }

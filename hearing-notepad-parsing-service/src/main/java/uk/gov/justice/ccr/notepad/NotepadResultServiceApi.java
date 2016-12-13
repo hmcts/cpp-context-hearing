@@ -32,7 +32,7 @@ public class NotepadResultServiceApi {
     @Handles("hearing.notepad.parse-result-prompt")
     public JsonEnvelope getResultPrompt(final JsonEnvelope envelope) {
         String resultCode = envelope.payloadAsJsonObject().getString("resultCode");
-        return enveloper.withMetadataFrom(envelope, "hearing.notepad.parse-result-definition-response")
+        return enveloper.withMetadataFrom(envelope, "hearing.notepad.parse-result-prompt-response")
                 .apply(objectToJsonObjectConverter.convert(DummyResultPromptGenerator.getPrompt(resultCode)));
     }
 

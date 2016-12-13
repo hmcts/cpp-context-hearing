@@ -16,7 +16,7 @@ public class HearingQueryController {
     @Inject
     private Requester requester;
 
-    @Handles("hearing.get.hearing-by-startdate")
+    @Handles("hearing.get.hearings-by-startdate")
     public JsonEnvelope findHearingsByStartDate(final JsonEnvelope query) {
         return requester.request(query);
     }
