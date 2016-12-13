@@ -25,7 +25,7 @@ public class HearingQueryView {
 
     static final String FIELD_HEARING_ID = "hearingId";
     static final String FIELD_START_DATE = "startDate";
-    static final String NAME_RESPONSE_HEARING_LIST = "hearing.get.hearing-by-startdate-response";
+    static final String NAME_RESPONSE_HEARING_LIST = "hearing.get.hearings-by-startdate-response";
     static final String NAME_RESPONSE_HEARING = "hearing.get.hearing-response";
 
     @Inject
@@ -40,7 +40,7 @@ public class HearingQueryView {
     @Inject
     private Enveloper enveloper;
 
-    @Handles("hearing.get.hearing-by-startdate")
+    @Handles("hearing.get.hearings-by-startdate")
     public JsonEnvelope findHearings(final JsonEnvelope envelope) {
         Optional<JsonString> startDate =
                 JsonObjects.getJsonString(envelope.payloadAsJsonObject(), FIELD_START_DATE);

@@ -18,7 +18,7 @@ end
 rule "Query - API - hearing.get.hearings"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.get.hearings");
+    $action: Action(name == "hearing.get.hearings-by-startdate");
     eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
   then
     $outcome.setSuccess(true);

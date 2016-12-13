@@ -126,6 +126,18 @@ public class HearingIT extends AbstractIT {
         assertThat("Hearing Started time should match",readResponse.jsonPath().get("startedAt").equals("2016-06-01T08:00:00Z"), equalTo(true));
         assertThat("Hearing ended time should match",readResponse.jsonPath().get("endedAt").equals("2016-06-01T09:00:00Z"), equalTo(true));
 
+
+        final String getHearingsByDate = MessageFormat
+                .format(prop.getProperty("hearing.get.hearings-by-startDate"), (String)readResponse.jsonPath().get("startDate"));
+
+        final Response readResponses = given().spec(reqSpec).and()
+                .accept("application/vnd.hearing.get.hearings-by-startdate+json")
+                .header(cppuidHeader).when().get(getHearingsByDate).then().extract()
+                .response();
+
+        assertThat(readResponses.getStatusCode(), is(200));
+        assertThat("hearings list size should be greater or equal one",readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
+
     }
 
 }
