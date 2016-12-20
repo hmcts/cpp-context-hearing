@@ -56,6 +56,25 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
         assertFailureOutcome(results);
     }
 
+    @Test
+    public void shouldAllowAuthorisedUserToGetProsecutionCounsels() {
+        final Action action = createActionFor("hearing.get.prosecution-counsels");
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowAuthorisedUserToGetProsecutionCounsels() {
+        final Action action = createActionFor("hearing.get.prosecution-counsels");
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
 
     @Override
     protected Map<Class, Object> getProviderMocks() {

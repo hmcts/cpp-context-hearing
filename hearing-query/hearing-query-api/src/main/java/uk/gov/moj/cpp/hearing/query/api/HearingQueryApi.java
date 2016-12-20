@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-
-
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -23,6 +21,11 @@ public class HearingQueryApi {
 
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope query) {
+        return requester.request(query);
+    }
+
+    @Handles("hearing.get.prosecution-counsels")
+    public JsonEnvelope getProsecutionCounsels(final JsonEnvelope query) {
         return requester.request(query);
     }
 

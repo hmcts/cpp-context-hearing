@@ -8,16 +8,21 @@ import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.query.view.convertor.ProsecutionCounselListConverter;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingEventDefinitionService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.query.view.service.ProsecutionCounselService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.JsonString;
 
 @ServiceComponent(Component.QUERY_VIEW)
@@ -39,10 +44,16 @@ public class HearingQueryView {
     private HearingService hearingService;
 
     @Inject
+    private ProsecutionCounselService prosecutionCounselService;
+
+    @Inject
     private HearingEventDefinitionService hearingEventDefinitionService;
 
     @Inject
     private Enveloper enveloper;
+
+    @Inject
+    private ProsecutionCounselListConverter prosecutionCounselsListConverter;
 
     @Handles("hearing.get.hearings-by-startdate")
     public JsonEnvelope findHearings(final JsonEnvelope envelope) {
@@ -63,6 +74,23 @@ public class HearingQueryView {
                 JsonObjects.getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
         return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING)
                 .apply(hearingService.getHearingById(hearingId.get()));
+    }
+
+    @Handles("hearing.get.prosecution-counsels")
+    public JsonEnvelope getProsecutionCounsels(final JsonEnvelope query) {
+
+        final UUID hearingId = UUID.fromString(query
+                .payloadAsJsonObject()
+                .getString(FIELD_HEARING_ID));
+
+        final List<ProsecutionCounsel> prosecutionCounsels =
+                prosecutionCounselService.getProsecutionCounselsByHearingId(hearingId);
+
+        return enveloper.withMetadataFrom(query, "hearing.get.prosecution-counsels").apply(payloadFrom(prosecutionCounsels));
+    }
+
+    private JsonObject payloadFrom(final List<ProsecutionCounsel> prosecutionCounsels) {
+        return prosecutionCounselsListConverter.convert(prosecutionCounsels);
     }
 
     @Handles("hearing.hearing-event-definitions")

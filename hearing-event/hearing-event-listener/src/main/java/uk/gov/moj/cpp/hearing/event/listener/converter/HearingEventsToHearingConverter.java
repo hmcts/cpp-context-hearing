@@ -5,9 +5,11 @@ import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.util.UUID;
 
@@ -57,5 +59,14 @@ public class HearingEventsToHearingConverter {
         hearingCase.setHearingId(caseAssociated.getHearingId());
         hearingCase.setCaseId(caseAssociated.getCaseId());
         return hearingCase;
+    }
+
+    public ProsecutionCounsel convert(final ProsecutionCounselAdded prosecutionCounselAdded) {
+        final ProsecutionCounsel prosecutionCounsel =
+                new ProsecutionCounsel(prosecutionCounselAdded.getAttendeeId(),
+                        prosecutionCounselAdded.getHearingId(),
+                        prosecutionCounselAdded.getPersonId(),
+                        prosecutionCounselAdded.getStatus());
+        return prosecutionCounsel;
     }
 }

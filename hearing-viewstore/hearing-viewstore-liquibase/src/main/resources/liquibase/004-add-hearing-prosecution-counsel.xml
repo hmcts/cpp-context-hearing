@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="ccr" id="hearing-4">
+        <createTable tableName="hearing_prosecution_counsel">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="hearingid" type="UUID"></column>
+            <column name="personid" type="UUID"></column>
+            <column name="status" type="VARCHAR(255)"></column>
+        </createTable>
+
+        <createIndex tableName="hearing_prosecution_counsel" indexName="prosecution_counsel_hearing_idx">
+            <column name="hearingid"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

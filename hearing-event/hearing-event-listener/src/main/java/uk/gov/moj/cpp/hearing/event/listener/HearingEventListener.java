@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -12,14 +13,17 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventDefinitionsConverter;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingDefinitionsRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
+import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +51,9 @@ public class HearingEventListener {
 
     @Inject
     private HearingCaseRepository hearingCaseRepository;
+
+    @Inject
+    private ProsecutionCounselRepository prosecutionCounselRepository;
 
     @Transactional
     @Handles("hearing.hearing-initiated")
@@ -119,8 +126,12 @@ public class HearingEventListener {
     @Transactional
     @Handles("hearing.prosecution-counsel-added")
     public void prosecutionCounselAdded(final JsonEnvelope event) {
-        //TODO should be implemented
+        final ProsecutionCounselAdded prosecutionCounselAdded =
+                jsonObjectConverter.convert(event.payloadAsJsonObject(), ProsecutionCounselAdded.class);
+        final ProsecutionCounsel prosecutionCounsel = converter.convert(prosecutionCounselAdded);
+        prosecutionCounselRepository.save(prosecutionCounsel);
     }
+
     @Transactional
     @Handles("hearing.case-associated")
     public void caseAssociated(final JsonEnvelope event) {

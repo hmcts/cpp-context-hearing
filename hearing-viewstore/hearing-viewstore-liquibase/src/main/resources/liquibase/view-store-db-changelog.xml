@@ -5,5 +5,6 @@
 
 	<include file="liquibase/001-viewdb-init.xml" />
 	<include file="liquibase/002-added-hearing-details.xml" />
-	<include file="liquibase/003-create-hearing-event-definition.xml" />
+    <include file="liquibase/003-create-hearing-event-definition.xml" />
+    <include file="liquibase/004-add-hearing-prosecution-counsel.xml" />
 </databaseChangeLog>
