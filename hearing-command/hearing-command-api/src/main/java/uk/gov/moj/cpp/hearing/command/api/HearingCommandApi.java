@@ -49,4 +49,10 @@ public class HearingCommandApi {
         sender.send(envelope);
     }
 
+    @Handles("hearing.create-hearing-event-definitions")
+    public void createHearingEventDefinitions(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
+
 }

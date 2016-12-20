@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
 import uk.gov.justice.services.common.converter.ListToJsonArrayConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -9,6 +8,7 @@ import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingEventDefinitionService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import java.time.LocalDate;
@@ -27,6 +27,7 @@ public class HearingQueryView {
     static final String FIELD_START_DATE = "startDate";
     static final String NAME_RESPONSE_HEARING_LIST = "hearing.get.hearings-by-startdate-response";
     static final String NAME_RESPONSE_HEARING = "hearing.get.hearing-response";
+    private static final String HEARING_QUERY_HEARING_EVENT_DEFINITIONS_RESPONSE = "hearing.query.hearing-event-definitions-response";
 
     @Inject
     private Requester requester;
@@ -36,6 +37,9 @@ public class HearingQueryView {
 
     @Inject
     private HearingService hearingService;
+
+    @Inject
+    private HearingEventDefinitionService hearingEventDefinitionService;
 
     @Inject
     private Enveloper enveloper;
@@ -59,5 +63,13 @@ public class HearingQueryView {
                 JsonObjects.getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
         return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING)
                 .apply(hearingService.getHearingById(hearingId.get()));
+    }
+
+    @Handles("hearing.hearing-event-definitions")
+    public JsonEnvelope findHearingEventDefinitions(final JsonEnvelope envelope) {
+        return enveloper.withMetadataFrom(envelope, HEARING_QUERY_HEARING_EVENT_DEFINITIONS_RESPONSE)
+                .apply(Json.createObjectBuilder()
+                        .add("eventDefinitions", helperService.convert(hearingEventDefinitionService.getHearingEventDefinitions()))
+                        .build());
     }
 }

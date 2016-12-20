@@ -23,7 +23,6 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearing.json
                     schema:  !include  json/schema/hearing.get.hearing.json
 
-
 /hearings:
    get:
       description: |
@@ -45,3 +44,20 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.hearings-by-startdate+json:
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
+
+/hearings/{hearingId}/event-definitions:
+    get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.hearing-event-definitions+json
+            name: hearing.hearing-event-definitions
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.hearing-event-definitions+json:
+                    example:  !include json/hearing.hearing-event-definitions.json
+                    schema:   !include json/schema/hearing.hearing-event-definitions.json
+

@@ -1,25 +1,36 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.google.common.io.Resources.getResource;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
-import static java.util.UUID.randomUUID;
+import static java.nio.charset.Charset.defaultCharset;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.jboss.resteasy.util.HttpResponseCodes.SC_ACCEPTED;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.helper.StubUtil;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Resources;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
-import com.jayway.restassured.response.ResponseBody;
 import org.apache.http.HttpStatus;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -40,8 +51,8 @@ public class HearingIT extends AbstractIT {
         final String hearingId = UUID.randomUUID().toString();
 
         final String initiateHearing = Resources.toString(
-                Resources.getResource("hearing.initiate-hearing.json"),
-                Charset.defaultCharset());
+                getResource("hearing.initiate-hearing.json"),
+                defaultCharset());
 
         final String commandAPIEndPoint = MessageFormat
                 .format(prop.getProperty("hearing.initiate-hearing"), hearingId);
@@ -138,6 +149,59 @@ public class HearingIT extends AbstractIT {
         assertThat(readResponses.getStatusCode(), is(200));
         assertThat("hearings list size should be greater or equal one",readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
 
+    }
+
+    @Test
+    public void hearingEventDefinitionsTest() throws IOException, InterruptedException {
+        List<HearingEventDefinition> hearingEventDefinitions = createHearingEventDefinitions();
+        String hearingEventDefinitionsPayload = createHearingEventDefinitionsPayload(hearingEventDefinitions);
+
+        Integer hearingId = 0;
+        final String commandAPIEndPoint = MessageFormat
+                .format(prop.getProperty("hearing-command-api-hearings-event_definitions"), hearingId);
+
+        final Response writeResponse = given().spec(reqSpec).and()
+                .contentType("application/vnd.hearing.create-hearing-event-definitions+json")
+                .body(hearingEventDefinitionsPayload).header(cppuidHeader).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(prop.getProperty("hearing-query-api-hearings-event_definitions"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.hearing-event-definitions+json";
+
+        poll(requestParams(url, mediaType).withHeader(cppuidHeader.getName(),cppuidHeader.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.eventDefinitions", hasSize(2)),
+                                withJsonPath("$.eventDefinitions[0].actionLabel", is(hearingEventDefinitions.get(0).getActionLabel())),
+                                withJsonPath("$.eventDefinitions[0].recordedLabel", is(hearingEventDefinitions.get(0).getRecordedLabel())),
+                                withJsonPath("$.eventDefinitions[1].actionLabel", is(hearingEventDefinitions.get(1).getActionLabel())),
+                                withJsonPath("$.eventDefinitions[1].recordedLabel", is(hearingEventDefinitions.get(1).getRecordedLabel()))
+                        )));
+    }
+
+    private List<HearingEventDefinition> createHearingEventDefinitions() {
+        return Arrays.asList(
+                new HearingEventDefinition(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
+                new HearingEventDefinition(UUID.randomUUID().toString(), UUID.randomUUID().toString())
+        );
+    }
+
+    private String createHearingEventDefinitionsPayload(List<HearingEventDefinition> hearingEventDefinitions) throws IOException {
+        String hearingEventDefinitionsPayload = Resources.toString(
+                getResource("hearing.command.create-hearing-event-definitions.json"),
+                defaultCharset());
+
+        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$actionLabel0", hearingEventDefinitions.get(0).getActionLabel());
+        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$recordedLabel0", hearingEventDefinitions.get(0).getRecordedLabel());
+        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$actionLabel1", hearingEventDefinitions.get(1).getActionLabel());
+        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$recordedLabel1", hearingEventDefinitions.get(1).getRecordedLabel());
+
+        return hearingEventDefinitionsPayload;
     }
 
 }

@@ -2,13 +2,13 @@ package uk.gov.moj.cpp.hearing.query.api;
 
 
 
-import javax.inject.Inject;
-
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import javax.inject.Inject;
 
 @ServiceComponent(Component.QUERY_API)
 public class HearingQueryApi {
@@ -26,4 +26,8 @@ public class HearingQueryApi {
         return requester.request(query);
     }
 
+    @Handles("hearing.hearing-event-definitions")
+    public JsonEnvelope findHearingEventDefinitions(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

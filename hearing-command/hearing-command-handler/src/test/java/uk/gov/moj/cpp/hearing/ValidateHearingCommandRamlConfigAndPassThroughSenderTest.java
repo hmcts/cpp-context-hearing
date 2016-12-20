@@ -44,7 +44,7 @@ public class ValidateHearingCommandRamlConfigAndPassThroughSenderTest {
         /**
          * Reading Raml and extraction action name @ {ramlActionNames}
          */
-        List<String> allLines = FileUtils.readLines(new File("src/raml/hearing_command_handler.messaging.raml"));
+        List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-command-handler.messaging.raml"));
         Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
 
         ramlActionNames = allLines.stream()

@@ -1,9 +1,9 @@
 #%RAML 0.8
-title: Hearing Command Controller
+title: Hearing Command handler
 version: 1.0
-baseUri:  message://command/controller/message/hearing
+baseUri:  message://command/handler/message/hearing
 
-/hearing.controller.command:
+/hearing.handler.command:
   post:
       body:
         application/vnd.hearing.initiate-hearing+json:
@@ -33,3 +33,9 @@ baseUri:  message://command/controller/message/hearing
         application/vnd.hearing.add-prosecution-counsel+json:
             example: !include json/hearing.add-prosecution-counsel.json
             schema:  !include json/schema/hearing.add-prosecution-counsel.json
+
+        application/vnd.hearing.create-hearing-event-definitions+json:
+            example: !include json/hearing.create-hearing-event-definitions.json
+            schema:  !include json/schema/hearing.create-hearing-event-definitions.json
+
+

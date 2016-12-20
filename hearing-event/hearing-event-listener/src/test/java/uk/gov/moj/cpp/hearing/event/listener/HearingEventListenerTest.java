@@ -38,7 +38,7 @@ public class HearingEventListenerTest {
 
 	@Mock
 	private HearingInitiated hearingInitiated;
-	
+
 
 	@Mock
 	private Hearing hearing;

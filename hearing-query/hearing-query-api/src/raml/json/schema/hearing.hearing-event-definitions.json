@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "eventDefinitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "actionLabel": {
+            "type": "string"
+          },
+          "recordedLabel": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "recordedLabel",
+          "actionLabel"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}
+

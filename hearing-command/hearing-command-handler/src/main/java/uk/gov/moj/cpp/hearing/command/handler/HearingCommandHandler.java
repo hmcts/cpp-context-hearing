@@ -22,6 +22,8 @@ import uk.gov.moj.cpp.hearing.domain.command.BookRoom;
 import uk.gov.moj.cpp.hearing.domain.command.EndHearing;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
+import uk.gov.moj.cpp.hearing.domain.command.CreateHearingEventDefinitions;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -38,6 +40,8 @@ public class HearingCommandHandler {
 
     @Inject
     private Enveloper enveloper;
+
+    @Inject HearingCommandFactory hearingCommandFactory;
 
     @Inject
     private AggregateService aggregateService;
@@ -96,6 +100,15 @@ public class HearingCommandHandler {
         final String status = payload.getString("status");
         applyToAggregate(hearingId, aggregate -> aggregate.addProsecutionCounsel(hearingId, attendeeId, personId, status), command);
 
+    }
+
+    @Handles("hearing.create-hearing-event-definitions")
+    public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
+        final UUID streamId = UUID.fromString(envelope.payloadAsJsonObject().getString("id"));
+        final CreateHearingEventDefinitions createHearingEventDefinitions = hearingCommandFactory.createHearingEventDefinitionsFrom(envelope.payloadAsJsonObject());
+        EventStream eventStream = eventSource.getStreamById(streamId);
+        Stream<Object> events = Stream.of(new HearingEventDefinitionsCreated(createHearingEventDefinitions.getUUID(), createHearingEventDefinitions.getEventDefinitions()));
+        eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
     }
 
     private void applyToAggregate(final UUID streamId, final Function<HearingAggregate, Stream<Object>> function,

@@ -98,7 +98,7 @@ function createEventLog() {
 
 function runLiquibase {
   #run liquibase for context
-  mvn -f ${CONTEXT_NAME}-viewstore/${CONTEXT_NAME}-viewstore-liquibase/pom.xml -Dliquibase.url=jdbc:postgresql://localhost:5432/postgres -Dliquibase.username=postgres -Dliquibase.password=postgres -Dliquibase.logLevel=info resources:resources liquibase:update
+  mvn -f ${CONTEXT_NAME}-viewstore/${CONTEXT_NAME}-viewstore-liquibase/pom.xml -Dliquibase.url=jdbc:postgresql://localhost:5432/hearingviewstore -Dliquibase.username=hearing -Dliquibase.password=hearing -Dliquibase.logLevel=info resources:resources liquibase:update
   echo "Finished executing liquibase"
 }
 

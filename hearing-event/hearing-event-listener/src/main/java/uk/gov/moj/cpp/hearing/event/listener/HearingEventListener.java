@@ -9,11 +9,14 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
+import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventDefinitionsConverter;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingDefinitionsRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
@@ -34,7 +37,13 @@ public class HearingEventListener {
     private HearingEventsToHearingConverter converter;
 
     @Inject
+    private HearingEventDefinitionsConverter hearingEventDefinitionsConverter;
+
+    @Inject
     private HearingRepository hearingRepository;
+
+    @Inject
+    private HearingDefinitionsRepository hearingDefinitionsRepository;
 
     @Inject
     private HearingCaseRepository hearingCaseRepository;
@@ -110,7 +119,7 @@ public class HearingEventListener {
     @Transactional
     @Handles("hearing.prosecution-counsel-added")
     public void prosecutionCounselAdded(final JsonEnvelope event) {
-       //TODO should be implemented
+        //TODO should be implemented
     }
     @Transactional
     @Handles("hearing.case-associated")
@@ -124,5 +133,14 @@ public class HearingEventListener {
                 .isPresent()) {
             hearingCaseRepository.save(hearing);
         }
+    }
+
+    @Transactional
+    @Handles("hearing.hearing-event-definitions-created")
+    public void hearingEventDefinitionsCreated(final JsonEnvelope event) {
+        hearingDefinitionsRepository.deleteAll();
+        hearingEventDefinitionsConverter
+                .convert(jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingEventDefinitionsCreated.class))
+                .forEach(hearingDefinitionsRepository::save);
     }
 }

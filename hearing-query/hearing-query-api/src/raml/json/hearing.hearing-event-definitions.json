@@ -1,0 +1,17 @@
+{
+  "eventDefinitions": [
+    {
+      "actionLabel": "Identify defendant",
+      "recordedLabel": "Defendant identified"
+    },
+    {
+      "actionLabel": "Start Hearing",
+      "recordedLabel": "Hearing started"
+    }
+  ]
+}
+
+
+
+
+

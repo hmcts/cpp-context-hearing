@@ -1,16 +1,21 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static javax.json.Json.createReader;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
+import static uk.gov.moj.cpp.hearing.command.handler.HearingEventDefinitionsTestHelper.HEARING_EVENT_DEFINITIONS_UUID;
+import static uk.gov.moj.cpp.hearing.command.handler.HearingEventDefinitionsTestHelper.createHearingEventDefinitions;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter;
+import uk.gov.moj.cpp.hearing.domain.command.CreateHearingEventDefinitions;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 
 import java.time.ZonedDateTime;
@@ -38,6 +43,18 @@ public class   HearingCommandFactoryTest {
         assertThat(event.getStartDateTime().toString(), equalTo(START_DATE_TIME));
         assertThat(event.getDuration(), equalTo(DURATION));
 
+    }
+
+    @Test
+    public void shouldCreateHearingEventDefinitionsInSameOrder() throws Exception {
+        CreateHearingEventDefinitions createHearingEventDefinitionsExpected = createHearingEventDefinitions(HEARING_EVENT_DEFINITIONS_UUID);
+
+        CreateHearingEventDefinitions hearingEventDefinitionsActual = new HearingCommandFactory()
+                .createHearingEventDefinitionsFrom(createReader(this.getClass()
+                        .getResourceAsStream("/hearing.command.create-hearing-event-definitions.json")).readObject());
+
+        assertThat(hearingEventDefinitionsActual.getEventDefinitions(), is(equalTo(createHearingEventDefinitionsExpected.getEventDefinitions())));
+        assertThat(hearingEventDefinitionsActual.getUUID(), is(equalTo(createHearingEventDefinitionsExpected.getUUID())));
     }
 
 

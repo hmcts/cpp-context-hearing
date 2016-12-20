@@ -47,4 +47,10 @@ public class HearingCommandController {
     public void addCase(final JsonEnvelope envelope) {
         sender.send(envelope);
     }
+
+    @Handles("hearing.create-hearing-event-definitions")
+    public void createHearingEventDefinitions(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
 }
