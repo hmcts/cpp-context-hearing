@@ -1,6 +1,6 @@
 {
   "caseId": "RANDOM_CASE_ID",
   "hearingType": "TRIAL",
-  "startDateTime": "2016-06-01T10:00:00+01:00[Europe/Paris]",
+  "startDateTime": "2016-06-01T10:00:00Z",
   "duration" : 1
 }

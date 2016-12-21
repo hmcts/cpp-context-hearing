@@ -51,7 +51,7 @@ public class HearingIT extends AbstractIT {
         Response  writeResponse = given().spec(reqSpec).and()
                 .contentType("application/vnd.hearing.start+json")
                 .body("{\n" +
-                        "  \"localTime\": \"2016-06-01T10:00:00+01:00[Europe/Paris]\"\n" +
+                        "  \"localTime\": \"2016-06-01T10:00:00Z\"\n" +
                         "}").header(cppuidHeader).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
@@ -59,7 +59,7 @@ public class HearingIT extends AbstractIT {
         writeResponse = given().spec(reqSpec).and()
                 .contentType("application/vnd.hearing.end+json")
                 .body("{\n" +
-                        "  \"localTime\": \"2016-06-01T11:00:00+01:00[Europe/Paris]\"\n" +
+                        "  \"localTime\": \"2016-06-01T11:00:00Z\"\n" +
                         "}").header(cppuidHeader).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
@@ -122,9 +122,9 @@ public class HearingIT extends AbstractIT {
         assertThat("Court Centre name should match",readResponse.jsonPath().get("courtCentreName").equals("Bournemouth"), equalTo(true));
         assertThat("Room name should match",readResponse.jsonPath().get("roomName").equals("Room1"), equalTo(true));
         assertThat("Hearing start Date should match",readResponse.jsonPath().get("startDate").equals("2016-06-01"), equalTo(true));
-        assertThat("Hearing Start time should match",readResponse.jsonPath().get("startTime").equals("08:00"), equalTo(true));
-        assertThat("Hearing Started time should match",readResponse.jsonPath().get("startedAt").equals("2016-06-01T08:00:00Z"), equalTo(true));
-        assertThat("Hearing ended time should match",readResponse.jsonPath().get("endedAt").equals("2016-06-01T09:00:00Z"), equalTo(true));
+        assertThat("Hearing Start time should match",readResponse.jsonPath().get("startTime").equals("10:00"), equalTo(true));
+        assertThat("Hearing Started time should match",readResponse.jsonPath().get("startedAt").equals("2016-06-01T10:00:00Z"), equalTo(true));
+        assertThat("Hearing ended time should match",readResponse.jsonPath().get("endedAt").equals("2016-06-01T11:00:00Z"), equalTo(true));
 
 
         final String getHearingsByDate = MessageFormat
