@@ -4,6 +4,8 @@ import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.nio.charset.Charset.defaultCharset;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -37,7 +39,7 @@ import org.junit.Test;
 
 public class HearingIT extends AbstractIT {
 
-    private final UUID userId = UUID.fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a");
+    private final UUID userId = fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a");
     private final Header cppuidHeader = new Header("CJSCPPUID", userId.toString());
 
     @Before
@@ -47,8 +49,8 @@ public class HearingIT extends AbstractIT {
 
     @Test
     public void hearingTest() throws IOException, InterruptedException {
-        final String caseId = UUID.randomUUID().toString();
-        final String hearingId = UUID.randomUUID().toString();
+        final String caseId = randomUUID().toString();
+        final String hearingId = randomUUID().toString();
 
         final String initiateHearing = Resources.toString(
                 getResource("hearing.initiate-hearing.json"),
@@ -131,9 +133,9 @@ public class HearingIT extends AbstractIT {
         assertThat("Court Centre name should match", readResponse.jsonPath().get("courtCentreName").equals("Bournemouth"), equalTo(true));
         assertThat("Room name should match", readResponse.jsonPath().get("roomName").equals("Room1"), equalTo(true));
         assertThat("Hearing start Date should match", readResponse.jsonPath().get("startDate").equals("2016-06-01"), equalTo(true));
-        assertThat("Hearing Start time should match", readResponse.jsonPath().get("startTime").equals("08:00"), equalTo(true));
-        assertThat("Hearing Started time should match", readResponse.jsonPath().get("startedAt").equals("2016-06-01T08:00:00Z"), equalTo(true));
-        assertThat("Hearing ended time should match", readResponse.jsonPath().get("endedAt").equals("2016-06-01T09:00:00Z"), equalTo(true));
+        assertThat("Hearing Start time should match", readResponse.jsonPath().get("startTime").equals("10:00"), equalTo(true));
+        assertThat("Hearing Started time should match", readResponse.jsonPath().get("startedAt").equals("2016-06-01T10:00:00Z"), equalTo(true));
+        assertThat("Hearing ended time should match", readResponse.jsonPath().get("endedAt").equals("2016-06-01T11:00:00Z"), equalTo(true));
 
 
         final String getHearingsByDate = MessageFormat
@@ -151,10 +153,10 @@ public class HearingIT extends AbstractIT {
 
     @Test
     public void hearingEventDefinitionsTest() throws IOException, InterruptedException {
-        List<HearingEventDefinition> hearingEventDefinitions = createHearingEventDefinitions();
-        String hearingEventDefinitionsPayload = createHearingEventDefinitionsPayload(hearingEventDefinitions);
+        final List<HearingEventDefinition> hearingEventDefinitions = createHearingEventDefinitions();
+        final String hearingEventDefinitionsPayload = createHearingEventDefinitionsPayload(hearingEventDefinitions);
 
-        Integer hearingId = 0;
+        final Integer hearingId = 0;
         final String commandAPIEndPoint = MessageFormat
                 .format(prop.getProperty("hearing-command-api-hearings-event_definitions"), hearingId);
 
@@ -184,8 +186,8 @@ public class HearingIT extends AbstractIT {
 
     private List<HearingEventDefinition> createHearingEventDefinitions() {
         return Arrays.asList(
-                new HearingEventDefinition(UUID.randomUUID().toString(), UUID.randomUUID().toString()),
-                new HearingEventDefinition(UUID.randomUUID().toString(), UUID.randomUUID().toString())
+                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString()),
+                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString())
         );
     }
 

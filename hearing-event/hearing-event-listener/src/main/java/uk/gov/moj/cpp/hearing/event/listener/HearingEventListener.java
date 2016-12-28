@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
@@ -76,23 +77,31 @@ public class HearingEventListener {
         final Hearing hearing = converter.convert(hearingInitiated);
         Optional<Hearing> storedHearing = hearingRepository.getByHearingId(hearing.getHearingId());
 
-        storedHearing.ifPresent(h ->
-                h = h.builder().withStartdate(hearing.getStartdate())
-                .withStartTime(hearing.getStartTime())
-                .withDuration(hearing.getDuration())
-                .withHearingType(hearing.getHearingType())
-                .build());
+        if (storedHearing.isPresent()) {
+            storedHearing = of(storedHearing.get().builder()
+                    .withStartdate(hearing.getStartdate())
+                    .withStartTime(hearing.getStartTime())
+                    .withDuration(hearing.getDuration())
+                    .withHearingType(hearing.getHearingType())
+                    .build());
+        }
+
         hearingRepository.save(storedHearing.orElse(hearing));
     }
 
     @Transactional
     @Handles("hearing.court-assigned")
     public void courtAssigned(final JsonEnvelope event) {
-        CourtAssigned courtAssigned = jsonObjectConverter.convert(event.payloadAsJsonObject(), CourtAssigned.class);
-        Hearing hearing = converter.convert(courtAssigned);
+        final CourtAssigned courtAssigned = jsonObjectConverter.convert(event.payloadAsJsonObject(), CourtAssigned.class);
+        final Hearing hearing = converter.convert(courtAssigned);
         Optional<Hearing> storedHearing = hearingRepository.getByHearingId(hearing.getHearingId());
 
-        storedHearing.ifPresent(h -> h.builder().withCourtCentreName(hearing.getCourtCentreName()).build());
+        if (storedHearing.isPresent()) {
+            storedHearing = of(storedHearing.get().builder()
+                    .withCourtCentreName(hearing.getCourtCentreName())
+                    .build());
+        }
+
         hearingRepository.save(storedHearing.orElse(hearing));
     }
 
@@ -103,31 +112,44 @@ public class HearingEventListener {
         Hearing hearing = converter.convert(roomBooked);
         Optional<Hearing> storedHearing = hearingRepository.getByHearingId(hearing.getHearingId());
 
-        storedHearing.ifPresent(h -> {
-            h.builder().withRoomName(hearing.getRoomName()).build();
-        });
+        if (storedHearing.isPresent()) {
+            storedHearing = of(storedHearing.get().builder()
+                    .withRoomName(hearing.getRoomName())
+                    .build());
+        }
+
         hearingRepository.save(storedHearing.orElse(hearing));
     }
 
     @Transactional
     @Handles("hearing.started")
     public void hearingStarted(final JsonEnvelope event) {
-        HearingStarted hearingStarted = jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingStarted.class);
-        Hearing hearing = converter.convert(hearingStarted);
+        final HearingStarted hearingStarted = jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingStarted.class);
+        final Hearing hearing = converter.convert(hearingStarted);
         Optional<Hearing> storedHearing = hearingRepository.getByHearingId(hearing.getHearingId());
 
-        storedHearing.ifPresent(h -> h.builder().withStartedAt(hearing.getStartedAt()).build());
+        if (storedHearing.isPresent()) {
+            storedHearing = of(storedHearing.get().builder()
+                    .withStartedAt(hearing.getStartedAt())
+                    .build());
+        }
+
         hearingRepository.save(storedHearing.orElse(hearing));
     }
 
     @Transactional
     @Handles("hearing.ended")
     public void hearingEnded(final JsonEnvelope event) {
-        HearingEnded hearingEnded = jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingEnded.class);
-        Hearing hearing = converter.convert(hearingEnded);
+        final HearingEnded hearingEnded = jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingEnded.class);
+        final Hearing hearing = converter.convert(hearingEnded);
         Optional<Hearing> storedHearing = hearingRepository.getByHearingId(hearing.getHearingId());
 
-        storedHearing.ifPresent(h -> h.builder().withEndedAt(hearing.getEndedAt()).build());
+        if (storedHearing.isPresent()) {
+            storedHearing = of(storedHearing.get().builder()
+                    .withEndedAt(hearing.getEndedAt())
+                    .build());
+        }
+
         hearingRepository.save(storedHearing.orElse(hearing));
     }
 
@@ -143,9 +165,9 @@ public class HearingEventListener {
     @Transactional
     @Handles("hearing.case-associated")
     public void caseAssociated(final JsonEnvelope event) {
-        CaseAssociated caseAssociated = jsonObjectConverter.convert(event.payloadAsJsonObject(), CaseAssociated.class);
-        HearingCase hearing = converter.convert(caseAssociated);
-        List<HearingCase> storedHearingCases = hearingCaseRepository.findByHearingId(hearing.getHearingId());
+        final CaseAssociated caseAssociated = jsonObjectConverter.convert(event.payloadAsJsonObject(), CaseAssociated.class);
+        final HearingCase hearing = converter.convert(caseAssociated);
+        final List<HearingCase> storedHearingCases = hearingCaseRepository.findByHearingId(hearing.getHearingId());
         if (storedHearingCases.stream().map(HearingCase::getCaseId)
                 .noneMatch(caseId -> caseId.equals(caseAssociated.getCaseId()))) {
             hearingCaseRepository.save(hearing);
