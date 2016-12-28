@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
-
+import static java.util.Collections.sort;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
@@ -12,8 +12,6 @@ import uk.gov.justice.services.core.annotation.Handles;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,22 +22,22 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ValidateHearingCommandRamlConfigAndPassThroughSenderTest {
+public class HearingCommandApiTest {
 
-    Map<String, String> apiHandlers = new HashMap<>();
-    List<String> ramlActionNames = new ArrayList<>();
+    private final Map<String, String> apiHandlers = new HashMap<>();
+    private List<String> ramlActionNames;
 
     @Before
     public void setup() throws IOException {
         for (Method method : HearingCommandApi.class.getMethods()) {
-            Handles handles = method.getAnnotation(Handles.class);
+            final Handles handles = method.getAnnotation(Handles.class);
             if (null != handles) {
                 apiHandlers.put(method.getName(), handles.value());
             }
         }
 
-        /**
-         * Reading Raml and extraction action name @ {ramlActionNames}
+        /*
+          Reading Raml and extraction action name @ {ramlActionNames}
          */
         List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-command-api.raml"));
         Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
@@ -54,13 +52,13 @@ public class ValidateHearingCommandRamlConfigAndPassThroughSenderTest {
 
     @Test
     public void testActionNameAndHandleNameAreSame() throws Exception {
-        List<String> handleNames = apiHandlers.entrySet()
+        final List<String> handleNames = apiHandlers.entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
-        Collections.sort(handleNames);
-        Collections.sort(ramlActionNames);
+        sort(handleNames);
+        sort(ramlActionNames);
 
         assertThat(handleNames, is(ramlActionNames));
     }

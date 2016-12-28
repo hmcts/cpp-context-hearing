@@ -12,13 +12,11 @@ public class HearingEventDefinitionsConverter implements Converter<HearingEventD
 
     @Override
     public List<HearingEventDefinitionEntity> convert(HearingEventDefinitionsCreated eventDefinitionsCreated) {
-        List<HearingEventDefinitionEntity> entities = new ArrayList<>();
+        final List<HearingEventDefinitionEntity> entities = new ArrayList<>();
         for (int index = 0; index < eventDefinitionsCreated.getEventDefinitions().size(); index++) {
-            HearingEventDefinition hearingEventDefinition = eventDefinitionsCreated.getEventDefinitions().get(index);
-            HearingEventDefinitionEntity entity = new HearingEventDefinitionEntity();
-            entity.setActionLabel(hearingEventDefinition.getActionLabel());
-            entity.setRecordedLabel(hearingEventDefinition.getRecordedLabel());
-            entity.setSequenceNumber(index + 1);
+            final HearingEventDefinition hearingEventDefinition = eventDefinitionsCreated.getEventDefinitions().get(index);
+            final HearingEventDefinitionEntity entity = new HearingEventDefinitionEntity(
+                    hearingEventDefinition.getRecordedLabel(), hearingEventDefinition.getActionLabel(), index + 1);
             entities.add(entity);
         }
         return entities;

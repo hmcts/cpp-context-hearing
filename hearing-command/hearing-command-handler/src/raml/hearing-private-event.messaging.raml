@@ -1,0 +1,11 @@
+#%RAML 0.8
+title: Private events
+baseUri: message://command/handler/message/hearing
+/hearing.event:
+  get:
+      responses:
+          200:
+              body:
+                application/vnd.hearing.hearing-event-logged+json:
+                    schema: !include json/schema/hearing.hearing-event-logged.json
+                    example: !include json/hearing.hearing-event-logged.json

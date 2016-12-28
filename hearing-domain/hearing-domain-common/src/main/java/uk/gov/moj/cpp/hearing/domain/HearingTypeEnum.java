@@ -5,7 +5,7 @@ public enum HearingTypeEnum {
 
     private String value;
 
-    private HearingTypeEnum(final String value) {
+    HearingTypeEnum(final String value) {
         this.value = value;
     }
 

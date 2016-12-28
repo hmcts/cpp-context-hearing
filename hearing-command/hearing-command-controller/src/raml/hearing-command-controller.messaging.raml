@@ -1,6 +1,5 @@
 #%RAML 0.8
-title: Hearing Command Controller
-version: 1.0
+title: Hearing Command controller
 baseUri:  message://command/controller/message/hearing
 
 /hearing.controller.command:
@@ -9,9 +8,11 @@ baseUri:  message://command/controller/message/hearing
         application/vnd.hearing.initiate-hearing+json:
             example: !include json/hearing.initiate-hearing.json
             schema:  !include json/schema/hearing.initiate-hearing.json
+
         application/vnd.hearing.create-hearing-event-definitions+json:
             example: !include json/hearing.create-hearing-event-definitions.json
             schema:  !include json/schema/hearing.create-hearing-event-definitions.json
+
         application/vnd.hearing.allocate-court+json:
             example: !include json/hearing.allocate-court.json
             schema:  !include json/schema/hearing.allocate-court.json
@@ -35,3 +36,9 @@ baseUri:  message://command/controller/message/hearing
         application/vnd.hearing.add-prosecution-counsel+json:
             example: !include json/hearing.add-prosecution-counsel.json
             schema:  !include json/schema/hearing.add-prosecution-counsel.json
+
+        application/vnd.hearing.log-hearing-event+json:
+            example: !include json/hearing.log-hearing-event.json
+            schema: !include json/schema/hearing.log-hearing-event.json
+
+

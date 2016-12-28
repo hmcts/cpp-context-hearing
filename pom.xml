@@ -13,15 +13,12 @@
 	<version>2.0.57-CCR-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Hearing services application</name>
+	<name>Hearing Context - Parent Module</name>
 	<description>A applications for hearing service.</description>
 	<properties>
-		<cpp-common-test-utils.version>0.1.0</cpp-common-test-utils.version>
 		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.report.export.path>sonar-report.json</sonar.report.export.path>
 		<sonar.scm.provider>git</sonar.scm.provider>
-		<openejb.version>7.0.0-M3</openejb.version>
-		<cpp.framework.action.mapping.enabled>true</cpp.framework.action.mapping.enabled>
 	</properties>
 	<modules>
 		<module>hearing-query</module>
@@ -31,7 +28,7 @@
 		<module>hearing-event</module>
 		<module>hearing-integration-test</module>
 		<module>hearing-performance-test</module>
-		<module>hearing-notepad-parsing-service</module>
+        <module>hearing-notepad-parsing-service</module>
 	</modules>
 	<build>
         <pluginManagement>

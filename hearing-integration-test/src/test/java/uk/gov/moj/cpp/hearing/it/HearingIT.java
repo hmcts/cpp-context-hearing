@@ -31,7 +31,7 @@ import com.google.common.io.Resources;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 
@@ -40,8 +40,8 @@ public class HearingIT extends AbstractIT {
     private final UUID userId = UUID.fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a");
     private final Header cppuidHeader = new Header("CJSCPPUID", userId.toString());
 
-    @BeforeClass
-    public static void setUp() {
+    @Before
+    public void setUp() {
         StubUtil.setupUsersGroupDataActionClassificationStub();
     }
 
@@ -59,7 +59,7 @@ public class HearingIT extends AbstractIT {
 
         final String initiateHearingBody = initiateHearing.replace("RANDOM_CASE_ID", caseId);
 
-        Response  writeResponse = given().spec(reqSpec).and()
+        Response writeResponse = given().spec(reqSpec).and()
                 .contentType("application/vnd.hearing.start+json")
                 .body("{\n" +
                         "  \"localTime\": \"2016-06-01T10:00:00Z\"\n" +
@@ -108,9 +108,7 @@ public class HearingIT extends AbstractIT {
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
 
-
         TimeUnit.SECONDS.sleep(15);
-
 
         final String queryAPIEndPoint = MessageFormat
                 .format(prop.getProperty("hearing.get.hearing"), hearingId);
@@ -126,20 +124,20 @@ public class HearingIT extends AbstractIT {
         /**
          * Test Read store
          */
-        assertThat("Case should associated with hearing",readResponse.jsonPath().getList("caseIds").contains(caseId), equalTo(true));
-        assertThat("Case should associated with hearing",readResponse.jsonPath().getList("caseIds").contains("2a2d7e9e-0c60-11e6-a148-3e1d05defe78"), equalTo(true));
-        assertThat("Hearing ID should match",readResponse.jsonPath().get("hearingId").equals(hearingId), equalTo(true));
-        assertThat("HearingType should match",readResponse.jsonPath().get("hearingType").equals("TRIAL"), equalTo(true));
-        assertThat("Court Centre name should match",readResponse.jsonPath().get("courtCentreName").equals("Bournemouth"), equalTo(true));
-        assertThat("Room name should match",readResponse.jsonPath().get("roomName").equals("Room1"), equalTo(true));
-        assertThat("Hearing start Date should match",readResponse.jsonPath().get("startDate").equals("2016-06-01"), equalTo(true));
-        assertThat("Hearing Start time should match",readResponse.jsonPath().get("startTime").equals("10:00"), equalTo(true));
-        assertThat("Hearing Started time should match",readResponse.jsonPath().get("startedAt").equals("2016-06-01T10:00:00Z"), equalTo(true));
-        assertThat("Hearing ended time should match",readResponse.jsonPath().get("endedAt").equals("2016-06-01T11:00:00Z"), equalTo(true));
+        assertThat("Case should associated with hearing", readResponse.jsonPath().getList("caseIds").contains(caseId), equalTo(true));
+        assertThat("Case should associated with hearing", readResponse.jsonPath().getList("caseIds").contains("2a2d7e9e-0c60-11e6-a148-3e1d05defe78"), equalTo(true));
+        assertThat("Hearing ID should match", readResponse.jsonPath().get("hearingId").equals(hearingId), equalTo(true));
+        assertThat("HearingType should match", readResponse.jsonPath().get("hearingType").equals("TRIAL"), equalTo(true));
+        assertThat("Court Centre name should match", readResponse.jsonPath().get("courtCentreName").equals("Bournemouth"), equalTo(true));
+        assertThat("Room name should match", readResponse.jsonPath().get("roomName").equals("Room1"), equalTo(true));
+        assertThat("Hearing start Date should match", readResponse.jsonPath().get("startDate").equals("2016-06-01"), equalTo(true));
+        assertThat("Hearing Start time should match", readResponse.jsonPath().get("startTime").equals("08:00"), equalTo(true));
+        assertThat("Hearing Started time should match", readResponse.jsonPath().get("startedAt").equals("2016-06-01T08:00:00Z"), equalTo(true));
+        assertThat("Hearing ended time should match", readResponse.jsonPath().get("endedAt").equals("2016-06-01T09:00:00Z"), equalTo(true));
 
 
         final String getHearingsByDate = MessageFormat
-                .format(prop.getProperty("hearing.get.hearings-by-startDate"), (String)readResponse.jsonPath().get("startDate"));
+                .format(prop.getProperty("hearing.get.hearings-by-startDate"), (String) readResponse.jsonPath().get("startDate"));
 
         final Response readResponses = given().spec(reqSpec).and()
                 .accept("application/vnd.hearing.get.hearings-by-startdate+json")
@@ -147,7 +145,7 @@ public class HearingIT extends AbstractIT {
                 .response();
 
         assertThat(readResponses.getStatusCode(), is(200));
-        assertThat("hearings list size should be greater or equal one",readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
+        assertThat("hearings list size should be greater or equal one", readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
 
     }
 
@@ -172,7 +170,7 @@ public class HearingIT extends AbstractIT {
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.hearing-event-definitions+json";
 
-        poll(requestParams(url, mediaType).withHeader(cppuidHeader.getName(),cppuidHeader.getValue()).build())
+        poll(requestParams(url, mediaType).withHeader(cppuidHeader.getName(), cppuidHeader.getValue()).build())
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(

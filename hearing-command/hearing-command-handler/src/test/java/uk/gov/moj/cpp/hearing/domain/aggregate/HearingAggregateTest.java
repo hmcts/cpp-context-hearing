@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -38,7 +37,7 @@ public class HearingAggregateTest {
     @Test
     public void shouldCreateHearing() {
         // given
-        UUID hearingId = randomUUID();
+        final UUID hearingId = randomUUID();
         // and
         InitiateHearing initiateHearing = createHearing(hearingId);
 

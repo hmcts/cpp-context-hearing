@@ -3,7 +3,7 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet author="Kayan Azimov" id="1">
+    <changeSet author="CCR" id="1" logicalFilePath="003-create-hearing-event-definition.xml">
         <createTable tableName="hearing_event_definitions">
             <column name="recorded_label" type="VARCHAR(200)">
                 <constraints primaryKey="true" nullable="false"/>

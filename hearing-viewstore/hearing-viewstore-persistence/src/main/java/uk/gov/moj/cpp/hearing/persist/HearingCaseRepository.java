@@ -1,10 +1,8 @@
 package uk.gov.moj.cpp.hearing.persist;
 
 
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,8 +11,9 @@ import org.apache.deltaspike.data.api.Query;
 import org.apache.deltaspike.data.api.QueryParam;
 import org.apache.deltaspike.data.api.Repository;
 
+@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 @Repository
-public abstract class HearingCaseRepository  extends AbstractEntityRepository<HearingCase, UUID> {
+public abstract class HearingCaseRepository extends AbstractEntityRepository<HearingCase, UUID> {
     /**
      * Find {@link HearingCase} by caseId and startDate.
      *

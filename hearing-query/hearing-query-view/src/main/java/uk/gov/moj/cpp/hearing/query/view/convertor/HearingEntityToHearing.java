@@ -10,7 +10,7 @@ public class HearingEntityToHearing {
 
     public static HearingView convert(Hearing hearing) {
         final HearingView hearingView = new HearingView();
-        hearingView.setHearingId(hearing.geHearingId().toString());
+        hearingView.setHearingId(hearing.getHearingId().toString());
         hearingView.setDuration(hearing.getDuration());
         hearingView.setStartDate(hearing.getStartdate());
         hearingView.setStartTime(hearing.getStartTime());

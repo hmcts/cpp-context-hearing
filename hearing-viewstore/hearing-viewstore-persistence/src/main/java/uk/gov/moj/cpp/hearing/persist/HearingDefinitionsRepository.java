@@ -10,6 +10,7 @@ import org.apache.deltaspike.data.api.Modifying;
 import org.apache.deltaspike.data.api.Query;
 import org.apache.deltaspike.data.api.Repository;
 
+@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 @Repository
 public interface HearingDefinitionsRepository extends EntityRepository<HearingEventDefinitionEntity, UUID> {
     @Modifying

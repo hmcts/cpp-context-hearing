@@ -93,12 +93,12 @@ function integrationTests {
 
 function createEventLog() {
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.moj.cpp.common-streaming.event-repository:envelope-repository-jpa-liquibase:0.2.0:jar
-    java -jar target/envelope-repository-jpa-liquibase-0.2.0.jar --url=jdbc:postgresql://localhost:5432/postgres --username=postgres --password=postgres --logLevel=info update
+    java -jar target/envelope-repository-jpa-liquibase-0.2.0.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}eventstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
 }
 
 function runLiquibase {
   #run liquibase for context
-  mvn -f ${CONTEXT_NAME}-viewstore/${CONTEXT_NAME}-viewstore-liquibase/pom.xml -Dliquibase.url=jdbc:postgresql://localhost:5432/hearingviewstore -Dliquibase.username=hearing -Dliquibase.password=hearing -Dliquibase.logLevel=info resources:resources liquibase:update
+  mvn -f ${CONTEXT_NAME}-viewstore/${CONTEXT_NAME}-viewstore-liquibase/pom.xml -Dliquibase.url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}viewstore -Dliquibase.username=${CONTEXT_NAME} -Dliquibase.password=${CONTEXT_NAME} -Dliquibase.logLevel=info resources:resources liquibase:update
   echo "Finished executing liquibase"
 }
 
@@ -110,7 +110,8 @@ function buildDeployAndTest {
 function deployAndTest {
   deleteAndDeployWars
   startVagrant
-  createEventLog
+  ## Not sure if this is required as it seems to break every time it's been run!
+ # createEventLog
   runLiquibase
    mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=$WILDFLY_DEPLOYMENT_DIR -Dartifact=uk.gov.justice.services:wiremock-service:1.1.0:war
   healthCheck

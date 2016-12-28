@@ -3,16 +3,13 @@ package uk.gov.moj.cpp.hearing.command.handler;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
@@ -26,13 +23,15 @@ import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelp
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payLoad;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.UUID;
-import static uk.gov.moj.cpp.hearing.domain.AttendeeType.PROSECUTION_COUNSEL;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -41,54 +40,64 @@ import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter;
-import uk.gov.moj.cpp.hearing.domain.AttendeeType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 
-import java.io.IOException;
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.json.Json;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandHandlerTest {
 
-    private static final UUID HEARING_ID = UUID.next();
+    private static final UUID HEARING_ID = randomUUID();
     private static final String LIST_HEARING_COMMAND = "hearing.initiate-hearing";
     private static final String HEARING_LISTED_EVENT = "hearing.hearing-initiated";
     private static final String ADD_PROSECUTION_COUNSEL_EVENT_NAME = "hearing.prosecution-counsel-added";
+    private static final String LOG_HEARING_EVENT_COMMAND = "hearing.log-hearing-event";
+    private static final String HEARING_EVENT_LOGGED_EVENT = "hearing.hearing-event-logged";
+
+    private static final String HEARING_EVENT_ID_FIELD = "id";
+    private static final String RECORDED_LABEL_FIELD = "recordedLabel";
+    private static final String HEARING_ID_FIELD = "hearingId";
+    private static final String TIMESTAMP_FIELD = "timestamp";
+
+    private static final UUID HEARING_EVENT_ID = randomUUID();
+    private static final String RECORDED_LABEL = STRING.next();
+    private static final String TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+
+    private final UUID personId = randomUUID();
+    private final UUID hearingId = randomUUID();
+    private final UUID attendeeId = randomUUID();
+    private final String status = STRING.next();
 
     @Mock
-    EventStream eventStream;
+    private EventStream eventStream;
 
     @Mock
     private EventSource eventSource;
 
     @Mock
-    JsonToHearingConverter jsonToHearingConverter;
+    private JsonToHearingConverter jsonToHearingConverter;
 
     @Mock
     private AggregateService aggregateService;
@@ -96,16 +105,16 @@ public class HearingCommandHandlerTest {
     @Mock
     private HearingAggregate hearingAggregate;
 
-    @Mock
-    private Enveloper enveloper;
+    @Spy
+    private Enveloper enveloper = createEnveloperWithEvents(HearingEventLogged.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
 
-    private final UUID personId = randomUUID();
-    private final UUID hearingId = randomUUID();
-    private final UUID attendeeId = randomUUID();
-    private final String status = STRING.next();
+    @Before
+    public void setup() {
+        when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
+    }
 
     @Test
     public void shouldHandlerListHearingCommand() throws Exception {
@@ -151,15 +160,14 @@ public class HearingCommandHandlerTest {
 
     private HearingInitiated createHearingListed(InitiateHearing initiateHearing) {
         return new HearingInitiated(initiateHearing.getHearingId(),
-                initiateHearing.getStartDateTime(), initiateHearing.getDuration(),initiateHearing.getHearingType());
+                initiateHearing.getStartDateTime(), initiateHearing.getDuration(), initiateHearing.getHearingType());
     }
+
     private InitiateHearing createHearing(UUID hearingId) {
-        UUID caseId = randomUUID();
-        ZonedDateTime startDateOfHearing = ZonedDateTime.now();
-        Integer duration = INTEGER.next();
-        LocalTime notBefore = LocalTime.now();
-        String random = "TRAIL";
-        return new InitiateHearing(hearingId, startDateOfHearing, duration,random);
+        final ZonedDateTime startDateOfHearing = new UtcClock().now();
+        final Integer duration = INTEGER.next();
+        final String random = "TRAIL";
+        return new InitiateHearing(hearingId, startDateOfHearing, duration, random);
     }
 
     @Test
@@ -186,10 +194,40 @@ public class HearingCommandHandlerTest {
                                         withJsonPath("$.attendeeId", equalTo(attendeeId.toString())),
                                         withJsonPath("$.status", equalTo(status)),
                                         withJsonPath("$.hearingId", equalTo(hearingId.toString()))
+                                        )
                                 )
-                        )
                 )
         ));
+    }
+
+    @Test
+    public void shouldRaiseHearingEventLogged() throws Exception {
+        final JsonEnvelope command = createHearingEventLoggedCommand();
+
+        hearingCommandHandler.logHearingEvent(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_LOGGED_EVENT),
+                        payloadIsJson(Matchers.allOf(
+                                withJsonPath(format("$.%s", HEARING_EVENT_ID_FIELD), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", HEARING_ID_FIELD), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s", RECORDED_LABEL_FIELD), equalTo(RECORDED_LABEL)),
+                                withJsonPath(format("$.%s", TIMESTAMP_FIELD), equalTo(TIMESTAMP))
+                        ))
+                ).thatMatchesSchema()
+        ));
+    }
+
+    private JsonEnvelope createHearingEventLoggedCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(LOG_HEARING_EVENT_COMMAND))
+                .withPayloadOf(HEARING_EVENT_ID, HEARING_EVENT_ID_FIELD)
+                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
+                .withPayloadOf(RECORDED_LABEL, RECORDED_LABEL_FIELD)
+                .withPayloadOf(TIMESTAMP, TIMESTAMP_FIELD)
+                .build();
     }
 
     private JsonEnvelope createAddProsecutionCounselCommand() {
@@ -231,7 +269,7 @@ public class HearingCommandHandlerTest {
                     returnStatus = false;
                 }
 
-                if (!Objects.equals(ZonedDateTimes.toString(initiateHearing.getStartDateTime()), getString(resultPayload, "startDateTime").get())) {
+                if (!Objects.equals(initiateHearing.getStartDateTime(), fromJsonString(resultPayload.getJsonString("startDateTime")))) {
                     description.appendText(format("StartDateOfHearing Mismatch:initiateHearing:%s, hearingListed%s",
                             initiateHearing.getStartDateTime(), getString(resultPayload, "startDateTime").get()));
                     returnStatus = false;

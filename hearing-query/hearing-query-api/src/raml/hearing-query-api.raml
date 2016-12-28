@@ -80,3 +80,23 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.prosecution-counsels+json:
                     example:  !include json/hearing.get.prosecution-counsels.json
                     schema:  !include  json/schema/hearing.get.prosecution-counsels.json
+
+/hearings/{hearingId}/event-log:
+    uriParameters:
+        hearingId:
+            description: ID of hearing to fetch the log for
+            type: string
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.hearing-event-log+json
+                name: hearing.get-hearing-event-log
+            ...
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.hearing-event-log+json:
+                        example: !include json/hearing.hearing-event-log.json
+                        schema: !include json/schema/hearing.hearing-event-log.json

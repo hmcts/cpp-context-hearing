@@ -7,10 +7,10 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "hearing_event_definitions")
-public class HearingEventDefinitionEntity implements Comparable<HearingEventDefinitionEntity>{
+public class HearingEventDefinitionEntity implements Comparable<HearingEventDefinitionEntity> {
 
     @Id
-    @Column(name = "recorded_label", unique = true, nullable = false)
+    @Column(name = "recorded_label", nullable = false)
     private String recordedLabel;
 
     @Column(name = "action_label", nullable = false)
@@ -19,32 +19,39 @@ public class HearingEventDefinitionEntity implements Comparable<HearingEventDefi
     @Column(nullable = false, name = "sequence_number")
     private Integer sequenceNumber;
 
-    public String getRecordedLabel() {
-        return recordedLabel;
+    public HearingEventDefinitionEntity() {
+        // for JPA
     }
 
-    public void setRecordedLabel(String recordedLabel) {
+    public HearingEventDefinitionEntity(final String recordedLabel, final String actionLabel, final Integer sequenceNumber) {
         this.recordedLabel = recordedLabel;
+        this.actionLabel = actionLabel;
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    public String getRecordedLabel() {
+        return recordedLabel;
     }
 
     public String getActionLabel() {
         return actionLabel;
     }
 
-    public void setActionLabel(String actionLabel) {
-        this.actionLabel = actionLabel;
-    }
-
     public Integer getSequenceNumber() {
         return sequenceNumber;
-    }
-
-    public void setSequenceNumber(Integer sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
     }
 
     @Override
     public int compareTo(HearingEventDefinitionEntity other) {
         return this.sequenceNumber.compareTo(other.sequenceNumber);
+    }
+
+    @Override
+    public String toString() {
+        return "HearingEventDefinitionEntity{" +
+                "recordedLabel='" + recordedLabel + '\'' +
+                ", actionLabel='" + actionLabel + '\'' +
+                ", sequenceNumber=" + sequenceNumber +
+                '}';
     }
 }

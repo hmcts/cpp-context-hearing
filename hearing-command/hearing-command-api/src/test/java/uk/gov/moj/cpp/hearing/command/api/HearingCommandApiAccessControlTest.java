@@ -131,6 +131,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
+
     @Override
     protected Map<Class, Object> getProviderMocks() {
         return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, userAndGroupProvider).build();

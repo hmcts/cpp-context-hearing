@@ -1,6 +1,5 @@
 #%RAML 0.8
 title: Hearing Command handler
-version: 1.0
 baseUri:  message://command/handler/message/hearing
 
 /hearing.handler.command:
@@ -38,4 +37,6 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.create-hearing-event-definitions.json
             schema:  !include json/schema/hearing.create-hearing-event-definitions.json
 
-
+        application/vnd.hearing.log-hearing-event+json:
+            schema: !include json/schema/hearing.log-hearing-event.json
+            example: !include json/hearing.log-hearing-event.json

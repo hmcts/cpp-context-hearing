@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler.converter;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
+
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.domain.command.AddCaseToHearing;
@@ -27,8 +28,8 @@ public class JsonToHearingConverter {
 
     public InitiateHearing convertToInitiateHearing(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();
-        ZonedDateTime startDateTime = ZonedDateTimes.fromJsonString(payload.getJsonString(START_DATE_TIME));
-        InitiateHearing initiateHearing = new InitiateHearing(JsonObjects.getUUID(payload, HEARING_ID).get(),
+        final ZonedDateTime startDateTime = fromJsonString(payload.getJsonString(START_DATE_TIME));
+        final InitiateHearing initiateHearing = new InitiateHearing(JsonObjects.getUUID(payload, HEARING_ID).get(),
                 startDateTime, payload.getInt("duration"), payload.getString(HEARING_TYPE, null));
         initiateHearing.setCourtCentreName(payload.getString(COURT_CENTRE_NAME, null));
         initiateHearing.setRoomName(payload.getString(ROOM_NAME, null));
@@ -38,13 +39,13 @@ public class JsonToHearingConverter {
 
     public StartHearing convertToStartHearing(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();
-        ZonedDateTime startTime = ZonedDateTimes.fromJsonString(payload.getJsonString(LOCAL_TIME));
+        ZonedDateTime startTime = fromJsonString(payload.getJsonString(LOCAL_TIME));
         return new StartHearing(JsonObjects.getUUID(payload, HEARING_ID).get(), startTime);
     }
 
     public EndHearing convertToEndHearing(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();
-        ZonedDateTime endTime = ZonedDateTimes.fromJsonString(payload.getJsonString(LOCAL_TIME));
+        ZonedDateTime endTime = fromJsonString(payload.getJsonString(LOCAL_TIME));
         return new EndHearing(JsonObjects.getUUID(payload, HEARING_ID).get(), endTime);
     }
 

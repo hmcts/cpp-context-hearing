@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.command.controller;
+package uk.gov.moj.cpp.hearing.query.api;
 
 
 import static org.hamcrest.CoreMatchers.is;
@@ -24,18 +24,18 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ValidateHearingCommandRamlConfigAndPassThroughSenderTest {
+public class HearingQueryApiTest {
 
-    Map<String, String> commandHandlers = new HashMap<>();
-    List<String> ramlActionNames = new ArrayList<>();
-    private  final String COMMAND_NAME = "hearing";
+    private final Map<String, String> apiHandlers = new HashMap<>();
+    private final String QUERY_NAME = "hearing";
+    private List<String> ramlActionNames = new ArrayList<>();
 
     @Before
     public void setup() throws IOException {
-        for (Method method : HearingCommandController.class.getMethods()) {
+        for (Method method : HearingQueryApi.class.getMethods()) {
             Handles handles = method.getAnnotation(Handles.class);
             if (null != handles) {
-                commandHandlers.put(method.getName(), handles.value());
+                apiHandlers.put(method.getName(), handles.value());
 
             }
         }
@@ -43,22 +43,21 @@ public class ValidateHearingCommandRamlConfigAndPassThroughSenderTest {
         /**
          * Reading Raml and extraction action name @ {ramlActionNames}
          */
-        List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-command-controller.messaging.raml"));
+        List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-query-api.raml"));
         Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
 
         ramlActionNames = allLines.stream()
                 .filter(nonEmptyStringPredicate)
-                .filter(line -> line.contains("application/vnd."))
-                .filter(line -> line.contains(COMMAND_NAME))
-                .map(line -> line.replaceAll("application/vnd.","").trim())
-                .map(line -> line.replaceAll("\\+json:","").trim())
+                .filter(line -> line.contains("name:"))
+                .filter(line -> line.contains(QUERY_NAME))
+                .map(line -> line.replaceAll("name:", "").trim())
                 .collect(Collectors.toList());
     }
 
 
     @Test
     public void testActionNameAndHandleNameAreSame() throws Exception {
-        List<String> handleNames = commandHandlers.entrySet()
+        List<String> handleNames = apiHandlers.entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
@@ -70,9 +69,9 @@ public class ValidateHearingCommandRamlConfigAndPassThroughSenderTest {
     }
 
     @Test
-    public void testHandleNamesPassThroughSender() throws Exception {
-        for (Map.Entry<String, String> entry : commandHandlers.entrySet())
-            assertThat(HearingCommandController.class, isHandlerClass(Component.COMMAND_CONTROLLER).with(method(entry.getKey()).thatHandles(entry.getValue()).withSenderPassThrough()));
+    public void testHandleNamesPassThroughRequester() throws Exception {
+        for (Map.Entry<String, String> entry : apiHandlers.entrySet())
+            assertThat(HearingQueryApi.class, isHandlerClass(Component.QUERY_API).with(method(entry.getKey()).thatHandles(entry.getValue()).withRequesterPassThrough()));
     }
 
 }

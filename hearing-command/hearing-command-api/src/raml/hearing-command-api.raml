@@ -1,6 +1,5 @@
 #%RAML 0.8
 title: Hearing API
-version: 1.0
 baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
 
 /hearings/{hearingId}:
@@ -89,3 +88,18 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             202:
                 description: OK
 
+/hearings/{hearingId}/event:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.log-hearing-event+json
+            name: hearing.log-hearing-event
+        ...
+      body:
+        application/vnd.hearing.log-hearing-event+json:
+            example: !include json/hearing.log-hearing-event.json
+            schema: !include json/schema/hearing.log-hearing-event.json
+      responses:
+            202:
+                description: OK

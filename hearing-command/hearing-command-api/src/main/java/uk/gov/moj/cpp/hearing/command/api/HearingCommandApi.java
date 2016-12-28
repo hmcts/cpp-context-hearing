@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
+
     @Inject
     private Sender sender;
 
@@ -54,5 +55,9 @@ public class HearingCommandApi {
         sender.send(envelope);
     }
 
+    @Handles("hearing.log-hearing-event")
+    public void logHearingEvent(final JsonEnvelope command) {
+        sender.send(command);
+    }
 
 }

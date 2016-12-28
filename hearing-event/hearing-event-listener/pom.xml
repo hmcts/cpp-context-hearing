@@ -10,14 +10,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>event-listener</artifactId>
-            
-        </dependency>
-        <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>event-listener</artifactId>
         </dependency>
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
@@ -31,34 +30,19 @@
         </dependency>
 
         <!-- Test Dependencies -->
+
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- ToDo If the library is really required then this needs to be moved to common bom -->
         <dependency>
             <groupId>io.github.lukehutch</groupId>
             <artifactId>fast-classpath-scanner</artifactId>
             <version>2.0.8</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>test-utils-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>1.0.2</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-
 
 </project>
