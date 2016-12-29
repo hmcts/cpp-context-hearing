@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
@@ -56,7 +57,6 @@ import javax.json.JsonObject;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.junit.Before;
 import org.junit.Test;
@@ -210,11 +210,11 @@ public class HearingCommandHandlerTest {
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_EVENT_LOGGED_EVENT),
-                        payloadIsJson(Matchers.allOf(
+                        payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", HEARING_EVENT_ID_FIELD), equalTo(HEARING_EVENT_ID.toString())),
                                 withJsonPath(format("$.%s", HEARING_ID_FIELD), equalTo(HEARING_ID.toString())),
                                 withJsonPath(format("$.%s", RECORDED_LABEL_FIELD), equalTo(RECORDED_LABEL)),
-                                withJsonPath(format("$.%s", TIMESTAMP_FIELD), equalTo(TIMESTAMP))
+                                withJsonPath(format("$.%s", TIMESTAMP_FIELD), notNullValue())
                         ))
                 ).thatMatchesSchema()
         ));
