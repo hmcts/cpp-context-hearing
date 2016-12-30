@@ -3,11 +3,13 @@
   "eventDefinitions": [
     {
       "actionLabel": "$actionLabel0",
-      "recordedLabel": "$recordedLabel0"
+      "recordedLabel": "$recordedLabel0",
+      "sequence": 1
     },
     {
       "actionLabel": "$actionLabel1",
-      "recordedLabel": "$recordedLabel1"
+      "recordedLabel": "$recordedLabel1",
+      "sequence": 2
     }
   ]
 }

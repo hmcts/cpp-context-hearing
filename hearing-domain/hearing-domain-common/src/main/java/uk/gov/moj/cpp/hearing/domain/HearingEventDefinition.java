@@ -2,12 +2,14 @@ package uk.gov.moj.cpp.hearing.domain;
 
 
 public class HearingEventDefinition {
-    private String actionLabel;
-    private String recordedLabel;
+    private final String actionLabel;
+    private final String recordedLabel;
+    private final Integer sequence;
 
-    public HearingEventDefinition(String actionLabel, String recordedLabel) {
+    public HearingEventDefinition(String actionLabel, String recordedLabel, Integer sequence) {
         this.actionLabel = actionLabel;
         this.recordedLabel = recordedLabel;
+        this.sequence = sequence;
     }
 
     public String getActionLabel() {
@@ -16,6 +18,10 @@ public class HearingEventDefinition {
 
     public String getRecordedLabel() {
         return recordedLabel;
+    }
+
+    public Integer getSequence() {
+        return sequence;
     }
 
     @Override
@@ -27,7 +33,9 @@ public class HearingEventDefinition {
 
         if (actionLabel != null ? !actionLabel.equals(that.actionLabel) : that.actionLabel != null)
             return false;
-        return recordedLabel != null ? recordedLabel.equals(that.recordedLabel) : that.recordedLabel == null;
+        if (recordedLabel != null ? !recordedLabel.equals(that.recordedLabel) : that.recordedLabel != null)
+            return false;
+        return sequence != null ? sequence.equals(that.sequence) : that.sequence == null;
 
     }
 
@@ -35,6 +43,7 @@ public class HearingEventDefinition {
     public int hashCode() {
         int result = actionLabel != null ? actionLabel.hashCode() : 0;
         result = 31 * result + (recordedLabel != null ? recordedLabel.hashCode() : 0);
+        result = 31 * result + (sequence != null ? sequence.hashCode() : 0);
         return result;
     }
 }

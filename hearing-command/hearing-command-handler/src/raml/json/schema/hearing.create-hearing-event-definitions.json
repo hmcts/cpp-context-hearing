@@ -15,12 +15,16 @@
           },
           "recordedLabel": {
             "type": "string"
+          },
+          "sequence": {
+            "type": "integer"
           }
         },
         "additionalProperties": false,
         "required": [
           "recordedLabel",
-          "actionLabel"
+          "actionLabel",
+          "sequence"
         ]
       }
     }

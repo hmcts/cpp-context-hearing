@@ -14,8 +14,8 @@ public class HearingEventDefinitionsTestHelper {
 
     public static CreateHearingEventDefinitions createHearingEventDefinitions(String uuid) {
         List<HearingEventDefinition> hearingEventDefinitions = asList(
-                new HearingEventDefinition("Identify defendant", "Defendant identified"),
-                new HearingEventDefinition("Start Hearing", "Hearing started"));
+                new HearingEventDefinition("Identify defendant", "Defendant identified", 1),
+                new HearingEventDefinition("Start Hearing", "Hearing started", 2));
         return new CreateHearingEventDefinitions(fromString(uuid), hearingEventDefinitions);
     }
 }

@@ -43,7 +43,8 @@ public class HearingCommandFactory {
         return hearingDefinitionsJson.getValuesAs(JsonObject.class).stream()
                 .map(hearingDefinitionJson -> new HearingEventDefinition(
                         hearingDefinitionJson.getString("actionLabel"),
-                        hearingDefinitionJson.getString("recordedLabel")
+                        hearingDefinitionJson.getString("recordedLabel"),
+                        hearingDefinitionJson.getInt("sequence")
                 )).collect(toList());
     }
 }

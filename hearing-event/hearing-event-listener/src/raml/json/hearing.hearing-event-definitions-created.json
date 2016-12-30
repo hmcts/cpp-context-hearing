@@ -3,11 +3,13 @@
   "eventDefinitions": [
     {
       "actionLabel": "Identify defendant",
-      "recordedLabel": "Defendant identified"
+      "recordedLabel": "Defendant identified",
+      "sequence": 1
     },
     {
       "actionLabel": "Start Hearing",
-      "recordedLabel": "Hearing started"
+      "recordedLabel": "Hearing started",
+      "sequence": 2
     }
   ]
 }
