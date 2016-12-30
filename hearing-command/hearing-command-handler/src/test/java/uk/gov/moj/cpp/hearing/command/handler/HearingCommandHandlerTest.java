@@ -9,6 +9,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -48,6 +50,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -182,7 +185,7 @@ public class HearingCommandHandlerTest {
         when(enveloper.withMetadataFrom(command)).thenReturn(
                 createEnveloperWithEvents(ProsecutionCounselAdded.class).withMetadataFrom(command));
 
-        hearingCommandHandler.addAttendee(command);
+        hearingCommandHandler.addProsecutionCounsel(command);
 
         assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
                 jsonEnvelope(

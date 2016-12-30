@@ -11,6 +11,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -19,11 +20,15 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventDefinitionsConverter;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
+import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
+import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingDefinitionsRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
+import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
@@ -66,6 +71,12 @@ public class HearingEventListener {
 
     @Inject
     private ProsecutionCounselRepository prosecutionCounselRepository;
+
+    @Inject
+    private DefenceCounselRepository defenceCounselRepository;
+
+    @Inject
+    private DefenceCounselDefendantRepository defenceCounselDefendantRepository;
 
     @Inject
     private HearingEventRepository hearingEventRepository;
@@ -160,6 +171,26 @@ public class HearingEventListener {
                 jsonObjectConverter.convert(event.payloadAsJsonObject(), ProsecutionCounselAdded.class);
         final ProsecutionCounsel prosecutionCounsel = converter.convert(prosecutionCounselAdded);
         prosecutionCounselRepository.save(prosecutionCounsel);
+    }
+
+    @Transactional
+    @Handles("hearing.defence-counsel-added")
+    public void defenceCounselAdded(final JsonEnvelope event) {
+        final DefenceCounselAdded defenceCounselAdded =
+                jsonObjectConverter.convert(event.payloadAsJsonObject(), DefenceCounselAdded.class);
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(
+                defenceCounselAdded.getAttendeeId(),
+                defenceCounselAdded.getHearingId(),
+                defenceCounselAdded.getPersonId(),
+                defenceCounselAdded.getStatus());
+        defenceCounselRepository.save(defenceCounsel);
+
+        for (final UUID defendantId: defenceCounselAdded.getDefendantIds()) {
+            final DefenceCounselDefendant defenceCounselDefendant =
+                new DefenceCounselDefendant(defenceCounselAdded.getAttendeeId(), defendantId);
+            defenceCounselDefendantRepository.save(defenceCounselDefendant);
+        }
     }
 
     @Transactional

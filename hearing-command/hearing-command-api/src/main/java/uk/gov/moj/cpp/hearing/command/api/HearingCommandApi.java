@@ -50,6 +50,11 @@ public class HearingCommandApi {
         sender.send(envelope);
     }
 
+    @Handles("hearing.add-defence-counsel")
+    public void addDefenceCounsel(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) {
         sender.send(envelope);

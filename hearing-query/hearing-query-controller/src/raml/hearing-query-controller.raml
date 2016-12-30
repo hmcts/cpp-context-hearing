@@ -83,3 +83,23 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.prosecution-counsels+json:
                     example:  !include json/hearing.get.prosecution-counsels.json
                     schema:  !include  json/schema/hearing.get.prosecution-counsels.json
+
+/hearing/{hearingId}/defence-counsels:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the defence counsels for
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.defence-counsels+json
+            name: hearing.get.defence-counsels
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.defence-counsels+json:
+                    example:  !include json/hearing.get.defence-counsels.json
+                    schema:  !include  json/schema/hearing.get.defence-counsels.json

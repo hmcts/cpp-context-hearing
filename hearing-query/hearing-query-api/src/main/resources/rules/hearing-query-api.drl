@@ -42,3 +42,12 @@ rule "Query - API - hearing.get.prosecution-counsels"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get.defence-counsels"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.defence-counsels");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+

@@ -28,6 +28,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.add-prosecution-counsel+json
             name: hearing.add-prosecution-counsel
+        (mapping):
+            requestType: application/vnd.hearing.add-defence-counsel+json
+            name: hearing.add-defence-counsel
         ...
       body:
         application/vnd.hearing.initiate-hearing+json:
@@ -65,7 +68,11 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.add-prosecution-counsel.json
             schema:
              !include json/schema/hearing.add-prosecution-counsel.json
-
+        application/vnd.hearing.add-defence-counsel+json:
+             example:
+              !include json/hearing.add-defence-counsel.json
+             schema:
+              !include json/schema/hearing.add-defence-counsel.json
       responses:
             202:
                 description: OK

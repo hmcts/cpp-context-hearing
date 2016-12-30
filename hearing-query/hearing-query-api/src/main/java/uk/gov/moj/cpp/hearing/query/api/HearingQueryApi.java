@@ -29,6 +29,11 @@ public class HearingQueryApi {
         return requester.request(query);
     }
 
+    @Handles("hearing.get.defence-counsels")
+    public JsonEnvelope getDefenceCounsels(final JsonEnvelope query) {
+        return requester.request(query);
+    }
+
     @Handles("hearing.hearing-event-definitions")
     public JsonEnvelope findHearingEventDefinitions(final JsonEnvelope query) {
         return requester.request(query);

@@ -1,27 +1,28 @@
 package uk.gov.moj.cpp.hearing.query.view.convertor;
 
+import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isOneOf;
+import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
-@RunWith(MockitoJUnitRunner.class)
+import org.junit.Test;
+
 public class ProsecutionCounselListConverterTest {
 
-    @InjectMocks
-    ProsecutionCounselListConverter prosecutionCounselListConverter;
+    private final ProsecutionCounselListConverter prosecutionCounselListConverter =
+            new ProsecutionCounselListConverter();
 
     @Test
     public void shouldConvertListOfProsecutionCounselsToJsonObjects() {
@@ -39,8 +40,20 @@ public class ProsecutionCounselListConverterTest {
 
         final List<ProsecutionCounsel> prosecutionCounsels = asList(prosecutionCounsel1, prosecutionCounsel2);
 
-        prosecutionCounselListConverter.convert(prosecutionCounsels);
+        final JsonObject jsonObject = new ProsecutionCounselListConverter().convert(prosecutionCounsels);
 
+        final JsonArray prosecutionCounselJsonArray = jsonObject.getJsonArray("prosecution-counsels");
+        assertThat(prosecutionCounselJsonArray, hasSize(2));
+
+        final JsonObject prosecutionCounselsJsonObject1 = prosecutionCounselJsonArray.getJsonObject(0);
+        assertThat(prosecutionCounselsJsonObject1.getJsonString("id").getString(), isOneOf(valueOf(id1), valueOf(id2)));
+        assertThat(prosecutionCounselsJsonObject1.getJsonString("personId").getString(), isOneOf(valueOf(personId1), valueOf(personId2)));
+        assertThat(prosecutionCounselsJsonObject1.getJsonString("status").getString(), isOneOf(valueOf(status1), valueOf(status2)));
+
+        final JsonObject prosecutionCounselsJsonObject2 = prosecutionCounselJsonArray.getJsonObject(1);
+        assertThat(prosecutionCounselsJsonObject2.getJsonString("id").getString(), isOneOf(valueOf(id1), valueOf(id2)));
+        assertThat(prosecutionCounselsJsonObject2.getJsonString("personId").getString(), isOneOf(valueOf(personId1), valueOf(personId2)));
+        assertThat(prosecutionCounselsJsonObject2.getJsonString("status").getString(), isOneOf(valueOf(status1), valueOf(status2)));
 
     }
 }

@@ -27,12 +27,16 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 @ServiceComponent(Component.COMMAND_HANDLER)
 public class HearingCommandHandler {
@@ -99,19 +103,34 @@ public class HearingCommandHandler {
     }
 
     @Handles("hearing.add-prosecution-counsel")
-    public void addAttendee(final JsonEnvelope command) throws EventStreamException {
+    public void addProsecutionCounsel(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(HEARING_ID));
         final UUID personId = fromString(payload.getString("personId"));
         final UUID attendeeId = fromString(payload.getString("attendeeId"));
         final String status = payload.getString("status");
         applyToAggregate(hearingId, aggregate -> aggregate.addProsecutionCounsel(hearingId, attendeeId, personId, status), command);
+    }
 
+    @Handles("hearing.add-defence-counsel")
+    public void addDefenceCounsel(final JsonEnvelope command) throws EventStreamException {
+        final JsonObject payload = command.payloadAsJsonObject();
+        final UUID hearingId = fromString(payload.getString(HEARING_ID));
+        final UUID personId = fromString(payload.getString("personId"));
+        final UUID attendeeId = fromString(payload.getString("attendeeId"));
+        final String status = payload.getString("status");
+        final JsonArray jsonArray = payload.getJsonArray("defendantIds");
+        final List<UUID> defendantIds = new ArrayList<>();
+        for (int i = 0; i < jsonArray.size(); i++){
+            final String defendantIdString = jsonArray.getJsonObject(i).getString("defendantId");
+            defendantIds.add(fromString(defendantIdString));
+        }
+        applyToAggregate(hearingId, aggregate -> aggregate.addDefenceCounsel(hearingId, attendeeId, personId, defendantIds, status), command);
     }
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
-        final UUID streamId = UUID.fromString(envelope.payloadAsJsonObject().getString("id"));
+        final UUID streamId = fromString(envelope.payloadAsJsonObject().getString("id"));
         final CreateHearingEventDefinitions createHearingEventDefinitions = hearingCommandFactory.createHearingEventDefinitionsFrom(envelope.payloadAsJsonObject());
         EventStream eventStream = eventSource.getStreamById(streamId);
         Stream<Object> events = Stream.of(new HearingEventDefinitionsCreated(createHearingEventDefinitions.getUUID(), createHearingEventDefinitions.getEventDefinitions()));

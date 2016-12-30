@@ -44,6 +44,11 @@ public class HearingCommandController {
         sender.send(envelope);
     }
 
+    @Handles("hearing.add-defence-counsel")
+    public void addDefenceCounsel(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
     @Handles("hearing.add-case")
     public void addCase(final JsonEnvelope envelope) {
         sender.send(envelope);
