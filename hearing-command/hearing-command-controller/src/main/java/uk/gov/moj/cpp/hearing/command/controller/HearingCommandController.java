@@ -64,4 +64,9 @@ public class HearingCommandController {
         sender.send(command);
     }
 
+    @Handles("hearing.save-draft-result")
+    public void saveDraftResult(final JsonEnvelope command) {
+        sender.send(command);
+    }
+
 }

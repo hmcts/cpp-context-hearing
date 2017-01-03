@@ -43,4 +43,10 @@ public class HearingQueryApi {
     public JsonEnvelope getHearingEventLog(final JsonEnvelope query) {
         return requester.request(query);
     }
+
+    @Handles("hearing.get-draft-result")
+    public JsonEnvelope getDraftResult(final JsonEnvelope query) {
+        return requester.request(query);
+    }
+
 }

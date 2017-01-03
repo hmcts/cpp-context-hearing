@@ -132,10 +132,31 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         assertFailureOutcome(results);
     }
 
+
+    @Test
+    public void shouldAllowAuthorisedUserToSaveDraftResult() {
+        final Action action = createActionFor("hearing.save-draft-result");
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToSaveDraftResult() {
+        final Action action = createActionFor("hearing.save-draft-result");
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
     @Override
     protected Map<Class, Object> getProviderMocks() {
         return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, userAndGroupProvider).build();
     }
+
+
 
 
 }

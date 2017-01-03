@@ -45,6 +45,11 @@ public class HearingCommandApi {
         sender.send(envelope);
     }
 
+    @Handles("hearing.save-draft-result")
+    public void saveDraftResult(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) {
         sender.send(envelope);

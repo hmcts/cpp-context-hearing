@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="1" author="CCR" logicalFilePath="007-create-table-hearing-outcome.xml">
+        <createTable tableName="hearing_outcome">
+            <column name="id" type="uuid">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="hearing_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="draft_result" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="offence_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defendant_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex tableName="hearing_outcome" indexName="hearing_outcome_hearing_idx">
+            <column name="hearing_id"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>

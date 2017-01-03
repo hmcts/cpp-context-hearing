@@ -10,11 +10,14 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.convertor.DefenceCounselToDefendantMapConverter;
+import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ProsecutionCounselListConverter;
 import uk.gov.moj.cpp.hearing.query.view.service.DefenceCounselService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingEventDefinitionService;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ProsecutionCounselService;
 
@@ -53,6 +56,9 @@ public class HearingQueryView {
     private ProsecutionCounselService prosecutionCounselService;
 
     @Inject
+    private HearingOutcomeService hearingOutcomeService;
+
+    @Inject
     private DefenceCounselService defenceCounselService;
 
     @Inject
@@ -63,6 +69,9 @@ public class HearingQueryView {
 
     @Inject
     private ProsecutionCounselListConverter prosecutionCounselsListConverter;
+
+    @Inject
+    private HearingOutcomesConverter hearingOutcomesConverter;
 
     @Inject
     private DefenceCounselToDefendantMapConverter defenceCounselToDefendantMapConverter;
@@ -135,5 +144,15 @@ public class HearingQueryView {
                 .apply(Json.createObjectBuilder()
                         .add("eventDefinitions", helperService.convert(hearingEventDefinitionService.getHearingEventDefinitions()))
                         .build());
+    }
+
+    @Handles("hearing.get-draft-result")
+    public JsonEnvelope getDraftResult(final JsonEnvelope envelope) {
+        final UUID hearingId = UUID.fromString(envelope
+                .payloadAsJsonObject()
+                .getString(FIELD_HEARING_ID));
+        final List<HearingOutcome> hearingOutcomes =
+                hearingOutcomeService.getHearingOutcomeByHearingId(hearingId);
+        return enveloper.withMetadataFrom(envelope, "hearing.get-draft-result-response").apply(hearingOutcomesConverter.convert(hearingOutcomes));
     }
 }

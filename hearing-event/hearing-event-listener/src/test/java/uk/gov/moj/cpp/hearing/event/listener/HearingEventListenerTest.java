@@ -6,6 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
@@ -16,10 +17,12 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
 import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.time.ZonedDateTime;
@@ -48,6 +51,16 @@ public class HearingEventListenerTest {
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String TIMESTAMP_FIELD = "timestamp";
+
+    public static final String DEFENDANT_ID = "defendantId";
+    private final UUID DEFENDANT_ID_VALUE = randomUUID();
+    public static final String TARGET_ID = "targetId";
+    private static final UUID TARGET_ID_VALUE = randomUUID();
+    public static final String OFFENCE_ID = "offenceId";
+    private static final UUID OFFENCE_ID_VALUE = randomUUID();
+    public static final String DRAFT_RESULT = "draftResult";
+    public static final String ARBITRARY_STRING_IMP_2_YRS = "imp 2 yrs";
+
 
     @Mock
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -82,8 +95,14 @@ public class HearingEventListenerTest {
     @Mock
     private HearingEventRepository hearingEventRepository;
 
+    @Mock
+    private HearingOutcomeRepository hearingOutcomeRepository;
+
     @Captor
     private ArgumentCaptor<HearingEvent> eventLogArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<HearingOutcome> hearingOutcomeArgumentCaptor;
 
     @InjectMocks
     private HearingEventListener hearingEventListener;
@@ -128,6 +147,21 @@ public class HearingEventListenerTest {
         assertThat(eventLogArgumentCaptor.getValue().getTimestamp().toString(), is(ZonedDateTimes.toString(TIMESTAMP)));
     }
 
+    @Test
+    public void shouldPersistHearingDraftResult() {
+        final JsonEnvelope event = getSaveDraftResultJsonEnvelope();
+
+        hearingEventListener.draftResultSaved(event);
+
+        verify(hearingOutcomeRepository).save(hearingOutcomeArgumentCaptor.capture());
+        assertThat(hearingOutcomeArgumentCaptor.getValue().getId(), is(TARGET_ID_VALUE));
+        assertThat(hearingOutcomeArgumentCaptor.getValue().getHearingId(), is(HEARING_ID));
+        assertThat(hearingOutcomeArgumentCaptor.getValue().getDraftResult(), is(ARBITRARY_STRING_IMP_2_YRS));
+        assertThat(hearingOutcomeArgumentCaptor.getValue().getDefendantId(), is(DEFENDANT_ID_VALUE));
+        assertThat(hearingOutcomeArgumentCaptor.getValue().getOffenceId(), is(OFFENCE_ID_VALUE));
+
+    }
+
     private JsonEnvelope getHearingEventLogJsonEnvelope() {
         return envelope()
                 .withPayloadOf(HEARING_EVENT_ID, HEARING_EVENT_ID_FIELD)
@@ -136,5 +170,13 @@ public class HearingEventListenerTest {
                 .withPayloadOf(ZonedDateTimes.toString(TIMESTAMP), TIMESTAMP_FIELD)
                 .build();
     }
-
+    private JsonEnvelope getSaveDraftResultJsonEnvelope() {
+        return envelope()
+                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
+                .withPayloadOf(DEFENDANT_ID_VALUE, DEFENDANT_ID)
+                .withPayloadOf(TARGET_ID_VALUE, TARGET_ID)
+                .withPayloadOf(OFFENCE_ID_VALUE, OFFENCE_ID)
+                .withPayloadOf(ARBITRARY_STRING_IMP_2_YRS, DRAFT_RESULT)
+                .build();
+    }
 }

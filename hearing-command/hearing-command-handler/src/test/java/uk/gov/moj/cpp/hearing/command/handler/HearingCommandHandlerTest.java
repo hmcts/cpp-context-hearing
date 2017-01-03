@@ -46,6 +46,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
+import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -77,7 +78,9 @@ public class HearingCommandHandlerTest {
     private static final String HEARING_LISTED_EVENT = "hearing.hearing-initiated";
     private static final String ADD_PROSECUTION_COUNSEL_EVENT_NAME = "hearing.prosecution-counsel-added";
     private static final String LOG_HEARING_EVENT_COMMAND = "hearing.log-hearing-event";
+    private static final String SAVE_DRAFT_RESULT_COMMAND = "hearing.save-draft-result";
     private static final String HEARING_EVENT_LOGGED_EVENT = "hearing.hearing-event-logged";
+    private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
 
     private static final String HEARING_EVENT_ID_FIELD = "id";
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
@@ -87,6 +90,14 @@ public class HearingCommandHandlerTest {
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final String TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    public static final String DEFENDANT_ID = "defendantId";
+    private final UUID DEFENDANT_ID_VALUE = randomUUID();
+    public static final String TARGET_ID = "targetId";
+    private static final UUID TARGET_ID_VALUE = randomUUID();
+    public static final String OFFENCE_ID = "offenceId";
+    private static final UUID OFFENCE_ID_VALUE = randomUUID();
+    public static final String DRAFT_RESULT = "draftResult";
+    public static final String ARBITRARY_STRING_IMP_2_YRS = "imp 2 yrs";
 
     private final UUID personId = randomUUID();
     private final UUID hearingId = randomUUID();
@@ -109,7 +120,7 @@ public class HearingCommandHandlerTest {
     private HearingAggregate hearingAggregate;
 
     @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(HearingEventLogged.class);
+    private Enveloper enveloper = createEnveloperWithEvents(HearingEventLogged.class, DraftResultSaved.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
@@ -223,6 +234,26 @@ public class HearingCommandHandlerTest {
         ));
     }
 
+    @Test
+    public void shouldRaiseDraftResultSaved() throws Exception {
+        final JsonEnvelope command = createSaveDraftResultCommand();
+
+        hearingCommandHandler.saveDraftResult(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_DRAFT_RESULT_SAVED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", DEFENDANT_ID), equalTo(DEFENDANT_ID_VALUE.toString())),
+                                withJsonPath(format("$.%s", OFFENCE_ID), equalTo(OFFENCE_ID_VALUE.toString())),
+                                withJsonPath(format("$.%s", DRAFT_RESULT), equalTo(ARBITRARY_STRING_IMP_2_YRS)),
+                                withJsonPath(format("$.%s", TARGET_ID), equalTo(TARGET_ID_VALUE.toString()))
+                        ))
+                ).thatMatchesSchema()
+        ));
+    }
+
     private JsonEnvelope createHearingEventLoggedCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(LOG_HEARING_EVENT_COMMAND))
@@ -233,6 +264,16 @@ public class HearingCommandHandlerTest {
                 .build();
     }
 
+    private JsonEnvelope createSaveDraftResultCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(SAVE_DRAFT_RESULT_COMMAND))
+                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
+                .withPayloadOf(DEFENDANT_ID_VALUE, DEFENDANT_ID)
+                .withPayloadOf(TARGET_ID_VALUE, TARGET_ID)
+                .withPayloadOf(OFFENCE_ID_VALUE, OFFENCE_ID)
+                .withPayloadOf(ARBITRARY_STRING_IMP_2_YRS, DRAFT_RESULT)
+                .build();
+    }
     private JsonEnvelope createAddProsecutionCounselCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(ADD_PROSECUTION_COUNSEL_EVENT_NAME))

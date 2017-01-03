@@ -204,4 +204,48 @@ public class HearingIT extends AbstractIT {
         return hearingEventDefinitionsPayload;
     }
 
+    @Test
+    public void hearingSaveDraftResultTest() throws IOException, InterruptedException {
+        final String targetId = randomUUID().toString();
+        final String hearingId = randomUUID().toString();
+        final String draftResultCommandPayload = createDraftResultCommandPayload(targetId);
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(prop.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(reqSpec).and()
+                .contentType("application/vnd.hearing.save-draft-result+json")
+                .body(draftResultCommandPayload).header(cppuidHeader).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(prop.getProperty("hearing-query-api-draft-result"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get-draft-result+json";
+
+        poll(requestParams(url, mediaType).withHeader(cppuidHeader.getName(), cppuidHeader.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.targets", hasSize(1)),
+                                withJsonPath("$.targets[0].targetId", is(targetId)),
+                                withJsonPath("$.targets[0].draftResult", is("imp 2 yrs")),
+                                withJsonPath("$.targets[0].defendantId", is(UUID.fromString("d06f6539-2a7c-4bc8-bca3-A1e5a225471a").toString())),
+                                withJsonPath("$.targets[0].offenceId", is(UUID.fromString("4daefec6-5f78-4109-82d9-1e60544a6c02").toString()))
+                        )));
+    }
+
+    private String createDraftResultCommandPayload(final String targetId) throws IOException {
+        String draftResultCommandPayload = Resources.toString(
+                getResource("hearing.draft-result.json"),
+                defaultCharset());
+
+        draftResultCommandPayload = draftResultCommandPayload.replace("$targetId", targetId);
+
+        return draftResultCommandPayload;
+    }
+
+
 }

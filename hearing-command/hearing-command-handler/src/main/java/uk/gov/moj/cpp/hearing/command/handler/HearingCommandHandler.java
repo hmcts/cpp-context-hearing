@@ -23,6 +23,7 @@ import uk.gov.moj.cpp.hearing.domain.command.CreateHearingEventDefinitions;
 import uk.gov.moj.cpp.hearing.domain.command.EndHearing;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
+import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 
@@ -52,7 +53,8 @@ public class HearingCommandHandler {
     @Inject
     private Enveloper enveloper;
 
-    @Inject HearingCommandFactory hearingCommandFactory;
+    @Inject
+    HearingCommandFactory hearingCommandFactory;
 
     @Inject
     private AggregateService aggregateService;
@@ -148,6 +150,20 @@ public class HearingCommandHandler {
         final Stream<Object> events = streamOf(new HearingEventLogged(hearingEventId, hearingId, recordedLabel, timestamp));
         eventSource.getStreamById(hearingId).append(events.map(enveloper.withMetadataFrom(command)));
     }
+
+    @Handles("hearing.save-draft-result")
+    public void saveDraftResult(final JsonEnvelope command) throws EventStreamException {
+        final JsonObject payload = command.payloadAsJsonObject();
+        final UUID defendantId = fromString(payload.getString("defendantId"));
+        final UUID targetId = fromString(payload.getString("targetId"));
+        final UUID offenceId = fromString(payload.getString("offenceId"));
+        final String draftResult = payload.getString("draftResult");
+        final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));
+
+        final Stream<Object> events = streamOf(new DraftResultSaved(targetId, defendantId, offenceId, draftResult,hearingId));
+        eventSource.getStreamById(hearingId).append(events.map(enveloper.withMetadataFrom(command)));
+    }
+
 
     private void applyToAggregate(final UUID streamId, final Function<HearingAggregate, Stream<Object>> function,
                                   final JsonEnvelope envelope) throws EventStreamException {

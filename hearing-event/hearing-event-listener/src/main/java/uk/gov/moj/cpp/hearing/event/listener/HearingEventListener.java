@@ -25,6 +25,7 @@ import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingDefinitionsRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
@@ -32,6 +33,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.time.ZonedDateTime;
@@ -50,6 +52,14 @@ public class HearingEventListener {
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
     private static final String TIMESTAMP_FIELD = "timestamp";
+    private static final String DEFENDANT_ID = "defendantId";
+    private static final String TARGET_ID = "targetId";
+    private static final String OFFENCE_ID = "offenceId";
+    private static final String DRAFT_RESULT = "draftResult";
+
+
+
+
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectConverter;
@@ -80,6 +90,9 @@ public class HearingEventListener {
 
     @Inject
     private HearingEventRepository hearingEventRepository;
+
+    @Inject
+    private HearingOutcomeRepository hearingOutcomeRepository;
 
     @Transactional
     @Handles("hearing.hearing-initiated")
@@ -224,6 +237,19 @@ public class HearingEventListener {
         final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(TIMESTAMP_FIELD));
 
         hearingEventRepository.save(new HearingEvent(id, hearingId, recordedLabel, timestamp));
+    }
+
+    @Handles("hearing.draft-result-saved")
+    public void draftResultSaved(final JsonEnvelope event) {
+       final JsonObject payload = event.payloadAsJsonObject();
+
+        final UUID targetId = fromString(payload.getString(TARGET_ID));
+        final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));
+        final UUID defendantId = fromString(payload.getString(DEFENDANT_ID));
+        final UUID offenceId = fromString(payload.getString(OFFENCE_ID));
+        final String draftResult = payload.getString(DRAFT_RESULT);
+
+        hearingOutcomeRepository.save(new HearingOutcome(offenceId, hearingId, defendantId, targetId, draftResult));
     }
 
 }

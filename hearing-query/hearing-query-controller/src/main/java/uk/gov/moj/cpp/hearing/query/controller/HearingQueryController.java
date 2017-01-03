@@ -38,4 +38,9 @@ public class HearingQueryController {
     public JsonEnvelope getDefenceCounsels(final JsonEnvelope query) {
         return requester.request(query);
     }
+
+    @Handles("hearing.get-draft-result")
+    public JsonEnvelope getDraftResult(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

@@ -51,3 +51,11 @@ rule "Query - API - hearing.get.defence-counsels"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get-draft-result"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-draft-result");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
