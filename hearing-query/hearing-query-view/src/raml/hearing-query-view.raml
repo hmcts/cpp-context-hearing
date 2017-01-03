@@ -2,7 +2,6 @@
 title: Hearing Query view
 baseUri: http://localhost:8080/hearing-query-view/query/view/rest/hearing
 protocols: [ HTTP, HTTPS ]
-                       
 
 /hearings/{hearingId}:
   uriParameters:
@@ -122,3 +121,23 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get-draft-result+json:
                     example:  !include json/hearing.get-draft-result.json
                     schema:  !include  json/schema/hearing.get-draft-result.json
+
+/hearings/{hearingId}/event-log:
+    uriParameters:
+        hearingId:
+            description: ID of hearing to fetch the log for
+            type: string
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.hearing-event-log+json
+                name: hearing.get-hearing-event-log
+            ...
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.hearing-event-log+json:
+                        example: !include json/hearing.hearing-event-log.json
+                        schema: !include json/schema/hearing.get-hearing-event-log.json

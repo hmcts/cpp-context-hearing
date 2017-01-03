@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.persist;
 
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.deltaspike.data.api.EntityRepository;
@@ -13,4 +14,6 @@ import org.apache.deltaspike.data.api.Repository;
 public interface HearingEventRepository extends EntityRepository<HearingEvent, UUID> {
 
     HearingEvent findById(final UUID hearingEventId);
+
+    List<HearingEvent> findByHearingId(final UUID hearingId);
 }

@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.controller;
 
-
+import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
@@ -10,61 +11,59 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ValidateHearingQueryRamlConfigAndPassThroughRequesterTest {
+public class HearingQueryControllerTest {
 
-    Map<String, String> apiHandlers = new HashMap<>();
-    List<String> ramlActionNames = new ArrayList<>();
-    private  final String QUERY_NAME = "hearing";
+    private static final String ACTION_LABEL = "name:";
+    private static final String QUERY_NAME = "hearing";
 
+    private final Map<String, String> apiHandlers = new HashMap<>();
+
+    private List<String> ramlActionNames;
 
     @Before
-    public void setup() throws IOException {
-        for (Method method : HearingQueryController.class.getMethods()) {
-            Handles handles = method.getAnnotation(Handles.class);
+    public void setup() throws Exception {
+        for (final Method method : HearingQueryController.class.getMethods()) {
+            final Handles handles = method.getAnnotation(Handles.class);
             if (null != handles) {
                 apiHandlers.put(method.getName(), handles.value());
 
             }
         }
 
-        /**
-         * Reading Raml and extraction action name @ {ramlActionNames}
+        /*
+          Reading Raml and extraction action name @ {ramlActionNames}
          */
-        List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-query-controller.raml"));
-        Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
+        final List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-query-controller.raml"));
+        final Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
 
         ramlActionNames = allLines.stream()
                 .filter(nonEmptyStringPredicate)
-                .filter(line -> line.contains("name:"))
+                .filter(line -> line.contains(ACTION_LABEL))
                 .filter(line -> line.contains(QUERY_NAME))
-                .map(line -> line.replaceAll("name:", "").trim())
-                .collect(Collectors.toList());
+                .map(line -> line.replaceAll(ACTION_LABEL, "").trim())
+                .collect(toList());
     }
 
 
     @Test
     public void testActionNameAndHandleNameAreSame() throws Exception {
-        List<String> handleNames = apiHandlers.entrySet()
+        final List<String> handleNames = apiHandlers.entrySet()
                 .stream()
                 .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
+                .collect(toList());
 
-        Collections.sort(handleNames);
-        Collections.sort(ramlActionNames);
+        sort(handleNames);
+        sort(ramlActionNames);
 
         assertThat(handleNames, is(ramlActionNames));
     }

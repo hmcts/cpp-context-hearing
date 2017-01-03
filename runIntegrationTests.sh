@@ -7,6 +7,7 @@
 ${VAGRANT_DIR:?"Please export VAGRANT_DIR environment variable to point at atcm-vagrant"}
 WILDFLY_DEPLOYMENT_DIR="${VAGRANT_DIR}/deployments"
 CONTEXT_NAME=hearing
+FRAMEWORK_VERSION=1.0.0
 
 #fail script on error
 set -e
@@ -38,11 +39,14 @@ function deleteAndDeployWars {
   echo "Copied wars to $WILDFLY_DEPLOYMENT_DIR"
 }
 
+function deployWiremock() {
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=$WILDFLY_DEPLOYMENT_DIR -Dartifact=uk.gov.justice.services:wiremock-service:1.1.0:war
+}
 
 function healthCheck {
   CONTEXT=("$CONTEXT_NAME-command-api" "$CONTEXT_NAME-command-controller" "$CONTEXT_NAME-command-handler" "${CONTEXT_NAME}-query-api" "${CONTEXT_NAME}-query-controller" "${CONTEXT_NAME}-query-view" "${CONTEXT_NAME}-event-listener")
   CONTEXT_COUNT=${#CONTEXT[@]}
-  TIMEOUT=90
+  TIMEOUT=180
   RETRY_DELAY=5
   START_TIME=$(date +%s)
 
@@ -92,8 +96,11 @@ function integrationTests {
 }
 
 function createEventLog() {
-    mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.moj.cpp.common-streaming.event-repository:envelope-repository-jpa-liquibase:0.2.0:jar
-    java -jar target/envelope-repository-jpa-liquibase-0.2.0.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}eventstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:event-repository-liquibase:${FRAMEWORK_VERSION}:jar
+    java -jar target/event-repository-liquibase-${FRAMEWORK_VERSION}.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}eventstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
+
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:aggregate-snapshot-repository-liquibase:${FRAMEWORK_VERSION}:jar
+    java -jar target/aggregate-snapshot-repository-liquibase-${FRAMEWORK_VERSION}.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}eventstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
 }
 
 function runLiquibase {
@@ -109,11 +116,10 @@ function buildDeployAndTest {
 
 function deployAndTest {
   deleteAndDeployWars
+  deployWiremock
   startVagrant
-  ## Not sure if this is required as it seems to break every time it's been run!
- # createEventLog
+  createEventLog
   runLiquibase
-   mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=$WILDFLY_DEPLOYMENT_DIR -Dartifact=uk.gov.justice.services:wiremock-service:1.1.0:war
   healthCheck
   integrationTests
 }

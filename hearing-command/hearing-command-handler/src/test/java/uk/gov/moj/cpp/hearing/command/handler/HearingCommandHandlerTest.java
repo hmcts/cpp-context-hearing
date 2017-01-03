@@ -9,8 +9,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -51,7 +49,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -73,7 +70,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandHandlerTest {
 
-    private static final UUID HEARING_ID = randomUUID();
     private static final String LIST_HEARING_COMMAND = "hearing.initiate-hearing";
     private static final String HEARING_LISTED_EVENT = "hearing.hearing-initiated";
     private static final String ADD_PROSECUTION_COUNSEL_EVENT_NAME = "hearing.prosecution-counsel-added";
@@ -86,6 +82,8 @@ public class HearingCommandHandlerTest {
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String TIMESTAMP_FIELD = "timestamp";
+
+    private static final UUID HEARING_ID = randomUUID();
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
