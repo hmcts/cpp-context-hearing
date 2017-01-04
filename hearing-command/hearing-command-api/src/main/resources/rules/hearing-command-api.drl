@@ -96,3 +96,11 @@ rule "Command - API - Action - hearing.create-hearing-event-definitions"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.log-hearing-event"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.log-hearing-event");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
