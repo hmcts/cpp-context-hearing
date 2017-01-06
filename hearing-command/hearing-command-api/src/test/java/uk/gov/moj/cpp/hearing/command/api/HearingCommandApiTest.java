@@ -49,7 +49,6 @@ public class HearingCommandApiTest {
                 .collect(Collectors.toList());
     }
 
-
     @Test
     public void testActionNameAndHandleNameAreSame() throws Exception {
         final List<String> handleNames = apiHandlers.entrySet()
@@ -65,8 +64,9 @@ public class HearingCommandApiTest {
 
     @Test
     public void testHandleNamesPassThroughSender() throws Exception {
-        for (Map.Entry<String, String> entry : apiHandlers.entrySet())
+        for (Map.Entry<String, String> entry : apiHandlers.entrySet()) {
             assertThat(HearingCommandApi.class, isHandlerClass(Component.COMMAND_API).with(method(entry.getKey()).thatHandles(entry.getValue()).withSenderPassThrough()));
+        }
     }
 
 }

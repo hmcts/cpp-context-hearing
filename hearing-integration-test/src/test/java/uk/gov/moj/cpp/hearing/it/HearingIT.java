@@ -4,23 +4,22 @@ import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.nio.charset.Charset.defaultCharset;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
-import static org.jboss.resteasy.util.HttpResponseCodes.SC_ACCEPTED;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.helper.StubUtil;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -32,19 +31,21 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.io.Resources;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
-import org.apache.http.HttpStatus;
 import org.junit.Before;
 import org.junit.Test;
 
-
+/**
+ * Todo need to re-factor all the tests in the class to follow BDD like pattern
+ * E.g. have a look at test cases in {@link HearingEventsIT}
+ */
 public class HearingIT extends AbstractIT {
 
-    private final UUID userId = fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a");
-    private final Header cppuidHeader = new Header("CJSCPPUID", userId.toString());
+    private static final UUID USER_ID = randomUUID();
+    private static final Header CPP_UID_HEADER = new Header("CJSCPPUID", USER_ID.toString());
 
     @Before
     public void setUp() {
-        StubUtil.setupUsersGroupDataActionClassificationStub();
+        setupAsAuthorisedUser(USER_ID.toString());
     }
 
     @Test
@@ -57,74 +58,74 @@ public class HearingIT extends AbstractIT {
                 defaultCharset());
 
         final String commandAPIEndPoint = MessageFormat
-                .format(prop.getProperty("hearing.initiate-hearing"), hearingId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
 
         final String initiateHearingBody = initiateHearing.replace("RANDOM_CASE_ID", caseId);
 
-        Response writeResponse = given().spec(reqSpec).and()
+        Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.start+json")
                 .body("{\n" +
                         "  \"localTime\": \"2016-06-01T10:00:00Z\"\n" +
-                        "}").header(cppuidHeader).when().post(commandAPIEndPoint)
+                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        writeResponse = given().spec(reqSpec).and()
+        writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.end+json")
                 .body("{\n" +
                         "  \"localTime\": \"2016-06-01T11:00:00Z\"\n" +
-                        "}").header(cppuidHeader).when().post(commandAPIEndPoint)
+                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
 
-        writeResponse = given().spec(reqSpec).and()
+        writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.initiate-hearing+json")
-                .body(initiateHearingBody).header(cppuidHeader).when().post(commandAPIEndPoint)
+                .body(initiateHearingBody).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
 
-        writeResponse = given().spec(reqSpec).and()
+        writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.add-case+json")
                 .body("{\n" +
                         "  \"caseId\": \"2a2d7e9e-0c60-11e6-a148-3e1d05defe78\"\n" +
-                        "}").header(cppuidHeader).when().post(commandAPIEndPoint)
+                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        writeResponse = given().spec(reqSpec).and()
+        writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.book-room+json")
                 .body("{\n" +
                         "  \"roomName\": \"Room1\"\n" +
-                        "}").header(cppuidHeader).when().post(commandAPIEndPoint)
+                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        writeResponse = given().spec(reqSpec).and()
+        writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.allocate-court+json")
                 .body("{\n" +
                         "  \"courtCentreName\": \"Bournemouth\"\n" +
-                        "}").header(cppuidHeader).when().post(commandAPIEndPoint)
+                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
 
         TimeUnit.SECONDS.sleep(15);
 
         final String queryAPIEndPoint = MessageFormat
-                .format(prop.getProperty("hearing.get.hearing"), hearingId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
 
-        final Response readResponse = given().spec(reqSpec).and()
+        final Response readResponse = given().spec(requestSpec).and()
                 .accept("application/vnd.hearing.get.hearing+json")
-                .header(cppuidHeader).when().get(queryAPIEndPoint).then().extract()
+                .header(CPP_UID_HEADER).when().get(queryAPIEndPoint).then().extract()
                 .response();
 
         assertThat(readResponse.getStatusCode(), is(200));
 
 
-        /**
-         * Test Read store
+        /*
+          Test Read store
          */
         assertThat("Case should associated with hearing", readResponse.jsonPath().getList("caseIds").contains(caseId), equalTo(true));
         assertThat("Case should associated with hearing", readResponse.jsonPath().getList("caseIds").contains("2a2d7e9e-0c60-11e6-a148-3e1d05defe78"), equalTo(true));
@@ -139,11 +140,11 @@ public class HearingIT extends AbstractIT {
 
 
         final String getHearingsByDate = MessageFormat
-                .format(prop.getProperty("hearing.get.hearings-by-startDate"), (String) readResponse.jsonPath().get("startDate"));
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-startDate"), (String) readResponse.jsonPath().get("startDate"));
 
-        final Response readResponses = given().spec(reqSpec).and()
+        final Response readResponses = given().spec(requestSpec).and()
                 .accept("application/vnd.hearing.get.hearings-by-startdate+json")
-                .header(cppuidHeader).when().get(getHearingsByDate).then().extract()
+                .header(CPP_UID_HEADER).when().get(getHearingsByDate).then().extract()
                 .response();
 
         assertThat(readResponses.getStatusCode(), is(200));
@@ -158,21 +159,21 @@ public class HearingIT extends AbstractIT {
 
         final Integer hearingId = 0;
         final String commandAPIEndPoint = MessageFormat
-                .format(prop.getProperty("hearing-command-api-hearings-event_definitions"), hearingId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing-command-api-hearings-event_definitions"), hearingId);
 
-        final Response writeResponse = given().spec(reqSpec).and()
+        final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.create-hearing-event-definitions+json")
-                .body(hearingEventDefinitionsPayload).header(cppuidHeader).when().post(commandAPIEndPoint)
+                .body(hearingEventDefinitionsPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
-                .format(prop.getProperty("hearing-query-api-hearings-event_definitions"), hearingId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-hearings-event_definitions"), hearingId);
 
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.hearing-event-definitions+json";
 
-        poll(requestParams(url, mediaType).withHeader(cppuidHeader.getName(), cppuidHeader.getValue()).build())
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -184,11 +185,37 @@ public class HearingIT extends AbstractIT {
                         )));
     }
 
-    private List<HearingEventDefinition> createHearingEventDefinitions() {
-        return Arrays.asList(
-                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 2),
-                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 1)
-        );
+    @Test
+    public void hearingSaveDraftResultTest() throws IOException, InterruptedException {
+        final String targetId = randomUUID().toString();
+        final String hearingId = randomUUID().toString();
+        final String draftResultCommandPayload = createDraftResultCommandPayload(targetId);
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.save-draft-result+json")
+                .body(draftResultCommandPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-draft-result"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get-draft-result+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.targets", hasSize(1)),
+                                withJsonPath("$.targets[0].targetId", is(targetId)),
+                                withJsonPath("$.targets[0].draftResult", is("imp 2 yrs")),
+                                withJsonPath("$.targets[0].defendantId", is(UUID.fromString("d06f6539-2a7c-4bc8-bca3-A1e5a225471a").toString())),
+                                withJsonPath("$.targets[0].offenceId", is(UUID.fromString("4daefec6-5f78-4109-82d9-1e60544a6c02").toString()))
+                        )));
     }
 
     private String createHearingEventDefinitionsPayload(List<HearingEventDefinition> hearingEventDefinitions) throws IOException {
@@ -204,37 +231,11 @@ public class HearingIT extends AbstractIT {
         return hearingEventDefinitionsPayload;
     }
 
-    @Test
-    public void hearingSaveDraftResultTest() throws IOException, InterruptedException {
-        final String targetId = randomUUID().toString();
-        final String hearingId = randomUUID().toString();
-        final String draftResultCommandPayload = createDraftResultCommandPayload(targetId);
-
-        final String commandAPIEndPoint = MessageFormat
-                .format(prop.getProperty("hearing.initiate-hearing"), hearingId);
-
-        final Response writeResponse = given().spec(reqSpec).and()
-                .contentType("application/vnd.hearing.save-draft-result+json")
-                .body(draftResultCommandPayload).header(cppuidHeader).when().post(commandAPIEndPoint)
-                .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(prop.getProperty("hearing-query-api-draft-result"), hearingId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get-draft-result+json";
-
-        poll(requestParams(url, mediaType).withHeader(cppuidHeader.getName(), cppuidHeader.getValue()).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.targets", hasSize(1)),
-                                withJsonPath("$.targets[0].targetId", is(targetId)),
-                                withJsonPath("$.targets[0].draftResult", is("imp 2 yrs")),
-                                withJsonPath("$.targets[0].defendantId", is(UUID.fromString("d06f6539-2a7c-4bc8-bca3-A1e5a225471a").toString())),
-                                withJsonPath("$.targets[0].offenceId", is(UUID.fromString("4daefec6-5f78-4109-82d9-1e60544a6c02").toString()))
-                        )));
+    private List<HearingEventDefinition> createHearingEventDefinitions() {
+        return Arrays.asList(
+                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 2),
+                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 1)
+        );
     }
 
     private String createDraftResultCommandPayload(final String targetId) throws IOException {
