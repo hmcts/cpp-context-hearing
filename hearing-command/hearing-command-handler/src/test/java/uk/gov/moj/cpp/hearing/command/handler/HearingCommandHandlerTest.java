@@ -311,7 +311,7 @@ public class HearingCommandHandlerTest {
                     returnStatus = false;
                 }
 
-                if (!Objects.equals(initiateHearing.getStartDateTime(), fromJsonString(resultPayload.getJsonString("startDateTime")))) {
+                if (!Objects.equals(initiateHearing.getStartDateTime().toLocalDate(), fromJsonString(resultPayload.getJsonString("startDateTime")).toLocalDate())) {
                     description.appendText(format("StartDateOfHearing Mismatch:initiateHearing:%s, hearingListed%s",
                             initiateHearing.getStartDateTime(), getString(resultPayload, "startDateTime").get()));
                     returnStatus = false;
