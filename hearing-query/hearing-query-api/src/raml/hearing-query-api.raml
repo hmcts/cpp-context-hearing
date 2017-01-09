@@ -61,7 +61,7 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.hearing-event-definitions.json
                     schema:   !include json/schema/hearing.hearing-event-definitions.json
 
-/hearing/{hearingId}/prosecution-counsels:
+/hearings/{hearingId}/prosecution-counsels:
   uriParameters:
         hearingId:
           description: ID of hearing to get the prosecution counsels for
@@ -81,7 +81,7 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.prosecution-counsels.json
                     schema:  !include  json/schema/hearing.get.prosecution-counsels.json
 
-/hearing/{hearingId}/draft-result:
+/hearings/{hearingId}/draft-result:
   uriParameters:
         hearingId:
           description: ID of hearing to get the prosecution counsels for
@@ -101,7 +101,7 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get-draft-result.json
                     schema:  !include  json/schema/hearing.get-draft-result.json
 
-/hearing/{hearingId}/defence-counsels:
+/hearings/{hearingId}/defence-counsels:
   uriParameters:
         hearingId:
           description: ID of hearing to get the defence counsels for
