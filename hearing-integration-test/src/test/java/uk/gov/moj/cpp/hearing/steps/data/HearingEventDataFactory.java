@@ -19,11 +19,18 @@ public class HearingEventDataFactory {
     }
 
     public static HearingEvent hearingStartedEvent(final UUID hearingId) {
+        return newHearingEvent(hearingId, "Hearing Started");
+    }
+
+    public static HearingEvent identifyDefendentEvent(final UUID hearingId) {
+        return newHearingEvent(hearingId, "Defendant Identified");
+    }
+
+    private static HearingEvent newHearingEvent(final UUID hearingId, final String recordedLabel) {
         final UUID hearingEventId = randomUUID();
-        final String hearingStartedLabel = "Hearing Started";
         final ZonedDateTime timestamp = new UtcClock().now();
 
-        return new HearingEvent(hearingEventId, hearingId, hearingStartedLabel, timestamp);
+        return new HearingEvent(hearingEventId, hearingId, recordedLabel, timestamp);
     }
 
 }

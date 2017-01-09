@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
@@ -113,7 +114,8 @@ public class HearingAggregate implements Aggregate {
                 when(ProsecutionCounselAdded.class)
                         .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId()),
                 when(DefenceCounselAdded.class)
-                        .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId())
+                        .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
+                otherwiseDoNothing()
         );
     }
 }

@@ -42,9 +42,13 @@ baseUri:  message://command/handler/message/hearing
             schema:  !include json/schema/hearing.create-hearing-event-definitions.json
 
         application/vnd.hearing.log-hearing-event+json:
-            schema: !include json/schema/hearing.log-hearing-event.json
             example: !include json/hearing.log-hearing-event.json
+            schema: !include json/schema/hearing.log-hearing-event.json
 
         application/vnd.hearing.save-draft-result+json:
-            schema: !include json/schema/hearing.save-draft-result.json
             example: !include json/hearing.save-draft-result.json
+            schema: !include json/schema/hearing.save-draft-result.json
+
+        application/vnd.hearing.correct-hearing-event+json:
+            example: !include json/schema/hearing.correct-hearing-event.json
+            schema: !include json/schema/hearing.correct-hearing-event.json

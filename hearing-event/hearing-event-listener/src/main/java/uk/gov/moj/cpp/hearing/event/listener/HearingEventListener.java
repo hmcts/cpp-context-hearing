@@ -48,7 +48,8 @@ import javax.transaction.Transactional;
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
 
-    private static final String HEARING_EVENT_ID_FIELD = "id";
+    private static final String ID_FIELD = "id";
+    private static final String HEARING_EVENT_ID_FIELD = "hearingEventId";
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
     private static final String TIMESTAMP_FIELD = "timestamp";
@@ -56,10 +57,6 @@ public class HearingEventListener {
     private static final String TARGET_ID = "targetId";
     private static final String OFFENCE_ID = "offenceId";
     private static final String DRAFT_RESULT = "draftResult";
-
-
-
-
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectConverter;
@@ -231,12 +228,27 @@ public class HearingEventListener {
     public void hearingEventLogged(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
 
-        final UUID id = fromString(payload.getString(HEARING_EVENT_ID_FIELD));
+        final UUID id = fromString(payload.getString(ID_FIELD));
         final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));
         final String recordedLabel = payload.getString(RECORDED_LABEL_FIELD);
         final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(TIMESTAMP_FIELD));
 
         hearingEventRepository.save(new HearingEvent(id, hearingId, recordedLabel, timestamp));
+    }
+
+    @Transactional
+    @Handles("hearing.hearing-event-corrected")
+    public void hearingEventCorrected(final JsonEnvelope event) {
+        final JsonObject payload = event.payloadAsJsonObject();
+
+        final ZonedDateTime newTimestamp = fromJsonString(payload.getJsonString(TIMESTAMP_FIELD));
+
+        HearingEvent hearingEvent = hearingEventRepository.findById(UUID.fromString(payload.getString(HEARING_EVENT_ID_FIELD)));
+        final UUID existingId = hearingEvent.getId();
+        final UUID existingHearingId = hearingEvent.getHearingId();
+        final String existingRecordedLabel = hearingEvent.getRecordedLabel();
+
+        hearingEventRepository.save(new HearingEvent(existingId, existingHearingId, existingRecordedLabel, newTimestamp));
     }
 
     @Handles("hearing.draft-result-saved")

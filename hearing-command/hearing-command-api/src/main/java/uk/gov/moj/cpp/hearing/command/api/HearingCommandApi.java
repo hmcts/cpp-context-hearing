@@ -70,4 +70,9 @@ public class HearingCommandApi {
         sender.send(command);
     }
 
+    @Handles("hearing.correct-hearing-event")
+    public void correctEvent(final JsonEnvelope command) {
+        sender.send(command);
+    }
+
 }
