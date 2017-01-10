@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "hearingEventId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "timestamp",
+    "hearingEventId",
+    "hearingId"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

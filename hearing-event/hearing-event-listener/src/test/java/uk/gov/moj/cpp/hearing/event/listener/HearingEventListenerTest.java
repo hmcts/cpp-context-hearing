@@ -1,18 +1,27 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
 import static java.util.UUID.randomUUID;
+import javax.json.JsonObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
@@ -25,20 +34,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.json.JsonObject;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
 
@@ -46,8 +41,10 @@ public class HearingEventListenerTest {
     private static final UUID HEARING_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final ZonedDateTime TIMESTAMP = PAST_ZONED_DATE_TIME.next();
+    private static final ZonedDateTime DIFFERENT_TIMESTAMP = PAST_ZONED_DATE_TIME.next();
 
-    private static final String HEARING_EVENT_ID_FIELD = "id";
+    private static final String ID_FIELD = "id";
+    private static final String HEARING_EVENT_ID_FIELD = "hearingEventId";
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String TIMESTAMP_FIELD = "timestamp";
@@ -148,6 +145,22 @@ public class HearingEventListenerTest {
     }
 
     @Test
+    public void shouldPersistAEventCorrection() {
+        final JsonEnvelope event = getHearingEventLogCorrectionEnvelope();
+        when(hearingEventRepository.findById(HEARING_EVENT_ID)).thenReturn(
+                new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP)
+        );
+
+        hearingEventListener.hearingEventCorrected(event);
+
+        verify(hearingEventRepository).save(eventLogArgumentCaptor.capture());
+        assertThat(eventLogArgumentCaptor.getValue().getId(), is(HEARING_EVENT_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getHearingId(), is(HEARING_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getRecordedLabel(), is(RECORDED_LABEL));
+        assertThat(eventLogArgumentCaptor.getValue().getTimestamp().toString(), is(ZonedDateTimes.toString(DIFFERENT_TIMESTAMP)));
+    }
+
+    @Test
     public void shouldPersistHearingDraftResult() {
         final JsonEnvelope event = getSaveDraftResultJsonEnvelope();
 
@@ -164,12 +177,21 @@ public class HearingEventListenerTest {
 
     private JsonEnvelope getHearingEventLogJsonEnvelope() {
         return envelope()
-                .withPayloadOf(HEARING_EVENT_ID, HEARING_EVENT_ID_FIELD)
+                .withPayloadOf(HEARING_EVENT_ID, ID_FIELD)
                 .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
                 .withPayloadOf(RECORDED_LABEL, RECORDED_LABEL_FIELD)
                 .withPayloadOf(ZonedDateTimes.toString(TIMESTAMP), TIMESTAMP_FIELD)
                 .build();
     }
+
+    private JsonEnvelope getHearingEventLogCorrectionEnvelope() {
+        return envelope()
+                .withPayloadOf(HEARING_EVENT_ID, HEARING_EVENT_ID_FIELD)
+                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
+                .withPayloadOf(ZonedDateTimes.toString(DIFFERENT_TIMESTAMP), TIMESTAMP_FIELD)
+                .build();
+    }
+
     private JsonEnvelope getSaveDraftResultJsonEnvelope() {
         return envelope()
                 .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)

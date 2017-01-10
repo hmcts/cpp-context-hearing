@@ -3,12 +3,15 @@ package uk.gov.moj.cpp.hearing.command.handler;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
+import java.util.function.Predicate;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import org.hamcrest.core.Is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
@@ -23,7 +26,6 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payLoad;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
@@ -43,8 +45,10 @@ import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventsLogAggregate;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -76,11 +80,15 @@ public class HearingCommandHandlerTest {
     private static final String LOG_HEARING_EVENT_COMMAND = "hearing.log-hearing-event";
     private static final String SAVE_DRAFT_RESULT_COMMAND = "hearing.save-draft-result";
     private static final String HEARING_EVENT_LOGGED_EVENT = "hearing.hearing-event-logged";
+
+    private static final String HEARING_CORRECT_EVENT_COMMAND = "hearing.correct-hearing-event";
+    private static final String HEARING_EVENT_CORRECTED_EVENT = "hearing.hearing-event-corrected";
     private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
 
-    private static final String HEARING_EVENT_ID_FIELD = "id";
+    private static final String ID_FIELD = "id";
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
     private static final String HEARING_ID_FIELD = "hearingId";
+    private static final String HEARING_EVENT_ID_FIELD = "hearingEventId";
     private static final String TIMESTAMP_FIELD = "timestamp";
 
     private static final UUID HEARING_ID = randomUUID();
@@ -88,6 +96,8 @@ public class HearingCommandHandlerTest {
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final String TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    private static final String DIFFERENT_TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+
     public static final String DEFENDANT_ID = "defendantId";
     private final UUID DEFENDANT_ID_VALUE = randomUUID();
     public static final String TARGET_ID = "targetId";
@@ -117,8 +127,13 @@ public class HearingCommandHandlerTest {
     @Mock
     private HearingAggregate hearingAggregate;
 
+    private HearingEventsLogAggregate hearingEventAggregate;
+
     @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(HearingEventLogged.class, DraftResultSaved.class);
+    private Enveloper enveloper = createEnveloperWithEvents(
+            HearingEventLogged.class,
+            HearingEventCorrected.class,
+            DraftResultSaved.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
@@ -126,6 +141,8 @@ public class HearingCommandHandlerTest {
     @Before
     public void setup() {
         when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
+
+        when(eventSource.getStreamById(HEARING_EVENT_ID)).thenReturn(eventStream);
     }
 
     @Test
@@ -200,8 +217,7 @@ public class HearingCommandHandlerTest {
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(ADD_PROSECUTION_COUNSEL_EVENT_NAME),
-                        payLoad()
-                                .isJson(allOf(
+                        payloadIsJson(allOf(
                                         withJsonPath("$.personId", equalTo(personId.toString())),
                                         withJsonPath("$.attendeeId", equalTo(attendeeId.toString())),
                                         withJsonPath("$.status", equalTo(status)),
@@ -214,6 +230,8 @@ public class HearingCommandHandlerTest {
 
     @Test
     public void shouldRaiseHearingEventLogged() throws Exception {
+        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(new HearingEventsLogAggregate());
+
         final JsonEnvelope command = createHearingEventLoggedCommand();
 
         hearingCommandHandler.logHearingEvent(command);
@@ -223,10 +241,34 @@ public class HearingCommandHandlerTest {
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_EVENT_LOGGED_EVENT),
                         payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", HEARING_EVENT_ID_FIELD), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", ID_FIELD), equalTo(HEARING_EVENT_ID.toString())),
                                 withJsonPath(format("$.%s", HEARING_ID_FIELD), equalTo(HEARING_ID.toString())),
                                 withJsonPath(format("$.%s", RECORDED_LABEL_FIELD), equalTo(RECORDED_LABEL)),
-                                withJsonPath(format("$.%s", TIMESTAMP_FIELD), notNullValue())
+                                withJsonPath(format("$.%s", TIMESTAMP_FIELD), representsSameTime(TIMESTAMP))
+                        ))
+                ).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseEventCorrected() throws Exception {
+        hearingEventAggregate = new HearingEventsLogAggregate();
+        hearingEventAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, ZonedDateTime.parse(TIMESTAMP)));
+
+        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(hearingEventAggregate);
+
+        final JsonEnvelope command = createEventCorrectedCommand();
+
+        hearingCommandHandler.correctEvent(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_CORRECTED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", HEARING_ID_FIELD), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s", HEARING_EVENT_ID_FIELD), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", TIMESTAMP_FIELD), representsSameTime(DIFFERENT_TIMESTAMP))
                         ))
                 ).thatMatchesSchema()
         ));
@@ -255,10 +297,19 @@ public class HearingCommandHandlerTest {
     private JsonEnvelope createHearingEventLoggedCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(LOG_HEARING_EVENT_COMMAND))
-                .withPayloadOf(HEARING_EVENT_ID, HEARING_EVENT_ID_FIELD)
+                .withPayloadOf(HEARING_EVENT_ID, ID_FIELD)
                 .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
                 .withPayloadOf(RECORDED_LABEL, RECORDED_LABEL_FIELD)
                 .withPayloadOf(TIMESTAMP, TIMESTAMP_FIELD)
+                .build();
+    }
+
+    private JsonEnvelope createEventCorrectedCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(HEARING_CORRECT_EVENT_COMMAND))
+                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
+                .withPayloadOf(HEARING_EVENT_ID, HEARING_EVENT_ID_FIELD)
+                .withPayloadOf(DIFFERENT_TIMESTAMP, TIMESTAMP_FIELD)
                 .build();
     }
 
@@ -320,6 +371,11 @@ public class HearingCommandHandlerTest {
                 return returnStatus;
             }
         };
+    }
+
+    private Matcher<String> representsSameTime(String time) {
+        //Framework JSON serialisation crops excess 0s from timestamp fields so we must compare against trimmed millisecond fields
+        return anyOf(is(time), is(time.replace("0Z", "Z")), is(time.replace("00Z", "Z")), is(time.replace("000Z", "Z")));
     }
 
 }
