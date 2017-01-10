@@ -26,7 +26,7 @@ public class HearingEventsLogAggregate implements Aggregate {
 
     private List<HearingEvent> hearingEvents = new ArrayList<>();
 
-    public Stream<Object> logHearingEvent(UUID hearingId, UUID hearingEventId, String recordedLabel, ZonedDateTime timestamp) {
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel, final ZonedDateTime timestamp) {
         if(hearingEventWithId(hearingEventId).isPresent()) {
             return Stream.empty();
         }
@@ -35,7 +35,7 @@ public class HearingEventsLogAggregate implements Aggregate {
         return Stream.of(new HearingEventLogged(hearingEventId, hearingId, recordedLabel, timestamp));
     }
 
-    public Stream<Object> correctEvent(UUID hearingId, UUID hearingEventId, ZonedDateTime timestamp) {
+    public Stream<Object> correctEvent(final UUID hearingId, final UUID hearingEventId, final ZonedDateTime timestamp) {
         Optional<HearingEvent> eventToChange = hearingEventWithId(hearingEventId);
 
         if(!eventToChange.isPresent()) {
@@ -47,30 +47,32 @@ public class HearingEventsLogAggregate implements Aggregate {
             return Stream.empty();
         }
 
-        eventToChange.get().setTimestamp(timestamp);
+        HearingEvent replacementEvent = new HearingEvent(eventToChange.get().getHearingEventId(), timestamp);
+        hearingEvents.set(hearingEvents.indexOf(eventToChange.get()), replacementEvent);
 
         return Stream.of(new HearingEventCorrected(hearingId, hearingEventId, timestamp));
     }
 
-    private void onEventLogged(HearingEventLogged eventLogged) {
+    private void onEventLogged(final HearingEventLogged eventLogged) {
 
         hearingEvents.add(new HearingEvent(eventLogged.getId(), eventLogged.getTimestamp()));
     }
 
-    private void onEventCorrected(HearingEventCorrected eventCorrected) {
+    private void onEventCorrected(final HearingEventCorrected eventCorrected) {
         Optional<HearingEvent> eventToChange = hearingEventWithId(eventCorrected.getHearingEventId());
 
         if(eventToChange.isPresent()) {
-            eventToChange.get().setTimestamp(eventCorrected.getTimestamp());
+            HearingEvent replacementEvent = new HearingEvent(eventToChange.get().getHearingEventId(), eventCorrected.getTimestamp());
+            hearingEvents.set(hearingEvents.indexOf(eventToChange.get()), replacementEvent);
         }
     }
 
-    private Optional<HearingEvent> hearingEventWithId(UUID eventId) {
+    private Optional<HearingEvent> hearingEventWithId(final UUID eventId) {
         return hearingEvents.stream().filter(event -> eventId.equals(event.getHearingEventId())).findFirst();
     }
 
     @Override
-    public Object apply(Object event) {
+    public Object apply(final Object event) {
         return match(event).with(
                 when(HearingEventLogged.class).apply(this::onEventLogged),
                 when(HearingEventCorrected.class).apply(this::onEventCorrected),
