@@ -19,6 +19,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 
 import java.io.IOException;
@@ -216,6 +217,101 @@ public class HearingIT extends AbstractIT {
                                 withJsonPath("$.targets[0].defendantId", is(UUID.fromString("d06f6539-2a7c-4bc8-bca3-A1e5a225471a").toString())),
                                 withJsonPath("$.targets[0].offenceId", is(UUID.fromString("4daefec6-5f78-4109-82d9-1e60544a6c02").toString()))
                         )));
+    }
+
+    @Test
+    public void hearingAddProsecutionCounselTest() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String personId = randomUUID().toString();
+        final String attendeeId = randomUUID().toString();
+        final String status = RandomGenerator.STRING.next();
+        final String addProsecutionCounselCommandPayload = createAddProsecutionCounselCommandPayload(personId, attendeeId, status);
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.add-prosecution-counsel+json")
+                .body(addProsecutionCounselCommandPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-prosecution-counsels"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.prosecution-counsels+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.prosecution-counsels", hasSize(1)),
+                                withJsonPath("$.prosecution-counsels[0].id", is(attendeeId)),
+                                withJsonPath("$.prosecution-counsels[0].personId", is(personId)),
+                                withJsonPath("$.prosecution-counsels[0].status", is(status)
+                        ))));
+    }
+
+    @Test
+    public void hearingAddDefenceCounselTest() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String personId = randomUUID().toString();
+        final String attendeeId = randomUUID().toString();
+        final String defendantId = randomUUID().toString();
+        final String status = RandomGenerator.STRING.next();
+        final String addDefenceCounselCommandPayload = createAddDefenceCounselCommandPayload(personId, attendeeId, status, defendantId);
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.add-defence-counsel+json")
+                .body(addDefenceCounselCommandPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-defence-counsels"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.defence-counsels+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.defence-counsels", hasSize(1)),
+                                withJsonPath("$.defence-counsels[0].id", is(attendeeId)),
+                                withJsonPath("$.defence-counsels[0].personId", is(personId)),
+                                withJsonPath("$.defence-counsels[0].status", is(status)),
+                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", is(defendantId)
+                        ))));
+    }
+
+    private String createAddProsecutionCounselCommandPayload(final String personId, final String attendeeId, final String status) throws IOException {
+        String addProsecutionCounselPayload = Resources.toString(
+                getResource("hearing.command.add-prosecution-counsel.json"),
+                defaultCharset());
+
+        addProsecutionCounselPayload = addProsecutionCounselPayload.replace("$personId", personId);
+        addProsecutionCounselPayload = addProsecutionCounselPayload.replace("$attendeeId", attendeeId);
+        addProsecutionCounselPayload = addProsecutionCounselPayload.replace("$status", status);
+
+        return addProsecutionCounselPayload;
+    }
+
+    private String createAddDefenceCounselCommandPayload(final String personId, final String attendeeId, final String status, final String defendantId) throws IOException {
+        String addDefenceCounselPayload = Resources.toString(
+                getResource("hearing.command.add-defence-counsel.json"),
+                defaultCharset());
+
+        addDefenceCounselPayload = addDefenceCounselPayload.replace("$personId", personId);
+        addDefenceCounselPayload = addDefenceCounselPayload.replace("$attendeeId", attendeeId);
+        addDefenceCounselPayload = addDefenceCounselPayload.replace("$status", status);
+        addDefenceCounselPayload = addDefenceCounselPayload.replace("$defendantId", defendantId);
+
+        return addDefenceCounselPayload;
     }
 
     private String createHearingEventDefinitionsPayload(List<HearingEventDefinition> hearingEventDefinitions) throws IOException {

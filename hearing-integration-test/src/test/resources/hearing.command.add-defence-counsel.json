@@ -1,0 +1,10 @@
+{
+  "attendeeId": "$attendeeId",
+  "personId": "$personId",
+  "defendantIds": [
+    {
+      "defendantId": "$defendantId"
+    }
+  ],
+  "status": "$status"
+}
