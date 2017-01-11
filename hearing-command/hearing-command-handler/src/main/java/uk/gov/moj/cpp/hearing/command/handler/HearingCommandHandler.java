@@ -175,17 +175,17 @@ public class HearingCommandHandler {
 
     private void applyToHearingAggregate(final UUID streamId, final Function<HearingAggregate, Stream<Object>> function,
                                          final JsonEnvelope envelope) throws EventStreamException {
-        EventStream eventStream = eventSource.getStreamById(streamId);
-        HearingAggregate aggregate = aggregateService.get(eventStream, HearingAggregate.class);
-        Stream<Object> events = function.apply(aggregate);
+        final EventStream eventStream = eventSource.getStreamById(streamId);
+        final HearingAggregate aggregate = aggregateService.get(eventStream, HearingAggregate.class);
+        final Stream<Object> events = function.apply(aggregate);
         eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
     }
 
     private void applyToHearingEventsLogAggregate(final UUID streamId, final Function<HearingEventsLogAggregate, Stream<Object>> function,
                                                   final JsonEnvelope envelope) throws EventStreamException {
-        EventStream eventStream = eventSource.getStreamById(streamId);
-        HearingEventsLogAggregate aggregate = aggregateService.get(eventStream, HearingEventsLogAggregate.class);
-        Stream<Object> events = function.apply(aggregate);
+        final EventStream eventStream = eventSource.getStreamById(streamId);
+        final HearingEventsLogAggregate aggregate = aggregateService.get(eventStream, HearingEventsLogAggregate.class);
+        final Stream<Object> events = function.apply(aggregate);
         eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
     }
 }

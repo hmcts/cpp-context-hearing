@@ -5,8 +5,8 @@ import java.util.UUID;
 
 public class HearingEvent {
 
-    private UUID hearingEventId;
-    private ZonedDateTime timestamp;
+    private final UUID hearingEventId;
+    private final ZonedDateTime timestamp;
 
     public HearingEvent(UUID hearingEventId, ZonedDateTime timestamp) {
         this.hearingEventId = hearingEventId;
@@ -21,7 +21,4 @@ public class HearingEvent {
         return timestamp;
     }
 
-    public void setTimestamp(ZonedDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
 }
