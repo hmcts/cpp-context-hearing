@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.eventsourcing.source.core.Events.streamOf;
 import static uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter.HEARING_ID;
@@ -15,12 +16,12 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventsLogAggregate;
 import uk.gov.moj.cpp.hearing.domain.command.AddCaseToHearing;
 import uk.gov.moj.cpp.hearing.domain.command.AllocateCourt;
 import uk.gov.moj.cpp.hearing.domain.command.BookRoom;
-import uk.gov.moj.cpp.hearing.domain.command.CreateHearingEventDefinitions;
 import uk.gov.moj.cpp.hearing.domain.command.EndHearing;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
@@ -41,20 +42,17 @@ import javax.json.JsonObject;
 @ServiceComponent(Component.COMMAND_HANDLER)
 public class HearingCommandHandler {
 
-    private static final String ID_FIELD = "id";
-    private static final String HEARING_EVENT_ID_FIELD = "hearingEventId";
-    private static final String HEARING_ID_FIELD = "hearingId";
-    private static final String RECORDED_LABEL_FIELD = "recordedLabel";
-    private static final String TIMESTAMP_FIELD = "timestamp";
+    private static final String FIELD_ID = "id";
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_RECORDED_LABEL = "recordedLabel";
+    private static final String FIELD_TIMESTAMP = "timestamp";
 
     @Inject
     private EventSource eventSource;
 
     @Inject
     private Enveloper enveloper;
-
-    @Inject
-    HearingCommandFactory hearingCommandFactory;
 
     @Inject
     private AggregateService aggregateService;
@@ -123,7 +121,7 @@ public class HearingCommandHandler {
         final String status = payload.getString("status");
         final JsonArray jsonArray = payload.getJsonArray("defendantIds");
         final List<UUID> defendantIds = new ArrayList<>();
-        for (int i = 0; i < jsonArray.size(); i++){
+        for (int i = 0; i < jsonArray.size(); i++) {
             final String defendantIdString = jsonArray.getJsonObject(i).getString("defendantId");
             defendantIds.add(fromString(defendantIdString));
         }
@@ -132,10 +130,19 @@ public class HearingCommandHandler {
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
-        final UUID streamId = fromString(envelope.payloadAsJsonObject().getString("id"));
-        final CreateHearingEventDefinitions createHearingEventDefinitions = hearingCommandFactory.createHearingEventDefinitionsFrom(envelope.payloadAsJsonObject());
-        EventStream eventStream = eventSource.getStreamById(streamId);
-        Stream<Object> events = Stream.of(new HearingEventDefinitionsCreated(createHearingEventDefinitions.getUUID(), createHearingEventDefinitions.getEventDefinitions()));
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final UUID hearingEventDefinitionsId = fromString(payload.getString("id"));
+        final List<HearingEventDefinition> hearingEventDefinitions = payload
+                .getJsonArray("eventDefinitions").getValuesAs(JsonObject.class)
+                .stream().map(hearingDefinitionJson -> new HearingEventDefinition(
+                        hearingDefinitionJson.getString("actionLabel"),
+                        hearingDefinitionJson.getString("recordedLabel"),
+                        hearingDefinitionJson.getInt("sequence"),
+                        hearingDefinitionJson.containsKey("caseAttribute") ? hearingDefinitionJson.getString("caseAttribute") : null))
+                .collect(toList());
+
+        final EventStream eventStream = eventSource.getStreamById(hearingEventDefinitionsId);
+        final Stream<Object> events = Stream.of(new HearingEventDefinitionsCreated(hearingEventDefinitionsId, hearingEventDefinitions));
         eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
     }
 
@@ -146,19 +153,19 @@ public class HearingCommandHandler {
         final UUID targetId = fromString(payload.getString("targetId"));
         final UUID offenceId = fromString(payload.getString("offenceId"));
         final String draftResult = payload.getString("draftResult");
-        final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
 
-        final Stream<Object> events = streamOf(new DraftResultSaved(targetId, defendantId, offenceId, draftResult,hearingId));
+        final Stream<Object> events = streamOf(new DraftResultSaved(targetId, defendantId, offenceId, draftResult, hearingId));
         eventSource.getStreamById(hearingId).append(events.map(enveloper.withMetadataFrom(command)));
     }
 
     @Handles("hearing.log-hearing-event")
     public void logHearingEvent(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingEventId = fromString(payload.getString(ID_FIELD));
-        final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));
-        final String recordedLabel = payload.getString(RECORDED_LABEL_FIELD);
-        final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(TIMESTAMP_FIELD));
+        final UUID hearingEventId = fromString(payload.getString(FIELD_ID));
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
+        final String recordedLabel = payload.getString(FIELD_RECORDED_LABEL);
+        final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(FIELD_TIMESTAMP));
 
         applyToHearingEventsLogAggregate(hearingId, aggregate -> aggregate.logHearingEvent(hearingId, hearingEventId, recordedLabel, timestamp), command);
     }
@@ -166,9 +173,9 @@ public class HearingCommandHandler {
     @Handles("hearing.correct-hearing-event")
     public void correctEvent(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));
-        final UUID hearingEventId = fromString(payload.getString(HEARING_EVENT_ID_FIELD));
-        final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(TIMESTAMP_FIELD));
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
+        final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
+        final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(FIELD_TIMESTAMP));
 
         applyToHearingEventsLogAggregate(hearingId, aggregate -> aggregate.correctEvent(hearingId, hearingEventId, timestamp), command);
     }

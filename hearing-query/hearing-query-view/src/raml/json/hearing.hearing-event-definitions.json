@@ -1,6 +1,16 @@
 {
   "eventDefinitions": [
     {
+      "actionLabel": "Mitigation By",
+      "actionOption": "$defenseCounsel",
+      "actionOptionExtraText": "Defending <defendant.name>",
+      "recordedLabel": "Mitigation by <counsel.name> for $defendant",
+      "people": [{
+        "defenseCounsel": "ID",
+        "defendant": "ID"
+      }]
+    },
+    {
       "actionLabel": "Identify defendant",
       "recordedLabel": "Defendant identified"
     },
@@ -10,8 +20,6 @@
     }
   ]
 }
-
-
 
 
 

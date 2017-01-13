@@ -2,18 +2,23 @@
   "id": "4daefec6-5f78-4109-82d9-1e60544a6c02",
   "eventDefinitions": [
     {
-      "actionLabel": "Identify defendant",
-      "recordedLabel": "Defendant identified",
+      "actionLabel": "Start Hearing",
+      "recordedLabel": "Hearing started",
       "sequence": 1
     },
     {
-      "actionLabel": "Start Hearing",
-      "recordedLabel": "Hearing started",
+      "actionLabel": "Identify defendant",
+      "recordedLabel": "Defendant identified",
       "sequence": 2
+    },
+    {
+      "actionLabel": "<counsel.name> Defending <defendant.name>",
+      "recordedLabel": "Defence <counsel.name> mitigated for <defendant.name>",
+      "sequence": 3,
+      "caseAttributes": [
+        "defendant.name",
+        "counsel.name"
+      ]
     }
   ]
 }
-
-
-
-

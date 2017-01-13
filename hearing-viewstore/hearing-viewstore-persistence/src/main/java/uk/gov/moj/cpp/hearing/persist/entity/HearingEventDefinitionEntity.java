@@ -19,14 +19,19 @@ public class HearingEventDefinitionEntity implements Comparable<HearingEventDefi
     @Column(nullable = false, name = "sequence_number")
     private Integer sequenceNumber;
 
+    @Column(name = "case_attribute")
+    private String caseAttribute;
+
     public HearingEventDefinitionEntity() {
         // for JPA
     }
 
-    public HearingEventDefinitionEntity(final String recordedLabel, final String actionLabel, final Integer sequenceNumber) {
+    public HearingEventDefinitionEntity(final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
+                                        final String caseAttribute) {
         this.recordedLabel = recordedLabel;
         this.actionLabel = actionLabel;
         this.sequenceNumber = sequenceNumber;
+        this.caseAttribute = caseAttribute;
     }
 
     public String getRecordedLabel() {
@@ -41,9 +46,13 @@ public class HearingEventDefinitionEntity implements Comparable<HearingEventDefi
         return sequenceNumber;
     }
 
+    public String getCaseAttribute() {
+        return caseAttribute;
+    }
+
     @Override
-    public int compareTo(HearingEventDefinitionEntity other) {
-        return this.sequenceNumber.compareTo(other.sequenceNumber);
+    public int compareTo(final HearingEventDefinitionEntity that) {
+        return this.sequenceNumber.compareTo(that.sequenceNumber);
     }
 
     @Override
@@ -52,6 +61,7 @@ public class HearingEventDefinitionEntity implements Comparable<HearingEventDefi
                 "recordedLabel='" + recordedLabel + '\'' +
                 ", actionLabel='" + actionLabel + '\'' +
                 ", sequenceNumber=" + sequenceNumber +
+                ", caseAttribute='" + caseAttribute + '\'' +
                 '}';
     }
 }

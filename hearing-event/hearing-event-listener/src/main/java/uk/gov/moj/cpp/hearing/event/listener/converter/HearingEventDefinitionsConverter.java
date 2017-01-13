@@ -10,14 +10,15 @@ import java.util.List;
 public class HearingEventDefinitionsConverter implements Converter<HearingEventDefinitionsCreated, List<HearingEventDefinitionEntity>> {
 
     @Override
-    public List<HearingEventDefinitionEntity> convert(HearingEventDefinitionsCreated eventDefinitionsCreated) {
+    public List<HearingEventDefinitionEntity> convert(final HearingEventDefinitionsCreated eventDefinitionsCreated) {
         final List<HearingEventDefinitionEntity> entities = new ArrayList<>();
         eventDefinitionsCreated.getEventDefinitions().forEach(hearingEventDefinition -> entities.add(
                 new HearingEventDefinitionEntity(
                         hearingEventDefinition.getRecordedLabel(),
                         hearingEventDefinition.getActionLabel(),
-                        hearingEventDefinition.getSequence()))
-        );
+                        hearingEventDefinition.getSequence(),
+                        hearingEventDefinition.getCaseAttribute())
+        ));
         return entities;
     }
 }

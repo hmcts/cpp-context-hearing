@@ -39,8 +39,8 @@ public class HearingCommandApiTest {
         /*
           Reading Raml and extraction action name @ {ramlActionNames}
          */
-        List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-command-api.raml"));
-        Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
+        final List<String> allLines = FileUtils.readLines(new File("src/raml/hearing-command-api.raml"));
+        final Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
 
         ramlActionNames = allLines.stream()
                 .filter(nonEmptyStringPredicate)

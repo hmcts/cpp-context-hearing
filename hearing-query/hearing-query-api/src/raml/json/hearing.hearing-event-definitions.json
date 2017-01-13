@@ -7,11 +7,20 @@
     {
       "actionLabel": "Start Hearing",
       "recordedLabel": "Hearing started"
+    },
+    {
+      "actionLabel": "<counsel.name> Defending <defendant.name>",
+      "recordedLabel": "Defence <counsel.name> mitigated for <defendant.name>",
+      "caseAttributes": [
+        {
+          "defendant.name": "ID",
+          "counsel.name": "ID"
+        },
+        {
+          "defendant.name": "ID",
+          "counsel.name": "ID"
+        }
+      ]
     }
   ]
 }
-
-
-
-
-

@@ -1,27 +1,17 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.UUID;
 import static java.util.UUID.randomUUID;
-import javax.json.JsonObject;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
@@ -33,6 +23,20 @@ import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
+
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
@@ -49,14 +53,14 @@ public class HearingEventListenerTest {
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String TIMESTAMP_FIELD = "timestamp";
 
-    public static final String DEFENDANT_ID = "defendantId";
-    private final UUID DEFENDANT_ID_VALUE = randomUUID();
-    public static final String TARGET_ID = "targetId";
+    private static final String DEFENDANT_ID = "defendantId";
+    private static final UUID DEFENDANT_ID_VALUE = randomUUID();
+    private static final String TARGET_ID = "targetId";
     private static final UUID TARGET_ID_VALUE = randomUUID();
-    public static final String OFFENCE_ID = "offenceId";
+    private static final String OFFENCE_ID = "offenceId";
     private static final UUID OFFENCE_ID_VALUE = randomUUID();
-    public static final String DRAFT_RESULT = "draftResult";
-    public static final String ARBITRARY_STRING_IMP_2_YRS = "imp 2 yrs";
+    private static final String DRAFT_RESULT = "draftResult";
+    private static final String ARBITRARY_STRING_IMP_2_YRS = "imp 2 yrs";
 
 
     @Mock

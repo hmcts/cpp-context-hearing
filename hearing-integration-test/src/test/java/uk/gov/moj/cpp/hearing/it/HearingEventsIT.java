@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andCorrectsTheTimeOfThatHearingEvent;
@@ -19,9 +17,12 @@ import static uk.gov.moj.cpp.hearing.steps.data.HearingEventDataFactory.identify
 
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 import com.jayway.restassured.response.Response;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class HearingEventsIT {
@@ -78,6 +79,18 @@ public class HearingEventsIT {
         andCorrectsTheTimeOfThatHearingEvent(userId, identifyDefendentEvent, PAST_TIMESTAMP);
 
         thenTheEventsShouldBeListedInTheSpecifiedOrder(userId, hearingId, Arrays.asList(updatedIdentifyDefendentEvent, hearingStartedEvent));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void shouldBeAbleToGenerateAndRecordMitigationEventsThatRequireDefendantAndDefenceCounsel() {
+        // Given option to log event with defendant and defence counsel is available
+
+        // and user has logged in as court clerk
+
+        // when user records mitigation by defence counsel for defendant
+
+        // then the mitigation is recorded along with defence counsel and defendant
     }
 
 }

@@ -29,13 +29,14 @@ public class HearingEventDefinitionsConverterTest {
             assertThat(eventDefinitionEntityActual.getActionLabel(), is(eventDefinitionExpected.getActionLabel()));
             assertThat(eventDefinitionEntityActual.getRecordedLabel(), is(eventDefinitionExpected.getRecordedLabel()));
             assertThat(eventDefinitionEntityActual.getSequenceNumber(), is((eventDefinitionExpected.getSequence())));
+            assertThat(eventDefinitionEntityActual.getCaseAttribute(), is((eventDefinitionExpected.getCaseAttribute())));
         }
     }
 
     private HearingEventDefinitionsCreated hearingEventDefinitionsCreated() {
         List<HearingEventDefinition> hearingEventDefinitions = asList(
-                new HearingEventDefinition("Identify defendant", "Defendant identified", 1),
-                new HearingEventDefinition("Start Hearing", "Hearing started", 2));
+                new HearingEventDefinition("Identify defendant", "Defendant identified", 1, "defendant.name"),
+                new HearingEventDefinition("Start Hearing", "Hearing started", 2, null));
         return new HearingEventDefinitionsCreated(fromString("4daefec6-5f78-4109-82d9-1e60544a6c02"), hearingEventDefinitions);
     }
 

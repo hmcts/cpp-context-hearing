@@ -329,8 +329,8 @@ public class HearingIT extends AbstractIT {
 
     private List<HearingEventDefinition> createHearingEventDefinitions() {
         return Arrays.asList(
-                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 2),
-                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 1)
+                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 2, null),
+                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 1, null)
         );
     }
 

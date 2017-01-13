@@ -1,15 +1,21 @@
 package uk.gov.moj.cpp.hearing.domain;
 
 
+import java.util.Objects;
+
 public class HearingEventDefinition {
+
     private final String actionLabel;
     private final String recordedLabel;
     private final Integer sequence;
+    private final String caseAttribute;
 
-    public HearingEventDefinition(String actionLabel, String recordedLabel, Integer sequence) {
+    public HearingEventDefinition(final String actionLabel, final String recordedLabel, final Integer sequence,
+                                  final String caseAttribute) {
         this.actionLabel = actionLabel;
         this.recordedLabel = recordedLabel;
         this.sequence = sequence;
+        this.caseAttribute = caseAttribute;
     }
 
     public String getActionLabel() {
@@ -24,26 +30,33 @@ public class HearingEventDefinition {
         return sequence;
     }
 
+    public String getCaseAttribute() {
+        return caseAttribute;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         HearingEventDefinition that = (HearingEventDefinition) o;
-
-        if (actionLabel != null ? !actionLabel.equals(that.actionLabel) : that.actionLabel != null)
-            return false;
-        if (recordedLabel != null ? !recordedLabel.equals(that.recordedLabel) : that.recordedLabel != null)
-            return false;
-        return sequence != null ? sequence.equals(that.sequence) : that.sequence == null;
-
+        return Objects.equals(getActionLabel(), that.getActionLabel()) &&
+                Objects.equals(getRecordedLabel(), that.getRecordedLabel()) &&
+                Objects.equals(getSequence(), that.getSequence()) &&
+                Objects.equals(getCaseAttribute(), that.getCaseAttribute());
     }
 
     @Override
     public int hashCode() {
-        int result = actionLabel != null ? actionLabel.hashCode() : 0;
-        result = 31 * result + (recordedLabel != null ? recordedLabel.hashCode() : 0);
-        result = 31 * result + (sequence != null ? sequence.hashCode() : 0);
-        return result;
+        return Objects.hash(getActionLabel(), getRecordedLabel(), getSequence(), getCaseAttribute());
+    }
+
+    @Override
+    public String toString() {
+        return "HearingEventDefinition{" +
+                "actionLabel='" + actionLabel + '\'' +
+                ", recordedLabel='" + recordedLabel + '\'' +
+                ", sequence=" + sequence +
+                ", caseAttribute='" + caseAttribute + '\'' +
+                '}';
     }
 }

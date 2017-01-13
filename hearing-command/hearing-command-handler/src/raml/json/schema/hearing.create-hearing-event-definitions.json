@@ -18,6 +18,9 @@
           },
           "sequence": {
             "type": "integer"
+          },
+          "caseAttribute": {
+            "type": "string"
           }
         },
         "additionalProperties": false,
