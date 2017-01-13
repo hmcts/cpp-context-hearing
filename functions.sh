@@ -106,7 +106,7 @@ function runLiquibase {
 }
 
 function buildDeployAndTest {
-#  buildWars
+  buildWars
   deployAndTest
 }
 
