@@ -9,7 +9,8 @@
     {
       "actionLabel": "$actionLabel1",
       "recordedLabel": "$recordedLabel1",
-      "sequence": 2
+      "sequence": 2,
+      "caseAttribute": "defendant.name,counsel.name"
     }
   ]
 }
