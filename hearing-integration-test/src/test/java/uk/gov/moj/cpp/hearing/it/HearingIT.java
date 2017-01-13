@@ -11,6 +11,7 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -222,19 +223,30 @@ public class HearingIT extends AbstractIT {
     @Test
     public void hearingAddProsecutionCounselTest() throws IOException, InterruptedException {
         final String hearingId = randomUUID().toString();
-        final String personId = randomUUID().toString();
-        final String attendeeId = randomUUID().toString();
-        final String status = RandomGenerator.STRING.next();
-        final String addProsecutionCounselCommandPayload = createAddProsecutionCounselCommandPayload(personId, attendeeId, status);
+        final String personId1 = randomUUID().toString();
+        final String attendeeId1 = randomUUID().toString();
+        final String status1 = RandomGenerator.STRING.next();
+
+        final String status2 = RandomGenerator.STRING.next();
+
+        final String personId3 = randomUUID().toString();
+        final String attendeeId3 = randomUUID().toString();
+        final String status3 = RandomGenerator.STRING.next();
+
+        final String addProsecutionCounselCommandPayload1 = createAddProsecutionCounselCommandPayload(personId1, attendeeId1, status1);
+        final String addProsecutionCounselCommandPayload2 = createAddProsecutionCounselCommandPayload(personId1, attendeeId1, status2);
+        final String addProsecutionCounselCommandPayload3 = createAddProsecutionCounselCommandPayload(personId3, attendeeId3, status3);
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
 
-        final Response writeResponse = given().spec(requestSpec).and()
+        // Add a prosecution Counsel to a hearing
+
+        final Response writeResponse1 = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.add-prosecution-counsel+json")
-                .body(addProsecutionCounselCommandPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .body(addProsecutionCounselCommandPayload1).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse1.getStatusCode(), equalTo(SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-prosecution-counsels"), hearingId);
@@ -247,27 +259,77 @@ public class HearingIT extends AbstractIT {
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.prosecution-counsels", hasSize(1)),
-                                withJsonPath("$.prosecution-counsels[0].id", is(attendeeId)),
-                                withJsonPath("$.prosecution-counsels[0].personId", is(personId)),
-                                withJsonPath("$.prosecution-counsels[0].status", is(status)
+                                withJsonPath("$.prosecution-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.prosecution-counsels[0].personId", is(personId1)),
+                                withJsonPath("$.prosecution-counsels[0].status", is(status1)
                         ))));
+
+        // Update the prosecution's details
+
+        final Response writeResponse3 = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.add-prosecution-counsel+json")
+                .body(addProsecutionCounselCommandPayload2).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse3.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.prosecution-counsels", hasSize(1)),
+                                withJsonPath("$.prosecution-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.prosecution-counsels[0].personId", is(personId1)),
+                                withJsonPath("$.prosecution-counsels[0].status", is(status2)
+                                ))));
+
+        // Add another prosecution Counsel to the same hearing
+        final Response writeResponse2 = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.add-prosecution-counsel+json")
+                .body(addProsecutionCounselCommandPayload3).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse1.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.prosecution-counsels", hasSize(2)),
+                                withJsonPath("$.prosecution-counsels[0].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.prosecution-counsels[0].personId", isOneOf(personId1, personId3)),
+                                withJsonPath("$.prosecution-counsels[0].status", isOneOf(status2, status3)),
+                                withJsonPath("$.prosecution-counsels[1].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.prosecution-counsels[1].personId", isOneOf(personId1, personId3)),
+                                withJsonPath("$.prosecution-counsels[1].status", isOneOf(status2, status3))
+                                )));
     }
 
     @Test
     public void hearingAddDefenceCounselTest() throws IOException, InterruptedException {
         final String hearingId = randomUUID().toString();
-        final String personId = randomUUID().toString();
-        final String attendeeId = randomUUID().toString();
-        final String defendantId = randomUUID().toString();
-        final String status = RandomGenerator.STRING.next();
-        final String addDefenceCounselCommandPayload = createAddDefenceCounselCommandPayload(personId, attendeeId, status, defendantId);
+
+        final String personId1 = randomUUID().toString();
+        final String attendeeId1 = randomUUID().toString();
+        final String defendantId1 = randomUUID().toString();
+        final String status1 = RandomGenerator.STRING.next();
+
+        final String defendantId2 = randomUUID().toString();
+        final String status2 = RandomGenerator.STRING.next();
+
+        final String personId3 = randomUUID().toString();
+        final String attendeeId3 = randomUUID().toString();
+        final String defendantId3 = randomUUID().toString();
+        final String status3 = RandomGenerator.STRING.next();
+
+        final String addDefenceCounselCommandPayload1 = createAddDefenceCounselCommandPayload(personId1, attendeeId1, status1, defendantId1);
+        final String addDefenceCounselCommandPayload2 = createAddDefenceCounselCommandPayload(personId1, attendeeId1, status2, defendantId2);
+        final String addDefenceCounselCommandPayload3 = createAddDefenceCounselCommandPayload(personId3, attendeeId3, status3, defendantId3);
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
 
-        final Response writeResponse = given().spec(requestSpec).and()
+        Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.add-defence-counsel+json")
-                .body(addDefenceCounselCommandPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .body(addDefenceCounselCommandPayload1).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
@@ -282,11 +344,52 @@ public class HearingIT extends AbstractIT {
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.defence-counsels", hasSize(1)),
-                                withJsonPath("$.defence-counsels[0].id", is(attendeeId)),
-                                withJsonPath("$.defence-counsels[0].personId", is(personId)),
-                                withJsonPath("$.defence-counsels[0].status", is(status)),
-                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", is(defendantId)
-                        ))));
+                                withJsonPath("$.defence-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.defence-counsels[0].personId", is(personId1)),
+                                withJsonPath("$.defence-counsels[0].status", is(status1)),
+                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", is(defendantId1)
+                                ))));
+
+        // Edit Defence Counsel
+        writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.add-defence-counsel+json")
+                .body(addDefenceCounselCommandPayload2).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.defence-counsels", hasSize(1)),
+                                withJsonPath("$.defence-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.defence-counsels[0].personId", is(personId1)),
+                                withJsonPath("$.defence-counsels[0].status", is(status2)),
+                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", isOneOf(defendantId1, defendantId2)),
+                                withJsonPath("$.defence-counsels[0].defendantIds[1].defendantId", isOneOf(defendantId1, defendantId2)
+                                ))));
+
+        // Add another defence counsel
+        writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.add-defence-counsel+json")
+                .body(addDefenceCounselCommandPayload3).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.defence-counsels", hasSize(2)),
+                                withJsonPath("$.defence-counsels[0].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.defence-counsels[0].personId", isOneOf(personId1, personId3)),
+                                withJsonPath("$.defence-counsels[0].status", isOneOf(status2, status3)),
+                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", isOneOf(defendantId1, defendantId2, defendantId3)),
+                                withJsonPath("$.defence-counsels[1].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.defence-counsels[1].personId", isOneOf(personId1, personId3)),
+                                withJsonPath("$.defence-counsels[1].status", isOneOf(status2, status3)),
+                                withJsonPath("$.defence-counsels[1].defendantIds[0].defendantId", isOneOf(defendantId1, defendantId2, defendantId3)
+                                ))));
     }
 
     private String createAddProsecutionCounselCommandPayload(final String personId, final String attendeeId, final String status) throws IOException {
