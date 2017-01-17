@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import java.util.Collections;
-import java.util.Comparator;
 import static java.util.UUID.fromString;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -52,7 +50,7 @@ public class HearingQueryView {
 
     private static final String FIELD_HEARING_ID = "hearingId";
 
-    private static final String FIELD_HEARING_EVENT_ID = "id";
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
     private static final String FIELD_HEARING_EVENTS = "events";
@@ -165,9 +163,7 @@ public class HearingQueryView {
     public JsonEnvelope getHearingEventLog(final JsonEnvelope query) {
         final String hearingId = query.payloadAsJsonObject().getString(FIELD_HEARING_ID);
 
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingId(
-                fromString(hearingId));
-        Collections.sort(hearingEvents, Comparator.comparing(HearingEvent::getTimestamp));
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingId(fromString(hearingId));
 
         final JsonArrayBuilder eventLogJsonArrayBuilder = createArrayBuilder();
 

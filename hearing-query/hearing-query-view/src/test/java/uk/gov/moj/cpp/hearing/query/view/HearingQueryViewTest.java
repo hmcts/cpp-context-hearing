@@ -65,7 +65,7 @@ public class HearingQueryViewTest {
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_START_DATE = "startDate";
-    private static final String FIELD_HEARING_EVENT_ID = "id";
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
     private static final String FIELD_HEARING_EVENTS = "events";
@@ -94,9 +94,6 @@ public class HearingQueryViewTest {
 
     @Spy
     private ListToJsonArrayConverter listToJsonArrayConverter = createListToJsonArrayConverter();
-
-    @Mock
-    private List<HearingView> hearings;
 
     @Mock
     private HearingView hearingView;
@@ -185,38 +182,6 @@ public class HearingQueryViewTest {
     }
 
     @Test
-    public void shouldGetHearingEventLogByHearingIdInOrder() {
-        when(hearingEventRepository.findByHearingId(HEARING_ID)).thenReturn(unorderedHearingEvents());
-
-        final JsonEnvelope query = envelopeFrom(
-                metadataWithDefaults(),
-                createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString()).build());
-
-        final JsonEnvelope actualHearingEventLog = hearingsQueryView.getHearingEventLog(query);
-
-        assertThat(actualHearingEventLog, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_HEARING_EVENT_LOG),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_HEARING_EVENTS), hasSize(3)),
-
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_TIMESTAMP), equalTo(ZonedDateTimes.toString(TIMESTAMP))),
-
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_2.toString())),
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_TIMESTAMP), equalTo(ZonedDateTimes.toString(TIMESTAMP_2))),
-
-                        withJsonPath(format("$.%s[2].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_3.toString())),
-                        withJsonPath(format("$.%s[2].%s", FIELD_HEARING_EVENTS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_3)),
-                        withJsonPath(format("$.%s[2].%s", FIELD_HEARING_EVENTS, FIELD_TIMESTAMP), equalTo(ZonedDateTimes.toString(TIMESTAMP_3)))
-                ))).thatMatchesSchema()
-        ));
-    }
-
-    @Test
     public void shouldReturnEmptyEventLogWhenThereAreNoEventsByHearingId() {
         when(hearingEventRepository.findByHearingId(HEARING_ID)).thenReturn(emptyList());
 
@@ -272,15 +237,6 @@ public class HearingQueryViewTest {
         final List<HearingEvent> hearingEvents = new ArrayList<>();
 
         hearingEvents.add(new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP));
-        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID_2, HEARING_ID, RECORDED_LABEL_2, TIMESTAMP_2));
-        return hearingEvents;
-    }
-
-    private List<HearingEvent> unorderedHearingEvents() {
-        final List<HearingEvent> hearingEvents = new ArrayList<>();
-
-        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP));
-        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID_3, HEARING_ID, RECORDED_LABEL_3, TIMESTAMP_3));
         hearingEvents.add(new HearingEvent(HEARING_EVENT_ID_2, HEARING_ID, RECORDED_LABEL_2, TIMESTAMP_2));
         return hearingEvents;
     }

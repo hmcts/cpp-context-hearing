@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "id": {
+    "hearingEventId": {
       "$ref": "#/definitions/uuid"
     },
     "recordedLabel": {
@@ -15,7 +15,7 @@
   },
   "additionalProperties": false,
   "required": [
-    "id",
+    "hearingEventId",
     "recordedLabel",
     "timestamp"
   ],

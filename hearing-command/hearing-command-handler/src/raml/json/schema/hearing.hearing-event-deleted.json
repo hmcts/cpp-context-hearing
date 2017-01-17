@@ -2,22 +2,13 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "timestamp": {
-      "type": "string",
-      "format": "date-time"
-    },
     "hearingEventId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "hearingId": {
       "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,
   "required": [
-    "timestamp",
-    "hearingEventId",
-    "hearingId"
+    "hearingEventId"
   ],
   "definitions": {
     "uuid": {

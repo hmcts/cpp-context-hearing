@@ -41,17 +41,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
 
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_RECORDED_LABEL = "recordedLabel";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_TIMESTAMP = "timestamp";
+
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final ZonedDateTime TIMESTAMP = PAST_ZONED_DATE_TIME.next();
-    private static final ZonedDateTime DIFFERENT_TIMESTAMP = PAST_ZONED_DATE_TIME.next();
-
-    private static final String ID_FIELD = "id";
-    private static final String HEARING_EVENT_ID_FIELD = "hearingEventId";
-    private static final String RECORDED_LABEL_FIELD = "recordedLabel";
-    private static final String HEARING_ID_FIELD = "hearingId";
-    private static final String TIMESTAMP_FIELD = "timestamp";
 
     private static final String DEFENDANT_ID = "defendantId";
     private static final UUID DEFENDANT_ID_VALUE = randomUUID();
@@ -61,7 +59,6 @@ public class HearingEventListenerTest {
     private static final UUID OFFENCE_ID_VALUE = randomUUID();
     private static final String DRAFT_RESULT = "draftResult";
     private static final String ARBITRARY_STRING_IMP_2_YRS = "imp 2 yrs";
-
 
     @Mock
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -80,9 +77,6 @@ public class HearingEventListenerTest {
 
     @Mock
     private HearingInitiated hearingInitiated;
-
-    @Mock
-    private ProsecutionCounselAdded prosecutionCounselAdded;
 
     @Mock
     private Hearing hearing;
@@ -149,19 +143,20 @@ public class HearingEventListenerTest {
     }
 
     @Test
-    public void shouldPersistAEventCorrection() {
-        final JsonEnvelope event = getHearingEventLogCorrectionEnvelope();
+    public void shouldDeleteAnExistingHearingEvent() {
+        final JsonEnvelope event = getHearingEventJsonEnvelopeToDelete();
         when(hearingEventRepository.findById(HEARING_EVENT_ID)).thenReturn(
-                new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP)
+                Optional.of(new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP))
         );
 
-        hearingEventListener.hearingEventCorrected(event);
+        hearingEventListener.hearingEventDeleted(event);
 
         verify(hearingEventRepository).save(eventLogArgumentCaptor.capture());
         assertThat(eventLogArgumentCaptor.getValue().getId(), is(HEARING_EVENT_ID));
         assertThat(eventLogArgumentCaptor.getValue().getHearingId(), is(HEARING_ID));
         assertThat(eventLogArgumentCaptor.getValue().getRecordedLabel(), is(RECORDED_LABEL));
-        assertThat(eventLogArgumentCaptor.getValue().getTimestamp().toString(), is(ZonedDateTimes.toString(DIFFERENT_TIMESTAMP)));
+        assertThat(eventLogArgumentCaptor.getValue().getTimestamp(), is(TIMESTAMP));
+        assertThat(eventLogArgumentCaptor.getValue().isDeleted(), is(true));
     }
 
     @Test
@@ -181,24 +176,22 @@ public class HearingEventListenerTest {
 
     private JsonEnvelope getHearingEventLogJsonEnvelope() {
         return envelope()
-                .withPayloadOf(HEARING_EVENT_ID, ID_FIELD)
-                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
-                .withPayloadOf(RECORDED_LABEL, RECORDED_LABEL_FIELD)
-                .withPayloadOf(ZonedDateTimes.toString(TIMESTAMP), TIMESTAMP_FIELD)
+                .withPayloadOf(HEARING_EVENT_ID, FIELD_HEARING_EVENT_ID)
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(RECORDED_LABEL, FIELD_RECORDED_LABEL)
+                .withPayloadOf(ZonedDateTimes.toString(TIMESTAMP), FIELD_TIMESTAMP)
                 .build();
     }
 
-    private JsonEnvelope getHearingEventLogCorrectionEnvelope() {
+    private JsonEnvelope getHearingEventJsonEnvelopeToDelete() {
         return envelope()
-                .withPayloadOf(HEARING_EVENT_ID, HEARING_EVENT_ID_FIELD)
-                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
-                .withPayloadOf(ZonedDateTimes.toString(DIFFERENT_TIMESTAMP), TIMESTAMP_FIELD)
+                .withPayloadOf(HEARING_EVENT_ID, FIELD_HEARING_EVENT_ID)
                 .build();
     }
 
     private JsonEnvelope getSaveDraftResultJsonEnvelope() {
         return envelope()
-                .withPayloadOf(HEARING_ID, HEARING_ID_FIELD)
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
                 .withPayloadOf(DEFENDANT_ID_VALUE, DEFENDANT_ID)
                 .withPayloadOf(TARGET_ID_VALUE, TARGET_ID)
                 .withPayloadOf(OFFENCE_ID_VALUE, OFFENCE_ID)

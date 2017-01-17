@@ -6,21 +6,22 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-@Event("hearing.hearing-event-logged")
-public class HearingEventLogged {
+@Event("hearing.hearing-event-ignored")
+public class HearingEventIgnored {
 
     private final UUID hearingEventId;
     private final UUID hearingId;
     private final String recordedLabel;
     private final ZonedDateTime timestamp;
+    private final String reason;
 
-    public HearingEventLogged(final UUID hearingEventId, final UUID hearingId, final String recordedLabel,
-                              final ZonedDateTime timestamp) {
-
+    public HearingEventIgnored(final UUID hearingEventId, final UUID hearingId, final String recordedLabel,
+                               final ZonedDateTime timestamp, final String reason) {
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
         this.recordedLabel = recordedLabel;
         this.timestamp = timestamp;
+        this.reason = reason;
     }
 
     public UUID getHearingEventId() {
@@ -39,11 +40,15 @@ public class HearingEventLogged {
         return timestamp;
     }
 
+    public String getReason() {
+        return reason;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HearingEventLogged that = (HearingEventLogged) o;
+        HearingEventIgnored that = (HearingEventIgnored) o;
         return Objects.equals(getHearingEventId(), that.getHearingEventId()) &&
                 Objects.equals(getHearingId(), that.getHearingId()) &&
                 Objects.equals(getRecordedLabel(), that.getRecordedLabel()) &&
@@ -57,11 +62,12 @@ public class HearingEventLogged {
 
     @Override
     public String toString() {
-        return "HearingEventLogged{" +
+        return "HearingEventIgnored{" +
                 "hearingEventId=" + hearingEventId +
                 ", hearingId=" + hearingId +
                 ", recordedLabel='" + recordedLabel + '\'' +
                 ", timestamp=" + timestamp +
+                ", reason='" + reason + '\'' +
                 '}';
     }
 }

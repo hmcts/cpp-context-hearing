@@ -48,7 +48,6 @@ import javax.transaction.Transactional;
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
 
-    private static final String ID_FIELD = "id";
     private static final String HEARING_EVENT_ID_FIELD = "hearingEventId";
     private static final String HEARING_ID_FIELD = "hearingId";
     private static final String RECORDED_LABEL_FIELD = "recordedLabel";
@@ -196,9 +195,9 @@ public class HearingEventListener {
                 defenceCounselAdded.getStatus());
         defenceCounselRepository.save(defenceCounsel);
 
-        for (final UUID defendantId: defenceCounselAdded.getDefendantIds()) {
+        for (final UUID defendantId : defenceCounselAdded.getDefendantIds()) {
             final DefenceCounselDefendant defenceCounselDefendant =
-                new DefenceCounselDefendant(defenceCounselAdded.getAttendeeId(), defendantId);
+                    new DefenceCounselDefendant(defenceCounselAdded.getAttendeeId(), defendantId);
             defenceCounselDefendantRepository.save(defenceCounselDefendant);
         }
     }
@@ -224,36 +223,33 @@ public class HearingEventListener {
                 .forEach(hearingDefinitionsRepository::save);
     }
 
+    @Transactional
     @Handles("hearing.hearing-event-logged")
     public void hearingEventLogged(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
 
-        final UUID id = fromString(payload.getString(ID_FIELD));
+        final UUID hearingEventId = fromString(payload.getString(HEARING_EVENT_ID_FIELD));
         final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));
         final String recordedLabel = payload.getString(RECORDED_LABEL_FIELD);
         final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(TIMESTAMP_FIELD));
 
-        hearingEventRepository.save(new HearingEvent(id, hearingId, recordedLabel, timestamp));
+        hearingEventRepository.save(new HearingEvent(hearingEventId, hearingId, recordedLabel, timestamp));
     }
 
     @Transactional
-    @Handles("hearing.hearing-event-corrected")
-    public void hearingEventCorrected(final JsonEnvelope event) {
+    @Handles("hearing.hearing-event-deleted")
+    public void hearingEventDeleted(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
 
-        final ZonedDateTime newTimestamp = fromJsonString(payload.getJsonString(TIMESTAMP_FIELD));
+        final UUID hearingEventId = fromString(payload.getString(HEARING_EVENT_ID_FIELD));
 
-        HearingEvent hearingEvent = hearingEventRepository.findById(UUID.fromString(payload.getString(HEARING_EVENT_ID_FIELD)));
-        final UUID existingId = hearingEvent.getId();
-        final UUID existingHearingId = hearingEvent.getHearingId();
-        final String existingRecordedLabel = hearingEvent.getRecordedLabel();
-
-        hearingEventRepository.save(new HearingEvent(existingId, existingHearingId, existingRecordedLabel, newTimestamp));
+        final Optional<HearingEvent> optionalHearingEvent = hearingEventRepository.findById(hearingEventId);
+        optionalHearingEvent.ifPresent(hearingEvent -> hearingEventRepository.save(hearingEvent.builder().delete().build()));
     }
 
     @Handles("hearing.draft-result-saved")
     public void draftResultSaved(final JsonEnvelope event) {
-       final JsonObject payload = event.payloadAsJsonObject();
+        final JsonObject payload = event.payloadAsJsonObject();
 
         final UUID targetId = fromString(payload.getString(TARGET_ID));
         final UUID hearingId = fromString(payload.getString(HEARING_ID_FIELD));

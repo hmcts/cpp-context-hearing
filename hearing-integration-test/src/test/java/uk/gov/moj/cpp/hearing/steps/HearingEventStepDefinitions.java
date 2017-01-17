@@ -1,25 +1,19 @@
 package uk.gov.moj.cpp.hearing.steps;
 
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
-import com.jayway.jsonpath.ReadContext;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
-import org.hamcrest.Matcher;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
@@ -33,12 +27,17 @@ import uk.gov.moj.cpp.hearing.it.AbstractIT;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 
 import java.text.MessageFormat;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import javax.json.JsonObjectBuilder;
 
+import com.jayway.jsonpath.ReadContext;
 import com.jayway.restassured.response.Response;
-import static uk.gov.moj.cpp.hearing.steps.data.HearingEventDataFactory.hearingStartedEvent;
+import org.hamcrest.Matcher;
 
 public class HearingEventStepDefinitions extends AbstractIT {
 
@@ -46,7 +45,8 @@ public class HearingEventStepDefinitions extends AbstractIT {
     private static final String MEDIA_TYPE_QUERY_EVENT_LOG = "application/vnd.hearing.hearing-event-log+json";
     private static final String MEDIA_TYPE_CORRECT_HEARING_EVENT = "application/vnd.hearing.correct-hearing-event+json";
 
-    private static final String FIELD_HEARING_EVENT_ID = "id";
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
 
@@ -96,11 +96,22 @@ public class HearingEventStepDefinitions extends AbstractIT {
         assertThat(response.getStatusCode(), equalTo(SC_ACCEPTED));
     }
 
-    public static Response andCorrectsTheTimeOfThatHearingEvent(final UUID userId, final HearingEvent hearingEvent, final ZonedDateTime newTimestamp) {
+    public static void andUserLogsAnEvent(final UUID userId, final HearingEvent hearingEvent) {
+        whenUserLogsAnEvent(userId, hearingEvent);
+    }
+
+    public static void andLogsAnotherEvent(final UUID userId, final HearingEvent hearingEvent) {
+        whenUserLogsAnEvent(userId, hearingEvent);
+    }
+
+    public static Response whenUserCorrectsTheTimeOfTheHearingEvent(final UUID userId, final HearingEvent hearingEvent,
+                                                                    final ZonedDateTime newTimestamp, final UUID newHearingEventId) {
         final String correctEventEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.correct-hearing-event"), hearingEvent.getHearingId(), hearingEvent.getId());
 
         final JsonObjectBuilder correctEventPayloadBuilder = createObjectBuilder()
-                .add(FIELD_TIMESTAMP, ZonedDateTimes.toString(newTimestamp));
+                .add(FIELD_TIMESTAMP, ZonedDateTimes.toString(newTimestamp))
+                .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
+                .add(FIELD_LATEST_HEARING_EVENT_ID, newHearingEventId.toString());
 
         return given().spec(requestSpec)
                 .and().contentType(MEDIA_TYPE_CORRECT_HEARING_EVENT)
@@ -108,6 +119,22 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 .and().body(correctEventPayloadBuilder.build().toString())
                 .when().post(correctEventEndPoint)
                 .then().extract().response();
+    }
+
+    public static void thenOnlySpecifiedHearingEventIsRecorded(final UUID userId, final HearingEvent hearingEvent) {
+        final String queryEventLogUrl = getQueryEventLogUrl(hearingEvent.getHearingId());
+
+        poll(requestParams(queryEventLogUrl, MEDIA_TYPE_QUERY_EVENT_LOG).withHeader(USER_ID, userId))
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(hearingEvent.getHearingId().toString())),
+                                withJsonPath("$.events", hasSize(1)),
+                                withJsonPath("$.events[0].hearingEventId", equalTo(hearingEvent.getId().toString())),
+                                withJsonPath("$.events[0].recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
+                                withJsonPath("$.events[0].timestamp", equalTo(ZonedDateTimes.toString(hearingEvent.getTimestamp())))
+                        ))
+                );
     }
 
     public static void thenHearingEventIsRecorded(final UUID userId, final HearingEvent hearingEvent) {
@@ -118,24 +145,29 @@ public class HearingEventStepDefinitions extends AbstractIT {
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.hearingId", equalTo(hearingEvent.getHearingId().toString())),
-                                withJsonPath("$.events", hasSize(1)),
-                                withJsonPath("$.events[0].id", equalTo(hearingEvent.getId().toString())),
-                                withJsonPath("$.events[0].recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
-                                withJsonPath("$.events[0].timestamp", equalTo(ZonedDateTimes.toString(hearingEvent.getTimestamp())))
+                                withJsonPath("$.events[*].hearingEventId", hasItems(hearingEvent.getId().toString())),
+                                withJsonPath("$.events[*].recordedLabel", hasItems(hearingEvent.getRecordedLabel())),
+                                withJsonPath("$.events[*].timestamp", hasItems(ZonedDateTimes.toString(hearingEvent.getTimestamp())))
                         ))
                 );
     }
 
-    public static void thenTheHearingEventHasTheUpdatedTimestamp(final UUID userId, final UUID hearingId, final ZonedDateTime newTimestamp) {
-        final String queryEventLogUrl = getQueryEventLogUrl(hearingId);
+    public static void andHearingEventIsRecorded(final UUID userId, final HearingEvent hearingEvent) {
+        thenHearingEventIsRecorded(userId, hearingEvent);
+    }
+
+    public static void thenTheHearingEventHasTheUpdatedTimestamp(final UUID userId, final HearingEvent hearingEvent,
+                                                                 final ZonedDateTime newTimestamp, final UUID newHearingEventId) {
+        final String queryEventLogUrl = getQueryEventLogUrl(hearingEvent.getHearingId());
 
         poll(requestParams(queryEventLogUrl, MEDIA_TYPE_QUERY_EVENT_LOG).withHeader(USER_ID, userId))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.hearingId", equalTo(hearingId.toString())),
-                                withJsonPath("$.events", hasSize(1)),
-                                withJsonPath("$.events[0].timestamp", equalTo(ZonedDateTimes.toString(newTimestamp)))
+                                withJsonPath("$.hearingId", equalTo(hearingEvent.getHearingId().toString())),
+                                withJsonPath("$.events[*].hearingEventId", hasItems(newHearingEventId.toString())),
+                                withJsonPath("$.events[*].recordedLabel", hasItems(hearingEvent.getRecordedLabel())),
+                                withJsonPath("$.events[*].timestamp", hasItems(ZonedDateTimes.toString(newTimestamp)))
                         ))
                 );
     }
@@ -158,9 +190,9 @@ public class HearingEventStepDefinitions extends AbstractIT {
         IntStream.range(0, events.size())
             .forEach(ix ->
                     {
-                        conditionsOnJson.add(withJsonPath("$.events[" + ix + "].id", equalTo(events.get(ix).getId().toString())));
-                        conditionsOnJson.add(withJsonPath("$.events[" + ix + "].recordedLabel", equalTo(events.get(ix).getRecordedLabel())));
-                        conditionsOnJson.add(withJsonPath("$.events[" + ix + "].timestamp", equalTo(ZonedDateTimes.toString(events.get(ix).getTimestamp()))));
+                        conditionsOnJson.add(withJsonPath(format("$.events[%s].hearingEventId", ix), equalTo(events.get(ix).getId().toString())));
+                        conditionsOnJson.add(withJsonPath(format("$.events[%s].recordedLabel", ix), equalTo(events.get(ix).getRecordedLabel())));
+                        conditionsOnJson.add(withJsonPath(format("$.events[%s].timestamp", ix), equalTo(ZonedDateTimes.toString(events.get(ix).getTimestamp()))));
                     }
             );
 

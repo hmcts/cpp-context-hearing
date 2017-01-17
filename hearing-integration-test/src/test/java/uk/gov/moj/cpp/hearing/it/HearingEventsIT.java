@@ -1,24 +1,26 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andCorrectsTheTimeOfThatHearingEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingIsNotStarted;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventIsRecorded;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andLogsAnotherEvent;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andUserLogsAnEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenItFailsForMissingTimestamp;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenOnlySpecifiedHearingEventIsRecorded;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheEventsShouldBeListedInTheSpecifiedOrder;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheHearingEventHasTheUpdatedTimestamp;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserAttemptsToStartAHearing;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserCorrectsTheTimeOfTheHearingEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserLogsAnEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.steps.data.HearingEventDataFactory.hearingEventWithMissingTimestamp;
 import static uk.gov.moj.cpp.hearing.steps.data.HearingEventDataFactory.hearingStartedEvent;
-import static uk.gov.moj.cpp.hearing.steps.data.HearingEventDataFactory.identifyDefendentEvent;
+import static uk.gov.moj.cpp.hearing.steps.data.HearingEventDataFactory.identifyDefendantEvent;
 
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.UUID;
 
 import com.jayway.restassured.response.Response;
@@ -30,8 +32,7 @@ public class HearingEventsIT {
     private final UUID userId = randomUUID();
     private final UUID hearingId = randomUUID();
 
-    private final ZonedDateTime PAST_TIMESTAMP = ZonedDateTime.now().minusMonths(2);
-    private final ZonedDateTime DIFFERENT_TIMESTAMP = PAST_ZONED_DATE_TIME.next();
+    private final ZonedDateTime PAST_TIMESTAMP = PAST_ZONED_DATE_TIME.next();
 
     @Test
     public void shouldBeAbleToStartAHearingByAnAuthorisedUser() {
@@ -41,7 +42,7 @@ public class HearingEventsIT {
         final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
         whenUserLogsAnEvent(userId, hearingStartedEvent);
 
-        thenHearingEventIsRecorded(userId, hearingStartedEvent);
+        thenOnlySpecifiedHearingEventIsRecorded(userId, hearingStartedEvent);
     }
 
     @Test
@@ -58,27 +59,32 @@ public class HearingEventsIT {
         givenAUserHasLoggedInAsACourtClerk(userId);
 
         final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
-        whenUserLogsAnEvent(userId, hearingStartedEvent);
+        andUserLogsAnEvent(userId, hearingStartedEvent);
 
-        andCorrectsTheTimeOfThatHearingEvent(userId, hearingStartedEvent, DIFFERENT_TIMESTAMP);
+        final UUID newHearingEventId = randomUUID();
+        whenUserCorrectsTheTimeOfTheHearingEvent(userId, hearingStartedEvent, PAST_TIMESTAMP, newHearingEventId);
 
-        thenTheHearingEventHasTheUpdatedTimestamp(userId, hearingStartedEvent.getHearingId(), DIFFERENT_TIMESTAMP);
+        thenTheHearingEventHasTheUpdatedTimestamp(userId, hearingStartedEvent, PAST_TIMESTAMP, newHearingEventId);
     }
 
     @Test
-    public void shouldReceiveTimesInChronologicalOrder() {
+    public void shouldReceiveHearingEventsInChronologicalOrder() {
         givenAUserHasLoggedInAsACourtClerk(userId);
 
         final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
-        whenUserLogsAnEvent(userId, hearingStartedEvent);
+        andUserLogsAnEvent(userId, hearingStartedEvent);
 
-        final HearingEvent identifyDefendentEvent = identifyDefendentEvent(hearingId);
-        whenUserLogsAnEvent(userId, identifyDefendentEvent);
+        final HearingEvent identifyDefendantEvent = identifyDefendantEvent(hearingId);
+        andLogsAnotherEvent(userId, identifyDefendantEvent);
 
-        final HearingEvent updatedIdentifyDefendentEvent = new HearingEvent(identifyDefendentEvent.getId(), identifyDefendentEvent.getHearingId(), identifyDefendentEvent.getRecordedLabel(), PAST_TIMESTAMP);
-        andCorrectsTheTimeOfThatHearingEvent(userId, identifyDefendentEvent, PAST_TIMESTAMP);
+        final UUID newHearingEventId = randomUUID();
+        whenUserCorrectsTheTimeOfTheHearingEvent(userId, identifyDefendantEvent, PAST_TIMESTAMP, newHearingEventId);
 
-        thenTheEventsShouldBeListedInTheSpecifiedOrder(userId, hearingId, Arrays.asList(updatedIdentifyDefendentEvent, hearingStartedEvent));
+        final HearingEvent updatedIdentifyDefendantEvent = identifyDefendantEvent.builder()
+                .withId(newHearingEventId)
+                .withTimestamp(PAST_TIMESTAMP)
+                .build();
+        thenTheEventsShouldBeListedInTheSpecifiedOrder(userId, hearingId, asList(updatedIdentifyDefendantEvent, hearingStartedEvent));
     }
 
     @Test

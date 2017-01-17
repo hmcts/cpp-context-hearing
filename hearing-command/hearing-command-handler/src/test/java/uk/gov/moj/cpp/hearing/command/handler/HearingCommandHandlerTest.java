@@ -6,12 +6,12 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromString;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelope;
 import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
@@ -47,8 +47,10 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventsLogAggregate;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -84,13 +86,16 @@ public class HearingCommandHandlerTest {
     private static final String HEARING_INITIATED_EVENT = "hearing.hearing-initiated";
     private static final String PROSECUTION_COUNSEL_ADDED_EVENT = "hearing.prosecution-counsel-added";
     private static final String HEARING_EVENT_LOGGED_EVENT = "hearing.hearing-event-logged";
-    private static final String HEARING_EVENT_CORRECTED_EVENT = "hearing.hearing-event-corrected";
+    private static final String HEARING_EVENT_DELETED_EVENT = "hearing.hearing-event-deleted";
     private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
     private static final String HEARING_EVENT_DEFINITIONS_CREATED_EVENT = "hearing.hearing-event-definitions-created";
+    private static final String HEARING_EVENT_DELETION_IGNORED_EVENT = "hearing.hearing-event-deletion-ignored";
+    private static final String HEARING_EVENT_IGNORED_EVENT = "hearing.hearing-event-ignored";
 
     private static final String FIELD_ID = "id";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
     private static final String FIELD_TIMESTAMP = "timestamp";
 
     private static final String FIELD_ACTION_LABEL = "actionLabel";
@@ -99,9 +104,12 @@ public class HearingCommandHandlerTest {
     private static final String FIELD_CASE_ATTRIBUTE = "caseAttribute";
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
 
+    private static final String FIELD_REASON = "reason";
+
     private static final UUID HEARING_ID = randomUUID();
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
+    private static final UUID LATEST_HEARING_EVENT_ID = randomUUID();
     private static final String TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
     private static final String DIFFERENT_TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
 
@@ -144,14 +152,14 @@ public class HearingCommandHandlerTest {
     @Mock
     private HearingAggregate hearingAggregate;
 
-    private HearingEventsLogAggregate hearingEventAggregate;
-
     @Spy
     private Enveloper enveloper = createEnveloperWithEvents(
             HearingEventLogged.class,
-            HearingEventCorrected.class,
             DraftResultSaved.class,
-            HearingEventDefinitionsCreated.class);
+            HearingEventDefinitionsCreated.class,
+            HearingEventDeletionIgnored.class,
+            HearingEventDeleted.class,
+            HearingEventIgnored.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
@@ -159,8 +167,6 @@ public class HearingCommandHandlerTest {
     @Before
     public void setup() {
         when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
-
-        when(eventSource.getStreamById(HEARING_EVENT_ID)).thenReturn(eventStream);
     }
 
     @Test
@@ -242,10 +248,10 @@ public class HearingCommandHandlerTest {
     }
 
     @Test
-    public void shouldRaiseHearingEventLogged() throws Exception {
+    public void shouldRaiseHearingEventLoggedIfNotAlreadyLogged() throws Exception {
         when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(new HearingEventsLogAggregate());
 
-        final JsonEnvelope command = createHearingEventLoggedCommand();
+        final JsonEnvelope command = createLogHearingEventCommand();
 
         hearingCommandHandler.logHearingEvent(command);
 
@@ -254,7 +260,7 @@ public class HearingCommandHandlerTest {
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_EVENT_LOGGED_EVENT),
                         payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_ID), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
                                 withJsonPath(format("$.%s", FIELD_TIMESTAMP), representsSameTime(TIMESTAMP))
@@ -264,24 +270,109 @@ public class HearingCommandHandlerTest {
     }
 
     @Test
-    public void shouldRaiseEventCorrected() throws Exception {
-        hearingEventAggregate = new HearingEventsLogAggregate();
-        hearingEventAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, ZonedDateTime.parse(TIMESTAMP)));
+    public void shouldIgnoreLogHearingEventIfItsAlreadyBeenLogged() throws Exception {
+        final HearingEventsLogAggregate hearingEventsLogAggregate = new HearingEventsLogAggregate();
+        hearingEventsLogAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, fromString(TIMESTAMP)));
+        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(hearingEventsLogAggregate);
 
-        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(hearingEventAggregate);
+        final JsonEnvelope command = createLogHearingEventCommand();
 
-        final JsonEnvelope command = createEventCorrectedCommand();
+        hearingCommandHandler.logHearingEvent(command);
 
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_IGNORED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
+                                withJsonPath(format("$.%s", FIELD_TIMESTAMP), representsSameTime(TIMESTAMP)),
+                                withJsonPath(format("$.%s", FIELD_REASON), equalTo("Already logged"))
+                        ))
+                ).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldIgnoreLogHearingEventIfItsBeenDeleted() throws Exception {
+        final HearingEventsLogAggregate hearingEventsLogAggregate = new HearingEventsLogAggregate();
+        hearingEventsLogAggregate.apply(new HearingEventDeleted(HEARING_EVENT_ID));
+        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(hearingEventsLogAggregate);
+
+        final JsonEnvelope command = createLogHearingEventCommand();
+
+        hearingCommandHandler.logHearingEvent(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_IGNORED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
+                                withJsonPath(format("$.%s", FIELD_TIMESTAMP), representsSameTime(TIMESTAMP)),
+                                withJsonPath(format("$.%s", FIELD_REASON), equalTo("Already deleted"))
+                        ))
+                ).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseLoggedAndDeletedHearingEventsWhenTimestampOfExistingHearingEventIsCorrected() throws Exception {
+        final HearingEventsLogAggregate hearingEventsLogAggregate = new HearingEventsLogAggregate();
+        hearingEventsLogAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, fromString(TIMESTAMP)));
+        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(hearingEventsLogAggregate);
+
+        final JsonEnvelope command = createCorrectHearingEventCommand();
         hearingCommandHandler.correctEvent(command);
 
         assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
-                                .withName(HEARING_EVENT_CORRECTED_EVENT),
+                                .withName(HEARING_EVENT_LOGGED_EVENT),
                         payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(LATEST_HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
                                 withJsonPath(format("$.%s", FIELD_TIMESTAMP), representsSameTime(DIFFERENT_TIMESTAMP))
+                        ))
+                ).thatMatchesSchema(),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_DELETED_EVENT),
+                        payloadIsJson(
+                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString()))
+                        )
+                ).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldLogUpdatedEventAndIgnoreDeletionWhenTimestampIsCorrectedForHearingEventWhichHasNotBeenLogged() throws Exception {
+        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(new HearingEventsLogAggregate());
+
+        final JsonEnvelope command = createCorrectHearingEventCommand();
+        hearingCommandHandler.correctEvent(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_LOGGED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(LATEST_HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
+                                withJsonPath(format("$.%s", FIELD_TIMESTAMP), representsSameTime(DIFFERENT_TIMESTAMP))
+                        ))
+                ).thatMatchesSchema(),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_DELETION_IGNORED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_REASON), equalTo("Hearing Event not found"))
                         ))
                 ).thatMatchesSchema()
         ));
@@ -355,21 +446,23 @@ public class HearingCommandHandlerTest {
         return new InitiateHearing(hearingId, startDateOfHearing, duration, random);
     }
 
-    private JsonEnvelope createHearingEventLoggedCommand() {
+    private JsonEnvelope createLogHearingEventCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(LOG_HEARING_EVENT_COMMAND))
-                .withPayloadOf(HEARING_EVENT_ID, FIELD_ID)
                 .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(HEARING_EVENT_ID, FIELD_HEARING_EVENT_ID)
                 .withPayloadOf(RECORDED_LABEL, FIELD_RECORDED_LABEL)
                 .withPayloadOf(TIMESTAMP, FIELD_TIMESTAMP)
                 .build();
     }
 
-    private JsonEnvelope createEventCorrectedCommand() {
+    private JsonEnvelope createCorrectHearingEventCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(HEARING_CORRECT_EVENT_COMMAND))
                 .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
                 .withPayloadOf(HEARING_EVENT_ID, FIELD_HEARING_EVENT_ID)
+                .withPayloadOf(RECORDED_LABEL, FIELD_RECORDED_LABEL)
+                .withPayloadOf(LATEST_HEARING_EVENT_ID, FIELD_LATEST_HEARING_EVENT_ID)
                 .withPayloadOf(DIFFERENT_TIMESTAMP, FIELD_TIMESTAMP)
                 .build();
     }
@@ -435,9 +528,17 @@ public class HearingCommandHandlerTest {
         };
     }
 
-    private Matcher<String> representsSameTime(String time) {
+    private Matcher<String> representsSameTime(final String time) {
         //Framework JSON serialisation crops excess 0s from timestamp fields so we must compare against trimmed millisecond fields
-        return anyOf(is(time), is(time.replace("0Z", "Z")), is(time.replace("00Z", "Z")), is(time.replace("000Z", "Z")));
+        if(time.endsWith("0Z")) {
+            return is(time.replace("0Z", "Z"));
+        } else if (time.endsWith("00Z")) {
+            return is(time.replace("00Z", "Z"));
+        } else if (time.endsWith("000Z")) {
+            return is(time.replace("000Z", "Z"));
+        } else {
+            return is(time);
+        }
     }
 
 }

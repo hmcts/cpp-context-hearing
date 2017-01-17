@@ -22,7 +22,7 @@ public class HearingEventDataFactory {
         return newHearingEvent(hearingId, "Hearing Started");
     }
 
-    public static HearingEvent identifyDefendentEvent(final UUID hearingId) {
+    public static HearingEvent identifyDefendantEvent(final UUID hearingId) {
         return newHearingEvent(hearingId, "Defendant Identified");
     }
 

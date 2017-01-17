@@ -1,84 +1,85 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-import uk.gov.justice.domain.aggregate.Aggregate;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.doNothing;
+import static java.util.stream.Stream.concat;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
-import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventCorrected;
+
+import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
+
+import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
 public class HearingEventsLogAggregate implements Aggregate {
 
-    private List<HearingEvent> hearingEvents = new ArrayList<>();
+    private static final String REASON_ALREADY_LOGGED = "Already logged";
+    private static final String REASON_ALREADY_DELETED = "Already deleted";
+    private static final String REASON_EVENT_NOT_FOUND = "Hearing Event not found";
 
-    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel, final ZonedDateTime timestamp) {
-        if(hearingEventWithId(hearingEventId).isPresent()) {
-            return Stream.empty();
-        }
-
-        hearingEvents.add(new HearingEvent(hearingEventId, timestamp));
-        return Stream.of(new HearingEventLogged(hearingEventId, hearingId, recordedLabel, timestamp));
-    }
-
-    public Stream<Object> correctEvent(final UUID hearingId, final UUID hearingEventId, final ZonedDateTime timestamp) {
-        Optional<HearingEvent> eventToChange = hearingEventWithId(hearingEventId);
-
-        if(!eventToChange.isPresent()) {
-            //This cannot happen as events cannot yet deleted. We should reconsider this case when we play that story.
-            return Stream.empty();
-        }
-
-        if(eventToChange.get().getTimestamp() == timestamp) {
-            return Stream.empty();
-        }
-
-        HearingEvent replacementEvent = new HearingEvent(eventToChange.get().getHearingEventId(), timestamp);
-        hearingEvents.set(hearingEvents.indexOf(eventToChange.get()), replacementEvent);
-
-        return Stream.of(new HearingEventCorrected(hearingId, hearingEventId, timestamp));
-    }
-
-    private void onEventLogged(final HearingEventLogged eventLogged) {
-
-        hearingEvents.add(new HearingEvent(eventLogged.getId(), eventLogged.getTimestamp()));
-    }
-
-    private void onEventCorrected(final HearingEventCorrected eventCorrected) {
-        Optional<HearingEvent> eventToChange = hearingEventWithId(eventCorrected.getHearingEventId());
-
-        if(eventToChange.isPresent()) {
-            HearingEvent replacementEvent = new HearingEvent(eventToChange.get().getHearingEventId(), eventCorrected.getTimestamp());
-            hearingEvents.set(hearingEvents.indexOf(eventToChange.get()), replacementEvent);
-        }
-    }
-
-    private Optional<HearingEvent> hearingEventWithId(final UUID eventId) {
-        return hearingEvents.stream().filter(event -> eventId.equals(event.getHearingEventId())).findFirst();
-    }
+    private Map<UUID, HearingEvent> hearingEventsLoggedMap = new ConcurrentHashMap<>();
+    private Set<UUID> hearingEventsDeleted = new ConcurrentSkipListSet<>();
 
     @Override
     public Object apply(final Object event) {
         return match(event).with(
                 when(HearingEventLogged.class).apply(this::onEventLogged),
-                when(HearingEventCorrected.class).apply(this::onEventCorrected),
+                when(HearingEventDeleted.class).apply(this::onEventDeleted),
+                when(HearingEventDeletionIgnored.class).apply(this::onEventDeletionIgnored),
                 otherwiseDoNothing()
         );
     }
 
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel,
+                                          final ZonedDateTime timestamp) {
+        if (hearingEventPreviouslyLogged(hearingEventId)) {
+            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, timestamp, REASON_ALREADY_LOGGED)));
+        } else if (hearingEventPreviouslyDeleted(hearingEventId)) {
+            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, timestamp, REASON_ALREADY_DELETED)));
+        }
+
+        return apply(Stream.of(new HearingEventLogged(hearingEventId, hearingId, recordedLabel, timestamp)));
+    }
+
+    public Stream<Object> correctEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel,
+                                       final ZonedDateTime timestamp, final UUID latestHearingEventId) {
+        return concat(logHearingEvent(hearingId, latestHearingEventId, recordedLabel, timestamp), deleteHearingEvent(hearingEventId));
+    }
+
+    public Stream<Object> deleteHearingEvent(final UUID hearingEventId) {
+        if (!hearingEventPreviouslyLogged(hearingEventId)) {
+            return apply(Stream.of(new HearingEventDeletionIgnored(hearingEventId, REASON_EVENT_NOT_FOUND)));
+        }
+
+        return apply(Stream.of(new HearingEventDeleted(hearingEventId)));
+    }
+
+    private void onEventLogged(final HearingEventLogged eventLogged) {
+        hearingEventsLoggedMap.put(eventLogged.getHearingEventId(), new HearingEvent(eventLogged.getHearingEventId(), eventLogged.getTimestamp()));
+    }
+
+    private void onEventDeleted(final HearingEventDeleted eventDeleted) {
+        hearingEventsDeleted.add(eventDeleted.getHearingEventId());
+    }
+
+    private void onEventDeletionIgnored(final HearingEventDeletionIgnored eventDeletionIgnored) {
+        hearingEventsDeleted.add(eventDeletionIgnored.getHearingEventId());
+    }
+
+    private boolean hearingEventPreviouslyLogged(final UUID eventId) {
+        return hearingEventsLoggedMap.containsKey(eventId);
+    }
+
+    private boolean hearingEventPreviouslyDeleted(final UUID hearingEventId) {
+        return hearingEventsDeleted.contains(hearingEventId);
+    }
 
 }

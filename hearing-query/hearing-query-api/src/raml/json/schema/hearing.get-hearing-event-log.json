@@ -20,7 +20,7 @@
     "event": {
       "type": "object",
       "properties": {
-        "id": {
+        "hearingEventId": {
           "$ref": "#/definitions/uuid"
         },
         "recordedLabel": {
@@ -32,7 +32,7 @@
         }
       },
       "required": [
-        "id",
+        "hearingEventId",
         "recordedLabel",
         "timestamp"
       ]

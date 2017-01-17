@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.persist;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.shuffle;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
-import static org.junit.rules.ExpectedException.none;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.LONG;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
@@ -12,15 +15,14 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 @SuppressWarnings("CdiInjectionPointsInspection")
@@ -37,8 +39,9 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     private static final String RECORDED_LABEL_2 = STRING.next();
     private static final ZonedDateTime TIMESTAMP_2 = TIMESTAMP.plusMinutes(1);
 
-    @Rule
-    public ExpectedException expectedException = none();
+    private static final UUID HEARING_EVENT_ID_3 = randomUUID();
+    private static final String RECORDED_LABEL_3 = STRING.next();
+    private static final ZonedDateTime TIMESTAMP_3 = TIMESTAMP_2.plusMinutes(1);
 
     @Inject
     private HearingEventRepository hearingEventRepository;
@@ -49,17 +52,30 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
 
         hearingEventRepository.save(new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP));
 
-        final HearingEvent hearingEvent = hearingEventRepository.findById(HEARING_EVENT_ID);
+        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findById(HEARING_EVENT_ID);
 
-        assertThat(hearingEvent.getHearingId(), is(HEARING_ID));
-        assertThat(hearingEvent.getId(), is(HEARING_EVENT_ID));
-        assertThat(hearingEvent.getRecordedLabel(), is(RECORDED_LABEL));
-        assertThat(hearingEvent.getTimestamp(), is(TIMESTAMP));
+        assertThat(hearingEvent.isPresent(), is(true));
+        assertThat(hearingEvent.get().getHearingId(), is(HEARING_ID));
+        assertThat(hearingEvent.get().getId(), is(HEARING_EVENT_ID));
+        assertThat(hearingEvent.get().getRecordedLabel(), is(RECORDED_LABEL));
+        assertThat(hearingEvent.get().getTimestamp(), is(TIMESTAMP));
+        assertThat(hearingEvent.get().isDeleted(), is(false));
     }
 
     @Test
-    public void shouldGetHearingLogForAHearing() {
-        givenHearingEventsExist();
+    public void shouldNotSeeADeletedHearingEvent() {
+        givenNoHearingEventsExist();
+
+        hearingEventRepository.save(new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP).builder().delete().build());
+
+        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findById(HEARING_EVENT_ID);
+
+        assertThat(hearingEvent.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldGetHearingEventsForAHearingWhichAreNotDeleted() {
+        givenHearingEventsExistWithDeletedOnes();
 
         final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingId(HEARING_ID);
         assertThat(hearingEvents.size(), is(2));
@@ -68,11 +84,13 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID));
         assertThat(hearingEvents.get(0).getRecordedLabel(), is(RECORDED_LABEL));
         assertThat(hearingEvents.get(0).getTimestamp(), is(TIMESTAMP));
+        assertThat(hearingEvents.get(0).isDeleted(), is(false));
 
         assertThat(hearingEvents.get(1).getHearingId(), is(HEARING_ID));
         assertThat(hearingEvents.get(1).getId(), is(HEARING_EVENT_ID_2));
         assertThat(hearingEvents.get(1).getRecordedLabel(), is(RECORDED_LABEL_2));
         assertThat(hearingEvents.get(1).getTimestamp(), is(TIMESTAMP_2));
+        assertThat(hearingEvents.get(1).isDeleted(), is(false));
     }
 
     @Test
@@ -85,20 +103,48 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenHearingEventIsRequestedWhichDoesNotExist() {
+    public void shouldNotThrowExceptionWhenHearingEventIsRequestedWhichDoesNotExist() {
         givenNoHearingEventsExist();
-        expectedException.expect(NoResultException.class);
-        expectedException.expectMessage("No entity found for query");
 
-        hearingEventRepository.findById(HEARING_EVENT_ID);
+        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findById(HEARING_EVENT_ID);
+
+        assertThat(hearingEvent.isPresent(), is(false));
     }
 
-    private void givenHearingEventsExist() {
-        hearingEventRepository.save(new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP));
-        hearingEventRepository.save(new HearingEvent(HEARING_EVENT_ID_2, HEARING_ID, RECORDED_LABEL_2, TIMESTAMP_2));
+    @Test
+    public void shouldGetHearingEventsInChronologicalOrder() {
+        givenHearingEventsExistInRandomOrder();
 
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findAll();
-        assertThat(hearingEvents.size(), is(2));
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingId(HEARING_ID);
+        assertThat(hearingEvents.size(), is(3));
+
+        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID));
+        assertThat(hearingEvents.get(1).getId(), is(HEARING_EVENT_ID_2));
+        assertThat(hearingEvents.get(2).getId(), is(HEARING_EVENT_ID_3));
+    }
+
+    private void givenHearingEventsExistWithDeletedOnes() {
+        final List<HearingEvent> hearingEvents = newArrayList(
+                new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP),
+                new HearingEvent(HEARING_EVENT_ID_2, HEARING_ID, RECORDED_LABEL_2, TIMESTAMP_2),
+                new HearingEvent(HEARING_EVENT_ID_3, HEARING_ID, RECORDED_LABEL_3, TIMESTAMP_3).builder().delete().build());
+
+        hearingEvents.forEach(hearingEvent -> hearingEventRepository.save(hearingEvent));
+
+        assertThat(hearingEventRepository.findAll(), hasSize(3));
+    }
+
+    private void givenHearingEventsExistInRandomOrder() {
+        final List<HearingEvent> hearingEvents = newArrayList(
+                new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP),
+                new HearingEvent(HEARING_EVENT_ID_2, HEARING_ID, RECORDED_LABEL_2, TIMESTAMP_2),
+                new HearingEvent(HEARING_EVENT_ID_3, HEARING_ID, RECORDED_LABEL_3, TIMESTAMP_3));
+
+        shuffle(hearingEvents, new Random(LONG.next()));
+
+        hearingEvents.forEach(hearingEvent -> hearingEventRepository.save(hearingEvent));
+
+        assertThat(hearingEventRepository.findAll(), hasSize(3));
     }
 
     private void givenNoHearingEventsExist() {

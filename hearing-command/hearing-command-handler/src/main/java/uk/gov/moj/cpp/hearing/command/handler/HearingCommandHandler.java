@@ -43,8 +43,9 @@ import javax.json.JsonObject;
 public class HearingCommandHandler {
 
     private static final String FIELD_ID = "id";
-    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
 
@@ -162,12 +163,15 @@ public class HearingCommandHandler {
     @Handles("hearing.log-hearing-event")
     public void logHearingEvent(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingEventId = fromString(payload.getString(FIELD_ID));
+        final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String recordedLabel = payload.getString(FIELD_RECORDED_LABEL);
         final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(FIELD_TIMESTAMP));
 
-        applyToHearingEventsLogAggregate(hearingId, aggregate -> aggregate.logHearingEvent(hearingId, hearingEventId, recordedLabel, timestamp), command);
+        final EventStream eventStream = eventSource.getStreamById(hearingId);
+        final HearingEventsLogAggregate aggregate = aggregateService.get(eventStream, HearingEventsLogAggregate.class);
+        final Stream<Object> events = aggregate.logHearingEvent(hearingId, hearingEventId, recordedLabel, timestamp);
+        eventStream.append(events.map(enveloper.withMetadataFrom(command)));
     }
 
     @Handles("hearing.correct-hearing-event")
@@ -175,23 +179,20 @@ public class HearingCommandHandler {
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
+        final String recordedLabel = payload.getString(FIELD_RECORDED_LABEL);
         final ZonedDateTime timestamp = fromJsonString(payload.getJsonString(FIELD_TIMESTAMP));
+        final UUID latestHearingEventId = fromString(payload.getString(FIELD_LATEST_HEARING_EVENT_ID));
 
-        applyToHearingEventsLogAggregate(hearingId, aggregate -> aggregate.correctEvent(hearingId, hearingEventId, timestamp), command);
+        final EventStream eventStream = eventSource.getStreamById(hearingId);
+        final HearingEventsLogAggregate aggregate = aggregateService.get(eventStream, HearingEventsLogAggregate.class);
+        final Stream<Object> events = aggregate.correctEvent(hearingId, hearingEventId, recordedLabel, timestamp, latestHearingEventId);
+        eventStream.append(events.map(enveloper.withMetadataFrom(command)));
     }
 
     private void applyToHearingAggregate(final UUID streamId, final Function<HearingAggregate, Stream<Object>> function,
                                          final JsonEnvelope envelope) throws EventStreamException {
         final EventStream eventStream = eventSource.getStreamById(streamId);
         final HearingAggregate aggregate = aggregateService.get(eventStream, HearingAggregate.class);
-        final Stream<Object> events = function.apply(aggregate);
-        eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
-    }
-
-    private void applyToHearingEventsLogAggregate(final UUID streamId, final Function<HearingEventsLogAggregate, Stream<Object>> function,
-                                                  final JsonEnvelope envelope) throws EventStreamException {
-        final EventStream eventStream = eventSource.getStreamById(streamId);
-        final HearingEventsLogAggregate aggregate = aggregateService.get(eventStream, HearingEventsLogAggregate.class);
         final Stream<Object> events = function.apply(aggregate);
         eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
     }

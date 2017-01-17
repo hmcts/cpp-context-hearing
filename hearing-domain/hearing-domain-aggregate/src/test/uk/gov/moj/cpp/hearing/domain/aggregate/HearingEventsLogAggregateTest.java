@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.is;
 import org.junit.Before;
 import org.junit.Test;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventCorrected;
+
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 
 public class HearingEventsLogAggregateTest {
