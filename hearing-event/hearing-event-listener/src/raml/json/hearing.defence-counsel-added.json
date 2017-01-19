@@ -1,0 +1,7 @@
+{
+  "attendeeId": "d06f6539-2a7c-4bc8-bca3-A1e5a225471a",
+  "personId": "a06f6539-2a7c-4bc8-bca3-A1e5a225471b",
+  "hearingId": "c06f6539-2a7c-4bc8-bca3-A1e5a225471c",
+  "defendantIds": ["a06f6539-2a7c-4bc8-bca3-A1e5a225471c","a06f6539-2a7c-4bc8-bca3-A1e5a225471d"],
+  "status": "QC"
+}

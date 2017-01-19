@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.util.stream.Collectors.toList;
+
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
@@ -31,12 +33,12 @@ public class HearingService {
         List<Hearing> caseHearingList = hearingRepository.findByStartdate(localDate);
 
         List<UUID> hearingIds = caseHearingList.stream()
-                .map(hearing -> hearing.geHearingId())
-                .collect(Collectors.toList());
+                .map(Hearing::getHearingId)
+                .collect(toList());
         List<HearingCase> hearingCases = hearingCaseRepository.findByHearingIds(hearingIds);
 
         List<HearingView> hearingViews =
-                new ArrayList<>(caseHearingList.stream().map(HearingEntityToHearing::convert).collect(Collectors.toList()));
+                new ArrayList<>(caseHearingList.stream().map(HearingEntityToHearing::convert).collect(toList()));
 
         Map<String, List<HearingCase>> byHearingId =
                 hearingCases
@@ -47,7 +49,7 @@ public class HearingService {
             byHearingId.computeIfPresent(hearingView.getHearingId(), (s, hcases) -> {
                 hearingView.setCaseIds(hcases.stream()
                         .map(hearingCase -> hearingCase.getCaseId().toString())
-                        .collect(Collectors.toList()));
+                        .collect(toList()));
                 return hcases;
             });
             return hearingView.getCaseIds();
@@ -61,12 +63,11 @@ public class HearingService {
         HearingView hearingView = new HearingView();
         if (hearing.isPresent()) {
             hearingView = HearingEntityToHearing.convert(hearing.get());
-            hearingView.setCaseIds(hearingCaseRepository.findByHearingId(hearing.get().geHearingId()).stream()
+            hearingView.setCaseIds(hearingCaseRepository.findByHearingId(hearing.get().getHearingId()).stream()
                     .map(hearingCase -> hearingCase.getCaseId().toString())
-                    .collect(Collectors.toList()));
+                    .collect(toList()));
         }
         return hearingView;
     }
-
 
 }

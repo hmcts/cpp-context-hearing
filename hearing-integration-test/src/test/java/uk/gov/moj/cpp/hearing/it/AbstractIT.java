@@ -1,38 +1,45 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.specification.RequestSpecification;
-import org.apache.commons.lang3.StringUtils;
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.specification.RequestSpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AbstractIT {
 
-    protected Properties prop;
-    protected RequestSpecification reqSpec;
-    private String baseUri;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
+    private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
 
-    public AbstractIT() {
+    protected static final Properties ENDPOINT_PROPERTIES = new Properties();
+
+    protected static RequestSpecification requestSpec;
+
+    private static String baseUri;
+
+    static  {
         readConfig();
         setRequestSpecification();
     }
 
-    private void readConfig() {
-        prop = new Properties();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream("endpoint.properties");
-        try {
-            prop.load(stream);
-        } catch (IOException e) {
-            e.printStackTrace();
+    private static void readConfig() {
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        try(final InputStream stream = loader.getResourceAsStream(ENDPOINT_PROPERTIES_FILE)) {
+            ENDPOINT_PROPERTIES.load(stream);
+        } catch (final IOException e) {
+            LOGGER.warn("Error reading properties from {}", ENDPOINT_PROPERTIES_FILE, e);
         }
         String baseUriProp = System.getProperty("INTEGRATION_HOST_KEY");
-        baseUri = (StringUtils.isNotEmpty(baseUriProp) ? "http://"+baseUriProp+":8080" : prop.getProperty("base-uri"));
+        baseUri = isNotEmpty(baseUriProp) ? format("http://%s:8080", baseUriProp) : ENDPOINT_PROPERTIES.getProperty("base-uri");
     }
 
-    private void setRequestSpecification() {
-        reqSpec = new RequestSpecBuilder().setBaseUri(baseUri).build();
+    private static void setRequestSpecification() {
+        requestSpec = new RequestSpecBuilder().setBaseUri(baseUri).build();
     }
 }

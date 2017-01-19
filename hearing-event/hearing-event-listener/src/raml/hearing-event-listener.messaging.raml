@@ -2,7 +2,6 @@
 title: API Using media type in the URL
 baseUri: message://event/listener/message/hearing
 
-version: v1
 /hearing.event:
   post:
     body:
@@ -31,5 +30,25 @@ version: v1
             example: !include json/hearing.case-associated.json
 
         application/vnd.hearing.prosecution-counsel-added+json:
-            schema: !include json/schema/hearing.case-associated.json
-            example: !include json/hearing.case-associated.json
+            schema: !include json/schema/hearing.prosecution-counsel-added.json
+            example: !include json/hearing.prosecution-counsel-added.json
+
+        application/vnd.hearing.defence-counsel-added+json:
+            schema: !include json/schema/hearing.defence-counsel-added.json
+            example: !include json/hearing.defence-counsel-added.json
+
+        application/vnd.hearing.hearing-event-definitions-created+json:
+            schema:  !include json/schema/hearing.hearing-event-definitions-created.json
+            example: !include json/hearing.hearing-event-definitions-created.json
+
+        application/vnd.hearing.hearing-event-logged+json:
+            schema: !include json/schema/hearing.hearing-event-logged.json
+            example: !include json/hearing.hearing-event-logged.json
+
+        application/vnd.hearing.hearing-event-deleted+json:
+            schema: !include json/schema/hearing.hearing-event-deleted.json
+            example: !include json/hearing.hearing-event-deleted.json
+
+        application/vnd.hearing.draft-result-saved+json:
+            schema: !include json/schema/hearing.draft-result-saved.json
+            example: !include json/hearing.draft-result-saved.json

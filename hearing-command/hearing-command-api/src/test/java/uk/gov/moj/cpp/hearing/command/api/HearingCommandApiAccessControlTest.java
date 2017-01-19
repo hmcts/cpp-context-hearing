@@ -15,12 +15,22 @@ import org.mockito.Mock;
 
 public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlTest {
 
+    private static final String ACTION_NAME_INITIATE_HEARING = "hearing.initiate-hearing";
+    private static final String ACTION_NAME_START_HEARING = "hearing.start";
+    private static final String ACTION_NAME_END_HEARING = "hearing.end";
+    private static final String ACTION_NAME_BOOK_ROOM = "hearing.book-room";
+    private static final String ACTION_NAME_ALLOCATE_COURT = "hearing.allocate-court";
+    private static final String ACTION_NAME_ADD_PROSECUTION_COUNSEL = "hearing.add-prosecution-counsel";
+    private static final String ACTION_NAME_SAVE_DRAFT_RESULT = "hearing.save-draft-result";
+    private static final String ACTION_NAME_LOG_HEARING_EVENT = "hearing.log-hearing-event";
+    private static final String ACTION_NAME_CORRECT_HEARING_EVENT = "hearing.correct-hearing-event";
+
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
 
     @Test
     public void shouldAllowAuthorisedUserToInitiateHearing() {
-        final Action action = createActionFor("hearing.initiate-hearing");
+        final Action action = createActionFor(ACTION_NAME_INITIATE_HEARING);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
                 .willReturn(true);
 
@@ -29,8 +39,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     }
 
     @Test
-    public void shouldNotAllowAuthorisedUserToInitiateHearing() {
-        final Action action = createActionFor("hearing.initiate-hearing");
+    public void shouldNotAllowUnauthorisedUserToInitiateHearing() {
+        final Action action = createActionFor(ACTION_NAME_INITIATE_HEARING);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -39,7 +49,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     @Test
     public void shouldAllowAuthorisedUserToStart() {
-        final Action action = createActionFor("hearing.start");
+        final Action action = createActionFor(ACTION_NAME_START_HEARING);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
                 .willReturn(true);
 
@@ -48,8 +58,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     }
 
     @Test
-    public void shouldNotAllowAuthorisedUserToStart() {
-        final Action action = createActionFor("hearing.start");
+    public void shouldNotAllowUnauthorisedUserToStart() {
+        final Action action = createActionFor(ACTION_NAME_START_HEARING);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -58,7 +68,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     @Test
     public void shouldAllowAuthorisedUserToEnd() {
-        final Action action = createActionFor("hearing.end");
+        final Action action = createActionFor(ACTION_NAME_END_HEARING);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
                 .willReturn(true);
 
@@ -67,8 +77,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     }
 
     @Test
-    public void shouldNotAllowAuthorisedUserToEnd() {
-        final Action action = createActionFor("hearing.end");
+    public void shouldNotAllowUnauthorisedUserToEnd() {
+        final Action action = createActionFor(ACTION_NAME_END_HEARING);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -77,7 +87,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     @Test
     public void shouldAllowAuthorisedUserToBookRoom() {
-        final Action action = createActionFor("hearing.book-room");
+        final Action action = createActionFor(ACTION_NAME_BOOK_ROOM);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
                 .willReturn(true);
 
@@ -86,8 +96,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     }
 
     @Test
-    public void shouldNotAllowAuthorisedUserToBookRoom() {
-        final Action action = createActionFor("hearing.book-room");
+    public void shouldNotAllowUnauthorisedUserToBookRoom() {
+        final Action action = createActionFor(ACTION_NAME_BOOK_ROOM);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -96,7 +106,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     @Test
     public void shouldAllowAuthorisedUserToAllocateCourt() {
-        final Action action = createActionFor("hearing.allocate-court");
+        final Action action = createActionFor(ACTION_NAME_ALLOCATE_COURT);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
                 .willReturn(true);
 
@@ -105,8 +115,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     }
 
     @Test
-    public void shouldNotAllowAuthorisedUserToAllocateCourt() {
-        final Action action = createActionFor("hearing.allocate-court");
+    public void shouldNotAllowUnauthorisedUserToAllocateCourt() {
+        final Action action = createActionFor(ACTION_NAME_ALLOCATE_COURT);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -115,7 +125,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     @Test
     public void shouldAllowAuthorisedUserToAddProsecutionCounsel() {
-        final Action action = createActionFor("hearing.add-prosecution-counsel");
+        final Action action = createActionFor(ACTION_NAME_ADD_PROSECUTION_COUNSEL);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
                 .willReturn(true);
 
@@ -124,17 +134,71 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     }
 
     @Test
-    public void shouldNotAllowAuthorisedUserToAddProsecutionCounsel() {
-        final Action action = createActionFor("hearing.add-prosecution-counsel");
+    public void shouldNotAllowUnauthorisedUserToAddProsecutionCounsel() {
+        final Action action = createActionFor(ACTION_NAME_ADD_PROSECUTION_COUNSEL);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
+
+
+    @Test
+    public void shouldAllowAuthorisedUserToSaveDraftResult() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_DRAFT_RESULT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToSaveDraftResult() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_DRAFT_RESULT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToLogHearingEvent() {
+        final Action action = createActionFor(ACTION_NAME_LOG_HEARING_EVENT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToLogHearingEvent() {
+        final Action action = createActionFor(ACTION_NAME_LOG_HEARING_EVENT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToCorrectHearingEvent() {
+        final Action action = createActionFor(ACTION_NAME_CORRECT_HEARING_EVENT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToCorrectHearingEvent() {
+        final Action action = createActionFor(ACTION_NAME_CORRECT_HEARING_EVENT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
     @Override
     protected Map<Class, Object> getProviderMocks() {
         return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, userAndGroupProvider).build();
     }
-
-
 }

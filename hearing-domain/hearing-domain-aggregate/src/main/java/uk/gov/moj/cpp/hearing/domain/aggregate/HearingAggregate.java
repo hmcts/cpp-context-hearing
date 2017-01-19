@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
@@ -12,17 +13,16 @@ import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HearingAggregate implements Aggregate {
 
@@ -88,6 +88,11 @@ public class HearingAggregate implements Aggregate {
         return Stream.of(new ProsecutionCounselAdded(hearingId, attendeeId, personId, status));
     }
 
+    public Stream<Object> addDefenceCounsel(final UUID hearingId, final UUID attendeeId,
+            final UUID personId, final List<UUID> defendantIds, final String status) {
+        return Stream.of(new DefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status));
+    }
+
     @Override
     public Object apply(Object event) {
         return match(event).with(
@@ -104,7 +109,10 @@ public class HearingAggregate implements Aggregate {
                 when(HearingStarted.class)
                         .apply(hearingStarted -> this.hearingId = hearingStarted.getHearingId()),
                 when(ProsecutionCounselAdded.class)
-                        .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId())
+                        .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId()),
+                when(DefenceCounselAdded.class)
+                        .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
+                otherwiseDoNothing()
         );
     }
 }

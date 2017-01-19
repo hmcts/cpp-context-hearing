@@ -3,28 +3,21 @@ package uk.gov.moj.cpp.hearing.persist.entity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-
 @Entity
-@Table(name = "Hearing")
+@Table(name = "hearing")
 public class Hearing {
 
     @Id
-    @Column(name = "hearingid", unique = true, nullable = false)
+    @Column(name = "hearingid", nullable = false)
     private UUID hearingId;
-
 
     @Column(name = "startdate")
     private LocalDate startdate;
@@ -50,56 +43,51 @@ public class Hearing {
     @Column(name = "ended_at")
     private ZonedDateTime endedAt;
 
+    public Hearing() {
+        // for JPA
+    }
+
+    public Hearing(final UUID hearingId, final LocalDate startdate, final LocalTime startTime,
+                   final Integer duration, final String roomName, final String hearingType,
+                   final String courtCentreName, final ZonedDateTime startedAt,
+                   final ZonedDateTime endedAt) {
+        this.hearingId = hearingId;
+        this.startdate = startdate;
+        this.startTime = startTime;
+        this.duration = duration;
+        this.roomName = roomName;
+        this.hearingType = hearingType;
+        this.courtCentreName = courtCentreName;
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
+    }
+
+    public UUID getHearingId() {
+        return hearingId;
+    }
+
     public LocalDate getStartdate() {
         return startdate;
     }
 
-    public void setStartdate(LocalDate startdate) {
-        this.startdate = startdate;
-    }
-
-    public UUID geHearingId() {
-        return hearingId;
-    }
-
-    public void setHearingId(UUID hearingId) {
-        this.hearingId = hearingId;
+    public LocalTime getStartTime() {
+        return startTime;
     }
 
     public Integer getDuration() {
         return duration;
     }
 
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
     public String getRoomName() {
         return roomName;
-    }
-
-    public void setRoomName(String roomName) {
-        this.roomName = roomName;
-    }
-
-    public String getCourtCentreName() {
-        return courtCentreName;
-    }
-
-    public void setCourtCentreName(String courtCentreName) {
-        this.courtCentreName = courtCentreName;
     }
 
     public String getHearingType() {
         return hearingType;
     }
 
-    public void setHearingType(String hearingType) {
-        this.hearingType = hearingType;
-    }
-
-    public void setStartedAt(ZonedDateTime startedAt) {
-        this.startedAt = startedAt;
+    public String getCourtCentreName() {
+        return courtCentreName;
     }
 
     public ZonedDateTime getStartedAt() {
@@ -110,16 +98,122 @@ public class Hearing {
         return endedAt;
     }
 
-    public void setEndedAt(ZonedDateTime endedAt) {
-        this.endedAt = endedAt;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Hearing hearing = (Hearing) o;
+        return Objects.equals(getHearingId(), hearing.getHearingId()) &&
+                Objects.equals(getStartdate(), hearing.getStartdate()) &&
+                Objects.equals(getStartTime(), hearing.getStartTime()) &&
+                Objects.equals(getDuration(), hearing.getDuration()) &&
+                Objects.equals(getRoomName(), hearing.getRoomName()) &&
+                Objects.equals(getHearingType(), hearing.getHearingType()) &&
+                Objects.equals(getCourtCentreName(), hearing.getCourtCentreName()) &&
+                Objects.equals(getStartedAt(), hearing.getStartedAt()) &&
+                Objects.equals(getEndedAt(), hearing.getEndedAt());
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    @Override
+    public int hashCode() {
+        return Objects.hash(getHearingId(), getStartdate(), getStartTime(), getDuration(), getRoomName(),
+                getHearingType(), getCourtCentreName(), getStartedAt(), getEndedAt());
     }
 
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
+    @Override
+    public String toString() {
+        return "Hearing{" +
+                "hearingId=" + hearingId +
+                ", startdate=" + startdate +
+                ", startTime=" + startTime +
+                ", duration=" + duration +
+                ", roomName='" + roomName + '\'' +
+                ", hearingType='" + hearingType + '\'' +
+                ", courtCentreName='" + courtCentreName + '\'' +
+                ", startedAt=" + startedAt +
+                ", endedAt=" + endedAt +
+                '}';
+    }
+
+    public Builder builder() {
+        return new Builder(getHearingId(), getStartdate(), getStartTime(), getDuration(), getRoomName(),
+                getHearingType(), getCourtCentreName(), getStartedAt(), getEndedAt());
+    }
+
+    public class Builder {
+        private final UUID hearingId;
+        private LocalDate startdate;
+        private LocalTime startTime;
+        private Integer duration;
+        private String roomName;
+        private String hearingType;
+        private String courtCentreName;
+        private ZonedDateTime startedAt;
+        private ZonedDateTime endedAt;
+
+        public Builder(final UUID hearingId) {
+            this.hearingId = hearingId;
+        }
+
+        public Builder(final UUID hearingId, final LocalDate startdate, final LocalTime startTime,
+                        final Integer duration, final String roomName, final String hearingType,
+                        final String courtCentreName, final ZonedDateTime startedAt,
+                        final ZonedDateTime endedAt) {
+            this.hearingId = hearingId;
+            this.startdate = startdate;
+            this.startTime = startTime;
+            this.duration = duration;
+            this.roomName = roomName;
+            this.hearingType = hearingType;
+            this.courtCentreName = courtCentreName;
+            this.startedAt = startedAt;
+            this.endedAt = endedAt;
+        }
+
+        public Builder withStartdate(final LocalDate startdate) {
+            this.startdate = startdate;
+            return this;
+        }
+
+        public Builder withStartTime(final LocalTime startTime) {
+            this.startTime = startTime;
+            return this;
+        }
+
+        public Builder withDuration(final Integer duration) {
+            this.duration = duration;
+            return this;
+        }
+
+        public Builder withRoomName(final String roomName) {
+            this.roomName = roomName;
+            return this;
+        }
+
+        public Builder withHearingType(final String hearingType) {
+            this.hearingType = hearingType;
+            return this;
+        }
+
+        public Builder withCourtCentreName(final String courtCentreName) {
+            this.courtCentreName = courtCentreName;
+            return this;
+        }
+
+        public Builder withStartedAt(final ZonedDateTime startedAt) {
+            this.startedAt = startedAt;
+            return this;
+        }
+
+        public Builder withEndedAt(final ZonedDateTime endedAt) {
+            this.endedAt = endedAt;
+            return this;
+        }
+
+        public Hearing build() {
+            return new Hearing(hearingId, startdate, startTime, duration, roomName, hearingType,
+                    courtCentreName, startedAt, endedAt);
+        }
     }
 
 }

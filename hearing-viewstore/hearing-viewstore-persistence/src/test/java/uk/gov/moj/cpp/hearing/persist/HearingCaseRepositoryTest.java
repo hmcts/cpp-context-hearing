@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist;
 
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -22,43 +23,31 @@ public class HearingCaseRepositoryTest {
     private HearingCaseRepository hearingCaseRepository;
 
     List<UUID> hearingIds = new ArrayList<>();
-    UUID hearingId = UUID.randomUUID();
-    UUID caseId_1 = UUID.randomUUID();
-    UUID caseId_2 = UUID.randomUUID();
+    UUID hearingId = randomUUID();
+    UUID caseId_1 = randomUUID();
+    UUID caseId_2 = randomUUID();
 
     @Before
     public void setup() {
         hearingIds.add(hearingId);
 
-        HearingCase hearingCase = new HearingCase();
-        hearingCase.setId(UUID.randomUUID());
-        hearingCase.setHearingId(hearingId);
-        hearingCase.setCaseId(caseId_1);
+        HearingCase hearingCase = new HearingCase(randomUUID(), hearingId, caseId_1);
         hearingCaseRepository.save(hearingCase);
 
-        hearingCase = new HearingCase();
-        hearingCase.setId(UUID.randomUUID());
-        hearingCase.setHearingId(hearingId);
-        hearingCase.setCaseId(caseId_2);
+        hearingCase = new HearingCase(randomUUID(), hearingId, caseId_2);
         hearingCaseRepository.save(hearingCase);
 
-        hearingCase = new HearingCase();
-        hearingCase.setId(UUID.randomUUID());
-        hearingCase.setHearingId(hearingId);
-        hearingCase.setCaseId(UUID.randomUUID());
+        hearingCase = new HearingCase(randomUUID(), hearingId, randomUUID());
         hearingCaseRepository.save(hearingCase);
 
-        hearingCase = new HearingCase();
-        hearingCase.setId(UUID.randomUUID());
-        hearingCase.setHearingId(UUID.randomUUID());
-        hearingCase.setCaseId(UUID.randomUUID());
+        hearingCase = new HearingCase(randomUUID(), randomUUID(), randomUUID());
         hearingCaseRepository.save(hearingCase);
 
         hearingIds.add(hearingCase.getHearingId());
     }
 
     @Test
-    public void testWithMutipleCasesPerHearing() throws Exception {
+    public void testWithMultipleCasesPerHearing() throws Exception {
         List<HearingCase> hearingCase = hearingCaseRepository.findByHearingId(hearingId);
 
         assertThat(hearingCase.size(), equalTo(3));
@@ -69,7 +58,7 @@ public class HearingCaseRepositoryTest {
     }
 
     @Test
-    public void testWithMutipleCasesForMutipleHearings() throws Exception {
+    public void testWithMultipleCasesForMutipleHearings() throws Exception {
         List<HearingCase> hearingCase = hearingCaseRepository.findByHearingIds(hearingIds);
 
         assertThat(hearingCase.size(), equalTo(4));
@@ -81,7 +70,7 @@ public class HearingCaseRepositoryTest {
 
     @Test
     public void testWithZeroCases() throws Exception {
-        List<HearingCase> hearingCase = hearingCaseRepository.findByHearingId(UUID.randomUUID());
+        List<HearingCase> hearingCase = hearingCaseRepository.findByHearingId(randomUUID());
 
         assertThat(hearingCase.size(), equalTo(0));
 

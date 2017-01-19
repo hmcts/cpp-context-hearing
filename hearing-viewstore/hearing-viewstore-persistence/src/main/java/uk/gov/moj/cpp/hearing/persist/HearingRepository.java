@@ -15,6 +15,7 @@ import org.apache.deltaspike.data.api.SingleResultType;
 /**
  * Repository for accessing Hearing data.
  */
+@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 @Repository
 public abstract class HearingRepository extends AbstractEntityRepository<Hearing, UUID>{
 

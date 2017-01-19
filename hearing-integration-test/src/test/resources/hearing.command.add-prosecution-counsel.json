@@ -1,0 +1,5 @@
+{
+  "attendeeId": "$attendeeId",
+  "personId": "$personId",
+  "status" : "$status"
+}

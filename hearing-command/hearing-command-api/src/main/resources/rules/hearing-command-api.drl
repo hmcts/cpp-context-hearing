@@ -68,3 +68,48 @@ rule "Command - API - Action - hearing.add-prosecution-counsel"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.save-draft-result"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.save-draft-result");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.add-defence-counsel"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-defence-counsel");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.create-hearing-event-definitions"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.create-hearing-event-definitions");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.log-hearing-event"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.log-hearing-event");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.correct-hearing-event"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.correct-hearing-event");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

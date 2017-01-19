@@ -71,4 +71,17 @@ public class InitiateHearing {
     public void setHearingType(String hearingType) {
         this.hearingType = hearingType;
     }
+
+    @Override
+    public String toString() {
+        return "InitiateHearing{" +
+                "hearingId=" + hearingId +
+                ", startDateTime=" + startDateTime +
+                ", duration=" + duration +
+                ", courtCentreName='" + courtCentreName + '\'' +
+                ", roomName='" + roomName + '\'' +
+                ", caseId=" + caseId +
+                ", hearingType='" + hearingType + '\'' +
+                '}';
+    }
 }

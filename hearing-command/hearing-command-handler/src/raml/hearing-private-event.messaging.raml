@@ -1,0 +1,23 @@
+#%RAML 0.8
+title: Private events
+baseUri: message://command/handler/message/hearing
+/hearing.event:
+  get:
+      responses:
+          200:
+              body:
+                application/vnd.hearing.hearing-event-logged+json:
+                    schema: !include json/schema/hearing.hearing-event-logged.json
+                    example: !include json/hearing.hearing-event-logged.json
+
+                application/vnd.hearing.hearing-event-deleted+json:
+                    schema: !include json/schema/hearing.hearing-event-deleted.json
+                    example: !include json/hearing.hearing-event-deleted.json
+
+                application/vnd.hearing.draft-result-saved+json:
+                    schema: !include json/schema/hearing.draft-result-saved.json
+                    example: !include json/hearing.draft-result-saved.json
+
+                application/vnd.hearing.hearing-event-definitions-created+json:
+                    schema:  !include json/schema/hearing.hearing-event-definitions-created.json
+                    example: !include json/hearing.hearing-event-definitions-created.json

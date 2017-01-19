@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 @ServiceComponent(Component.COMMAND_CONTROLLER)
 public class HearingCommandController {
+
     @Inject
     private Sender sender;
 
@@ -43,8 +44,34 @@ public class HearingCommandController {
         sender.send(envelope);
     }
 
+    @Handles("hearing.add-defence-counsel")
+    public void addDefenceCounsel(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
     @Handles("hearing.add-case")
     public void addCase(final JsonEnvelope envelope) {
         sender.send(envelope);
     }
+
+    @Handles("hearing.create-hearing-event-definitions")
+    public void createHearingEventDefinitions(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
+    @Handles("hearing.log-hearing-event")
+    public void logHearingEvent(final JsonEnvelope command) {
+        sender.send(command);
+    }
+
+    @Handles("hearing.save-draft-result")
+    public void saveDraftResult(final JsonEnvelope command) {
+        sender.send(command);
+    }
+
+    @Handles("hearing.correct-hearing-event")
+    public void correctEvent(final JsonEnvelope command) {
+        sender.send(command);
+    }
+
 }

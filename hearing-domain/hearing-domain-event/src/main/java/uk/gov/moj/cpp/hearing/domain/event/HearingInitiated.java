@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
 
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 

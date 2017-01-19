@@ -24,3 +24,47 @@ rule "Query - API - hearing.get.hearings"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.hearing-event-definitions"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.hearing-event-definitions");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get-hearing-event-log"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-hearing-event-log");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get.prosecution-counsels"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.prosecution-counsels");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get.defence-counsels"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.defence-counsels");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get-draft-result"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-draft-result");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

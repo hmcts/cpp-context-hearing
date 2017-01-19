@@ -23,7 +23,6 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearing.json
                     schema:  !include  json/schema/hearing.get.hearing.json
 
-
 /hearings:
    get:
       description: |
@@ -45,3 +44,99 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.hearings-by-startdate+json:
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
+
+/hearings/{hearingId}/event-definitions:
+    get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.hearing-event-definitions+json
+            name: hearing.hearing-event-definitions
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.hearing-event-definitions+json:
+                    example:  !include json/hearing.hearing-event-definitions.json
+                    schema:   !include json/schema/hearing.hearing-event-definitions.json
+
+/hearings/{hearingId}/prosecution-counsels:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the prosecution counsels for
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.prosecution-counsels+json
+            name: hearing.get.prosecution-counsels
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.prosecution-counsels+json:
+                    example:  !include json/hearing.get.prosecution-counsels.json
+                    schema:  !include  json/schema/hearing.get.prosecution-counsels.json
+
+/hearings/{hearingId}/draft-result:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the prosecution counsels for
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get-draft-result+json
+            name: hearing.get-draft-result
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get-draft-result+json:
+                    example:  !include json/hearing.get-draft-result.json
+                    schema:  !include  json/schema/hearing.get-draft-result.json
+
+/hearings/{hearingId}/defence-counsels:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the defence counsels for
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.defence-counsels+json
+            name: hearing.get.defence-counsels
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.defence-counsels+json:
+                    example:  !include json/hearing.get.defence-counsels.json
+                    schema:  !include  json/schema/hearing.get.defence-counsels.json
+
+/hearings/{hearingId}/event-log:
+    uriParameters:
+        hearingId:
+            description: ID of hearing to fetch the log for
+            type: string
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.hearing-event-log+json
+                name: hearing.get-hearing-event-log
+            ...
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.hearing-event-log+json:
+                        example: !include json/hearing.hearing-event-log.json
+                        schema: !include json/schema/hearing.get-hearing-event-log.json

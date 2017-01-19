@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
+
     @Inject
     private Sender sender;
 
@@ -44,9 +45,34 @@ public class HearingCommandApi {
         sender.send(envelope);
     }
 
+    @Handles("hearing.save-draft-result")
+    public void saveDraftResult(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) {
         sender.send(envelope);
+    }
+
+    @Handles("hearing.add-defence-counsel")
+    public void addDefenceCounsel(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
+    @Handles("hearing.create-hearing-event-definitions")
+    public void createHearingEventDefinitions(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
+    @Handles("hearing.log-hearing-event")
+    public void logHearingEvent(final JsonEnvelope command) {
+        sender.send(command);
+    }
+
+    @Handles("hearing.correct-hearing-event")
+    public void correctEvent(final JsonEnvelope command) {
+        sender.send(command);
     }
 
 }

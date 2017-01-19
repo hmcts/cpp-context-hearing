@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.command;
 
+import uk.gov.moj.cpp.hearing.domain.HearingTypeEnum;
+
 import java.time.LocalDate;
 import java.util.UUID;
-
-import uk.gov.moj.cpp.hearing.domain.HearingTypeEnum;
 
 public class ListHearing {
 

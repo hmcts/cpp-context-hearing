@@ -1,61 +1,57 @@
 package uk.gov.moj.cpp.hearing.event.listener.converter;
 
+import static java.util.UUID.randomUUID;
+
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
-
-import java.util.UUID;
+import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 public class HearingEventsToHearingConverter {
 
     public Hearing convert(HearingInitiated hearingInitiated) {
-        final Hearing hearing = new Hearing();
-        hearing.setHearingId(hearingInitiated.getHearingId());
-        hearing.setStartdate(hearingInitiated.getStartDateTime().toLocalDate());
-        hearing.setStartTime(hearingInitiated.getStartDateTime().toLocalTime());
-        hearing.setDuration(hearingInitiated.getDuration());
-        hearing.setHearingType(hearingInitiated.getHearingType());
-        return hearing;
+        return new Hearing(hearingInitiated.getHearingId(),
+                hearingInitiated.getStartDateTime().toLocalDate(),
+                hearingInitiated.getStartDateTime().toLocalTime(),
+                hearingInitiated.getDuration(), null, hearingInitiated.getHearingType(),
+                null, null, null);
     }
 
     public Hearing convert(CourtAssigned courtAssigned) {
-        final Hearing hearing = new Hearing();
-        hearing.setHearingId(courtAssigned.getHearingId());
-        hearing.setCourtCentreName(courtAssigned.getCourtCentreName());
-        return hearing;
+        return new Hearing(courtAssigned.getHearingId(), null, null, null, null, null,
+                courtAssigned.getCourtCentreName(), null, null);
     }
 
     public Hearing convert(RoomBooked roomBooked) {
-        final Hearing hearing = new Hearing();
-        hearing.setHearingId(roomBooked.getHearingId());
-        hearing.setRoomName(roomBooked.getRoomName());
-        return hearing;
+        return new Hearing(roomBooked.getHearingId(), null, null, null,
+                roomBooked.getRoomName(), null, null, null, null);
     }
 
     public Hearing convert(HearingStarted hearingStarted) {
-        final Hearing hearing = new Hearing();
-        hearing.setHearingId(hearingStarted.getHearingId());
-        hearing.setStartedAt(hearingStarted.getStartTime());
-        return hearing;
+        return new Hearing(hearingStarted.getHearingId(), null, null, null,
+                null, null, null, hearingStarted.getStartTime(), null);
     }
 
     public Hearing convert(HearingEnded hearingEnded) {
-        final Hearing hearing = new Hearing();
-        hearing.setHearingId(hearingEnded.getHearingId());
-        hearing.setEndedAt(hearingEnded.getEndTime());
-        return hearing;
+        return new Hearing(hearingEnded.getHearingId(), null, null, null, null,
+                null, null, null, hearingEnded.getEndTime());
     }
 
     public HearingCase convert(CaseAssociated caseAssociated) {
-        final HearingCase hearingCase = new HearingCase();
-        hearingCase.setId(UUID.randomUUID());
-        hearingCase.setHearingId(caseAssociated.getHearingId());
-        hearingCase.setCaseId(caseAssociated.getCaseId());
-        return hearingCase;
+        return new HearingCase(randomUUID(), caseAssociated.getHearingId(),
+                caseAssociated.getCaseId());
+    }
+
+    public ProsecutionCounsel convert(final ProsecutionCounselAdded prosecutionCounselAdded) {
+        return new ProsecutionCounsel(prosecutionCounselAdded.getAttendeeId(),
+                prosecutionCounselAdded.getHearingId(),
+                prosecutionCounselAdded.getPersonId(),
+                prosecutionCounselAdded.getStatus());
     }
 }

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/event"
+      }
+    }
+  },
+  "required": [
+    "hearingId",
+    "events"
+  ],
+  "definitions": {
+    "event": {
+      "type": "object",
+      "properties": {
+        "hearingEventId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "recordedLabel": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "hearingEventId",
+        "recordedLabel",
+        "timestamp"
+      ]
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

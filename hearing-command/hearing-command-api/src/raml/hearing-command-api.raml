@@ -1,0 +1,136 @@
+#%RAML 0.8
+title: Hearing API
+baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
+
+/hearings/{hearingId}:
+  displayName: Hearing
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.initiate-hearing+json
+            name: hearing.initiate-hearing
+        (mapping):
+            requestType: application/vnd.hearing.allocate-court+json
+            name: hearing.allocate-court
+         (mapping):
+             requestType: application/vnd.hearing.book-room+json
+             name: hearing.book-room
+         (mapping):
+             requestType: application/vnd.hearing.add-case+json
+             name: hearing.add-case
+        (mapping):
+             requestType: application/vnd.hearing.start+json
+             name: hearing.start
+        (mapping):
+            requestType: application/vnd.hearing.end+json
+            name: hearing.end
+        (mapping):
+            requestType: application/vnd.hearing.add-prosecution-counsel+json
+            name: hearing.add-prosecution-counsel
+        (mapping):
+            requestType: application/vnd.hearing.add-defence-counsel+json
+            name: hearing.add-defence-counsel
+        (mapping):
+            requestType: application/vnd.hearing.save-draft-result+json
+            name: hearing.save-draft-result
+        ...
+      body:
+        application/vnd.hearing.initiate-hearing+json:
+            example:
+             !include json/hearing.initiate-hearing.json
+            schema:
+             !include json/schema/hearing.initiate-hearing.json
+        application/vnd.hearing.allocate-court+json:
+            example:
+             !include json/hearing.allocate-court.json
+            schema:
+             !include json/schema/hearing.allocate-court.json
+        application/vnd.hearing.book-room+json:
+            example:
+             !include json/hearing.book-room.json
+            schema:
+             !include json/schema/hearing.book-room.json
+        application/vnd.hearing.add-case+json:
+            example:
+             !include json/hearing.add-case.json
+            schema:
+             !include json/schema/hearing.add-case.json
+        application/vnd.hearing.start+json:
+            example:
+             !include json/hearing.start.json
+            schema:
+             !include json/schema/hearing.start.json
+        application/vnd.hearing.end+json:
+            example:
+             !include json/hearing.end.json
+            schema:
+             !include json/schema/hearing.end.json
+        application/vnd.hearing.save-draft-result+json:
+            example:
+             !include json/hearing.save-draft-result.json
+            schema:
+             !include json/schema/hearing.save-draft-result.json
+        application/vnd.hearing.add-prosecution-counsel+json:
+            example:
+             !include json/hearing.add-prosecution-counsel.json
+            schema:
+             !include json/schema/hearing.add-prosecution-counsel.json
+        application/vnd.hearing.add-defence-counsel+json:
+             example:
+              !include json/hearing.add-defence-counsel.json
+             schema:
+              !include json/schema/hearing.add-defence-counsel.json
+      responses:
+            202:
+                description: OK
+
+/hearings/event-definitions:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.create-hearing-event-definitions+json
+            name: hearing.create-hearing-event-definitions
+        ...
+      body:
+        application/vnd.hearing.create-hearing-event-definitions+json:
+            example:
+             !include json/hearing.create-hearing-event-definitions.json
+            schema:
+             !include json/schema/hearing.create-hearing-event-definitions.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/event:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.log-hearing-event+json
+            name: hearing.log-hearing-event
+        ...
+      body:
+        application/vnd.hearing.log-hearing-event+json:
+            example: !include json/hearing.log-hearing-event.json
+            schema: !include json/schema/hearing.log-hearing-event.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/event/{hearingEventId}:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.correct-hearing-event+json
+            name: hearing.correct-hearing-event
+        ...
+      body:
+        application/vnd.hearing.correct-hearing-event+json:
+            example: !include json/hearing.correct-hearing-event.json
+            schema: !include json/schema/hearing.correct-hearing-event.json
+      responses:
+            202:
+                description: OK
