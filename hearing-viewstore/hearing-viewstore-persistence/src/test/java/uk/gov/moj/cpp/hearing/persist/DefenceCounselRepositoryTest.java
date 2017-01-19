@@ -7,7 +7,6 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
-import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.util.List;
 import java.util.UUID;

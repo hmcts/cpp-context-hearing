@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class HearingAggregate implements Aggregate {
 
     private UUID hearingId;

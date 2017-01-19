@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist;
 
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
-import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.util.List;
 import java.util.UUID;

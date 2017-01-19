@@ -1,15 +1,17 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import java.time.ZonedDateTime;
-import java.util.UUID;
-import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import org.junit.Before;
-import org.junit.Test;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class HearingEventsLogAggregateTest {
 

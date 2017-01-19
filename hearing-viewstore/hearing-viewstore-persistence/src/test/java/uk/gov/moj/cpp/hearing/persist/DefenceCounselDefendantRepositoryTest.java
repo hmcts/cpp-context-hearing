@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.persist;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 

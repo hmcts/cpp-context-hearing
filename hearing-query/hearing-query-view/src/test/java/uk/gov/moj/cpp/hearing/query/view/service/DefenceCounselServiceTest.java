@@ -7,10 +7,8 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
-import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.util.List;
 import java.util.UUID;
