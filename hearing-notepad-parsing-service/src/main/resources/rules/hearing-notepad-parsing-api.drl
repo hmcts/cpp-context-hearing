@@ -1,0 +1,25 @@
+package uk.gov.moj.cpp.accesscontrol;
+
+import uk.gov.moj.cpp.accesscontrol.drools.Outcome;
+import uk.gov.moj.cpp.accesscontrol.drools.Action;
+import java.util.Arrays;
+
+global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
+
+rule "Command - API - Action - hearing.notepad.parse-result-definition"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.notepad.parse-result-definition");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.notepad.parse-result-prompt"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.notepad.parse-result-prompt");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

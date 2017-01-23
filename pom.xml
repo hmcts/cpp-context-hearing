@@ -28,6 +28,7 @@
 		<module>hearing-event</module>
 		<module>hearing-integration-test</module>
 		<module>hearing-performance-test</module>
+        <module>hearing-notepad-parsing-service</module>
 	</modules>
 	<build>
         <pluginManagement>
