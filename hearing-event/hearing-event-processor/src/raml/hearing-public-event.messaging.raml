@@ -1,0 +1,12 @@
+#%RAML 0.8
+title: API Using media type in the URL
+baseUri: message://event/processor/message/hearing
+
+/public.event:
+  get:
+      responses:
+          200:
+              body:
+                  application/vnd.public.hearing.hearing-initiated+json:
+                      schema: !include json/schema/public.hearing.hearing-initiated.json
+                      example: !include json/public.hearing.hearing-initiated.json
