@@ -9,5 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>hearing-event-listener</module>
+      <module>hearing-event-processor</module>
   </modules>
 </project>
