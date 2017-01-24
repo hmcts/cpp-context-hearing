@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class HearingEvent {
+public class HearingEvent implements Serializable {
 
     private final UUID hearingEventId;
     private final ZonedDateTime timestamp;

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -63,5 +64,25 @@ public class HearingEventDefinitionEntity implements Comparable<HearingEventDefi
                 ", sequenceNumber=" + sequenceNumber +
                 ", caseAttribute='" + caseAttribute + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HearingEventDefinitionEntity that = (HearingEventDefinitionEntity) o;
+        return Objects.equals(recordedLabel, that.recordedLabel) &&
+                Objects.equals(actionLabel, that.actionLabel) &&
+                Objects.equals(sequenceNumber, that.sequenceNumber) &&
+                Objects.equals(caseAttribute, that.caseAttribute);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(recordedLabel, actionLabel, sequenceNumber, caseAttribute);
     }
 }
