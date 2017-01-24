@@ -1,16 +1,12 @@
 package uk.gov.moj.cpp.hearing.persist;
 
+import org.apache.deltaspike.data.api.*;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import org.apache.deltaspike.data.api.AbstractEntityRepository;
-import org.apache.deltaspike.data.api.Query;
-import org.apache.deltaspike.data.api.Repository;
-import org.apache.deltaspike.data.api.SingleResultType;
 
 /**
  * Repository for accessing Hearing data.
@@ -42,5 +38,15 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
      */
 
     public abstract List<Hearing> findByStartdate(LocalDate startdate);
+
+
+   /**
+     * Find {@link Hearing} by hearingids.
+     *
+     * @param hearingids list of hearing ids.
+     * @return Hearings.
+     */
+    @Query(value = "FROM Hearing h where h.hearingId in (:hearingids)")
+    public abstract List<Hearing> findByHearingIds(@QueryParam("hearingids") List<UUID> hearingids);
 
 }

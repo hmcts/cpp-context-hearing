@@ -17,6 +17,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
     private static final String ACTION_NAME_GET_HEARINGS_BY_START_DATE = "hearing.get.hearings-by-startdate";
+    private static final String ACTION_NAME_GET_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid";
     private static final String ACTION_NAME_GET_PROSECUTION_COUNSELS = "hearing.get.prosecution-counsels";
     private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
     private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
@@ -44,7 +45,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Test
-    public void shouldAllowAuthorisedUserToGetHearings() {
+    public void shouldAllowAuthorisedUserToGetHearingsByStartDate() {
         final Action action = createActionFor(ACTION_NAME_GET_HEARINGS_BY_START_DATE);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
                 .willReturn(true);
@@ -54,8 +55,27 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Test
-    public void shouldNotAllowUnauthorisedUserToGetHearings() {
+    public void shouldNotAllowUnauthorisedUserToGetHearingsByStartDate() {
         final Action action = createActionFor(ACTION_NAME_GET_HEARINGS_BY_START_DATE);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToGetHearingsByCaseId() {
+        final Action action = createActionFor(ACTION_NAME_GET_HEARINGS_BY_CASE_ID);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToGetHearingsByCaseId() {
+        final Action action = createActionFor(ACTION_NAME_GET_HEARINGS_BY_CASE_ID);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

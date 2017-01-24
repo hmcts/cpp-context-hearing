@@ -30,15 +30,15 @@ public class HearingService {
 
     @Transactional
     public List<HearingView> getHearingsByStartDate(LocalDate localDate) {
-        List<Hearing> caseHearingList = hearingRepository.findByStartdate(localDate);
+        List<Hearing> hearings = hearingRepository.findByStartdate(localDate);
 
-        List<UUID> hearingIds = caseHearingList.stream()
+        List<UUID> hearingIds = hearings.stream()
                 .map(Hearing::getHearingId)
                 .collect(toList());
         List<HearingCase> hearingCases = hearingCaseRepository.findByHearingIds(hearingIds);
 
         List<HearingView> hearingViews =
-                new ArrayList<>(caseHearingList.stream().map(HearingEntityToHearing::convert).collect(toList()));
+                new ArrayList<>(hearings.stream().map(HearingEntityToHearing::convert).collect(toList()));
 
         Map<String, List<HearingCase>> byHearingId =
                 hearingCases
@@ -68,6 +68,19 @@ public class HearingService {
                     .collect(toList()));
         }
         return hearingView;
+    }
+
+    @Transactional
+    public List<HearingView> getHearingsByCaseId(UUID caseId) {
+        List<HearingCase> hearingCases = hearingCaseRepository.findByCaseId(caseId);
+
+        List<UUID> hearingIds = hearingCases.stream()
+                .map(HearingCase::getHearingId)
+                .collect(toList());
+        List<Hearing> hearings = hearingRepository.findByHearingIds(hearingIds);
+
+        return new ArrayList<>(hearings.stream().map(HearingEntityToHearing::convert).collect(toList()));
+
     }
 
 }

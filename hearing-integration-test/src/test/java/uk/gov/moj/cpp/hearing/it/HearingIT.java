@@ -144,7 +144,7 @@ public class HearingIT extends AbstractIT {
         final String getHearingsByDate = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-startDate"), (String) readResponse.jsonPath().get("startDate"));
 
-        final Response readResponses = given().spec(requestSpec).and()
+        Response readResponses = given().spec(requestSpec).and()
                 .accept("application/vnd.hearing.get.hearings-by-startdate+json")
                 .header(CPP_UID_HEADER).when().get(getHearingsByDate).then().extract()
                 .response();
@@ -152,6 +152,17 @@ public class HearingIT extends AbstractIT {
         assertThat(readResponses.getStatusCode(), is(200));
         assertThat("hearings list size should be greater or equal one", readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
 
+
+        final String getHearingsByCaseId = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-caseId"), caseId);
+
+        readResponses = given().spec(requestSpec).and()
+                .accept("application/vnd.hearing.get.hearings-by-caseid+json")
+                .header(CPP_UID_HEADER).when().get(getHearingsByCaseId).then().extract()
+                .response();
+
+        assertThat(readResponses.getStatusCode(), is(200));
+        assertThat("hearings list size should be greater or equal one", readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
     }
 
     @Test

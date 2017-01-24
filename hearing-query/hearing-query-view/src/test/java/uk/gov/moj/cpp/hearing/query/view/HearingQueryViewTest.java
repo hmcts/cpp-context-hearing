@@ -59,17 +59,20 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HearingQueryViewTest {
 
-    private static final String NAME_RESPONSE_HEARING_LIST = "hearing.get.hearings-by-startdate-response";
+    private static final String NAME_RESPONSE_HEARINGS_BY_STARTDATE = "hearing.get.hearings-by-startdate-response";
+    private static final String NAME_RESPONSE_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid-response";
     private static final String NAME_RESPONSE_HEARING = "hearing.get.hearing-response";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_START_DATE = "startDate";
+    private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
     private static final String FIELD_HEARING_EVENTS = "events";
 
+    private static final UUID CASE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
     private static final UUID HEARING_ID_2 = randomUUID();
     private static final LocalDate START_DATE = LocalDate.now();
@@ -121,10 +124,10 @@ public class HearingQueryViewTest {
                 metadataWithDefaults(),
                 createObjectBuilder().add(FIELD_START_DATE, LocalDates.to(START_DATE)).build());
 
-        final JsonEnvelope actualHearings = hearingsQueryView.findHearings(query);
+        final JsonEnvelope actualHearings = hearingsQueryView.findHearingsByStartDate(query);
 
         assertThat(actualHearings, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query).withName(NAME_RESPONSE_HEARING_LIST),
+                withMetadataEnvelopedFrom(query).withName(NAME_RESPONSE_HEARINGS_BY_STARTDATE),
                 payloadIsJson(allOf(
                         withJsonPath("$.hearings", hasSize(2)),
                         withJsonPath("$.hearings[0].hearingId", equalTo(HEARING_ID.toString())),
@@ -132,6 +135,27 @@ public class HearingQueryViewTest {
                 ))
         )));
     }
+
+    @Test
+    public void shouldGetHearingsByCaseId() {
+        when(hearingService.getHearingsByCaseId(CASE_ID)).thenReturn(getHearings());
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithDefaults(),
+                createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).build());
+
+        final JsonEnvelope actualHearings = hearingsQueryView.findHearingsByCaseId(query);
+
+        assertThat(actualHearings, is(jsonEnvelope(
+                withMetadataEnvelopedFrom(query).withName(NAME_RESPONSE_HEARINGS_BY_CASE_ID),
+                payloadIsJson(allOf(
+                        withJsonPath("$.hearings", hasSize(2)),
+                        withJsonPath("$.hearings[0].hearingId", equalTo(HEARING_ID.toString())),
+                        withJsonPath("$.hearings[1].hearingId", equalTo(HEARING_ID_2.toString()))
+                ))
+        )));
+    }
+
 
     @Test
     public void shouldFindHearing() {

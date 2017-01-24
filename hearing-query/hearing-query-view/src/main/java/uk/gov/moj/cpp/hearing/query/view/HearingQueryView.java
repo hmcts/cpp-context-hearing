@@ -44,7 +44,8 @@ import javax.json.JsonObject;
 public class HearingQueryView {
 
     private static final String HEARING_QUERY_HEARING_EVENT_DEFINITIONS_RESPONSE = "hearing.query.hearing-event-definitions-response";
-    private static final String NAME_RESPONSE_HEARING_LIST = "hearing.get.hearings-by-startdate-response";
+    private static final String NAME_RESPONSE_HEARING_LIST_BY_START_DATE = "hearing.get.hearings-by-startdate-response";
+    private static final String NAME_RESPONSE_HEARING_LIST_BY_CASE_ID = "hearing.get.hearings-by-caseid-response";
     private static final String NAME_RESPONSE_HEARING = "hearing.get.hearing-response";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
 
@@ -56,6 +57,7 @@ public class HearingQueryView {
     private static final String FIELD_HEARING_EVENTS = "events";
 
     private static final String FIELD_START_DATE = "startDate";
+    private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_HEARINGS = "hearings";
 
     @Inject
@@ -92,11 +94,21 @@ public class HearingQueryView {
     private HearingEventRepository hearingEventRepository;
 
     @Handles("hearing.get.hearings-by-startdate")
-    public JsonEnvelope findHearings(final JsonEnvelope envelope) {
+    public JsonEnvelope findHearingsByStartDate(final JsonEnvelope envelope) {
         final LocalDate localDate = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_START_DATE));
-        return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING_LIST)
+        return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING_LIST_BY_START_DATE)
                 .apply(createObjectBuilder().add(FIELD_HEARINGS,
                         listToJsonArrayConverter.convert(hearingService.getHearingsByStartDate(localDate))
+                        ).build()
+                );
+    }
+
+    @Handles("hearing.get.hearings-by-caseid")
+    public JsonEnvelope findHearingsByCaseId(final JsonEnvelope envelope) {
+        final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(),FIELD_CASE_ID);
+        return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING_LIST_BY_CASE_ID)
+                .apply(createObjectBuilder().add(FIELD_HEARINGS,
+                        listToJsonArrayConverter.convert(hearingService.getHearingsByCaseId(caseId.get()))
                         ).build()
                 );
     }
