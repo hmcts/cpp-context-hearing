@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
 public class HearingCaseRepositoryTest {
+
     @Inject
     private HearingCaseRepository hearingCaseRepository;
 
@@ -77,6 +78,13 @@ public class HearingCaseRepositoryTest {
         long count =  hearingCase.stream().map(hearingCase1 -> hearingCase1.getCaseId()).filter(caseId -> caseId.equals(caseId_1)).count();
         assertThat(0l,equalTo(count));
 
+    }
+
+    @Test
+    public void testFindByCaseId() throws Exception {
+        List<HearingCase> hearingCase = hearingCaseRepository.findByCaseId(caseId_1);
+
+        assertThat(hearingCase.size(), equalTo(1));
     }
 
 }

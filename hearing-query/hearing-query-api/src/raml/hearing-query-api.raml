@@ -30,18 +30,28 @@ protocols: [ HTTP, HTTPS ]
         (mapping):
             responseType: application/vnd.hearing.get.hearings-by-startdate+json
             name: hearing.get.hearings-by-startdate
+        (mapping):
+            responseType: application/vnd.hearing.get.hearings-by-caseid+json
+            name: hearing.get.hearings-by-caseid
         ...
       queryParameters:
         startDate:
           description: startDate of hearing
           type: string
-          required: true
+          required: false
+        caseId:
+          description: case Id
+          type: string
+          required: false
 
       responses:
             200:
                 description: OK
                 body:
                   application/vnd.hearing.get.hearings-by-startdate+json:
+                    example:  !include json/hearing.get.hearings.json
+                    schema:  !include  json/schema/hearing.get.hearings.json
+                  application/vnd.hearing.get.hearings-by-caseid+json:
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
 

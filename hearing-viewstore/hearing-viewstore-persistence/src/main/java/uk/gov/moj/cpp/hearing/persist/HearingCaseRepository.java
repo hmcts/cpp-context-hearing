@@ -15,7 +15,7 @@ import org.apache.deltaspike.data.api.Repository;
 @Repository
 public abstract class HearingCaseRepository extends AbstractEntityRepository<HearingCase, UUID> {
     /**
-     * Find {@link HearingCase} by caseId and startDate.
+     * Find {@link HearingCase} by hearing Id.
      *
      * @param hearingid of the case to retrieve.
      * @return HearingCases.
@@ -23,12 +23,20 @@ public abstract class HearingCaseRepository extends AbstractEntityRepository<Hea
     public abstract List<HearingCase> findByHearingId(UUID hearingid);
 
     /**
-     * Find {@link HearingCase} by caseId and startDate.
+     * Find {@link HearingCase} by hearing Ids.
      *
      * @param hearingids of the case to retrieve.
      * @return HearingCases.
      */
     @Query(value = "FROM HearingCase hc where hc.hearingId in (:hearingids)")
     public abstract List<HearingCase> findByHearingIds(@QueryParam("hearingids") List<UUID> hearingids);
+
+    /**
+     * Find {@link HearingCase} by case Id.
+     *
+     * @param caseId of the case to retrieve.
+     * @return HearingCases.
+     */
+    public abstract List<HearingCase> findByCaseId(UUID caseId);
 
 }

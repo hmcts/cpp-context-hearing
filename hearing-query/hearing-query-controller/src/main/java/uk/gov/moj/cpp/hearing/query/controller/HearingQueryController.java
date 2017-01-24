@@ -19,6 +19,11 @@ public class HearingQueryController {
         return requester.request(query);
     }
 
+    @Handles("hearing.get.hearings-by-caseid")
+    public JsonEnvelope findHearingsByCaseId(final JsonEnvelope query) {
+        return requester.request(query);
+    }
+
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope query) {
         return requester.request(query);
