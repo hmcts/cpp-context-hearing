@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventDefinitionsConverter;
@@ -135,6 +136,22 @@ public class HearingEventListener {
         if (storedHearing.isPresent()) {
             storedHearing = of(storedHearing.get().builder()
                     .withRoomName(hearing.getRoomName())
+                    .build());
+        }
+
+        hearingRepository.save(storedHearing.orElse(hearing));
+    }
+
+    @Transactional
+    @Handles("hearing.adjourn-date-updated")
+    public void hearingStartDateUpdated(final JsonEnvelope event) {
+        final HearingAdjournDateUpdated hearingAdjournDateUpdated = jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingAdjournDateUpdated.class);
+        final Hearing hearing = converter.convert(hearingAdjournDateUpdated);
+        Optional<Hearing> storedHearing = hearingRepository.getByHearingId(hearingAdjournDateUpdated.getHearingId());
+
+        if (storedHearing.isPresent()) {
+            storedHearing = of(storedHearing.get().builder()
+                    .withStartdate(hearing.getStartdate())
                     .build());
         }
 

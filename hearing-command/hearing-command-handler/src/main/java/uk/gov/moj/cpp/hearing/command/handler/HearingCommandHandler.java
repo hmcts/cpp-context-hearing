@@ -28,6 +28,7 @@ import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,7 @@ public class HearingCommandHandler {
     private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
+    private static final String FIELD_START_DATE= "startDate";
 
     @Inject
     private EventSource eventSource;
@@ -87,6 +89,13 @@ public class HearingCommandHandler {
         final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(HEARING_ID));
         final StartHearing startHearing = jsonToHearingConverter.convertToStartHearing(envelope);
         applyToHearingAggregate(hearingId, aggregate -> aggregate.startHearing(startHearing), envelope);
+    }
+
+    @Handles("hearing.adjourn-date")
+    public void adjournHearingDate(final JsonEnvelope envelope) throws EventStreamException {
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(HEARING_ID));
+        final LocalDate startDate = LocalDate.parse(envelope.payloadAsJsonObject().getString(FIELD_START_DATE));
+        applyToHearingAggregate(hearingId, aggregate -> aggregate.adjournHearingDate(hearingId, startDate), envelope);
     }
 
     @Handles("hearing.end")

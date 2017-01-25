@@ -40,6 +40,11 @@ public class HearingCommandApi {
         sender.send(envelope);
     }
 
+    @Handles("hearing.adjourn-date")
+    public void adjournHearingDate(final JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
     @Handles("hearing.end")
     public void end(final JsonEnvelope envelope) {
         sender.send(envelope);

@@ -17,6 +17,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     private static final String ACTION_NAME_INITIATE_HEARING = "hearing.initiate-hearing";
     private static final String ACTION_NAME_START_HEARING = "hearing.start";
+    private static final String ACTION_NAME_ADJOURN_HEARING_DATE = "hearing.adjourn-date";
     private static final String ACTION_NAME_END_HEARING = "hearing.end";
     private static final String ACTION_NAME_BOOK_ROOM = "hearing.book-room";
     private static final String ACTION_NAME_ALLOCATE_COURT = "hearing.allocate-court";
@@ -60,6 +61,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToStart() {
         final Action action = createActionFor(ACTION_NAME_START_HEARING);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToAdjournDate() {
+        final Action action = createActionFor(ACTION_NAME_ADJOURN_HEARING_DATE);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToAdjournDate() {
+        final Action action = createActionFor(ACTION_NAME_ADJOURN_HEARING_DATE);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

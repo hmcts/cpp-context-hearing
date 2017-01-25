@@ -2,13 +2,7 @@ package uk.gov.moj.cpp.hearing.event.listener.converter;
 
 import static java.util.UUID.randomUUID;
 
-import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
-import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
@@ -36,6 +30,11 @@ public class HearingEventsToHearingConverter {
     public Hearing convert(HearingStarted hearingStarted) {
         return new Hearing(hearingStarted.getHearingId(), null, null, null,
                 null, null, null, hearingStarted.getStartTime(), null);
+    }
+
+    public Hearing convert(HearingAdjournDateUpdated hearingAdjournDateUpdated) {
+        return new Hearing(hearingAdjournDateUpdated.getHearingId(), hearingAdjournDateUpdated.getStartDate(), null, null,
+                null, null, null, null, null);
     }
 
     public Hearing convert(HearingEnded hearingEnded) {
