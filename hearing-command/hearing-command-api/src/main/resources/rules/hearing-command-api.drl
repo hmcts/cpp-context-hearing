@@ -51,6 +51,15 @@ rule "Command - API - Action - hearing.start"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.adjourn-date"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.adjourn-date");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.end"
   when
     $outcome: Outcome();

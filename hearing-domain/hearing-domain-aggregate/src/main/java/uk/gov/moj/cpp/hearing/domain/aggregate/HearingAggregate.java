@@ -11,15 +11,9 @@ import uk.gov.moj.cpp.hearing.domain.command.BookRoom;
 import uk.gov.moj.cpp.hearing.domain.command.EndHearing;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
-import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
-import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -70,6 +64,10 @@ public class HearingAggregate implements Aggregate {
         return Stream.of(new HearingStarted(
                 startHearing.getHearingId(),
                 startHearing.getStartTime()));
+    }
+
+    public Stream<Object> adjournHearingDate(UUID hearingId, LocalDate startDate) {
+        return Stream.of(new HearingAdjournDateUpdated(hearingId,startDate));
     }
 
     public Stream<Object> addCaseToHearing(AddCaseToHearing addCaseToHearing) {

@@ -30,12 +30,17 @@ public class HearingCommandController {
     }
 
     @Handles("hearing.start")
-    public void end(JsonEnvelope envelope) {
+    public void start(JsonEnvelope envelope) {
+        sender.send(envelope);
+    }
+
+    @Handles("hearing.adjourn-date")
+    public void adjournHearingDate(JsonEnvelope envelope) {
         sender.send(envelope);
     }
 
     @Handles("hearing.end")
-    public void start(JsonEnvelope envelope) {
+    public void end(JsonEnvelope envelope) {
         sender.send(envelope);
     }
 
