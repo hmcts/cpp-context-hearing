@@ -8,13 +8,14 @@ public class DefenceCounselDefendantCompositeKey implements Serializable {
     private UUID defenceCounselAttendeeId;
     private UUID defendantId;
 
+    public DefenceCounselDefendantCompositeKey() {
+        // for JPA //NOSONAR
+    }
+
     public DefenceCounselDefendantCompositeKey(final UUID defenceCounselAttendeeId,
                                                final UUID defendantId) {
         this.defenceCounselAttendeeId = defenceCounselAttendeeId;
         this.defendantId = defendantId;
-    }
-
-    public DefenceCounselDefendantCompositeKey(){
     }
 
     public UUID getDefenceCounselAttendeeId() {

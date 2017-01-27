@@ -9,11 +9,19 @@ import uk.gov.moj.cpp.hearing.domain.command.AddCaseToHearing;
 import uk.gov.moj.cpp.hearing.domain.command.AllocateCourt;
 import uk.gov.moj.cpp.hearing.domain.command.BookRoom;
 import uk.gov.moj.cpp.hearing.domain.command.EndHearing;
-import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
 import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
-import uk.gov.moj.cpp.hearing.domain.event.*;
+import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
+import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -22,30 +30,26 @@ public class HearingAggregate implements Aggregate {
 
     private UUID hearingId;
 
-    public Stream<Object> initiateHearing(InitiateHearing initiateHearing) {
-        Stream.Builder<Object> streamBuilder = Stream.builder();
-        HearingInitiated hearingInitiated = new HearingInitiated(
-                initiateHearing.getHearingId(),
-                initiateHearing.getStartDateTime(),
-                initiateHearing.getDuration(),initiateHearing.getHearingType());
+    public Stream<Object> initiateHearing(final UUID hearingId, final ZonedDateTime startDateTime,
+                                          final int duration, final String hearingType, final String courtCentreName,
+                                          final String roomName, final UUID caseId) {
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        streamBuilder.add(hearingInitiated);
-        if (null != initiateHearing.getCaseId()) {
-            streamBuilder.add(new CaseAssociated(
-                    initiateHearing.getHearingId(),
-                    initiateHearing.getCaseId()));
+        streamBuilder.add(new HearingInitiated(hearingId, startDateTime, duration, hearingType));
+
+        if (caseId != null) {
+            streamBuilder.add(new CaseAssociated(hearingId, caseId));
         }
-        if (null != initiateHearing.getCourtCentreName()) {
-            streamBuilder.add(new CourtAssigned(
-                    initiateHearing.getHearingId(),
-                    initiateHearing.getCourtCentreName()));
+
+        if (courtCentreName != null) {
+            streamBuilder.add(new CourtAssigned(hearingId, courtCentreName));
         }
-        if (null != initiateHearing.getRoomName()) {
-            streamBuilder.add(new RoomBooked(
-                    initiateHearing.getHearingId(),
-                    initiateHearing.getRoomName()));
+
+        if (roomName != null) {
+            streamBuilder.add(new RoomBooked(hearingId, roomName));
         }
-        return streamBuilder.build();
+
+        return apply(streamBuilder.build());
     }
 
     public Stream<Object> allocateCourt(AllocateCourt allocateCourt) {
@@ -67,7 +71,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> adjournHearingDate(UUID hearingId, LocalDate startDate) {
-        return Stream.of(new HearingAdjournDateUpdated(hearingId,startDate));
+        return Stream.of(new HearingAdjournDateUpdated(hearingId, startDate));
     }
 
     public Stream<Object> addCaseToHearing(AddCaseToHearing addCaseToHearing) {
@@ -87,7 +91,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addDefenceCounsel(final UUID hearingId, final UUID attendeeId,
-            final UUID personId, final List<UUID> defendantIds, final String status) {
+                                            final UUID personId, final List<UUID> defendantIds, final String status) {
         return Stream.of(new DefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status));
     }
 

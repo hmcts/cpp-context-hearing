@@ -24,7 +24,7 @@ import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingCon
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingDefinitionsRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionsRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
@@ -71,7 +71,7 @@ public class HearingEventListener {
     private HearingRepository hearingRepository;
 
     @Inject
-    private HearingDefinitionsRepository hearingDefinitionsRepository;
+    private HearingEventDefinitionsRepository hearingEventDefinitionsRepository;
 
     @Inject
     private HearingCaseRepository hearingCaseRepository;
@@ -234,10 +234,10 @@ public class HearingEventListener {
     @Transactional
     @Handles("hearing.hearing-event-definitions-created")
     public void hearingEventDefinitionsCreated(final JsonEnvelope event) {
-        hearingDefinitionsRepository.deleteAll();
+        hearingEventDefinitionsRepository.deleteAll();
         hearingEventDefinitionsConverter
                 .convert(jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingEventDefinitionsCreated.class))
-                .forEach(hearingDefinitionsRepository::save);
+                .forEach(hearingEventDefinitionsRepository::save);
     }
 
     @Transactional

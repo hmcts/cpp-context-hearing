@@ -13,13 +13,6 @@ import javax.persistence.Table;
 @IdClass(value = DefenceCounselDefendantCompositeKey.class)
 public class DefenceCounselDefendant {
 
-    public DefenceCounselDefendant(){}
-
-    public DefenceCounselDefendant(final UUID defenceCounselAttendeeId, final UUID defendantId) {
-        this.defendantId = defendantId;
-        this.defenceCounselAttendeeId = defenceCounselAttendeeId;
-    }
-
     @Id
     @Column(name = "defence_counsel_attendee_id")
     private UUID defenceCounselAttendeeId;
@@ -27,6 +20,15 @@ public class DefenceCounselDefendant {
     @Id
     @Column(name = "defendant_id")
     private UUID defendantId;
+
+    public DefenceCounselDefendant() {
+        // for JPA //NOSONAR
+    }
+
+    public DefenceCounselDefendant(final UUID defenceCounselAttendeeId, final UUID defendantId) {
+        this.defenceCounselAttendeeId = defenceCounselAttendeeId;
+        this.defendantId = defendantId;
+    }
 
     public UUID getDefenceCounselAttendeeId() {
         return defenceCounselAttendeeId;

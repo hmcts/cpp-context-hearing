@@ -8,15 +8,13 @@ import java.util.UUID;
 @Event("hearing.hearing-initiated")
 public class HearingInitiated {
 
-    private UUID hearingId;
+    private final UUID hearingId;
+    private final ZonedDateTime startDateTime;
+    private final Integer duration;
+    private final String hearingType;
 
-    private ZonedDateTime startDateTime;
-
-    private Integer duration;
-
-    private String hearingType;
-
-    public HearingInitiated(UUID hearingId, ZonedDateTime startDateTime, Integer duration,String hearingType) {
+    public HearingInitiated(final UUID hearingId, final ZonedDateTime startDateTime, final Integer duration,
+                            final String hearingType) {
         this.hearingId = hearingId;
         this.startDateTime = startDateTime;
         this.duration = duration;
@@ -26,7 +24,6 @@ public class HearingInitiated {
     public UUID getHearingId() {
         return hearingId;
     }
-
 
     public Integer getDuration() {
         return duration;
