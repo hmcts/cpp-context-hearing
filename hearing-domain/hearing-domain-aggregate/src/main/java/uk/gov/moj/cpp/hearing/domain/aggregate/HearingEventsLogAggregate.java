@@ -1,23 +1,19 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.util.stream.Stream.concat;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
-import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-
 import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Stream;
+import static java.util.stream.Stream.concat;
+import uk.gov.justice.domain.aggregate.Aggregate;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 
 public class HearingEventsLogAggregate implements Aggregate {
 
@@ -25,8 +21,8 @@ public class HearingEventsLogAggregate implements Aggregate {
     private static final String REASON_ALREADY_DELETED = "Already deleted";
     private static final String REASON_EVENT_NOT_FOUND = "Hearing Event not found";
 
-    private Map<UUID, HearingEvent> hearingEventsLoggedMap = new ConcurrentHashMap<>();
-    private Set<UUID> hearingEventsDeleted = new ConcurrentSkipListSet<>();
+    private ConcurrentHashMap<UUID, HearingEvent> hearingEventsLoggedMap = new ConcurrentHashMap<>();
+    private ConcurrentSkipListSet<UUID> hearingEventsDeleted = new ConcurrentSkipListSet<>();
 
     @Override
     public Object apply(final Object event) {

@@ -112,6 +112,13 @@ public class HearingIT extends AbstractIT {
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
+        writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.adjourn-date+json")
+                .body("{\n" +
+                        "  \"startDate\": \"2016-06-05\"\n" +
+                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
         TimeUnit.SECONDS.sleep(15);
 
@@ -135,7 +142,7 @@ public class HearingIT extends AbstractIT {
         assertThat("HearingType should match", readResponse.jsonPath().get("hearingType").equals("TRIAL"), equalTo(true));
         assertThat("Court Centre name should match", readResponse.jsonPath().get("courtCentreName").equals("Bournemouth"), equalTo(true));
         assertThat("Room name should match", readResponse.jsonPath().get("roomName").equals("Room1"), equalTo(true));
-        assertThat("Hearing start Date should match", readResponse.jsonPath().get("startDate").equals("2016-06-01"), equalTo(true));
+        assertThat("Hearing start Date should match", readResponse.jsonPath().get("startDate").equals("2016-06-05"), equalTo(true));
         assertThat("Hearing Start time should match", readResponse.jsonPath().get("startTime").equals("10:00"), equalTo(true));
         assertThat("Hearing Started time should match", readResponse.jsonPath().get("startedAt").equals("2016-06-01T10:00:00Z"), equalTo(true));
         assertThat("Hearing ended time should match", readResponse.jsonPath().get("endedAt").equals("2016-06-01T11:00:00Z"), equalTo(true));
