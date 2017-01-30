@@ -46,15 +46,9 @@ import uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventsLogAggregate;
 import uk.gov.moj.cpp.hearing.domain.command.InitiateHearing;
-import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -85,6 +79,7 @@ public class HearingCommandHandlerTest {
 
     private static final String HEARING_INITIATED_EVENT = "hearing.hearing-initiated";
     private static final String PROSECUTION_COUNSEL_ADDED_EVENT = "hearing.prosecution-counsel-added";
+    private static final String HEARING_EVENT_ADJOURN_DATE_UPDATED = "hearing.adjourn-date-updated";
     private static final String HEARING_EVENT_LOGGED_EVENT = "hearing.hearing-event-logged";
     private static final String HEARING_EVENT_DELETED_EVENT = "hearing.hearing-event-deleted";
     private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
@@ -134,6 +129,7 @@ public class HearingCommandHandlerTest {
     private final UUID hearingId = randomUUID();
     private final UUID attendeeId = randomUUID();
     private final String status = STRING.next();
+    private final LocalDate CURRENT_DATE = LocalDate.now();
 
     private static final UUID HEARING_EVENT_DEFINITIONS_ID = randomUUID();
 
@@ -397,6 +393,32 @@ public class HearingCommandHandlerTest {
                 ).thatMatchesSchema()
         ));
     }
+ó
+    @Test
+    public void shouldAdjournHearingDate() throws Exception {
+        final JsonEnvelope command = createAdjournHearingDateCommand();
+
+        when(eventSource.getStreamById(hearingId)).thenReturn(eventStream);
+        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(hearingAggregate.adjournHearingDate(hearingId, CURRENT_DATE)).thenReturn(Stream.of(
+                new HearingAdjournDateUpdated(hearingId, CURRENT_DATE)));
+        when(enveloper.withMetadataFrom(command)).thenReturn(
+                createEnveloperWithEvents(HearingAdjournDateUpdated.class).withMetadataFrom(command));
+
+        hearingCommandHandler.adjournHearingDate(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_EVENT_ADJOURN_DATE_UPDATED),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(hearingId.toString())),
+                                withJsonPath("$.startDate", equalTo(CURRENT_DATE.toString()))
+                                )
+                        )
+                )
+        ));
+    }
 
     private static JsonEnvelope createHearingEventDefinitions() {
         final JsonArrayBuilder eventDefinitionsBuilder = createArrayBuilder()
@@ -487,6 +509,15 @@ public class HearingCommandHandlerTest {
                 .withPayloadOf(status, "status")
                 .build();
     }
+
+    private JsonEnvelope createAdjournHearingDateCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(HEARING_EVENT_ADJOURN_DATE_UPDATED))
+                .withPayloadOf(hearingId, "hearingId")
+                .withPayloadOf(CURRENT_DATE.toString(), "startDate")
+                .build();
+    }
+
 
     private Matcher<JsonObject> isFrom(final InitiateHearing initiateHearing) {
         return new TypeSafeDiagnosingMatcher<JsonObject>() {
