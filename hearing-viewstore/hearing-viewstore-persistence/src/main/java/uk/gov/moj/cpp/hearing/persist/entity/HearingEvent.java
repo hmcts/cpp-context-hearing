@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
 import java.time.ZonedDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -29,7 +28,7 @@ public class HearingEvent {
     private boolean deleted;
 
     public HearingEvent() {
-        // for JPA
+        // for JPA //NOSONAR
     }
 
     public HearingEvent(final UUID id, final UUID hearingId, final String recordedLabel,
@@ -68,30 +67,6 @@ public class HearingEvent {
 
     public boolean isDeleted() {
         return deleted;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HearingEvent that = (HearingEvent) o;
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
-    }
-
-    @Override
-    public String toString() {
-        return "HearingEvent{" +
-                "id=" + id +
-                ", hearingId=" + hearingId +
-                ", recordedLabel='" + recordedLabel + '\'' +
-                ", timestamp=" + timestamp +
-                ", deleted=" + deleted +
-                '}';
     }
 
     public Builder builder() {

@@ -1,19 +1,20 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import java.time.ZonedDateTime;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Stream;
 import static java.util.stream.Stream.concat;
-import uk.gov.justice.domain.aggregate.Aggregate;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
+import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
 public class HearingEventsLogAggregate implements Aggregate {
 
@@ -21,7 +22,7 @@ public class HearingEventsLogAggregate implements Aggregate {
     private static final String REASON_ALREADY_DELETED = "Already deleted";
     private static final String REASON_EVENT_NOT_FOUND = "Hearing Event not found";
 
-    private ConcurrentHashMap<UUID, HearingEvent> hearingEventsLoggedMap = new ConcurrentHashMap<>();
+    private ConcurrentSkipListSet<UUID> hearingEventsLogged = new ConcurrentSkipListSet<>();
     private ConcurrentSkipListSet<UUID> hearingEventsDeleted = new ConcurrentSkipListSet<>();
 
     @Override
@@ -59,7 +60,7 @@ public class HearingEventsLogAggregate implements Aggregate {
     }
 
     private void onEventLogged(final HearingEventLogged eventLogged) {
-        hearingEventsLoggedMap.put(eventLogged.getHearingEventId(), new HearingEvent(eventLogged.getHearingEventId(), eventLogged.getTimestamp()));
+        hearingEventsLogged.add(eventLogged.getHearingEventId());
     }
 
     private void onEventDeleted(final HearingEventDeleted eventDeleted) {
@@ -70,8 +71,8 @@ public class HearingEventsLogAggregate implements Aggregate {
         hearingEventsDeleted.add(eventDeletionIgnored.getHearingEventId());
     }
 
-    private boolean hearingEventPreviouslyLogged(final UUID eventId) {
-        return hearingEventsLoggedMap.containsKey(eventId);
+    private boolean hearingEventPreviouslyLogged(final UUID hearingEventId) {
+        return hearingEventsLogged.contains(hearingEventId);
     }
 
     private boolean hearingEventPreviouslyDeleted(final UUID hearingEventId) {

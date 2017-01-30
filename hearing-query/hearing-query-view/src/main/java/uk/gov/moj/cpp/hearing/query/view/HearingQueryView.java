@@ -13,17 +13,18 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionsRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinitions;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.convertor.DefenceCounselToDefendantMapConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ProsecutionCounselListConverter;
 import uk.gov.moj.cpp.hearing.query.view.service.DefenceCounselService;
-import uk.gov.moj.cpp.hearing.query.view.service.HearingEventDefinitionService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ProsecutionCounselService;
@@ -43,10 +44,10 @@ import javax.json.JsonObject;
 @ServiceComponent(Component.QUERY_VIEW)
 public class HearingQueryView {
 
-    private static final String HEARING_QUERY_HEARING_EVENT_DEFINITIONS_RESPONSE = "hearing.query.hearing-event-definitions-response";
-    private static final String NAME_RESPONSE_HEARING_LIST_BY_START_DATE = "hearing.get.hearings-by-startdate-response";
-    private static final String NAME_RESPONSE_HEARING_LIST_BY_CASE_ID = "hearing.get.hearings-by-caseid-response";
-    private static final String NAME_RESPONSE_HEARING = "hearing.get.hearing-response";
+    private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.hearing-event-definitions-response";
+    private static final String RESPONSE_NAME_HEARING_LIST_BY_START_DATE = "hearing.get.hearings-by-startdate-response";
+    private static final String RESPONSE_NAME_HEARING_LIST_BY_CASE_ID = "hearing.get.hearings-by-caseid-response";
+    private static final String RESPONSE_NAME_HEARING = "hearing.get.hearing-response";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
 
     private static final String FIELD_HEARING_ID = "hearingId";
@@ -55,6 +56,8 @@ public class HearingQueryView {
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
     private static final String FIELD_HEARING_EVENTS = "events";
+    private static final String FIELD_HEARING_EVENT_DEFINITIONS = "eventDefinitions";
+    private static final String FIELD_ACTION_LABEL = "actionLabel";
 
     private static final String FIELD_START_DATE = "startDate";
     private static final String FIELD_CASE_ID = "caseId";
@@ -76,9 +79,6 @@ public class HearingQueryView {
     private DefenceCounselService defenceCounselService;
 
     @Inject
-    private HearingEventDefinitionService hearingEventDefinitionService;
-
-    @Inject
     private Enveloper enveloper;
 
     @Inject
@@ -93,10 +93,13 @@ public class HearingQueryView {
     @Inject
     private HearingEventRepository hearingEventRepository;
 
+    @Inject
+    private HearingEventDefinitionsRepository hearingEventDefinitionsRepository;
+
     @Handles("hearing.get.hearings-by-startdate")
     public JsonEnvelope findHearingsByStartDate(final JsonEnvelope envelope) {
         final LocalDate localDate = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_START_DATE));
-        return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING_LIST_BY_START_DATE)
+        return enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING_LIST_BY_START_DATE)
                 .apply(createObjectBuilder().add(FIELD_HEARINGS,
                         listToJsonArrayConverter.convert(hearingService.getHearingsByStartDate(localDate))
                         ).build()
@@ -105,8 +108,8 @@ public class HearingQueryView {
 
     @Handles("hearing.get.hearings-by-caseid")
     public JsonEnvelope findHearingsByCaseId(final JsonEnvelope envelope) {
-        final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(),FIELD_CASE_ID);
-        return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING_LIST_BY_CASE_ID)
+        final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), FIELD_CASE_ID);
+        return enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING_LIST_BY_CASE_ID)
                 .apply(createObjectBuilder().add(FIELD_HEARINGS,
                         listToJsonArrayConverter.convert(hearingService.getHearingsByCaseId(caseId.get()))
                         ).build()
@@ -116,7 +119,7 @@ public class HearingQueryView {
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        return enveloper.withMetadataFrom(envelope, NAME_RESPONSE_HEARING)
+        return enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING)
                 .apply(hearingService.getHearingById(hearingId.get()));
     }
 
@@ -154,10 +157,21 @@ public class HearingQueryView {
     }
 
     @Handles("hearing.hearing-event-definitions")
-    public JsonEnvelope findHearingEventDefinitions(final JsonEnvelope envelope) {
-        return enveloper.withMetadataFrom(envelope, HEARING_QUERY_HEARING_EVENT_DEFINITIONS_RESPONSE)
+    public JsonEnvelope getHearingEventDefinitions(final JsonEnvelope query) {
+        final List<HearingEventDefinitions> hearingEventDefinitions = hearingEventDefinitionsRepository.findAll();
+
+        final JsonArrayBuilder eventDefinitionsJsonArrayBuilder = createArrayBuilder();
+
+        hearingEventDefinitions.
+                forEach(eventDefinition -> eventDefinitionsJsonArrayBuilder.add(
+                        createObjectBuilder()
+                                .add(FIELD_ACTION_LABEL, eventDefinition.getActionLabel())
+                                .add(FIELD_RECORDED_LABEL, eventDefinition.getRecordedLabel())
+                ));
+
+        return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_DEFINITIONS)
                 .apply(createObjectBuilder()
-                        .add("eventDefinitions", listToJsonArrayConverter.convert(hearingEventDefinitionService.getHearingEventDefinitions()))
+                        .add(FIELD_HEARING_EVENT_DEFINITIONS, eventDefinitionsJsonArrayBuilder)
                         .build());
     }
 
@@ -181,11 +195,11 @@ public class HearingQueryView {
 
         hearingEvents.
                 forEach(hearingEvent -> eventLogJsonArrayBuilder.add(
-                createObjectBuilder()
-                        .add(FIELD_HEARING_EVENT_ID, hearingEvent.getId().toString())
-                        .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
-                        .add(FIELD_TIMESTAMP, ZonedDateTimes.toString(hearingEvent.getTimestamp()))
-        ));
+                        createObjectBuilder()
+                                .add(FIELD_HEARING_EVENT_ID, hearingEvent.getId().toString())
+                                .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
+                                .add(FIELD_TIMESTAMP, ZonedDateTimes.toString(hearingEvent.getTimestamp()))
+                ));
 
         return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_LOG)
                 .apply(createObjectBuilder()

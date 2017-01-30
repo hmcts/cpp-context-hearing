@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.persist.entity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -44,7 +43,7 @@ public class Hearing {
     private ZonedDateTime endedAt;
 
     public Hearing() {
-        // for JPA
+        // for JPA //NOSONAR
     }
 
     public Hearing(final UUID hearingId, final LocalDate startdate, final LocalTime startTime,
@@ -98,43 +97,6 @@ public class Hearing {
         return endedAt;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Hearing hearing = (Hearing) o;
-        return Objects.equals(getHearingId(), hearing.getHearingId()) &&
-                Objects.equals(getStartdate(), hearing.getStartdate()) &&
-                Objects.equals(getStartTime(), hearing.getStartTime()) &&
-                Objects.equals(getDuration(), hearing.getDuration()) &&
-                Objects.equals(getRoomName(), hearing.getRoomName()) &&
-                Objects.equals(getHearingType(), hearing.getHearingType()) &&
-                Objects.equals(getCourtCentreName(), hearing.getCourtCentreName()) &&
-                Objects.equals(getStartedAt(), hearing.getStartedAt()) &&
-                Objects.equals(getEndedAt(), hearing.getEndedAt());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getHearingId(), getStartdate(), getStartTime(), getDuration(), getRoomName(),
-                getHearingType(), getCourtCentreName(), getStartedAt(), getEndedAt());
-    }
-
-    @Override
-    public String toString() {
-        return "Hearing{" +
-                "hearingId=" + hearingId +
-                ", startdate=" + startdate +
-                ", startTime=" + startTime +
-                ", duration=" + duration +
-                ", roomName='" + roomName + '\'' +
-                ", hearingType='" + hearingType + '\'' +
-                ", courtCentreName='" + courtCentreName + '\'' +
-                ", startedAt=" + startedAt +
-                ", endedAt=" + endedAt +
-                '}';
-    }
-
     public Builder builder() {
         return new Builder(getHearingId(), getStartdate(), getStartTime(), getDuration(), getRoomName(),
                 getHearingType(), getCourtCentreName(), getStartedAt(), getEndedAt());
@@ -150,10 +112,6 @@ public class Hearing {
         private String courtCentreName;
         private ZonedDateTime startedAt;
         private ZonedDateTime endedAt;
-
-        public Builder(final UUID hearingId) {
-            this.hearingId = hearingId;
-        }
 
         public Builder(final UUID hearingId, final LocalDate startdate, final LocalTime startTime,
                         final Integer duration, final String roomName, final String hearingType,

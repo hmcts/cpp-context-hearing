@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
-import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -26,7 +25,7 @@ public class ProsecutionCounsel {
     private String status;
 
     public ProsecutionCounsel(){
-        // for JPA
+        // for JPA //NOSONAR
     }
 
     public ProsecutionCounsel(final UUID id, final UUID hearingId, final UUID personId, final String status) {
@@ -52,29 +51,4 @@ public class ProsecutionCounsel {
         return status;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProsecutionCounsel that = (ProsecutionCounsel) o;
-        return Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getHearingId(), that.getHearingId()) &&
-                Objects.equals(getPersonId(), that.getPersonId()) &&
-                Objects.equals(getStatus(), that.getStatus());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getHearingId(), getPersonId(), getStatus());
-    }
-
-    @Override
-    public String toString() {
-        return "ProsecutionCounsel{" +
-                "id=" + id +
-                ", hearingId=" + hearingId +
-                ", personId=" + personId +
-                ", status='" + status + '\'' +
-                '}';
-    }
 }
