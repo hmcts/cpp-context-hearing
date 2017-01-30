@@ -393,7 +393,7 @@ public class HearingCommandHandlerTest {
                 ).thatMatchesSchema()
         ));
     }
-ó
+
     @Test
     public void shouldAdjournHearingDate() throws Exception {
         final JsonEnvelope command = createAdjournHearingDateCommand();
