@@ -33,6 +33,12 @@
             <artifactId>test-utils-persistence</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <!-- TODO need to remove the version number once common-bom 2.0.13 is released -->
+        <dependency>
+            <groupId>com.google.code.bean-matchers</groupId>
+            <artifactId>bean-matchers</artifactId>
+            <version>0.10</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

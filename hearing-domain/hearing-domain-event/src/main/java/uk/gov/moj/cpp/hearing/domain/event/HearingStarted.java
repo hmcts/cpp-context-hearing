@@ -8,11 +8,11 @@ import java.util.UUID;
 @Event("hearing.started")
 public class HearingStarted {
 
-    private UUID hearingId;
+    private final UUID hearingId;
 
-    private ZonedDateTime startTime;
+    private final ZonedDateTime startTime;
 
-    public HearingStarted(UUID hearingId, ZonedDateTime startTime) {
+    public HearingStarted(final UUID hearingId, final ZonedDateTime startTime) {
         this.hearingId = hearingId;
         this.startTime = startTime;
     }

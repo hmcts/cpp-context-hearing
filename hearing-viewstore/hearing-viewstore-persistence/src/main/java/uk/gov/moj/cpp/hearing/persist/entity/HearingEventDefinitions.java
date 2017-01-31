@@ -23,7 +23,7 @@ public class HearingEventDefinitions {
     private String caseAttribute;
 
     public HearingEventDefinitions() {
-        // for JPA //NOSONAR
+        // for JPA
     }
 
     public HearingEventDefinitions(final String recordedLabel, final String actionLabel, final Integer sequenceNumber,

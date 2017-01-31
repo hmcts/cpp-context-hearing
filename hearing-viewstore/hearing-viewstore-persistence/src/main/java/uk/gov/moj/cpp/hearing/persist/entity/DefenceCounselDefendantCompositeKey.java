@@ -9,7 +9,7 @@ public class DefenceCounselDefendantCompositeKey implements Serializable {
     private UUID defendantId;
 
     public DefenceCounselDefendantCompositeKey() {
-        // for JPA //NOSONAR
+        // for JPA
     }
 
     public DefenceCounselDefendantCompositeKey(final UUID defenceCounselAttendeeId,

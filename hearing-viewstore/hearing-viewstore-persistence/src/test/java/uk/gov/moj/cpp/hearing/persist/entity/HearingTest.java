@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
+import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -28,6 +29,11 @@ public class HearingTest {
     private static final String COURT_CENTRE_NAME = STRING.next();
     private static final ZonedDateTime STARTED_AT = PAST_ZONED_DATE_TIME.next();
     private static final ZonedDateTime ENDED_AT = STARTED_AT.plusHours(10);
+
+    @Test
+    public void shouldHaveANoArgsConstructor() {
+        assertThat(Hearing.class, hasValidBeanConstructor());
+    }
 
     @Test
     public void shouldCreateNewObjectWithSameValuesIfBuilderDoesNotOverwriteAnyFields() {

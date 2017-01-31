@@ -25,7 +25,7 @@ public class DefenceCounsel {
     private String status;
 
     public DefenceCounsel() {
-        // for JPA //NOSONAR
+        // for JPA
     }
 
     public DefenceCounsel(final UUID id, final UUID hearingId, final UUID personId, final String status) {

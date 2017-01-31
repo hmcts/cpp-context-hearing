@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import static java.util.Collections.unmodifiableList;
+
 import uk.gov.justice.domain.annotation.Event;
 
 import java.util.List;
@@ -20,7 +22,7 @@ public class DefenceCounselAdded {
         this.hearingId = hearingId;
         this.attendeeId = attendeeId;
         this.personId = personId;
-        this.defendantIds = defendantIds;
+        this.defendantIds = unmodifiableList(defendantIds);
         this.status = status;
     }
 
@@ -37,7 +39,7 @@ public class DefenceCounselAdded {
     }
 
     public List<UUID> getDefendantIds() {
-        return defendantIds;
+        return unmodifiableList(defendantIds);
     }
 
     public String getStatus() {

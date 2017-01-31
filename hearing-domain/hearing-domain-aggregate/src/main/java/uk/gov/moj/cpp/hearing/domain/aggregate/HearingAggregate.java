@@ -5,11 +5,6 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.moj.cpp.hearing.domain.command.AddCaseToHearing;
-import uk.gov.moj.cpp.hearing.domain.command.AllocateCourt;
-import uk.gov.moj.cpp.hearing.domain.command.BookRoom;
-import uk.gov.moj.cpp.hearing.domain.command.EndHearing;
-import uk.gov.moj.cpp.hearing.domain.command.StartHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
@@ -52,47 +47,38 @@ public class HearingAggregate implements Aggregate {
         return apply(streamBuilder.build());
     }
 
-    public Stream<Object> allocateCourt(AllocateCourt allocateCourt) {
-        return Stream.of(new CourtAssigned(
-                allocateCourt.getHearingId(),
-                allocateCourt.getCourtCentreName()));
+    public Stream<Object> allocateCourt(final UUID hearingId, final String courtCentreName) {
+        return apply(Stream.of(new CourtAssigned(hearingId, courtCentreName)));
     }
 
-    public Stream<Object> bookRoom(BookRoom bookRoom) {
-        return Stream.of(new RoomBooked(
-                bookRoom.getHearingId(),
-                bookRoom.getRoomName()));
+    public Stream<Object> bookRoom(final UUID hearingId, final String roomName) {
+        return apply(Stream.of(new RoomBooked(hearingId, roomName)));
     }
 
-    public Stream<Object> startHearing(StartHearing startHearing) {
-        return Stream.of(new HearingStarted(
-                startHearing.getHearingId(),
-                startHearing.getStartTime()));
+    public Stream<Object> startHearing(final UUID hearingId, final ZonedDateTime startTime) {
+        return apply(Stream.of(new HearingStarted(hearingId, startTime)));
     }
 
-    public Stream<Object> adjournHearingDate(UUID hearingId, LocalDate startDate) {
-        return Stream.of(new HearingAdjournDateUpdated(hearingId, startDate));
+    public Stream<Object> adjournHearingDate(final UUID hearingId, final LocalDate startDate) {
+        return apply(Stream.of(new HearingAdjournDateUpdated(hearingId, startDate)));
     }
 
-    public Stream<Object> addCaseToHearing(AddCaseToHearing addCaseToHearing) {
-        return Stream.of(new CaseAssociated(
-                addCaseToHearing.getHearingId(),
-                addCaseToHearing.getCaseId()));
+    public Stream<Object> addCaseToHearing(final UUID hearingId, final UUID caseId) {
+        return apply(Stream.of(new CaseAssociated(hearingId, caseId)));
     }
 
-    public Stream<Object> endHearing(EndHearing endHearing) {
-        return Stream.of(new HearingEnded(
-                endHearing.getHearingId(),
-                endHearing.getEndTime()));
+    public Stream<Object> endHearing(final UUID hearingId, final ZonedDateTime endTime) {
+        return apply(Stream.of(new HearingEnded(hearingId, endTime)));
     }
 
-    public Stream<Object> addProsecutionCounsel(final UUID hearingId, final UUID attendeeId, final UUID personId, final String status) {
-        return Stream.of(new ProsecutionCounselAdded(hearingId, attendeeId, personId, status));
+    public Stream<Object> addProsecutionCounsel(final UUID hearingId, final UUID attendeeId,
+                                                final UUID personId, final String status) {
+        return apply(Stream.of(new ProsecutionCounselAdded(hearingId, attendeeId, personId, status)));
     }
 
     public Stream<Object> addDefenceCounsel(final UUID hearingId, final UUID attendeeId,
                                             final UUID personId, final List<UUID> defendantIds, final String status) {
-        return Stream.of(new DefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status));
+        return apply(Stream.of(new DefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status)));
     }
 
     @Override

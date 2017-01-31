@@ -24,8 +24,8 @@ public class ProsecutionCounsel {
     @Column(name = "status")
     private String status;
 
-    public ProsecutionCounsel(){
-        // for JPA //NOSONAR
+    public ProsecutionCounsel() {
+        // for JPA
     }
 
     public ProsecutionCounsel(final UUID id, final UUID hearingId, final UUID personId, final String status) {
