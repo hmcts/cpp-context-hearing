@@ -7,7 +7,7 @@ import static org.hamcrest.core.Is.is;
 
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinitionEntity;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinitions;
 
 import java.util.List;
 
@@ -20,12 +20,12 @@ public class HearingEventDefinitionsConverterTest {
     @Test
     public void convert() throws Exception {
         HearingEventDefinitionsCreated eventDefinitionsCreated = hearingEventDefinitionsCreated();
-        List<HearingEventDefinitionEntity> hearingEventDefinitionEntities = converter.convert(eventDefinitionsCreated);
+        List<HearingEventDefinitions> hearingEventDefinitionEntities = converter.convert(eventDefinitionsCreated);
 
         for (int i = 0; i < eventDefinitionsCreated.getEventDefinitions().size(); i++) {
             HearingEventDefinition eventDefinitionExpected = eventDefinitionsCreated.getEventDefinitions().get(i);
 
-            HearingEventDefinitionEntity eventDefinitionEntityActual = hearingEventDefinitionEntities.get(i);
+            HearingEventDefinitions eventDefinitionEntityActual = hearingEventDefinitionEntities.get(i);
             assertThat(eventDefinitionEntityActual.getActionLabel(), is(eventDefinitionExpected.getActionLabel()));
             assertThat(eventDefinitionEntityActual.getRecordedLabel(), is(eventDefinitionExpected.getRecordedLabel()));
             assertThat(eventDefinitionEntityActual.getSequenceNumber(), is((eventDefinitionExpected.getSequence())));

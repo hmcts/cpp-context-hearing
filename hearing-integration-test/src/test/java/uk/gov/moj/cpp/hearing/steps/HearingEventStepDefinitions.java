@@ -6,6 +6,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
@@ -197,6 +198,8 @@ public class HearingEventStepDefinitions extends AbstractIT {
             );
 
         poll(requestParams(queryEventLogUrl, MEDIA_TYPE_QUERY_EVENT_LOG).withHeader(USER_ID, userId))
+                .with().timeout(20, SECONDS)
+                .with().logging()
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(conditionsOnJson))

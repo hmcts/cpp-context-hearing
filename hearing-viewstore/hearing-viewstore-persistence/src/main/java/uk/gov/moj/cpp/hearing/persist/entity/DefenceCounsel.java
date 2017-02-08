@@ -24,15 +24,15 @@ public class DefenceCounsel {
     @Column(name = "status")
     private String status;
 
+    public DefenceCounsel() {
+        // for JPA //NOSONAR
+    }
+
     public DefenceCounsel(final UUID id, final UUID hearingId, final UUID personId, final String status) {
         this.id = id;
         this.hearingId = hearingId;
         this.personId = personId;
         this.status = status;
-    }
-
-    public DefenceCounsel(){
-
     }
 
     public UUID getId() {

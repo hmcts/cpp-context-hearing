@@ -30,8 +30,10 @@ import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionsRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinitions;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
@@ -53,16 +55,17 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
- * Todo test cases in the class needs to be re-factored to use less mocks and instead use real objects
- * E.g. {@link HearingQueryViewTest#shouldGetHearingEventLogByHearingId()}
+ * Todo test cases in the class needs to be re-factored to use less mocks and instead use real
+ * objects E.g. {@link HearingQueryViewTest#shouldGetHearingEventLogByHearingId()}
  */
 @RunWith(MockitoJUnitRunner.class)
 public class HearingQueryViewTest {
 
-    private static final String NAME_RESPONSE_HEARINGS_BY_STARTDATE = "hearing.get.hearings-by-startdate-response";
-    private static final String NAME_RESPONSE_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid-response";
-    private static final String NAME_RESPONSE_HEARING = "hearing.get.hearing-response";
+    private static final String RESPONSE_NAME_HEARINGS_BY_STARTDATE = "hearing.get.hearings-by-startdate-response";
+    private static final String RESPONSE_NAME_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid-response";
+    private static final String RESPONSE_NAME_HEARING = "hearing.get.hearing-response";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
+    private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.hearing-event-definitions-response";
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_START_DATE = "startDate";
@@ -71,6 +74,8 @@ public class HearingQueryViewTest {
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_TIMESTAMP = "timestamp";
     private static final String FIELD_HEARING_EVENTS = "events";
+    private static final String FIELD_HEARING_EVENT_DEFINITIONS = "eventDefinitions";
+    private static final String FIELD_ACTION_LABEL = "actionLabel";
 
     private static final UUID CASE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
@@ -85,9 +90,9 @@ public class HearingQueryViewTest {
     private static final String RECORDED_LABEL_2 = STRING.next();
     private static final ZonedDateTime TIMESTAMP_2 = TIMESTAMP.plusMinutes(1);
 
-    private static final UUID HEARING_EVENT_ID_3 = randomUUID();
-    private static final String RECORDED_LABEL_3 = STRING.next();
-    private static final ZonedDateTime TIMESTAMP_3 = TIMESTAMP.plusMinutes(2);
+    private static final String ACTION_LABEL = STRING.next();
+
+    private static final String ACTION_LABEL_2 = STRING.next();
 
     @Mock
     private JsonEnvelope query;
@@ -113,6 +118,9 @@ public class HearingQueryViewTest {
     @Mock
     private HearingEventRepository hearingEventRepository;
 
+    @Mock
+    private HearingEventDefinitionsRepository hearingEventDefinitionsRepository;
+
     @InjectMocks
     private HearingQueryView hearingsQueryView;
 
@@ -127,7 +135,7 @@ public class HearingQueryViewTest {
         final JsonEnvelope actualHearings = hearingsQueryView.findHearingsByStartDate(query);
 
         assertThat(actualHearings, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query).withName(NAME_RESPONSE_HEARINGS_BY_STARTDATE),
+                withMetadataEnvelopedFrom(query).withName(RESPONSE_NAME_HEARINGS_BY_STARTDATE),
                 payloadIsJson(allOf(
                         withJsonPath("$.hearings", hasSize(2)),
                         withJsonPath("$.hearings[0].hearingId", equalTo(HEARING_ID.toString())),
@@ -147,7 +155,7 @@ public class HearingQueryViewTest {
         final JsonEnvelope actualHearings = hearingsQueryView.findHearingsByCaseId(query);
 
         assertThat(actualHearings, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query).withName(NAME_RESPONSE_HEARINGS_BY_CASE_ID),
+                withMetadataEnvelopedFrom(query).withName(RESPONSE_NAME_HEARINGS_BY_CASE_ID),
                 payloadIsJson(allOf(
                         withJsonPath("$.hearings", hasSize(2)),
                         withJsonPath("$.hearings[0].hearingId", equalTo(HEARING_ID.toString())),
@@ -169,7 +177,7 @@ public class HearingQueryViewTest {
 
         when(hearingService.getHearingById(hearingId)).thenReturn(hearingView);
 
-        when(enveloper.withMetadataFrom(query, NAME_RESPONSE_HEARING))
+        when(enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING))
                 .thenReturn(function);
 
         when(function.apply(hearingView)).thenReturn(responseJson);
@@ -225,6 +233,29 @@ public class HearingQueryViewTest {
         ));
     }
 
+    @Test
+    public void shouldGetAllHearingEventDefinitions() {
+        when(hearingEventDefinitionsRepository.findAll()).thenReturn(hearingEventDefinitions());
+
+        final JsonEnvelope query = envelopeFrom(metadataWithDefaults(), createObjectBuilder().build());
+
+        final JsonEnvelope actualHearingEventDefinitions = hearingsQueryView.getHearingEventDefinitions(query);
+
+        assertThat(actualHearingEventDefinitions, is(jsonEnvelope(
+                withMetadataEnvelopedFrom(query)
+                        .withName(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_HEARING_EVENT_DEFINITIONS), hasSize(2)),
+
+                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL)),
+
+                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2))
+                ))
+        )));
+    }
+
     private List<HearingView> getHearings() {
         final List<HearingView> hearings = new ArrayList<>();
         final HearingView hearing1 = new HearingView();
@@ -263,6 +294,13 @@ public class HearingQueryViewTest {
         hearingEvents.add(new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP));
         hearingEvents.add(new HearingEvent(HEARING_EVENT_ID_2, HEARING_ID, RECORDED_LABEL_2, TIMESTAMP_2));
         return hearingEvents;
+    }
+
+    private List<HearingEventDefinitions> hearingEventDefinitions() {
+        return newArrayList(
+                new HearingEventDefinitions(RECORDED_LABEL, ACTION_LABEL, 1, null),
+                new HearingEventDefinitions(RECORDED_LABEL_2, ACTION_LABEL_2, 2, null)
+        );
     }
 
 }

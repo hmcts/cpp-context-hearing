@@ -36,8 +36,12 @@ public class HearingEventDefinition {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         HearingEventDefinition that = (HearingEventDefinition) o;
         return Objects.equals(getActionLabel(), that.getActionLabel()) &&
                 Objects.equals(getRecordedLabel(), that.getRecordedLabel()) &&

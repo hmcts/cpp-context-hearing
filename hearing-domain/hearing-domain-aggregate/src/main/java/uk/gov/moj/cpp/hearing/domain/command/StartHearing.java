@@ -27,7 +27,7 @@ public class StartHearing {
 
     @Override
     public String toString() {
-        return "InitiateHearing{" +
+        return "StartHearing{" +
                 "hearingId=" + hearingId +
                 ", startTime=" + startTime +
                 '}';

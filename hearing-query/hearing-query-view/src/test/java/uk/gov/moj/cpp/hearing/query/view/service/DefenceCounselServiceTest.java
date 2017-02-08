@@ -23,19 +23,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DefenceCounselServiceTest {
 
     @InjectMocks
-    DefenceCounselService defenceCounselService;
+    private DefenceCounselService defenceCounselService;
 
     @Mock
-    DefenceCounselRepository defenceCounselRepository;
+    private DefenceCounselRepository defenceCounselRepository;
 
     @Mock
-    DefenceCounselDefendantRepository defenceCounselDefendantRepository;
+    private DefenceCounselDefendantRepository defenceCounselDefendantRepository;
 
     @Mock
-    List<DefenceCounsel> defenceCounselList;
+    private List<DefenceCounsel> defenceCounselList;
 
     @Mock
-    List<DefenceCounselDefendant> defenceCounselDefendantList;
+    private List<DefenceCounselDefendant> defenceCounselDefendantList;
 
     @Test
     public void shouldGetDefenceCounselsByHearingId(){
