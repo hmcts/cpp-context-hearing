@@ -23,7 +23,7 @@ public class HearingCase {
     private UUID caseId;
 
     public HearingCase() {
-        // for JPA //NOSONAR
+        // for JPA
     }
 
     public HearingCase(final UUID id, final UUID hearingId, final UUID caseId) {

@@ -8,6 +8,8 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromString;
@@ -21,6 +23,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
@@ -30,23 +33,25 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.handler.converter.JsonToHearingConverter;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventsLogAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEnded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import javax.json.JsonArrayBuilder;
 
@@ -63,6 +68,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class HearingCommandHandlerTest {
 
     private static final String INITIATE_HEARING_COMMAND = "hearing.initiate-hearing";
+    private static final String ALLOCATE_COURT_COMMAND = "hearing.allocate-court";
+    private static final String BOOK_ROOM_COMMAND = "hearing.book-room";
+    private static final String HEARING_START_COMMAND = "hearing.start";
+    private static final String HEARING_END_COMMAND = "hearing.end";
+    private static final String ADD_CASE_COMMAND = "hearing.add-case";
+    private static final String ADD_PROSECUTION_COUNSEL_COMMAND = "hearing.add-prosecution-counsel";
+    private static final String ADD_DEFENCE_COUNSEL_COMMAND = "hearing.add-defence-counsel";
+    private static final String ADJOURN_DATE_COMMAND = "hearing.adjourn-date";
     private static final String LOG_HEARING_EVENT_COMMAND = "hearing.log-hearing-event";
     private static final String SAVE_DRAFT_RESULT_COMMAND = "hearing.save-draft-result";
     private static final String HEARING_CORRECT_EVENT_COMMAND = "hearing.correct-hearing-event";
@@ -72,7 +85,11 @@ public class HearingCommandHandlerTest {
     private static final String CASE_ASSOCIATED_EVENT = "hearing.case-associated";
     private static final String COURT_ASSIGNED_EVENT = "hearing.court-assigned";
     private static final String ROOM_BOOKED_EVENT = "hearing.room-booked";
+    private static final String HEARING_STARTED_EVENT = "hearing.started";
+    private static final String HEARING_ENDED_EVENT = "hearing.ended";
     private static final String PROSECUTION_COUNSEL_ADDED_EVENT = "hearing.prosecution-counsel-added";
+    private static final String DEFENCE_COUNSEL_ADDED_EVENT = "hearing.defence-counsel-added";
+    private static final String ADJOURN_DATE_UPDATED_EVENT = "hearing.adjourn-date-updated";
     private static final String HEARING_EVENT_LOGGED_EVENT = "hearing.hearing-event-logged";
     private static final String HEARING_EVENT_DELETED_EVENT = "hearing.hearing-event-deleted";
     private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
@@ -100,6 +117,16 @@ public class HearingCommandHandlerTest {
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_ROOM_NAME = "roomName";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_LOCAL_TIME = "localTime";
+    private static final String FIELD_PERSON_ID = "personId";
+    private static final String FIELD_ATTENDEE_ID = "attendeeId";
+    private static final String FIELD_STATUS = "status";
+    private static final String FIELD_DEFENDANT_IDS = "defendantIds";
+    private static final String FIELD_DEFENDANT_ID = "defendantId";
+    private static final String FIELD_TARGET_ID = "targetId";
+    private static final String FIELD_OFFENCE_ID = "offenceId";
+    private static final String FIELD_DRAFT_RESULT = "draftResult";
+    private static final String FIELD_START_DATE = "startDate";
 
     private static final UUID HEARING_ID = randomUUID();
 
@@ -108,14 +135,11 @@ public class HearingCommandHandlerTest {
     private static final String TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
     private static final String DIFFERENT_TIMESTAMP = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
 
-    private static final String DEFENDANT_ID = "defendantId";
-    private static final UUID DEFENDANT_ID_VALUE = randomUUID();
-    private static final String TARGET_ID = "targetId";
-    private static final UUID TARGET_ID_VALUE = randomUUID();
-    private static final String OFFENCE_ID = "offenceId";
-    private static final UUID OFFENCE_ID_VALUE = randomUUID();
-    private static final String DRAFT_RESULT = "draftResult";
+    private static final UUID DEFENDANT_ID = randomUUID();
+    private static final UUID TARGET_ID = randomUUID();
+    private static final UUID OFFENCE_ID = randomUUID();
     private static final String ARBITRARY_STRING_IMP_2_YRS = "imp 2 yrs";
+    private static final UUID DEFENDANT_ID_2 = randomUUID();
 
     private static final String ACTION_LABEL = STRING.next();
     private static final String RECORDED_LABEL = STRING.next();
@@ -137,6 +161,8 @@ public class HearingCommandHandlerTest {
     private static final UUID CASE_ID = randomUUID();
     private static final String ROOM_NAME = STRING.next();
     private static final String COURT_CENTRE_NAME = STRING.next();
+    private static final String END_DATE_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    private static final String START_DATE = PAST_LOCAL_DATE.next().toString();
 
     @Mock
     private EventStream eventStream;
@@ -145,20 +171,15 @@ public class HearingCommandHandlerTest {
     private EventSource eventSource;
 
     @Mock
-    private JsonToHearingConverter jsonToHearingConverter;
-
-    @Mock
     private AggregateService aggregateService;
-
-    @Mock
-    private HearingAggregate hearingAggregate;
 
     @Spy
     private Enveloper enveloper = createEnveloperWithEvents(
             HearingEventLogged.class, DraftResultSaved.class, HearingEventDefinitionsCreated.class,
             HearingEventDeletionIgnored.class, HearingEventDeleted.class, HearingEventIgnored.class,
             HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
-            RoomBooked.class);
+            RoomBooked.class, HearingStarted.class, HearingEnded.class, ProsecutionCounselAdded.class,
+            DefenceCounselAdded.class, HearingAdjournDateUpdated.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
@@ -166,12 +187,12 @@ public class HearingCommandHandlerTest {
     @Before
     public void setup() {
         when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
+        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
+        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(new HearingEventsLogAggregate());
     }
 
     @Test
     public void shouldRaiseHearingInitiatedEventWhenOnlyRequiredFieldsAreAvailable() throws Exception {
-        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
-
         final JsonEnvelope command = createInitiateHearingCommandWithOnlyRequiredFields();
 
         hearingCommandHandler.initiateHearing(command);
@@ -191,8 +212,6 @@ public class HearingCommandHandlerTest {
 
     @Test
     public void shouldRaiseMultipleEventsWhenAllTheFieldsAreAvailableForInitiateHearing() throws Exception {
-        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
-
         final JsonEnvelope command = createInitiateHearingCommand();
 
         hearingCommandHandler.initiateHearing(command);
@@ -232,15 +251,110 @@ public class HearingCommandHandlerTest {
     }
 
     @Test
-    public void shouldAddProsecutionCounsel() throws Exception {
-        final JsonEnvelope command = createAddProsecutionCounselCommand();
+    public void shouldRaiseCourtAssignedEvent() throws Exception {
+        final JsonEnvelope command = createAllocateCourtCommand();
 
-        when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
-        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
-        when(hearingAggregate.addProsecutionCounsel(HEARING_ID, ATTENDEE_ID, PERSON_ID, STATUS)).thenReturn(Stream.of(
-                new ProsecutionCounselAdded(HEARING_ID, ATTENDEE_ID, PERSON_ID, STATUS)));
-        when(enveloper.withMetadataFrom(command)).thenReturn(
-                createEnveloperWithEvents(ProsecutionCounselAdded.class).withMetadataFrom(command));
+        hearingCommandHandler.allocateCourt(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(COURT_ASSIGNED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.courtCentreName", equalTo(COURT_CENTRE_NAME))
+                        ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseRoomBookedEvent() throws Exception {
+        final JsonEnvelope command = createBookRoomCommand();
+
+        hearingCommandHandler.bookRoom(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(ROOM_BOOKED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.roomName", equalTo(ROOM_NAME))
+                        ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseHearingStartedEvent() throws Exception {
+        final JsonEnvelope command = createStartHearingCommand();
+
+        hearingCommandHandler.start(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_STARTED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.startTime", representsSameTime(START_DATE_TIME))
+                        ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseHearingEndedEvent() throws Exception {
+        final JsonEnvelope command = createEndHearingCommand();
+
+        hearingCommandHandler.end(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_ENDED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.endTime", representsSameTime(END_DATE_TIME))
+                        ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseHearingAdjournDateUpdatedEvent() throws Exception {
+        final JsonEnvelope command = createAdjournHearingDateCommand();
+
+        hearingCommandHandler.adjournHearingDate(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(ADJOURN_DATE_UPDATED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.startDate", representsSameTime(START_DATE))
+                        ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseCaseAssociatedEvent() throws Exception {
+        final JsonEnvelope command = createAddCaseCommand();
+
+        hearingCommandHandler.addCase(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(CASE_ASSOCIATED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.caseId", equalTo(CASE_ID.toString()))
+                        ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseProsecutionCounselAddedEvent() throws Exception {
+        final JsonEnvelope command = createAddProsecutionCounselCommand();
 
         hearingCommandHandler.addProsecutionCounsel(command);
 
@@ -253,9 +367,28 @@ public class HearingCommandHandlerTest {
                                 withJsonPath("$.attendeeId", equalTo(ATTENDEE_ID.toString())),
                                 withJsonPath("$.status", equalTo(STATUS)),
                                 withJsonPath("$.hearingId", equalTo(HEARING_ID.toString()))
-                                )
-                        )
-                )
+                        ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldRaiseDefenceCounselAddedEvent() throws Exception {
+        final JsonEnvelope command = createAddDefenceCounselCommand();
+
+        hearingCommandHandler.addDefenceCounsel(command);
+
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(DEFENCE_COUNSEL_ADDED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.personId", equalTo(PERSON_ID.toString())),
+                                withJsonPath("$.attendeeId", equalTo(ATTENDEE_ID.toString())),
+                                withJsonPath("$.status", equalTo(STATUS)),
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.defendantIds", hasSize(2)),
+                                withJsonPath("$.defendantIds", hasItems(DEFENDANT_ID.toString(), DEFENDANT_ID_2.toString()))
+                        ))).thatMatchesSchema()
         ));
     }
 
@@ -287,8 +420,6 @@ public class HearingCommandHandlerTest {
 
     @Test
     public void shouldRaiseHearingEventLoggedIfNotAlreadyLogged() throws Exception {
-        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(new HearingEventsLogAggregate());
-
         final JsonEnvelope command = createLogHearingEventCommand();
 
         hearingCommandHandler.logHearingEvent(command);
@@ -389,8 +520,6 @@ public class HearingCommandHandlerTest {
 
     @Test
     public void shouldLogUpdatedEventAndIgnoreDeletionWhenTimestampIsCorrectedForHearingEventWhichHasNotBeenLogged() throws Exception {
-        when(aggregateService.get(eventStream, HearingEventsLogAggregate.class)).thenReturn(new HearingEventsLogAggregate());
-
         final JsonEnvelope command = createCorrectHearingEventCommand();
         hearingCommandHandler.correctEvent(command);
 
@@ -427,10 +556,10 @@ public class HearingCommandHandlerTest {
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_DRAFT_RESULT_SAVED_EVENT),
                         payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", DEFENDANT_ID), equalTo(DEFENDANT_ID_VALUE.toString())),
-                                withJsonPath(format("$.%s", OFFENCE_ID), equalTo(OFFENCE_ID_VALUE.toString())),
-                                withJsonPath(format("$.%s", DRAFT_RESULT), equalTo(ARBITRARY_STRING_IMP_2_YRS)),
-                                withJsonPath(format("$.%s", TARGET_ID), equalTo(TARGET_ID_VALUE.toString()))
+                                withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_DRAFT_RESULT), equalTo(ARBITRARY_STRING_IMP_2_YRS)),
+                                withJsonPath(format("$.%s", FIELD_TARGET_ID), equalTo(TARGET_ID.toString()))
                         ))
                 ).thatMatchesSchema()
         ));
@@ -478,6 +607,54 @@ public class HearingCommandHandlerTest {
                 .build();
     }
 
+    private JsonEnvelope createAllocateCourtCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(ALLOCATE_COURT_COMMAND))
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(COURT_CENTRE_NAME, FIELD_COURT_CENTRE_NAME)
+                .build();
+    }
+
+    private JsonEnvelope createBookRoomCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(BOOK_ROOM_COMMAND))
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(ROOM_NAME, FIELD_ROOM_NAME)
+                .build();
+    }
+
+    private JsonEnvelope createStartHearingCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(HEARING_START_COMMAND))
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(START_DATE_TIME, FIELD_LOCAL_TIME)
+                .build();
+    }
+
+    private JsonEnvelope createEndHearingCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(HEARING_END_COMMAND))
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(END_DATE_TIME, FIELD_LOCAL_TIME)
+                .build();
+    }
+
+    private JsonEnvelope createAdjournHearingDateCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(ADJOURN_DATE_COMMAND))
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(START_DATE, FIELD_START_DATE)
+                .build();
+    }
+
+    private JsonEnvelope createAddCaseCommand() {
+        return envelope()
+                .with(metadataWithRandomUUID(ADD_CASE_COMMAND))
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(CASE_ID, FIELD_CASE_ID)
+                .build();
+    }
+
     private JsonEnvelope createLogHearingEventCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(LOG_HEARING_EVENT_COMMAND))
@@ -503,21 +680,36 @@ public class HearingCommandHandlerTest {
         return envelope()
                 .with(metadataWithRandomUUID(SAVE_DRAFT_RESULT_COMMAND))
                 .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
-                .withPayloadOf(DEFENDANT_ID_VALUE, DEFENDANT_ID)
-                .withPayloadOf(TARGET_ID_VALUE, TARGET_ID)
-                .withPayloadOf(OFFENCE_ID_VALUE, OFFENCE_ID)
-                .withPayloadOf(ARBITRARY_STRING_IMP_2_YRS, DRAFT_RESULT)
+                .withPayloadOf(DEFENDANT_ID, FIELD_DEFENDANT_ID)
+                .withPayloadOf(TARGET_ID, FIELD_TARGET_ID)
+                .withPayloadOf(OFFENCE_ID, FIELD_OFFENCE_ID)
+                .withPayloadOf(ARBITRARY_STRING_IMP_2_YRS, FIELD_DRAFT_RESULT)
                 .build();
     }
 
     private JsonEnvelope createAddProsecutionCounselCommand() {
         return envelope()
-                .with(metadataWithRandomUUID(PROSECUTION_COUNSEL_ADDED_EVENT))
-                .withPayloadOf(HEARING_ID, "hearingId")
-                .withPayloadOf(PERSON_ID, "personId")
-                .withPayloadOf(ATTENDEE_ID, "attendeeId")
-                .withPayloadOf(STATUS, "status")
+                .with(metadataWithRandomUUID(ADD_PROSECUTION_COUNSEL_COMMAND))
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(PERSON_ID, FIELD_PERSON_ID)
+                .withPayloadOf(ATTENDEE_ID, FIELD_ATTENDEE_ID)
+                .withPayloadOf(STATUS, FIELD_STATUS)
                 .build();
+    }
+
+    private JsonEnvelope createAddDefenceCounselCommand() {
+        JsonArrayBuilder defendantIdsBuilder = createArrayBuilder()
+                .add(createObjectBuilder().add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString()))
+                .add(createObjectBuilder().add(FIELD_DEFENDANT_ID, DEFENDANT_ID_2.toString()));
+
+        return envelopeFrom(metadataWithRandomUUID(ADD_DEFENCE_COUNSEL_COMMAND),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .add(FIELD_PERSON_ID, PERSON_ID.toString())
+                        .add(FIELD_ATTENDEE_ID, ATTENDEE_ID.toString())
+                        .add(FIELD_STATUS, STATUS)
+                        .add(FIELD_DEFENDANT_IDS, defendantIdsBuilder)
+                        .build());
     }
 
     private Matcher<String> representsSameTime(final String time) {

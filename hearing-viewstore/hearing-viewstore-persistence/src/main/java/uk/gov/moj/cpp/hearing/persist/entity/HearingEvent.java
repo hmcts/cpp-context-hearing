@@ -28,7 +28,7 @@ public class HearingEvent {
     private boolean deleted;
 
     public HearingEvent() {
-        // for JPA //NOSONAR
+        // for JPA
     }
 
     public HearingEvent(final UUID id, final UUID hearingId, final String recordedLabel,

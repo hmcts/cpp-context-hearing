@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.apache.deltaspike.data.api.AbstractEntityRepository;
 import org.apache.deltaspike.data.api.Repository;
 
+@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 @Repository
 public abstract class DefenceCounselRepository extends AbstractEntityRepository<DefenceCounsel, UUID> {
     /**

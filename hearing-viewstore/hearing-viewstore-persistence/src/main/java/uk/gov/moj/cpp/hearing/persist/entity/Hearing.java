@@ -43,7 +43,7 @@ public class Hearing {
     private ZonedDateTime endedAt;
 
     public Hearing() {
-        // for JPA //NOSONAR
+        // for JPA
     }
 
     public Hearing(final UUID hearingId, final LocalDate startdate, final LocalTime startTime,

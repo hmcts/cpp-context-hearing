@@ -28,7 +28,7 @@ public class HearingOutcome implements Serializable {
     private String draftResult;
 
     public HearingOutcome(){
-        //For JPA //NOSONAR
+        //For JPA
     }
 
     public HearingOutcome(final UUID offenceId,

@@ -22,7 +22,7 @@ public class DefenceCounselDefendant {
     private UUID defendantId;
 
     public DefenceCounselDefendant() {
-        // for JPA //NOSONAR
+        // for JPA
     }
 
     public DefenceCounselDefendant(final UUID defenceCounselAttendeeId, final UUID defendantId) {

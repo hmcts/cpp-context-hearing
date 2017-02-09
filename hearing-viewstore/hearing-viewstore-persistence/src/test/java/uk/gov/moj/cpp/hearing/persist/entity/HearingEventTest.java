@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
+import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -21,6 +22,11 @@ public class HearingEventTest {
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final ZonedDateTime TIMESTAMP = PAST_ZONED_DATE_TIME.next();
+
+    @Test
+    public void shouldHaveANoArgsConstructor() {
+        assertThat(HearingEvent.class, hasValidBeanConstructor());
+    }
 
     @Test
     public void shouldCreateNewObjectWithSameValuesIfBuilderDoesNotOverwriteAnyFields() {

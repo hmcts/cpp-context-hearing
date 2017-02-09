@@ -34,14 +34,14 @@ public class ValidateHearingCommandRamlConfigAndPassThroughSenderTest {
     public void setup() throws IOException {
         for (Method method : HearingCommandHandler.class.getMethods()) {
             final Handles handles = method.getAnnotation(Handles.class);
-            if (null != handles) {
+            if (handles != null) {
                 handlers.put(method.getName(), handles.value());
 
             }
         }
 
-        /**
-         * Reading Raml and extraction action name @ {ramlActionNames}
+        /*
+          Reading Raml and extraction action name @ {ramlActionNames}
          */
         final List<String> allLines = readLines(new File("src/raml/hearing-command-handler.messaging.raml"));
         final Predicate<String> nonEmptyStringPredicate = (String s) -> !s.isEmpty();
