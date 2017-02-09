@@ -144,7 +144,7 @@ public class HearingEventListener {
 
     @Transactional
     @Handles("hearing.adjourn-date-updated")
-    public void hearingStartDateUpdated(final JsonEnvelope event) {
+    public void hearingAdjournDateUpdated(final JsonEnvelope event) {
         final HearingAdjournDateUpdated hearingAdjournDateUpdated = jsonObjectConverter.convert(event.payloadAsJsonObject(), HearingAdjournDateUpdated.class);
         final Hearing hearing = converter.convert(hearingAdjournDateUpdated);
         Optional<Hearing> storedHearing = hearingRepository.getByHearingId(hearingAdjournDateUpdated.getHearingId());

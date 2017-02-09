@@ -12,6 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.event.listener.converter.HearingEventsToHearingConverter;
@@ -77,6 +78,9 @@ public class HearingEventListenerTest {
 
     @Mock
     private HearingInitiated hearingInitiated;
+
+    @Mock
+    private HearingAdjournDateUpdated hearingAdjournDateUpdated;
 
     @Mock
     private Hearing hearing;
@@ -171,6 +175,18 @@ public class HearingEventListenerTest {
         assertThat(hearingOutcomeArgumentCaptor.getValue().getDraftResult(), is(ARBITRARY_STRING_IMP_2_YRS));
         assertThat(hearingOutcomeArgumentCaptor.getValue().getDefendantId(), is(DEFENDANT_ID_VALUE));
         assertThat(hearingOutcomeArgumentCaptor.getValue().getOffenceId(), is(OFFENCE_ID_VALUE));
+
+    }
+
+    @Test
+    public void shouldHandleHearingAdjournDateUpdatedEvent() throws Exception {
+
+        when(envelope.payloadAsJsonObject()).thenReturn(payload);
+        when(jsonObjectToObjectConverter.convert(payload, HearingAdjournDateUpdated.class)).thenReturn(hearingAdjournDateUpdated);
+        when(hearingRepository.getByHearingId(hearing.getHearingId())).thenReturn(Optional.empty());
+        when(hearingEventsToHearingConverter.convert(hearingAdjournDateUpdated)).thenReturn(hearing);
+        hearingEventListener.hearingAdjournDateUpdated(envelope);
+        verify(hearingRepository).save(hearing);
 
     }
 

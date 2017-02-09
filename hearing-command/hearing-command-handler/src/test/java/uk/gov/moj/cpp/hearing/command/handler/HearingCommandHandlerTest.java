@@ -51,6 +51,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingStarted;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import javax.json.JsonArrayBuilder;
@@ -90,6 +91,7 @@ public class HearingCommandHandlerTest {
     private static final String PROSECUTION_COUNSEL_ADDED_EVENT = "hearing.prosecution-counsel-added";
     private static final String DEFENCE_COUNSEL_ADDED_EVENT = "hearing.defence-counsel-added";
     private static final String ADJOURN_DATE_UPDATED_EVENT = "hearing.adjourn-date-updated";
+    private static final String HEARING_EVENT_ADJOURN_DATE_UPDATED = "hearing.adjourn-date-updated";
     private static final String HEARING_EVENT_LOGGED_EVENT = "hearing.hearing-event-logged";
     private static final String HEARING_EVENT_DELETED_EVENT = "hearing.hearing-event-deleted";
     private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
@@ -152,6 +154,7 @@ public class HearingCommandHandlerTest {
     private static final UUID PERSON_ID = randomUUID();
     private static final UUID ATTENDEE_ID = randomUUID();
     private static final String STATUS = STRING.next();
+    private final LocalDate CURRENT_DATE = LocalDate.now();
 
     private static final UUID HEARING_EVENT_DEFINITIONS_ID = randomUUID();
 
@@ -564,6 +567,33 @@ public class HearingCommandHandlerTest {
                 ).thatMatchesSchema()
         ));
     }
+
+//   TODO jayen needs to verify it after the merge
+//   @Test
+//    public void shouldAdjournHearingDate() throws Exception {
+//        final JsonEnvelope command = createAdjournHearingDateCommand();
+//
+//        when(eventSource.getStreamById(hearingId)).thenReturn(eventStream);
+//        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+//        when(hearingAggregate.adjournHearingDate(hearingId, CURRENT_DATE)).thenReturn(Stream.of(
+//                new HearingAdjournDateUpdated(hearingId, CURRENT_DATE)));
+//        when(enveloper.withMetadataFrom(command)).thenReturn(
+//                createEnveloperWithEvents(HearingAdjournDateUpdated.class).withMetadataFrom(command));
+//
+//        hearingCommandHandler.adjournHearingDate(command);
+//
+//        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+//                jsonEnvelope(
+//                        withMetadataEnvelopedFrom(command)
+//                                .withName(HEARING_EVENT_ADJOURN_DATE_UPDATED),
+//                        payloadIsJson(allOf(
+//                                withJsonPath("$.hearingId", equalTo(hearingId.toString())),
+//                                withJsonPath("$.startDate", equalTo(CURRENT_DATE.toString()))
+//                                )
+//                        )
+//                )
+//        ));
+//    }
 
     private static JsonEnvelope createHearingEventDefinitions() {
         final JsonArrayBuilder eventDefinitionsBuilder = createArrayBuilder()
