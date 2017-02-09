@@ -36,10 +36,7 @@ import com.jayway.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * Todo need to re-factor all the tests in the class to follow BDD like pattern
- * E.g. have a look at test cases in {@link HearingEventsIT}
- */
+
 public class HearingIT extends AbstractIT {
 
     private static final UUID USER_ID = randomUUID();
@@ -51,28 +48,13 @@ public class HearingIT extends AbstractIT {
     }
 
     @Test
-    public void hearingTest() throws IOException, InterruptedException {
-        final String caseId = randomUUID().toString();
+    public void endHearingTest() throws IOException, InterruptedException {
         final String hearingId = randomUUID().toString();
-
-        final String initiateHearing = Resources.toString(
-                getResource("hearing.initiate-hearing.json"),
-                defaultCharset());
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
 
-        final String initiateHearingBody = initiateHearing.replace("RANDOM_CASE_ID", caseId);
-
-        Response writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.start+json")
-                .body("{\n" +
-                        "  \"localTime\": \"2016-06-01T10:00:00Z\"\n" +
-                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
-
-        writeResponse = given().spec(requestSpec).and()
+        final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.end+json")
                 .body("{\n" +
                         "  \"localTime\": \"2016-06-01T11:00:00Z\"\n" +
@@ -81,13 +63,76 @@ public class HearingIT extends AbstractIT {
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
 
-        writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.initiate-hearing+json")
-                .body(initiateHearingBody).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.endedAt", is("2016-06-01T11:00:00Z"))
+                        )));
+    }
+
+    @Test
+    public void startHearingTest() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.start+json")
+                .body("{\n" +
+                        "  \"localTime\": \"2016-06-01T10:00:00Z\"\n" +
+                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
 
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.startedAt", is("2016-06-01T10:00:00Z"))
+                        )));
+    }
+
+    @Test
+    public void hearingHavingMultipleCasesTest() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.initiate-hearing+json")
+                .body(Resources.toString(getResource("hearing.initiate-hearing.json"),
+                        defaultCharset()).replace("RANDOM_CASE_ID", caseId)).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.caseIds[0]", is(caseId))
+                        )));
         writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.add-case+json")
                 .body("{\n" +
@@ -96,7 +141,26 @@ public class HearingIT extends AbstractIT {
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        writeResponse = given().spec(requestSpec).and()
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.caseIds", hasSize(2)),
+                                withJsonPath("$.caseIds[0]", is(caseId)),
+                                withJsonPath("$.caseIds[1]", is("2a2d7e9e-0c60-11e6-a148-3e1d05defe78"))
+                        )));
+
+
+    }
+
+    @Test
+    public void hearingBookRoomTest() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.book-room+json")
                 .body("{\n" +
                         "  \"roomName\": \"Room1\"\n" +
@@ -104,7 +168,28 @@ public class HearingIT extends AbstractIT {
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        writeResponse = given().spec(requestSpec).and()
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.roomName", is("Room1"))
+                        )));
+    }
+
+    @Test
+    public void hearingAllocateCourtTest() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.allocate-court+json")
                 .body("{\n" +
                         "  \"courtCentreName\": \"Bournemouth\"\n" +
@@ -112,7 +197,28 @@ public class HearingIT extends AbstractIT {
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        writeResponse = given().spec(requestSpec).and()
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.courtCentreName", is("Bournemouth"))
+                        )));
+    }
+
+    @Test
+    public void hearingAdjournDateTest() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.adjourn-date+json")
                 .body("{\n" +
                         "  \"startDate\": \"2016-06-05\"\n" +
@@ -120,56 +226,18 @@ public class HearingIT extends AbstractIT {
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        TimeUnit.SECONDS.sleep(15);
-
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
 
-        final Response readResponse = given().spec(requestSpec).and()
-                .accept("application/vnd.hearing.get.hearing+json")
-                .header(CPP_UID_HEADER).when().get(queryAPIEndPoint).then().extract()
-                .response();
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
 
-        assertThat(readResponse.getStatusCode(), is(200));
-
-
-        /*
-          Test Read store
-         */
-        assertThat("Case should associated with hearing", readResponse.jsonPath().getList("caseIds").contains(caseId), equalTo(true));
-        assertThat("Case should associated with hearing", readResponse.jsonPath().getList("caseIds").contains("2a2d7e9e-0c60-11e6-a148-3e1d05defe78"), equalTo(true));
-        assertThat("Hearing ID should match", readResponse.jsonPath().get("hearingId").equals(hearingId), equalTo(true));
-        assertThat("HearingType should match", readResponse.jsonPath().get("hearingType").equals("TRIAL"), equalTo(true));
-        assertThat("Court Centre name should match", readResponse.jsonPath().get("courtCentreName").equals("Bournemouth"), equalTo(true));
-        assertThat("Room name should match", readResponse.jsonPath().get("roomName").equals("Room1"), equalTo(true));
-        assertThat("Hearing start Date should match", readResponse.jsonPath().get("startDate").equals("2016-06-05"), equalTo(true));
-        assertThat("Hearing Start time should match", readResponse.jsonPath().get("startTime").equals("10:00"), equalTo(true));
-        assertThat("Hearing Started time should match", readResponse.jsonPath().get("startedAt").equals("2016-06-01T10:00:00Z"), equalTo(true));
-        assertThat("Hearing ended time should match", readResponse.jsonPath().get("endedAt").equals("2016-06-01T11:00:00Z"), equalTo(true));
-
-
-        final String getHearingsByDate = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-startDate"), (String) readResponse.jsonPath().get("startDate"));
-
-        Response readResponses = given().spec(requestSpec).and()
-                .accept("application/vnd.hearing.get.hearings-by-startdate+json")
-                .header(CPP_UID_HEADER).when().get(getHearingsByDate).then().extract()
-                .response();
-
-        assertThat(readResponses.getStatusCode(), is(200));
-        assertThat("hearings list size should be greater or equal one", readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
-
-
-        final String getHearingsByCaseId = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-caseId"), caseId);
-
-        readResponses = given().spec(requestSpec).and()
-                .accept("application/vnd.hearing.get.hearings-by-caseid+json")
-                .header(CPP_UID_HEADER).when().get(getHearingsByCaseId).then().extract()
-                .response();
-
-        assertThat(readResponses.getStatusCode(), is(200));
-        assertThat("hearings list size should be greater or equal one", readResponses.jsonPath().getList("hearings").size() >= 1, equalTo(true));
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.startDate", is("2016-06-05"))
+                        )));
     }
 
     @Test
