@@ -744,12 +744,12 @@ public class HearingCommandHandlerTest {
 
     private Matcher<String> representsSameTime(final String time) {
         //Framework JSON serialisation crops excess 0s from timestamp fields so we must compare against trimmed millisecond fields
-        if (time.endsWith("0Z")) {
-            return is(time.replace("0Z", "Z"));
+        if (time.endsWith("000Z")) {
+            return is(time.replace("000Z", "Z"));
         } else if (time.endsWith("00Z")) {
             return is(time.replace("00Z", "Z"));
-        } else if (time.endsWith("000Z")) {
-            return is(time.replace("000Z", "Z"));
+        } else if (time.endsWith("0Z")) {
+            return is(time.replace("0Z", "Z"));
         } else {
             return is(time);
         }
