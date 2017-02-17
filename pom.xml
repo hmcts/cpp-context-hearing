@@ -1,36 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>uk.gov.moj.cpp.common</groupId>
-		<artifactId>service-parent-pom</artifactId>
-		<version>3.0.2</version>
-	</parent>
+    <parent>
+        <groupId>uk.gov.moj.cpp.common</groupId>
+        <artifactId>service-parent-pom</artifactId>
+        <version>3.0.2</version>
+    </parent>
 
-	<groupId>uk.gov.moj.cpp.hearing</groupId>
-	<artifactId>hearing-parent</artifactId>
-	<version>2.0.66-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>uk.gov.moj.cpp.hearing</groupId>
+    <artifactId>hearing-parent</artifactId>
+    <version>2.0.66-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<name>Hearing Context - Parent Module</name>
-	<description>A applications for hearing service.</description>
-	<properties>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
-		<sonar.report.export.path>sonar-report.json</sonar.report.export.path>
-		<sonar.scm.provider>git</sonar.scm.provider>
-	</properties>
-	<modules>
-		<module>hearing-query</module>
-		<module>hearing-viewstore</module>
-		<module>hearing-command</module>
-		<module>hearing-domain</module>
-		<module>hearing-event</module>
-		<module>hearing-integration-test</module>
-		<module>hearing-performance-test</module>
+    <name>Hearing Context - Parent Module</name>
+    <description>A applications for hearing service.</description>
+    <properties>
+        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+        <sonar.report.export.path>sonar-report.json</sonar.report.export.path>
+        <sonar.scm.provider>git</sonar.scm.provider>
+        <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
+    </properties>
+    <modules>
+        <module>hearing-query</module>
+        <module>hearing-viewstore</module>
+        <module>hearing-command</module>
+        <module>hearing-domain</module>
+        <module>hearing-event</module>
+        <module>hearing-integration-test</module>
+        <module>hearing-performance-test</module>
         <module>hearing-notepad-parsing-service</module>
-	</modules>
-	<build>
+    </modules>
+    <build>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -60,4 +61,10 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <site>
+            <id>site</id>
+            <url>${mvn.site.url}</url>
+        </site>
+    </distributionManagement>
 </project>
