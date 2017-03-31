@@ -10,11 +10,7 @@ import uk.gov.moj.cpp.hearing.query.view.convertor.HearingEntityToHearing;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -31,6 +27,10 @@ public class HearingService {
     @Transactional
     public List<HearingView> getHearingsByStartDate(LocalDate localDate) {
         List<Hearing> hearings = hearingRepository.findByStartdate(localDate);
+
+        if (hearings.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         List<UUID> hearingIds = hearings.stream()
                 .map(Hearing::getHearingId)
@@ -73,6 +73,10 @@ public class HearingService {
     @Transactional
     public List<HearingView> getHearingsByCaseId(UUID caseId) {
         List<HearingCase> hearingCases = hearingCaseRepository.findByCaseId(caseId);
+
+        if (hearingCases.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         List<UUID> hearingIds = hearingCases.stream()
                 .map(HearingCase::getHearingId)
