@@ -3,10 +3,12 @@ package uk.gov.moj.cpp.hearing.persist;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -67,6 +69,8 @@ public class HearingCaseRepositoryTest {
         long count =  hearingCase.stream().map(hearingCase1 -> hearingCase1.getCaseId()).filter(caseId -> caseId.equals(caseId_1)).count();
         assertThat(1l,equalTo(count));
 
+        hearingCase = hearingCaseRepository.findByHearingIds(Collections.emptyList());
+        assertThat(hearingCase, hasSize(0));
     }
 
     @Test
