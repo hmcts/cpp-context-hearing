@@ -43,7 +43,7 @@ import org.apache.commons.lang3.StringUtils;
  * Processor class will match List of provided values with resulting metadata and return Knowledge
  * back as a result Currently it has three main matching types mentioned in enum
  *
- * @ResultDefinitionMatchingOutput.MatchingType Note : metadata stored in memory all in lowercase
+ * {@link ResultDefinitionMatchingOutput.MatchingType} Note : metadata stored in memory all in lowercase
  * and we are converting parts values in lower case before matching with metadata
  */
 public class Processor {
