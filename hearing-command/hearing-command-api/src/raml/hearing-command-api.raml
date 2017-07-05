@@ -20,12 +20,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              requestType: application/vnd.hearing.add-case+json
              name: hearing.add-case
         (mapping):
-             requestType: application/vnd.hearing.start+json
-             name: hearing.start
-        (mapping):
-            requestType: application/vnd.hearing.end+json
-            name: hearing.end
-        (mapping):
             requestType: application/vnd.hearing.add-prosecution-counsel+json
             name: hearing.add-prosecution-counsel
         (mapping):
@@ -59,16 +53,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.add-case.json
             schema:
              !include json/schema/hearing.add-case.json
-        application/vnd.hearing.start+json:
-            example:
-             !include json/hearing.start.json
-            schema:
-             !include json/schema/hearing.start.json
-        application/vnd.hearing.end+json:
-            example:
-             !include json/hearing.end.json
-            schema:
-             !include json/schema/hearing.end.json
         application/vnd.hearing.save-draft-result+json:
             example:
              !include json/hearing.save-draft-result.json
@@ -139,6 +123,22 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.correct-hearing-event+json:
             example: !include json/hearing.correct-hearing-event.json
             schema: !include json/schema/hearing.correct-hearing-event.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/share-results:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.share-results+json
+            name: hearing.share-results
+        ...
+      body:
+        application/vnd.hearing.share-results+json:
+            example: !include json/hearing.share-results.json
+            schema: !include json/schema/hearing.share-results.json
       responses:
             202:
                 description: OK

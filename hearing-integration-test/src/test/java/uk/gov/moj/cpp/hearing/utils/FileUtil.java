@@ -1,11 +1,11 @@
 package uk.gov.moj.cpp.hearing.utils;
 
+import static java.nio.charset.Charset.defaultCharset;
 import static javax.json.Json.createReader;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 
 import javax.json.JsonObject;
 import javax.json.JsonReader;
@@ -21,7 +21,7 @@ public class FileUtil {
     public static String getPayload(final String path) {
         String request = null;
         try {
-            request = Resources.toString(Resources.getResource(path), Charset.defaultCharset());
+            request = Resources.toString(Resources.getResource(path), defaultCharset());
         } catch (final Exception e) {
             LOGGER.error("Error consuming file from location {}", path, e);
             fail("Error consuming file from location " + path);

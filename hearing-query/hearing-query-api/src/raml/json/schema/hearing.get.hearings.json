@@ -5,35 +5,61 @@
     "hearings": {
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "hearingId": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string"
-          },
-          "startTime": {
-            "type": "string"
-          },
-          "hearingType": {
-            "type": "string"
-          },
-          "duration": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "hearingId",
-          "startDate",
-          "startTime",
-          "hearingType",
-          "duration"
-        ]
+        "$ref": "#/definitions/hearing"
       }
     }
   },
   "required": [
     "hearings"
-  ]
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "hearingType": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "integer"
+        },
+        "courtCentreName": {
+          "type": "string"
+        },
+        "roomName": {
+          "type": "string"
+        },
+        "caseIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uuid"
+          }
+        }
+      },
+      "required": [
+        "hearingId",
+        "startDate",
+        "startTime",
+        "hearingType",
+        "duration",
+        "courtCentreName",
+        "roomName",
+        "caseIds"
+      ],
+      "additionalProperties": false
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }

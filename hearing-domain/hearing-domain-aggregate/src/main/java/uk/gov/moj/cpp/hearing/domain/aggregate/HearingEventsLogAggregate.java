@@ -36,19 +36,19 @@ public class HearingEventsLogAggregate implements Aggregate {
     }
 
     public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel,
-                                          final ZonedDateTime timestamp) {
+                                          final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime) {
         if (hearingEventPreviouslyLogged(hearingEventId)) {
-            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, timestamp, REASON_ALREADY_LOGGED)));
+            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, eventTime, REASON_ALREADY_LOGGED)));
         } else if (hearingEventPreviouslyDeleted(hearingEventId)) {
-            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, timestamp, REASON_ALREADY_DELETED)));
+            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, eventTime, REASON_ALREADY_DELETED)));
         }
 
-        return apply(Stream.of(new HearingEventLogged(hearingEventId, hearingId, recordedLabel, timestamp)));
+        return apply(Stream.of(new HearingEventLogged(hearingEventId, hearingId, recordedLabel, eventTime, lastModifiedTime)));
     }
 
     public Stream<Object> correctEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel,
-                                       final ZonedDateTime timestamp, final UUID latestHearingEventId) {
-        return concat(logHearingEvent(hearingId, latestHearingEventId, recordedLabel, timestamp), deleteHearingEvent(hearingEventId));
+                                       final ZonedDateTime eventTime, ZonedDateTime lastModifiedTime, final UUID latestHearingEventId) {
+        return concat(logHearingEvent(hearingId, latestHearingEventId, recordedLabel, eventTime, lastModifiedTime), deleteHearingEvent(hearingEventId));
     }
 
     public Stream<Object> deleteHearingEvent(final UUID hearingEventId) {

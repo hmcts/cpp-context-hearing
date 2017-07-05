@@ -21,8 +21,11 @@ public class HearingEvent {
     @Column(name = "recorded_label")
     private String recordedLabel;
 
-    @Column(name = "timestamp")
-    private ZonedDateTime timestamp;
+    @Column(name = "event_time")
+    private ZonedDateTime eventTime;
+
+    @Column(name = "last_modified_time")
+    private ZonedDateTime lastModifiedTime;
 
     @Column(name = "deleted")
     private boolean deleted;
@@ -32,20 +35,23 @@ public class HearingEvent {
     }
 
     public HearingEvent(final UUID id, final UUID hearingId, final String recordedLabel,
-                        final ZonedDateTime timestamp) {
+                        final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime) {
         this.id = id;
         this.hearingId = hearingId;
         this.recordedLabel = recordedLabel;
-        this.timestamp = timestamp;
+        this.eventTime = eventTime;
+        this.lastModifiedTime = lastModifiedTime;
         this.deleted = false;
     }
 
     private HearingEvent(final UUID id, final UUID hearingId, final String recordedLabel,
-                        final ZonedDateTime timestamp, final boolean deleted) {
+                         final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime,
+                         final boolean deleted) {
         this.id = id;
         this.hearingId = hearingId;
         this.recordedLabel = recordedLabel;
-        this.timestamp = timestamp;
+        this.eventTime = eventTime;
+        this.lastModifiedTime = lastModifiedTime;
         this.deleted = deleted;
     }
 
@@ -61,8 +67,12 @@ public class HearingEvent {
         return recordedLabel;
     }
 
-    public ZonedDateTime getTimestamp() {
-        return timestamp;
+    public ZonedDateTime getEventTime() {
+        return eventTime;
+    }
+
+    public ZonedDateTime getLastModifiedTime() {
+        return lastModifiedTime;
     }
 
     public boolean isDeleted() {
@@ -70,22 +80,25 @@ public class HearingEvent {
     }
 
     public Builder builder() {
-        return new Builder(getId(), getHearingId(), getRecordedLabel(), getTimestamp(), isDeleted());
+        return new Builder(getId(), getHearingId(), getRecordedLabel(), getEventTime(), getLastModifiedTime(), isDeleted());
     }
 
     public class Builder {
         private UUID id;
         private UUID hearingId;
         private String recordedLabel;
-        private ZonedDateTime timestamp;
+        private ZonedDateTime eventTime;
+        private ZonedDateTime lastModifiedTime;
         private boolean deleted;
 
         public Builder(final UUID id, final UUID hearingId, final String recordedLabel,
-                       final ZonedDateTime timestamp, final boolean deleted) {
+                       final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime,
+                       final boolean deleted) {
             this.id = id;
             this.hearingId = hearingId;
             this.recordedLabel = recordedLabel;
-            this.timestamp = timestamp;
+            this.eventTime = eventTime;
+            this.lastModifiedTime = lastModifiedTime;
             this.deleted = deleted;
         }
 
@@ -94,8 +107,13 @@ public class HearingEvent {
             return this;
         }
 
-        public Builder withTimestamp(final ZonedDateTime timestamp) {
-            this.timestamp = timestamp;
+        public Builder withEventTime(final ZonedDateTime eventTime) {
+            this.eventTime = eventTime;
+            return this;
+        }
+
+        public Builder withLastModifiedTime(final ZonedDateTime lastModifiedTime) {
+            this.lastModifiedTime = lastModifiedTime;
             return this;
         }
 
@@ -105,7 +123,7 @@ public class HearingEvent {
         }
 
         public HearingEvent build() {
-            return new HearingEvent(this.id, this.hearingId, this.recordedLabel, this.timestamp, this.deleted);
+            return new HearingEvent(this.id, this.hearingId, this.recordedLabel, this.eventTime, this.lastModifiedTime, this.deleted);
         }
     }
 

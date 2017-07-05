@@ -1,5 +1,7 @@
 package uk.gov.justice.ccr.notepad;
 
+import static java.util.UUID.fromString;
+
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 
 import java.util.Optional;
@@ -13,8 +15,11 @@ import javax.enterprise.inject.Alternative;
 @Alternative
 @Priority(2)
 public class HearingSystemUserProvider implements SystemUserProvider {
+
+    private static final UUID SYSTEM_USER_ID = fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a");
+
     @Override
     public Optional<UUID> getContextSystemUserId() {
-        return Optional.of(UUID.fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a"));
+        return Optional.of(SYSTEM_USER_ID);
     }
 }

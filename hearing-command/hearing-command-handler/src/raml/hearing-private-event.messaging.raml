@@ -38,14 +38,6 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.case-associated.json
                     example: !include json/hearing.case-associated.json
 
-                application/vnd.hearing.started+json:
-                    schema: !include json/schema/hearing.started.json
-                    example: !include json/hearing.started.json
-
-                application/vnd.hearing.ended+json:
-                    schema: !include json/schema/hearing.ended.json
-                    example: !include json/hearing.ended.json
-
                 application/vnd.hearing.prosecution-counsel-added+json:
                     schema: !include json/schema/hearing.prosecution-counsel-added.json
                     example: !include json/hearing.prosecution-counsel-added.json
@@ -57,3 +49,11 @@ baseUri: message://command/handler/message/hearing
                 application/vnd.hearing.adjourn-date-updated+json:
                     schema: !include json/schema/hearing.adjourn-date-updated.json
                     example: !include json/hearing.adjourn-date-updated.json
+
+                application/vnd.hearing.results-shared+json:
+                    schema: !include json/schema/hearing.results-shared.json
+                    example: !include json/hearing.results-shared.json
+
+                application/vnd.hearing.result-amended+json:
+                    schema: !include json/schema/hearing.result-amended.json
+                    example: !include json/hearing.result-amended.json

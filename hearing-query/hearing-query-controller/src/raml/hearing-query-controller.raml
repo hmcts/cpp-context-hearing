@@ -63,7 +63,7 @@ protocols: [ HTTP, HTTPS ]
         ...
         (mapping):
             responseType: application/vnd.hearing.hearing-event-definitions+json
-            name: hearing.hearing-event-definitions
+            name: hearing.get-hearing-event-definitions
         ...
       responses:
             200:
@@ -71,7 +71,7 @@ protocols: [ HTTP, HTTPS ]
                 body:
                   application/vnd.hearing.hearing-event-definitions+json:
                     example:  !include json/hearing.hearing-event-definitions.json
-                    schema:   !include json/schema/hearing.hearing-event-definitions.json
+                    schema:   !include json/schema/hearing.get-hearing-event-definitions.json
 
 
 /hearings/{hearingId}/prosecution-counsels:

@@ -39,7 +39,7 @@ public class HearingQueryApi {
         return requester.request(query);
     }
 
-    @Handles("hearing.hearing-event-definitions")
+    @Handles("hearing.get-hearing-event-definitions")
     public JsonEnvelope findHearingEventDefinitions(final JsonEnvelope query) {
         return requester.request(query);
     }

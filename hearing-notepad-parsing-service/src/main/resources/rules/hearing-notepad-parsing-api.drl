@@ -23,3 +23,12 @@ rule "Command - API - Action - hearing.notepad.parse-result-prompt"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.notepad.reload-result-cache"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.notepad.reload-result-cache");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks","Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end

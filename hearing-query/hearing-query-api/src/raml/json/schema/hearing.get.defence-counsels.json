@@ -7,7 +7,7 @@
       "items": {
         "type": "object",
         "properties": {
-          "id": {
+          "attendeeId": {
             "$ref": "#/definitions/uuid"
           },
           "personId": {
@@ -32,7 +32,7 @@
           }
         },
         "required": [
-          "id",
+          "attendeeId",
           "personId",
           "defendantIds",
           "status"

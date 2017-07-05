@@ -13,11 +13,9 @@ import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,16 +36,6 @@ public class HearingServiceTest {
 
     @InjectMocks
     private HearingService caseHearingService;
-
-    @Ignore
-    public void findHearingsByStartDateTest() throws IOException {
-
-        final List<Hearing> hearings = Arrays.asList(getHearing().get(), getHearing().get());
-
-       // when(this.hearingRepository.findStartdatetimeWithNative("")).thenReturn(hearings);
-
-      //  assertEquals(2, this.caseHearingService.getHearingsByStartDate(Optional.of("")).size());
-    }
 
     @Test
     public void shouldFindHearingByIdTest() throws IOException {

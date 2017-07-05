@@ -38,12 +38,12 @@ public class HearingRepositoryTest {
     @Before
     public void setup() {
         final Hearing hearingOne = new Hearing(HEARING_ID_ONE, ARBITRARY_DATE_1.toLocalDate(),
-                ARBITRARY_DATE_1.toLocalTime(), 1, null, null, null, null, null);
+                ARBITRARY_DATE_1.toLocalTime(), 1, null, null, null);
         hearings.add(hearingOne);
         hearingRepository.save(hearingOne);
 
         final Hearing hearingTwo = new Hearing(HEARING_ID_TWO, ARBITRARY_DATE_2.toLocalDate(),
-                ARBITRARY_DATE_2.toLocalTime(), 1, null, null, null, null, null);
+                ARBITRARY_DATE_2.toLocalTime(), 1, null, null, null);
         hearings.add(hearingTwo);
         hearingRepository.save(hearingTwo);
     }
@@ -56,7 +56,7 @@ public class HearingRepositoryTest {
 
     @Test
     public void shouldFindByStartDateTime() throws Exception {
-        final List<Hearing> results = hearingRepository.findByStartdate(ARBITRARY_DATE_1.toLocalDate());
+        final List<Hearing> results = hearingRepository.findByStartDate(ARBITRARY_DATE_1.toLocalDate());
 
         assertEquals(results.size(), 2);
 
@@ -67,14 +67,14 @@ public class HearingRepositoryTest {
         final List<Hearing> results = hearingRepository.findAll();
         assertEquals(results.size(), 2);
         Hearing result = results.get(0);
-        assertThat(result.getStartdate(), equalTo(ARBITRARY_DATE_1.toLocalDate()));
+        assertThat(result.getStartDate(), equalTo(ARBITRARY_DATE_1.toLocalDate()));
     }
 
     @Test
     public void shouldFindByHearingId() throws Exception {
         final Optional<Hearing> result = hearingRepository.getByHearingId(HEARING_ID_ONE);
         assertThat(result.get().getDuration(), equalTo(1));
-        assertThat(result.get().getStartdate(), equalTo(ARBITRARY_DATE_1.toLocalDate()));
+        assertThat(result.get().getStartDate(), equalTo(ARBITRARY_DATE_1.toLocalDate()));
     }
 
     @Test

@@ -17,7 +17,7 @@ public class HearingEntityToHearingTest {
 
         final HearingView hearingVo = HearingEntityToHearing.convert(hearingA);
         assertEquals(hearingVo.getHearingId(), hearingA.getHearingId().toString());
-        assertEquals(hearingVo.getStartDate(), hearingA.getStartdate());
+        assertEquals(hearingVo.getStartDate(), hearingA.getStartDate());
         assertEquals(hearingVo.getDuration(), hearingA.getDuration());
     }
 

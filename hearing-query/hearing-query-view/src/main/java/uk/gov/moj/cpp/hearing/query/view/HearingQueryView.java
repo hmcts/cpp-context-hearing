@@ -1,24 +1,25 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static java.time.format.DateTimeFormatter.ISO_TIME;
 import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
-import uk.gov.justice.services.common.converter.ListToJsonArrayConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionsRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinitions;
+import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.convertor.DefenceCounselToDefendantMapConverter;
@@ -44,27 +45,23 @@ import javax.json.JsonObject;
 @ServiceComponent(Component.QUERY_VIEW)
 public class HearingQueryView {
 
-    private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.hearing-event-definitions-response";
-    private static final String RESPONSE_NAME_HEARING_LIST_BY_START_DATE = "hearing.get.hearings-by-startdate-response";
-    private static final String RESPONSE_NAME_HEARING_LIST_BY_CASE_ID = "hearing.get.hearings-by-caseid-response";
-    private static final String RESPONSE_NAME_HEARING = "hearing.get.hearing-response";
-    private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
+    private static final String DEFAULT_COURT_CENTRE_NAME = "Liverpool";
+    private static final String DEFAULT_ROOM_NAME = "Room 1";
 
-    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String RESPONSE_NAME_HEARINGS = "hearing.get.hearings";
+    private static final String RESPONSE_NAME_HEARING = "hearing.get-hearing";
 
-    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
-    private static final String FIELD_RECORDED_LABEL = "recordedLabel";
-    private static final String FIELD_TIMESTAMP = "timestamp";
-    private static final String FIELD_HEARING_EVENTS = "events";
-    private static final String FIELD_HEARING_EVENT_DEFINITIONS = "eventDefinitions";
-    private static final String FIELD_ACTION_LABEL = "actionLabel";
-
-    private static final String FIELD_START_DATE = "startDate";
-    private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_HEARINGS = "hearings";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_START_DATE = "startDate";
+    private static final String FIELD_START_TIME = "startTime";
+    private static final String FIELD_DURATION = "duration";
+    private static final String FIELD_HEARING_TYPE = "hearingType";
+    private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_ROOM_NAME = "roomName";
+    private static final String FIELD_CASE_IDS = "caseIds";
 
-    @Inject
-    private ListToJsonArrayConverter listToJsonArrayConverter;
+    private static final String FIELD_CASE_ID = "caseId";
 
     @Inject
     private HearingService hearingService;
@@ -82,6 +79,12 @@ public class HearingQueryView {
     private Enveloper enveloper;
 
     @Inject
+    private HearingRepository hearingRepository;
+
+    @Inject
+    private HearingCaseRepository hearingCaseRepository;
+
+    @Inject
     private ProsecutionCounselListConverter prosecutionCounselsListConverter;
 
     @Inject
@@ -90,30 +93,73 @@ public class HearingQueryView {
     @Inject
     private DefenceCounselToDefendantMapConverter defenceCounselToDefendantMapConverter;
 
-    @Inject
-    private HearingEventRepository hearingEventRepository;
-
-    @Inject
-    private HearingEventDefinitionsRepository hearingEventDefinitionsRepository;
-
     @Handles("hearing.get.hearings-by-startdate")
-    public JsonEnvelope findHearingsByStartDate(final JsonEnvelope envelope) {
-        final LocalDate localDate = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_START_DATE));
-        return enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING_LIST_BY_START_DATE)
-                .apply(createObjectBuilder().add(FIELD_HEARINGS,
-                        listToJsonArrayConverter.convert(hearingService.getHearingsByStartDate(localDate))
-                        ).build()
-                );
+    public JsonEnvelope findHearingsByStartDate(final JsonEnvelope query) {
+        final LocalDate startDate = LocalDates.from(query.payloadAsJsonObject().getString(FIELD_START_DATE));
+
+        final List<Hearing> hearings = hearingRepository.findByStartDate(startDate);
+        final JsonArrayBuilder hearingsJsonArrayBuilder = createArrayBuilder();
+
+        if (!hearings.isEmpty()) {
+            final List<UUID> hearingIds = hearings.stream().map(Hearing::getHearingId).collect(toList());
+            final List<HearingCase> hearingCases = hearingCaseRepository.findByHearingIds(hearingIds);
+
+            final Map<UUID, List<HearingCase>> hearingToCasesMap = hearingCases.stream().collect(groupingBy(HearingCase::getHearingId));
+
+
+            hearings.forEach(hearing -> {
+                        final JsonArrayBuilder caseIdsJsonArrayBuilder = createArrayBuilder();
+                        hearingToCasesMap.get(hearing.getHearingId()).forEach(hearingCase ->
+                                caseIdsJsonArrayBuilder.add(hearingCase.getCaseId().toString()));
+
+                        hearingsJsonArrayBuilder.add(
+                                createObjectBuilder()
+                                        .add(FIELD_HEARING_ID, hearing.getHearingId().toString())
+                                        .add(FIELD_START_DATE, LocalDates.to(hearing.getStartDate()))
+                                        .add(FIELD_START_TIME, hearing.getStartTime().format(ISO_TIME))
+                                        .add(FIELD_HEARING_TYPE, hearing.getHearingType())
+                                        .add(FIELD_DURATION, hearing.getDuration())
+                                        .add(FIELD_COURT_CENTRE_NAME, hearing.getCourtCentreName() != null ? hearing.getCourtCentreName() : DEFAULT_COURT_CENTRE_NAME)
+                                        .add(FIELD_ROOM_NAME, hearing.getRoomName() != null ? hearing.getRoomName() : DEFAULT_ROOM_NAME)
+                                        .add(FIELD_CASE_IDS, caseIdsJsonArrayBuilder)
+                        );
+                    }
+            );
+        }
+        return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARINGS)
+                .apply(createObjectBuilder()
+                        .add(FIELD_HEARINGS, hearingsJsonArrayBuilder)
+                        .build());
     }
 
     @Handles("hearing.get.hearings-by-caseid")
-    public JsonEnvelope findHearingsByCaseId(final JsonEnvelope envelope) {
-        final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), FIELD_CASE_ID);
-        return enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING_LIST_BY_CASE_ID)
-                .apply(createObjectBuilder().add(FIELD_HEARINGS,
-                        listToJsonArrayConverter.convert(hearingService.getHearingsByCaseId(caseId.get()))
-                        ).build()
-                );
+    public JsonEnvelope findHearingsByCaseId(final JsonEnvelope query) {
+        final UUID caseId = fromString(query.payloadAsJsonObject().getString(FIELD_CASE_ID));
+
+        final List<HearingCase> hearingCases = hearingCaseRepository.findByCaseId(caseId);
+
+        final List<UUID> hearingIds = hearingCases.stream().map(HearingCase::getHearingId).collect(toList());
+        final List<Hearing> hearings = hearingRepository.findByHearingIds(hearingIds);
+
+        final JsonArrayBuilder hearingsJsonArrayBuilder = createArrayBuilder();
+
+        hearings.forEach(hearing ->
+                hearingsJsonArrayBuilder.add(
+                        createObjectBuilder()
+                                .add(FIELD_HEARING_ID, hearing.getHearingId().toString())
+                                .add(FIELD_START_DATE, LocalDates.to(hearing.getStartDate()))
+                                .add(FIELD_START_TIME, hearing.getStartTime().format(ISO_TIME))
+                                .add(FIELD_HEARING_TYPE, hearing.getHearingType())
+                                .add(FIELD_DURATION, hearing.getDuration())
+                                .add(FIELD_COURT_CENTRE_NAME, hearing.getCourtCentreName() != null ? hearing.getCourtCentreName() : DEFAULT_COURT_CENTRE_NAME)
+                                .add(FIELD_ROOM_NAME, hearing.getRoomName() != null ? hearing.getRoomName() : DEFAULT_ROOM_NAME)
+                                .add(FIELD_CASE_IDS, createArrayBuilder().add(caseId.toString()))
+                ));
+
+        return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARINGS)
+                .apply(createObjectBuilder()
+                        .add(FIELD_HEARINGS, hearingsJsonArrayBuilder)
+                        .build());
     }
 
     @Handles("hearing.get.hearing")
@@ -150,29 +196,10 @@ public class HearingQueryView {
 
         for (DefenceCounsel defenceCounsel : defenceCounsels) {
             defenceCounselsAndDefendantsMap.put(defenceCounsel,
-                    defenceCounselService.getDefenceCounselDefendantsByDefenceCounselAttendeeId(defenceCounsel.getId()));
+                    defenceCounselService.getDefenceCounselDefendantsByDefenceCounselAttendeeId(defenceCounsel.getAttendeeId()));
         }
 
         return enveloper.withMetadataFrom(query, "hearing.get.defence-counsels").apply(payloadFrom(defenceCounselsAndDefendantsMap));
-    }
-
-    @Handles("hearing.hearing-event-definitions")
-    public JsonEnvelope getHearingEventDefinitions(final JsonEnvelope query) {
-        final List<HearingEventDefinitions> hearingEventDefinitions = hearingEventDefinitionsRepository.findAll();
-
-        final JsonArrayBuilder eventDefinitionsJsonArrayBuilder = createArrayBuilder();
-
-        hearingEventDefinitions.
-                forEach(eventDefinition -> eventDefinitionsJsonArrayBuilder.add(
-                        createObjectBuilder()
-                                .add(FIELD_ACTION_LABEL, eventDefinition.getActionLabel())
-                                .add(FIELD_RECORDED_LABEL, eventDefinition.getRecordedLabel())
-                ));
-
-        return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_DEFINITIONS)
-                .apply(createObjectBuilder()
-                        .add(FIELD_HEARING_EVENT_DEFINITIONS, eventDefinitionsJsonArrayBuilder)
-                        .build());
     }
 
     @Handles("hearing.get-draft-result")
@@ -183,30 +210,6 @@ public class HearingQueryView {
         final List<HearingOutcome> hearingOutcomes =
                 hearingOutcomeService.getHearingOutcomeByHearingId(hearingId);
         return enveloper.withMetadataFrom(envelope, "hearing.get-draft-result-response").apply(hearingOutcomesConverter.convert(hearingOutcomes));
-    }
-
-    @Handles("hearing.get-hearing-event-log")
-    public JsonEnvelope getHearingEventLog(final JsonEnvelope query) {
-        final String hearingId = query.payloadAsJsonObject().getString(FIELD_HEARING_ID);
-
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingId(fromString(hearingId));
-
-        final JsonArrayBuilder eventLogJsonArrayBuilder = createArrayBuilder();
-
-        hearingEvents.
-                forEach(hearingEvent -> eventLogJsonArrayBuilder.add(
-                        createObjectBuilder()
-                                .add(FIELD_HEARING_EVENT_ID, hearingEvent.getId().toString())
-                                .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
-                                .add(FIELD_TIMESTAMP, ZonedDateTimes.toString(hearingEvent.getTimestamp()))
-                ));
-
-        return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_LOG)
-                .apply(createObjectBuilder()
-                        .add(FIELD_HEARING_ID, hearingId)
-                        .add(FIELD_HEARING_EVENTS, eventLogJsonArrayBuilder)
-                        .build()
-                );
     }
 
     private JsonObject payloadFrom(final List<ProsecutionCounsel> prosecutionCounsels) {

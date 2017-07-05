@@ -1,0 +1,24 @@
+{
+  "resultDefinitions":[
+	{
+	    "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+	    "label": "imprisonment",
+		"shortCode": "impr",
+		"level": "O",
+		"adjournment": "N",
+		"category": "F",
+		"urgent": "Y",
+		"financial": "N",
+		"convicted": "N",
+		"d20": "N",
+		"resultDefinitionGroup": "",
+		"dvla": "",
+		"cjsCode": "3047",
+		"qualifier": "BA",
+		"postHearingCustodyStatus": "",
+		"jurisdiction": "B",
+		"resultSequence": "",
+        "keywords": "xyz"
+	}
+  ]
+}

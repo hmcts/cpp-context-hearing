@@ -21,7 +21,7 @@ public class DefenceCounselToDefendantMapConverter implements Converter<Map<Defe
         final JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
         defenceCounselsAndDefendantsMap.forEach((a,b) -> {
             jsonArrayBuilder.add(createObjectBuilder()
-                    .add("id", valueOf(a.getId()))
+                    .add("attendeeId", valueOf(a.getAttendeeId()))
                     .add("personId", valueOf(a.getPersonId()))
                     .add("status", a.getStatus())
                     .add("defendantIds", convert(b))

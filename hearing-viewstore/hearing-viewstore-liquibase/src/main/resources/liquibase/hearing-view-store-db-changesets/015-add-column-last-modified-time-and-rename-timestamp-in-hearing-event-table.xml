@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="1" author="CCR"
+               logicalFilePath="015-add-column-last-modified-time-and-rename-timestamp-in-hearing-event-table.xml">
+
+        <addColumn tableName="hearing_event">
+            <column name="last_modified_time" type="DATETIME TZ"/>
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet id="2" author="CCR"
+               logicalFilePath="015-add-column-last-modified-time-and-rename-timestamp-in-hearing-event-table.xml">
+
+        <renameColumn tableName="hearing_event" oldColumnName="timestamp"
+                      newColumnName="event_time"/>
+
+    </changeSet>
+</databaseChangeLog>

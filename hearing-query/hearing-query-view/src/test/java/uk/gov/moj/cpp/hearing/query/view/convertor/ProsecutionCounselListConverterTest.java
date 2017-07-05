@@ -20,9 +20,6 @@ import org.junit.Test;
 
 public class ProsecutionCounselListConverterTest {
 
-    private final ProsecutionCounselListConverter prosecutionCounselListConverter =
-            new ProsecutionCounselListConverter();
-
     @Test
     public void shouldConvertListOfProsecutionCounselsToJsonObjects() {
         final UUID id1 = randomUUID();
@@ -45,12 +42,12 @@ public class ProsecutionCounselListConverterTest {
         assertThat(prosecutionCounselJsonArray, hasSize(2));
 
         final JsonObject prosecutionCounselsJsonObject1 = prosecutionCounselJsonArray.getJsonObject(0);
-        assertThat(prosecutionCounselsJsonObject1.getJsonString("id").getString(), isOneOf(valueOf(id1), valueOf(id2)));
+        assertThat(prosecutionCounselsJsonObject1.getJsonString("attendeeId").getString(), isOneOf(valueOf(id1), valueOf(id2)));
         assertThat(prosecutionCounselsJsonObject1.getJsonString("personId").getString(), isOneOf(valueOf(personId1), valueOf(personId2)));
         assertThat(prosecutionCounselsJsonObject1.getJsonString("status").getString(), isOneOf(valueOf(status1), valueOf(status2)));
 
         final JsonObject prosecutionCounselsJsonObject2 = prosecutionCounselJsonArray.getJsonObject(1);
-        assertThat(prosecutionCounselsJsonObject2.getJsonString("id").getString(), isOneOf(valueOf(id1), valueOf(id2)));
+        assertThat(prosecutionCounselsJsonObject2.getJsonString("attendeeId").getString(), isOneOf(valueOf(id1), valueOf(id2)));
         assertThat(prosecutionCounselsJsonObject2.getJsonString("personId").getString(), isOneOf(valueOf(personId1), valueOf(personId2)));
         assertThat(prosecutionCounselsJsonObject2.getJsonString("status").getString(), isOneOf(valueOf(status1), valueOf(status2)));
 

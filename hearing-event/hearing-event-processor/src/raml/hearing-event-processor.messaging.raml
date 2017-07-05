@@ -2,11 +2,19 @@
 title: API Using media type in the URL
 baseUri: message://event/processor/message/hearing
 
-version: v1
 /hearing.event:
   post:
     body:
         application/vnd.hearing.hearing-initiated+json:
             schema: !include json/schema/hearing.hearing-initiated.json
             example: !include json/hearing.hearing-initiated.json
+        application/vnd.hearing.adjourn-date-updated+json:
+            schema: !include json/schema/hearing.adjourn-date-updated.json
+            example: !include json/hearing.adjourn-date-updated.json
+        application/vnd.hearing.results-shared+json:
+            schema: !include json/schema/hearing.results-shared.json
+            example: !include json/hearing.results-shared.json
+        application/vnd.hearing.result-amended+json:
+            schema: !include json/schema/hearing.result-amended.json
+            example: !include json/hearing.result-amended.json
 

@@ -11,7 +11,7 @@
     "hearingId": {
       "$ref": "#/definitions/uuid"
     },
-    "timestamp": {
+    "eventTime": {
       "type": "string",
       "format": "date-time"
     },
@@ -24,7 +24,7 @@
     "hearingEventId",
     "recordedLabel",
     "hearingId",
-    "timestamp",
+    "eventTime",
     "reason"
   ],
   "definitions": {

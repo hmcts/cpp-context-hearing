@@ -19,7 +19,7 @@ import org.apache.deltaspike.data.api.Repository;
 @Repository
 public abstract class HearingEventRepository extends AbstractEntityRepository<HearingEvent, UUID> {
 
-    public Optional<HearingEvent> findById(@QueryParam("hearingEventId") final UUID hearingEventId) {
+    public Optional<HearingEvent> findOptionalById(final UUID hearingEventId) {
         final HearingEvent hearingEvent = findBy(hearingEventId);
         return hearingEvent == null ? empty() : Optional.of(hearingEvent);
     }
@@ -27,6 +27,6 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     @Query(value = "from HearingEvent he where he.deleted is false and he.id = :hearingEventId", singleResult = OPTIONAL)
     public abstract HearingEvent findBy(@QueryParam("hearingEventId") final UUID hearingEventId);
 
-    @Query(value = "from HearingEvent he where he.deleted is false and he.hearingId = :hearingId order by he.timestamp asc")
-    public abstract List<HearingEvent> findByHearingId(@QueryParam("hearingId") final UUID hearingId);
+    @Query(value = "from HearingEvent he where he.deleted is false and he.hearingId = :hearingId order by he.eventTime asc")
+    public abstract List<HearingEvent> findByHearingIdOrderByEventTimeAsc(@QueryParam("hearingId") final UUID hearingId);
 }

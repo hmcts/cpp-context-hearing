@@ -13,7 +13,7 @@ public class HearingTestUtils {
 
     public static Optional<Hearing> getHearing() {
         final Hearing hearingA = new Hearing(randomUUID(), startDate, null, 1,
-                null, null, null, null, null);
+                null, null, null);
         return Optional.of(hearingA);
     }
 }

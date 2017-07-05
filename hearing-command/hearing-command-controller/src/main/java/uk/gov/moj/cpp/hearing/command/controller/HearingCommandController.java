@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.controller;
 
-import uk.gov.justice.services.core.annotation.Component;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_CONTROLLER;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.sender.Sender;
@@ -8,7 +9,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
 
-@ServiceComponent(Component.COMMAND_CONTROLLER)
+@ServiceComponent(COMMAND_CONTROLLER)
 public class HearingCommandController {
 
     @Inject
@@ -29,18 +30,8 @@ public class HearingCommandController {
         sender.send(envelope);
     }
 
-    @Handles("hearing.start")
-    public void start(JsonEnvelope envelope) {
-        sender.send(envelope);
-    }
-
     @Handles("hearing.adjourn-date")
     public void adjournHearingDate(JsonEnvelope envelope) {
-        sender.send(envelope);
-    }
-
-    @Handles("hearing.end")
-    public void end(JsonEnvelope envelope) {
         sender.send(envelope);
     }
 
@@ -79,4 +70,8 @@ public class HearingCommandController {
         sender.send(command);
     }
 
+    @Handles("hearing.share-results")
+    public void shareResults(final JsonEnvelope command) {
+        sender.send(command);
+    }
 }

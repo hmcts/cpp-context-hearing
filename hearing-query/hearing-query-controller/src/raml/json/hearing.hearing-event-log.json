@@ -4,7 +4,8 @@
     {
       "hearingEventId": "7daefec3-2f76-8109-82d9-2e60544a6c02",
       "recordedLabel": "Hearing Started",
-      "timestamp": "2016-12-08T14:13:12Z"
+      "eventTime": "2016-12-08T14:13:00Z",
+      "lastModifiedTime": "2016-12-08T14:15:12Z"
     }
   ]
 }

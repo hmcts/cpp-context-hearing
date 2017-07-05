@@ -1,0 +1,15 @@
+{
+  "capabilities": [
+    {
+      "name": "hearing.notepad.parse-result-definition",
+      "type": "action",
+      "action": "hearing.notepad.parse-result-definition"
+    },
+    {
+      "name": "hearing.notepad.parse-result-prompt",
+      "type": "action",
+      "action": "hearing.notepad.parse-result-prompt"
+    }
+  ]
+}
+

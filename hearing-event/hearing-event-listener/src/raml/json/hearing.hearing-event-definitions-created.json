@@ -4,21 +4,43 @@
     {
       "actionLabel": "Start Hearing",
       "recordedLabel": "Hearing started",
-      "sequence": 1
+      "sequence": 1,
+      "sequenceType": "SENTENCING"
     },
     {
       "actionLabel": "Identify defendant",
       "recordedLabel": "Defendant identified",
-      "sequence": 2
+      "sequence": 2,
+      "sequenceType": "SENTENCING"
     },
     {
-      "actionLabel": "<counsel.name> Defending <defendant.name>",
+      "groupLabel": "Mitigation by:",
+      "actionLabel": "<counsel.name>",
+      "actionLabelExtension": "Defending <defendant.name>",
       "recordedLabel": "Defence <counsel.name> mitigated for <defendant.name>",
       "sequence": 3,
-      "caseAttributes": [
-        "defendant.name",
-        "counsel.name"
-      ]
+      "sequenceType": "SENTENCING",
+      "caseAttribute": "defendant.name,counsel.name"
+    },
+    {
+      "actionLabel": "Prosecution challenges defence application",
+      "recordedLabel": "Prosecution challenged defence application"
+    },
+    {
+      "actionLabel": "Judge ruling: Contempt of court",
+      "recordedLabel": "Judge ruling: Contempt of court"
+    },
+    {
+      "actionLabel": "Pause",
+      "recordedLabel": "Hearing paused",
+      "sequence": 1,
+      "sequenceType": "PAUSE_RESUME"
+    },
+    {
+      "actionLabel": "Resume",
+      "recordedLabel": "Hearing resumed",
+      "sequence": 2,
+      "sequenceType": "PAUSE_RESUME"
     }
   ]
 }

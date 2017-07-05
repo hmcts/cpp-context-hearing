@@ -5,10 +5,11 @@ import static java.util.stream.Collectors.toList;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingEntityToHearing;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,39 +26,6 @@ public class HearingService {
     private HearingCaseRepository hearingCaseRepository;
 
     @Transactional
-    public List<HearingView> getHearingsByStartDate(LocalDate localDate) {
-        List<Hearing> hearings = hearingRepository.findByStartdate(localDate);
-
-        if (hearings.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<UUID> hearingIds = hearings.stream()
-                .map(Hearing::getHearingId)
-                .collect(toList());
-        List<HearingCase> hearingCases = hearingCaseRepository.findByHearingIds(hearingIds);
-
-        List<HearingView> hearingViews =
-                new ArrayList<>(hearings.stream().map(HearingEntityToHearing::convert).collect(toList()));
-
-        Map<String, List<HearingCase>> byHearingId =
-                hearingCases
-                        .stream()
-                        .collect(
-                                Collectors.groupingBy(hearingCase -> hearingCase.getHearingId().toString()));
-        hearingViews.stream().map(hearingView -> {
-            byHearingId.computeIfPresent(hearingView.getHearingId(), (s, hcases) -> {
-                hearingView.setCaseIds(hcases.stream()
-                        .map(hearingCase -> hearingCase.getCaseId().toString())
-                        .collect(toList()));
-                return hcases;
-            });
-            return hearingView.getCaseIds();
-        }).count();
-        return hearingViews;
-    }
-
-    @Transactional
     public HearingView getHearingById(UUID hearingId) {
         Optional<Hearing> hearing = hearingRepository.getByHearingId(hearingId);
         HearingView hearingView = new HearingView();
@@ -69,22 +37,4 @@ public class HearingService {
         }
         return hearingView;
     }
-
-    @Transactional
-    public List<HearingView> getHearingsByCaseId(UUID caseId) {
-        List<HearingCase> hearingCases = hearingCaseRepository.findByCaseId(caseId);
-
-        if (hearingCases.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<UUID> hearingIds = hearingCases.stream()
-                .map(HearingCase::getHearingId)
-                .collect(toList());
-        List<Hearing> hearings = hearingRepository.findByHearingIds(hearingIds);
-
-        return new ArrayList<>(hearings.stream().map(HearingEntityToHearing::convert).collect(toList()));
-
-    }
-
 }

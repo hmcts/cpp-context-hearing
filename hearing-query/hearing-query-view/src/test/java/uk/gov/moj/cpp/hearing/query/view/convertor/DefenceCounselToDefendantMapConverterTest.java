@@ -56,7 +56,7 @@ public class DefenceCounselToDefendantMapConverterTest {
         assertThat(defenceCounsels, hasSize(1));
 
         final JsonObject defenceCounselsJsonObject = defenceCounsels.getJsonObject(0);
-        assertThat(defenceCounselsJsonObject.getJsonString("id").getString(), is(valueOf(defenceCounselAttendeeId)));
+        assertThat(defenceCounselsJsonObject.getJsonString("attendeeId").getString(), is(valueOf(defenceCounselAttendeeId)));
         assertThat(defenceCounselsJsonObject.getJsonString("personId").getString(), is(valueOf(personId)));
         assertThat(defenceCounselsJsonObject.getJsonString("status").getString(), is(status));
 

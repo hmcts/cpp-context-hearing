@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.persist.entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -19,7 +18,7 @@ public class Hearing {
     private UUID hearingId;
 
     @Column(name = "startdate")
-    private LocalDate startdate;
+    private LocalDate startDate;
 
     @Column(name = "starttime")
     private LocalTime startTime;
@@ -36,37 +35,28 @@ public class Hearing {
     @Column(name = "courtcentrename")
     private String courtCentreName;
 
-    @Column(name = "started_at")
-    private ZonedDateTime startedAt;
-
-    @Column(name = "ended_at")
-    private ZonedDateTime endedAt;
-
     public Hearing() {
         // for JPA
     }
 
-    public Hearing(final UUID hearingId, final LocalDate startdate, final LocalTime startTime,
+    public Hearing(final UUID hearingId, final LocalDate startDate, final LocalTime startTime,
                    final Integer duration, final String roomName, final String hearingType,
-                   final String courtCentreName, final ZonedDateTime startedAt,
-                   final ZonedDateTime endedAt) {
+                   final String courtCentreName) {
         this.hearingId = hearingId;
-        this.startdate = startdate;
+        this.startDate = startDate;
         this.startTime = startTime;
         this.duration = duration;
         this.roomName = roomName;
         this.hearingType = hearingType;
         this.courtCentreName = courtCentreName;
-        this.startedAt = startedAt;
-        this.endedAt = endedAt;
     }
 
     public UUID getHearingId() {
         return hearingId;
     }
 
-    public LocalDate getStartdate() {
-        return startdate;
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
     public LocalTime getStartTime() {
@@ -89,47 +79,34 @@ public class Hearing {
         return courtCentreName;
     }
 
-    public ZonedDateTime getStartedAt() {
-        return startedAt;
-    }
-
-    public ZonedDateTime getEndedAt() {
-        return endedAt;
-    }
-
     public Builder builder() {
-        return new Builder(getHearingId(), getStartdate(), getStartTime(), getDuration(), getRoomName(),
-                getHearingType(), getCourtCentreName(), getStartedAt(), getEndedAt());
+        return new Builder(getHearingId(), getStartDate(), getStartTime(), getDuration(), getRoomName(),
+                getHearingType(), getCourtCentreName());
     }
 
     public class Builder {
         private final UUID hearingId;
-        private LocalDate startdate;
+        private LocalDate startDate;
         private LocalTime startTime;
         private Integer duration;
         private String roomName;
         private String hearingType;
         private String courtCentreName;
-        private ZonedDateTime startedAt;
-        private ZonedDateTime endedAt;
 
-        public Builder(final UUID hearingId, final LocalDate startdate, final LocalTime startTime,
-                        final Integer duration, final String roomName, final String hearingType,
-                        final String courtCentreName, final ZonedDateTime startedAt,
-                        final ZonedDateTime endedAt) {
+        public Builder(final UUID hearingId, final LocalDate startDate, final LocalTime startTime,
+                       final Integer duration, final String roomName, final String hearingType,
+                       final String courtCentreName) {
             this.hearingId = hearingId;
-            this.startdate = startdate;
+            this.startDate = startDate;
             this.startTime = startTime;
             this.duration = duration;
             this.roomName = roomName;
             this.hearingType = hearingType;
             this.courtCentreName = courtCentreName;
-            this.startedAt = startedAt;
-            this.endedAt = endedAt;
         }
 
-        public Builder withStartdate(final LocalDate startdate) {
-            this.startdate = startdate;
+        public Builder withStartDate(final LocalDate startDate) {
+            this.startDate = startDate;
             return this;
         }
 
@@ -158,19 +135,9 @@ public class Hearing {
             return this;
         }
 
-        public Builder withStartedAt(final ZonedDateTime startedAt) {
-            this.startedAt = startedAt;
-            return this;
-        }
-
-        public Builder withEndedAt(final ZonedDateTime endedAt) {
-            this.endedAt = endedAt;
-            return this;
-        }
-
         public Hearing build() {
-            return new Hearing(hearingId, startdate, startTime, duration, roomName, hearingType,
-                    courtCentreName, startedAt, endedAt);
+            return new Hearing(hearingId, startDate, startTime, duration, roomName, hearingType,
+                    courtCentreName);
         }
     }
 

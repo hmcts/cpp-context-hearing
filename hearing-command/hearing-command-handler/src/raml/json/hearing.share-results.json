@@ -1,0 +1,39 @@
+{
+  "hearingId": "7601f854-2e7b-4174-a83b-8ac564244b11",
+  "sharedTime": "2017-04-12T09:18:23Z",
+  "resultLines": [
+    {
+      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
+      "personId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
+      "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+      "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
+      "level": "OFFENCE",
+      "resultLabel": "Imprisonment",
+      "prompts": [
+        {
+          "label": "Imprisonment duration",
+          "value": "1 year 6 months"
+        },
+        {
+          "label": "Prison",
+          "value": "Wormwood Scrubs"
+        }
+      ]
+    },
+    {
+      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
+      "lastSharedResultId": "17c02158-4322-4dd0-b913-0ada7fcf81b6",
+      "personId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
+      "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+      "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
+      "level": "CASE",
+      "resultLabel": "Victim Surchange",
+      "prompts": [
+        {
+          "label": "Amount",
+          "value": "£60"
+        }
+      ]
+    }
+  ]
+}

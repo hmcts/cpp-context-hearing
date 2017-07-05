@@ -1,12 +1,17 @@
 package uk.gov.moj.cpp.hearing.persist;
 
-import org.apache.deltaspike.data.api.*;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.apache.deltaspike.data.api.AbstractEntityRepository;
+import org.apache.deltaspike.data.api.Query;
+import org.apache.deltaspike.data.api.QueryParam;
+import org.apache.deltaspike.data.api.Repository;
+import org.apache.deltaspike.data.api.SingleResultType;
 
 /**
  * Repository for accessing Hearing data.
@@ -23,30 +28,30 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
      * @return Hearing.
      */
     @Query(singleResult = SingleResultType.OPTIONAL)
-    abstract Hearing findByHearingId(UUID hearingId);
+    abstract Hearing findByHearingId(final UUID hearingId);
 
-    public Optional<Hearing> getByHearingId(UUID hearingId) {
-        Hearing hearing  = findByHearingId(hearingId);
+    public Optional<Hearing> getByHearingId(final UUID hearingId) {
+        final Hearing hearing  = findByHearingId(hearingId);
         return hearing != null ? Optional.of(hearing) :  Optional.empty();
     }
 
     /**
      * Find {@link Hearing} by caseId and startDate.
      *
-     * @param startdate of the case to retrieve.
+     * @param startDate of the case to retrieve.
      * @return Hearing.
      */
 
-    public abstract List<Hearing> findByStartdate(LocalDate startdate);
+    public abstract List<Hearing> findByStartDate(final LocalDate startDate);
 
 
    /**
-     * Find {@link Hearing} by hearingids.
+     * Find {@link Hearing} by hearingIds.
      *
-     * @param hearingids list of hearing ids.
+     * @param hearingIds list of hearing ids.
      * @return Hearings.
      */
-    @Query(value = "FROM Hearing h where h.hearingId in (:hearingids)")
-    public abstract List<Hearing> findByHearingIds(@QueryParam("hearingids") List<UUID> hearingids);
+    @Query(value = "FROM Hearing h where h.hearingId in (:hearingIds)")
+    public abstract List<Hearing> findByHearingIds(@QueryParam("hearingIds") final List<UUID> hearingIds);
 
 }

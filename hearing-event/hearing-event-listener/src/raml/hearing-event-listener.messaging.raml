@@ -1,5 +1,5 @@
 #%RAML 0.8
-title: API Using media type in the URL
+title: Hearing event listener
 baseUri: message://event/listener/message/hearing
 
 /hearing.event:
@@ -16,14 +16,6 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.room-booked+json:
             schema: !include json/schema/hearing.room-booked.json
             example: !include json/hearing.room-booked.json
-
-        application/vnd.hearing.started+json:
-            schema: !include json/schema/hearing.started.json
-            example: !include json/hearing.started.json
-
-        application/vnd.hearing.ended+json:
-            schema: !include json/schema/hearing.ended.json
-            example: !include json/hearing.ended.json
 
         application/vnd.hearing.case-associated+json:
             schema: !include json/schema/hearing.case-associated.json
@@ -56,3 +48,11 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.adjourn-date-updated+json:
             schema: !include json/schema/hearing.adjourn-date-updated.json
             example: !include json/hearing.adjourn-date-updated.json
+
+        application/vnd.hearing.results-shared+json:
+            schema: !include json/schema/hearing.results-shared.json
+            example: !include json/hearing.results-shared.json
+
+        application/vnd.hearing.result-amended+json:
+            schema: !include json/schema/hearing.result-amended.json
+            example: !include json/hearing.result-amended.json

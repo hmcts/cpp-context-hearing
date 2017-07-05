@@ -51,7 +51,7 @@ public class ProsecutionCounselRepositoryTest {
                 prosecutionCounselRepository.findByHearingId(HEARING_ID_1);
         assertThat(prosecutionCounselList, hasSize(1));
         final ProsecutionCounsel prosecutionCounsel = prosecutionCounselList.get(0);
-        assertEquals(ID_1, prosecutionCounsel.getId());
+        assertEquals(ID_1, prosecutionCounsel.getAttendeeId());
         assertEquals(HEARING_ID_1, prosecutionCounsel.getHearingId());
         assertEquals(PERSON_ID_1, prosecutionCounsel.getPersonId());
         assertEquals(STATUS_1, prosecutionCounsel.getStatus());

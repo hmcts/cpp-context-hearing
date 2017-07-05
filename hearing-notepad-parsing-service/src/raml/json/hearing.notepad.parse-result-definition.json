@@ -1,56 +1,79 @@
 {
-  "originalText": "imp sus 2yr",
+  "originalText": "alc req 2 conc [abc def] £23 xyz",
+  "resultLineId": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
   "parts": [
     {
-      "text": "imp",
+      "value": "alc",
+      "state": "UNRESOLVED",
       "resultChoices": [
         {
-          "code": "1",
-          "label": "Imprisonment",
+          "code": "dd5aeb25-88d9-4751-b513-043c5c28b6da",
+          "label": "Alcohol treatment requirement",
+          "level": "O",
           "type": "RESULT",
-          "synonyms": [
-            "imp",
-            "impr",
-            "impris"
-          ]
+          "synonymMatch": "alcohol"
         },
         {
-          "code": "2",
-          "label": "Suspended sentence order - imprisonment",
+          "code": "2aa15e42-69e4-4d4c-9b45-9671926f6a72",
+          "label": "Alcohol abstinence requirement",
+          "level": "O",
           "type": "RESULT",
-          "synonyms": [
-            "sus",
-            "susp",
-            "sus imp",
-            "imp sus"
-          ]
+          "synonymMatch": "alcohol"
         }
       ]
     },
     {
-      "text": "sus",
+      "value": "req",
+      "state": "UNRESOLVED",
       "resultChoices": [
         {
-          "code": "2",
-          "label": "Suspended sentence order - imprisonment",
+          "code": "237f7a20-619a-47a5-a493-ec4ccd244401",
+          "label": "Unpaid work requirement",
+          "level": "O",
           "type": "RESULT",
-          "synonyms": [
-            "sus",
-            "susp",
-            "sus imp",
-            "imp sus"
-          ]
+          "synonymMatch": "requirement"
+        },
+        {
+          "code": "dd5aeb25-88d9-4751-b513-043c5c28b6da",
+          "label": "Alcohol treatment requirement",
+          "level": "O",
+          "type": "RESULT",
+          "synonymMatch": "requirement"
+        },
+        {
+          "code": "2aa15e42-69e4-4d4c-9b45-9671926f6a72",
+          "label": "Alcohol abstinence requirement",
+          "level": "O",
+          "type": "RESULT",
+          "synonymMatch": "requirement"
         }
       ]
     },
     {
-      "text": "2yr",
-      "resultChoices": [
-        {
-          "type": "TEXT",
-          "synonyms": []
-        }
-      ]
+      "value": "2",
+      "state": "UNRESOLVED",
+      "type": "INT"
+    },
+    {
+      "value": "conc",
+      "state": "UNRESOLVED",
+      "type": "BOOLEAN",
+      "label": "Concurrent"
+    },
+    {
+      "value": "[abc def]",
+      "state": "UNRESOLVED",
+      "type": "TXT"
+    },
+    {
+      "value": "£23",
+      "state": "UNRESOLVED",
+      "type": "CURR"
+    },
+    {
+      "value": "xyz",
+      "state": "UNRESOLVED",
+      "type": "TXT"
     }
   ]
 }

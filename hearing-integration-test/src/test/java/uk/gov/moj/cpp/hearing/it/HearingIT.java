@@ -1,12 +1,13 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,93 +19,38 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserLogsMultipleEvents;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.andHearingResultsHaveBeenShared;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.thenHearingAmendedPublicEventShouldBePublished;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.thenHearingResultedPublicEventShouldBePublished;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.whenTheUserSharesAmendedResultsForTheHearing;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.whenTheUserSharesResultsForAHearing;
+import static uk.gov.moj.cpp.hearing.steps.data.ResultLevel.CASE;
+import static uk.gov.moj.cpp.hearing.steps.data.ResultLevel.DEFENDANT;
+import static uk.gov.moj.cpp.hearing.steps.data.ResultLevel.OFFENCE;
+import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.amendedResultLine;
+import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.resultLine;
+import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.sharedResultLine;
+import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.manyRandomEvents;
+import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubSetStatusForCapability;
 
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Resources;
-import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
-import org.junit.Before;
+import org.apache.http.HttpStatus;
 import org.junit.Test;
 
 
 public class HearingIT extends AbstractIT {
-
-    private static final UUID USER_ID = randomUUID();
-    private static final Header CPP_UID_HEADER = new Header("CJSCPPUID", USER_ID.toString());
-
-    @Before
-    public void setUp() {
-        setupAsAuthorisedUser(USER_ID.toString());
-    }
-
-    @Test
-    public void endHearingTest() throws IOException, InterruptedException {
-        final String hearingId = randomUUID().toString();
-
-        final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
-
-        final Response writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.end+json")
-                .body("{\n" +
-                        "  \"localTime\": \"2016-06-01T11:00:00Z\"\n" +
-                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
-
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.endedAt", is("2016-06-01T11:00:00Z"))
-                        )));
-    }
-
-    @Test
-    public void startHearingTest() throws IOException, InterruptedException {
-        final String hearingId = randomUUID().toString();
-
-        final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
-
-        final Response writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.start+json")
-                .body("{\n" +
-                        "  \"localTime\": \"2016-06-01T10:00:00Z\"\n" +
-                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.startedAt", is("2016-06-01T10:00:00Z"))
-                        )));
-    }
 
     @Test
     public void hearingHavingMultipleCasesTest() throws IOException, InterruptedException {
@@ -119,7 +65,7 @@ public class HearingIT extends AbstractIT {
                 .body(Resources.toString(getResource("hearing.initiate-hearing.json"),
                         defaultCharset()).replace("RANDOM_CASE_ID", caseId)).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
@@ -139,7 +85,8 @@ public class HearingIT extends AbstractIT {
                         "  \"caseId\": \"2a2d7e9e-0c60-11e6-a148-3e1d05defe78\"\n" +
                         "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
@@ -149,24 +96,36 @@ public class HearingIT extends AbstractIT {
                                 withJsonPath("$.caseIds[0]", is(caseId)),
                                 withJsonPath("$.caseIds[1]", is("2a2d7e9e-0c60-11e6-a148-3e1d05defe78"))
                         )));
-
-
     }
 
     @Test
-    public void hearingBookRoomTest() throws IOException, InterruptedException {
+    public void initiateHearing_CapabilityDisabled() throws IOException, InterruptedException {
+
+        stubSetStatusForCapability("hearing.initiate-hearing", false);
+
         final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
 
-        final Response writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.book-room+json")
-                .body("{\n" +
-                        "  \"roomName\": \"Room1\"\n" +
-                        "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+        Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.initiate-hearing+json")
+                .body(Resources.toString(getResource("hearing.initiate-hearing.json"),
+                        defaultCharset()).replace("RANDOM_CASE_ID", caseId)).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_FORBIDDEN));
+
+        stubSetStatusForCapability("hearing.initiate-hearing", true);
+    }
+
+    @Test
+    public void getHearing_CapabilityDisabled() throws IOException, InterruptedException {
+
+        stubSetStatusForCapability("hearing.get.hearing", false);
+
+        final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
@@ -176,11 +135,11 @@ public class HearingIT extends AbstractIT {
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.roomName", is("Room1"))
-                        )));
+                        status().is(FORBIDDEN));
+
+        stubSetStatusForCapability("hearing.get.hearing", true);
     }
+
 
     @Test
     public void hearingAllocateCourtTest() throws IOException, InterruptedException {
@@ -195,7 +154,7 @@ public class HearingIT extends AbstractIT {
                         "  \"courtCentreName\": \"Bournemouth\"\n" +
                         "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
@@ -224,7 +183,7 @@ public class HearingIT extends AbstractIT {
                         "  \"startDate\": \"2016-06-05\"\n" +
                         "}").header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
@@ -241,39 +200,6 @@ public class HearingIT extends AbstractIT {
     }
 
     @Test
-    public void hearingEventDefinitionsTest() throws IOException, InterruptedException {
-        final List<HearingEventDefinition> hearingEventDefinitions = createHearingEventDefinitions();
-        final String hearingEventDefinitionsPayload = createHearingEventDefinitionsPayload(hearingEventDefinitions);
-
-        final Integer hearingId = 0;
-        final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing-command-api-hearings-event_definitions"), hearingId);
-
-        final Response writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.create-hearing-event-definitions+json")
-                .body(hearingEventDefinitionsPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-hearings-event_definitions"), hearingId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.hearing-event-definitions+json";
-
-        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.eventDefinitions", hasSize(2)),
-                                withJsonPath("$.eventDefinitions[0].actionLabel", is(hearingEventDefinitions.get(0).getActionLabel())),
-                                withJsonPath("$.eventDefinitions[0].recordedLabel", is(hearingEventDefinitions.get(0).getRecordedLabel())),
-                                withJsonPath("$.eventDefinitions[1].actionLabel", is(hearingEventDefinitions.get(1).getActionLabel())),
-                                withJsonPath("$.eventDefinitions[1].recordedLabel", is(hearingEventDefinitions.get(1).getRecordedLabel()))
-                        )));
-    }
-
-    @Test
     public void hearingSaveDraftResultTest() throws IOException, InterruptedException {
         final String targetId = randomUUID().toString();
         final String hearingId = randomUUID().toString();
@@ -286,7 +212,7 @@ public class HearingIT extends AbstractIT {
                 .contentType("application/vnd.hearing.save-draft-result+json")
                 .body(draftResultCommandPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-draft-result"), hearingId);
@@ -332,7 +258,7 @@ public class HearingIT extends AbstractIT {
                 .contentType("application/vnd.hearing.add-prosecution-counsel+json")
                 .body(addProsecutionCounselCommandPayload1).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse1.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse1.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-prosecution-counsels"), hearingId);
@@ -345,10 +271,10 @@ public class HearingIT extends AbstractIT {
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.prosecution-counsels", hasSize(1)),
-                                withJsonPath("$.prosecution-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.prosecution-counsels[0].attendeeId", is(attendeeId1)),
                                 withJsonPath("$.prosecution-counsels[0].personId", is(personId1)),
                                 withJsonPath("$.prosecution-counsels[0].status", is(status1)
-                        ))));
+                                ))));
 
         // Update the prosecution's details
 
@@ -356,14 +282,14 @@ public class HearingIT extends AbstractIT {
                 .contentType("application/vnd.hearing.add-prosecution-counsel+json")
                 .body(addProsecutionCounselCommandPayload2).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse3.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse3.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.prosecution-counsels", hasSize(1)),
-                                withJsonPath("$.prosecution-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.prosecution-counsels[0].attendeeId", is(attendeeId1)),
                                 withJsonPath("$.prosecution-counsels[0].personId", is(personId1)),
                                 withJsonPath("$.prosecution-counsels[0].status", is(status2)
                                 ))));
@@ -373,20 +299,20 @@ public class HearingIT extends AbstractIT {
                 .contentType("application/vnd.hearing.add-prosecution-counsel+json")
                 .body(addProsecutionCounselCommandPayload3).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse1.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse1.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.prosecution-counsels", hasSize(2)),
-                                withJsonPath("$.prosecution-counsels[0].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.prosecution-counsels[0].attendeeId", isOneOf(attendeeId1, attendeeId3)),
                                 withJsonPath("$.prosecution-counsels[0].personId", isOneOf(personId1, personId3)),
                                 withJsonPath("$.prosecution-counsels[0].status", isOneOf(status2, status3)),
-                                withJsonPath("$.prosecution-counsels[1].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.prosecution-counsels[1].attendeeId", isOneOf(attendeeId1, attendeeId3)),
                                 withJsonPath("$.prosecution-counsels[1].personId", isOneOf(personId1, personId3)),
                                 withJsonPath("$.prosecution-counsels[1].status", isOneOf(status2, status3))
-                                )));
+                        )));
     }
 
     @Test
@@ -417,7 +343,7 @@ public class HearingIT extends AbstractIT {
                 .contentType("application/vnd.hearing.add-defence-counsel+json")
                 .body(addDefenceCounselCommandPayload1).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-defence-counsels"), hearingId);
@@ -430,7 +356,7 @@ public class HearingIT extends AbstractIT {
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.defence-counsels", hasSize(1)),
-                                withJsonPath("$.defence-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.defence-counsels[0].attendeeId", is(attendeeId1)),
                                 withJsonPath("$.defence-counsels[0].personId", is(personId1)),
                                 withJsonPath("$.defence-counsels[0].status", is(status1)),
                                 withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", is(defendantId1)
@@ -441,18 +367,17 @@ public class HearingIT extends AbstractIT {
                 .contentType("application/vnd.hearing.add-defence-counsel+json")
                 .body(addDefenceCounselCommandPayload2).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.defence-counsels", hasSize(1)),
-                                withJsonPath("$.defence-counsels[0].id", is(attendeeId1)),
+                                withJsonPath("$.defence-counsels[0].attendeeId", is(attendeeId1)),
                                 withJsonPath("$.defence-counsels[0].personId", is(personId1)),
                                 withJsonPath("$.defence-counsels[0].status", is(status2)),
-                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", isOneOf(defendantId1, defendantId2)),
-                                withJsonPath("$.defence-counsels[0].defendantIds[1].defendantId", isOneOf(defendantId1, defendantId2)
+                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", is(defendantId2)
                                 ))));
 
         // Add another defence counsel
@@ -460,22 +385,79 @@ public class HearingIT extends AbstractIT {
                 .contentType("application/vnd.hearing.add-defence-counsel+json")
                 .body(addDefenceCounselCommandPayload3).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(SC_ACCEPTED));
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.defence-counsels", hasSize(2)),
-                                withJsonPath("$.defence-counsels[0].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.defence-counsels[0].attendeeId", isOneOf(attendeeId1, attendeeId3)),
                                 withJsonPath("$.defence-counsels[0].personId", isOneOf(personId1, personId3)),
                                 withJsonPath("$.defence-counsels[0].status", isOneOf(status2, status3)),
-                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", isOneOf(defendantId1, defendantId2, defendantId3)),
-                                withJsonPath("$.defence-counsels[1].id", isOneOf(attendeeId1, attendeeId3)),
+                                withJsonPath("$.defence-counsels[0].defendantIds[0].defendantId", isOneOf(defendantId2, defendantId3)),
+                                withJsonPath("$.defence-counsels[1].attendeeId", isOneOf(attendeeId1, attendeeId3)),
                                 withJsonPath("$.defence-counsels[1].personId", isOneOf(personId1, personId3)),
                                 withJsonPath("$.defence-counsels[1].status", isOneOf(status2, status3)),
-                                withJsonPath("$.defence-counsels[1].defendantIds[0].defendantId", isOneOf(defendantId1, defendantId2, defendantId3)
-                                ))));
+                                withJsonPath("$.defence-counsels[1].defendantIds[0].defendantId", isOneOf(defendantId2, defendantId3))
+                        )));
+    }
+
+    @Test
+    public void shouldShareAllAvailableResultLines() {
+        final UUID hearingId = randomUUID();
+
+        final ResultLineData resultForCase = resultLine(CASE);
+        final ResultLineData resultForOffence = resultLine(OFFENCE);
+        final ResultLineData resultForDefendant = resultLine(DEFENDANT);
+
+        final List<ResultLineData> resultLines = newArrayList(resultForCase, resultForDefendant, resultForOffence);
+
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
+        whenTheUserSharesResultsForAHearing(hearingId, resultLines);
+
+        thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines);
+    }
+
+    @Test
+    public void shouldShareAllAvailableResultLinesEvenAfterManyEventsLogged() {
+        final UUID hearingId = randomUUID();
+
+        final ResultLineData resultForCase = resultLine(CASE);
+        final ResultLineData resultForOffence = resultLine(OFFENCE);
+        final ResultLineData resultForDefendant = resultLine(DEFENDANT);
+
+        final List<ResultLineData> resultLines = newArrayList(resultForCase, resultForDefendant, resultForOffence);
+
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
+        final List<HearingEvent> randomEvents = manyRandomEvents(hearingId, 30);
+        whenUserLogsMultipleEvents(randomEvents);
+        whenTheUserSharesResultsForAHearing(hearingId, resultLines);
+
+        thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines);
+    }
+
+    @Test
+    public void shouldNotifyWhenASharedResultIsAmended() {
+        final UUID hearingId = randomUUID();
+
+        final ResultLineData resultForCase = resultLine(CASE);
+        final ResultLineData resultForOffence = resultLine(OFFENCE);
+        final ResultLineData resultForDefendant = resultLine(DEFENDANT);
+
+        final List<ResultLineData> resultLines = newArrayList(resultForCase, resultForDefendant, resultForOffence);
+
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        andHearingResultsHaveBeenShared(hearingId, resultLines);
+
+        final ResultLineData amendedResultForOffence = amendedResultLine(resultForOffence);
+        final ResultLineData sharedResultForCase = sharedResultLine(resultForCase);
+        final ResultLineData sharedResultForDefendant = sharedResultLine(resultForDefendant);
+        whenTheUserSharesAmendedResultsForTheHearing(hearingId, newArrayList(sharedResultForCase, sharedResultForDefendant, amendedResultForOffence));
+
+        thenHearingAmendedPublicEventShouldBePublished(hearingId, amendedResultForOffence);
     }
 
     private String createAddProsecutionCounselCommandPayload(final String personId, final String attendeeId, final String status) throws IOException {
@@ -501,26 +483,6 @@ public class HearingIT extends AbstractIT {
         addDefenceCounselPayload = addDefenceCounselPayload.replace("$defendantId", defendantId);
 
         return addDefenceCounselPayload;
-    }
-
-    private String createHearingEventDefinitionsPayload(List<HearingEventDefinition> hearingEventDefinitions) throws IOException {
-        String hearingEventDefinitionsPayload = Resources.toString(
-                getResource("hearing.command.create-hearing-event-definitions.json"),
-                defaultCharset());
-
-        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$actionLabel0", hearingEventDefinitions.get(0).getActionLabel());
-        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$recordedLabel0", hearingEventDefinitions.get(0).getRecordedLabel());
-        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$actionLabel1", hearingEventDefinitions.get(1).getActionLabel());
-        hearingEventDefinitionsPayload = hearingEventDefinitionsPayload.replace("$recordedLabel1", hearingEventDefinitions.get(1).getRecordedLabel());
-
-        return hearingEventDefinitionsPayload;
-    }
-
-    private List<HearingEventDefinition> createHearingEventDefinitions() {
-        return Arrays.asList(
-                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 2, null),
-                new HearingEventDefinition(randomUUID().toString(), randomUUID().toString(), 1, null)
-        );
     }
 
     private String createDraftResultCommandPayload(final String targetId) throws IOException {

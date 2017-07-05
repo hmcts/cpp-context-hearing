@@ -2,53 +2,28 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "originalText": {
+    "resultCode": {
       "type": "string"
     },
-    "parts": {
+    "promptChoices": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "text": {
+          "code": {
             "type": "string"
           },
-          "choices": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "code": {
-                  "type": "string"
-                },
-                "text": {
-                  "type": "string"
-                },
-                "synonyms": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "code",
-                "text",
-                "synonyms",
-                "type"
-              ]
-            }
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "required": {
+            "type": "string"
           }
-        },
-        "required": [
-          "text",
-          "choices"
-        ]
+        }
       }
     }
-  },
-  "required": [
-    "originalText",
-    "parts"
-  ]
+  }
 }

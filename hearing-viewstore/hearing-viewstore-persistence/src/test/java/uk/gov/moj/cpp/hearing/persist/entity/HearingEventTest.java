@@ -21,7 +21,8 @@ public class HearingEventTest {
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
-    private static final ZonedDateTime TIMESTAMP = PAST_ZONED_DATE_TIME.next();
+    private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next();
+    private static final ZonedDateTime LAST_MODIFIED_TIME = PAST_ZONED_DATE_TIME.next();
 
     @Test
     public void shouldHaveANoArgsConstructor() {
@@ -39,7 +40,8 @@ public class HearingEventTest {
         assertThat(actualHearingEvent.getHearingId(), is(hearingEvent.getHearingId()));
         assertThat(actualHearingEvent.getId(), is(hearingEvent.getId()));
         assertThat(actualHearingEvent.getRecordedLabel(), is(hearingEvent.getRecordedLabel()));
-        assertThat(actualHearingEvent.getTimestamp(), is(hearingEvent.getTimestamp()));
+        assertThat(actualHearingEvent.getEventTime(), is(hearingEvent.getEventTime()));
+        assertThat(actualHearingEvent.getLastModifiedTime(), is(hearingEvent.getLastModifiedTime()));
         assertThat(actualHearingEvent.isDeleted(), is(hearingEvent.isDeleted()));
     }
 
@@ -49,7 +51,8 @@ public class HearingEventTest {
 
         final HearingEvent updatedHearingEvent = hearingEvent.builder()
                 .withId(randomUUID())
-                .withTimestamp(PAST_ZONED_DATE_TIME.next())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
                 .delete()
                 .build();
 
@@ -58,11 +61,12 @@ public class HearingEventTest {
         assertThat(updatedHearingEvent.getHearingId(), is(hearingEvent.getHearingId()));
         assertThat(updatedHearingEvent.getId(), is(not(hearingEvent.getId())));
         assertThat(updatedHearingEvent.getRecordedLabel(), is(hearingEvent.getRecordedLabel()));
-        assertThat(updatedHearingEvent.getTimestamp(), is(not(hearingEvent.getTimestamp())));
+        assertThat(updatedHearingEvent.getEventTime(), is(not(hearingEvent.getEventTime())));
+        assertThat(updatedHearingEvent.getLastModifiedTime(), is(not(hearingEvent.getLastModifiedTime())));
         assertThat(updatedHearingEvent.isDeleted(), is(not(hearingEvent.isDeleted())));
     }
 
     private HearingEvent getHearingEvent() {
-        return new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, TIMESTAMP);
+        return new HearingEvent(HEARING_EVENT_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME);
     }
 }

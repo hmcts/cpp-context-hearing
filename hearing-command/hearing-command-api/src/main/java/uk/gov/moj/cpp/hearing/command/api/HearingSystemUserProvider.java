@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
-import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
@@ -17,8 +16,10 @@ import javax.enterprise.inject.Alternative;
 @Priority(2)
 public class HearingSystemUserProvider implements SystemUserProvider {
 
+    private static final UUID SYSTEM_USER_ID = fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a");
+
     @Override
     public Optional<UUID> getContextSystemUserId() {
-        return of(fromString("8959b8b5-92bd-4ada-96f4-7ac9d482671a"));
+        return Optional.of(SYSTEM_USER_ID);
     }
 }

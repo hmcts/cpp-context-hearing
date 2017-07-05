@@ -12,12 +12,10 @@ public class HearingEntityToHearing {
         final HearingView hearingView = new HearingView();
         hearingView.setHearingId(hearing.getHearingId().toString());
         hearingView.setDuration(hearing.getDuration());
-        hearingView.setStartDate(hearing.getStartdate());
+        hearingView.setStartDate(hearing.getStartDate());
         hearingView.setStartTime(hearing.getStartTime());
         hearingView.setCourtCentreName(hearing.getCourtCentreName());
         hearingView.setRoomName(hearing.getRoomName());
-        hearingView.setStartedAt(hearing.getStartedAt());
-        hearingView.setEndedAt(hearing.getEndedAt());
         hearingView.setHearingType(hearing.getHearingType());
         return hearingView;
     }

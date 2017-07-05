@@ -10,7 +10,13 @@
       "items": {
         "type": "object",
         "properties": {
+          "groupLabel": {
+            "type": "string"
+          },
           "actionLabel": {
+            "type": "string"
+          },
+          "actionLabelExtension": {
             "type": "string"
           },
           "recordedLabel": {
@@ -19,6 +25,9 @@
           "sequence": {
             "type": "integer"
           },
+          "sequenceType": {
+            "type": "string"
+          },
           "caseAttribute": {
             "type": "string"
           }
@@ -26,12 +35,15 @@
         "additionalProperties": false,
         "required": [
           "recordedLabel",
-          "actionLabel",
-          "sequence"
+          "actionLabel"
         ]
       }
     }
   },
+  "required": [
+    "id",
+    "eventDefinitions"
+  ],
   "additionalProperties": false,
   "definitions": {
     "uuid": {

@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.query.view.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 public class HearingView {
@@ -20,10 +19,6 @@ public class HearingView {
     private String hearingType;
 
     private String courtCentreName;
-
-    private ZonedDateTime startedAt;
-
-    private ZonedDateTime endedAt;
 
     private List<String> caseIds;
 
@@ -80,22 +75,6 @@ public class HearingView {
 
     public void setCourtCentreName(String courtCentreName) {
         this.courtCentreName = courtCentreName;
-    }
-
-    public ZonedDateTime getStartedAt() {
-        return startedAt;
-    }
-
-    public void setStartedAt(ZonedDateTime startedAt) {
-        this.startedAt = startedAt;
-    }
-
-    public ZonedDateTime getEndedAt() {
-        return endedAt;
-    }
-
-    public void setEndedAt(ZonedDateTime endedAt) {
-        this.endedAt = endedAt;
     }
 
     public LocalTime getStartTime() {

@@ -19,7 +19,7 @@ public class ProsecutionCounselListConverter implements Converter<List<Prosecuti
         final JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
         prosecutionCounsels.forEach(prosecutionCounsel -> {
             jsonArrayBuilder.add(createObjectBuilder()
-                    .add("id", valueOf(prosecutionCounsel.getId()))
+                    .add("attendeeId", valueOf(prosecutionCounsel.getAttendeeId()))
                     .add("personId", valueOf(prosecutionCounsel.getPersonId()))
                     .add("status", prosecutionCounsel.getStatus())
                     .build());

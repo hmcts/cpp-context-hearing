@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -10,13 +12,14 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
 public class HearingEventProcessor {
 
     private static final String PUBLIC_HEARING_HEARING_INITIATED = "public.hearing.hearing-initiated";
+    private static final String PUBLIC_HEARING_RESULTED = "public.hearing.resulted";
+    private static final String PUBLIC_HEARING_RESULT_AMENDED = "public.hearing.result-amended";
+    private static final String PUBLIC_HEARING_HEARING_ADJOURNED = "public.hearing.adjourn-date-updated";
 
     @Inject
     private Enveloper enveloper;
@@ -31,5 +34,20 @@ public class HearingEventProcessor {
         sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_INITIATED).apply(payload));
     }
 
+    @Handles("hearing.results-shared")
+    public void publishHearingResultsSharedPublicEvent(final JsonEnvelope event) {
+        sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(event.payloadAsJsonObject()));
+    }
 
+    @Handles("hearing.adjourn-date-updated")
+    public void publishHearingDateAdjournedPublicEvent(final JsonEnvelope event) {
+        final String startDate = event.payloadAsJsonObject().getString("startDate");
+        final JsonObject payload = Json.createObjectBuilder().add("startDate", startDate).build();
+        sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_ADJOURNED).apply(payload));
+    }
+
+    @Handles("hearing.result-amended")
+    public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
+        sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
+    }
 }

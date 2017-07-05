@@ -14,7 +14,11 @@
     "recordedLabel": {
       "type": "string"
     },
-    "timestamp": {
+    "eventTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastModifiedTime": {
       "type": "string",
       "format": "date-time"
     }
@@ -25,7 +29,8 @@
     "hearingEventId",
     "latestHearingEventId",
     "recordedLabel",
-    "timestamp"
+    "eventTime",
+    "lastModifiedTime"
   ],
   "definitions": {
     "uuid": {

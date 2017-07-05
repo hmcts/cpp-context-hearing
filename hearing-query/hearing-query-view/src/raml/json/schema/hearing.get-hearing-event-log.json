@@ -16,6 +16,7 @@
     "hearingId",
     "events"
   ],
+  "additionalProperties": false,
   "definitions": {
     "event": {
       "type": "object",
@@ -26,7 +27,11 @@
         "recordedLabel": {
           "type": "string"
         },
-        "timestamp": {
+        "eventTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModifiedTime": {
           "type": "string",
           "format": "date-time"
         }
@@ -34,8 +39,10 @@
       "required": [
         "hearingEventId",
         "recordedLabel",
-        "timestamp"
-      ]
+        "eventTime",
+        "lastModifiedTime"
+      ],
+      "additionalProperties": false
     },
     "uuid": {
       "type": "string",

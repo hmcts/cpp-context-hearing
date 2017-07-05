@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -13,7 +14,7 @@ public class ProsecutionCounsel {
 
     @Id
     @Column(name = "id", nullable = false)
-    private UUID id;
+    private UUID attendeeId;
 
     @Column(name = "hearingid")
     private UUID hearingId;
@@ -24,19 +25,19 @@ public class ProsecutionCounsel {
     @Column(name = "status")
     private String status;
 
-    public ProsecutionCounsel() {
+    public ProsecutionCounsel(){
         // for JPA
     }
 
-    public ProsecutionCounsel(final UUID id, final UUID hearingId, final UUID personId, final String status) {
-        this.id = id;
+    public ProsecutionCounsel(final UUID attendeeId, final UUID hearingId, final UUID personId, final String status) {
+        this.attendeeId = attendeeId;
         this.hearingId = hearingId;
         this.personId = personId;
         this.status = status;
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getAttendeeId() {
+        return attendeeId;
     }
 
     public UUID getHearingId() {
@@ -51,4 +52,29 @@ public class ProsecutionCounsel {
         return status;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProsecutionCounsel that = (ProsecutionCounsel) o;
+        return Objects.equals(getAttendeeId(), that.getAttendeeId()) &&
+                Objects.equals(getHearingId(), that.getHearingId()) &&
+                Objects.equals(getPersonId(), that.getPersonId()) &&
+                Objects.equals(getStatus(), that.getStatus());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAttendeeId(), getHearingId(), getPersonId(), getStatus());
+    }
+
+    @Override
+    public String toString() {
+        return "ProsecutionCounsel{" +
+                "attendeeId=" + attendeeId +
+                ", hearingId=" + hearingId +
+                ", personId=" + personId +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

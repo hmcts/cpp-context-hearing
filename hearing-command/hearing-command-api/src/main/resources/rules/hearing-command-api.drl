@@ -10,7 +10,7 @@ rule "Command - API - Action - hearing.initiate-hearing"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.initiate-hearing");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers","Crown Court Admin", "Court Clerks"));
   then
     $outcome.setSuccess(true);
 end
@@ -42,29 +42,11 @@ rule "Command - API - Action - hearing.add-case"
     $outcome.setSuccess(true);
 end
 
-rule "Command - API - Action - hearing.start"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.start");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
-  then
-    $outcome.setSuccess(true);
-end
-
 rule "Command - API - Action - hearing.adjourn-date"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.adjourn-date");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
-  then
-    $outcome.setSuccess(true);
-end
-
-rule "Command - API - Action - hearing.end"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.end");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers","Crown Court Admin", "Court Clerks"));
   then
     $outcome.setSuccess(true);
 end
@@ -92,6 +74,15 @@ rule "Command - API - Action - hearing.add-defence-counsel"
     $outcome: Outcome();
     $action: Action(name == "hearing.add-defence-counsel");
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.share-results"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.share-results");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Court Clerks"));
   then
     $outcome.setSuccess(true);
 end

@@ -13,7 +13,7 @@ public class DefenceCounsel {
 
     @Id
     @Column(name = "id", unique = true, nullable = false)
-    private UUID id;
+    private UUID attendeeId;
 
     @Column(name = "hearing_id")
     private UUID hearingId;
@@ -27,16 +27,15 @@ public class DefenceCounsel {
     public DefenceCounsel() {
         // for JPA
     }
-
-    public DefenceCounsel(final UUID id, final UUID hearingId, final UUID personId, final String status) {
-        this.id = id;
+    public DefenceCounsel(final UUID attendeeId, final UUID hearingId, final UUID personId, final String status) {
+        this.attendeeId = attendeeId;
         this.hearingId = hearingId;
         this.personId = personId;
         this.status = status;
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getAttendeeId() {
+        return attendeeId;
     }
 
     public UUID getHearingId() {

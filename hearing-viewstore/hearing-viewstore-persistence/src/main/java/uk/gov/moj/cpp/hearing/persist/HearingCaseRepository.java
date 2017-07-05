@@ -17,19 +17,19 @@ public abstract class HearingCaseRepository extends AbstractEntityRepository<Hea
     /**
      * Find {@link HearingCase} by hearing Id.
      *
-     * @param hearingid of the case to retrieve.
+     * @param hearingId of the case to retrieve.
      * @return HearingCases.
      */
-    public abstract List<HearingCase> findByHearingId(UUID hearingid);
+    public abstract List<HearingCase> findByHearingId(final UUID hearingId);
 
     /**
      * Find {@link HearingCase} by hearing Ids.
      *
-     * @param hearingids of the case to retrieve.
+     * @param hearingIds of the case to retrieve.
      * @return HearingCases.
      */
-    @Query(value = "FROM HearingCase hc where hc.hearingId in (:hearingids)")
-    public abstract List<HearingCase> findByHearingIds(@QueryParam("hearingids") List<UUID> hearingids);
+    @Query(value = "FROM HearingCase hc where hc.hearingId in (:hearingIds)")
+    public abstract List<HearingCase> findByHearingIds(@QueryParam("hearingIds") final List<UUID> hearingIds);
 
     /**
      * Find {@link HearingCase} by case Id.

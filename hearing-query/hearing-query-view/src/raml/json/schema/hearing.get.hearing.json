@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "hearingId": {
-      "type": "string"
+      "$ref": "#/definitions/uuid"
     },
     "startDate": {
       "type": "string"
@@ -11,11 +11,20 @@
     "startTime": {
       "type": "string"
     },
-    "hearingType":{
+    "hearingType": {
       "type": "string"
     },
     "duration": {
       "type": "integer"
+    },
+    "courtCentreName": {
+      "type": "string"
+    },
+    "caseIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uuid"
+      }
     }
   },
   "required": [
@@ -23,6 +32,15 @@
     "startDate",
     "startTime",
     "hearingType",
-    "duration"
-  ]
+    "duration",
+    "courtCentreName",
+    "caseIds"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }

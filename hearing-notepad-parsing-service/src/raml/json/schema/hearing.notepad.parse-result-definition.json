@@ -5,15 +5,30 @@
     "originalText": {
       "type": "string"
     },
+    "resultLineId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "resultCode": {
+      "type": "string"
+    },
+    "resultLevel": {
+      "type": "string"
+    },
     "parts": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "text": {
+          "value": {
             "type": "string"
           },
-          "choices": {
+          "state": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "resultChoices": {
             "type": "array",
             "items": {
               "type": "object",
@@ -21,34 +36,30 @@
                 "code": {
                   "type": "string"
                 },
-                "text": {
+                "label": {
                   "type": "string"
                 },
-                "synonyms": {
+                "level": {
                   "type": "string"
                 },
                 "type": {
                   "type": "string"
+                },
+                "synonymMatch": {
+                  "type": "string"
                 }
-              },
-              "required": [
-                "code",
-                "text",
-                "synonyms",
-                "type"
-              ]
+              }
             }
           }
-        },
-        "required": [
-          "text",
-          "choices"
-        ]
+        }
       }
     }
   },
-  "required": [
-    "originalText",
-    "parts"
-  ]
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }

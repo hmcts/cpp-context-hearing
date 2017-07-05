@@ -1,56 +1,17 @@
 {
-  "originalText": "imp sus 2yr",
-  "parts": [
+  "resultCode": "dd5aeb25-88d9-4751-b513-043c5c28b6da",
+  "promptChoices": [
     {
-      "text": "imp",
-      "resultChoices": [
-        {
-          "code": "1",
-          "label": "Imprisonment",
-          "type": "RESULT",
-          "synonyms": [
-            "imp",
-            "impr",
-            "impris"
-          ]
-        },
-        {
-          "code": "2",
-          "label": "Suspended sentence order - imprisonment",
-          "type": "RESULT",
-          "synonyms": [
-            "sus",
-            "susp",
-            "sus imp",
-            "imp sus"
-          ]
-        }
-      ]
+      "code": "2d406cbe-c792-4a0c-af3d-25153e35f0be",
+      "label": "Under direction of",
+      "type": "TXT",
+      "required": "true"
     },
     {
-      "text": "sus",
-      "resultChoices": [
-        {
-          "code": "2",
-          "label": "Suspended sentence order - imprisonment",
-          "type": "RESULT",
-          "synonyms": [
-            "sus",
-            "susp",
-            "sus imp",
-            "imp sus"
-          ]
-        }
-      ]
-    },
-    {
-      "text": "2yr",
-      "resultChoices": [
-        {
-          "type": "TEXT",
-          "synonyms": []
-        }
-      ]
+      "code": "fa62316a-df37-4c00-9ce2-ee67dd09837d",
+      "label": "Additional information",
+      "type": "TXT",
+      "required": "false"
     }
   ]
 }

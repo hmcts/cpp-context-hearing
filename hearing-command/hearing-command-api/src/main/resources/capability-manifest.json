@@ -1,0 +1,65 @@
+{
+  "capabilities": [
+    {
+      "name": "hearing.initiate-hearing",
+      "type": "action",
+      "action": "hearing.initiate-hearing"
+    },
+    {
+      "name": "hearing.allocate-court",
+      "type": "action",
+      "action": "hearing.allocate-court"
+    },
+    {
+      "name": "hearing.book-room",
+      "type": "action",
+      "action": "hearing.book-room"
+    },
+    {
+      "name": "hearing.add-case",
+      "type": "action",
+      "action": "hearing.add-case"
+    },
+    {
+      "name": "hearing.add-prosecution-counsel",
+      "type": "action",
+      "action": "hearing.add-prosecution-counsel"
+    },
+    {
+      "name": "hearing.add-defence-counsel",
+      "type": "action",
+      "action": "hearing.add-defence-counsel"
+    },
+    {
+      "name": "hearing.save-draft-result",
+      "type": "action",
+      "action": "hearing.save-draft-result"
+    },
+    {
+      "name": "hearing.adjourn-date",
+      "type": "action",
+      "action": "hearing.adjourn-date"
+    },
+    {
+      "name": "hearing.create-hearing-event-definitions",
+      "type": "action",
+      "action": "hearing.create-hearing-event-definitions"
+    },
+    {
+      "name": "hearing.log-hearing-event",
+      "type": "action",
+      "action": "hearing.log-hearing-event"
+    },
+    {
+      "name": "hearing.correct-hearing-event",
+      "type": "action",
+      "action": "hearing.correct-hearing-event"
+    },
+    {
+      "name": "hearing.share-result",
+      "type": "action",
+      "action": "hearing.share-result"
+    }
+  ]
+}
+

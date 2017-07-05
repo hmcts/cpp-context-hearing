@@ -11,15 +11,15 @@ public class HearingEventIgnored {
     private final UUID hearingEventId;
     private final UUID hearingId;
     private final String recordedLabel;
-    private final ZonedDateTime timestamp;
+    private final ZonedDateTime eventTime;
     private final String reason;
 
     public HearingEventIgnored(final UUID hearingEventId, final UUID hearingId, final String recordedLabel,
-                               final ZonedDateTime timestamp, final String reason) {
+                               final ZonedDateTime eventTime, final String reason) {
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
         this.recordedLabel = recordedLabel;
-        this.timestamp = timestamp;
+        this.eventTime = eventTime;
         this.reason = reason;
     }
 
@@ -35,8 +35,8 @@ public class HearingEventIgnored {
         return recordedLabel;
     }
 
-    public ZonedDateTime getTimestamp() {
-        return timestamp;
+    public ZonedDateTime getEventTime() {
+        return eventTime;
     }
 
     public String getReason() {
