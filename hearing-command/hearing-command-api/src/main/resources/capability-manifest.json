@@ -56,9 +56,9 @@
       "action": "hearing.correct-hearing-event"
     },
     {
-      "name": "hearing.share-result",
+      "name": "hearing.share-results",
       "type": "action",
-      "action": "hearing.share-result"
+      "action": "hearing.share-results"
     }
   ]
 }
