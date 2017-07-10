@@ -1,7 +1,6 @@
 package uk.gov.justice.ccr.notepad.process;
 
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.cartesianProduct;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.powerSet;
@@ -10,7 +9,6 @@ import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.
 
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -86,64 +84,50 @@ class ResultDefinitionMatcher {
     private ResultDefinition matchResultDefinition(final Map<String, Set<String>> matchedSynonymWords) throws ExecutionException {
         Set<List<String>> allCombinations = cartesianProduct(matchedSynonymWords.entrySet().stream().map(Map.Entry::getValue)
                 .collect(Collectors.toList()));
-        for (Set<List<String>> combinations : findCombinationHaveMaximumMatches(allCombinations).values()) {
-            for (List<String> words : combinations) {
-                List<Long> resultDefinitionIndexes = findDefinitionsIndexesByKeyword.run(words);
-                Map<Long, Long> byIndex = groupResultByIndex.run(resultDefinitionIndexes);
-                Set<Set<String>> powerSets = powerSet(new HashSet<>(words));
-                Map<Integer, Set<Object>> bucketOfSets = Maps.newHashMap();
-                powerSets.stream().filter(CollectionUtils::isNotEmpty).forEach(strings -> {
-                    Set<Object> newItem = newHashSet();
-                    bucketOfSets.putIfAbsent(strings.size(), newItem);
-                    bucketOfSets.computeIfPresent(strings.size(), (integer, sets) -> {
-                        sets.add(strings);
-                        return sets;
-                    });
+        Set<Set<String>> setOfPossibleCombination = newHashSet();
+        for (List<String> words : allCombinations) {
+            Set<Set<String>> powerSets = powerSet(new HashSet<>(words));
+            powerSets.stream().filter(CollectionUtils::isNotEmpty).forEach(setOfPossibleCombination::add);
+        }
 
-                });
-                for (int i = bucketOfSets.size(); i > 0; i--) {
-                    List<ResultDefinition> resultDefinitions = getMatchedResultDefinition(byIndex, bucketOfSets, i);
-                    if (resultDefinitions.size() > 1) {
-                        return null;
-                    } else if (resultDefinitions.size() == 1) {
-                        return resultDefinitions.get(0);
-                    }
-                }
+        Map<Long, Set<Set<String>>> matchingWordsInDescendingOrder = findCombinationHaveMaximumMatches(setOfPossibleCombination);
+
+
+        for (Map.Entry<Long, Set<Set<String>>> entry : matchingWordsInDescendingOrder.entrySet()) {
+            List<ResultDefinition> resultDefinitions = getMatchedResultDefinition(entry.getValue());
+            if (resultDefinitions.size() > 1) {
+                return null;
+            } else if (resultDefinitions.size() == 1) {
+                return resultDefinitions.get(0);
             }
         }
+
+
         return null;
     }
 
-    private List<ResultDefinition> getMatchedResultDefinition(final Map<Long, Long> byIndex, final Map<Integer, Set<Object>> bucketOfSets, final int i) throws ExecutionException {
-        Map<List<String>, Set<Long>> input = Maps.newHashMap();
-        for (Object powerSet : bucketOfSets.get(i)) {
-            int finalI = i;
-            Set<Long> indexes = byIndex.entrySet().stream().filter(v -> v.getValue() == finalI).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)).keySet();
-            input.putIfAbsent(new ArrayList<>((Set) powerSet), indexes);
+    private List<ResultDefinition> getMatchedResultDefinition(final Set<Set<String>> setOfWords) throws ExecutionException {
+        Map<Set<String>, Set<Long>> input = Maps.newHashMap();
+        for (Set<String> words : setOfWords) {
+            input.put(words, new HashSet<>(findDefinitionsIndexesByKeyword.run(words)));
         }
         return compareDefinitionKeywordsUsingIndexes.run(input);
     }
 
-    private Map<Long, Set<List<String>>> findCombinationHaveMaximumMatches(final Set<List<String>> allCombinations) throws ExecutionException {
-        Map<Long, Set<List<String>>> orderedMatchedAsPerCount = Maps.newHashMap();
-        List<String> singleWordMatch = newArrayList();
-        Set<List<String>> entry = newHashSet();
-        entry.add(singleWordMatch);
-        orderedMatchedAsPerCount.putIfAbsent(1l, entry);
-        for (List<String> words : allCombinations) {
+    private Map<Long, Set<Set<String>>> findCombinationHaveMaximumMatches(final Set<Set<String>> allCombinations) throws ExecutionException {
+        Map<Long, Set<Set<String>>> orderedMatchedAsPerCount = Maps.newHashMap();
+        for (Set<String> words : allCombinations) {
             List<Long> resultDefinitionIndexes = findDefinitionsIndexesByKeyword.run(words);
             Map<Long, Long> byIndex = groupResultByIndex.run(resultDefinitionIndexes);
             if (!byIndex.isEmpty()) {
                 long maxMatch = Collections.max(byIndex.values());
-                if (maxMatch > 1) {
+                if (maxMatch == words.size()) {
                     orderedMatchedAsPerCount.putIfAbsent(maxMatch, newHashSet());
                     orderedMatchedAsPerCount.get(maxMatch).add(words);
-                } else {
-                    singleWordMatch.addAll(words);
                 }
             }
         }
-        Map<Long, Set<List<String>>> descendingOrder = new TreeMap(Collections.reverseOrder());
+        Map<Long, Set<Set<String>>> descendingOrder = new TreeMap(Collections.reverseOrder());
         descendingOrder.putAll(orderedMatchedAsPerCount);
         return descendingOrder;
     }

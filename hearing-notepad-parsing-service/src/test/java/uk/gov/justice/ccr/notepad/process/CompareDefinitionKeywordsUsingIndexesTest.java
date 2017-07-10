@@ -1,5 +1,6 @@
 package uk.gov.justice.ccr.notepad.process;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -8,6 +9,7 @@ import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,12 +39,12 @@ public class CompareDefinitionKeywordsUsingIndexesTest {
     public void run() throws Exception {
 
         //Given
-        List<String> words = Arrays.asList("imprisonment", "suspended");
+        Set<String> words = new HashSet<>(Arrays.asList("imprisonment", "suspended"));
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words);
         GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
         Map<Long, Long> outPut = groupResultByIndex.run(resultDefinitions);
         Set<Long> indexes = outPut.entrySet().stream().filter(v -> v.getValue() == 2).collect(Collectors.toMap(Entry::getKey, Entry::getValue)).keySet();
-        Map<List<String>, Set<Long>> input = Maps.newHashMap();
+        Map<Set<String>, Set<Long>> input = Maps.newHashMap();
         input.putIfAbsent(words, indexes);
 
         //When
@@ -58,12 +61,12 @@ public class CompareDefinitionKeywordsUsingIndexesTest {
     public void run_WhenIndexEmpty() throws Exception {
 
         //Given
-        List<String> words = Arrays.asList("imprisonment", "suspended");
+        Set<String> words = new HashSet<>(Arrays.asList("imprisonment", "suspended"));
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words);
         GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
         Map<Long, Long> outPut = groupResultByIndex.run(resultDefinitions);
         Set<Long> indexes = outPut.entrySet().stream().filter(v -> v.getValue() == 3).collect(Collectors.toMap(Entry::getKey, Entry::getValue)).keySet();
-        Map<List<String>, Set<Long>> input = Maps.newHashMap();
+        Map<Set<String>, Set<Long>> input = Maps.newHashMap();
         input.putIfAbsent(words, indexes);
 
         //When
@@ -80,13 +83,13 @@ public class CompareDefinitionKeywordsUsingIndexesTest {
     public void run_WhenWordsEmpty() throws Exception {
 
         //Given
-        List<String> words = Arrays.asList("imprisonment", "suspended");
+        Set<String> words = new HashSet<>(Arrays.asList("imprisonment", "suspended"));
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words);
         GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
         Map<Long, Long> outPut = groupResultByIndex.run(resultDefinitions);
         Set<Long> indexes = outPut.entrySet().stream().filter(v -> v.getValue() == 3).collect(Collectors.toMap(Entry::getKey,Entry::getValue)).keySet();
-        Map<List<String>, Set<Long>> input = Maps.newHashMap();
-        input.putIfAbsent(new ArrayList<>(), indexes);
+        Map<Set<String>, Set<Long>> input = Maps.newHashMap();
+        input.putIfAbsent(newHashSet(), indexes);
 
         //When
         List<ResultDefinition> output = testObj.run(input);

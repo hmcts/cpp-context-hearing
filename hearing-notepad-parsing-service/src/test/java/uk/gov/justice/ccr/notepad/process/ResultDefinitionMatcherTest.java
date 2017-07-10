@@ -165,6 +165,19 @@ public class ResultDefinitionMatcherTest {
     }
     @Test
     public void match3_6() throws Exception {
+        List<Part> parts = new PartsResolver().getParts("community ord em curfew");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+
+        assertThat(
+                resultDefinitionMatchingOutput.getMatchingType()
+                , is(UNKNOWN)
+        );
+    }
+
+    @Test
+    public void match3_6_1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("community order em curfew");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
@@ -331,7 +344,7 @@ public class ResultDefinitionMatcherTest {
 
     @Test
     public void matchContains1() throws Exception {
-        List<Part> parts = new PartsResolver().getParts("res ord pr im su");
+        List<Part> parts = new PartsResolver().getParts("res ord pr su");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
         Optional<ResultDefinition> resultDefinition = testObj.matchContains(values);

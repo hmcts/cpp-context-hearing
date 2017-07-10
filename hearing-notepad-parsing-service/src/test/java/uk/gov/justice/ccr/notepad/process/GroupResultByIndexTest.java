@@ -6,8 +6,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
@@ -26,7 +28,7 @@ public class GroupResultByIndexTest {
 
     @Test
     public void run() throws Exception {
-        List<String> words = Arrays.asList("imprisonment", "suspended");
+        Set<String> words = new HashSet<>(Arrays.asList("imprisonment", "suspended"));
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words);
 
         GroupResultByIndex testObj = new GroupResultByIndex();
@@ -42,7 +44,7 @@ public class GroupResultByIndexTest {
 
     @Test
     public void runWithMutipleWords() throws Exception {
-        List<String> words = Arrays.asList("restraining", "order","period","imprisonment", "suspended");
+        Set<String> words = new HashSet<>(Arrays.asList("restraining", "order","period","imprisonment", "suspended"));
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words);
 
         GroupResultByIndex testObj = new GroupResultByIndex();

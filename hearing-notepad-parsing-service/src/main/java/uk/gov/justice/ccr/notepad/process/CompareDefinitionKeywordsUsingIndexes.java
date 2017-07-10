@@ -14,14 +14,14 @@ import javax.inject.Inject;
 
 import com.google.common.collect.Lists;
 
-class CompareDefinitionKeywordsUsingIndexes implements ResultFilter<List<ResultDefinition>, Map<List<String>, Set<Long>>> {
+class CompareDefinitionKeywordsUsingIndexes implements ResultFilter<List<ResultDefinition>, Map<Set<String>, Set<Long>>> {
 
 
     @Inject
     ResultCache resultCache;
 
     @Override
-    public List<ResultDefinition> run(final Map<List<String>, Set<Long>> indexes) throws ExecutionException {
+    public List<ResultDefinition> run(final Map<Set<String>, Set<Long>> indexes) throws ExecutionException {
 
         List<ResultDefinition> matchedResultDefinition = Lists.newArrayList();
         List<ResultDefinition> resultDefinitions = resultCache.getResultDefinition();

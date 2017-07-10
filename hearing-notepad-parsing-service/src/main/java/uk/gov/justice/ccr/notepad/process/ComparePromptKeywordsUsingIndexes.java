@@ -13,14 +13,14 @@ import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
-class ComparePromptKeywordsUsingIndexes implements ResultFilter<ResultPrompt, Map<List<String>, Set<Long>>> {
+class ComparePromptKeywordsUsingIndexes implements ResultFilter<ResultPrompt, Map<Set<String>, Set<Long>>> {
 
 
     @Inject
     ResultCache resultCache;
 
     @Override
-    public ResultPrompt run(final Map<List<String>, Set<Long>> indexes) throws ExecutionException {
+    public ResultPrompt run(final Map<Set<String>, Set<Long>> indexes) throws ExecutionException {
 
         List<ResultPrompt> resultPrompts = resultCache.getResultPrompt();
         OptionalLong index = indexes.entrySet()

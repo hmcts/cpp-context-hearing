@@ -7,7 +7,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.hamcrest.core.AnyOf;
@@ -27,7 +29,7 @@ public class FindDefinitionsIndexesByKeywordTest {
 
     @Test
     public void run() throws Exception {
-        List<String> words = Arrays.asList("rehabilitation", "imprisonment", "suspended");
+        Set<String> words = new HashSet<>(Arrays.asList("rehabilitation", "imprisonment", "suspended"));
 
         List<Long> resultDefinitionsIndex = testObj.run(words);
 
