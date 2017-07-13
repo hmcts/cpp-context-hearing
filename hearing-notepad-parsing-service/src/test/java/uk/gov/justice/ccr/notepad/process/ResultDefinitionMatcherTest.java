@@ -10,6 +10,7 @@ import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 import uk.gov.justice.ccr.notepad.view.Part;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 public class ResultDefinitionMatcherTest {
     ResultCache resultCache = new ResultCache();
+    FileResultLoader fileResultLoader = new FileResultLoader();
     ResultDefinitionMatcher testObj = new ResultDefinitionMatcher();
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
     CompareDefinitionKeywordsUsingIndexes compareDefinitionKeywordsUsingIndexes = new CompareDefinitionKeywordsUsingIndexes();
@@ -34,7 +36,8 @@ public class ResultDefinitionMatcherTest {
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.loadResultCache();
+        resultCache.setResultLoader(fileResultLoader);
+        resultCache.lazyLoad(null);
         findDefinitionsIndexesByKeyword.resultCache = resultCache;
         compareDefinitionKeywordsUsingIndexes.resultCache = resultCache;
         findDefinitionExactMatchSynonyms.resultCache = resultCache;

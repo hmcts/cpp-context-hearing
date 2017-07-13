@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
+import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,11 +19,13 @@ import org.junit.Test;
 
 public class GroupResultByIndexTest {
     ResultCache resultCache = new ResultCache();
+    FileResultLoader fileResultLoader = new FileResultLoader();
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.loadResultCache();
+        resultCache.setResultLoader(fileResultLoader);
+        resultCache.lazyLoad(null);
         findDefinitionsIndexesByKeyword.resultCache = resultCache;
     }
 

@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
+import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -16,10 +17,12 @@ import org.junit.Test;
 public class ResultPromptLoaderTest {
 
     ResultCache resultCache = new ResultCache();
+    FileResultLoader fileResultLoader = new FileResultLoader();
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.loadResultCache();
+        resultCache.setResultLoader(fileResultLoader);
+        resultCache.lazyLoad(null);
     }
 
     @Test

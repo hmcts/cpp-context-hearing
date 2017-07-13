@@ -21,19 +21,6 @@ public class ResultCacheTest {
     ResultCache testObj = new ResultCache();
 
 
-    @Before
-    public void setup() throws ExecutionException {
-        testObj.reloadCache(true,null);
-    }
-
-    @Test
-    public void getResultLoader() throws Exception {
-
-        ResultLoader resultLoader = testObj.getResultLoader();
-
-        assertThat(resultLoader instanceof ReadStoreResultLoader, Matchers.is(true));
-
-    }
 
     @Test(expected = CacheLoader.InvalidCacheLoadException.class)
     public void getResultLoaderWithKeyNotFound() throws Exception {
@@ -43,9 +30,5 @@ public class ResultCacheTest {
 
     }
 
-    @After
-    public void tearDown() throws ExecutionException {
-        testObj.reloadCache(false,null);
-    }
 
 }

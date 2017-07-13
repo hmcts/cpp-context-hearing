@@ -24,22 +24,9 @@ public class NotepadHearingIT extends AbstractIT {
         stubForReferenceDataResults();
 
         String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.reload-result-cache"), true);
-        String url =  getBaseUri() + "/" + queryAPIEndPoint;
-        String mediaType = "application/vnd.hearing.notepad.reload-result-cache+json";
-
-        poll(requestParams(url, mediaType).withHeader(USER_ID, USER_ID_VALUE).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.reload", is("Done"))
-                        )));
-
-
-        queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "xyz");
-        url =  getBaseUri() + "/"  + queryAPIEndPoint;
-        mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
+        String url =  getBaseUri() + "/"  + queryAPIEndPoint;
+        String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         poll(requestParams(url, mediaType).withHeader(USER_ID, USER_ID_VALUE).build())
                 .until(

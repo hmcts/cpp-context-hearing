@@ -43,8 +43,8 @@ import org.apache.commons.lang3.StringUtils;
  * Processor class will match List of provided values with resulting metadata and return Knowledge
  * back as a result Currently it has three main matching types mentioned in enum
  *
- * {@link ResultDefinitionMatchingOutput.MatchingType} Note : metadata stored in memory all in lowercase
- * and we are converting parts values in lower case before matching with metadata
+ * {@link ResultDefinitionMatchingOutput.MatchingType} Note : metadata stored in memory all in
+ * lowercase and we are converting parts values in lower case before matching with metadata
  */
 public class Processor {
 
@@ -68,8 +68,8 @@ public class Processor {
     private CurrencyMatcher currencyMatcher = new CurrencyMatcher();
 
 
-    public void reloadResultCache(final boolean loadFromReadStore, final JsonEnvelope envelope) throws ExecutionException {
-        resultCache.reloadCache(loadFromReadStore, envelope);
+    public void lazyLoad(final JsonEnvelope envelope) throws ExecutionException {
+        resultCache.lazyLoad(envelope);
     }
 
     public Knowledge processParts(final List<String> partsValues) throws ExecutionException {

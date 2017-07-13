@@ -8,6 +8,7 @@ import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
+import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 import uk.gov.justice.ccr.notepad.view.Part;
 import uk.gov.justice.ccr.notepad.view.PromptChoice;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
@@ -25,6 +26,7 @@ import org.junit.Test;
 public class ProcessorTest {
 
     Processor processor = new Processor();
+    FileResultLoader fileResultLoader = new FileResultLoader();
     ResultCache resultCache = new ResultCache();
     ResultPromptMatcher resultPromptMatcher = new ResultPromptMatcher();
     ResultDefinitionMatcher resultDefinitionMatcher = new ResultDefinitionMatcher();
@@ -42,7 +44,8 @@ public class ProcessorTest {
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.loadResultCache();
+        resultCache.setResultLoader(fileResultLoader);
+        resultCache.lazyLoad(null);
         findPromptsIndexesByKeyword.resultCache = resultCache;
         comparePromptKeywordsUsingIndexes.resultCache = resultCache;
         findPromptSynonyms.resultCache = resultCache;

@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,12 +26,14 @@ import org.junit.Test;
 
 public class CompareDefinitionKeywordsUsingIndexesTest {
     ResultCache resultCache = new ResultCache();
+    FileResultLoader fileResultLoader = new FileResultLoader();
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
     CompareDefinitionKeywordsUsingIndexes testObj = new CompareDefinitionKeywordsUsingIndexes();
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.loadResultCache();
+        resultCache.setResultLoader(fileResultLoader);
+        resultCache.lazyLoad(null);
         findDefinitionsIndexesByKeyword.resultCache = resultCache;
         testObj.resultCache = resultCache;
     }

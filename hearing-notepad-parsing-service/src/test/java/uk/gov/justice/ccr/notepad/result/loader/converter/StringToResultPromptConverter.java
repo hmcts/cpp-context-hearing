@@ -11,6 +11,7 @@ import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public final class StringToResultPromptConverter {
@@ -28,6 +29,7 @@ public final class StringToResultPromptConverter {
         final String[] values = TAB_SPLITTER.split(line, -1);
         if (MAX_TOKEN == values.length) {
             ResultPrompt resultPrompt = new ResultPrompt();
+            resultPrompt.setId(UUID.randomUUID().toString());
             resultPrompt.setLabel(values[ResultPromptKey.LABEL.getOrder()].trim());
             resultPrompt.setResultDefinitionLabel(values[ResultPromptKey.RESULT_DEFINITION_LABEL.getOrder()].trim());
             String durationElement = values[ResultPromptKey.DURATION_ELEMENT.getOrder()].trim();

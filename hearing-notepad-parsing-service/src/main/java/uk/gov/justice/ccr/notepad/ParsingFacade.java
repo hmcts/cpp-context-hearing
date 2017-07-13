@@ -28,8 +28,8 @@ public class ParsingFacade {
         return processor.processResultPrompt(resultDefinitionId);
     }
 
-    public void reloadResultCache(final boolean loadFromReadStore, final JsonEnvelope envelope) throws ExecutionException {
-        processor.reloadResultCache(loadFromReadStore, envelope);
+    public void lazyLoad(final JsonEnvelope envelope) throws ExecutionException {
+        processor.lazyLoad(envelope);
     }
 
 }

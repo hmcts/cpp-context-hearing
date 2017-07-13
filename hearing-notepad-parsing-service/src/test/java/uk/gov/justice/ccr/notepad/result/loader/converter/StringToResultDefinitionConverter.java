@@ -5,6 +5,7 @@ import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionKey;
 
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class StringToResultDefinitionConverter {
@@ -20,6 +21,7 @@ public class StringToResultDefinitionConverter {
 
         if (MAX_TOKEN == values.length) {
             ResultDefinition resultDefinition = new ResultDefinition();
+            resultDefinition.setId(UUID.randomUUID().toString());
             resultDefinition.setLabel(values[ResultDefinitionKey.LABEL.getOrder()].trim());
             resultDefinition.setShortCode(values[ResultDefinitionKey.SHORT_CODE.getOrder()].toLowerCase().trim());
             resultDefinition.setLevel(values[ResultDefinitionKey.LEVEL.getOrder()]);

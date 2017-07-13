@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
+import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 import uk.gov.justice.ccr.notepad.view.Part;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
@@ -22,11 +23,13 @@ import org.junit.Test;
 
 public class FindDefinitionExactMatchSynonymsTest {
     ResultCache resultCache = new ResultCache();
+    FileResultLoader fileResultLoader = new FileResultLoader();
     FindDefinitionExactMatchSynonyms testObj = new FindDefinitionExactMatchSynonyms();
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.loadResultCache();
+        resultCache.setResultLoader(fileResultLoader);
+        resultCache.lazyLoad(null);
         testObj.resultCache = resultCache;
     }
 

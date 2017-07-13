@@ -46,26 +46,3 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.notepad.parse-result-prompt+json:
                     example:  !include json/hearing.notepad.parse-result-prompt.json
                     schema:  !include  json/schema/hearing.notepad.parse-result-prompt.json
-
-/reload:
-   get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.notepad.reload-result-cache+json
-            name: hearing.notepad.reload-result-cache
-        ...
-      queryParameters:
-        loadFromReadStore:
-          description: false will load result from file, true will load from CQRS read store
-          type: boolean
-          required: true
-
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.notepad.reload-result-cache+json:
-                    example:  !include json/hearing.notepad.reload-result-cache.json
-                    schema:  !include  json/schema/hearing.notepad.reload-result-cache.json
-

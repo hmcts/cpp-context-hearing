@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class ResultPrompt {
 
-    private final String id = UUID.randomUUID().toString();
+    private String id ;
     private String resultDefinitionLabel;
     private String label;
     private ResultType type;
@@ -79,5 +79,9 @@ public class ResultPrompt {
 
     public Set<String> getFixedList() {
         return fixedList;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

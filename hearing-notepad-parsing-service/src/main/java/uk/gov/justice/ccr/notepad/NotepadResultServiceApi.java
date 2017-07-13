@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
-import javax.json.Json;
 
 @ServiceComponent(Component.QUERY_API)
 public class NotepadResultServiceApi {
@@ -42,6 +41,7 @@ public class NotepadResultServiceApi {
 
     @Handles("hearing.notepad.parse-result-definition")
     public JsonEnvelope getResultDefinition(final JsonEnvelope envelope) throws ExecutionException {
+        lazyResultCacheLoad(envelope);
         String originalText = envelope.payloadAsJsonObject().getString("originalText");
         List<Part> parts = new PartsResolver().getParts(originalText);
         Knowledge knowledge = parsingFacade.processParts(parts);
@@ -51,6 +51,7 @@ public class NotepadResultServiceApi {
 
     @Handles("hearing.notepad.parse-result-prompt")
     public JsonEnvelope getResultPrompt(final JsonEnvelope envelope) throws ExecutionException {
+        lazyResultCacheLoad(envelope);
         String resultCode = envelope.payloadAsJsonObject().getString("resultCode");
         Knowledge knowledge = parsingFacade.processPrompt(resultCode);
         return enveloper.withMetadataFrom(envelope, "hearing.notepad.parse-result-prompt-response")
@@ -58,14 +59,8 @@ public class NotepadResultServiceApi {
 
     }
 
-    @Handles("hearing.notepad.reload-result-cache")
-    public JsonEnvelope reloadResultCache(final JsonEnvelope envelope) throws ExecutionException {
-        Boolean loadFromReadStore = envelope.payloadAsJsonObject().getBoolean("loadFromReadStore");
-        parsingFacade.reloadResultCache(loadFromReadStore, envelope);
-        return enveloper.withMetadataFrom(envelope, "hearing.notepad.reload-result-cache-response")
-                .apply(Json.createObjectBuilder()
-                        .add("reload", "Done")
-                        .build());
+    private void lazyResultCacheLoad(final JsonEnvelope envelope) throws ExecutionException {
+        parsingFacade.lazyLoad(envelope);
     }
 
     ResultDefinitionView buildResultDefinitionView(final String originalText, final List<Part> parts, final Knowledge knowledge) {

@@ -4,11 +4,10 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ResultDefinition {
-    private final String id = UUID.randomUUID().toString();
+    private String id;
     private String label;
     private String shortCode;
     private String level;
@@ -48,6 +47,9 @@ public class ResultDefinition {
         }
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
     public final String getId() {
         return id;
     }

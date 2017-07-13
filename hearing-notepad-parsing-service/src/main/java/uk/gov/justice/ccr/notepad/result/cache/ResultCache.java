@@ -9,11 +9,8 @@ import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionSynonym;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
-import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
 import uk.gov.justice.ccr.notepad.result.loader.ResultLoader;
-import uk.gov.justice.ccr.notepad.result.loader.converter.StringToResultDefinitionSynonymConverter;
-import uk.gov.justice.ccr.notepad.result.loader.converter.StringToResultPromptSynonymConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
@@ -22,10 +19,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -36,7 +33,6 @@ import com.google.common.collect.Maps;
 @ApplicationScoped
 public class ResultCache {
 
-    private Boolean loadFromReadStore = false;
     private JsonEnvelope envelope;
 
     private static final String RESULT_DEFINITION_KEY = "resultDefinitionKey";
@@ -46,8 +42,10 @@ public class ResultCache {
     private static final String RESULT_PROMPT_KEY = "resultPromptKey";
     private static final String RESULT_PROMPT_SYNONYM_KEY = "resultPromptSynonymKey";
 
+
     @Inject
-    ReadStoreResultLoader readStoreResultLoader;
+    @Named("readStoreResultLoader")
+    ResultLoader resultLoader;
 
     final LoadingCache<String, Object> cache = CacheBuilder
             .newBuilder()
@@ -60,10 +58,22 @@ public class ResultCache {
                 }
             });
 
-    @PostConstruct
-    public void loadResultCache() throws ExecutionException {
 
-        ResultLoader resultLoader = getResultLoader();
+    public void lazyLoad(final JsonEnvelope envelope) throws ExecutionException {
+        if (cache.asMap().size() == 0) {
+            synchronized (this) {
+                //Double protection to stop multiple cache loads
+                if (cache.asMap().size() == 0) {
+                    if (resultLoader instanceof ReadStoreResultLoader) {
+                        ((ReadStoreResultLoader) resultLoader).setJsonEnvelope(envelope);
+                    }
+                    loadResultCache();
+                }
+            }
+        }
+    }
+
+    void loadResultCache() throws ExecutionException {
 
         addValueToCache(RESULT_DEFINITION_KEY, resultLoader.loadResultDefinition());
 
@@ -82,16 +92,11 @@ public class ResultCache {
         addValueToCache(RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY, resultPromptsIndexByKeyWord);
     }
 
-    public synchronized void reloadCache(final boolean loadFromReadStore,final JsonEnvelope envelope) throws ExecutionException {
-        this.loadFromReadStore = loadFromReadStore;
-        this.envelope = envelope;
-        loadResultCache();
+    private void addValueToCache(final String key, final Object value) {
+        cache.asMap().remove(key);
+        cache.asMap().put(key, value);
     }
 
-    private void addValueToCache(final String key, final Object value){
-        cache.asMap().remove(key);
-        cache.asMap().put(key,value);
-    }
     private Map<String, List<Long>> getPromptsIndexByKeyword() throws ExecutionException {
         Map<String, List<Long>> resultPromptsIndexByKeyWord = Maps.newHashMap();
         AtomicLong indexPromptIncrementer = new AtomicLong();
@@ -141,11 +146,15 @@ public class ResultCache {
     }
 
     public List<ResultDefinitionSynonym> getResultDefinitionSynonym() throws ExecutionException {
-        StringToResultDefinitionSynonymConverter converter = new StringToResultDefinitionSynonymConverter();
         Set<String> allKeyWords = newHashSet();
         getResultDefinition().stream().map(ResultDefinition::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
         List<ResultDefinitionSynonym> resultDefinitionKeyWordsSynonyms =
-                allKeyWords.stream().map(s -> converter.convert(s + "\t" + s)).collect(toList());
+                allKeyWords.stream().map(s -> {
+                    ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
+                    resultDefinitionSynonym.setSynonym(s);
+                    resultDefinitionSynonym.setWord(s);
+                    return resultDefinitionSynonym;
+                }).collect(toList());
         //Adding all keywords as default entry with itself
         resultDefinitionKeyWordsSynonyms.addAll(getCachedResultDefinitionSynonym());
         return resultDefinitionKeyWordsSynonyms;
@@ -161,26 +170,18 @@ public class ResultCache {
     }
 
     public List<ResultPromptSynonym> getResultPromptSynonym() throws ExecutionException {
-        StringToResultPromptSynonymConverter converter = new StringToResultPromptSynonymConverter();
         Set<String> allKeyWords = newHashSet();
         getCachedResultPrompt().stream().map(ResultPrompt::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
         List<ResultPromptSynonym> resultPromptSynonyms =
-                allKeyWords.stream().map(s -> converter.convert(s + "\t" + s)).collect(toList());
+                allKeyWords.stream().map(s -> {
+                    ResultPromptSynonym resultPromptSynonym = new ResultPromptSynonym();
+                    resultPromptSynonym.setWord(s);
+                    resultPromptSynonym.setSynonym(s);
+                    return resultPromptSynonym;
+                }).collect(toList());
         //Adding all keywords as default entry with itself
         resultPromptSynonyms.addAll(getCachedResultPromptSynonym());
         return resultPromptSynonyms;
-    }
-
-    ResultLoader getResultLoader() {
-        if (this.resultFileServiceDisabled()) {
-            if(readStoreResultLoader == null){
-                readStoreResultLoader = new ReadStoreResultLoader();
-            }
-            readStoreResultLoader.setJsonEnvelope(envelope);
-            return readStoreResultLoader;
-        } else {
-            return new FileResultLoader();
-        }
     }
 
     private ResultDefinition getResultDefinitionById(final String resultDefinitionId) throws ExecutionException {
@@ -223,7 +224,9 @@ public class ResultCache {
         return (List<ResultPromptSynonym>) cache.get(RESULT_PROMPT_SYNONYM_KEY);
     }
 
-    private boolean resultFileServiceDisabled() {
-        return loadFromReadStore;
+    public void setResultLoader(ResultLoader resultLoader) {
+        this.resultLoader = resultLoader;
     }
+
+
 }
