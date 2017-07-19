@@ -122,7 +122,6 @@ public class HearingEventQueryViewTest {
 
         final JsonEnvelope query = envelopeFrom(
                 metadataWithRandomUUIDAndName(),
-                //metadataWithRandomUUID(RESPONSE_NAME_HEARING_EVENT_LOG),//TODO
                 createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString()).build());
 
         final JsonEnvelope actualHearingEventLog = hearingEventQueryView.getHearingEventLog(query);
@@ -153,7 +152,6 @@ public class HearingEventQueryViewTest {
 
         final JsonEnvelope query = envelopeFrom(
                 metadataWithRandomUUIDAndName(),
-                //metadataWithRandomUUID(RESPONSE_NAME_HEARING_EVENT_LOG),//TODO
                 createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString()).build());
 
         final JsonEnvelope actualHearingEventLog = hearingEventQueryView.getHearingEventLog(query);
@@ -173,7 +171,6 @@ public class HearingEventQueryViewTest {
         when(hearingEventDefinitionRepository.findAllOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithoutCaseAttributes());
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
-        //final JsonEnvelope query = envelopeFrom(metadataWithRandomUUID(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS), createObjectBuilder()//TODO
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
                 .build());
 
@@ -210,7 +207,6 @@ public class HearingEventQueryViewTest {
         when(defenceCounselRepository.findDefenceCounselAndDefendantByHearingId(HEARING_ID)).thenReturn(defenceCounselToDefendants());
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
-        //final JsonEnvelope query = envelopeFrom(metadataWithRandomUUID(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS), createObjectBuilder()//TODO
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
                 .build());
 
@@ -248,7 +244,6 @@ public class HearingEventQueryViewTest {
         when(hearingEventDefinitionRepository.findAllOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithOutOfSequenceEvent());
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
-        //final JsonEnvelope query = envelopeFrom(metadataWithRandomUUID(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS), createObjectBuilder()//TODO
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
                 .build());
 
