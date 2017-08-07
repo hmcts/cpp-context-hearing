@@ -9,7 +9,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>hearing-query-api</module>
-  	<module>hearing-query-controller</module>
   	<module>hearing-query-view</module>
   </modules>
 </project>

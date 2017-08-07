@@ -8,6 +8,11 @@
     <artifactId>hearing-event-listener</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <cpp.service-component>EVENT_LISTENER</cpp.service-component>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>javax</groupId>
@@ -15,8 +20,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
+            <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>event-listener</artifactId>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>

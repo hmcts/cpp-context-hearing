@@ -7,9 +7,11 @@
     </parent>
     <artifactId>hearing-query-api</artifactId>
     <packaging>war</packaging>
+
     <properties>
         <cpp.service-component>QUERY_API</cpp.service-component>
     </properties>
+
 
     <build>
         <plugins>
@@ -19,7 +21,7 @@
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
-                        <artifactId>hearing-query-controller</artifactId>
+                        <artifactId>hearing-query-view</artifactId>
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
                     </dependency>
@@ -36,23 +38,19 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
+            <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>query-api</artifactId>
+            <type>pom</type>
         </dependency>
+
         <dependency>
-            <groupId>uk.gov.moj.cpp.access-control</groupId>
-            <artifactId>access-control-common-providers</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>uk.gov.moj.cpp.common</groupId>
-                    <artifactId>system-users-library</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
+            <artifactId>authorisation-interceptor</artifactId>
         </dependency>
+        
         <dependency>
-            <groupId>uk.gov.moj.cpp.authorisation.service</groupId>
-            <artifactId>authorisation-service-interceptor</artifactId>
-            <version>${authorisation.service.version}</version>
+            <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
+            <artifactId>authorisation-interceptor-strategy-sync</artifactId>
         </dependency>
 
         <!-- Test dependencies -->

@@ -11,7 +11,7 @@
 
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
-            <artifactId>domain</artifactId>
+            <artifactId>framework-api-domain</artifactId>
         </dependency>
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>

@@ -2,7 +2,7 @@ package uk.gov.justice.ccr.notepad.service;
 
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.dispatcher.Requester;
+import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 

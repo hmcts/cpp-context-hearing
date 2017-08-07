@@ -10,7 +10,6 @@
 
     <modules>
         <module>hearing-command-api</module>
-        <module>hearing-command-controller</module>
         <module>hearing-command-handler</module>
     </modules>
 </project>

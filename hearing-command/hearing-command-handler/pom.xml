@@ -8,6 +8,10 @@
     <artifactId>hearing-command-handler</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <cpp.service-component>COMMAND_HANDLER</cpp.service-component>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>javax</groupId>
@@ -15,8 +19,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
+            <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>command-handler</artifactId>
+            <type>pom</type>
         </dependency>
 
         <!-- project Dependencies -->

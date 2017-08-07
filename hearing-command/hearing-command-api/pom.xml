@@ -8,6 +8,27 @@
     <artifactId>hearing-command-api</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <cpp.service-component>COMMAND_API</cpp.service-component>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>uk.gov.justice.maven</groupId>
+                <artifactId>raml-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.hearing</groupId>
+                        <artifactId>hearing-command-handler</artifactId>
+                        <version>${project.version}</version>
+                        <classifier>raml</classifier>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+    
     <dependencies>
         <dependency>
             <groupId>javax</groupId>
@@ -15,25 +36,21 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
+            <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>command-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.moj.cpp.access-control</groupId>
-            <artifactId>access-control-common-providers</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>uk.gov.moj.cpp.common</groupId>
-                    <artifactId>system-users-library</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>uk.gov.moj.cpp.authorisation.service</groupId>
-            <artifactId>authorisation-service-interceptor</artifactId>
-            <version>${authorisation.service.version}</version>
+            <type>pom</type>
         </dependency>
 
+        <dependency>
+            <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
+            <artifactId>authorisation-interceptor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
+            <artifactId>authorisation-interceptor-strategy-sync</artifactId>
+        </dependency>
+        
         <!-- Test Dependencies -->
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
