@@ -54,8 +54,12 @@ public class ProsecutionCounsel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ProsecutionCounsel that = (ProsecutionCounsel) o;
         return Objects.equals(getAttendeeId(), that.getAttendeeId()) &&
                 Objects.equals(getHearingId(), that.getHearingId()) &&

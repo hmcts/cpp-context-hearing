@@ -15,16 +15,15 @@ public class ResultLine {
     private final String resultLabel;
     private final List<ResultPrompt> prompts;
 
-    public ResultLine(final UUID id, final UUID lastSharedResultId, final UUID caseId, final UUID personId, final UUID offenceId,
-                      final String level, final String resultLabel, final List<ResultPrompt> prompts) {
-        this.id = id;
-        this.lastSharedResultId = lastSharedResultId;
-        this.caseId = caseId;
-        this.personId = personId;
-        this.offenceId = offenceId;
-        this.level = level;
-        this.resultLabel = resultLabel;
-        this.prompts = prompts;
+    public ResultLine(ResultLineDecisionParameters resultLineDecisionParameters) {
+        this.id = resultLineDecisionParameters.getId();
+        this.lastSharedResultId = resultLineDecisionParameters.getLastSharedResultId();
+        this.caseId = resultLineDecisionParameters.getCaseId();
+        this.personId = resultLineDecisionParameters.getPersonId();
+        this.offenceId = resultLineDecisionParameters.getOffenceId();
+        this.level = resultLineDecisionParameters.getLevel();
+        this.resultLabel = resultLineDecisionParameters.getResultLabel();
+        this.prompts = resultLineDecisionParameters.getPrompts();
     }
 
     public UUID getId() {
@@ -61,17 +60,36 @@ public class ResultLine {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final ResultLine that = (ResultLine) o;
-        return Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getLastSharedResultId(), that.getLastSharedResultId()) &&
-                Objects.equals(getCaseId(), that.getCaseId()) &&
-                Objects.equals(getPersonId(), that.getPersonId()) &&
-                Objects.equals(getOffenceId(), that.getOffenceId()) &&
-                Objects.equals(getLevel(), that.getLevel()) &&
-                Objects.equals(getResultLabel(), that.getResultLabel()) &&
-                Objects.equals(getPrompts(), that.getPrompts());
+
+        if (id != null ? !id.equals(that.id) : that.id != null) {
+            return false;
+        }
+        if (lastSharedResultId != null ? !lastSharedResultId.equals(that.lastSharedResultId) : that.lastSharedResultId != null) {
+            return false;
+        }
+        if (caseId != null ? !caseId.equals(that.caseId) : that.caseId != null) {
+            return false;
+        }
+        if (personId != null ? !personId.equals(that.personId) : that.personId != null) {
+            return false;
+        }
+        if (offenceId != null ? !offenceId.equals(that.offenceId) : that.offenceId != null) {
+            return false;
+        }
+        if (level != null ? !level.equals(that.level) : that.level != null) {
+            return false;
+        }
+        if (resultLabel != null ? !resultLabel.equals(that.resultLabel) : that.resultLabel != null) {
+            return false;
+        }
+        return prompts != null ? prompts.equals(that.prompts) : that.prompts == null;
     }
 
     @Override

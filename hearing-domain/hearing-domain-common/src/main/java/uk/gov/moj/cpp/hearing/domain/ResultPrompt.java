@@ -21,8 +21,12 @@ public class ResultPrompt {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final ResultPrompt that = (ResultPrompt) o;
         return Objects.equals(getLabel(), that.getLabel()) &&
                 Objects.equals(getValue(), that.getValue());
