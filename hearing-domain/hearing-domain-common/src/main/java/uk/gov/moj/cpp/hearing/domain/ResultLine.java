@@ -15,15 +15,16 @@ public class ResultLine {
     private final String resultLabel;
     private final List<ResultPrompt> prompts;
 
-    public ResultLine(ResultLineDecisionParameters resultLineDecisionParameters) {
-        this.id = resultLineDecisionParameters.getId();
-        this.lastSharedResultId = resultLineDecisionParameters.getLastSharedResultId();
-        this.caseId = resultLineDecisionParameters.getCaseId();
-        this.personId = resultLineDecisionParameters.getPersonId();
-        this.offenceId = resultLineDecisionParameters.getOffenceId();
-        this.level = resultLineDecisionParameters.getLevel();
-        this.resultLabel = resultLineDecisionParameters.getResultLabel();
-        this.prompts = resultLineDecisionParameters.getPrompts();
+    public ResultLine(final UUID id, final UUID lastSharedResultId, final UUID caseId, final UUID personId, final UUID offenceId,
+                      final String level, final String resultLabel, final List<ResultPrompt> prompts) {
+        this.id = id;
+        this.lastSharedResultId = lastSharedResultId;
+        this.caseId = caseId;
+        this.personId = personId;
+        this.offenceId = offenceId;
+        this.level = level;
+        this.resultLabel = resultLabel;
+        this.prompts = prompts;
     }
 
     public UUID getId() {

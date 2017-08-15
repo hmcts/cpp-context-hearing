@@ -17,7 +17,6 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
-import uk.gov.moj.cpp.hearing.domain.ResultLineDecisionParameters;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
@@ -190,18 +189,16 @@ public class HearingCommandHandler {
     }
 
     private ResultLine extractResultLine(final JsonObject resultLine) {
-        ResultLineDecisionParameters resultLineDecisionParameters = new ResultLineDecisionParameters();
-        resultLineDecisionParameters.setId(fromString(resultLine.getString(FIELD_GENERIC_ID)));
-        resultLineDecisionParameters.setLastSharedResultId(resultLine.containsKey(FIELD_LAST_SHARED_RESULT_ID) ? fromString(resultLine.getString(FIELD_LAST_SHARED_RESULT_ID)) : null);
-        resultLineDecisionParameters.setCaseId(fromString(resultLine.getString(FIELD_CASE_ID)));
-        resultLineDecisionParameters.setOffenceId(fromString(resultLine.getString(FIELD_OFFENCE_ID)));
-        resultLineDecisionParameters.setPersonId(fromString(resultLine.getString(FIELD_PERSON_ID)));
-        resultLineDecisionParameters.setLevel(resultLine.getString(FIELD_LEVEL));
-        resultLineDecisionParameters.setPrompts(resultLine.getJsonArray(FIELD_RESULT_PROMPTS).getValuesAs(JsonObject.class).stream()
-                .map(prompt -> new ResultPrompt(prompt.getString(FIELD_RESULT_LABEL), prompt.getString(FIELD_RESULT_VALUE)))
-                .collect(toList()));
-        resultLineDecisionParameters.setResultLabel(resultLine.getString(RESULT_LABEL));
-
-        return new ResultLine(resultLineDecisionParameters);
+        return new ResultLine(fromString(resultLine.getString(FIELD_GENERIC_ID)),
+                resultLine.containsKey(FIELD_LAST_SHARED_RESULT_ID) ? fromString(resultLine.getString(FIELD_LAST_SHARED_RESULT_ID)) : null,
+                fromString(resultLine.getString(FIELD_CASE_ID)),
+                fromString(resultLine.getString(FIELD_PERSON_ID)),
+                fromString(resultLine.getString(FIELD_OFFENCE_ID)),
+                resultLine.getString(FIELD_LEVEL),
+                resultLine.getString(RESULT_LABEL),
+                resultLine.getJsonArray(FIELD_RESULT_PROMPTS).getValuesAs(JsonObject.class).stream()
+                        .map(prompt -> new ResultPrompt(prompt.getString(FIELD_RESULT_LABEL), prompt.getString(FIELD_RESULT_VALUE)))
+                        .collect(toList())
+        );
     }
 }

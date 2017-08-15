@@ -35,7 +35,6 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
-import uk.gov.moj.cpp.hearing.domain.ResultLineDecisionParameters;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
@@ -626,31 +625,15 @@ public class HearingCommandHandlerTest {
     }
 
     private List<ResultLine> prepareResultLines() {
-        ResultLineDecisionParameters resultLineDecisionParametersOne = new ResultLineDecisionParameters();
-        resultLineDecisionParametersOne.setId(GENERIC_ID);
-        resultLineDecisionParametersOne.setLastSharedResultId(null);
-        resultLineDecisionParametersOne.setCaseId(CASE_ID);
-        resultLineDecisionParametersOne.setOffenceId(OFFENCE_ID);
-        resultLineDecisionParametersOne.setPersonId(PERSON_ID);
-        resultLineDecisionParametersOne.setLevel(LEVEL);
-        resultLineDecisionParametersOne.setPrompts(newArrayList(new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1)));
-        resultLineDecisionParametersOne.setResultLabel(RESULT_LABEL);
-
-
-        ResultLineDecisionParameters resultLineDecisionParametersTwo = new ResultLineDecisionParameters();
-        resultLineDecisionParametersTwo.setId(GENERIC_ID_4);
-        resultLineDecisionParametersTwo.setLastSharedResultId(null);
-        resultLineDecisionParametersTwo.setCaseId(CASE_ID);
-        resultLineDecisionParametersTwo.setOffenceId(OFFENCE_ID);
-        resultLineDecisionParametersTwo.setPersonId(PERSON_ID);
-        resultLineDecisionParametersTwo.setLevel(LEVEL);
-        resultLineDecisionParametersTwo.setPrompts(newArrayList(new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1),
-                new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2)));
-        resultLineDecisionParametersTwo.setResultLabel(RESULT_LABEL);
-
-        return newArrayList(new ResultLine(resultLineDecisionParametersOne),
-                new ResultLine(resultLineDecisionParametersTwo));
+        return newArrayList(new ResultLine(GENERIC_ID, null, CASE_ID, PERSON_ID, OFFENCE_ID, LEVEL, RESULT_LABEL,
+                newArrayList(new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1),
+                        new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2))),
+                new ResultLine(GENERIC_ID_4, null, CASE_ID, PERSON_ID, OFFENCE_ID, LEVEL, RESULT_LABEL,
+                        newArrayList(new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1),
+                                new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2)))
+        );
     }
+
 
     private List<ResultAmended> prepareAmendedResults() {
         return newArrayList(new ResultAmended(GENERIC_ID_2, GENERIC_ID, SHARED_TIME_2, HEARING_ID, CASE_ID, PERSON_ID, OFFENCE_ID, LEVEL, RESULT_LABEL,
