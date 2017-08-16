@@ -91,7 +91,7 @@ rule "Command - API - Action - hearing.create-hearing-event-definitions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.create-hearing-event-definitions");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "System Users"));
   then
     $outcome.setSuccess(true);
 end

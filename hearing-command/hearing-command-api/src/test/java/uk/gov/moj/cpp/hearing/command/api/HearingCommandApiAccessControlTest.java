@@ -24,6 +24,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_LOG_HEARING_EVENT = "hearing.log-hearing-event";
     private static final String ACTION_NAME_CORRECT_HEARING_EVENT = "hearing.correct-hearing-event";
     private static final String ACTION_NAME_SHARE_RESULTS_EVENT = "hearing.share-results";
+    private static final String ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT = "hearing.create-hearing-event-definitions";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -31,7 +32,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToInitiateHearing() {
         final Action action = createActionFor(ACTION_NAME_INITIATE_HEARING);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers","Crown Court Admin","Court Clerks"))
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Crown Court Admin", "Court Clerks"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -50,7 +51,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAdjournDate() {
         final Action action = createActionFor(ACTION_NAME_ADJOURN_HEARING_DATE);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers","Crown Court Admin","Court Clerks"))
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Crown Court Admin", "Court Clerks"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -189,6 +190,24 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToCorrectHearingEvent() {
         final Action action = createActionFor(ACTION_NAME_CORRECT_HEARING_EVENT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToCreateHearingEventDefinitions() {
+        final Action action = createActionFor(ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "System Users")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToCreateHearingEventDefinitions() {
+        final Action action = createActionFor(ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

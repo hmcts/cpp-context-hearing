@@ -55,8 +55,12 @@ public class ResultChoice implements Comparable<ResultChoice> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ResultChoice)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ResultChoice)) {
+            return false;
+        }
 
         ResultChoice that = (ResultChoice) o;
 

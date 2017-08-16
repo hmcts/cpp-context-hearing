@@ -3,14 +3,13 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>2.0.84-R2-SNAPSHOT</version>
+        <version>2.0.86-R2-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-command</artifactId>
     <packaging>pom</packaging>
 
     <modules>
         <module>hearing-command-api</module>
-        <module>hearing-command-controller</module>
         <module>hearing-command-handler</module>
     </modules>
 </project>

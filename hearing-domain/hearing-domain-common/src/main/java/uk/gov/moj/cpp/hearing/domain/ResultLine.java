@@ -61,17 +61,36 @@ public class ResultLine {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final ResultLine that = (ResultLine) o;
-        return Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getLastSharedResultId(), that.getLastSharedResultId()) &&
-                Objects.equals(getCaseId(), that.getCaseId()) &&
-                Objects.equals(getPersonId(), that.getPersonId()) &&
-                Objects.equals(getOffenceId(), that.getOffenceId()) &&
-                Objects.equals(getLevel(), that.getLevel()) &&
-                Objects.equals(getResultLabel(), that.getResultLabel()) &&
-                Objects.equals(getPrompts(), that.getPrompts());
+
+        if (id != null ? !id.equals(that.id) : that.id != null) {
+            return false;
+        }
+        if (lastSharedResultId != null ? !lastSharedResultId.equals(that.lastSharedResultId) : that.lastSharedResultId != null) {
+            return false;
+        }
+        if (caseId != null ? !caseId.equals(that.caseId) : that.caseId != null) {
+            return false;
+        }
+        if (personId != null ? !personId.equals(that.personId) : that.personId != null) {
+            return false;
+        }
+        if (offenceId != null ? !offenceId.equals(that.offenceId) : that.offenceId != null) {
+            return false;
+        }
+        if (level != null ? !level.equals(that.level) : that.level != null) {
+            return false;
+        }
+        if (resultLabel != null ? !resultLabel.equals(that.resultLabel) : that.resultLabel != null) {
+            return false;
+        }
+        return prompts != null ? prompts.equals(that.prompts) : that.prompts == null;
     }
 
     @Override
