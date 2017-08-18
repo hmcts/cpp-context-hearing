@@ -7,6 +7,9 @@
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "groupLabel": {
             "type": "string"
           },
@@ -24,6 +27,9 @@
             "items": {
               "type": "object"
             }
+          },
+          "alterable": {
+            "type": "boolean"
           },
           "sequence": {
             "type": "object",
@@ -44,8 +50,10 @@
         },
         "additionalProperties": false,
         "required": [
+          "id",
           "recordedLabel",
-          "actionLabel"
+          "actionLabel",
+          "alterable"
         ]
       }
     }

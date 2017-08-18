@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Stream;
 
-public class HearingEventsLogAggregate implements Aggregate {
+public class HearingEventLogAggregate implements Aggregate {
 
     private static final String REASON_ALREADY_LOGGED = "Already logged";
     private static final String REASON_ALREADY_DELETED = "Already deleted";
@@ -35,23 +35,25 @@ public class HearingEventsLogAggregate implements Aggregate {
         );
     }
 
-    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel,
-                                          final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime) {
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final UUID hearingEventDefinitionId,
+                                          final String recordedLabel, final ZonedDateTime eventTime,
+                                          final ZonedDateTime lastModifiedTime, final boolean alterable) {
         if (hearingEventPreviouslyLogged(hearingEventId)) {
-            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, eventTime, REASON_ALREADY_LOGGED)));
+            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, REASON_ALREADY_LOGGED, alterable)));
         } else if (hearingEventPreviouslyDeleted(hearingEventId)) {
-            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, recordedLabel, eventTime, REASON_ALREADY_DELETED)));
+            return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, REASON_ALREADY_DELETED, alterable)));
         }
 
-        return apply(Stream.of(new HearingEventLogged(hearingEventId, hearingId, recordedLabel, eventTime, lastModifiedTime)));
+        return apply(Stream.of(new HearingEventLogged(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable)));
     }
 
-    public Stream<Object> correctEvent(final UUID hearingId, final UUID hearingEventId, final String recordedLabel,
-                                       final ZonedDateTime eventTime, ZonedDateTime lastModifiedTime, final UUID latestHearingEventId) {
-        return concat(logHearingEvent(hearingId, latestHearingEventId, recordedLabel, eventTime, lastModifiedTime), deleteHearingEvent(hearingEventId));
+    public Stream<Object> correctEvent(final UUID hearingId, final UUID hearingEventId, final UUID hearingEventDefinitionId,
+                                       final String recordedLabel, final ZonedDateTime eventTime, ZonedDateTime lastModifiedTime,
+                                       final UUID latestHearingEventId, final boolean alterable) {
+        return concat(logHearingEvent(hearingId, latestHearingEventId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable), deleteHearingEvent(hearingEventId));
     }
 
-    public Stream<Object> deleteHearingEvent(final UUID hearingEventId) {
+    private Stream<Object> deleteHearingEvent(final UUID hearingEventId) {
         if (!hearingEventPreviouslyLogged(hearingEventId)) {
             return apply(Stream.of(new HearingEventDeletionIgnored(hearingEventId, REASON_EVENT_NOT_FOUND)));
         }

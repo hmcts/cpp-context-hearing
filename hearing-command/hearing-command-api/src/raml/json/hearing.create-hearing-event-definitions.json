@@ -2,45 +2,59 @@
   "id": "4daefec6-5f78-4109-82d9-1e60544a6c02",
   "eventDefinitions": [
     {
+      "id": "92aefec6-5f78-4109-82d9-1e60564a6c02",
       "actionLabel": "Start Hearing",
       "recordedLabel": "Hearing started",
       "sequence": 1,
-      "sequenceType": "SENTENCING"
+      "sequenceType": "SENTENCING",
+      "alterable": false
     },
     {
+      "id": "4daef646-5f78-4109-8069-1e60544a6c02",
       "actionLabel": "Identify defendant",
       "recordedLabel": "Defendant identified",
       "sequence": 2,
-      "sequenceType": "SENTENCING"
+      "sequenceType": "SENTENCING",
+      "alterable": true
     },
     {
+      "id": "e1b210f9-dcea-4701-971c-8458d36fda2a",
       "groupLabel": "Mitigation by:",
       "actionLabel": "<counsel.name>",
       "actionLabelExtension": "Defending <defendant.name>",
       "recordedLabel": "Defence <counsel.name> mitigated for <defendant.name>",
       "sequence": 3,
       "sequenceType": "SENTENCING",
-      "caseAttribute": "defendant.name,counsel.name"
+      "caseAttribute": "defendant.name,counsel.name",
+      "alterable": true
     },
     {
+      "id": "ca3030e4-7855-40c4-8665-6c39fc11ac72",
       "actionLabel": "Prosecution challenges defence application",
-      "recordedLabel": "Prosecution challenged defence application"
+      "recordedLabel": "Prosecution challenged defence application",
+      "alterable": true
     },
     {
+      "id": "db28a81c-c4c6-4f38-b5f8-e962a295dda1",
       "actionLabel": "Judge ruling: Contempt of court",
-      "recordedLabel": "Judge ruling: Contempt of court"
+      "recordedLabel": "Judge ruling: Contempt of court",
+      "alterable": true
     },
     {
+      "id": "88e8b9dc-00dd-436b-92e4-6007c530f5b4",
       "actionLabel": "Pause",
       "recordedLabel": "Hearing paused",
       "sequence": 1,
-      "sequenceType": "PAUSE_RESUME"
+      "sequenceType": "PAUSE_RESUME",
+      "alterable": false
     },
     {
+      "id": "deac62a7-8546-4d87-9d82-f539bdd93bb9",
       "actionLabel": "Resume",
       "recordedLabel": "Hearing resumed",
       "sequence": 2,
-      "sequenceType": "PAUSE_RESUME"
+      "sequenceType": "PAUSE_RESUME",
+      "alterable": false
     }
   ]
 }

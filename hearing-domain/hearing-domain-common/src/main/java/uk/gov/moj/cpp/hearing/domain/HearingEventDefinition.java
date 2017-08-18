@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain;
 
 
+import java.util.UUID;
+
 public class HearingEventDefinition {
 
+    private final UUID id;
     private final String actionLabel;
     private final String recordedLabel;
     private final Integer sequence;
@@ -10,10 +13,12 @@ public class HearingEventDefinition {
     private final String caseAttribute;
     private final String groupLabel;
     private final String actionLabelExtension;
+    private final boolean alterable;
 
-    public HearingEventDefinition(final String actionLabel, final String recordedLabel, final Integer sequence,
+    public HearingEventDefinition(final UUID id, final String actionLabel, final String recordedLabel, final Integer sequence,
                                   final String sequenceType, final String caseAttribute, final String groupLabel,
-                                  final String actionLabelExtension) {
+                                  final String actionLabelExtension, final boolean alterable) {
+        this.id = id;
         this.actionLabel = actionLabel;
         this.recordedLabel = recordedLabel;
         this.sequence = sequence;
@@ -21,6 +26,11 @@ public class HearingEventDefinition {
         this.caseAttribute = caseAttribute;
         this.groupLabel = groupLabel;
         this.actionLabelExtension = actionLabelExtension;
+        this.alterable = alterable;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getActionLabel() {
@@ -49,5 +59,9 @@ public class HearingEventDefinition {
 
     public String getActionLabelExtension() {
         return actionLabelExtension;
+    }
+
+    public boolean isAlterable() {
+        return alterable;
     }
 }

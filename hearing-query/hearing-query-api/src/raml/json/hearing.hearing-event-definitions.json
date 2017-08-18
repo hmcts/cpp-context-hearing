@@ -1,22 +1,27 @@
 {
   "eventDefinitions": [
     {
+      "id": "cababf6e-62f4-411b-98ef-2d45f7ede08f",
       "actionLabel": "Start Hearing",
       "recordedLabel": "Hearing started",
       "sequence": {
         "type": "SENTENCING",
         "id": 1
-      }
+      },
+      "alterable": false
     },
     {
+      "id": "3a1a2985-934f-4b0e-b026-e59382fd6915",
       "actionLabel": "Identify defendant",
       "recordedLabel": "Defendant identified",
       "sequence": {
         "type": "SENTENCING",
         "id": 2
-      }
+      },
+      "alterable": true
     },
     {
+      "id": "7d5db3ef-1ca7-4ad6-95f2-5a67f861e74e",
       "groupLabel": "Mitigation by:",
       "actionLabel": "<counsel.name>",
       "actionLabelExtension": "Defending <defendant.name>",
@@ -34,31 +39,40 @@
           "defendant.name": "4bb4cd5a-ce2a-467d-8984-76b62ec92072",
           "counsel.name": "ed0bbb23-533e-4dd5-82fc-2ad4edcdae6d"
         }
-      ]
+      ],
+      "alterable": true
     },
     {
+      "id": "1c20e2bc-bfe6-4e2e-9abc-13a863ae4be2",
       "actionLabel": "Pause",
       "recordedLabel": "Hearing paused",
       "sequence": {
         "type": "PAUSE_RESUME",
         "id": 1
-      }
+      },
+      "alterable": false
     },
     {
+      "id": "e5e9fec5-f961-4412-982c-6e0ecc3e1710",
       "actionLabel": "Resume",
       "recordedLabel": "Hearing resumed",
       "sequence": {
         "type": "PAUSE_RESUME",
         "id": 2
-      }
+      },
+      "alterable": false
     },
     {
+      "id": "b9be3207-1a08-4ee1-ae76-b57658da743f",
       "actionLabel": "Prosecution challenges defence application",
-      "recordedLabel": "Prosecution challenged defence application"
+      "recordedLabel": "Prosecution challenged defence application",
+      "alterable": true
     },
     {
+      "id": "eeb7a393-1068-4fce-85ef-48bcb1a854cb",
       "actionLabel": "Judge ruling: Contempt of court",
-      "recordedLabel": "Judge ruling: Contempt of court"
+      "recordedLabel": "Judge ruling: Contempt of court",
+      "alterable": true
     }
   ]
 }
