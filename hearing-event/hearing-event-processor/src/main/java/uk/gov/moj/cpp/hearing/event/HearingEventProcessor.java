@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.lang.String.format;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import uk.gov.justice.services.core.annotation.Handles;
@@ -12,9 +13,15 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
 public class HearingEventProcessor {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(HearingEventProcessor.class.getName());
 
     private static final String PUBLIC_HEARING_HEARING_INITIATED = "public.hearing.hearing-initiated";
     private static final String PUBLIC_HEARING_RESULTED = "public.hearing.resulted";
@@ -36,6 +43,7 @@ public class HearingEventProcessor {
 
     @Handles("hearing.results-shared")
     public void publishHearingResultsSharedPublicEvent(final JsonEnvelope event) {
+        LOGGER.debug(format("'public.hearing.resulted' event received %s", event.payloadAsJsonObject()));
         sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(event.payloadAsJsonObject()));
     }
 
