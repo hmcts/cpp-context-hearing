@@ -47,11 +47,11 @@ public class HearingQueryApiTest {
 
     @Test
     public void testHandleNamesPassThroughRequester() throws Exception {
-        apiMethodsToHandlerNames.entrySet()
-                .forEach(entry -> assertThat(HearingQueryApi.class, isHandlerClass(QUERY_API)
-                .with(method(entry.getKey())
-                        .thatHandles(entry.getValue())
-                        .withRequesterPassThrough())));
+        apiMethodsToHandlerNames.forEach((key, value) -> assertThat(HearingQueryApi.class,
+                isHandlerClass(QUERY_API)
+                        .with(method(key)
+                                .thatHandles(value)
+                                .withRequesterPassThrough())));
     }
 
 

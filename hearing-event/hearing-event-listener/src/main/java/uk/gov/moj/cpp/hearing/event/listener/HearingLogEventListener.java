@@ -20,13 +20,15 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.transaction.Transactional;
 
+@SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_LISTENER)
 public class HearingLogEventListener {
 
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_DEFINITION_ID = "id";
     private static final String FIELD_EVENT_TIME = "eventTime";
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
@@ -37,6 +39,7 @@ public class HearingLogEventListener {
     private static final String FIELD_SEQUENCE_TYPE = "sequenceType";
     private static final String FIELD_GROUP_LABEL = "groupLabel";
     private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
+    private static final String FIELD_ALTERABLE = "alterable";
 
     @Inject
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
@@ -44,42 +47,51 @@ public class HearingLogEventListener {
     @Inject
     private HearingEventRepository hearingEventRepository;
 
-    @Transactional
     @Handles("hearing.hearing-event-definitions-created")
     public void hearingEventDefinitionsCreated(final JsonEnvelope event) {
-        hearingEventDefinitionRepository.deleteAll();
-
         final List<HearingEventDefinition> entities = new ArrayList<>();
         event.payloadAsJsonObject().getJsonArray(FIELD_EVENT_DEFINITIONS).forEach(item -> {
             final JsonObject jsonObject = (JsonObject) item;
             entities.add(new HearingEventDefinition(
+                    fromString(jsonObject.getString(FIELD_DEFINITION_ID)),
                     jsonObject.getString(FIELD_RECORDED_LABEL),
                     jsonObject.getString(FIELD_ACTION_LABEL),
                     jsonObject.containsKey(FIELD_SEQUENCE) ? jsonObject.getInt(FIELD_SEQUENCE) : null,
                     jsonObject.getString(FIELD_SEQUENCE_TYPE, null),
                     jsonObject.getString(FIELD_CASE_ATTRIBUTE, null),
                     jsonObject.getString(FIELD_GROUP_LABEL, null),
-                    jsonObject.getString(FIELD_ACTION_LABEL_EXTENSION, null)));
+                    jsonObject.getString(FIELD_ACTION_LABEL_EXTENSION, null),
+                    jsonObject.getBoolean(FIELD_ALTERABLE)));
         });
 
         entities.forEach(hearingEventDefinitionRepository::save);
     }
 
-    @Transactional
+    @SuppressWarnings("unused")
+    @Handles("hearing.hearing-event-definitions-deleted")
+    public void hearingEventDefinitionsDeleted(final JsonEnvelope event) {
+        final List<HearingEventDefinition> activeEventDefinitions = hearingEventDefinitionRepository.findAllActive();
+
+        activeEventDefinitions.stream()
+                .map(eventDefinition -> eventDefinition.builder().delete().build())
+                .forEach(hearingEventDefinitionRepository::save);
+    }
+
     @Handles("hearing.hearing-event-logged")
     public void hearingEventLogged(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
 
         final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
+        final UUID hearingEventDefinitionId = fromString(payload.getString(FIELD_HEARING_EVENT_DEFINITION_ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String recordedLabel = payload.getString(FIELD_RECORDED_LABEL);
         final ZonedDateTime eventTime = fromJsonString(payload.getJsonString(FIELD_EVENT_TIME));
         final ZonedDateTime lastModifiedTime = fromJsonString(payload.getJsonString(FIELD_LAST_MODIFIED_TIME));
+        final boolean alterable = payload.getBoolean(FIELD_ALTERABLE);
 
-        hearingEventRepository.save(new HearingEvent(hearingEventId, hearingId, recordedLabel, eventTime, lastModifiedTime));
+        hearingEventRepository.save(new HearingEvent(hearingEventId, hearingEventDefinitionId, hearingId, recordedLabel, eventTime, lastModifiedTime, alterable));
     }
 
-    @Transactional
     @Handles("hearing.hearing-event-deleted")
     public void hearingEventDeleted(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();

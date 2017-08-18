@@ -58,6 +58,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@SuppressWarnings("unused")
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandApiTest {
 
@@ -94,7 +95,7 @@ public class HearingCommandApiTest {
     private static final String VALUE = STRING.next();
 
     private static final String COMMAND_SHARE_RESULTS = "hearing.share-results";
-    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults");
+    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent", "correctEvent");
 
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
@@ -113,6 +114,9 @@ public class HearingCommandApiTest {
 
     @InjectMocks
     private HearingCommandApi hearingCommandApi;
+
+    @InjectMocks
+    private HearingEventCommandApi hearingEventCommandApi;
 
     @Before
     public void setup() {
@@ -139,7 +143,9 @@ public class HearingCommandApiTest {
         assertHandlerMethodsArePassThrough(HearingCommandApi.class, apiMethodsToHandlerNames.keySet().stream()
                 .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
                 .collect(toMap(identity(), apiMethodsToHandlerNames::get)));
-        assertHandlerMethodsArePassThrough(HearingEventCommandApi.class, eventApiMethodsToHandlerNames);
+        assertHandlerMethodsArePassThrough(HearingEventCommandApi.class, eventApiMethodsToHandlerNames.keySet().stream()
+                .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
+                .collect(toMap(identity(), eventApiMethodsToHandlerNames::get)));
     }
 
     @Test
