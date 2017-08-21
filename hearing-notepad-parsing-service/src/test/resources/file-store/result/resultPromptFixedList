@@ -1,21 +1,19 @@
 Fixed List ID	Code	Value
-Imprisonment Reason	001	Offence so serious
-Imprisonment Reason	002	Violent or sexual offence - public protection
-Imprisonment Reason	003	Failed to express willingness to comply with a proposed requirement for a community order
-Imprisonment Reason	004	Failed to express willingness to comply with a drug treatment and testing order requirement
-Imprisonment Reason	005	Wilful and persistent failure to comply with the requirements of a community order
-Imprisonment Reason	006	To secure a recognisance
-Imprisonment Reason	007	To await surety
-Imprisonment Reason	008	Failed to comply with a pre-sentence drug testing order
-Probation Team	LNPS	London Division NPS
-Probation Team	MNPS	Midlands Division NPS
-Probation Team	NENPS	North East Division NPS
-Probation Team	NWNPS	North West Division NPS
-Probation Team	SEENPS	South East and Eastern Division NPS
-Probation Team	SWCNPS	South West and Central  NPS
-Probation Team	WNPS	Wales Division NPS
-Prison	HD	HMP High Down
-Prison	WANDS	HMP Wandswoth
-Prison	LIVERS	HMP Liverpool
 Conviction / acquittal	CON	Convicted
 Conviction / acquittal	ACQ	Acquitted
+Responsible officer - community	AC	the officer in charge of the Attendance Centre
+Responsible officer - community	EM	the electronic monitoring supervisor
+Responsible officer - community	PO	a probation officer
+Responsible officer - community	YOT	a member of the youth offending team
+Responsible officer - community	PROV	an officer of a provider of probation services
+Responsible officer - suspended imprisonment	AC	the officer in charge of the Attendance Centre
+Responsible officer - suspended imprisonment	EM	the electronic monitoring supervisor
+Responsible officer - suspended imprisonment	PO	a probation officer
+Responsible officer - suspended imprisonment	PROV	an officer of a provider of probation services
+Responsible officer - suspended imprisonment	NA	Not applicable
+Responsible officer - suspended detention	AC	the officer in charge of the Attendance Centre
+Responsible officer - suspended detention	EM	the electronic monitoring supervisor
+Responsible officer - suspended detention	PO	a probation officer
+Responsible officer - suspended detention	YOT	a member of the youth offending team
+Responsible officer - suspended detention	PROV	an officer of a provider of probation services
+Responsible officer - suspended detention	NA	Not applicable

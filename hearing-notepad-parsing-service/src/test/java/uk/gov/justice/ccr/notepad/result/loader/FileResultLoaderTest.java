@@ -12,13 +12,12 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class FileResultLoaderTest {
 
-    @Ignore
-    public void loadResultPrompt() throws Exception {
+    @Test
+    public void loadResultPromptWithFixedList() throws Exception {
         //given
         FileResultLoader testObject = new FileResultLoader();
 
@@ -29,7 +28,8 @@ public class FileResultLoaderTest {
 
         //then
         assertThat(actualPrompts.isEmpty(), is(false));
-        List<ResultPrompt> actualFixedListPrompts = actualPrompts.stream().filter(r -> r.getType() == ResultType.FIXL).collect(Collectors.toList());
+        List<ResultPrompt> actualFixedListPrompts = actualPrompts.stream()
+                .filter(r -> r.getType() == ResultType.FIXL).collect(Collectors.toList());
         HashSet<String> expected = Sets.newHashSet("Acquitted", "Convicted");
         assertThat(actualFixedListPrompts.get(0).getFixedList(), is(new TreeSet<String>(expected)));
     }

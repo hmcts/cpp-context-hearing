@@ -6,15 +6,15 @@ Restraining order for period	Period of order	Y	INT	Years	Years
 Restraining order for period	Period of order	Y	INT	Months	Months	
 Restraining order for period	Period of order	Y	INT	Weeks	Weeks	
 Restraining order for period	Period of order	Y	INT	Days	Days	
-Restraining order for period	Conviction / acquittal	N	TXT			Conviction / acquittal
+Restraining order for period	Conviction / acquittal	Y	FIXL			Conviction / acquittal
 Restraining order for period	Reason	N	TXT			
 Restraining order until further order	Protected person	Y	TXT			
 Restraining order until further order	Protected person's address	Y	TXT			
 Restraining order until further order	Order details	Y	TXT			
-Restraining order until further order	Conviction / acquittal	N	TXT			Conviction / acquittal
+Restraining order until further order	Conviction / acquittal	Y	FIXL			Conviction / acquittal
 Restraining order until further order	Reason	N	TXT			
 Community order England / Wales	End Date	Y	DATE			
-Community order England / Wales	Responsible officer	N	TXT 			Responsible officer
+Community order England / Wales	Responsible officer	Y	FIXL 			Responsible officer - community
 Community order England / Wales	Supervising Court name	Y	TXT			LJA
 Community order England / Wales	Probation team to be notified	N	TXT			Probation team
 Community order England / Wales	Persistent offender previously fined	N	TXT			
@@ -258,7 +258,7 @@ Suspended sentence order - imprisonment	Consecutive to offence number	N	INT
 Suspended sentence order - imprisonment	Where consecutive to an offence on another case - specify that case number	N	TXT			
 Suspended sentence order - imprisonment	Imprisonment reasons	N	TXT			Imprisonment reason
 Suspended sentence order - imprisonment	Reason for custody	N	TXT			
-Suspended sentence order - imprisonment	Responsible officer	N	TXT			Responsible officer
+Suspended sentence order - imprisonment	Responsible officer	Y	FIXL			Responsible officer - suspended imprisonment
 Suspended sentence order - imprisonment	Supervising Court name	N	TXT			LJA
 Suspended sentence order - imprisonment	Probation team to be notified	N	TXT			Probation team
 Suspended sentence order - imprisonment	Reason for sentence without PSR	N	TXT			
@@ -324,7 +324,7 @@ Community order Scotland	Judge reserved breach proceedings	N	BOOLEAN
 Community order Northern Ireland	End Date	Y	DATE			
 Community order Northern Ireland	Petty Sessions District	Y	TXT			Northern Ireland Court
 Community order Northern Ireland	Corresponding Northern Ireland Order 	Y	TXT			
-Community order Northern Ireland	Responsible officer	N	TXT 			Responsible officer
+Community order Northern Ireland	Responsible officer	Y	FIXL 			Responsible officer - community
 Community order Northern Ireland	Supervising Court name	Y	TXT			LJA
 Community order Northern Ireland	Probation team to be notified	N	TXT			Probation team
 Community order Northern Ireland	Persistent offender previously fined	N	TXT			
@@ -587,7 +587,7 @@ Suspended sentence order - detention in a young offender institution	Consecutive
 Suspended sentence order - detention in a young offender institution	Where consecutive to an offence on another case - specify that case number	N	TXT			
 Suspended sentence order - detention in a young offender institution	Custody reasons	N	TXT			Imprisonment reason
 Suspended sentence order - detention in a young offender institution	Reason for detention	N	TXT			
-Suspended sentence order - detention in a young offender institution	Responsible officer	N	TXT			Responsible officer
+Suspended sentence order - detention in a young offender institution	Responsible officer	Y	FIXL			Responsible officer - suspended detention
 Suspended sentence order - detention in a young offender institution	Supervising Court name	N	TXT			LJA
 Suspended sentence order - detention in a young offender institution	Probation team to be notified	N	TXT			Probation team
 Suspended sentence order - detention in a young offender institution	Reason for sentence without PSR	N	TXT			
