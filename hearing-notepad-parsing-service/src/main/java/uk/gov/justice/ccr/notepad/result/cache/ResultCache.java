@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 @Startup
 @ApplicationScoped
-public class ResultCache implements Runnable {
+public class ResultCache {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ResultCache.class.getName());
@@ -233,15 +233,10 @@ public class ResultCache implements Runnable {
     }
 
 
-    @Override
-    public void run() {
+    public void reload() throws ExecutionException {
         if (cache.asMap().size() != 0) {
             LOGGER.info("Reloading cache by MidnightScheduler ");
-            try {
-                loadResultCache();
-            } catch (ExecutionException e) {
-                LOGGER.error("ExecutionException {} ", e);
-            }
+            loadResultCache();
         }
     }
 }

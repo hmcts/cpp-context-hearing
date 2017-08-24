@@ -3,46 +3,34 @@ package uk.gov.justice.ccr.notepad.common;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Startup;
-import javax.enterprise.context.ApplicationScoped;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.inject.Inject;
 
-@Startup
-@ApplicationScoped
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Singleton
 public class MidnightScheduler {
 
-    private int period;
-    private long initialDelay;
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(MidnightScheduler.class.getName());
+
 
     @Inject
     ResultCache resultCache;
 
-    private final ScheduledExecutorService scheduledThreadPoolExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public MidnightScheduler() {
-        super();
+    @Schedule(hour = "23", minute = "59", second = "59", persistent = false)
+    public void runJob() {
+        LOGGER.info("Running job... to reload result cache ");
+        try {
+            resultCache.reload();
+        } catch (ExecutionException e) {
+            LOGGER.error("Error while reloading result cahce");
+        }
     }
-
-    public MidnightScheduler(final Runnable runnable, final long initialDelay, final int period, final TimeUnit unit) {
-        this.period = period;
-        this.initialDelay = initialDelay;
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(runnable, initialDelay, period, unit);
-    }
-
-    @PostConstruct
-    public void setup() {
-        initialDelay = LocalDateTime.now().until(LocalDate.now().plusDays(1).atStartOfDay(), ChronoUnit.MINUTES);
-        period = 1440;
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(resultCache, initialDelay, period, TimeUnit.MINUTES);
-    }
-
 
 }
