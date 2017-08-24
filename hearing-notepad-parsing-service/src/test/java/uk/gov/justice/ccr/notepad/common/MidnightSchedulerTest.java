@@ -21,7 +21,8 @@ public class MidnightSchedulerTest {
     @Test
     public void midnightScheduler_InitialDelayNotElapsed() throws InterruptedException {
         StubResultCache stubResultCache = new StubResultCache();
-        MidnightScheduler testObj = new MidnightScheduler(stubResultCache);
+        MidnightScheduler testObj = new MidnightScheduler();
+        testObj.resultCache = stubResultCache;
         testObj.resultCache = stubResultCache;
         Thread.sleep(1000);
         Assert.assertEquals("foo", stubResultCache.arbitrary);
