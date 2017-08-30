@@ -14,7 +14,7 @@ Restraining order until further order	Order details	Y	TXT
 Restraining order until further order	Conviction / acquittal	Y	FIXL			Conviction / acquittal
 Restraining order until further order	Reason	N	TXT			
 Community order England / Wales	End Date	Y	DATE			
-Community order England / Wales	Responsible officer	Y	FIXL 			Responsible officer - community
+Community order England / Wales	Responsible officer	Y	FIXL			Responsible officer - community
 Community order England / Wales	Supervising Court name	Y	TXT			LJA
 Community order England / Wales	Probation team to be notified	N	TXT			Probation team
 Community order England / Wales	Persistent offender previously fined	N	TXT			
@@ -55,22 +55,22 @@ Community requirement: Drug rehabilitation non-residential with review	Treatment
 Community requirement: Drug rehabilitation non-residential with review	Period to provide samples	Y	INT	Years	Years	
 Community requirement: Drug rehabilitation non-residential with review	Period to provide samples	Y	INT	Months	Months	
 Community requirement: Drug rehabilitation non-residential with review	Treatment intervals	N	TXT			Interval
-Community requirement: Drug rehabilitation non-residential with review	Review frequency	Y	TXT 			DWM frequency
+Community requirement: Drug rehabilitation non-residential with review	Review frequency	Y	TXT			DWM frequency
 Community requirement: Drug rehabilitation non-residential with review	Judge reserves the review hearing	N	BOOLEAN			
 Community requirement: Drug rehabilitation non-residential with review	First review date	Y	DATE			
 Community requirement: Drug rehabilitation non-residential with review	First review time	Y	TIME			
 Community requirement: Drug rehabilitation non-residential with review	Courthouse name	Y	TXT			Courthouse Adult & Yth NI & Scot
-Community requirement: Drug rehabilitation non-residential with review	Courtroom 	N	TXT			Crt numbers within Courthouse
+Community requirement: Drug rehabilitation non-residential with review	Courtroom 	O	TXT			Crt numbers within Courthouse
 Community requirement: Drug rehabilitation non-residential with review	Attendance 	Y	TXT			Attendance
 Community requirement: Drug rehabilitation residential with review	Under direction of	Y	TXT			
 Community requirement: Drug rehabilitation residential with review	Treatment place	Y	TXT			
 Community requirement: Drug rehabilitation residential with review	Period to provide samples	Y	INT	Years	Years	
 Community requirement: Drug rehabilitation residential with review	Period to provide samples	Y	INT	Months	Months	
-Community requirement: Drug rehabilitation residential with review	Review frequency	Y	TXT 			DWM frequency
-Community requirement: Drug rehabilitation residential with review	Judge reserves the review hearing	N	BOOLEAN			
+Community requirement: Drug rehabilitation residential with review	Review frequency	Y	TXT			DWM frequency
+Community requirement: Drug rehabilitation residential with review	Judge reserves the review hearing	N	BOOLEAN		reserve, review	
 Community requirement: Drug rehabilitation residential with review	First review date	Y	DATE			
 Community requirement: Drug rehabilitation residential with review	First review time	Y	TIME			
-Community requirement: Drug rehabilitation residential with review	Courthouse name	Y	TXT 			Courthouse Adult & Yth NI & Scot
+Community requirement: Drug rehabilitation residential with review	Courthouse name	Y	TXT			Courthouse Adult & Yth NI & Scot
 Community requirement: Drug rehabilitation residential with review	Courtroom 	N	TXT			Crt numbers within Courthouse
 Community requirement: Drug rehabilitation residential with review	Attendance 	Y	TXT			Attendance
 Community requirement: Drug rehabilitation non-residential 	Under direction of	Y	TXT			
@@ -150,7 +150,7 @@ Community requirement: Attendance centre	Additional  / concurrent to what	N	TXT
 Community requirement: Attendance centre	Additional information	N	TXT			
 Community requirement: Alcohol abstinence	Number of days	Y	INT	Days	Days	
 Community requirement: Alcohol abstinence with alcohol limit	Number of days	Y	INT	Days	Days	
-Community requirement: Alcohol abstinence with alcohol limit	Alcohol limit	Y	TXT			
+Community requirement: Alcohol abstinence with alcohol limit	Alcohol limit	T	TXT			
 Community requirement: Mental health treatment	Medical practitioner / Psychologist	Y	TXT			
 Community requirement: Mental health treatment 	Period of treatment	Y	INT	Years	Years	
 Community requirement: Mental health treatment	Period of treatment	Y	INT	Months	Months	
@@ -219,7 +219,7 @@ Community requirement: Exclusion not to leave a place for a period with between 
 Community requirement: Exclusion not to leave a place for a period with between dates and electronic monitoring	Start time of tag	Y	TIME			
 Community requirement: Exclusion not to leave a place for a period with between dates and electronic monitoring	End date of tag	Y	DATE			
 Community requirement: Exclusion not to leave a place for a period with between dates and electronic monitoring	End time of tag	Y	TIME			
-Community requirement: Exclusion not to leave a place for a period with between dates and electronic monitoring	Contractor	Y	TXT 			Contractor
+Community requirement: Exclusion not to leave a place for a period with between dates and electronic monitoring	Contractor	Y	TXT			Contractor
 Community requirement: Exclusion not to leave a place for a period with between dates and electronic monitoring	Additional information	N	TXT			
 Imprisonment	Imprisonment Period	Y	INT	Years	Years	
 Imprisonment	Imprisonment Period	Y	INT	Months	Months	
@@ -284,8 +284,8 @@ Total suspended imprisonment	Time of hearing	N	TIME
 Total suspended imprisonment	Courthouse 	N	TXT			Crown Courts
 Total suspended imprisonment	Courthouse 	N	TXT			Adult & NI & Scot
 Total suspended imprisonment	Defendant to attend review	N	BOOLEAN			
-Total suspended imprisonment	Judge reserves review hearing	N	BOOLEAN			
-Total suspended imprisonment	Judge reserves breach proceedings	N	BOOLEAN			
+Total suspended imprisonment	Judge reserves review hearing	N	BOOLEAN		reserve, review	
+Total suspended imprisonment	Judge reserves breach proceedings	N	BOOLEAN		reserve, breach	
 Credit for time remanded on bail 	Number of tagged bail days	Y	INT			
 Credit for time in custody in foreign jurisdiction	Number of days	Y	INT			
 Recommended for deportation when detained	Nationality	Y	TXT			Nationality
@@ -294,7 +294,7 @@ Recommended for deportation when detained	Reason	N	TXT
 Recommended for deportation when released	Nationality	Y	TXT			Nationality
 Recommended for deportation when released	Residence and reporting restrictions etc	N	TXT			
 Recommended for deportation when released	Reason	N	TXT			
-No action taken on breach 	Imposing court	Y	TXT 			LJA / YC / CC
+No action taken on breach 	Imposing court	Y	TXT			LJA / YC / CC
 No action taken on breach 	Date of original imposition	Y	DATE			
 No action taken on breach 	Reason	N	TXT			
 Surcharge	Amount of surcharge	Y	CURR			
@@ -320,15 +320,15 @@ Community order Scotland	Corresponding Scottish Order 	Y	TXT
 Community order Scotland	Supervising Court name	Y	TXT			LJA
 Community order Scotland	Probation team to be notified	N	TXT			Probation team
 Community order Scotland	Persistent offender previously fined	N	TXT			
-Community order Scotland	Judge reserved breach proceedings	N	BOOLEAN			
+Community order Scotland	Judge reserved breach proceedings	N	BOOLEAN		reserve, breach	
 Community order Northern Ireland	End Date	Y	DATE			
 Community order Northern Ireland	Petty Sessions District	Y	TXT			Northern Ireland Court
 Community order Northern Ireland	Corresponding Northern Ireland Order 	Y	TXT			
-Community order Northern Ireland	Responsible officer	Y	FIXL 			Responsible officer - community
+Community order Northern Ireland	Responsible officer	Y	FIXL			Responsible officer - community
 Community order Northern Ireland	Supervising Court name	Y	TXT			LJA
 Community order Northern Ireland	Probation team to be notified	N	TXT			Probation team
 Community order Northern Ireland	Persistent offender previously fined	N	TXT			
-Community order Northern Ireland	Judge reserved breach proceedings	N	BOOLEAN			
+Community order Northern Ireland	Judge reserved breach proceedings	N	BOOLEAN		reserve, breach	
 Suspended sentence order Scotland - imprisonment	Imprisonment Period	Y	INT	Years	Years	
 Suspended sentence order Scotland - imprisonment	Imprisonment Period	Y	INT	Months	Months	
 Suspended sentence order Scotland - imprisonment	Imprisonment Period	Y	INT	Weeks	Weeks	
@@ -517,7 +517,7 @@ Detained for specified period for serious offence (under 18)(S.91)	Detention Per
 Detained for specified period for serious offence (under 18)(S.91)	Detention Period	Y	INT	Months	Months	
 Detained for specified period for serious offence (under 18)(S.91)	Detention Period	Y	INT	Weeks	Weeks	
 Detained for specified period for serious offence (under 18)(S.91)	Detention Period	Y	INT	Days	Days	
-Detained for specified period for serious offence (under 18)(S.91)	Concurrent 	N	BOOLEAN			
+Detained for specified period for serious offence (under 18)(S.91)	Concurrent 	N	BOOLEAN		Concurrent	
 Detained for specified period for serious offence (under 18)(S.91)	Consecutive to offence number	N	INT			
 Detained for specified period for serious offence (under 18)(S.91)	Where consecutive to an offence on another case - specify that case number	N	TXT			
 Detained for specified period for serious offence (under 18)(S.91)	Detention reasons	N	TXT			Imprisonment reason
@@ -604,7 +604,7 @@ Suspended sentence order Scotland - detention in a young offender institution	Pr
 Suspended sentence order Scotland - detention in a young offender institution	Appropriate Scottish Court	Y	TXT			Sheriff Courts
 Suspended sentence order Scotland - detention in a young offender institution	Locality in Scotland	Y	TXT			
 Suspended sentence order Scotland - detention in a young offender institution	Reason for sentence without PSR	N	TXT			
-Suspended sentence order Scotland - detention in a young offender institution	Judge reserved breach proceedings	N	BOOLEAN			
+Suspended sentence order Scotland - detention in a young offender institution	Judge reserved breach proceedings	N	BOOLEAN		reserve, breach	
 Suspended sentence order Northern Ireland - detention in a young offender institution	Custodial Period	Y	INT	Years	Years	
 Suspended sentence order Northern Ireland - detention in a young offender institution	Custodial Period	Y	INT	Months	Months	
 Suspended sentence order Northern Ireland - detention in a young offender institution	Custodial Period	Y	INT	Weeks	Weeks	
@@ -617,7 +617,7 @@ Suspended sentence order Northern Ireland - detention in a young offender instit
 Suspended sentence order Northern Ireland - detention in a young offender institution	Petty Sessions District	Y	TXT			Northern Ireland Court
 Suspended sentence order Northern Ireland - detention in a young offender institution	Probation team to be notified	N	TXT			Probation team
 Suspended sentence order Northern Ireland - detention in a young offender institution	Reason for sentence without PSR	N	TXT			
-Suspended sentence order Northern Ireland - detention in a young offender institution	Judge reserved breach proceedings	N	BOOLEAN			
+Suspended sentence order Northern Ireland - detention in a young offender institution	Judge reserved breach proceedings	N	BOOLEAN		reserve, breach	
 Suspended sentence of imprisonment implemented unaltered	Original custody term	Y	INT	Years	Years	
 Suspended sentence of imprisonment implemented unaltered	Original custody term	Y	INT	Months	Months	
 Suspended sentence of imprisonment implemented unaltered	Original custody term	Y	INT	Weeks	Weeks	
@@ -718,19 +718,6 @@ Suspended sentence of detention in a young offender institution implemented with
 Suspended sentence of detention in a young offender institution implemented with lesser term	Sentenced in absence	N	BOOLEAN		Absence	
 Suspended sentence of detention in a young offender institution implemented with lesser term	Probation team to be notified	N	TXT			Probation team
 Suspended sentence of detention in a young offender institution implemented with lesser term	Reasons	N	TXT			
-Remanded on unconditional bail	Date of hearing	Y	DATE			
-Remanded on unconditional bail	Time of hearing	N	TIME			
-Remanded on unconditional bail	Courtroom	N	INT			
-Remanded on unconditional bail	Courthouse	Y	TXT			
-Remanded on unconditional bail	Defendant attendance required	Y	BOOLEAN			
-Remanded on conditional bail	Date of hearing	Y	DATE			
-Remanded on conditional bail	Time of hearing	N	TIME			
-Remanded on conditional bail	Courtroom	N	INT			
-Remanded on conditional bail	Courthouse	Y	TXT			
-Remanded on conditional bail	Defendant attendance	Y	BOOLEAN			
-Remanded on conditional bail	Bail condition reason	Y	TXT			Bail condition reasons
-Remanded on conditional bail	Additional reasons	N	TXT			
-Remanded on conditional bail	BASS provider list	N	TXT			BASS provider list
 For a plea and trial preparation hearing	Attendance required	Y	BOOLEAN			
 At request of the defence	Additional information	N	TXT			
 For an interpreter	Language	N	TXT			
@@ -738,38 +725,38 @@ At request of the prosecution	Additional information	N	TXT
 For a pre-sentence report to be prepared	Additional information	N	TXT			
 Unforeseen circumstances prevented the hearing of this case	Additional information	N	TXT			
 Non-standard reason	Reason for adjournment	Y	TXT			
-Bail condition: Assessments / Reports - undergo assessment for dependency on Class A drugs	Qualified person's name	Y	TXT			
-Bail condition: Assessments / Reports - participate in assistance or treatment for misuse of Class A drugs	Qualified person's name	Y	TXT			
-Bail condition: Assessments / Reports - provide pre-sentence drug test samples	Date to provide sample by	Y	DATE			
-Bail condition: Assessments / Reports - provide pre-sentence drug test samples	Additional information	N	TXT			
-Bail condition: Assessments / Reports - report to probation office for report to be made	Place to report to	Y	TXT			
-Bail condition: Assessments / Reports - report to probation office for report to be made	Time to report	Y	TIME			
-Bail condition: Assessments / Reports - report to probation office for report to be made	Date to report	Y	DATE			
-Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	Place to report to	Y	TXT			
-Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	Time to report	Y	TIME			
-Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	Date to report	Y	DATE			
-Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Youth Justice Location	Y	TXT			
-Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Place to report to	Y	TXT			
-Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Time to report	Y	TIME			
-Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Date to report	Y	DATE			
-Bail condition: Computer - not to use  	Specify device	Y	TXT			
-Bail condition: Computer - not to use  	Specify restriction	Y	TXT			
-Bail condition: Curfew - curfew times and frequency	Time 1	Y	TIME			
-Bail condition: Curfew - curfew times and frequency	Time 2	Y	TIME			
-Bail condition: Curfew - curfew times and frequency	Curfew frequency	Y	TXT			
-Bail condition: Curfew - curfew times and frequency	Additional information	N	TXT			
-Bail condition: Curfew - curfew times and frequency and present to police	Time 1	Y	TIME			
-Bail condition: Curfew - curfew times and frequency and present to police	Time 2	Y	TIME			
-Bail condition: Curfew - curfew times and frequency and present to police	Curfew frequency	Y	TXT			
-Bail condition: Exclusion - not to associate with named person(s)	Name(s)	Y	TXT			
-Bail condition: Exclusion - not to contact directly or indirectly named person(s)	Name(s)	Y	TXT			
-Bail condition: Exclusion - not to contact directly or indirectly named person(s)	Additional information	N	TXT			
-Bail condition: Exclusion - not to enter place	Place or area	Y	TXT			
-Bail condition: Exclusion - not to enter place	Additional information	N	TXT			
-Bail condition: Exclusion - not to go within a radius of a place	Radius	Y	TXT			
-Bail condition: Exclusion - not to go within a radius of a place	Place	Y	TXT			
-Bail condition: Exclusion - not to go within a radius of a place	Additional information	N	TXT			
-Bail condition: Residence - live and sleep each night at an address	Address	Y	TXT			
+Bail condition: Assessments / Reports - undergo assessment for dependency on Class A drugs	Qualified person's name	Y	TXT			
+Bail condition: Assessments / Reports - participate in assistance or treatment for misuse of Class A drugs	Qualified person's name	Y	TXT			
+Bail condition: Assessments / Reports - provide pre-sentence drug test samples	Date to provide sample by	Y	DATE			
+Bail condition: Assessments / Reports - provide pre-sentence drug test samples	Additional information	N	TXT			
+Bail condition: Assessments / Reports - report to probation office for report to be made	Place to report to	Y	TXT			
+Bail condition: Assessments / Reports - report to probation office for report to be made	Time to report	Y	TIME			
+Bail condition: Assessments / Reports - report to probation office for report to be made	Date to report	Y	DATE			
+Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	Place to report to	Y	TXT			
+Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	Time to report	Y	TIME			
+Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	Date to report	Y	DATE			
+Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Youth Justice Location	Y	TXT			
+Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Place to report to	Y	TXT			
+Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Time to report	Y	TIME			
+Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	Date to report	Y	DATE			
+Bail condition: Computer - not to use  	Specify device	Y	TXT			
+Bail condition: Computer - not to use  	Specify restriction	Y	TXT			
+Bail condition: Curfew - curfew times and frequency	Time 1	Y	TIME			
+Bail condition: Curfew - curfew times and frequency	Time 2	Y	TIME			
+Bail condition: Curfew - curfew times and frequency	Curfew frequency	Y	TXT			
+Bail condition: Curfew - curfew times and frequency	Additional information	N	TXT			
+Bail condition: Curfew - curfew times and frequency and present to police	Time 1	Y	TIME			
+Bail condition: Curfew - curfew times and frequency and present to police	Time 2	Y	TIME			
+Bail condition: Curfew - curfew times and frequency and present to police	Curfew frequency	Y	TXT			
+Bail condition: Exclusion - not to associate with named person(s)	Name(s)	Y	TXT			
+Bail condition: Exclusion - not to contact directly or indirectly named person(s)	Name(s)	Y	TXT			
+Bail condition: Exclusion - not to contact directly or indirectly named person(s)	Additional information	N	TXT			
+Bail condition: Exclusion - not to enter place	Place or area	Y	TXT			
+Bail condition: Exclusion - not to enter place	Additional information	N	TXT			
+Bail condition: Exclusion - not to go within a radius of a place	Radius	Y	TXT			
+Bail condition: Exclusion - not to go within a radius of a place	Place	Y	TXT			
+Bail condition: Exclusion - not to go within a radius of a place	Additional information	N	TXT			
+Bail condition: Residence - live and sleep each night at an address	Address	Y	TXT			
 No compensation reason	Reason for no compensation	Y	TXT			No compensation reasons
 No order for costs	Reason for no costs	Y	TXT			
 Trial adjourned	Reason  	Y	TXT			
@@ -793,18 +780,18 @@ Criminal behaviour order variation	Requirements (added, varied or removed)	N	TXT
 Criminal behaviour order variation	Supervisor	N	TXT			
 Criminal behaviour order variation	Supervisor's address	N	TXT			
 Criminal behaviour order variation	Prohibitions (added, varied or removed)	N	TXT			
-Criminal behaviour order variation	Is the person on the original order a youth?	Y	TXT 			Y/N
+Criminal behaviour order variation	Is the person on the original order a youth?	Y	TXT			Y/N
 Criminal behaviour order variation	Parent's name	N	TXT			
 Criminal behaviour order variation	Parent's address	N	TXT			
 No video link reason	Reasons	Y	TXT			
-Order discharged	Type of order discharged	Y	TXT 			Discharged order type
+Order discharged	Type of order discharged	Y	TXT			Discharged order type
 Order discharged	Supervising court	Y	TXT			
 Order discharged	Date original order made	Y	DATE			
 Certificate of conviction under Section 232A of the Criminal Justice Act 2003	Date of conviction	Y	DATE			
 Reasons	Reasons	Y	TXT			
 Recommended licence conditions	Recommendations made	Y	TXT			
 Custody time limit extended	Custody time limit extended until	Y	DATE			
-Custody time limit extended	Reason for extension	N	TXT 			Reason for CTL extension
+Custody time limit extended	Reason for extension	N	TXT			Reason for CTL extension
 Custody time limit not extended	Reason for not extending	N	TXT			
 No surcharge	Reason for no surcharge	Y	TXT			
 Surcharge reduced	Reason for reducing surcharge	Y	TXT			
@@ -812,37 +799,37 @@ Football banning order 	Duration of order	Y	INT	Years
 Football banning order 	Duration of order	Y	INT	Months		
 Football banning order 	Police station name 	Y	TXT			
 Football banning order 	Police station address	Y	TXT			
-Football banning order 	Report within 5 days	Y	TXT 			Football banning order reporting
+Football banning order 	Report within 5 days	Y	TXT			Football banning order reporting
 Football banning order 	Reasons for making the order	N	TXT			
 Football banning order 	Additional requirements	N	TXT			
-Football banning order 	Prison name	N	TXT 			Prisons
+Football banning order 	Prison name	N	TXT			Prisons
 Football banning order 	Prison address	N	TXT			
 Football banning order terminated	End date of order	Y	DATE			
 Football banning order terminated	Date original order made	Y	DATE			
-Football banning order terminated	Prison name	N	TXT 			Prisons
+Football banning order terminated	Prison name	N	TXT			Prisons
 Football banning order terminated	Prison address	N	TXT			
 Football banning order varied	Details of variation	Y	TXT			
-Football banning order varied	Original court	Y	TXT 			LJA / YC / CC
+Football banning order varied	Original court	Y	TXT			LJA / YC / CC
 Football banning order varied	Date original order made	Y	DATE			
-Football banning order varied	Prison name	N	TXT 			Prisons
+Football banning order varied	Prison name	N	TXT			Prisons
 Football banning order varied	Prison address	N	TXT			
 Football banning order termination refused	Date original order made	Y	DATE			
 Football banning order arising from offence outside England and Wales	Duration of order	Y	INT	Years		
 Football banning order arising from offence outside England and Wales	Duration of order	Y	INT	Months		
 Football banning order arising from offence outside England and Wales	Police station name 	Y	TXT			
 Football banning order arising from offence outside England and Wales	Police station address	Y	TXT			
-Football banning order arising from offence outside England and Wales	Report within 5 days	Y	TXT 			Football banning order reporting
+Football banning order arising from offence outside England and Wales	Report within 5 days	Y	TXT			Football banning order reporting
 Football banning order arising from offence outside England and Wales	Reasons for making the order	N	TXT			
 Football banning order arising from offence outside England and Wales	Additional requirements	N	TXT			
 No football banning order	Reasons for not making a football banning order	Y	TXT			
-Declaration of relevance relating to football matches	Type of football match	Y	TXT 			Football matches
+Declaration of relevance relating to football matches	Type of football match	Y	TXT			Football matches
 Bind over to keep the peace	Amount of bind over	Y	CURR			
 Bind over to keep the peace	Duration of bind over	Y	INT	Days		
 Bind over to keep the peace	Duration of bind over	Y	INT	Weeks		
 Bind over to keep the peace	Duration of bind over	Y	INT	Months		
 Bind over to keep the peace	Duration of bind over	Y	INT	Years		
 Bind over to keep the peace	Conduct or activity to be refrained from	Y	TXT			
-Bind over to keep the peace	To keep the peace especially towards - name of person	N	TXT			
+Bind over to keep the peace	To keep the peace especially towards - name of person	N	TXT			
 Bind over to keep the peace	Reason	N	TXT			
 Bind over to come up for judgement when called on	Amount of bind over	Y	CURR			
 Bind over to come up for judgement when called on	Duration of bind over	Y	INT	Days		
@@ -900,19 +887,19 @@ Total suspended detention	Time of hearing	N	TIME
 Total suspended detention	Courthouse 	N	TXT			Crown Courts
 Total suspended detention	Courthouse 	N	TXT			Adult & NI & Scot
 Total suspended detention	Defendant to attend review	N	BOOLEAN			
-Total suspended detention	Judge reserves review hearing	N	BOOLEAN			
-Total suspended detention	Judge reserves breach proceedings	N 	BOOLEAN			
-Disqualification from involvement as a director etc of a company	Duration of disqualification	Y	INT	Months		
-Disqualification from involvement as a director etc of a company	Duration of disqualification	Y	INT	Years		
-Disqualification from involvement as a director etc of a company	Specify Section of Company Directors Disqualification Act 1986	Y	TXT			Company directors disq
-Disqualification from involvement as a director etc of a company	Disqualification start date	Y	DATE			
+Total suspended detention	Judge reserves review hearing	N	BOOLEAN		reserve, review	
+Total suspended detention	Judge reserves breach proceedings	N 	BOOLEAN		reserve, breach	
+Disqualification from involvement as a director etc of a company	Duration of disqualification	M	INT	Months		
+Disqualification from involvement as a director etc of a company	Duration of disqualification	M	INT	Years		
+Disqualification from involvement as a director etc of a company	Specify Section of Company Directors Disqualification Act 1986	M	TXT			Company directors disq
+Disqualification from involvement as a director etc of a company	Disqualification start date	M	DATE			
 Disqualification from involvement as a director etc of a company	Section 243 exemption applies	N	BOOLEAN			
 Disqualification from involvement as a director etc of a company	Name of company(ies) / LLP(s) in respect of conduct leading to disqualification	Y	TXT			
 Disqualification from involvement as a director etc of a company	Reasons	N	TXT			
-Disqualification against a body corporate / firm	Duration of disqualification	Y	INT	Months		
-Disqualification against a body corporate / firm	Duration of disqualification	Y	INT	Years		
-Disqualification against a body corporate / firm	Specify Section of Company Directors Disqualification Act 1986	Y	TXT			Company directors disq
-Disqualification against a body corporate / firm	Disqualification start date	Y	DATE			
+Disqualification against a body corporate / firm	Duration of disqualification	M	INT	Months		
+Disqualification against a body corporate / firm	Duration of disqualification	M	INT	Years		
+Disqualification against a body corporate / firm	Specify Section of Company Directors Disqualification Act 1986	M	TXT			Company directors disq
+Disqualification against a body corporate / firm	Disqualification start date	M	DATE			
 Disqualification against a body corporate / firm	Company registration number	N	TXT			
 Disqualification against a body corporate / firm	Country of registration	N	TXT			
 Disqualification against a body corporate / firm	Name of company(ies) / LLP(s) in respect of conduct leading to disqualification	Y	TXT			
@@ -1053,14 +1040,14 @@ Removal of Driving Disqualification	Original date of conviction	Y	DATE
 Removal of Driving Disqualification	Original offence date	Y	DATE			
 Removal of Driving Disqualification	DVLA offence code	Y	TXT			
 Removal of Driving Disqualification	Applicant driving licence number	N	TXT			
-Removal of Driving Disqualification	Original convicting court	Y	TXT 			LJA / YC / CC
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	Disqualification period	Y	INT	Years		
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	Disqualification period	Y	INT	Months		
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	Disqualification period	Y	INT	Weeks		
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	Disqualification period	Y	INT	Days		
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	Extension period section 147A (immediate custodial sentence)	N	TXT			
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	Extension period section 147B (effect of custodial sentence noted)	N	TXT			
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	Defendant driving licence number	N	TXT			
+Removal of Driving Disqualification	Original convicting court	Y	TXT			LJA / YC / CC
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	Disqualification period	Y	INT	Years		
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	Disqualification period	Y	INT	Months		
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	Disqualification period	Y	INT	Weeks		
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	Disqualification period	Y	INT	Days		
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	Extension period section 147A (immediate custodial sentence)	N	TXT			
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	Extension period section 147B (effect of custodial sentence noted)	N	TXT			
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	Defendant driving licence number	N	TXT			
 Disqualification for non-endorsable offence (vehicle used for purposes of crime)	Disqualification period	Y	INT	Years		
 Disqualification for non-endorsable offence (vehicle used for purposes of crime)	Disqualification period	Y	INT	Months		
 Disqualification for non-endorsable offence (vehicle used for purposes of crime)	Disqualification period	Y	INT	Weeks		
@@ -1069,17 +1056,17 @@ Disqualification for non-endorsable offence (vehicle used for purposes of crime)
 Disqualification for non-endorsable offence (vehicle used for purposes of crime)	Extension period section 147B (effect of custodial sentence noted)	N	TXT			
 Disqualification for non-endorsable offence (vehicle used for purposes of crime)	Defendant driving licence number	N	TXT			
 Disqualification suspended pending appeal	Defendant driving licence number	N	TXT			
-Disqualification suspended pending appeal in a later session 	Convicting court	Y	TXT 			LJA / YC / CC
-Disqualification suspended pending appeal in a later session 	Sentencing court if different from convicting court	N	TXT 			LJA / YC / CC
+Disqualification suspended pending appeal in a later session 	Convicting court	Y	TXT			LJA / YC / CC
+Disqualification suspended pending appeal in a later session 	Sentencing court if different from convicting court	N	TXT			LJA / YC / CC
 Disqualification suspended pending appeal in a later session 	Date of conviction	Y	DATE			
 Disqualification suspended pending appeal in a later session 	Date of offence	Y	DATE			
 Disqualification suspended pending appeal in a later session 	Date of sentence if different from conviction date	N	DATE			
 Disqualification suspended pending appeal in a later session 	DVLA code for offence	Y	TXT			
 Disqualification suspended pending appeal in a later session 	Court contact (SPOC)	N	TXT			
 Disqualification suspended pending appeal in a later session 	Applicant driving licence number	N	TXT			
-Driving licence disposal	Driving licence type	Y	TXT 			Driving licence type
-Driving licence disposal	Driving licence destination	Y	TXT 			Driving licence destination
-Driving licence disposal	Reason driving licence sent to DVLA	N	TXT 			Reason driving licence sent to DVLA
+Driving licence disposal	Driving licence type	Y	TXT			Driving licence type
+Driving licence disposal	Driving licence destination	Y	TXT			Driving licence destination
+Driving licence disposal	Reason driving licence sent to DVLA	N	TXT			Reason driving licence sent to DVLA
 Licensed Premises - Exclusion Order 	Name of licensed premises excluded from	Y	TXT			
 Licensed Premises - Exclusion Order 	Duration of exclusion	Y	INT	Months		
 Licensed Premises - Exclusion Order 	Duration of exclusion	Y	INT	Years		
@@ -1121,8 +1108,8 @@ Foreign travel prohibition	Period of foreign travel prohibition	Y	INT	Weeks
 Foreign travel prohibition	Period of foreign travel prohibition	Y	INT	Months		
 Foreign travel prohibition	Period of foreign travel prohibition	Y	INT	Years		
 Foreign travel prohibition removed	Date removed with effect from	N	DATE			
-Foreign travel prohibition extended	Date foreign travel prohibition made	Y	DATE			
-Foreign travel prohibition extended	Foreign travel prohibition extended until 	Y	DATE			
+Foreign travel prohibition extended	Date foreign travel prohibition made	M	DATE			
+Foreign travel prohibition extended	Foreign travel prohibition extended until 	M	DATE			
 Sexual harm prevention order discharged	Sexual harm prevention order type	Y	TXT			Sexual harm prevention order type
 Sexual harm prevention order discharged	Date order made	Y	Date			
 Sexual harm prevention order discharged	Name of defendant on original order	Y	TXT			
@@ -1135,8 +1122,8 @@ Sexual harm prevention order renewed	Duration of order	Y	INT	Days
 Sexual harm prevention order renewed	Duration of order	Y	INT	Weels		
 Sexual harm prevention order renewed	Duration of order	Y	INT	Months		
 Sexual harm prevention order renewed	Duration of order	Y	INT	Years		
-Foreign travel prohibition varied	Date foreign travel prohibition made	Y	DATE			
-Foreign travel prohibition varied	Details of variation	Y	TXT			
+Foreign travel prohibition varied	Date foreign travel prohibition made	M	DATE			
+Foreign travel prohibition varied	Details of variation	M	TXT			
 Foreign travel prohibition added	Not to travel to any country outside the United Kingdom	N	BOOLEAN			
 Foreign travel prohibition added	Not to travel to the following countries outside the United Kingdom	N	TXT			
 Foreign travel prohibition added	Not to travel to any country outside the United Kingdom other than	N	TXT			
@@ -1225,7 +1212,7 @@ Criminal behaviour order until further order	Supervisor's address	N	TXT
 Criminal behaviour order until further order	Prohibitions	N	TXT			
 Vehicle Excise Back Duty	Amount of back duty	Y	CURR			
 Certificate of conviction under Section 113 of the Powers of Criminal Courts (Sentencing) Act 2000	Date of conviction	Y	DATE			
-Certificate of conviction under Section 113 of the Powers of Criminal Courts (Sentencing) Act 2000	Convicting court	Y	TXT 			LJA / YC / CC
+Certificate of conviction under Section 113 of the Powers of Criminal Courts (Sentencing) Act 2000	Convicting court	Y	TXT			LJA / YC / CC
 Certificate of conviction under Section 113 of the Powers of Criminal Courts (Sentencing) Act 2000	Type of offence	Y	TXT			Domestic Burglary / drug trafficking
 Offences taken into consideration 	Number of offences admitted and taken into consideration	Y	INT			
 TIC compensation	Amount of compensation	Y	CURR			
@@ -1234,12 +1221,12 @@ Warrant not executed	Reason for warrant not executed	N	TXT
 Warrant withdrawn	Reason for withdrawing warrant	N	TXT			
 Restraining order discharged	Third party's name (victim or police)	Y	TXT			
 Restraining order discharged	Third party's address	Y	TXT			
-Restraining order discharged	Original order made by	Y	TXT 			LJA / YC / CC
+Restraining order discharged	Original order made by	Y	TXT			LJA / YC / CC
 Restraining order discharged	Date original order made	Y	DATE			
 Restraining order discharged	Reason	N	TXT			
 Restraining order varied	Third party's name (victim or police)	Y	TXT			
 Restraining order varied	Third party's address	Y	TXT			
-Restraining order varied	Original order made by	Y	TXT 			LJA / YC / CC
+Restraining order varied	Original order made by	Y	TXT			LJA / YC / CC
 Restraining order varied	Date original order made	Y	DATE			
 Restraining order varied	Terms of variation	Y	TXT			
 Restraining order varied	Order now expires	Y	TXT			
@@ -1288,10 +1275,13 @@ Disqualified for having custody of a dog for period	Disqualification period	Y	IN
 Disqualified for having custody of a dog for period	Disqualification period	Y	INT	Months		
 Disqualified for having custody of a dog for period	Disqualification period	Y	INT	Years		
 Disqualified for having custody of a dog for period	Reason for decision	N	TXT			
-Order to keep dog under proper control	Dog control method	N	TXT			Dog control method
+Order to keep dog under proper control	Dog to be fitted with a muzzle sufficient to prevent it biting any person	N	BOOLEAN			
+Order to keep dog under proper control	Dog to be securely held on a lead by a person who is not less than 16 years old	N	BOOLEAN			
+Order to keep dog under proper control	Dog excluded from	N	TXT			
+Order to keep dog under proper control	Specify terms	N	TXT			
 Order to keep dog under proper control	Describe dog eg name, breed, colour	N	TXT			
 Order to keep dog under proper control	Reason for decision	N	TXT			
-Order that dog be destroyed	Details of dog	Y	TXT			
+Order that dog be destroyed	Details of dog	M	TXT			
 Order that dog be destroyed	Further information about destruction	N	TXT			
 Order that dog be destroyed	Reason for decision	N	TXT			
 Disqualified from keeping a dog for period	Disqualification period	Y	INT	Days		
@@ -1316,8 +1306,8 @@ Prosecutor's costs from central funds - sum to be assessed	Percentage reduction 
 Money found to be applied to debt	Amount to be applied	Y	CURR			
 Money found not to be taken	Amount of money court directs should not be taken	Y	CURR			
 Money found not to be taken	Reason for not taking money	N	TXT			
-Imprisonment in default of payment - on same date as imposition	Imprisonment Period	Y	INT	Years	Years	
-Imprisonment in default of payment - on same date as imposition	Imprisonment Period	Y	INT	Months	Months	
+Imprisonment in default of payment - on same date as imposition 	Imprisonment Period	Y	INT	Years	Years	
+Imprisonment in default of payment - on same date as imposition 	Imprisonment Period	Y	INT	Months	Months	
 Imprisonment in default of payment - on same date as imposition 	Imprisonment Period	Y	INT	Weeks	Weeks	
 Imprisonment in default of payment - on same date as imposition 	Imprisonment Period	Y	INT	Days	Days	
 Imprisonment in default of payment - on same date as imposition 	Concurrent 	N	BOOLEAN		Concurrent	
@@ -1332,7 +1322,7 @@ Detention in default of payment - on same date as imposition	Detention Period	Y	
 Detention in default of payment - on same date as imposition	Detention Period	Y	INT	Months		
 Detention in default of payment - on same date as imposition	Detention Period	Y	INT	Weeks		
 Detention in default of payment - on same date as imposition	Detention Period	Y	INT	Days		
-Detention in default of payment - on same date as imposition	Concurrent 	N	BOOLEAN			
+Detention in default of payment - on same date as imposition	Concurrent 	N	BOOLEAN		Concurrent	
 Detention in default of payment - on same date as imposition	Consecutive to offence number	N	INT			
 Detention in default of payment - on same date as imposition	Where consecutive to an offence on another case - specify that case number	N	TXT			
 Detention in default of payment - on same date as imposition	Imprisonment reasons	N	TXT			
@@ -1415,16 +1405,14 @@ Payment terms - second instalment type - fortnightly	Second instalment amount	Y	
 Payment terms - second instalment type - fortnightly	Start date	Y	DATE			
 Payment terms - second instalment type - four calendar weeks	Second instalment amount	Y	CURR			
 Payment terms - second instalment type - four calendar weeks	Start date	Y	DATE			
-In custody with bail direction 	Remand basis	Y	TXT			Remand basis
-In custody with bail direction 	Prison 	N	TXT			Prisons
-In custody with bail direction 	Risk or vulnerability factors	N	TXT			
-In custody with bail direction 	Bail date	Y	DATE			
-In custody with bail direction 	Bail time	N	TIME			
-In custody with bail direction 	Bail condition reason	Y	TXT			Bail condition reasons
-In custody with bail direction 	Is defendant to be ELECTRONICALLY MONITORED?	Y	BOOLEAN			
-In custody with bail direction 	Contractor	N	TXT			Contractor
-In custody with bail direction 	BASS provider list	N	TXT			BASS provider list
-In custody with bail direction 	Parties excused	N	TXT			Parties excused
+Remanded in custody with bail direction 	Remand basis	Y	TXT			Remand basis
+Remanded in custody with bail direction 	Prison 	N	TXT			Prisons
+Remanded in custody with bail direction 	Risk or vulnerability factors	N	TXT			
+Remanded in custody with bail direction 	Bail date	Y	DATE			
+Remanded in custody with bail direction 	Bail time	N	TIME			
+Remanded in custody with bail direction 	Bail condition reason	Y	TXT			Bail condition reasons
+Remanded in custody with bail direction 	BASS provider list	N	TXT			BASS provider list
+Remanded in custody with bail direction 	Parties excused	N	TXT			Parties excused
 Remanded in custody for medical reports	Remanded under Section number	N	TXT			
 Remanded in custody for medical reports	Type of medical report required	Y	TXT			
 Remanded in custody for medical reports	Reason for report	Y	TXT			
@@ -1437,7 +1425,7 @@ Remanded in custody for medical reports	Probation/Probation Services Officer	Y	T
 Pre-release bail condition: Passport - give to Police Station	Police Station Name	Y	TXT			
 Pre-release bail condition: Passport - surrender to Police Station during football control period	Police Station Name	Y	TXT			
 Pre-release bail condition: Passport - give to police station any identity card held which could be used as a travel document within the European Economic Area	Police Station Name	Y	TXT			
-Pre-release bail condition: Passport -	surrender identity card to police station during football control period	Police Station Name	Y	TXT			
+Pre-release bail condition: Passport - surrender identity card to police station during football control period	Police Station Name	Y	TXT			
 Pre-release bail condition: Surety - find a surety	In the sum of	Y	CURR			
 Pre-release bail condition: Surety - find a continuous surety	In the sum of	Y	CURR			
 Pre-release bail condition: Surety - find sureties	Number of sureties	Y	INT			
@@ -1445,7 +1433,7 @@ Pre-release bail condition: Surety - find sureties	In the sum of	Y	CURR
 Pre-release bail condition: Security - lodge with Court	Specify what is to be lodged	Y	TXT			
 Pre-release bail condition: Security - pay a deposit to Court	Amount	Y	CURR			
 Pre-release bail condition: Other - give the court a telephone number and tell the court immediately if the number changes or you can no longer be contacted on that number	Date by which must give telephone number	Y	DATE			
-Pre-release bail condition: Other 	Specify  	Y	TXT			
+Pre-release bail condition: Other  	Specify  	Y	TXT			
 Post-release bail condition: Assessments/Reports - undergo an assessment for dependency on Class A drugs and participate in any follow-up assessment, assistance or treatment considered appropriate	Specify qualified person to conduct assessments/reports	Y	TXT			
 Post-release bail condition: Assessments/Reports - participate in any assistance or treatment considered appropriate for misuse of class A drugs	Specify qualified person who will decide treatment	Y	TXT			
 Post-release bail condition: Assessments/Reports - provide pre-sentence drug test samples 	Date to provide samples by	Y	DATE			
@@ -1495,12 +1483,69 @@ Post-release bail condition: Other - report to police station	Reporting days	Y	T
 Post-release bail condition: Residence - live, and sleep each night, at bail hostel	Hostel name	Y	TXT			
 Post-release bail condition: Residence - live, and sleep each night, at bail hostel or at any other place where you may be told to go by specified person	Hostel name	Y	TXT			
 Post-release bail condition: Residence - live, and sleep each night, at bail hostel or at any other place where you may be told to go by specified person	Supervisor	Y	TXT			
-Post-release bail condition: Residence - live and sleep each night at address	Address	Y	TXT			
 Post-release bail condition: Residence - not to live in the same household	Specify restriction	Y	TXT			
 Post-release bail condition: Residence BASS - live and sleep each night at specified address and comply with the conditions of BASS	BASS address	Y	TXT			
 Post-release bail condition: Surety - find continuous surety / sureties	Number of sureties	Y	INT			
 Post-release bail condition: Surety - find continuous surety / sureties	In the sum of	Y	CURR			
-Next hearing in Crown Court	Date of hearing	Y	DATE			
-Next hearing in Crown Court	Time of hearing	N	TIME			
-Next hearing in Crown Court	Courtroom	N	INT			
-Next hearing in Crown Court	Courthouse name	Y	TXT			CC Courthouse Names
+Post-release bail condition: Travel - not to leave England and Wales			TXT			
+Next hearing in Crown Court - scheduled	Date of hearing	Y	DATE			
+Next hearing in Crown Court - scheduled	Time of hearing	N	TIME			
+Next hearing in Crown Court - scheduled	Courtroom	N	INT			
+Next hearing in Crown Court - scheduled	Courthouse name	Y	TXT			CC Courthouse Names
+Remanded in custody with bail direction with electronic monitoring	Remand basis	Y	TXT			Remand basis
+Remanded in custody with bail direction with electronic monitoring	Prison 	N	TXT			Prisons
+Remanded in custody with bail direction with electronic monitoring	Risk or vulnerability factors	N	TXT			
+Remanded in custody with bail direction with electronic monitoring	Bail date	Y	DATE			
+Remanded in custody with bail direction with electronic monitoring	Bail time	N	TIME			
+Remanded in custody with bail direction with electronic monitoring	Bail condition reason	Y	TXT			Bail condition reasons
+Remanded in custody with bail direction with electronic monitoring	Contractor	Y	TXT			Contractor
+Remanded in custody with bail direction with electronic monitoring	BASS provider list	N	TXT			BASS provider list
+Remanded in custody with bail direction with electronic monitoring	Parties excused	N	TXT			Parties excused
+Remanded on conditional bail	Defendant excused attendance	Y	BOOLEAN			
+Remanded on conditional bail	Bail condition reason	Y	TXT			Bail condition reasons
+Remanded on conditional bail	BASS provider list	N	TXT			BASS provider list
+Remanded on conditional bail	Additional reasons	N	TXT			
+Remanded on conditional bail with electronic monitoring	Bail condition reason	Y	TXT			Bail condition reasons
+Remanded on conditional bail with electronic monitoring	Electronic monitoring contractor	Y	TXT			Contractor
+Remanded on conditional bail with electronic monitoring	BASS provider list	N	TXT			BASS provider list
+Remanded on conditional bail with electronic monitoring	Additional reasons	N	TXT			
+Remanded on unconditional bail	Defendant excused attendance	Y	BOOLEAN			
+Remanded in custody	Remand basis	Y	TXT			Remand basis
+Remanded in custody	Prison	N	TXT			Prisons
+Remanded in custody	Risk or vulnerability factors	N	TXT			
+Remanded in custody	Bail exception	Y	TXT			Bail exception
+Remanded in custody	Bail exception reason	Y	TXT			Bail exception reason
+Remanded in custody	Additional reasons	N	TXT			`
+Remanded in custody pending receipt of Prosecutor's written notice of appeal	Time when oral notice of appeal was given	Y	TIME			
+Remanded in custody pending receipt of Prosecutor's written notice of appeal	Custodian name	Y	TXT			
+Prosecutor's notice of appeal received. Remanded in custody	Prison	N	TXT			Prisons
+Prosecutor's notice of appeal received. Remanded in custody	Time when written notice of appeal was received	Y	TIME			
+Prosecutor's notice of appeal received. Remanded in custody	Crown Court name	Y	TXT			Crown Courts
+Prosecutor's notice of appeal received. Remanded in custody	Date otherwise bailed to	Y	DATE			
+Prosecutor's notice of appeal received. Remanded in custody	Risk or vulnerability factors	N	TXT			
+Prosecutor's bail appeal withdrawn. (D in local custody). Release in accordance with earlier decision	Basis of appeal being withdrawn	Y	TXT			Basis of withdrawal of bail appeal
+Remitted to youth court for trial	Defendant excused attendance	Y	BOOLEAN			
+Remitted to youth court for trial	Reasons	N	TXT			
+Remitted to youth court for sentence	Defendant excused attendance	Y	BOOLEAN			
+Remitted to youth court for sentence	Reasons	N	TXT			
+Direction made under section 45 of the Youth Justice and Criminal Evidence Act 1999	Restricting publicity in respect of youth - Specify name	Y	TXT			
+Direction made under section 45 of the Youth Justice and Criminal Evidence Act 1999	Further details	N	TXT			
+Direction under Section 45A of the Youth Justice and Criminal Evidence Act 1999	Restricting publicity in respect of youth - Specify name	Y	TXT			
+Direction under Section 45A of the Youth Justice and Criminal Evidence Act 1999	Further details	N	TXT			
+Direction made under Section 46 of the Youth Justice and Criminal Evidence Act 1999	Restricting publicity in respect of adult witness - specify name	Y	TXT			
+Direction made under Section 46 of the Youth Justice and Criminal Evidence Act 1999	Further details	N	TXT			
+Direction made under Section 39 of the Children and Young Persons Act 1933	State if youth is defendant, witness or victim or combination of	Y	TXT			
+Direction made under Section 39 of the Children and Young Persons Act 1933	Further details	N	TXT			
+Order made under Section 11 of the Contempt of Court Act 1981 until date	Details of the order	Y	TXT			
+Order made under Section 11 of the Contempt of Court Act 1981 until date	Date of expiry	Y	DATE			
+Order made under Section 11 of the Contempt of Court Act 1981 until date	Purpose of order	Y	TXT			
+Order made under Section 11 of the Contempt of Court Act 1981 until further order	Details of the order	Y	TXT			
+Order made under Section 11 of the Contempt of Court Act 1981 until further order	Purpose of order	Y	TXT			
+Order made under Section 4 of the Contempt of Court Act 1981	Details of the order	Y	TXT			
+Order made under Section 4 of the Contempt of Court Act 1981	Reasons	N	TXT			
+Order made under Section 58 of the Criminal Procedure and Investigations Act 1996 until date - derogatory assertions	Assertions	Y	TXT			
+Order made under Section 58 of the Criminal Procedure and Investigations Act 1996 until date - derogatory assertions	Witness name	Y	TXT			
+Order made under Section 58 of the Criminal Procedure and Investigations Act 1996 until date - derogatory assertions	Date of expiry	Y	DATE			
+Order made under Section 58 of the Criminal Procedure and Investigations Act 1996 until further order - derogatory assertions	Assertions	Y	TXT			
+Order made under Section 58 of the Criminal Procedure and Investigations Act 1996 until further order - derogatory assertions	Witness name	Y	TXT			
+Order made under Section 49 of the Children and Young Persons Act 1933 dispensing with the restrictions on publicity	Details of reporting restriction lifted	Y	TXT			

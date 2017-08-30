@@ -27,7 +27,7 @@ public class FileResultLoader implements ResultLoader {
     @Override
     public List<ResultDefinition> loadResultDefinition() {
         StringToResultDefinitionConverter converter = new StringToResultDefinitionConverter();
-        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/result/resultDefinition", true)
+        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/b6a117cb-c284-4103-958d-34ffcf200b24", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()));
 
     }
@@ -35,7 +35,7 @@ public class FileResultLoader implements ResultLoader {
     @Override
     public List<ResultDefinitionSynonym> loadResultDefinitionSynonym() {
         StringToResultDefinitionSynonymConverter converter = new StringToResultDefinitionSynonymConverter();
-        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/result/resultDefinitionSynonym", true)
+        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/237ece8d-95eb-4dca-a28e-9448707568b4", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()));
     }
 
@@ -44,13 +44,13 @@ public class FileResultLoader implements ResultLoader {
         Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList();
         
         StringToResultPromptConverter resultPromptConverter = new StringToResultPromptConverter(resultPromptFixedListMap);
-        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/result/resultPrompt", true)
+        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/7afc734b-ea8c-4458-8790-a8d2fb4db30f", true)
                 .stream().map(resultPromptConverter::convert).filter(Objects::nonNull).collect(toList()));
     }
 
     private Map<String, Set<String>> loadResultPromptFixedList() {
         StringToResultPromptFixedListConverter resultPromptFixedListConverter = new StringToResultPromptFixedListConverter();
-        List<ResultPromptFixedList> resultPromptFixedLists =  Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/result/resultPromptFixedList", true)
+        List<ResultPromptFixedList> resultPromptFixedLists =  Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/8c930efb-01ae-417e-ac2b-75a19d581f36", true)
                  .stream().map(resultPromptFixedListConverter::convert).filter(Objects::nonNull).collect(toList()));
 
         return resultPromptFixedLists.stream().collect(groupingBy(ResultPromptFixedList::getId, Collectors.mapping(ResultPromptFixedList::getValue, Collectors.toCollection(TreeSet::new))));
@@ -59,7 +59,7 @@ public class FileResultLoader implements ResultLoader {
     @Override
     public List<ResultPromptSynonym> loadResultPromptSynonym() {
         StringToResultPromptSynonymConverter converter = new StringToResultPromptSynonymConverter();
-        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/result/resultPromptSynonym", true)
+        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/cbd59d34-1a5f-4788-a43c-29e1f9da329e", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()));
     }
 }

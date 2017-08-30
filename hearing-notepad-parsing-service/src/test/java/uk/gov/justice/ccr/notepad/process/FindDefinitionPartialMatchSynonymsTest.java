@@ -45,23 +45,28 @@ public class FindDefinitionPartialMatchSynonymsTest {
                 output.size()
                 , is(5)
         );
-        assertThat(
-                Arrays.asList("rehabilitation",
-                        "imprisonment",
-                        "activate",
-                        "stimp",
-                        "sso",
-                        "tsusp",
-                        "susps",
-                        "except",
-                        "ticcompensation",
-                        "extivs",
-                        "timp",
-                        "compensation",
-                        "suspended").containsAll(output.entrySet().stream().map(Map.Entry::getValue)
-                        .flatMap(Collection::stream)
-                        .collect(Collectors.toSet()))
-                , is(true)
+
+        List<String> expectesResult = Arrays.asList("rehabilitation",
+                "imprisonment",
+                "activate",
+                "stimp",
+                "sso",
+                "stdet",
+                "susps",
+                "except",
+                "ticcompensation",
+                "extivs",
+                "timp",
+                "compensation",
+                "suspended");
+
+        Set<String> actualResult = output.entrySet().stream().map(Map.Entry::getValue)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        List<String> difference = expectesResult.stream().filter(v -> !actualResult.contains(v)).collect(Collectors.toList());
+        assertThat(difference.toString(),
+                difference.size()
+                , is(0)
         );
 
     }

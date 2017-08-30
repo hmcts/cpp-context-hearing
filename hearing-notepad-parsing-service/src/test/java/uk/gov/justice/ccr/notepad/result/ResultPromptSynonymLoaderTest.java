@@ -23,7 +23,7 @@ public class ResultPromptSynonymLoaderTest {
     }
     @Test
     public void getResultPromptSynonyms() throws Exception {
-        assertThat(resultCache.getResultPromptSynonym().size(), is(42));
+        assertThat(resultCache.getResultPromptSynonym().size(), is(49));
     }
 
 }

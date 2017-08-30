@@ -7,6 +7,7 @@ Restraining	Rstr
 Restraining	Restraint
 RESTRAOP	ROP
 RESTRAOP	R/O/P
+RESTRAOP	RESP
 RESTRAOF	RO
 RESTRAOF	R/O
 RESTRAOF	resord
@@ -175,6 +176,8 @@ destruction	dest
 cremfile	lof
 VS	V/S
 VS	surcharge
+VS	FVS
+Fine	FO
 seperate	sep
 penalty	pen
 forfov	forfeiture
@@ -253,6 +256,8 @@ TIMP	Tes
 STIMP 	Tes
 TDET	Tes
 STDET	Tes
+STDET	TSUSP
+reserve	res
 reserved	res
 disqualification	disq
 director	dir

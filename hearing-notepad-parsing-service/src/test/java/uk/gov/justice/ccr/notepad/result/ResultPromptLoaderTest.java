@@ -30,7 +30,7 @@ public class ResultPromptLoaderTest {
 
     @Test
     public void getResultPrompts() throws Exception {
-        assertThat(resultCache.getResultPrompt().size(), is(1504));
+        assertThat(resultCache.getResultPrompt().size(), is(1550));
     }
 
     @Test

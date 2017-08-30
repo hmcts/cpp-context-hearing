@@ -29,7 +29,8 @@ public class MidnightScheduler {
         try {
             resultCache.reload();
         } catch (ExecutionException e) {
-            LOGGER.error("Error while reloading result cahce");
+            LOGGER.error("Error while reloading result cache ");
+            LOGGER.error("{}",e);
         }
     }
 

@@ -15,7 +15,7 @@ public class ResourceFileReaderTest {
     StringToResultDefinitionConverter converter = new StringToResultDefinitionConverter();
     @Test
     public void getLines() throws Exception {
-        assertThat(new ResourceFileReader().getLines("/file-store/result/resultDefinition", true)
+        assertThat(new ResourceFileReader().getLines("/file-store/b6a117cb-c284-4103-958d-34ffcf200b24", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()).size() > 1, is(true));
     }
 
