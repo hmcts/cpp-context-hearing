@@ -38,6 +38,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processor class will match List of provided values with resulting metadata and return Knowledge
@@ -49,6 +51,8 @@ import org.apache.commons.lang3.StringUtils;
 public class Processor {
 
     private final Pattern alphaNumericRegex = Pattern.compile("[a-z]+|\\d+");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
 
     @Inject
     ResultDefinitionMatcher resultDefinitionMatcher;
@@ -86,7 +90,11 @@ public class Processor {
     public Knowledge processResultPrompt(final String resultDefinitionId) throws ExecutionException {
         Knowledge knowledge = new Knowledge();
         List<ResultPrompt> resultPrompts = resultCache.getResultPromptByResultDefinitionId(resultDefinitionId);
+        LOGGER.debug("resultPrompts unordered:"+resultPrompts);
+        resultPrompts = new ResultPromptsOrder().process(resultPrompts);
+        LOGGER.debug("resultPrompts ordered:"+resultPrompts);
         knowledge.setPromptChoices(resultPrompts.stream().map(resultPrompt -> {
+
             PromptChoice promptChoice = new PromptChoice();
             promptChoice.setCode(resultPrompt.getId());
             promptChoice.setDurationElement(resultPrompt.getDurationElement());
