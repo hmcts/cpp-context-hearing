@@ -3,7 +3,13 @@ package uk.gov.justice.ccr.notepad.process;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.*;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DATE;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.INT;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TIME;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TXT;
 import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
@@ -19,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 
 import com.google.common.collect.Sets;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -324,7 +329,7 @@ public class ProcessorTest {
         );
     }
 
-    @Ignore
+    @Test
     public void processResultPromptWithFixedList() throws Exception {
         List<Part> parts = new PartsResolver().getParts("restraop conv");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());

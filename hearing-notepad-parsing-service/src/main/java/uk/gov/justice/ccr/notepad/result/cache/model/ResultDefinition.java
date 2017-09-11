@@ -50,7 +50,19 @@ public class ResultDefinition {
     public void setId(String id) {
         this.id = id;
     }
+
     public final String getId() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return "ResultDefinition{" +
+                "id='" + id + '\'' +
+                ", label='" + label + '\'' +
+                ", shortCode='" + shortCode + '\'' +
+                ", level='" + level + '\'' +
+                ", keywords=" + keywords +
+                '}';
     }
 }

@@ -22,4 +22,11 @@ public class ResultPromptSynonym {
         synonym = value;
     }
 
+    @Override
+    public String toString() {
+        return "ResultPromptSynonym{" +
+                "word='" + word + '\'' +
+                ", synonym='" + synonym + '\'' +
+                '}';
+    }
 }

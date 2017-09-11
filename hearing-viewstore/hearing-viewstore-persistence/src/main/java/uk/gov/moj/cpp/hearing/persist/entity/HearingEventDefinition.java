@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,6 +12,9 @@ import javax.persistence.Table;
 public class HearingEventDefinition {
 
     @Id
+    @Column(name = "id", nullable = false)
+    private UUID id;
+
     @Column(name = "recorded_label", nullable = false)
     private String recordedLabel;
 
@@ -33,13 +38,27 @@ public class HearingEventDefinition {
     @Column(name = "action_label_extension")
     private String actionLabelExtension;
 
+    @Column(name = "alterable", nullable = false)
+    private boolean alterable;
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted;
+
     public HearingEventDefinition() {
         // for JPA
     }
 
-    public HearingEventDefinition(final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
+    public HearingEventDefinition(final UUID id, final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
                                   final String sequenceType, final String caseAttribute, final String groupLabel,
-                                  final String actionLabelExtension) {
+                                  final String actionLabelExtension, final boolean alterable) {
+        this(id, recordedLabel, actionLabel, sequenceNumber, sequenceType, caseAttribute, groupLabel,
+                actionLabelExtension, alterable, false);
+    }
+
+    private HearingEventDefinition(final UUID id, final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
+                                   final String sequenceType, final String caseAttribute, final String groupLabel,
+                                   final String actionLabelExtension, final boolean alterable, final boolean deleted) {
+        this.id = id;
         this.recordedLabel = recordedLabel;
         this.actionLabel = actionLabel;
         this.sequenceNumber = sequenceNumber;
@@ -47,6 +66,12 @@ public class HearingEventDefinition {
         this.caseAttribute = caseAttribute;
         this.groupLabel = groupLabel;
         this.actionLabelExtension = actionLabelExtension;
+        this.alterable = alterable;
+        this.deleted = deleted;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public String getRecordedLabel() {
@@ -76,4 +101,55 @@ public class HearingEventDefinition {
     public String getActionLabelExtension() {
         return actionLabelExtension;
     }
+
+    public boolean isAlterable() {
+        return alterable;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public Builder builder() {
+        return new Builder(getId(), getRecordedLabel(), getActionLabel(), getSequenceNumber(), getSequenceType(),
+                getCaseAttribute(), getGroupLabel(), getActionLabelExtension(), isAlterable(), isDeleted());
+    }
+
+    public class Builder {
+        private UUID id;
+        private String recordedLabel;
+        private String actionLabel;
+        private Integer sequenceNumber;
+        private String sequenceType;
+        private String caseAttribute;
+        private String groupLabel;
+        private String actionLabelExtension;
+        private boolean alterable;
+        private boolean deleted;
+
+        Builder(final UUID id, final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
+                final String sequenceType, final String caseAttribute, final String groupLabel,
+                final String actionLabelExtension, final boolean alterable, final boolean deleted) {
+            this.id = id;
+            this.recordedLabel = recordedLabel;
+            this.actionLabel = actionLabel;
+            this.sequenceNumber = sequenceNumber;
+            this.sequenceType = sequenceType;
+            this.caseAttribute = caseAttribute;
+            this.groupLabel = groupLabel;
+            this.actionLabelExtension = actionLabelExtension;
+            this.alterable = alterable;
+            this.deleted = deleted;
+        }
+
+        public Builder delete() {
+            this.deleted = true;
+            return this;
+        }
+
+        public HearingEventDefinition build() {
+            return new HearingEventDefinition(id, recordedLabel, actionLabel, sequenceNumber, sequenceType, caseAttribute, groupLabel, actionLabelExtension, alterable, deleted);
+        }
+    }
+
 }

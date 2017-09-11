@@ -24,6 +24,9 @@
         "hearingEventId": {
           "$ref": "#/definitions/uuid"
         },
+        "hearingEventDefinitionId": {
+          "$ref": "#/definitions/uuid"
+        },
         "recordedLabel": {
           "type": "string"
         },
@@ -34,13 +37,18 @@
         "lastModifiedTime": {
           "type": "string",
           "format": "date-time"
+        },
+        "alterable": {
+          "type": "boolean"
         }
       },
       "required": [
         "hearingEventId",
+        "hearingEventDefinitionId",
         "recordedLabel",
         "eventTime",
-        "lastModifiedTime"
+        "lastModifiedTime",
+        "alterable"
       ],
       "additionalProperties": false
     },

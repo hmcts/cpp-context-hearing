@@ -5,6 +5,9 @@
     "hearingEventId": {
       "$ref": "#/definitions/uuid"
     },
+    "hearingEventDefinitionId": {
+      "$ref": "#/definitions/uuid"
+    },
     "recordedLabel": {
       "type": "string"
     },
@@ -17,15 +20,20 @@
     },
     "reason": {
       "type": "string"
+    },
+    "alterable": {
+      "type": "boolean"
     }
   },
   "additionalProperties": false,
   "required": [
     "hearingEventId",
+    "hearingEventDefinitionId",
     "recordedLabel",
     "hearingId",
     "eventTime",
-    "reason"
+    "reason",
+    "alterable"
   ],
   "definitions": {
     "uuid": {

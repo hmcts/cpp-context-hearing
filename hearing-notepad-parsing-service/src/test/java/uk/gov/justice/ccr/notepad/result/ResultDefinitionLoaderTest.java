@@ -27,7 +27,7 @@ public class ResultDefinitionLoaderTest {
 
     @Test
     public void getResultDefinition() throws Exception {
-        assertThat(resultCache.getResultDefinition().size(), is(414));
+        assertThat(resultCache.getResultDefinition().size(), is(433));
     }
 
     @Test

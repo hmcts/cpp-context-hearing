@@ -19,6 +19,7 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserLogsMultipleEvents;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.andHearingResultsHaveBeenShared;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
@@ -32,11 +33,11 @@ import static uk.gov.moj.cpp.hearing.steps.data.ResultLevel.OFFENCE;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.amendedResultLine;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.resultLine;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.sharedResultLine;
+import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithPauseAndResumeEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.manyRandomEvents;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubSetStatusForCapability;
 
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
 
 import java.io.IOException;
@@ -431,9 +432,9 @@ public class HearingIT extends AbstractIT {
         final List<ResultLineData> resultLines = newArrayList(resultForCase, resultForDefendant, resultForOffence);
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithPauseAndResumeEvents());
 
-        final List<HearingEvent> randomEvents = manyRandomEvents(hearingId, 30);
-        whenUserLogsMultipleEvents(randomEvents);
+        whenUserLogsMultipleEvents(manyRandomEvents(hearingId, 30));
         whenTheUserSharesResultsForAHearing(hearingId, resultLines);
 
         thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines);

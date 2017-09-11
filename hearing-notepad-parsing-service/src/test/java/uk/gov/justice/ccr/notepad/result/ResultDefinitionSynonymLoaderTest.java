@@ -22,7 +22,7 @@ public class ResultDefinitionSynonymLoaderTest {
     }
     @Test
     public void getResultDefinitionSynonyms() throws Exception {
-        assertThat(resultCache.getResultDefinitionSynonym().size(), is(504));
+        assertThat(resultCache.getResultDefinitionSynonym().size(), is(517));
     }
 
 }

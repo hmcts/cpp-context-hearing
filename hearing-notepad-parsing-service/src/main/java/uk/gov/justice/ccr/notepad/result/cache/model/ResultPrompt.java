@@ -84,4 +84,18 @@ public class ResultPrompt {
     public void setId(String id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "ResultPrompt{" +
+                "id='" + id + '\'' +
+                ", resultDefinitionLabel='" + resultDefinitionLabel + '\'' +
+                ", label='" + label + '\'' +
+                ", type=" + type +
+                ", mandatory='" + mandatory + '\'' +
+                ", durationElement='" + durationElement + '\'' +
+                ", keywords=" + keywords +
+                ", fixedList=" + fixedList +
+                '}';
+    }
 }

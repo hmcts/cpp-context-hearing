@@ -28,8 +28,9 @@ Community requirement: Prohibited activity for dates	PARD	O	N	A	N	N	Y	N	Communit
 Community requirement: Prohibited activity for days of week	PARW	O	N	A	N	N	Y	N	Community Requirement		3104			B		Prohibited, activity, days
 Community requirement: Foreign travel prohibition any country for period	FTPCP	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign, travel, Any, country,period 
 Community requirement: Foreign travel prohibition with list of countries for period	FTPLP	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign, travel, country,period 
+Community requirement: foreign travel prohibition with list of countries for dates	FTPLD	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign, travel, country,any,dates
 Community requirement: Foreign travel prohibition any country for dates	FTPCD	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign, travel, Any,dates
-Community requirement: Foreign travel prohibition with list of countries for dates	FTPLD	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign, travel,country,dates
+Community requirement: Foreign travel with list of countries for dates	FTPLD	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign, travel,country,dates
 Community requirement: Foreign travel prohibition with excepted country for period	FTPEP	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign, travel, except,period 
 Community requirement: Foreign travel prohibition with excepted country for dates	FTPED	O	N	A	N	N	Y	N	Community Requirement		3147			B		Foreign,travel, except,,dates
 Community requirement: Alcohol treatment 	ATR	O	N	A	N	N	Y	N	Community Requirement		3110			B		Alcohol, treatment, requirement
@@ -127,8 +128,6 @@ Suspended sentence of imprisonment implemented unaltered	SSI	O	N	F	N	N	Y	N		C	15
 Suspended sentence of imprisonment implemented with lesser term	SSIV 	O	N	F	N	N	Y	N		C	1507			B		suspended, imprisonment, activate, lesser
 Suspended sentence of detention in a young offender institution implemented unaltered	SSID	O	N	F	N	N	Y	N		C	1507			B		suspended, detention, activate
 Suspended sentence of detention in a young offender institution implemented with lesser term	SSIVD	O	N	F	N	N	Y	N		C	1507			B		suspended, detention, activate, lesser
-Remanded on unconditional bail	RU	O	S	I	N	N	N	N			4047		UB	B		remanded, unconditional
-Remanded on conditional bail	RC	O	S	I	Y	N	N	N			4027		CB	B		remanded, conditional
 To attend or warrant to issue	AW	O	N	A	N	N	N	N	Adjournment reasons			GE		B		adjournment, attend, warrant
 For a bail application to be made	BA	O	N	A	N	N	N	N	Adjournment reasons			KL		B		adjournment,bail, application
 For a plea and trial preparation hearing	PTPH	O	N	A	N	N	N	N	Adjournment reasons			DZ		CC		adjournment,preparation, hearing
@@ -151,31 +150,31 @@ Unforeseen circumstances prevented the hearing of this case	UNF	O	N	A	N	N	N	N	Ad
 Insufficient court time	INSUF	O	N	A	N	N	N	N	Adjournment reasons			KQ		B		adjournment, insufficient, time
 Non-standard reason	NSR	O	N	A	N	N	N	N	Adjournment reasons					B		adjournment, reason
 Case part heard	CPH	O	N	A	N	N	N	N	Adjournment reasons					B		adjournment, part, heard
-Bail condition: Assessments / Reports - undergo assessment for dependency on Class A drugs	DASS	O	N	A	N	N	N	N	Bail conditions			GT		B		bail, assess, drug, dependency
-Bail condition: Assessments / Reports - participate in assistance or treatment for misuse of Class A drugs	DASSFU	O	N	A	N	N	N	N	Bail conditions			GT		B		bail, treat, drug
-Bail condition: Assessments / Reports - provide pre-sentence drug test samples	DT	O	N	A	N	N	N	N	Bail conditions			GT		B		bail, drug, test, sample
-Bail condition: Assessments / Reports - report to probation office for report to be made	POR	O	N	A	N	N	N	N	Bail conditions			JZ		B		bail, probation, report
-Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	POPS	O	N	A	N	N	N	N	Bail conditions			JZ		B		bail, probation, provider, report
-Bail condition: Assessments / Reports - make available for reports to be prepared	REP	O	N	A	N	N	N	N	Bail conditions			JZ		B		bail, prepare, report
-Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	YJT	O	N	A	N	N	N	N	Bail conditions			RE		B		bail, yjt, report
-Bail condition: Computer - not to use device capable of accessing the internet unless it can retain and disply history of internet use and is made available to police for inspection upon request	COMPI	O	N	A	N	N	N	N	Bail conditions			RF		B		bail, internet, access
-Bail condition: Computer - not to delete any history of computer use	COMPH	O	N	A	N	N	N	N	Bail conditions			RG		B		bail, delete, computer, history
-Bail condition: Computer - not to use  	COMPU	O	N	A	N	N	N	N	Bail conditions					B		bail, computer, not, use
-Bail condition: Computer - not to possess device capable of storing digital images 	COMPD	O	N	A	N	N	N	N	Bail conditions					B		bail, device, digital, image
-Bail condition: Curfew - curfew times and frequency	CURF	O	N	A	N	N	N	N	Bail conditions			JD		B		bail, curfew
-Bail condition: Curfew - curfew times and frequency	CURF	O	N	A	N	N	N	N	CURF			JD		B		Curfew, conditions
-Bail condition: Curfew - curfew condition to be electronically monitored	CURFE 	O	N	A	N	N	N	N	Bail conditions			BA		B		bail, curfew, em
-Bail condition: Curfew - curfew condition to be electronically monitored	CURFE 	O	N	A	N	N	N	N	Bail conditions			BA		B		bail, curfew, electronic, monitoring
-Bail condition: Curfew - curfew times and frequency and present to police	CURFP	O	N	A	N	N	N	N	Bail conditions			JE		B		bail, curfew, police
-Bail condition: Curfew - curfew times and frequency and present to police	CURFP	O	N	A	N	N	N	N	CURFP			JE		B		bail, curfew, police
-Bail condition: Curfew - curfew times and frequency and present to police	CURFP	O	N	A	N	N	N	N	Bail conditions			JE		B		bail, curfew, doorstep
-Bail condition: Exclusion - not to drive a motor vehicle on a road or public place	EXCD	O	N	A	N	N	N	N	Bail conditions			JF		B		bail, vehicle
-Bail condition: Exclusion - not to associate with named person(s)	EXCN	O	N	A	N	N	N	N	Bail conditions			JK		B		bail, not, associate
-Bail condition: Exclusion - not to contact directly or indirectly named person(s)	EXCD	O	N	A	N	N	N	N	Bail conditions			JK		B		bail, not, contact
-Bail condition: Exclusion - not to enter place	EXCE	O	N	A	N	N	N	N	Bail conditions			JO		B		bail, not, enter
-Bail condition: Exclusion - not to go to any public house, licensed club or off licence	EXCL	O	N	A	N	N	N	N	Bail conditions			JN		B		bail, not, licensed
-Bail condition: Exclusion - not to go within a radius of a place	EXCP	O	N	A	N	N	N	N	Bail conditions			JO		B		bail, not, within, radius
-Bail condition: Residence - live and sleep each night at an address	RESA	O	N	A	N	N	N	N	Bail conditions			RB		B		bail, live, sleep
+Bail condition: Assessments / Reports - undergo assessment for dependency on Class A drugs	DASS	O	N	A	N	N	N	N	Bail conditions			GT		B		bail, assess, drug, dependency
+Bail condition: Assessments / Reports - participate in assistance or treatment for misuse of Class A drugs	DASSFU	O	N	A	N	N	N	N	Bail conditions			GT		B		bail, treat, drug
+Bail condition: Assessments / Reports - provide pre-sentence drug test samples	DT	O	N	A	N	N	N	N	Bail conditions			GT		B		bail, drug, test, sample
+Bail condition: Assessments / Reports - report to probation office for report to be made	POR	O	N	A	N	N	N	N	Bail conditions			JZ		B		bail, probation, report
+Bail condition: Assessments / Reports - report to officer of a provider of probation services for report to be made	POPS	O	N	A	N	N	N	N	Bail conditions			JZ		B		bail, probation, provider, report
+Bail condition: Assessments / Reports - make available for reports to be prepared	REP	O	N	A	N	N	N	N	Bail conditions			JZ		B		bail, prepare, report
+Bail condition: Assessments / Reports - report to youth justice team for report to be prepared	YJT	O	N	A	N	N	N	N	Bail conditions			RE		B		bail, yjt, report
+Bail condition: Computer - not to use device capable of accessing the internet unless it can retain and disply history of internet use and is made available to police for inspection upon request	COMPI	O	N	A	N	N	N	N	Bail conditions			RF		B		bail, internet, access
+Bail condition: Computer - not to delete any history of computer use	COMPH	O	N	A	N	N	N	N	Bail conditions			RG		B		bail, delete, computer, history
+Bail condition: Computer - not to use  	COMPU	O	N	A	N	N	N	N	Bail conditions					B		bail, computer, not, use
+Bail condition: Computer - not to possess device capable of storing digital images 	COMPD	O	N	A	N	N	N	N	Bail conditions					B		bail, device, digital, image
+Bail condition: Curfew - curfew times and frequency	CRF	O	N	A	N	N	N	N	Bail conditions			JD		B		bail, curfew
+Bail condition: Curfew - curfew times and frequency	CRF	O	N	A	N	N	N	N	CURF			JD		B		Curfew, conditions
+Bail condition: Curfew - curfew condition to be electronically monitored	CRFE 	O	N	A	N	N	N	N	Bail conditions			BA		B		bail, curfew, em
+Bail condition: Curfew - curfew condition to be electronically monitored	CRFE 	O	N	A	N	N	N	N	Bail conditions			BA		B		bail, curfew, electronic, monitoring
+Bail condition: Curfew - curfew times and frequency and present to police	CRFP	O	N	A	N	N	N	N	Bail conditions			JE		B		bail, curfew, police
+Bail condition: Curfew - curfew times and frequency and present to police	CRFP	O	N	A	N	N	N	N	CURFP			JE		B		bail, curfew, police
+Bail condition: Curfew - curfew times and frequency and present to police	CRFP	O	N	A	N	N	N	N	Bail conditions			JE		B		bail, curfew, doorstep
+Bail condition: Exclusion - not to drive a motor vehicle on a road or public place	EXCD	O	N	A	N	N	N	N	Bail conditions			JF		B		bail, vehicle
+Bail condition: Exclusion - not to associate with named person(s)	EXCN	O	N	A	N	N	N	N	Bail conditions			JK		B		bail, not, associate
+Bail condition: Exclusion - not to contact directly or indirectly named person(s)	EXCD	O	N	A	N	N	N	N	Bail conditions			JK		B		bail, not, contact
+Bail condition: Exclusion - not to enter place	EXCE	O	N	A	N	N	N	N	Bail conditions			JO		B		bail, not, enter
+Bail condition: Exclusion - not to go to any public house, licensed club or off licence	EXCL	O	N	A	N	N	N	N	Bail conditions			JN		B		bail, not, licensed
+Bail condition: Exclusion - not to go within a radius of a place	EXCP	O	N	A	N	N	N	N	Bail conditions			JO		B		bail, not, within, radius
+Bail condition: Residence - live and sleep each night at an address	RESA	O	N	A	N	N	N	N	Bail conditions			RB		B		bail, live, sleep
 No compensation reason	NCR	O	N	A	N	N	Y	N						B		compensation,  no
 No order for costs	NCOSTS	O	N	A	N	N	Y	N						B		no, costs
 Defendant has died	DEAD	D	N	F	N	N	N	N			2065			B		
@@ -189,7 +188,6 @@ No evidence offered - verdict of not guilty by order of Judge	NGJ	O	N	F	N	N	N	N	
 No evidence offered - verdict of not guilty by order of Judge	NGJ	O	N	F	N	N	N	N			2050			CC		NGJ
 Dismissed	DISM	O	N	F	N	N	N	N			2006			B		DISM
 No collection order reason	NC	O	N	A	N	N	Y	N						B		no, collection, order
-																
 Criminal behaviour order	CRIMBO	O	N	F	N	N	Y	N			1177			B		criminal, behaviour, order
 Interim criminal behaviour order	CRIMBI	O	N	F	N	N	N	N			1178			B		interim, criminal, behaviour, order
 Criminal behaviour order variation	CRIMBV	O	N	F	N	N	N	N			1177			B		criminal, behaviour, order, varied
@@ -248,7 +246,7 @@ No disqualification - Mitigating Circumstances	NDMC	C	N	A	N	N	Y	N			3509			B		no
 No disqualification - Special Reasons	NDSR	O	N	A	N	N	Y	N			3509			B		no, disqualification, special, reason
 No endorsement - Special Reasons	NESR	O	N	A	N	N	Y	N			3508			B		
 Removal of Driving Disqualification	RDD	O	N	F	Y	N	N	Y			3030			B		
-Disqualification for non-endorsable offence (assault by driving a motor vehicle case)	DDRA	O	N	F	Y	N	N	Y			3095			B		
+Disqualification for non-endorsable offence (assault by driving a motor vehicle)	DDRA	O	N	F	Y	N	N	Y			3095			B		
 Disqualification for non-endorsable offence (vehicle used for purposes of crime)	DDRV	O	N	F	Y	N	N	Y			3095			CC		
 Disqualification suspended pending appeal	DSPA	O	N	A	Y	N	Y	N			3075			B		
 Disqualification suspended pending appeal in a later session 	DSPAS	O	N	F	Y	N	N	N			3076			B		
@@ -319,7 +317,7 @@ Aggravated due to sexual orientation of victim	SEXOV	O	N	A	N	N	Y	N				AV		B
 Order that dog be destroyed	DDES	O	N	F	N	N	Y	N			3021			B		
 Disqualified from keeping a dog for period	DDIS	O	N	F	N	N	Y	N			3022			B		
 Disqualified from keeping a dog for life	DDISL	O	N	F	N	N	Y	N			3022			B		
-Aggravated due to hostility based on disability of victim   	DISV	O	N	A	N	N	Y	N				AX		B		
+Aggravated due to hostility based on disability of victim   	DISV	O	N	A	N	N	Y	N				AX		B		
 Motivated by hostility towards persons who have a disability or a particular disability	DISG	O	N	A	N	N	Y	N				AY		B		
 Shotgun Certificate cancelled 	CSHOC	O	N	A	N	N	Y	N			3035			B		
 Firearm Certificate Cancelled	CFIRC	O	N	A	N	N	Y	N			3035			B		
@@ -342,35 +340,36 @@ Proceedings stayed	STAYP	O	N	F	N	N	N	N			2061			B
 Disqualification order relating to animals for period	ADISQ	O	N	F	N	N	Y	N			3115			B		
 Disqualification order relating to animals for life	ADISQL	O	N	F	N	N	Y	N			3115			B		
 Surety discharged	SURDIS	O	N	A	N	N	N	N						B		
-Payment terms - in full	PTF	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - lump sum	PTLS	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - second lump sum	PTSLS	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - weekly	PTW	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - monthly	PTM	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - fortnightly	PTFO	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - four calendar weeks	PTCW	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - second instalment type - weekly	PTSW	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - second instalment type - monthly	PTSM	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - second instalment type - fortnightly	PTSF	D	N	A	N	N	N	N	Payment terms					B		
-Payment terms - second instalment type - four calendar weeks	PTSCW	D	N	A	N	N	N	N	Payment terms					B		
+Payment terms - in full	PTF	D	N	A	N	N	N	N	Payment terms					B		payment, full
+Payment terms - lump sum	PTLS	D	N	A	N	N	N	N	Payment terms					B		payment, lump
+Payment terms - second lump sum	PTSLS	D	N	A	N	N	N	N	Payment terms					B		payment, second, lump
+Payment terms - weekly	PTW	D	N	A	N	N	N	N	Payment terms					B		payment, weekly
+Payment terms - monthly	PTM	D	N	A	N	N	N	N	Payment terms					B		payment, monthly
+Payment terms - fortnightly	PTFO	D	N	A	N	N	N	N	Payment terms					B		payment, fortnightly
+Payment terms - four calendar weeks	PTCW	D	N	A	N	N	N	N	Payment terms					B		payment, four, weeks
+Payment terms - second instalment type - weekly	PTSW	D	N	A	N	N	N	N	Payment terms					B		payment, second, weekly
+Payment terms - second instalment type - monthly	PTSM	D	N	A	N	N	N	N	Payment terms					B		payment, second, monthly
+Payment terms - second instalment type - fortnightly	PTSF	D	N	A	N	N	N	N	Payment terms					B		payment, second, fortnightly
+Payment terms - second instalment type - four calendar weeks	PTSCW	D	N	A	N	N	N	N	Payment terms					B		payment, second, four, weeks
 Collection order	CO	C	N	A	N	N	N	N						CC		
-In custody with bail direction 	RIB	O	N	A	Y	N	N	N			4046			B		
+Remanded In custody with bail direction 	RIB	O	N	A	Y	N	N	N			4046		CB with pre-release conditions	B		
+Remanded in custody with bail direction with electronic monitoring	RIBE	O	N	A	Y	N	N	N			4046	BA	CB with pre-release conditions	B		
 Remanded in custody for medical reports	REMMED	O	N	A	N	N	N	N						B		
 Pre-release bail condition: Passport - give to the court any passport held	PRBCP1	O	N	A	N	N	N	N	Pre-release bail condition			JL		B		
-Pre-release bail condition: Passport - give to HM Revenue and Customs any passport held	PRBCP2	O	N	A	N	N	N	N	Pre-release bail condition							
-Pre-release bail condition: Passport - give to Police Station	PRBCP3	O	N	A	N	N	N	N	Pre-release bail condition			JM				
-Pre-release bail condition: Passport - surrender to Police Station during football control period	PRBCP4	O	N	A	N	N	N	N	Pre-release bail condition			JM				
+Pre-release bail condition: Passport - give to HM Revenue and Customs any passport held	PRBCP2	O	N	A	N	N	N	N	Pre-release bail condition					B		
+Pre-release bail condition: Passport - give to Police Station	PRBCP3	O	N	A	N	N	N	N	Pre-release bail condition			JM		B		
+Pre-release bail condition: Passport - surrender to Police Station during football control period	PRBCP4	O	N	A	N	N	N	N	Pre-release bail condition			JM		B		
 Pre-release bail condition: Passport - give to the court any identity card held which could be used as a travel document within the European Economic Area	PRBCP5	O	N	A	N	N	N	N	Pre-release bail condition			JL		B		
-Pre-release bail condition: Passport - give to HM Revenue and Customs any identity card held which could be used as a travel document within the European Economic Area	PRBCP6	O	N	A	N	N	N	N	Pre-release bail condition							
-Pre-release bail condition: Passport - give to police station any identity card held which could be used as a travel document within the European Economic Area	PRBCP7	O	N	A	N	N	N	N	Pre-release bail condition			JM				
-Pre-release bail condition: Passport - surrender identity card to police station during football control period	PRBCP8	O	N	A	N	N	N	N	Pre-release bail condition			JM				
-Pre-release bail condition: Surety - find a surety	PRBCS1	O	N	A	N	N	N	N	Pre-release bail condition			JU				
-Pre-release bail condition: Surety - find a continuous surety	PRBCS2	O	N	A	N	N	N	N	Pre-release bail condition			JV				
-Pre-release bail condition: Surety - find sureties	PRBCS3	O	N	A	N	N	N	N	Pre-release bail condition			JW				
-Pre-release bail condition: Security - lodge with Court	PRBCSE1	O	N	A	N	N	N	N	Pre-release bail condition			JT				
-Pre-release bail condition: Security - pay a deposit to Court	PRBCSE2	O	N	A	N	N	N	N	Pre-release bail condition			JT				
-Pre-release bail condition: Other - give the court a telephone number and tell the court immediately if the number changes or you can no longer be contacted on that number	PRBCT	O	N	A	N	N	N	N	Pre-release bail condition			JG				
-Pre-release bail condition: Other	PRBCO	O	N	A	N	N	N	N	Pre-release bail condition			RA				
+Pre-release bail condition: Passport - give to HM Revenue and Customs any identity card held which could be used as a travel document within the European Economic Area	PRBCP6	O	N	A	N	N	N	N	Pre-release bail condition					B		
+Pre-release bail condition: Passport - give to police station any identity card held which could be used as a travel document within the European Economic Area	PRBCP7	O	N	A	N	N	N	N	Pre-release bail condition			JM		B		
+Pre-release bail condition: Passport - surrender identity card to police station during football control period	PRBCP8	O	N	A	N	N	N	N	Pre-release bail condition			JM		B		
+Pre-release bail condition: Surety - find a surety	PRBCS1	O	N	A	N	N	N	N	Pre-release bail condition			JU		B		
+Pre-release bail condition: Surety - find a continuous surety	PRBCS2	O	N	A	N	N	N	N	Pre-release bail condition			JV		B		
+Pre-release bail condition: Surety - find sureties	PRBCS3	O	N	A	N	N	N	N	Pre-release bail condition			JW		B		
+Pre-release bail condition: Security - lodge with Court	PRBCSE1	O	N	A	N	N	N	N	Pre-release bail condition			JT		B		
+Pre-release bail condition: Security - pay a deposit to Court	PRBCSE2	O	N	A	N	N	N	N	Pre-release bail condition			JT		B		
+Pre-release bail condition: Other - give the court a telephone number and tell the court immediately if the number changes or you can no longer be contacted on that number	PRBCT	O	N	A	N	N	N	N	Pre-release bail condition			JG		B		
+Pre-release bail condition: Other	PRBCO	O	N	A	N	N	N	N	Pre-release bail condition			RA		B		
 Post-release bail condition: Assessments/Reports - undergo an assessment for dependency on Class A drugs and participate in any follow-up assessment, assistance or treatment considered appropriate	PORAR1	O	N	A	N	N	N	N	Post-release bail condition			GT		B		
 Post-release bail condition: Assessments/Reports - participate in any assistance or treatment considered appropriate for misuse of class A drugs	PORAR2	O	N	A	N	N	N	N	Post-release bail condition			GT		B		
 Post-release bail condition: Assessments/Reports - provide pre-sentence drug test samples 	PORAR3	O	N	A	N	N	N	N	Post-release bail condition			GT		B		
@@ -412,4 +411,24 @@ Post-release bail condition: Residence BASS - take part in additional mandatory 
 Post-release bail condition: Surety - find continuous surety / sureties	PORS	O	N	A	N	N	N	N	Post-release bail condition			JX		B		
 Post-release bail condition: Travel - not to apply for international travel documents or be in possession of any	PORT1	O	N	A	N	N	N	N	Post-release bail condition			JT		B		
 Post-release bail condition: Travel - not to leave England and Wales	PORT2	O	N	A	N	N	N	N	Post-release bail condition			JY		B		
-Next hearing in Crown Court	NHCC	O	N	A	N	N	N	N	Next hearing					B		
+Next hearing in Crown Court - scheduled	NHCCS	O	S	I	N	N	N	N	Next hearing					B		
+Next hearing in Crown Court - unscheduled	NHCCU	O	U	I	N	N	N	N	Next hearing					B		
+Remanded on conditional bail	RC	O	N	A	Y	N	N	N	Remand conditional bail		4027		CB	B		
+Remanded on conditional bail with electronic monitoring	RCE	O	N	A	Y	N	N	N	Remand conditional bail		4027	BA	CB	B		
+Remanded on unconditional bail	RU	O	N	A	N	N	N	N	Remand unconditional bail		4047		UB	B		remanded, unconditional
+Remanded in custody	RI	O	N	A	N	N	N	N	Remand in custody		4028		C 	B		
+Remanded in custody pending receipt of Prosecutor's written notice of appeal	RIBA2	O	N	A	N	N	N	N	Remand appeal					B		
+Prosecutor's notice of appeal received. Remanded in custody	RIBA48	O	N	A	N	N	N	N	Remand appeal		4049		C	CC		
+Prosecutor's bail appeal withdrawn. (D in local custody). Release in accordance with earlier decision	RIBAWL	O	N	A	N	N	N	N	Remand appeal					B		
+Remitted to youth court for trial	REMYCT	O	N	F	N	N	N	N						CC		
+Remitted to youth court for sentence	REMYCS	O	N	F	N	N	Y	N						CC		
+Direction made under Section 45 of the Youth Justice and Criminal Evidence Act 1999	D45	O	N	A	N	N	N	N	Press		4510			B		
+Direction under Section 45A of the Youth Justice and Criminal Evidence Act 1999	D45A	O	N	A	N	N	N	N	Press		4510			B		
+Direction made under Section 46 of the Youth Justice and Criminal Evidence Act 1999	D46	O	N	A	N	N	N	N	Press		4510			B		
+Direction made under Section 39 of the Children and Young Persons Act 1933	D39	O	N	A	N	N	N	N	Press		4510			B		
+Order made under Section 11 of the Contempt of Court Act 1981 until date	D11	O	N	A	N	N	N	N	Press					B		
+Order made under Section 11 of the Contempt of Court Act 1981 until further order	D11FO	O	N	A	N	N	N	N	Press					B		
+Order made under Section 4 of the Contempt of Court Act 1981	D4	O	N	A	N	N	N	N	Press		4510			B		
+Order made under Section 58 of the Criminal Procedure and Investigations Act 1996 until date - derogatory assertions	D58	O	N	A	N	N	N	N	Press					B		
+Order made under Section 58 of the Criminal Procedure and Investigations Act 1996 until further order - derogatory assertions	D58FO	O	N	A	N	N	N	N	Press					B		
+Order made under Section 49 of the Children and Young Persons Act 1933 dispensing with the restrictions on publicity	D49	O	N	A	N	N	N	N	Press		4509			B		

@@ -10,18 +10,22 @@ public class HearingEventLogged {
 
     private final UUID hearingEventId;
     private final UUID hearingId;
+    private final UUID hearingEventDefinitionId;
     private final String recordedLabel;
     private final ZonedDateTime eventTime;
     private final ZonedDateTime lastModifiedTime;
+    private final boolean alterable;
 
-    public HearingEventLogged(final UUID hearingEventId, final UUID hearingId, final String recordedLabel,
-                              final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime) {
+    public HearingEventLogged(final UUID hearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final String recordedLabel,
+                              final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime, final boolean alterable) {
 
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
+        this.hearingEventDefinitionId = hearingEventDefinitionId;
         this.recordedLabel = recordedLabel;
         this.eventTime = eventTime;
         this.lastModifiedTime = lastModifiedTime;
+        this.alterable = alterable;
     }
 
     public UUID getHearingEventId() {
@@ -42,5 +46,13 @@ public class HearingEventLogged {
 
     public ZonedDateTime getLastModifiedTime() {
         return lastModifiedTime;
+    }
+
+    public boolean isAlterable() {
+        return alterable;
+    }
+
+    public UUID getHearingEventDefinitionId() {
+        return hearingEventDefinitionId;
     }
 }

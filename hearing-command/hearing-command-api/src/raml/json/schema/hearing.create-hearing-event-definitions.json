@@ -10,6 +10,9 @@
       "items": {
         "type": "object",
         "properties": {
+          "id": {
+            "$ref": "#/definitions/uuid"
+          },
           "groupLabel": {
             "type": "string"
           },
@@ -30,12 +33,17 @@
           },
           "caseAttribute": {
             "type": "string"
+          },
+          "alterable": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false,
         "required": [
+          "id",
           "recordedLabel",
-          "actionLabel"
+          "actionLabel",
+          "alterable"
         ]
       }
     }

@@ -15,7 +15,6 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
-import org.kie.api.runtime.ExecutionResults;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -30,6 +29,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
     private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
+    private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -118,22 +118,13 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Test
-    public void shouldAllowAuthorisedUserToGetHearingEventDefinitions() {
-        final Action action = createActionFor(ACTION_NAME_GET_HEARING_EVENT_LOG);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
-                .willReturn(true);
-
-        final ExecutionResults results = executeRulesWith(action);
-        assertSuccessfulOutcome(results);
+    public void shouldAllowUserInAuthorisedGroupToGetHearingEventDefinition() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks");
     }
 
     @Test
-    public void shouldNotAllowUnauthorisedUserToGetHearingEventDefinitions() {
-        final Action action = createActionFor(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
-
-        final ExecutionResults results = executeRulesWith(action);
-        assertFailureOutcome(results);
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinition() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks");
     }
 
     @Override

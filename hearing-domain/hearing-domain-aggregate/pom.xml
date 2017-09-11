@@ -6,12 +6,13 @@
     <version>2.0.86-SNAPSHOT</version>
   </parent>
   <artifactId>hearing-domain-aggregate</artifactId>
-    
+
    <dependencies>
 
        <dependency>
            <groupId>uk.gov.justice.services</groupId>
            <artifactId>framework-api-domain</artifactId>
+           <scope>provided</scope>
        </dependency>
 
        <dependency>

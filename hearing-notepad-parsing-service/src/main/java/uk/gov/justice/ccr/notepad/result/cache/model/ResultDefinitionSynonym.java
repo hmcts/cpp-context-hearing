@@ -21,4 +21,12 @@ public class ResultDefinitionSynonym {
     public final void setSynonym(String value) {
         synonym = value;
     }
+
+    @Override
+    public String toString() {
+        return "ResultDefinitionSynonym{" +
+                "word='" + word + '\'' +
+                ", synonym='" + synonym + '\'' +
+                '}';
+    }
 }

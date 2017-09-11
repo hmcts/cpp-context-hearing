@@ -1,0 +1,19 @@
+Fixed List ID	Code	Value
+Conviction / acquittal	CON	Convicted
+Conviction / acquittal	ACQ	Acquitted
+Responsible officer - community	AC	the officer in charge of the Attendance Centre
+Responsible officer - community	EM	the electronic monitoring supervisor
+Responsible officer - community	PO	a probation officer
+Responsible officer - community	YOT	a member of the youth offending team
+Responsible officer - community	PROV	an officer of a provider of probation services
+Responsible officer - suspended imprisonment	AC	the officer in charge of the Attendance Centre
+Responsible officer - suspended imprisonment	EM	the electronic monitoring supervisor
+Responsible officer - suspended imprisonment	PO	a probation officer
+Responsible officer - suspended imprisonment	PROV	an officer of a provider of probation services
+Responsible officer - suspended imprisonment	NA	Not applicable
+Responsible officer - suspended detention	AC	the officer in charge of the Attendance Centre
+Responsible officer - suspended detention	EM	the electronic monitoring supervisor
+Responsible officer - suspended detention	PO	a probation officer
+Responsible officer - suspended detention	YOT	a member of the youth offending team
+Responsible officer - suspended detention	PROV	an officer of a provider of probation services
+Responsible officer - suspended detention	NA	Not applicable

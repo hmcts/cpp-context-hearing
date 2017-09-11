@@ -24,11 +24,12 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("WeakerAccess")
 public class AbstractIT {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     protected static final UUID USER_ID_VALUE = randomUUID();
     protected static final Header CPP_UID_HEADER = new Header(USER_ID, USER_ID_VALUE.toString());
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
 
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
     protected static final Properties ENDPOINT_PROPERTIES = new Properties();

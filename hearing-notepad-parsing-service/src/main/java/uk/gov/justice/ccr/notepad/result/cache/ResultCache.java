@@ -15,6 +15,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,12 +29,15 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Startup
 @ApplicationScoped
 public class ResultCache {
 
-    private JsonEnvelope envelope;
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ResultCache.class.getName());
 
     private static final String RESULT_DEFINITION_KEY = "resultDefinitionKey";
     private static final String RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY = "resultDefinitionsGroupByKeywordKey";
@@ -41,7 +45,6 @@ public class ResultCache {
     private static final String RESULT_DEFINITION_SYNONYM_KEY = "resultDefinitionSynonymKey";
     private static final String RESULT_PROMPT_KEY = "resultPromptKey";
     private static final String RESULT_PROMPT_SYNONYM_KEY = "resultPromptSynonymKey";
-
 
     @Inject
     @Named("readStoreResultLoader")
@@ -73,7 +76,7 @@ public class ResultCache {
         }
     }
 
-    void loadResultCache() throws ExecutionException {
+    private void loadResultCache() throws ExecutionException {
 
         addValueToCache(RESULT_DEFINITION_KEY, resultLoader.loadResultDefinition());
 
@@ -90,10 +93,11 @@ public class ResultCache {
         Map<String, List<Long>> resultPromptsIndexByKeyWord = getPromptsIndexByKeyword();
 
         addValueToCache(RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY, resultPromptsIndexByKeyWord);
+
     }
 
     private void addValueToCache(final String key, final Object value) {
-        cache.asMap().remove(key);
+        LOGGER.info("Add to cache key {} value {}", key, value);
         cache.asMap().put(key, value);
     }
 
@@ -165,7 +169,7 @@ public class ResultCache {
     }
 
     public List<ResultPrompt> getResultPromptByResultDefinitionId(final String resultDefinitionId) throws ExecutionException {
-        String resultDefinitionLabel = getResultDefinitionById(resultDefinitionId).getLabel();
+        String resultDefinitionLabel = getResultDefinitionById(resultDefinitionId).get().getLabel();
         return getResultPromptByResultDefinitionLabel(resultDefinitionLabel);
     }
 
@@ -184,9 +188,9 @@ public class ResultCache {
         return resultPromptSynonyms;
     }
 
-    private ResultDefinition getResultDefinitionById(final String resultDefinitionId) throws ExecutionException {
+    private Optional<ResultDefinition> getResultDefinitionById(final String resultDefinitionId) throws ExecutionException {
         return getResultDefinition().stream()
-                .filter(resultDefinition -> resultDefinition.getId().equals(resultDefinitionId)).findFirst().orElse(null);
+                .filter(resultDefinition -> resultDefinition.getId().equals(resultDefinitionId)).findFirst();
 
     }
 
@@ -229,4 +233,10 @@ public class ResultCache {
     }
 
 
+    public void reload() throws ExecutionException {
+        if (cache.asMap().size() != 0) {
+            LOGGER.info("Reloading cache by MidnightScheduler ");
+            loadResultCache();
+        }
+    }
 }
