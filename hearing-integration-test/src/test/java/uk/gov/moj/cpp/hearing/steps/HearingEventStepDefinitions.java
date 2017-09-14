@@ -17,6 +17,7 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.AllOf.allOf;
@@ -29,7 +30,11 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 
+import com.jayway.jsonpath.matchers.IsJson;
+import com.jayway.restassured.path.json.JsonPath;
+import org.hamcrest.CoreMatchers;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
@@ -46,6 +51,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import javax.jms.MessageConsumer;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -67,7 +73,11 @@ public class HearingEventStepDefinitions extends AbstractIT {
     private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions+json";
     private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITION = "application/vnd.hearing.hearing-event-definition+json";
 
+    private static final String HEARING_LOGGED_PUBLIC_EVENT ="public.hearing.event-logged";
+    private static final String HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT="public.hearing.event-timestamp-corrected";
+
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_LAST_HEARING_EVENT_ID = "lastHearingEventId";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
@@ -469,4 +479,30 @@ public class HearingEventStepDefinitions extends AbstractIT {
         }
     }
 
+    public static void andHearingEventLoggedPublicEventShouldBePublished(final MessageConsumer messageConsumer, final HearingEvent hearingEvent) {
+        final JsonPath message = retrieveMessage(messageConsumer);
+
+        assertThat(message.prettify(), new IsJson(CoreMatchers.allOf(
+                withJsonPath("$._metadata.name", equalTo(HEARING_LOGGED_PUBLIC_EVENT)),
+                withJsonPath("$.hearingEventId", equalTo(hearingEvent.getId().toString())),
+                withJsonPath("$.hearingEventDefinitionId", equalTo(hearingEvent.getHearingEventDefinitionId().toString())),
+                withJsonPath("$.recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
+                withJsonPath("$.eventTime", equalTo(hearingEvent.getEventTime().toString())),
+                withJsonPath("$.priority", equalTo(hearingEvent.isAlterable()))
+        )));
+    }
+
+    public static void andHearingEventTimeStampCorrectedPublicEventShouldBePublished(final MessageConsumer messageConsumer, final HearingEvent hearingEvent, final ZonedDateTime newEventTime, final UUID newHearingEventId) {
+        final JsonPath message = retrieveMessage(messageConsumer);
+
+        assertThat(message.prettify(), new IsJson(CoreMatchers.allOf(
+                withJsonPath("$._metadata.name", equalTo(HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT)),
+               //TODO withJsonPath("$.lastHearingEventId",  equalTo(hearingEvent.get())),
+                withJsonPath("$.hearingEventId", equalTo(newHearingEventId.toString())),
+                withJsonPath("$.hearingEventDefinitionId", equalTo(hearingEvent.getHearingEventDefinitionId().toString())),
+                withJsonPath("$.recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
+                withJsonPath("$.eventTime", equalTo(ZonedDateTimes.toString(newEventTime))),
+                withJsonPath("$.priority", equalTo(hearingEvent.isAlterable()))
+        )));
+    }
 }

@@ -14,6 +14,8 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHeari
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionsAreRecorded;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionsShouldProvideOptionToLogEventWithDefendantAndDefenceCouncil;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventIsRecorded;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldBePublished;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventTimeStampCorrectedPublicEventShouldBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenItFailsForMissingEventTime;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenOnlySpecifiedHearingEventIsRecorded;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheEventsShouldBeListedInTheSpecifiedOrder;
@@ -37,6 +39,7 @@ import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingStartedEvent;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.identifyDefendantEvent;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.mitigationEvent;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
@@ -48,6 +51,8 @@ import java.util.UUID;
 
 import com.jayway.restassured.response.Response;
 import org.junit.Test;
+
+import javax.jms.MessageConsumer;
 
 public class HearingEventsIT extends AbstractIT {
 
@@ -61,9 +66,13 @@ public class HearingEventsIT extends AbstractIT {
 
     private final ZonedDateTime pastEventTime = PAST_ZONED_DATE_TIME.next();
     private final ZonedDateTime currentLastModifiedTime = ZonedDateTime.now();
+    private static final String HEARING_LOGGED_PUBLIC_EVENT ="public.hearing.event-logged";
+    private static final String HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT="public.hearing.event-timestamp-corrected";
 
     @Test
-    public void shouldBeAbleToStartAHearingByAnAuthorisedUser() {
+    public void shouldBeAbleToStartAHearingByAnAuthorisedUserAndRaisePublicEvent() {
+        final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_LOGGED_PUBLIC_EVENT);
+
         givenAUserHasLoggedInAsACourtClerk(userId);
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
         andHearingIsNotStarted(hearingId);
@@ -72,6 +81,8 @@ public class HearingEventsIT extends AbstractIT {
         whenUserLogsAnEvent(hearingStartedEvent);
 
         thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
+
+        andHearingEventLoggedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent);
     }
 
     @Test
@@ -85,7 +96,8 @@ public class HearingEventsIT extends AbstractIT {
     }
 
     @Test
-    public void shouldBeAbleToCorrectTimeOfAHearingEvent() {
+    public void shouldBeAbleToCorrectTimeOfAHearingEventAndRaisedPublicEventTimeStampCorrected() {
+        final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT);
         givenAUserHasLoggedInAsACourtClerk(userId);
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
 
@@ -96,6 +108,8 @@ public class HearingEventsIT extends AbstractIT {
         whenUserCorrectsTheTimeOfTheHearingEvent(hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
 
         thenTheHearingEventHasTheUpdatedEventTime(hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
+
+        andHearingEventTimeStampCorrectedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent, pastEventTime, newHearingEventId);
     }
 
     @Test

@@ -22,7 +22,6 @@ import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -74,6 +73,13 @@ public class HearingEventProcessorTest {
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_SHARED_TIME = "sharedTime";
+    private static final String FIELD_HEARING_DEFINITION_ID ="hearingEventDefinitionId";
+    private static final String FIELD_EVENT_TIME ="eventTime";
+    private static final String FIELD_RECORDED_LABEL ="recordedLabel";
+    private static final String FIELD_ALTERABLE ="alterable";
+    private static final String FIELD_PRIORITY ="priority";
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_LAST_HEARING_EVENT_ID = "lastHearingEventId";
 
     private static final UUID GENERIC_ID = randomUUID();
     private static final UUID LAST_SHARED_RESULT_ID = randomUUID();
@@ -88,6 +94,7 @@ public class HearingEventProcessorTest {
     private static final UUID OFFENCE_ID = randomUUID();
     private static final UUID CASE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
+    private static final String LABEL_VALUE="hearing started";
 
     @Test
     public void publishCaseStartedPublicEvent() throws Exception {
@@ -164,7 +171,7 @@ public class HearingEventProcessorTest {
     @Test
     public void publishAdjournDateUpdatedPublicEvent() throws Exception {
         // given
-        final JsonEnvelope event = EnvelopeFactory.createEnvelope("hearing.adjourn-date-updated", createObjectBuilder().add("startDate", STARTDATE).build());
+        final JsonEnvelope event = createEnvelope("hearing.adjourn-date-updated", createObjectBuilder().add("startDate", STARTDATE).build());
 
         //when
         hearingEventProcessor.publishHearingDateAdjournedPublicEvent(event);
@@ -180,6 +187,64 @@ public class HearingEventProcessorTest {
                 )));
 
 
+    }
+
+    @Test
+    public void publishHearingEventLoggedPublicEvent() throws Exception {
+        // given
+        final JsonEnvelope event = createEnvelope("hearing.hearing-event-logged", createObjectBuilder().add(FIELD_EVENT_TIME, STARTDATE)
+                .add(FIELD_RECORDED_LABEL, LABEL_VALUE)
+                .add(FIELD_HEARING_EVENT_ID, GENERIC_ID.toString())
+                .add(FIELD_HEARING_DEFINITION_ID, GENERIC_ID.toString())
+                .add(FIELD_ALTERABLE, true).build());
+
+        //when
+        hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+
+        // then
+        final ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.event-logged"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_EVENT_TIME), equalTo(STARTDATE)),
+                        withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
+                        withJsonPath(format("$.%s", FIELD_PRIORITY), equalTo(true))
+                        )
+                )));
+    }
+
+    @Test
+    public void publishHearingEventTimeStampCorrectedPublicEvent() throws Exception {
+        // given
+        final JsonEnvelope event = createEnvelope("hearing.hearing-event-logged", createObjectBuilder().add(FIELD_EVENT_TIME, STARTDATE)
+                .add(FIELD_RECORDED_LABEL, LABEL_VALUE)
+                .add(FIELD_HEARING_EVENT_ID, GENERIC_ID.toString())
+                .add(FIELD_LAST_HEARING_EVENT_ID, GENERIC_ID.toString())
+                .add(FIELD_HEARING_DEFINITION_ID, GENERIC_ID.toString())
+                .add(FIELD_ALTERABLE, true).build());
+
+        //when
+        hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+
+        // then
+        final ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.event-timestamp-corrected"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_LAST_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_EVENT_TIME), equalTo(STARTDATE)),
+                        withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
+                        withJsonPath(format("$.%s", FIELD_PRIORITY), equalTo(true))
+                        )
+                )));
     }
 
     private JsonEnvelope createResultsSharedEvent() {

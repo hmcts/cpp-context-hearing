@@ -27,6 +27,16 @@ public class HearingEventProcessor {
     private static final String PUBLIC_HEARING_RESULTED = "public.hearing.resulted";
     private static final String PUBLIC_HEARING_RESULT_AMENDED = "public.hearing.result-amended";
     private static final String PUBLIC_HEARING_HEARING_ADJOURNED = "public.hearing.adjourn-date-updated";
+    private static final String PUBLIC_HEARING_EVENT_LOGGED = "public.hearing.event-logged";
+    private static final String PUBLIC_HEARING_TIMESTAMP_CORRECTED = "public.hearing.event-timestamp-corrected";
+
+    private static final String FIELD_HEARING_DEFINITION_ID ="hearingEventDefinitionId";
+    private static final String FIELD_HEARING_EVENT_ID ="hearingEventId";
+    private static final String FIELD_LAST_HEARING_EVENT_ID ="lastHearingEventId";
+    private static final String FIELD_EVENT_TIME ="eventTime";
+    private static final String FIELD_RECORDED_LABEL ="recordedLabel";
+    private static final String FIELD_ALTERABLE ="alterable";
+    private static final String FIELD_PRIORITY ="priority";
 
     @Inject
     private Enveloper enveloper;
@@ -58,4 +68,36 @@ public class HearingEventProcessor {
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
         sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
     }
+
+    @Handles("hearing.hearing-event-logged")
+    public void publishHearingEventLoggedPublicEvent(final JsonEnvelope event) {
+        final JsonObject jsonObject = event.payloadAsJsonObject();
+        final String hearingEventDefinitionId = jsonObject.getString(FIELD_HEARING_DEFINITION_ID);
+        final String hearingEventId = jsonObject.getString(FIELD_HEARING_EVENT_ID);
+        final String lastHearingEventId = jsonObject.getString(FIELD_LAST_HEARING_EVENT_ID, null);
+        final String recordedLabel = jsonObject.getString(FIELD_RECORDED_LABEL);
+        final String eventTime = jsonObject.getString(FIELD_EVENT_TIME);
+        final boolean priority = jsonObject.getBoolean(FIELD_ALTERABLE);
+        if (lastHearingEventId == null) {
+            final JsonObject payload = Json.createObjectBuilder().add(FIELD_EVENT_TIME, eventTime)
+                    .add(FIELD_RECORDED_LABEL, recordedLabel)
+                    .add(FIELD_HEARING_DEFINITION_ID, hearingEventDefinitionId)
+                    .add(FIELD_HEARING_EVENT_ID, hearingEventId)
+                    .add(FIELD_PRIORITY, priority).build();
+            LOGGER.debug(format("'public.hearing-event-logged' event published %s", jsonObject));
+            sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_EVENT_LOGGED).apply(payload));
+        } else {
+            final JsonObject payload = Json.createObjectBuilder().add(FIELD_EVENT_TIME, eventTime)
+                    .add(FIELD_RECORDED_LABEL, recordedLabel)
+                    .add(FIELD_HEARING_DEFINITION_ID, hearingEventDefinitionId)
+                    .add(FIELD_HEARING_EVENT_ID, hearingEventId)
+                    .add(FIELD_LAST_HEARING_EVENT_ID, lastHearingEventId)
+                    .add(FIELD_PRIORITY, priority).build();
+
+            LOGGER.debug(format("'public.hearing-event-timestamp-corrected' event published %s", jsonObject));
+            sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_TIMESTAMP_CORRECTED).apply(payload));
+        }
+
+    }
+
 }

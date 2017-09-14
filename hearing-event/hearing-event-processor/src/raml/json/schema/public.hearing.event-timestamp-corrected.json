@@ -8,9 +8,6 @@
     "lastHearingEventId": {
       "$ref": "#/definitions/uuid"
     },
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
-    },
     "hearingEventDefinitionId": {
       "$ref": "#/definitions/uuid"
     },
@@ -21,23 +18,18 @@
       "type": "string",
       "format": "date-time"
     },
-    "lastModifiedTime": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "alterable": {
+    "priority": {
       "type": "boolean"
     }
   },
   "additionalProperties": false,
   "required": [
     "hearingEventId",
-    "hearingId",
+    "lastHearingEventId",
+    "hearingEventDefinitionId",
     "recordedLabel",
     "eventTime",
-    "lastModifiedTime",
-    "hearingEventDefinitionId",
-    "alterable"
+    "priority"
   ],
   "definitions": {
     "uuid": {
