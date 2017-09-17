@@ -6,6 +6,7 @@
 		"label":"Person name",
 		"mandatory":"Y",
 		"promptType":"FIXL",
+		"promptOrder": 1,
 		"keywords": "",
 		"durationElement": "",
 		"fixedListId": "Conviction / acquittal"

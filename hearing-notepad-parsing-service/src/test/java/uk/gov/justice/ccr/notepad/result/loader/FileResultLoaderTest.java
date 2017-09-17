@@ -13,14 +13,17 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.mockito.Mock;
 
 public class FileResultLoaderTest {
+
+    @Mock
+    ResultPromptsProcessor resultPromptsProcessor;
 
     @Test
     public void loadResultPromptWithFixedList() throws Exception {
         //given
         FileResultLoader testObject = new FileResultLoader();
-
 
         //when
         List<ResultPrompt> actualPrompts = testObject.loadResultPrompt();
@@ -31,7 +34,7 @@ public class FileResultLoaderTest {
         List<ResultPrompt> actualFixedListPrompts = actualPrompts.stream()
                 .filter(r -> r.getType() == ResultType.FIXL).collect(Collectors.toList());
         HashSet<String> expected = Sets.newHashSet("Acquitted", "Convicted");
-        assertThat(actualFixedListPrompts.get(0).getFixedList(), is(new TreeSet<String>(expected)));
+        assertThat(actualFixedListPrompts.get(1).getFixedList(), is(new TreeSet<String>(expected)));
     }
 
 }
