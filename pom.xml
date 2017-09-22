@@ -21,6 +21,7 @@
         <sonar.scm.provider>git</sonar.scm.provider>
         <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
         <authorisation.service.version>0.1.19</authorisation.service.version>
+        <structure.version>2.0.298</structure.version>
     </properties>
     <modules>
         <module>hearing-query</module>

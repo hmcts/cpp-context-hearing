@@ -18,6 +18,13 @@
       "type": "string",
       "format": "date-time"
     },
+    "lastModifiedTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "caseUrn": {
+      "type": "string"
+    },
     "priority": {
       "type": "boolean"
     }
@@ -29,6 +36,8 @@
     "hearingEventDefinitionId",
     "recordedLabel",
     "eventTime",
+    "lastModifiedTime",
+    "caseUrn",
     "priority"
   ],
   "definitions": {

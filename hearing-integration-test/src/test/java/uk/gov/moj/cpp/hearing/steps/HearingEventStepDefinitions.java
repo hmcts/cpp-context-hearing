@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.steps;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
@@ -9,6 +10,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
+import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
@@ -24,6 +26,7 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNull;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -31,9 +34,12 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
+import static uk.gov.moj.cpp.hearing.utils.StructureStub.stubForCaseDetails;
 
+import com.google.common.io.Resources;
 import com.jayway.jsonpath.matchers.IsJson;
 import com.jayway.restassured.path.json.JsonPath;
+import org.apache.http.HttpStatus;
 import org.hamcrest.CoreMatchers;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
@@ -42,6 +48,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
 import java.time.ZonedDateTime;
@@ -482,27 +489,67 @@ public class HearingEventStepDefinitions extends AbstractIT {
     public static void andHearingEventLoggedPublicEventShouldBePublished(final MessageConsumer messageConsumer, final HearingEvent hearingEvent) {
         final JsonPath message = retrieveMessage(messageConsumer);
 
-        assertThat(message.prettify(), new IsJson(CoreMatchers.allOf(
+        assertThat(message.prettify(), new IsJson(allOf(
                 withJsonPath("$._metadata.name", equalTo(HEARING_LOGGED_PUBLIC_EVENT)),
                 withJsonPath("$.hearingEventId", equalTo(hearingEvent.getId().toString())),
                 withJsonPath("$.hearingEventDefinitionId", equalTo(hearingEvent.getHearingEventDefinitionId().toString())),
                 withJsonPath("$.recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
                 withJsonPath("$.eventTime", equalTo(hearingEvent.getEventTime().toString())),
+                withJsonPath("$.lastModifiedTime", equalTo(hearingEvent.getLastModifiedTime().toString())),
+                withJsonPath("$.caseUrn", is(notNullValue())),
                 withJsonPath("$.priority", equalTo(hearingEvent.isAlterable()))
         )));
     }
 
-    public static void andHearingEventTimeStampCorrectedPublicEventShouldBePublished(final MessageConsumer messageConsumer, final HearingEvent hearingEvent, final ZonedDateTime newEventTime, final UUID newHearingEventId) {
+    public static void andHearingEventLoggedPublicEventShouldNotBePublished(final MessageConsumer messageConsumer, final HearingEvent hearingEvent) {
+        final JsonPath message = retrieveMessage(messageConsumer);
+        assertNull(message);
+
+    }
+
+    public static void andHearingEventTimeStampCorrectedPublicEventShouldBePublished(final MessageConsumer messageConsumer, final HearingEvent hearingEvent, final ZonedDateTime newEventTime, final ZonedDateTime newLastModifiedTime, final UUID newHearingEventId) {
         final JsonPath message = retrieveMessage(messageConsumer);
 
-        assertThat(message.prettify(), new IsJson(CoreMatchers.allOf(
+        assertThat(message.prettify(), new IsJson(allOf(
                 withJsonPath("$._metadata.name", equalTo(HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT)),
-               //TODO withJsonPath("$.lastHearingEventId",  equalTo(hearingEvent.get())),
+                withJsonPath("$.lastHearingEventId",  equalTo(hearingEvent.getId().toString())),
                 withJsonPath("$.hearingEventId", equalTo(newHearingEventId.toString())),
                 withJsonPath("$.hearingEventDefinitionId", equalTo(hearingEvent.getHearingEventDefinitionId().toString())),
                 withJsonPath("$.recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
                 withJsonPath("$.eventTime", equalTo(ZonedDateTimes.toString(newEventTime))),
+                withJsonPath("$.lastModifiedTime", equalTo(ZonedDateTimes.toString(newLastModifiedTime))),
+                withJsonPath("$.caseUrn", is(notNullValue())),
                 withJsonPath("$.priority", equalTo(hearingEvent.isAlterable()))
         )));
     }
+
+
+    public static void andHearingHasInitiated(final UUID hearingId) throws IOException, InterruptedException {
+        final String caseId = randomUUID().toString();
+        stubForCaseDetails();
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId.toString());
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.initiate-hearing+json")
+                .body(Resources.toString(getResource("hearing.initiate-hearing.json"),
+                        defaultCharset()).replace("RANDOM_CASE_ID", caseId)).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.caseIds[0]", is(caseId))
+                        )));
+    }
+
+
 }

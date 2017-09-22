@@ -1,12 +1,28 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.jayway.restassured.response.Response;
+import org.junit.Test;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
+import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
+
+import javax.jms.MessageConsumer;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldBePublished;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldNotBePublished;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventTimeStampCorrectedPublicEventShouldBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingIsNotStarted;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingHasInitiated;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andLogsAnotherEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andUserLogsAnEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventAlterableFlagIs;
@@ -14,8 +30,6 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHeari
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionsAreRecorded;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionsShouldProvideOptionToLogEventWithDefendantAndDefenceCouncil;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventIsRecorded;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldBePublished;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventTimeStampCorrectedPublicEventShouldBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenItFailsForMissingEventTime;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenOnlySpecifiedHearingEventIsRecorded;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheEventsShouldBeListedInTheSpecifiedOrder;
@@ -41,19 +55,6 @@ import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.mitigationEvent;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
-import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
-
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import com.jayway.restassured.response.Response;
-import org.junit.Test;
-
-import javax.jms.MessageConsumer;
-
 public class HearingEventsIT extends AbstractIT {
 
     private final UUID userId = randomUUID();
@@ -70,7 +71,24 @@ public class HearingEventsIT extends AbstractIT {
     private static final String HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT="public.hearing.event-timestamp-corrected";
 
     @Test
-    public void shouldBeAbleToStartAHearingByAnAuthorisedUserAndRaisePublicEvent() {
+    public void shouldBeAbleToStartAHearingByAnAuthorisedUserAndRaisePublicEvent() throws IOException, InterruptedException {
+        final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_LOGGED_PUBLIC_EVENT);
+
+        givenAUserHasLoggedInAsACourtClerk(userId);
+        andHearingHasInitiated(hearingId);
+        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
+        andHearingIsNotStarted(hearingId);
+
+        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
+        whenUserLogsAnEvent(hearingStartedEvent);
+
+        thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
+
+        andHearingEventLoggedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent);
+    }
+
+    @Test
+    public void shouldNotRaiseHearingEventLoggedPublicEventWhenHearingNotInitiated() throws IOException, InterruptedException {
         final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_LOGGED_PUBLIC_EVENT);
 
         givenAUserHasLoggedInAsACourtClerk(userId);
@@ -82,7 +100,7 @@ public class HearingEventsIT extends AbstractIT {
 
         thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
 
-        andHearingEventLoggedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent);
+        andHearingEventLoggedPublicEventShouldNotBePublished(messageConsumer, hearingStartedEvent);
     }
 
     @Test
@@ -96,9 +114,11 @@ public class HearingEventsIT extends AbstractIT {
     }
 
     @Test
-    public void shouldBeAbleToCorrectTimeOfAHearingEventAndRaisedPublicEventTimeStampCorrected() {
+    public void shouldBeAbleToCorrectTimeOfAHearingEventAndRaisedPublicEventTimeStampCorrected() throws IOException, InterruptedException {
         final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT);
+
         givenAUserHasLoggedInAsACourtClerk(userId);
+        andHearingHasInitiated(hearingId);
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
 
         final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
@@ -109,7 +129,7 @@ public class HearingEventsIT extends AbstractIT {
 
         thenTheHearingEventHasTheUpdatedEventTime(hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
 
-        andHearingEventTimeStampCorrectedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent, pastEventTime, newHearingEventId);
+        andHearingEventTimeStampCorrectedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
     }
 
     @Test
@@ -230,5 +250,6 @@ public class HearingEventsIT extends AbstractIT {
 
         thenHearingEventDefinitionIsStillAvailable(values(initialHearingEventDefinitions.getEventDefinitions()).next());
     }
+
 
 }
