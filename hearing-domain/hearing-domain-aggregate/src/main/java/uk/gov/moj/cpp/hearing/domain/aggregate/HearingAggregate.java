@@ -91,7 +91,7 @@ public class HearingAggregate implements Aggregate {
                             !sharedResultIds.contains(resultLine.getId()))
                     .map(resultLine -> new ResultAmended(resultLine.getId(), resultLine.getLastSharedResultId(),
                             sharedTime, hearingId, resultLine.getCaseId(), resultLine.getPersonId(), resultLine.getOffenceId(),
-                            resultLine.getLevel(), resultLine.getResultLabel(), resultLine.getPrompts())
+                            resultLine.getLevel(), resultLine.getResultLabel(), resultLine.getPrompts(), resultLine.getCourt(), resultLine.getCourtRoom(), resultLine.getClerkOfTheCourtId(), resultLine.getClerkOfTheCourtFirstName(), resultLine.getClerkOfTheCourtLastName())
                     )
                     .collect(toList()));
         } else {

@@ -42,6 +42,21 @@
         "resultLabel": {
           "type": "string"
         },
+        "court": {
+          "type": "string"
+        },
+        "courtRoom": {
+          "type": "string"
+        },
+        "clerkOfTheCourtId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "clerkOfTheCourtFirstName": {
+          "type": "string"
+        },
+        "clerkOfTheCourtLastName": {
+          "type": "string"
+        },
         "prompts": {
           "type": "array",
           "items": {
@@ -63,6 +78,11 @@
         "id",
         "personId",
         "caseId",
+        "court",
+        "courtRoom",
+        "clerkOfTheCourtId",
+        "clerkOfTheCourtFirstName",
+        "clerkOfTheCourtLastName",
         "offenceId",
         "level",
         "resultLabel",

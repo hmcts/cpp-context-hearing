@@ -60,6 +60,11 @@ public class HearingCommandHandler {
     private static final String FIELD_RESULT_PROMPTS = "prompts";
     private static final String FIELD_RESULT_LABEL = "label";
     private static final String FIELD_RESULT_VALUE = "value";
+    private static final String FIELD_COURT = "court";
+    private static final String FIELD_COURT_ROOM = "courtRoom";
+    private static final String FIELD_CLERK_OF_THE_COURT_ID = "clerkOfTheCourtId";
+    private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME = "clerkOfTheCourtFirstName";
+    private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME = "clerkOfTheCourtLastName";
 
     @Inject
     private EventSource eventSource;
@@ -198,7 +203,11 @@ public class HearingCommandHandler {
                 resultLine.getString(RESULT_LABEL),
                 resultLine.getJsonArray(FIELD_RESULT_PROMPTS).getValuesAs(JsonObject.class).stream()
                         .map(prompt -> new ResultPrompt(prompt.getString(FIELD_RESULT_LABEL), prompt.getString(FIELD_RESULT_VALUE)))
-                        .collect(toList())
-        );
+                        .collect(toList()),
+                resultLine.getString(FIELD_COURT),
+                resultLine.getString(FIELD_COURT_ROOM),
+                fromString(resultLine.getString(FIELD_CLERK_OF_THE_COURT_ID)),
+                resultLine.getString(FIELD_CLERK_OF_THE_COURT_FIRST_NAME),
+                resultLine.getString(FIELD_CLERK_OF_THE_COURT_LAST_NAME));
     }
 }

@@ -21,6 +21,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -94,6 +95,18 @@ public class HearingEventProcessorTest {
     private static final String FIELD_PRIORITY ="priority";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_LAST_HEARING_EVENT_ID = "lastHearingEventId";
+    private static final String FIELD_COURT = "court";
+    private static final String FIELD_COURT_ROOM = "courtRoom";
+    private static final String FIELD_CLERK_OF_THE_COURT_ID = "clerkOfTheCourtId";
+    private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME = "clerkOfTheCourtFirstName";
+    private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME = "clerkOfTheCourtLastName";
+
+    private static final String FIELD_COURT_VALUE = STRING.next();
+    private static final String FIELD_COURT_ROOM_VALUE = STRING.next();
+    private static final UUID FIELD_CLERK_OF_THE_COURT_ID_VALUE = randomUUID();
+    private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE = STRING.next();
+    private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE = STRING.next();
+
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String FIELD_CASE_URN = "caseUrn";
 
@@ -149,6 +162,11 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_LEVEL), equalTo(LEVEL)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT), equalTo(FIELD_COURT_VALUE)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
                         withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
                         withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
                         withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
@@ -177,6 +195,11 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                         withJsonPath(format("$.%s", FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
                         withJsonPath(format("$.%s", FIELD_LEVEL), equalTo(LEVEL)),
+                        withJsonPath(format("$.%s", FIELD_COURT), equalTo(FIELD_COURT_VALUE)),
+                        withJsonPath(format("$.%s", FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
+                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
+                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
+                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
                         withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
                         withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
                         withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
@@ -331,6 +354,11 @@ public class HearingEventProcessorTest {
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                         .add(FIELD_LEVEL, LEVEL)
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                        .add(FIELD_COURT,FIELD_COURT_VALUE)
+                        .add(FIELD_COURT_ROOM,FIELD_COURT_ROOM_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_ID,FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())
+                        .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME,FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME,FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
@@ -360,6 +388,11 @@ public class HearingEventProcessorTest {
                 .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                 .add(FIELD_LEVEL, LEVEL)
                 .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                .add(FIELD_COURT,FIELD_COURT_VALUE)
+                .add(FIELD_COURT_ROOM,FIELD_COURT_ROOM_VALUE)
+                .add(FIELD_CLERK_OF_THE_COURT_ID,FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())
+                .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME,FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)
+                .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME,FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
                 .add(FIELD_PROMPTS, createArrayBuilder()
                         .add(createObjectBuilder()
                                 .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)

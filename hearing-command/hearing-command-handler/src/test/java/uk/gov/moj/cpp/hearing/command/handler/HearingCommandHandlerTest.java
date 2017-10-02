@@ -112,6 +112,17 @@ public class HearingCommandHandlerTest {
     private static final String FIELD_PROMPT_LABEL = "label";
     private static final String FIELD_PROMPT_VALUE = "value";
     private static final String FIELD_SHARED_TIME = "sharedTime";
+    private static final String FIELD_COURT = "court";
+    private static final String FIELD_COURT_ROOM = "courtRoom";
+    private static final String FIELD_CLERK_OF_THE_COURT_ID = "clerkOfTheCourtId";
+    private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME = "clerkOfTheCourtFirstName";
+    private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME = "clerkOfTheCourtLastName";
+
+    private static final String FIELD_COURT_VALUE = STRING.next();
+    private static final String FIELD_COURT_ROOM_VALUE = STRING.next();
+    private static final UUID FIELD_CLERK_OF_THE_COURT_ID_VALUE = randomUUID();
+    private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE = STRING.next();
+    private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE = STRING.next();
 
     private static final UUID GENERIC_ID = randomUUID();
     private static final UUID GENERIC_ID_2 = randomUUID();
@@ -381,6 +392,11 @@ public class HearingCommandHandlerTest {
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_LEVEL), equalTo(LEVEL)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT), equalTo(FIELD_COURT_VALUE)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
                                 withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
                                 withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
@@ -413,6 +429,11 @@ public class HearingCommandHandlerTest {
                                 withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_LEVEL), equalTo(LEVEL)),
+                                withJsonPath(format("$.%s", FIELD_COURT), equalTo(FIELD_COURT_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
                                 withJsonPath(format("$.%s", FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
                                 withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
                                 withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_3)),
@@ -433,6 +454,11 @@ public class HearingCommandHandlerTest {
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_LEVEL), equalTo(LEVEL)),
                                 withJsonPath(format("$.%s", FIELD_RESULT_LABEL), equalTo(RESULT_LABEL_2)),
+                                withJsonPath(format("$.%s", FIELD_COURT), equalTo(FIELD_COURT_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
                                 withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_3)),
                                 withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_3)),
                                 withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_4)),
@@ -467,6 +493,11 @@ public class HearingCommandHandlerTest {
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_LEVEL), equalTo(LEVEL)),
                                 withJsonPath(format("$.%s", FIELD_RESULT_LABEL), equalTo(RESULT_LABEL_2)),
+                                withJsonPath(format("$.%s", FIELD_COURT), equalTo(FIELD_COURT_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
+                                withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
                                 withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_3)),
                                 withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_3)),
                                 withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_4)),
@@ -551,6 +582,11 @@ public class HearingCommandHandlerTest {
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                         .add(FIELD_LEVEL, LEVEL)
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                        .add(FIELD_COURT, FIELD_COURT_VALUE)
+                        .add(FIELD_COURT_ROOM, FIELD_COURT_ROOM_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_ID, FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())
+                        .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
@@ -578,6 +614,11 @@ public class HearingCommandHandlerTest {
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                         .add(FIELD_LEVEL, LEVEL)
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                        .add(FIELD_COURT, FIELD_COURT_VALUE)
+                        .add(FIELD_COURT_ROOM, FIELD_COURT_ROOM_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_ID, FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())
+                        .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
@@ -592,6 +633,11 @@ public class HearingCommandHandlerTest {
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                         .add(FIELD_LEVEL, LEVEL)
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL_2)
+                        .add(FIELD_COURT, FIELD_COURT_VALUE)
+                        .add(FIELD_COURT_ROOM, FIELD_COURT_ROOM_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_ID, FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())
+                        .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_3)
@@ -607,6 +653,11 @@ public class HearingCommandHandlerTest {
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                         .add(FIELD_LEVEL, LEVEL)
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                        .add(FIELD_COURT, FIELD_COURT_VALUE)
+                        .add(FIELD_COURT_ROOM, FIELD_COURT_ROOM_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_ID, FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())
+                        .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)
+                        .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
@@ -625,12 +676,15 @@ public class HearingCommandHandlerTest {
     }
 
     private List<ResultLine> prepareResultLines() {
-        return newArrayList(new ResultLine(GENERIC_ID, null, CASE_ID, PERSON_ID, OFFENCE_ID, LEVEL, RESULT_LABEL,
-                newArrayList(new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1),
-                        new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2))),
+        return newArrayList(
+                new ResultLine(GENERIC_ID, null, CASE_ID, PERSON_ID, OFFENCE_ID, LEVEL, RESULT_LABEL,
+                        newArrayList(new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1),
+                                new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2)),
+                        FIELD_COURT_VALUE, FIELD_COURT_ROOM_VALUE, FIELD_CLERK_OF_THE_COURT_ID_VALUE, FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE, FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE),
                 new ResultLine(GENERIC_ID_4, null, CASE_ID, PERSON_ID, OFFENCE_ID, LEVEL, RESULT_LABEL,
                         newArrayList(new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1),
-                                new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2)))
+                                new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2)),
+                        FIELD_COURT_VALUE, FIELD_COURT_ROOM_VALUE, FIELD_CLERK_OF_THE_COURT_ID_VALUE, FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE, FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
         );
     }
 
@@ -639,7 +693,7 @@ public class HearingCommandHandlerTest {
         return newArrayList(new ResultAmended(GENERIC_ID_2, GENERIC_ID, SHARED_TIME_2, HEARING_ID, CASE_ID, PERSON_ID, OFFENCE_ID, LEVEL, RESULT_LABEL,
                 newArrayList(
                         new ResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1),
-                        new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2)))
+                        new ResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2)), FIELD_COURT_VALUE, FIELD_COURT_ROOM_VALUE, FIELD_CLERK_OF_THE_COURT_ID_VALUE, FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE, FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)
         );
     }
 

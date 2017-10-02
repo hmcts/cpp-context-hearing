@@ -33,23 +33,23 @@ public class HearingDataFactory {
     public static ResultLineData resultLine(final ResultLevel level) {
         return new ResultLineData(randomUUID(), null, randomUUID(), randomUUID(),
                 randomUUID(), level, STRING.next(),
-                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList())
-        );
+                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList()),
+                STRING.next(), STRING.next(), randomUUID(), STRING.next(), STRING.next());
     }
 
     public static ResultLineData amendedResultLine(final ResultLineData pastSharedResult) {
         return new ResultLineData(randomUUID(), pastSharedResult.getId(), pastSharedResult.getCaseId(),
                 pastSharedResult.getPersonId(), pastSharedResult.getOffenceId(),
                 randomEnum(ResultLevel.class).next(), STRING.next(),
-                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList())
-        );
+                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList()),
+                STRING.next(), STRING.next(), randomUUID(), STRING.next(), STRING.next());
     }
 
     public static ResultLineData sharedResultLine(final ResultLineData resultLine) {
         return new ResultLineData(resultLine.getId(), resultLine.getId(), resultLine.getCaseId(),
                 resultLine.getPersonId(), resultLine.getOffenceId(), resultLine.getLevel(),
-                resultLine.getResultLabel(), resultLine.getPrompts()
-        );
+                resultLine.getResultLabel(), resultLine.getPrompts(),
+                STRING.next(), STRING.next(), randomUUID(), STRING.next(), STRING.next());
     }
 
     private static ResultPrompt resultPrompt() {

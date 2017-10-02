@@ -58,6 +58,11 @@ public class HearingStepDefinitions extends AbstractIT {
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_RESULT_LINES = "resultLines";
     private static final String FIELD_RESULT_LABEL = "resultLabel";
+    private static final String FIELD_COURT = "court";
+    private static final String FIELD_COURT_ROOM = "courtRoom";
+    private static final String FIELD_CLERK_OF_THE_COURT_ID = "clerkOfTheCourtId";
+    private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME = "clerkOfTheCourtFirstName";
+    private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME = "clerkOfTheCourtLastName";
     private static final String FIELD_PROMPTS = "prompts";
     private static final String FIELD_LABEL = "label";
     private static final String FIELD_VALUE = "value";
@@ -196,6 +201,11 @@ public class HearingStepDefinitions extends AbstractIT {
                 .add(FIELD_OFFENCE_ID, resultLine.getOffenceId().toString())
                 .add(FIELD_LEVEL, resultLine.getLevel().name())
                 .add(FIELD_RESULT_LABEL, resultLine.getResultLabel())
+                .add(FIELD_COURT, resultLine.getCourt())
+                .add(FIELD_COURT_ROOM, resultLine.getCourtRoom())
+                .add(FIELD_CLERK_OF_THE_COURT_ID, resultLine.getClerkOfTheCourtId().toString())
+                .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, resultLine.getClerkOfTheCourtFirstName())
+                .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, resultLine.getClerkOfTheCourtLastName())
                 .add(FIELD_PROMPTS, resultLine.getPrompts().stream()
                         .map(prompt -> createObjectBuilder().add(FIELD_LABEL, prompt.getLabel()).add(FIELD_VALUE, prompt.getValue()))
                         .collect(Json::createArrayBuilder, JsonArrayBuilder::add, JsonArrayBuilder::add)
