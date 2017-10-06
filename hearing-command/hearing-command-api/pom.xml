@@ -50,11 +50,6 @@
             <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
             <artifactId>authorisation-interceptor</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
-            <artifactId>authorisation-interceptor-strategy-sync</artifactId>
-        </dependency>
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-domain-common</artifactId>

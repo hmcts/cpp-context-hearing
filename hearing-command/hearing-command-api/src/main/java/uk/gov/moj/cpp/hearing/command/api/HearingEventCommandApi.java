@@ -43,7 +43,7 @@ public class HearingEventCommandApi {
     public void logHearingEvent(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();
         final JsonObject responsePayload = getEventDefinition(command);
-        enrichAndSendCommand(command, responsePayload, COMMAND_LOG_HEARING_EVENT);
+        enrichAndSendCommand(command, responsePayload, "hearing.command.log-hearing-event");
     }
 
     @Handles(COMMAND_CORRECT_HEARING_EVENT)
@@ -52,7 +52,7 @@ public class HearingEventCommandApi {
         final String hearingDefinitionId = payload.getString(FIELD_HEARING_EVENT_DEFINITION_ID);
 
         final JsonObject responsePayload = getEventDefinition(command);
-        enrichAndSendCommand(command, responsePayload, COMMAND_CORRECT_HEARING_EVENT);
+        enrichAndSendCommand(command, responsePayload, "hearing.command.correct-hearing-event");
     }
 
     private void enrichAndSendCommand(final JsonEnvelope command, final JsonObject eventDefinitionDetails, final String eventName) {

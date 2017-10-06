@@ -32,11 +32,6 @@
             <artifactId>authorisation-interceptor</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
-            <artifactId>authorisation-interceptor-strategy-sync</artifactId>
-        </dependency>
-
         <!-- JUnit regression testing framework. -->
        <dependency>
             <groupId>uk.gov.moj.cpp.access-control</groupId>

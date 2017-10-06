@@ -81,6 +81,6 @@ public class HearingCommandApi {
                 .add(FIELD_SHARED_TIME, ZonedDateTimes.toString(clock.now()))
                 .add(FIELD_RESULT_LINES, payload.getJsonArray(FIELD_RESULT_LINES));
 
-        sender.send(enveloper.withMetadataFrom(command, COMMAND_SHARE_RESULTS).apply(payloadWithSharedTime.build()));
+        sender.send(enveloper.withMetadataFrom(command, "hearing.command.share-results").apply(payloadWithSharedTime.build()));
     }
 }

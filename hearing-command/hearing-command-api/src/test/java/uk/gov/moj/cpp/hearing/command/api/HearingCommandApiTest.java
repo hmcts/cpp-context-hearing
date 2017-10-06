@@ -94,7 +94,7 @@ public class HearingCommandApiTest {
     private static final String LABEL = STRING.next();
     private static final String VALUE = STRING.next();
 
-    private static final String COMMAND_SHARE_RESULTS = "hearing.share-results";
+    private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent", "correctEvent");
 
     private Map<String, String> apiMethodsToHandlerNames;

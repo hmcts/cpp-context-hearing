@@ -81,7 +81,7 @@ public class HearingEventCommandHandler {
         eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
     }
 
-    @Handles("hearing.log-hearing-event")
+    @Handles("hearing.command.log-hearing-event")
     public void logHearingEvent(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
@@ -98,7 +98,7 @@ public class HearingEventCommandHandler {
         eventStream.append(events.map(enveloper.withMetadataFrom(command)));
     }
 
-    @Handles("hearing.correct-hearing-event")
+    @Handles("hearing.command.correct-hearing-event")
     public void correctEvent(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));

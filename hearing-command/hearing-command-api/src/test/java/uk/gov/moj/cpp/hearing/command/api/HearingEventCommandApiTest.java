@@ -101,7 +101,7 @@ public class HearingEventCommandApiTest {
         hearingEventCommandApi.logHearingEvent(command);
 
         verify(sender).send(senderArgumentCaptor.capture());
-        assertLogHearingEventSent(expectation, command, "hearing.log-hearing-event");
+        assertLogHearingEventSent(expectation, command, "hearing.command.log-hearing-event");
 
         verify(requester).request(requesterArgumentCaptor.capture());
         assertGetHearingEventDefinitionEventRequested(command);
@@ -115,7 +115,7 @@ public class HearingEventCommandApiTest {
         hearingEventCommandApi.correctEvent(command);
 
         verify(sender).send(senderArgumentCaptor.capture());
-        assertLogHearingEventSent(expectation, command, "hearing.correct-hearing-event");
+        assertLogHearingEventSent(expectation, command, "hearing.command.correct-hearing-event");
 
         verify(requester).request(requesterArgumentCaptor.capture());
         assertGetHearingEventDefinitionEventRequested(command);
