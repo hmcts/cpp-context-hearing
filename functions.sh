@@ -31,7 +31,7 @@ function deleteAndDeployWars {
   sleep 10
 
   rm -rf $WILDFLY_DEPLOYMENT_DIR/*.undeployed
-  find . -name "*.war"  -exec cp {} $WILDFLY_DEPLOYMENT_DIR \;
+  find . \(-iname "${CONTEXT_NAME}-service-*.war" \) -exec cp {} $WILDFLY_DEPLOYMENT_DIR \;
   echo "Copied wars to $WILDFLY_DEPLOYMENT_DIR"
 }
 

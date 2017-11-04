@@ -167,7 +167,7 @@ public class HearingCommandHandler {
         eventSource.getStreamById(hearingId).append(events.map(enveloper.withMetadataFrom(command)));
     }
 
-    @Handles("hearing.share-results")
+    @Handles("hearing.command.share-results")
     public void shareResult(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
