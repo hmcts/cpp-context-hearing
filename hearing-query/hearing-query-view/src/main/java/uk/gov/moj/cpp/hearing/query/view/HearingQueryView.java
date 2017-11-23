@@ -8,6 +8,18 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -30,18 +42,6 @@ import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ProsecutionCounselService;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-
-@SuppressWarnings("CdiInjectionPointsInspection")
 @ServiceComponent(Component.QUERY_VIEW)
 public class HearingQueryView {
 
@@ -60,6 +60,8 @@ public class HearingQueryView {
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
     private static final String FIELD_ROOM_NAME = "roomName";
     private static final String FIELD_CASE_IDS = "caseIds";
+    private static final String FIELD_ROOM_ID = "roomId";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
 
     private static final String FIELD_CASE_ID = "caseId";
 
@@ -112,24 +114,32 @@ public class HearingQueryView {
                         hearingToCasesMap.get(hearing.getHearingId()).forEach(hearingCase ->
                                 caseIdsJsonArrayBuilder.add(hearingCase.getCaseId().toString()));
 
-                        hearingsJsonArrayBuilder.add(
-                                createObjectBuilder()
-                                        .add(FIELD_HEARING_ID, hearing.getHearingId().toString())
-                                        .add(FIELD_START_DATE, LocalDates.to(hearing.getStartDate()))
-                                        .add(FIELD_START_TIME, hearing.getStartTime().format(ISO_TIME))
-                                        .add(FIELD_HEARING_TYPE, hearing.getHearingType())
-                                        .add(FIELD_DURATION, hearing.getDuration())
-                                        .add(FIELD_COURT_CENTRE_NAME, hearing.getCourtCentreName() != null ? hearing.getCourtCentreName() : DEFAULT_COURT_CENTRE_NAME)
-                                        .add(FIELD_ROOM_NAME, hearing.getRoomName() != null ? hearing.getRoomName() : DEFAULT_ROOM_NAME)
-                                        .add(FIELD_CASE_IDS, caseIdsJsonArrayBuilder)
-                        );
-                    }
-            );
+                setHearingJsonArrayBuilder(hearingsJsonArrayBuilder, hearing, caseIdsJsonArrayBuilder);
+            });
         }
         return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARINGS)
                 .apply(createObjectBuilder()
                         .add(FIELD_HEARINGS, hearingsJsonArrayBuilder)
                         .build());
+    }
+
+    private void setHearingJsonArrayBuilder(final JsonArrayBuilder hearingsJsonArrayBuilder, final Hearing hearing, final JsonArrayBuilder caseIdsJsonArrayBuilder) {
+        final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
+                .add(FIELD_HEARING_ID, hearing.getHearingId().toString())
+                .add(FIELD_START_DATE, LocalDates.to(hearing.getStartDate()))
+                .add(FIELD_START_TIME, hearing.getStartTime().format(ISO_TIME))
+                .add(FIELD_HEARING_TYPE, hearing.getHearingType())
+                .add(FIELD_DURATION, hearing.getDuration())
+                .add(FIELD_COURT_CENTRE_NAME, hearing.getCourtCentreName() != null ? hearing.getCourtCentreName() : DEFAULT_COURT_CENTRE_NAME)
+                .add(FIELD_ROOM_NAME, hearing.getRoomName() != null ? hearing.getRoomName() : DEFAULT_ROOM_NAME)
+                .add(FIELD_CASE_IDS, caseIdsJsonArrayBuilder);
+        if (hearing.getRoomId() != null) {
+            jsonObjectBuilder.add(FIELD_ROOM_ID, hearing.getRoomId().toString());
+        }
+        if (hearing.getCourtCentreId() != null) {
+            jsonObjectBuilder.add(FIELD_COURT_CENTRE_ID, hearing.getCourtCentreId().toString());
+        }
+        hearingsJsonArrayBuilder.add(jsonObjectBuilder);
     }
 
     @Handles("hearing.get.hearings-by-caseid")
@@ -143,18 +153,8 @@ public class HearingQueryView {
 
         final JsonArrayBuilder hearingsJsonArrayBuilder = createArrayBuilder();
 
-        hearings.forEach(hearing ->
-                hearingsJsonArrayBuilder.add(
-                        createObjectBuilder()
-                                .add(FIELD_HEARING_ID, hearing.getHearingId().toString())
-                                .add(FIELD_START_DATE, LocalDates.to(hearing.getStartDate()))
-                                .add(FIELD_START_TIME, hearing.getStartTime().format(ISO_TIME))
-                                .add(FIELD_HEARING_TYPE, hearing.getHearingType())
-                                .add(FIELD_DURATION, hearing.getDuration())
-                                .add(FIELD_COURT_CENTRE_NAME, hearing.getCourtCentreName() != null ? hearing.getCourtCentreName() : DEFAULT_COURT_CENTRE_NAME)
-                                .add(FIELD_ROOM_NAME, hearing.getRoomName() != null ? hearing.getRoomName() : DEFAULT_ROOM_NAME)
-                                .add(FIELD_CASE_IDS, createArrayBuilder().add(caseId.toString()))
-                ));
+        hearings.forEach(hearing -> setHearingJsonArrayBuilder(hearingsJsonArrayBuilder, hearing,
+                        createArrayBuilder().add(caseId.toString())));
 
         return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARINGS)
                 .apply(createObjectBuilder()
@@ -194,7 +194,7 @@ public class HearingQueryView {
 
         final Map<DefenceCounsel, List<DefenceCounselDefendant>> defenceCounselsAndDefendantsMap = new HashMap<>();
 
-        for (DefenceCounsel defenceCounsel : defenceCounsels) {
+        for (final DefenceCounsel defenceCounsel : defenceCounsels) {
             defenceCounselsAndDefendantsMap.put(defenceCounsel,
                     defenceCounselService.getDefenceCounselDefendantsByDefenceCounselAttendeeId(defenceCounsel.getAttendeeId()));
         }

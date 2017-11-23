@@ -58,7 +58,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@SuppressWarnings("unused")
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandApiTest {
 
@@ -103,11 +102,14 @@ public class HearingCommandApiTest {
     @Mock
     private Sender sender;
 
-    @Spy
-    private Enveloper enveloper = createEnveloper();
+    @Mock
+    private JsonEnvelope envelope;
 
     @Spy
-    private Clock clock = new StoppedClock(ZonedDateTime.now());
+    private final Enveloper enveloper = createEnveloper();
+
+    @Spy
+    private final Clock clock = new StoppedClock(ZonedDateTime.now());
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> senderArgumentCaptor;

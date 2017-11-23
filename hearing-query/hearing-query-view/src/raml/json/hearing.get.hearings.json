@@ -8,6 +8,8 @@
       "duration": 1,
       "courtCentreName": "Liverpool",
       "roomName": "Room 1",
+      "roomId": "1daefec3-2f76-8109-82d9-2e60544a6c02",
+      "courtCentreId": "1daefec3-2f76-8109-82d9-2e60544a6c03",
       "caseIds": [
         "0161a828-cfd1-4608-8616-d92870baba3d",
         "1b8e3c17-a699-4798-80b8-5e6f72510473",
@@ -22,6 +24,8 @@
       "duration": 1,
       "courtCentreName": "Liverpool",
       "roomName": "Room 1",
+      "roomId": "1daefec3-2f76-8109-82d9-2e60544a6c04",
+      "courtCentreId": "1daefec3-2f76-8109-82d9-2e60544a6c05",
       "caseIds": [
         "ed0bbb23-533e-4dd5-82fc-2ad4edcdae6d"
       ]

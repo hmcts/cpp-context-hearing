@@ -33,6 +33,7 @@ import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
@@ -52,6 +53,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -94,7 +96,9 @@ public class HearingCommandHandlerTest {
     private static final String FIELD_DURATION = "duration";
     private static final String FIELD_HEARING_TYPE = "hearingType";
     private static final String FIELD_CASE_ID = "caseId";
+    private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_ROOM_NAME = "roomName";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
     private static final String FIELD_PERSON_ID = "personId";
     private static final String FIELD_ATTENDEE_ID = "attendeeId";
@@ -145,7 +149,9 @@ public class HearingCommandHandlerTest {
     private static final Integer DURATION = INTEGER.next();
     private static final String HEARING_TYPE = STRING.next();
     private static final UUID CASE_ID = randomUUID();
+    private static final UUID ROOM_ID = randomUUID();
     private static final String ROOM_NAME = STRING.next();
+    private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final String COURT_CENTRE_NAME = STRING.next();
     private static final String START_DATE = PAST_LOCAL_DATE.next().toString();
 
@@ -172,7 +178,7 @@ public class HearingCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(
+    private final Enveloper enveloper = createEnveloperWithEvents(
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
             RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
             HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class);
@@ -183,6 +189,7 @@ public class HearingCommandHandlerTest {
     @Before
     public void setup() {
         when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
+        when(eventSource.getStreamById(CASE_ID)).thenReturn(eventStream);
         when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
     }
 
@@ -233,14 +240,16 @@ public class HearingCommandHandlerTest {
                                 .withName(COURT_ASSIGNED_EVENT),
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
-                                withJsonPath("$.courtCentreName", equalTo(COURT_CENTRE_NAME))
+                                withJsonPath("$.courtCentreName", equalTo(COURT_CENTRE_NAME)),
+                                withJsonPath("$.courtCentreId", equalTo(COURT_CENTRE_ID.toString()))
                         ))).thatMatchesSchema(),
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(ROOM_BOOKED_EVENT),
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
-                                withJsonPath("$.roomName", equalTo(ROOM_NAME))
+                                withJsonPath("$.roomName", equalTo(ROOM_NAME)),
+                                withJsonPath("$.roomId", equalTo(ROOM_ID.toString()))
                         ))).thatMatchesSchema()
         ));
     }
@@ -507,6 +516,29 @@ public class HearingCommandHandlerTest {
         ));
     }
 
+    @Test
+    public void shouldRaiseHearingInitiatedEventFromAddHearingsWhenOnlyRequiredFieldsAreAvailable() throws Exception {
+        final JsonEnvelope command = createAddHearingsCommandWithOnlyRequiredFields();
+        hearingCommandHandler.addHearing(command);
+        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(HEARING_INITIATED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.startDateTime", is(ZonedDateTimes.toString(START_DATE_TIME))),
+                                withJsonPath("$.duration", equalTo(DURATION)),
+                                withJsonPath("$.hearingType", equalTo(HEARING_TYPE))
+                        ))).thatMatchesSchema(),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(CASE_ASSOCIATED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.caseId", equalTo(CASE_ID.toString()))
+                        ))).thatMatchesSchema()
+        ));
+    }
     private JsonEnvelope createInitiateHearingCommandWithOnlyRequiredFields() {
         return envelope()
                 .with(metadataWithRandomUUID(INITIATE_HEARING_COMMAND))
@@ -517,6 +549,16 @@ public class HearingCommandHandlerTest {
                 .build();
     }
 
+    private JsonEnvelope createAddHearingsCommandWithOnlyRequiredFields() {
+        final JsonObject hearing = createObjectBuilder().add(FIELD_GENERIC_ID, HEARING_ID.toString())
+                .add(FIELD_START_DATE_TIME, ZonedDateTimes.toString(START_DATE_TIME))
+                .add(FIELD_DURATION, DURATION)
+                .add(FIELD_HEARING_TYPE, HEARING_TYPE)
+                .build();
+        final JsonArray hearings = createArrayBuilder().add(hearing).build();
+        final JsonObject addHearings = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).add("hearings", hearings).build();
+        return new DefaultJsonEnvelope(metadataWithRandomUUID(INITIATE_HEARING_COMMAND).build(), addHearings);
+    }
     private JsonEnvelope createInitiateHearingCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(INITIATE_HEARING_COMMAND))
@@ -525,7 +567,9 @@ public class HearingCommandHandlerTest {
                 .withPayloadOf(DURATION, FIELD_DURATION)
                 .withPayloadOf(HEARING_TYPE, FIELD_HEARING_TYPE)
                 .withPayloadOf(CASE_ID, FIELD_CASE_ID)
+                .withPayloadOf(COURT_CENTRE_ID, FIELD_COURT_CENTRE_ID)
                 .withPayloadOf(COURT_CENTRE_NAME, FIELD_COURT_CENTRE_NAME)
+                .withPayloadOf(ROOM_ID, FIELD_ROOM_ID)
                 .withPayloadOf(ROOM_NAME, FIELD_ROOM_NAME)
                 .build();
     }
@@ -708,7 +752,7 @@ public class HearingCommandHandlerTest {
     }
 
     private JsonEnvelope createAddDefenceCounselCommand() {
-        JsonArrayBuilder defendantIdsBuilder = createArrayBuilder()
+        final JsonArrayBuilder defendantIdsBuilder = createArrayBuilder()
                 .add(createObjectBuilder().add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString()))
                 .add(createObjectBuilder().add(FIELD_DEFENDANT_ID, DEFENDANT_ID_2.toString()));
 

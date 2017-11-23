@@ -9,6 +9,23 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+
+import java.io.StringReader;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import javax.transaction.Transactional;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -27,23 +44,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
-import java.io.StringReader;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.transaction.Transactional;
-
-@SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
 
@@ -56,7 +56,9 @@ public class HearingEventListener {
     private static final String FIELD_DURATION = "duration";
     private static final String FIELD_HEARING_TYPE = "hearingType";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_ROOM_NAME = "roomName";
+    private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_START_DATE = "startDate";
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_PERSON_ID = "personId";
@@ -99,14 +101,15 @@ public class HearingEventListener {
         final Optional<Hearing> existingHearing = hearingRepository.getByHearingId(hearingId);
         final Hearing hearing = existingHearing.map(item ->
                 item.builder()
+                        .withHearingId(item.getHearingId())
                         .withStartDate(startDateTime.toLocalDate())
                         .withStartTime(startDateTime.toLocalTime())
                         .withDuration(duration)
                         .withHearingType(hearingType)
                         .build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, startDateTime.toLocalDate(), startDateTime.toLocalTime(),
-                                duration, null, hearingType, null));
+        new Hearing(hearingId, startDateTime.toLocalDate(), startDateTime.toLocalTime(), duration,
+                        null, hearingType, null));
 
         hearingRepository.save(hearing);
     }
@@ -117,14 +120,16 @@ public class HearingEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String courtCentreName = payload.getString(FIELD_COURT_CENTRE_NAME);
-
+        final UUID courtCentreId = getUUID(payload, FIELD_COURT_CENTRE_ID).orElse(null);
         final Optional<Hearing> existingHearing = hearingRepository.getByHearingId(hearingId);
 
         final Hearing hearing = existingHearing.map(item ->
-                item.builder().withCourtCentreName(courtCentreName).build())
+        item.builder().withHearingId(item.getHearingId()).withCourtCentreName(courtCentreName)
+                        .withCourtCentreId(courtCentreId)
+                        .build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, null, null, null, null, null,
-                                courtCentreName));
+        new Hearing.Builder().withHearingId(hearingId).withCourtCentreId(courtCentreId)
+                        .withCourtCentreName(courtCentreName).build());
 
         hearingRepository.save(hearing);
     }
@@ -135,14 +140,15 @@ public class HearingEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String roomName = payload.getString(FIELD_ROOM_NAME);
-
+        final UUID roomId = getUUID(payload, FIELD_ROOM_ID).orElse(null);
         final Optional<Hearing> existingHearing = hearingRepository.getByHearingId(hearingId);
 
         final Hearing hearing = existingHearing.map(item ->
-                item.builder().withRoomName(roomName).build())
+        item.builder().withHearingId(item.getHearingId()).withRoomName(roomName).withRoomId(roomId)
+                        .build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, null, null, null, roomName, null,
-                                null));
+        new Hearing.Builder().withHearingId(hearingId).withRoomId(roomId).withRoomName(roomName)
+                        .build());
 
         hearingRepository.save(hearing);
     }

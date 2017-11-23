@@ -16,6 +16,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.HearingDetails;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
@@ -33,15 +34,22 @@ import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ServiceComponent(COMMAND_HANDLER)
 public class HearingCommandHandler {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(HearingCommandHandler.class.getName());
 
     private static final String FIELD_HEARING_ID = "hearingId";
 
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_START_DATE = "startDate";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_COURT_ROOM_ID = "roomId";
     private static final String FIELD_ROOM_NAME = "roomName";
     private static final String FIELD_START_DATE_TIME = "startDateTime";
     private static final String FIELD_CASE_ID = "caseId";
@@ -65,6 +73,7 @@ public class HearingCommandHandler {
     private static final String FIELD_CLERK_OF_THE_COURT_ID = "clerkOfTheCourtId";
     private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME = "clerkOfTheCourtFirstName";
     private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME = "clerkOfTheCourtLastName";
+    private static final String FIELD_HEARINGS = "hearings";
 
     @Inject
     private EventSource eventSource;
@@ -82,12 +91,38 @@ public class HearingCommandHandler {
         final ZonedDateTime startDateTime = fromJsonString(payload.getJsonString(FIELD_START_DATE_TIME));
         final int duration = payload.getInt(FIELD_DURATION);
         final String hearingType = payload.getString(FIELD_HEARING_TYPE);
+        final UUID courtCentreId = getUUID(payload, FIELD_COURT_CENTRE_ID).orElse(null);
         final String courtCentreName = payload.getString(FIELD_COURT_CENTRE_NAME, null);
+        final UUID roomId = getUUID(payload, FIELD_COURT_ROOM_ID).orElse(null);
         final String roomName = payload.getString(FIELD_ROOM_NAME, null);
         final UUID caseId = getUUID(payload, FIELD_CASE_ID).orElse(null);
+        final HearingDetails hearingDetails = new HearingDetails.Builder().withHearingId(hearingId).withStartDateTime(startDateTime).withDuration(duration).withHearingType(hearingType)
+                .withCourtCentreId(courtCentreId).withCourtCentreName(courtCentreName).withRoomId(roomId).withRoomName(roomName).withCaseId(caseId).build();
 
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.initiateHearing(hearingId, startDateTime,
-                duration, hearingType, courtCentreName, roomName, caseId), command);
+        applyToHearingAggregate(hearingId, aggregate -> aggregate.initiateHearing(hearingDetails), command);
+    }
+
+    @Handles("hearing.add-hearings")
+    public void addHearing(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.trace("Processing  hearing.add-hearings event");
+        final JsonObject payload = command.payloadAsJsonObject();
+        final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
+        final JsonArray hearingsArray = payload.getJsonArray(FIELD_HEARINGS);
+        for (int i = 0; i < hearingsArray.size(); i++) {
+            final JsonObject hearing = hearingsArray.getJsonObject(i);
+            final UUID hearingId = fromString(hearing.getString(FIELD_GENERIC_ID));
+            final ZonedDateTime startDateTime = fromJsonString(hearing.getJsonString(FIELD_START_DATE_TIME));
+            final int duration = hearing.getInt(FIELD_DURATION);
+            final String hearingType = hearing.getString(FIELD_HEARING_TYPE);
+            final UUID courtCentreId = getUUID(payload, FIELD_COURT_CENTRE_ID).orElse(null);
+            final String courtCentreName = hearing.getString(FIELD_COURT_CENTRE_NAME, null);
+            final UUID roomId = getUUID(payload, FIELD_COURT_ROOM_ID).orElse(null);
+            final String roomName = hearing.getString(FIELD_ROOM_NAME, null);
+            final HearingDetails hearingDetails = new HearingDetails.Builder().withHearingId(hearingId).withStartDateTime(startDateTime).withDuration(duration).withHearingType(hearingType)
+                    .withCourtCentreId(courtCentreId).withCourtCentreName(courtCentreName).withRoomId(roomId).withRoomName(roomName).withCaseId(caseId).build();
+
+            applyToHearingAggregate(caseId, aggregate -> aggregate.initiateHearing(hearingDetails), command);
+        }
     }
 
     @Handles("hearing.allocate-court")

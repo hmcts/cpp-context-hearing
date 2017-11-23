@@ -7,17 +7,28 @@ import java.util.UUID;
 @Event("hearing.court-assigned")
 public class CourtAssigned {
 
-    private UUID hearingId;
+    private final UUID hearingId;
+    private final UUID courtCentreId;
+    private final String courtCentreName;
 
-    private String courtCentreName;
-
-    public CourtAssigned(UUID hearingId, String courtCentreName) {
+    public CourtAssigned(final UUID hearingId, final String courtCentreName) {
         this.hearingId = hearingId;
+        this.courtCentreName = courtCentreName;
+        this.courtCentreId = null;
+    }
+
+    public CourtAssigned(final UUID hearingId, final UUID courtCentreId, final String courtCentreName) {
+        this.hearingId = hearingId;
+        this.courtCentreId = courtCentreId;
         this.courtCentreName = courtCentreName;
     }
 
     public UUID getHearingId() {
         return hearingId;
+    }
+
+    public UUID getCourtCentreId() {
+        return courtCentreId;
     }
 
     public String getCourtCentreName() {

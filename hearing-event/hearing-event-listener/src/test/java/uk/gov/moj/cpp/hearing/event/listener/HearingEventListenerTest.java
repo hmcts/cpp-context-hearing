@@ -68,7 +68,9 @@ public class HearingEventListenerTest {
     private static final String FIELD_START_DATE_TIME = "startDateTime";
     private static final String FIELD_DURATION = "duration";
     private static final String FIELD_HEARING_TYPE = "hearingType";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_ROOM_NAME = "roomName";
     private static final String FIELD_START_DATE = "startDate";
     private static final String FIELD_CASE_ID = "caseId";
@@ -110,7 +112,9 @@ public class HearingEventListenerTest {
     private static final LocalTime START_TIME = START_DATE_TIME.toLocalTime();
     private static final Integer DURATION = INTEGER.next();
     private static final String HEARING_TYPE = STRING.next();
+    private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final String COURT_CENTRE_NAME = STRING.next();
+    private static final UUID ROOM_ID = randomUUID();
     private static final String ROOM_NAME = STRING.next();
 
     private static final ZonedDateTime START_DATE_TIME_2 = PAST_UTC_DATE_TIME.next();
@@ -265,6 +269,7 @@ public class HearingEventListenerTest {
         assertThat(actualHearing.getDuration(), is(nullValue()));
         assertThat(actualHearing.getHearingType(), is(nullValue()));
         assertThat(actualHearing.getCourtCentreName(), is(COURT_CENTRE_NAME));
+        assertThat(actualHearing.getCourtCentreId(), is(COURT_CENTRE_ID));
         assertThat(actualHearing.getRoomName(), is(nullValue()));
     }
 
@@ -302,6 +307,7 @@ public class HearingEventListenerTest {
         assertThat(actualHearing.getHearingType(), is(nullValue()));
         assertThat(actualHearing.getCourtCentreName(), is(nullValue()));
         assertThat(actualHearing.getRoomName(), is(ROOM_NAME));
+        assertThat(actualHearing.getRoomId(), is(ROOM_ID));
     }
 
     @Test
@@ -434,7 +440,7 @@ public class HearingEventListenerTest {
         assertThat(actualDefenceCounsel.getStatus(), is(STATUS));
 
 
-        InOrder inOrder = inOrder(defenceCounselDefendantRepository);
+        final InOrder inOrder = inOrder(defenceCounselDefendantRepository);
         inOrder.verify(defenceCounselDefendantRepository, times(2)).remove(defenceCounselDefendantRemoveArgumentCaptor.capture());
         final List<DefenceCounselDefendant> actualRemovedValues = defenceCounselDefendantRemoveArgumentCaptor.getAllValues();
         assertThat(actualRemovedValues, hasSize(2));
@@ -562,6 +568,7 @@ public class HearingEventListenerTest {
         return envelope()
                 .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
                 .withPayloadOf(COURT_CENTRE_NAME, FIELD_COURT_CENTRE_NAME)
+                .withPayloadOf(COURT_CENTRE_ID, FIELD_COURT_CENTRE_ID)
                 .build();
     }
 
@@ -569,6 +576,7 @@ public class HearingEventListenerTest {
         return envelope()
                 .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
                 .withPayloadOf(ROOM_NAME, FIELD_ROOM_NAME)
+                .withPayloadOf(ROOM_ID, FIELD_ROOM_ID)
                 .build();
     }
 

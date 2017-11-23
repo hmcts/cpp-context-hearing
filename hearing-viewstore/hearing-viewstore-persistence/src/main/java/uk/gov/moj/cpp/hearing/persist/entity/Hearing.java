@@ -26,11 +26,17 @@ public class Hearing {
     @Column(name = "duration")
     private Integer duration;
 
+    @Column(name = "roomid")
+    private UUID roomId;
+
     @Column(name = "roomname")
     private String roomName;
 
     @Column(name = "hearingtype")
     private String hearingType;
+
+    @Column(name = "courtcentreid")
+    private UUID courtCentreId;
 
     @Column(name = "courtcentrename")
     private String courtCentreName;
@@ -49,6 +55,18 @@ public class Hearing {
         this.roomName = roomName;
         this.hearingType = hearingType;
         this.courtCentreName = courtCentreName;
+    }
+
+    private Hearing(final Builder builder) {
+        this.hearingId = builder.hearingId;
+        this.startDate = builder.startDate;
+        this.startTime = builder.startTime;
+        this.duration = builder.duration;
+        this.roomId = builder.roomId;
+        this.roomName = builder.roomName;
+        this.hearingType = builder.hearingType;
+        this.courtCentreId = builder.courtCentreId;
+        this.courtCentreName = builder.courtCentreName;
     }
 
     public UUID getHearingId() {
@@ -79,31 +97,33 @@ public class Hearing {
         return courtCentreName;
     }
 
-    public Builder builder() {
-        return new Builder(getHearingId(), getStartDate(), getStartTime(), getDuration(), getRoomName(),
-                getHearingType(), getCourtCentreName());
+    public UUID getRoomId() {
+        return roomId;
     }
 
-    public class Builder {
-        private final UUID hearingId;
+    public UUID getCourtCentreId() {
+        return courtCentreId;
+    }
+
+    public Builder builder() {
+        // Ensure existing values are retained untill builder overrides it
+        return new Builder().withHearingId(getHearingId()).withStartTime(getStartTime())
+                        .withStartDate(getStartDate()).withDuration(getDuration())
+                        .withRoomId(getRoomId()).withRoomName(roomName)
+                        .withHearingType(getHearingType())
+                        .withCourtCentreId(getCourtCentreId()).withCourtCentreName(courtCentreName);
+    }
+
+    public static class Builder {
+        private UUID hearingId;
         private LocalDate startDate;
         private LocalTime startTime;
         private Integer duration;
+        private UUID roomId;
         private String roomName;
         private String hearingType;
+        private UUID courtCentreId;
         private String courtCentreName;
-
-        public Builder(final UUID hearingId, final LocalDate startDate, final LocalTime startTime,
-                       final Integer duration, final String roomName, final String hearingType,
-                       final String courtCentreName) {
-            this.hearingId = hearingId;
-            this.startDate = startDate;
-            this.startTime = startTime;
-            this.duration = duration;
-            this.roomName = roomName;
-            this.hearingType = hearingType;
-            this.courtCentreName = courtCentreName;
-        }
 
         public Builder withStartDate(final LocalDate startDate) {
             this.startDate = startDate;
@@ -120,6 +140,10 @@ public class Hearing {
             return this;
         }
 
+        public Builder withRoomId(final UUID roomId) {
+            this.roomId = roomId;
+            return this;
+        }
         public Builder withRoomName(final String roomName) {
             this.roomName = roomName;
             return this;
@@ -135,9 +159,17 @@ public class Hearing {
             return this;
         }
 
+        public Builder withCourtCentreId(final UUID courtCentreId) {
+            this.courtCentreId = courtCentreId;
+            return this;
+        }
+
+        public Builder withHearingId(final UUID hearingId) {
+            this.hearingId = hearingId;
+            return this;
+        }
         public Hearing build() {
-            return new Hearing(hearingId, startDate, startTime, duration, roomName, hearingType,
-                    courtCentreName);
+            return new Hearing(this);
         }
     }
 

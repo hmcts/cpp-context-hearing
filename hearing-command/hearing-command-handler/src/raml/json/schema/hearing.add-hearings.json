@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "caseId": {
+      "$ref":"#/definitions/uuidPattern"
+    },
+    "hearings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/hearing"
+      }
+    }
+  },
+  "required": [
+    "caseId",
+    "hearings"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref":"#/definitions/uuidPattern"
+        },
+        "hearingType": {
+          "type": "string"
+        },
+        "startDateTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "courtCentreId": {
+          "$ref":"#/definitions/uuidPattern"
+        },
+        "courtCentreName": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "roomId": {
+          "$ref":"#/definitions/uuidPattern"
+        },
+        "roomName": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "duration": {
+          "type": "integer"
+        },
+        "pleas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/plea"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "hearingType",
+        "startDateTime",
+        "duration"
+      ],
+      "additionalProperties": false
+    },
+    "plea": {
+      "type": "object",
+      "properties": {
+        "offenceId": {
+          "$ref":"#/definitions/uuidPattern"
+        },
+        "defendantId": {
+          "$ref":"#/definitions/uuidPattern"
+        },
+        "plea": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "offenceId",
+        "defendantId",
+        "plea"
+      ],
+      "additionalProperties": false
+    },
+    "uuidPattern":{
+      "type":"string",
+      "pattern":"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

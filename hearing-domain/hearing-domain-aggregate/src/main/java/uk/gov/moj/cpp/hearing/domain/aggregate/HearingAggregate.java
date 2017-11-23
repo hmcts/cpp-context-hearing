@@ -7,6 +7,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.domain.HearingDetails;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
@@ -31,25 +32,23 @@ public class HearingAggregate implements Aggregate {
 
     private UUID hearingId;
     private boolean resultsShared;
-    private Set<UUID> sharedResultIds = new HashSet<>();
+    private final Set<UUID> sharedResultIds = new HashSet<>();
 
-    public Stream<Object> initiateHearing(final UUID hearingId, final ZonedDateTime startDateTime,
-                                          final int duration, final String hearingType, final String courtCentreName,
-                                          final String roomName, final UUID caseId) {
+    public Stream<Object> initiateHearing(final HearingDetails hearingDetails) {
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        streamBuilder.add(new HearingInitiated(hearingId, startDateTime, duration, hearingType));
+        streamBuilder.add(new HearingInitiated(hearingDetails.getHearingId(), hearingDetails.getStartDateTime(), hearingDetails.getDuration(), hearingDetails.getHearingType()));
 
-        if (caseId != null) {
-            streamBuilder.add(new CaseAssociated(hearingId, caseId));
+        if (hearingDetails.getCaseId() != null) {
+            streamBuilder.add(new CaseAssociated(hearingDetails.getHearingId(), hearingDetails.getCaseId()));
         }
 
-        if (courtCentreName != null) {
-            streamBuilder.add(new CourtAssigned(hearingId, courtCentreName));
+        if (hearingDetails.getCourtCentreName() != null) {
+            streamBuilder.add(new CourtAssigned(hearingDetails.getHearingId(), hearingDetails.getCourtCentreId(), hearingDetails.getCourtCentreName()));
         }
 
-        if (roomName != null) {
-            streamBuilder.add(new RoomBooked(hearingId, roomName));
+        if (hearingDetails.getRoomName() != null) {
+            streamBuilder.add(new RoomBooked(hearingDetails.getHearingId(), hearingDetails.getRoomId(), hearingDetails.getRoomName()));
         }
 
         return apply(streamBuilder.build());
@@ -102,7 +101,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     @Override
-    public Object apply(Object event) {
+    public Object apply(final Object event) {
         return match(event).with(
                 when(HearingInitiated.class)
                         .apply(hearingInitiated -> this.hearingId = hearingInitiated.getHearingId()),
@@ -117,7 +116,7 @@ public class HearingAggregate implements Aggregate {
                 when(DefenceCounselAdded.class)
                         .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
                 when(ResultsShared.class)
-                        .apply(resultsShared -> recordSharedResults(resultsShared.getResultLines())),
+                        .apply(resultsSharedResult -> recordSharedResults(resultsSharedResult.getResultLines())),
                 when(ResultAmended.class)
                         .apply(this::recordAmendedResult),
                 otherwiseDoNothing()

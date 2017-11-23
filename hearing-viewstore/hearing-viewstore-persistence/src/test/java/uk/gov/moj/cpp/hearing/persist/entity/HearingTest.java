@@ -22,8 +22,10 @@ public class HearingTest {
     private static final LocalDate START_DATE = PAST_LOCAL_DATE.next();
     private static final LocalTime START_TIME = LocalTime.now();
     private static final Integer DURATION = INTEGER.next();
+    private static final UUID ROOM_ID = randomUUID();
     private static final String ROOM_NAME = STRING.next();
     private static final String HEARING_TYPE = STRING.next();
+    private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final String COURT_CENTRE_NAME = STRING.next();
 
     @Test
@@ -42,8 +44,10 @@ public class HearingTest {
         assertThat(actualHearing.getStartDate(), is(hearing.getStartDate()));
         assertThat(actualHearing.getStartTime(), is(hearing.getStartTime()));
         assertThat(actualHearing.getDuration(), is(hearing.getDuration()));
+        assertThat(actualHearing.getRoomId(), is(hearing.getRoomId()));
         assertThat(actualHearing.getRoomName(), is(hearing.getRoomName()));
         assertThat(actualHearing.getHearingType(), is(hearing.getHearingType()));
+        assertThat(actualHearing.getCourtCentreId(), is(hearing.getCourtCentreId()));
         assertThat(actualHearing.getCourtCentreName(), is(hearing.getCourtCentreName()));
     }
 
@@ -55,8 +59,10 @@ public class HearingTest {
                 .withStartDate(PAST_LOCAL_DATE.next())
                 .withStartTime(LocalTime.now().plusMinutes(1))
                 .withDuration(INTEGER.next())
+                .withRoomId(randomUUID())
                 .withRoomName(STRING.next())
                 .withHearingType(STRING.next())
+                .withCourtCentreId(randomUUID())
                 .withCourtCentreName(STRING.next())
                 .build();
 
@@ -65,13 +71,20 @@ public class HearingTest {
         assertThat(updatedHearing.getStartDate(), is(not(hearing.getStartDate())));
         assertThat(updatedHearing.getStartTime(), is(not(hearing.getStartTime())));
         assertThat(updatedHearing.getDuration(), is(not(hearing.getDuration())));
+        assertThat(updatedHearing.getRoomId(), is(not(hearing.getRoomId())));
         assertThat(updatedHearing.getRoomName(), is(not(hearing.getRoomName())));
         assertThat(updatedHearing.getHearingType(), is(not(hearing.getHearingType())));
+        assertThat(updatedHearing.getCourtCentreId(), is(not(hearing.getCourtCentreId())));
         assertThat(updatedHearing.getCourtCentreName(), is(not(hearing.getCourtCentreName())));
     }
 
     private Hearing getHearing() {
-        return new Hearing(HEARING_ID, START_DATE, START_TIME, DURATION, ROOM_NAME, HEARING_TYPE, COURT_CENTRE_NAME);
+        return new Hearing.Builder().withHearingId(HEARING_ID).withStartDate(START_DATE)
+                        .withStartTime(START_TIME).withDuration(DURATION).withRoomId(ROOM_ID)
+                        .withRoomName(ROOM_NAME).withHearingType(HEARING_TYPE)
+                        .withCourtCentreId(COURT_CENTRE_ID).withCourtCentreName(COURT_CENTRE_NAME)
+                        .build();
+
     }
 
 }

@@ -3,13 +3,16 @@ package uk.gov.moj.cpp.hearing.event;
 import static java.lang.String.format;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -18,7 +21,6 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
 public class HearingEventProcessor {
 
@@ -46,6 +48,7 @@ public class HearingEventProcessor {
 
     private static final String HEARING_QUERY = "hearing.get.hearing";
     private static final String CASE_QUERY = "structure.query.case";
+    private static final String COMMAND_ADD_HEARINGS = "hearing.add-hearings";
 
     @Inject
     private Enveloper enveloper;
@@ -79,6 +82,13 @@ public class HearingEventProcessor {
     @Handles("hearing.result-amended")
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
         sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
+    }
+
+    @Handles("public.hearing-added")
+    public void createAddHearingCommandFromSendCaseForListing(final JsonEnvelope event) {
+        LOGGER.trace("Received hearing-added public event, processing");
+        final Metadata metadata = metadataWithRandomUUID(COMMAND_ADD_HEARINGS).build();
+        sender.sendAsAdmin(new DefaultJsonEnvelope(metadata, ListingCaseToAddHearingConverter.transformListingCase(event)));
     }
 
     @Handles("hearing.hearing-event-logged")
@@ -151,7 +161,7 @@ public class HearingEventProcessor {
                 if (!caseResponsePayload.isEmpty()) {
                     caseUrn = caseResponsePayload.getString("urn");
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOGGER.error("error while query structure context for case detail for case id {}, hearing id {} :", caseId, hearingId, e);
             }
         }

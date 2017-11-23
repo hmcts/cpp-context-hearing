@@ -22,12 +22,16 @@ public class HearingView {
 
     private List<String> caseIds;
 
+    private String roomId;
+
+    private String courtCentreId;
+
 
     public String getHearingId() {
         return hearingId;
     }
 
-    public void setHearingId(String hearingId) {
+    public void setHearingId(final String hearingId) {
         this.hearingId = hearingId;
     }
 
@@ -41,7 +45,7 @@ public class HearingView {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(final LocalDate startDate) {
         this.startDate = startDate;
     }
 
@@ -49,7 +53,7 @@ public class HearingView {
         return duration;
     }
 
-    public void setDuration(Integer duration) {
+    public void setDuration(final Integer duration) {
         this.duration = duration;
     }
 
@@ -57,7 +61,7 @@ public class HearingView {
         return roomName;
     }
 
-    public void setRoomName(String roomName) {
+    public void setRoomName(final String roomName) {
         this.roomName = roomName;
     }
 
@@ -65,7 +69,7 @@ public class HearingView {
         return hearingType;
     }
 
-    public void setHearingType(String hearingType) {
+    public void setHearingType(final String hearingType) {
         this.hearingType = hearingType;
     }
 
@@ -73,7 +77,7 @@ public class HearingView {
         return courtCentreName;
     }
 
-    public void setCourtCentreName(String courtCentreName) {
+    public void setCourtCentreName(final String courtCentreName) {
         this.courtCentreName = courtCentreName;
     }
 
@@ -81,7 +85,7 @@ public class HearingView {
         return startTime;
     }
 
-    public void setStartTime(LocalTime startTime) {
+    public void setStartTime(final LocalTime startTime) {
         this.startTime = startTime;
     }
 
@@ -89,7 +93,23 @@ public class HearingView {
         return caseIds;
     }
 
-    public void setCaseIds(List<String> caseIds) {
+    public void setCaseIds(final List<String> caseIds) {
         this.caseIds = caseIds;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(final String roomId) {
+        this.roomId = roomId;
+    }
+
+    public String getCourtCentreId() {
+        return courtCentreId;
+    }
+
+    public void setCourtCentreId(final String courtCentreId) {
+        this.courtCentreId = courtCentreId;
     }
 }

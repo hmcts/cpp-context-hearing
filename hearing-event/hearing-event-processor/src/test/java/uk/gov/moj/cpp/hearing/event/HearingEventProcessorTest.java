@@ -12,8 +12,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -22,13 +22,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
-
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -48,7 +41,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-@SuppressWarnings({"unused", "unchecked"})
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventProcessorTest {
 
@@ -67,7 +67,7 @@ public class HearingEventProcessorTest {
     JsonEnvelope responseEnvelope;
 
     @Spy
-    private Enveloper enveloper = createEnveloper();
+    private final Enveloper enveloper = createEnveloper();
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
@@ -109,7 +109,14 @@ public class HearingEventProcessorTest {
 
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String FIELD_CASE_URN = "caseUrn";
-
+    private static final String FIELD_TYPE = "type";
+    private static final String FIELD_DURATION = "duration";
+    private static final String FIELD_HEARING_TYPE = "hearingType";
+    private static final String TYPE = "TRIAL";
+    private static final String FIELD_START_DATE_TIME = "startDateTime";
+    private static final String START_DATE_TIME = PAST_ZONED_DATE_TIME.next().toString();
+    private static final String FIELD_ESTIMATE_MINUTES = "estimateMinutes";
+    private static final int DURATION = 15;
     private static final UUID GENERIC_ID = randomUUID();
     private static final UUID LAST_SHARED_RESULT_ID = randomUUID();
     private static final String LEVEL = "OFFENCE";
@@ -345,6 +352,29 @@ public class HearingEventProcessorTest {
         verify(sender,times(0)).send(envelopeArgumentCaptor.capture());
     }
 
+    @Test
+    public void processHearingAddedPublicEvent() {
+        
+        hearingEventProcessor.createAddHearingCommandFromSendCaseForListing(getJsonHearingAddedEnvelope());
+        verify(sender).sendAsAdmin(envelopeArgumentCaptor.capture());
+        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("hearing.add-hearings"),
+                payloadIsJson(allOf(
+                                        withJsonPath(format("$.%s", FIELD_CASE_ID),
+                                                        equalTo(CASE_ID.toString())),
+                                        withJsonPath(format("$.%s[0].%s", "hearings",
+                                                        FIELD_GENERIC_ID),
+                                                        equalTo(GENERIC_ID.toString())),
+                                        withJsonPath(format("$.%s[0].%s", "hearings",
+                                                        FIELD_HEARING_TYPE), equalTo(TYPE)),
+                                        withJsonPath(format("$.%s[0].%s", "hearings",
+                                                        FIELD_DURATION), equalTo(DURATION))
+                                        
+                        )
+                )));
+    }
+
+
     private JsonEnvelope createResultsSharedEvent() {
         final JsonArray resultLines = createArrayBuilder().add(
                 createObjectBuilder()
@@ -420,4 +450,18 @@ public class HearingEventProcessorTest {
         when(responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
     }
 
+    private JsonEnvelope getJsonHearingAddedEnvelope() {
+        final JsonObjectBuilder hearing = createObjectBuilder();
+        hearing.add(FIELD_GENERIC_ID, GENERIC_ID.toString());
+        hearing.add(FIELD_TYPE, TYPE);
+        hearing.add(FIELD_START_DATE_TIME, START_DATE_TIME);
+        hearing.add(FIELD_ESTIMATE_MINUTES, DURATION);
+
+        final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
+                .add("hearing", hearing).build();
+
+        final Metadata metadata = metadataWithDefaults().build();
+        return new DefaultJsonEnvelope(metadata, jsonObject);
+
+    }
 }

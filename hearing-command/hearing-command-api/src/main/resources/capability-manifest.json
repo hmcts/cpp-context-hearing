@@ -59,6 +59,11 @@
       "name": "hearing.share-results",
       "type": "action",
       "action": "hearing.share-results"
+    },
+    {
+      "name": "hearing.add-hearings",
+      "type": "action",
+      "action": "hearing.add-hearings"
     }
   ]
 }

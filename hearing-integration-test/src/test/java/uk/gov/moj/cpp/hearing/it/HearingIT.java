@@ -36,19 +36,34 @@ import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.share
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithPauseAndResumeEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.manyRandomEvents;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubSetStatusForCapability;
-
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.common.io.Resources;
-import com.jayway.restassured.response.Response;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.json.JsonObject;
+
 import org.apache.http.HttpStatus;
+import org.hamcrest.core.AllOf;
+import org.hamcrest.core.IsEqual;
 import org.junit.Test;
+
+import com.google.common.io.Resources;
+import com.jayway.jsonpath.matchers.IsJson;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.response.Response;
+
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
 
 
 public class HearingIT extends AbstractIT {
@@ -110,7 +125,7 @@ public class HearingIT extends AbstractIT {
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
 
-        Response writeResponse = given().spec(requestSpec).and()
+        final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.initiate-hearing+json")
                 .body(Resources.toString(getResource("hearing.initiate-hearing.json"),
                         defaultCharset()).replace("RANDOM_CASE_ID", caseId)).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
@@ -461,6 +476,42 @@ public class HearingIT extends AbstractIT {
         thenHearingAmendedPublicEventShouldBePublished(hearingId, amendedResultForOffence);
     }
 
+    @Test
+    public void hearingAddHearingsTest() throws Exception {
+        final MessageProducer messageProducer = publicEvents.createProducer();
+        final String caseId = UUID.randomUUID().toString();
+        final String hearingId = UUID.randomUUID().toString();
+        final String userId = UUID.randomUUID().toString();
+        final String commandName = "public.hearing-added";
+        final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), commandName)
+                .withUserId(userId)
+                .build();
+        final JsonObject eventPayload = getSendCaseForListingPayload("public.hearing-added.json",
+                caseId, hearingId);
+        final MessageConsumer messageConsumer = publicEvents.createConsumer(commandName);
+        sendMessage(messageProducer, commandName, eventPayload, metadata);
+        final JsonPath message = retrieveMessage(messageConsumer);
+
+        assertThat(message.prettify(), new IsJson<String>(
+                        AllOf.allOf(
+                withJsonPath("$._metadata.name", IsEqual.equalTo(commandName)),
+                withJsonPath("$.hearing.id", IsEqual.equalTo(hearingId)),
+                withJsonPath("$.caseId", IsEqual.equalTo(caseId))
+        )));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId))
+                        )));
+    }
     private String createAddProsecutionCounselCommandPayload(final String personId, final String attendeeId, final String status) throws IOException {
         String addProsecutionCounselPayload = Resources.toString(
                 getResource("hearing.command.add-prosecution-counsel.json"),
@@ -496,5 +547,15 @@ public class HearingIT extends AbstractIT {
         return draftResultCommandPayload;
     }
 
+    private JsonObject getSendCaseForListingPayload(final String resource, final String caseId, final String hearingId) throws IOException {
+        String sendCaseForListingEventPayloadString = getStringFromResource(resource);
+        sendCaseForListingEventPayloadString = sendCaseForListingEventPayloadString.replace("RANDOM_CASE_ID", caseId);
+        sendCaseForListingEventPayloadString = sendCaseForListingEventPayloadString.replace("RANDOM_HEARING_ID", hearingId);
+        return new StringToJsonObjectConverter().convert(sendCaseForListingEventPayloadString);
+    }
 
+    private String getStringFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path),
+                defaultCharset());
+    }
 }

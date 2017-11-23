@@ -20,6 +20,15 @@
     "courtCentreName": {
       "type": "string"
     },
+    "roomName": {
+      "type": "string"
+    },
+    "roomId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "courtCentreId": {
+      "$ref": "#/definitions/uuid"
+    },
     "caseIds": {
       "type": "array",
       "items": {
