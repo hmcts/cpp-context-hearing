@@ -15,17 +15,17 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
 public class HearingEventProcessor {
 
-    private static final Logger LOGGER =
-           LoggerFactory.getLogger(HearingEventProcessor.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
 
     private static final String PUBLIC_HEARING_HEARING_INITIATED = "public.hearing.hearing-initiated";
     private static final String PUBLIC_HEARING_RESULTED = "public.hearing.resulted";
@@ -45,6 +45,9 @@ public class HearingEventProcessor {
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_CASE_URN = "caseUrn";
+    private static final String FIELD_CASE = "case";
+    private static final String FIELD_HEARING_EVENT_DEFINITION = "hearingEventDefinition";
+    private static final String FIELD_HEARING_EVENT = "hearingEvent";
 
     private static final String HEARING_QUERY = "hearing.get.hearing";
     private static final String CASE_QUERY = "structure.query.case";
@@ -62,7 +65,7 @@ public class HearingEventProcessor {
     @Handles("hearing.hearing-initiated")
     public void publishHearingInitiatedPublicEvent(final JsonEnvelope event) {
         final String hearingId = event.payloadAsJsonObject().getString(FIELD_HEARING_ID);
-        final JsonObject payload = Json.createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build();
+        final JsonObject payload = createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build();
         sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_INITIATED).apply(payload));
     }
 
@@ -75,7 +78,7 @@ public class HearingEventProcessor {
     @Handles("hearing.adjourn-date-updated")
     public void publishHearingDateAdjournedPublicEvent(final JsonEnvelope event) {
         final String startDate = event.payloadAsJsonObject().getString("startDate");
-        final JsonObject payload = Json.createObjectBuilder().add("startDate", startDate).build();
+        final JsonObject payload = createObjectBuilder().add("startDate", startDate).build();
         sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_ADJOURNED).apply(payload));
     }
 
@@ -104,33 +107,34 @@ public class HearingEventProcessor {
         final String caseUrn = getCaseUrn(event);
 
         if (caseUrn != null) {
-            if (lastHearingEventId == null) {
-                final JsonObject payload = Json.createObjectBuilder().add(FIELD_EVENT_TIME, eventTime)
-                        .add(FIELD_RECORDED_LABEL, recordedLabel)
-                        .add(FIELD_HEARING_DEFINITION_ID, hearingEventDefinitionId)
-                        .add(FIELD_HEARING_EVENT_ID, hearingEventId)
-                        .add(FIELD_CASE_URN, caseUrn)
-                        .add(FIELD_LAST_MODIFIED_TIME, lastModifiedTime)
-                        .add(FIELD_PRIORITY, priority).build();
-                LOGGER.debug(format("'public.hearing-event-logged' event published %s", payload));
-                sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_EVENT_LOGGED).apply(payload));
-            } else {
-                final JsonObject payload = Json.createObjectBuilder().add(FIELD_EVENT_TIME, eventTime)
-                        .add(FIELD_RECORDED_LABEL, recordedLabel)
-                        .add(FIELD_HEARING_DEFINITION_ID, hearingEventDefinitionId)
-                        .add(FIELD_HEARING_EVENT_ID, hearingEventId)
-                        .add(FIELD_LAST_HEARING_EVENT_ID, lastHearingEventId)
-                        .add(FIELD_CASE_URN, caseUrn)
-                        .add(FIELD_LAST_MODIFIED_TIME, lastModifiedTime)
-                        .add(FIELD_PRIORITY, priority).build();
+            final JsonObjectBuilder hearingEventJsonBuilder = createObjectBuilder()
+                    .add(FIELD_HEARING_EVENT_ID, hearingEventId)
+                    .add(FIELD_RECORDED_LABEL, recordedLabel)
+                    .add(FIELD_EVENT_TIME, eventTime)
+                    .add(FIELD_LAST_MODIFIED_TIME, lastModifiedTime);
+            if (null != lastHearingEventId) {
+                hearingEventJsonBuilder.add(FIELD_LAST_HEARING_EVENT_ID, lastHearingEventId);
+            }
 
-                LOGGER.debug(format("'public.hearing-event-timestamp-corrected' event published %s", payload));
+            final JsonObjectBuilder hearingEventPayloadBuilder = createObjectBuilder()
+                    .add(FIELD_CASE, createObjectBuilder().add(FIELD_CASE_URN, caseUrn))
+                    .add(FIELD_HEARING_EVENT_DEFINITION, createObjectBuilder()
+                            .add(FIELD_HEARING_DEFINITION_ID, hearingEventDefinitionId)
+                            .add(FIELD_PRIORITY, priority))
+                    .add(FIELD_HEARING_EVENT, hearingEventJsonBuilder);
+
+            if (null != lastHearingEventId) {
+                final JsonObject payload = hearingEventPayloadBuilder.build();
+                LOGGER.debug("public.hearing-event-timestamp-corrected event published {}", payload);
                 sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_TIMESTAMP_CORRECTED).apply(payload));
+            } else {
+                final JsonObject payload = hearingEventPayloadBuilder.build();
+                LOGGER.debug("public.hearing-event-logged event published {}", payload);
+                sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_EVENT_LOGGED).apply(payload));
             }
         } else {
-            LOGGER.error("case URN is null for hearingId {}  and hearingEventId {}" ,event.payloadAsJsonObject().getString(FIELD_HEARING_ID), hearingEventId);
+            LOGGER.error("case urn is null for hearingId {} and hearingEventId {}", event.payloadAsJsonObject().getString(FIELD_HEARING_ID), hearingEventId);
         }
-
     }
 
     private String getCaseUrn(final JsonEnvelope event) {
@@ -161,8 +165,8 @@ public class HearingEventProcessor {
                 if (!caseResponsePayload.isEmpty()) {
                     caseUrn = caseResponsePayload.getString("urn");
                 }
-            } catch (final Exception e) {
-                LOGGER.error("error while query structure context for case detail for case id {}, hearing id {} :", caseId, hearingId, e);
+            } catch (final RuntimeException e) {
+                LOGGER.error("Could not find case details for case id {}, hearing id {}:", caseId, hearingId, e);
             }
         }
         return caseUrn;

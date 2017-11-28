@@ -2,44 +2,83 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "hearingEventId": {
-      "$ref": "#/definitions/uuid"
+    "case": {
+      "$ref": "#/definitions/case"
     },
-    "hearingEventDefinitionId": {
-      "$ref": "#/definitions/uuid"
+    "hearingEventDefinition": {
+      "$ref": "#/definitions/hearingEventDefinition"
     },
-    "recordedLabel": {
-      "type": "string"
-    },
-    "eventTime": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "lastModifiedTime": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "caseUrn": {
-      "type": "string"
-    },
-    "priority": {
-      "type": "boolean"
+    "hearingEvent": {
+      "$ref": "#/definitions/hearingEvent"
     }
   },
   "additionalProperties": false,
   "required": [
-    "hearingEventId",
-    "hearingEventDefinitionId",
-    "recordedLabel",
-    "eventTime",
-    "lastModifiedTime",
-    "caseUrn",
-    "priority"
+    "case",
+    "hearingEventDefinition",
+    "hearingEvent"
   ],
   "definitions": {
     "uuid": {
       "type": "string",
       "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "case": {
+      "type": "object",
+      "properties": {
+        "caseUrn": {
+          "type": "string",
+          "minLength": 11,
+          "maxLength": 11
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "caseUrn"
+      ]
+    },
+    "hearingEventDefinition": {
+      "type": "object",
+      "properties": {
+        "hearingEventDefinitionId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "priority": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hearingEventDefinitionId",
+        "priority"
+      ]
+    },
+    "hearingEvent": {
+      "type": "object",
+      "properties": {
+        "hearingEventId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "recordedLabel": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "eventTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastModifiedTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "hearingEventId",
+        "recordedLabel",
+        "eventTime",
+        "lastModifiedTime"
+      ]
     }
   }
 }
