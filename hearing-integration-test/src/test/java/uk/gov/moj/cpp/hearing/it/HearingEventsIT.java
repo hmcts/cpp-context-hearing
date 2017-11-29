@@ -1,17 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.jayway.restassured.response.Response;
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
-import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
-
-import javax.jms.MessageConsumer;
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -21,8 +9,8 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearin
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldNotBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventTimeStampCorrectedPublicEventShouldBePublished;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingIsNotStarted;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingHasInitiated;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingIsNotStarted;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andLogsAnotherEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andUserLogsAnEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventAlterableFlagIs;
@@ -54,6 +42,20 @@ import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.identifyDefendantEvent;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.mitigationEvent;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
+import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
+
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import javax.jms.MessageConsumer;
+
+import com.jayway.restassured.response.Response;
+import org.junit.Test;
 
 public class HearingEventsIT extends AbstractIT {
 
@@ -100,7 +102,7 @@ public class HearingEventsIT extends AbstractIT {
 
         thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
 
-        andHearingEventLoggedPublicEventShouldNotBePublished(messageConsumer, hearingStartedEvent);
+        andHearingEventLoggedPublicEventShouldNotBePublished(messageConsumer);
     }
 
     @Test
