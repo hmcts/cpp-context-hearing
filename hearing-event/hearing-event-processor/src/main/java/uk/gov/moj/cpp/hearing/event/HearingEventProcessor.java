@@ -1,18 +1,22 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static java.lang.String.format;
+import static java.util.UUID.fromString;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.external.domain.listing.Hearing;
+import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
+
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -42,8 +46,6 @@ public class HearingEventProcessor {
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_ALTERABLE = "alterable";
     private static final String FIELD_PRIORITY = "priority";
-    private static final String FIELD_HEARING_ID = "hearingId";
-    private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_CASE_URN = "caseUrn";
     private static final String FIELD_CASE = "case";
     private static final String FIELD_HEARING_EVENT_DEFINITION = "hearingEventDefinition";
@@ -51,7 +53,14 @@ public class HearingEventProcessor {
 
     private static final String HEARING_QUERY = "hearing.get.hearing";
     private static final String CASE_QUERY = "structure.query.case";
-    private static final String COMMAND_ADD_HEARINGS = "hearing.add-hearings";
+    private static final String HEARING_INITIATE_HEARING = "hearing.initiate-hearing";
+    private static final String HEARING_PLEA_ADD = "hearing.plea-add";
+    private static final String HEARING_PLEA_CHANGE = "hearing.plea-change";
+
+    private static final String FIELD_HEARING_ID = "hearingId";
+
+    private static final String FIELD_CASE_ID = "caseId";
+    private static final String FIELD_HEARING = "hearing";
 
     @Inject
     private Enveloper enveloper;
@@ -62,36 +71,64 @@ public class HearingEventProcessor {
     @Inject
     private Requester requester;
 
+    @Inject
+    JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Inject
+    ObjectToJsonValueConverter objectToJsonValueConverter;
+
     @Handles("hearing.hearing-initiated")
     public void publishHearingInitiatedPublicEvent(final JsonEnvelope event) {
         final String hearingId = event.payloadAsJsonObject().getString(FIELD_HEARING_ID);
         final JsonObject payload = createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build();
-        sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_INITIATED).apply(payload));
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_INITIATED).apply(payload));
     }
 
     @Handles("hearing.results-shared")
     public void publishHearingResultsSharedPublicEvent(final JsonEnvelope event) {
         LOGGER.debug(format("'public.hearing.resulted' event received %s", event.payloadAsJsonObject()));
-        sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(event.payloadAsJsonObject()));
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.adjourn-date-updated")
     public void publishHearingDateAdjournedPublicEvent(final JsonEnvelope event) {
         final String startDate = event.payloadAsJsonObject().getString("startDate");
         final JsonObject payload = createObjectBuilder().add("startDate", startDate).build();
-        sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_ADJOURNED).apply(payload));
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_ADJOURNED).apply(payload));
     }
 
     @Handles("hearing.result-amended")
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
-        sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
     }
 
-    @Handles("public.hearing-added")
-    public void createAddHearingCommandFromSendCaseForListing(final JsonEnvelope event) {
-        LOGGER.trace("Received hearing-added public event, processing");
-        final Metadata metadata = metadataWithRandomUUID(COMMAND_ADD_HEARINGS).build();
-        sender.sendAsAdmin(new DefaultJsonEnvelope(metadata, ListingCaseToAddHearingConverter.transformListingCase(event)));
+    @Handles("hearing.confirmed-recorded")
+    public void createInitiateHearingCommandFromHearingConfirmedRecorded(final JsonEnvelope event) {
+        LOGGER.trace("Received hearing.confirmed-recorded event, processing");
+        final JsonObject payload = event.payloadAsJsonObject();
+        final Hearing hearing = this.jsonObjectToObjectConverter.convert(payload.getJsonObject(FIELD_HEARING),Hearing.class);
+        final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
+
+        final InitiateHearingCommand initiateHearingCommand =
+                        getInitiateHearingCommand(caseId, hearing);
+
+
+        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
+                .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));;
+    }
+    @Handles("hearing.case.plea-added")
+    public void createHearingPleaAddFromPleaAdded(final JsonEnvelope event) {
+        LOGGER.trace("Received plea-added event, processing");
+        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_ADD)
+                .apply(event.payloadAsJsonObject()));;
+
+    }
+    @Handles("hearing.case.plea-changed")
+    public void createHearingPleaChangeFromPleaAdded(final JsonEnvelope event) {
+        LOGGER.trace("Received plea-changed event, processing");
+        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_CHANGE)
+                .apply(event.payloadAsJsonObject()));;
+
     }
 
     @Handles("hearing.hearing-event-logged")
@@ -126,11 +163,11 @@ public class HearingEventProcessor {
             if (null != lastHearingEventId) {
                 final JsonObject payload = hearingEventPayloadBuilder.build();
                 LOGGER.debug("public.hearing-event-timestamp-corrected event published {}", payload);
-                sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_TIMESTAMP_CORRECTED).apply(payload));
+                this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_TIMESTAMP_CORRECTED).apply(payload));
             } else {
                 final JsonObject payload = hearingEventPayloadBuilder.build();
                 LOGGER.debug("public.hearing-event-logged event published {}", payload);
-                sender.send(enveloper.withMetadataFrom(event, PUBLIC_HEARING_EVENT_LOGGED).apply(payload));
+                this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_EVENT_LOGGED).apply(payload));
             }
         } else {
             LOGGER.error("case urn is null for hearingId {} and hearingEventId {}", event.payloadAsJsonObject().getString(FIELD_HEARING_ID), hearingEventId);
@@ -141,26 +178,26 @@ public class HearingEventProcessor {
         String caseUrn = null;
         final String hearingId = event.payloadAsJsonObject().getString(FIELD_HEARING_ID);
         //get caseId from hearing
-        final JsonEnvelope hearingQuery = enveloper.withMetadataFrom(event, HEARING_QUERY).apply(
+        final JsonEnvelope hearingQuery = this.enveloper.withMetadataFrom(event, HEARING_QUERY).apply(
                 createObjectBuilder()
                         .add(FIELD_HEARING_ID, hearingId)
                         .build()
         );
 
-        final JsonObject hearingResponsePayload = requester.request(hearingQuery).payloadAsJsonObject();
+        final JsonObject hearingResponsePayload = this.requester.request(hearingQuery).payloadAsJsonObject();
 
         if (!hearingResponsePayload.isEmpty()) {
             final String caseId = hearingResponsePayload.getJsonArray("caseIds").getString(0);
 
             //get caseUrn from case
-            final JsonEnvelope caseQuery = enveloper.withMetadataFrom(event, CASE_QUERY).apply(
+            final JsonEnvelope caseQuery = this.enveloper.withMetadataFrom(event, CASE_QUERY).apply(
                     createObjectBuilder()
                             .add(FIELD_CASE_ID, caseId)
                             .build()
             );
 
             try {
-                final JsonObject caseResponsePayload = requester.request(caseQuery).payloadAsJsonObject();
+                final JsonObject caseResponsePayload = this.requester.request(caseQuery).payloadAsJsonObject();
 
                 if (!caseResponsePayload.isEmpty()) {
                     caseUrn = caseResponsePayload.getString("urn");
@@ -172,4 +209,20 @@ public class HearingEventProcessor {
         return caseUrn;
     }
 
+    private InitiateHearingCommand getInitiateHearingCommand(final UUID caseId,
+                    final Hearing hearing) {
+        final InitiateHearingCommand command = new InitiateHearingCommand();
+        command.setHearingId(hearing.getId());
+        command.setCaseId(caseId);
+        command.setCourtCentreId(hearing.getCourtCentreId() == null ? null
+                        : UUID.fromString(hearing.getCourtCentreId()));
+        command.setRoomId(hearing.getCourtRoomId() == null ? null
+                        : UUID.fromString(hearing.getCourtRoomId()));
+        command.setCourtCentreName(hearing.getCourtCentreName());
+        command.setRoomName(hearing.getCourtRoomName());
+        command.setDuration(hearing.getEstimateMinutes());
+        command.setHearingType(hearing.getType());
+        command.setStartDateTime(hearing.getStartDateTime());
+        return command;
+    }
 }

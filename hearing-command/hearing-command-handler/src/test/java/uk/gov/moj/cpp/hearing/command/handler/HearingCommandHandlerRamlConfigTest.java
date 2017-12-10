@@ -30,6 +30,7 @@ public class HearingCommandHandlerRamlConfigTest {
     @Before
     public void setup() {
         handlerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingCommandHandler.class);
+        handlerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(ListingCommandHandler.class));
         eventHandlerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingEventCommandHandler.class);
     }
 
@@ -40,7 +41,7 @@ public class HearingCommandHandlerRamlConfigTest {
         final List<String> ramlActionNames = allLines.stream()
                 .filter(action -> !action.isEmpty())
                 .filter(line -> line.contains(CONTENT_TYPE_PREFIX) && line.contains(COMMAND_NAME))
-                .map(line -> line.replaceAll("(application/vnd\\.)|(\\+json:)","").trim())
+                .map(line -> line.replaceAll("(application/vnd\\.)|(\\+json:)", "").trim())
                 .collect(Collectors.toList());
 
         final List<String> allHandlerNames = concat(handlerMethodsToHandlerNames.values().stream(), eventHandlerMethodsToHandlerNames.values().stream()).collect(toList());

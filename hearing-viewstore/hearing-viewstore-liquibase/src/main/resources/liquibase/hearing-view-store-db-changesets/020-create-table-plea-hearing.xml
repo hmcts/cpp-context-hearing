@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="20" author="CCR" logicalFilePath="020-create-table-plea-hearing.xml">
+        <createTable tableName="plea_hearing">
+            <column name="plea_id" type="uuid">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="hearing_id" type="uuid"/>
+            <column name="case_id" type="uuid"/>
+            <column name="defendant_id" type="uuid"/>
+            <column name="offence_id" type="uuid"/>
+            <column name="person_id" type="uuid"/>
+            <column name="value" type="VARCHAR(255)"/>
+            <column name="plea_date" type="date"/>
+        </createTable>
+
+        <createIndex tableName="plea_hearing" indexName="plea_hearing_case_id_idx">
+            <column name="case_id"/>
+        </createIndex>
+
+    </changeSet>
+</databaseChangeLog>

@@ -68,5 +68,10 @@
             <artifactId>hamcrest-library</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-domain-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

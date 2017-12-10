@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ResultLine {
@@ -91,30 +90,39 @@ public class ResultLine {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ResultLine)) return false;
+        if (this == o) { return true; }
+        if (!(o instanceof ResultLine)) { return false; }
 
         ResultLine that = (ResultLine) o;
 
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
-        if (lastSharedResultId != null ? !lastSharedResultId.equals(that.lastSharedResultId) : that.lastSharedResultId != null)
+        if (id != null ? !id.equals(that.id) : that.id != null) { return false; }
+        if (lastSharedResultId != null ? !lastSharedResultId.equals(that.lastSharedResultId) : that.lastSharedResultId != null) {
             return false;
-        if (caseId != null ? !caseId.equals(that.caseId) : that.caseId != null) return false;
-        if (personId != null ? !personId.equals(that.personId) : that.personId != null)
+        }
+        if (caseId != null ? !caseId.equals(that.caseId) : that.caseId != null) { return false; }
+        if (personId != null ? !personId.equals(that.personId) : that.personId != null) {
             return false;
-        if (offenceId != null ? !offenceId.equals(that.offenceId) : that.offenceId != null)
+        }
+        if (offenceId != null ? !offenceId.equals(that.offenceId) : that.offenceId != null) {
             return false;
-        if (level != null ? !level.equals(that.level) : that.level != null) return false;
-        if (resultLabel != null ? !resultLabel.equals(that.resultLabel) : that.resultLabel != null)
+        }
+        if (level != null ? !level.equals(that.level) : that.level != null) { return false; }
+        if (resultLabel != null ? !resultLabel.equals(that.resultLabel) : that.resultLabel != null) {
             return false;
-        if (prompts != null ? !prompts.equals(that.prompts) : that.prompts != null) return false;
-        if (court != null ? !court.equals(that.court) : that.court != null) return false;
-        if (courtRoom != null ? !courtRoom.equals(that.courtRoom) : that.courtRoom != null)
+        }
+        if (prompts != null ? !prompts.equals(that.prompts) : that.prompts != null) {
             return false;
-        if (clerkOfTheCourtId != null ? !clerkOfTheCourtId.equals(that.clerkOfTheCourtId) : that.clerkOfTheCourtId != null)
+        }
+        if (court != null ? !court.equals(that.court) : that.court != null) { return false; }
+        if (courtRoom != null ? !courtRoom.equals(that.courtRoom) : that.courtRoom != null) {
             return false;
-        if (clerkOfTheCourtFirstName != null ? !clerkOfTheCourtFirstName.equals(that.clerkOfTheCourtFirstName) : that.clerkOfTheCourtFirstName != null)
+        }
+        if (clerkOfTheCourtId != null ? !clerkOfTheCourtId.equals(that.clerkOfTheCourtId) : that.clerkOfTheCourtId != null) {
             return false;
+        }
+        if (clerkOfTheCourtFirstName != null ? !clerkOfTheCourtFirstName.equals(that.clerkOfTheCourtFirstName) : that.clerkOfTheCourtFirstName != null) {
+            return false;
+        }
         return clerkOfTheCourtLastName != null ? clerkOfTheCourtLastName.equals(that.clerkOfTheCourtLastName) : that.clerkOfTheCourtLastName == null;
     }
 

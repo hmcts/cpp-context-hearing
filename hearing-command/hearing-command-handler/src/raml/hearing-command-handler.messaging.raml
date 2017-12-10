@@ -53,6 +53,18 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.command.share-results.json
             schema:  !include json/schema/hearing.command.share-results.json
 
-        application/vnd.hearing.add-hearings+json:
-            example: !include json/hearing.add-hearings.json
-            schema:  !include json/schema/hearing.add-hearings.json
+        application/vnd.record-hearing-confirmed+json:
+            example: !include json/record-hearing-confirmed.json
+            schema:  !include json/schema/record-hearing-confirmed.json
+
+        application/vnd.hearing.update-plea+json:
+            example: !include json/hearing.update-plea.json
+            schema:  !include json/schema/hearing.update-plea.json
+
+        application/vnd.hearing.plea-add+json:
+            example: !include json/hearing.plea-add.json
+            schema:  !include json/schema/hearing.plea-add.json
+
+        application/vnd.hearing.plea-change+json:
+            example: !include json/hearing.plea-change.json
+            schema:  !include json/schema/hearing.plea-change.json

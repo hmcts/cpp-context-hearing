@@ -13,12 +13,12 @@ public class DraftResultSaved {
     private final UUID hearingId;
 
     public DraftResultSaved(
-                            final UUID targetId,
-                            final UUID defendantId,
-                            final UUID offenceId,
-                            final String draftResult,
-                            final UUID hearingId
-                            ) {
+            final UUID targetId,
+            final UUID defendantId,
+            final UUID offenceId,
+            final String draftResult,
+            final UUID hearingId
+    ) {
         this.targetId = targetId;
         this.defendantId = defendantId;
         this.offenceId = offenceId;

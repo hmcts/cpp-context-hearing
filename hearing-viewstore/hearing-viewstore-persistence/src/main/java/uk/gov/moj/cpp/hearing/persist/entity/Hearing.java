@@ -108,10 +108,10 @@ public class Hearing {
     public Builder builder() {
         // Ensure existing values are retained untill builder overrides it
         return new Builder().withHearingId(getHearingId()).withStartTime(getStartTime())
-                        .withStartDate(getStartDate()).withDuration(getDuration())
-                        .withRoomId(getRoomId()).withRoomName(roomName)
-                        .withHearingType(getHearingType())
-                        .withCourtCentreId(getCourtCentreId()).withCourtCentreName(courtCentreName);
+                .withStartDate(getStartDate()).withDuration(getDuration())
+                .withRoomId(getRoomId()).withRoomName(roomName)
+                .withHearingType(getHearingType())
+                .withCourtCentreId(getCourtCentreId()).withCourtCentreName(courtCentreName);
     }
 
     public static class Builder {
@@ -144,6 +144,7 @@ public class Hearing {
             this.roomId = roomId;
             return this;
         }
+
         public Builder withRoomName(final String roomName) {
             this.roomName = roomName;
             return this;
@@ -168,6 +169,7 @@ public class Hearing {
             this.hearingId = hearingId;
             return this;
         }
+
         public Hearing build() {
             return new Hearing(this);
         }

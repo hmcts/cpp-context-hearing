@@ -8,8 +8,12 @@
     "courtCentreName": "Liverpool Crown Court",
     "courtRoomId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
     "courtRoomName": "3",
-    "judgeId": "b9e23e2b-c3ff-42cc-a884-18868fec6445",
-    "judgeName": "HHJ Neil Flewitt",
+    "judge": {
+      "id": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "title": "HHJ",
+      "firstName": "Neil",
+      "lastName": "Flewitt"
+    },
     "startDateTime": "2016-06-01T10:00:00Z",
     "notBefore": true,
     "estimateMinutes": 7200,
@@ -33,6 +37,34 @@
               "title": "Wounding with intent",
               "legislation": "legislation"
             }
+          }
+        ]
+      },
+      {
+        "id": "0baecac5-222b-402d-9047-84803679edac",
+        "personId": "0baecac5-222b-402d-9047-84803679edad",
+        "firstName": "David",
+        "lastName": "Lloyd",
+        "dateOfBirth": "1995-03-23",
+        "bailStatus": "inCustody",
+        "custodyTimeLimit": "2018-01-30",
+        "defenceOrganisation": "Solicitor XYZ",
+        "offences": [
+          {
+            "id": "0baecac5-222b-402d-9047-84803679edad",
+            "offenceCode": "OF61131",
+            "startDate": "2016-06-21",
+            "endDate": "2017-08-01",
+            "statementOfOffence": {
+              "title": "murder",
+              "legislation": "legislation"
+            }
+          },
+          {
+            "id": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+            "offenceCode": "OF61131",
+            "startDate": "2016-06-21",
+            "endDate": "2017-08-01"
           }
         ]
       }

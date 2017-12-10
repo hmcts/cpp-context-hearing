@@ -31,6 +31,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.adjourn-date+json
             name: hearing.adjourn-date
+        (mapping):
+            requestType: application/vnd.hearing.update-plea+json
+            name: hearing.update-plea
         ...
       body:
         application/vnd.hearing.initiate-hearing+json:
@@ -73,6 +76,11 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.adjourn-date.json
             schema:
              !include json/schema/hearing.adjourn-date.json
+        application/vnd.hearing.update-plea+json:
+            example:
+             !include json/hearing.update-plea.json
+            schema:
+             !include json/schema/hearing.update-plea.json
       responses:
             202:
                 description: OK

@@ -35,42 +35,47 @@ public class HearingCommandApi {
 
     @Handles("hearing.initiate-hearing")
     public void initiateHearing(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.allocate-court")
     public void allocateCourt(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.book-room")
     public void bookRoom(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.add-case")
     public void addCase(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.adjourn-date")
     public void adjournHearingDate(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.add-defence-counsel")
     public void addDefenceCounsel(final JsonEnvelope envelope) {
-        sender.send(envelope);
+        this.sender.send(envelope);
+    }
+
+    @Handles("hearing.update-plea")
+    public void updatePlea(final JsonEnvelope envelope) {
+        this.sender.send(envelope);
     }
 
     @Handles(COMMAND_SHARE_RESULTS)
@@ -78,9 +83,9 @@ public class HearingCommandApi {
         final JsonObject payload = command.payloadAsJsonObject();
         final JsonObjectBuilder payloadWithSharedTime = createObjectBuilder()
                 .add(FIELD_HEARING_ID, payload.getString(FIELD_HEARING_ID))
-                .add(FIELD_SHARED_TIME, ZonedDateTimes.toString(clock.now()))
+                .add(FIELD_SHARED_TIME, ZonedDateTimes.toString(this.clock.now()))
                 .add(FIELD_RESULT_LINES, payload.getJsonArray(FIELD_RESULT_LINES));
 
-        sender.send(enveloper.withMetadataFrom(command, "hearing.command.share-results").apply(payloadWithSharedTime.build()));
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.share-results").apply(payloadWithSharedTime.build()));
     }
 }

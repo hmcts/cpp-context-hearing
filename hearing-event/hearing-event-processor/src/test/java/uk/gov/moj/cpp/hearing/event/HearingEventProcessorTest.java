@@ -24,13 +24,17 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -40,6 +44,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -70,6 +75,9 @@ public class HearingEventProcessorTest {
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectConverter;
 
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String RESULT_AMENDED_EVENT = "hearing.result-amended";
@@ -140,17 +148,29 @@ public class HearingEventProcessorTest {
     private static final String START_DATE = ZonedDateTimes.toString(now());
     private static final String LAST_MODIFIED_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
     private static final String EVENT_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    private static final String FIELD_JUDGE = "judge";
+    private static final String FIELD_JUDGE_ID = "id";
+    private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
+    private static final String FIELD_JUDGE_LAST_NAME = "lastName";
+    private static final String FIELD_JUDGE_TITLE = "title";
+
+    @Before
+    public void setUp() {
+        this.hearingEventProcessor.objectToJsonValueConverter = new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
+        ReflectionUtils.setField(this.jsonObjectConverter, "mapper",
+                new ObjectMapperProducer().objectMapper());
+    }
 
     @Test
     public void publishCaseStartedPublicEvent() throws Exception {
         final JsonEnvelope event = createEnvelope("hearing.hearing-initiated",
                 createObjectBuilder().add("hearingId", HEARING_ID.toString()).build());
 
-        hearingEventProcessor.publishHearingInitiatedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingInitiatedPublicEvent(event);
 
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.hearing-initiated"),
                 payloadIsJson(
                         withJsonPath(format("$.%s", "hearingId"), equalTo(HEARING_ID.toString()))
@@ -161,11 +181,11 @@ public class HearingEventProcessorTest {
     public void publishHearingResultedPublicEvent() throws Exception {
         final JsonEnvelope event = createResultsSharedEvent();
 
-        hearingEventProcessor.publishHearingResultsSharedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingResultsSharedPublicEvent(event);
 
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.resulted"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
@@ -193,11 +213,11 @@ public class HearingEventProcessorTest {
     public void publishHearingResultAmendedPublicEvent() throws Exception {
         final JsonEnvelope event = createResultAmendedEvent();
 
-        hearingEventProcessor.publishHearingResultAmendedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingResultAmendedPublicEvent(event);
 
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.result-amended"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_GENERIC_ID), equalTo(GENERIC_ID.toString())),
@@ -228,12 +248,12 @@ public class HearingEventProcessorTest {
         final JsonEnvelope event = createEnvelope("hearing.adjourn-date-updated", createObjectBuilder().add(FIELD_START_DATE, START_DATE).build());
 
         //when
-        hearingEventProcessor.publishHearingDateAdjournedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingDateAdjournedPublicEvent(event);
 
         // then
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.adjourn-date-updated"),
                 payloadIsJson(
                         withJsonPath(format("$.%s", FIELD_START_DATE), equalTo(START_DATE))
@@ -248,12 +268,12 @@ public class HearingEventProcessorTest {
         fakeCaseResponse();
 
         //when
-        hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
 
         // then
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.event-logged"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
@@ -275,10 +295,10 @@ public class HearingEventProcessorTest {
         fakeCaseResponseWithoutUrn();
 
         //when
-        hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
 
         // then
-        verifyZeroInteractions(sender);
+        verifyZeroInteractions(this.sender);
     }
 
     @Test
@@ -289,14 +309,13 @@ public class HearingEventProcessorTest {
         fakeCaseResponse();
 
         //when
-        hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
 
         // then
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        System.out.println(envelopeArgumentCaptor.getValue().asJsonObject());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.event-timestamp-corrected"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
@@ -319,23 +338,23 @@ public class HearingEventProcessorTest {
         fakeCaseResponseWithoutUrn();
 
         //when
-        hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
 
         // then
-        verifyZeroInteractions(sender);
+        verifyZeroInteractions(this.sender);
     }
 
     @Test
     public void processHearingAddedPublicEvent() {
-        hearingEventProcessor.createAddHearingCommandFromSendCaseForListing(getJsonHearingAddedEnvelope());
-        verify(sender).sendAsAdmin(envelopeArgumentCaptor.capture());
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("hearing.add-hearings"),
+        this.hearingEventProcessor.createInitiateHearingCommandFromHearingConfirmedRecorded(getJsonHearingAddedEnvelope());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("hearing.initiate-hearing"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", "hearings", FIELD_GENERIC_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", "hearings", FIELD_HEARING_TYPE), equalTo(TYPE)),
-                        withJsonPath(format("$.%s[0].%s", "hearings", FIELD_DURATION), equalTo(DURATION)))
+                        withJsonPath(format("$.%s",  "hearingId"), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_TYPE), equalTo(TYPE)),
+                        withJsonPath(format("$.%s", FIELD_DURATION), equalTo(DURATION)))
                 )));
     }
 
@@ -431,8 +450,8 @@ public class HearingEventProcessorTest {
                 .add("urn", URN_VALUE)
                 .add("caseIds", createArrayBuilder().add(CASE_ID.toString()))
                 .build();
-        when(requester.request(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
-        when(responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
+        when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);
+        when(this.responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
     }
 
     private void fakeCaseResponseWithoutUrn() {
@@ -440,8 +459,8 @@ public class HearingEventProcessorTest {
                 .add("urn", JsonValue.NULL)
                 .add("caseIds", createArrayBuilder().add(CASE_ID.toString()))
                 .build();
-        when(requester.request(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
-        when(responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
+        when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);
+        when(this.responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
     }
 
     private JsonEnvelope getJsonHearingAddedEnvelope() {
@@ -450,7 +469,7 @@ public class HearingEventProcessorTest {
         hearing.add(FIELD_TYPE, TYPE);
         hearing.add(FIELD_START_DATE_TIME, START_DATE_TIME);
         hearing.add(FIELD_ESTIMATE_MINUTES, DURATION);
-
+        hearing.add(FIELD_CASE_ID, CASE_ID.toString());
         final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
                 .add("hearing", hearing).build();
 

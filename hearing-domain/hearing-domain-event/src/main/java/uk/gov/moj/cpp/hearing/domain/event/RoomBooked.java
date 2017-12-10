@@ -4,14 +4,21 @@ import uk.gov.justice.domain.annotation.Event;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Event("hearing.room-booked")
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RoomBooked {
 
     private UUID hearingId;
     private UUID roomId;
     private final String roomName;
 
-    public RoomBooked(final UUID hearingId, final String roomName) {
+    public RoomBooked(@JsonProperty("hearingId")final UUID hearingId,
+                        @JsonProperty("roomName")final String roomName) {
         this.hearingId = hearingId;
         this.roomName = roomName;
     }

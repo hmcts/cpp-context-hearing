@@ -59,4 +59,9 @@ public class HearingQueryApi {
         return requester.request(query);
     }
 
+    @Handles("hearing.get.pleas")
+    public JsonEnvelope getPleas(final JsonEnvelope query) {
+        return requester.request(query);
+    }
+
 }

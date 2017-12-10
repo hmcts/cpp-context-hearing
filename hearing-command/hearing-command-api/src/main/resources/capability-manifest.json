@@ -61,9 +61,14 @@
       "action": "hearing.share-results"
     },
     {
-      "name": "hearing.add-hearings",
+      "name": "record-hearing-confirmed",
       "type": "action",
-      "action": "hearing.add-hearings"
+      "action": "record-hearing-confirmed"
+    },
+    {
+      "name": "hearing.update-plea",
+      "type": "action",
+      "action": "hearing.update-plea"
     }
   ]
 }

@@ -482,7 +482,7 @@ public class HearingIT extends AbstractIT {
         final String caseId = UUID.randomUUID().toString();
         final String hearingId = UUID.randomUUID().toString();
         final String userId = UUID.randomUUID().toString();
-        final String commandName = "public.hearing-added";
+        final String commandName = "public.hearing-confirmed";
         final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), commandName)
                 .withUserId(userId)
                 .build();

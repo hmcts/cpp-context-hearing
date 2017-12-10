@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.lang.String.format;
+import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -15,6 +17,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -28,7 +31,10 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
@@ -38,25 +44,31 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingsPleaAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
+import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
+import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -88,7 +100,13 @@ public class HearingCommandHandlerTest {
     private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
     private static final String HEARING_RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String HEARING_RESULT_AMENDED_EVENT = "hearing.result-amended";
-
+    private static final String HEARING_UPDATE_PLEA = "hearing.update-plea";
+    private static final String HEARING_PLEA_ADD = "hearing.plea-add";
+    private static final String HEARING_PLEA_CHANGE = "hearing.plea-change";
+    private static final String HEARING_PLEA_ADDED = "hearing.plea-added";
+    private static final String HEARING_PLEA_CHANGED = "hearing.plea-changed";
+    private static final String PLEA_ADDED = "hearing.case.plea-added";
+    private static final String PLEA_CHANGED = "hearing.case.plea-changed";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
@@ -168,6 +186,12 @@ public class HearingCommandHandlerTest {
     private static final String PROMPT_LABEL_4 = "Creditor name";
     private static final String PROMPT_VALUE_4 = "Roger Stokes";
 
+    private static final String DEFEDANT_ID = UUID.randomUUID().toString();
+    private static final String PLEA_ID = UUID.randomUUID().toString();
+    private static final String PLEA_DATE = "2017-02-02";
+    private static final String PLEA_VALUE = "GUILTY";
+    private static final String FIELD_PLEA = "plea";
+
     @Mock
     private EventStream eventStream;
 
@@ -178,28 +202,36 @@ public class HearingCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
+    JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
             RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
-            HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class);
+            HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class, PleaAdded.class, PleaChanged.class,
+            HearingPleaAdded.class, HearingPleaChanged.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
 
     @Before
     public void setup() {
-        when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
-        when(eventSource.getStreamById(CASE_ID)).thenReturn(eventStream);
-        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
+        setField(this.jsonObjectToObjectConverter, "mapper",
+                new ObjectMapperProducer().objectMapper());
+
+        when(this.eventSource.getStreamById(HEARING_ID)).thenReturn(this.eventStream);
+        when(this.eventSource.getStreamById(CASE_ID)).thenReturn(this.eventStream);
+        when(this.aggregateService.get(this.eventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
+        when(this.aggregateService.get(this.eventStream, HearingsPleaAggregate.class)).thenReturn(new HearingsPleaAggregate());
     }
 
     @Test
     public void shouldRaiseHearingInitiatedEventWhenOnlyRequiredFieldsAreAvailable() throws Exception {
         final JsonEnvelope command = createInitiateHearingCommandWithOnlyRequiredFields();
 
-        hearingCommandHandler.initiateHearing(command);
+        this.hearingCommandHandler.initiateHearing(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_INITIATED_EVENT),
@@ -216,9 +248,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseMultipleEventsWhenAllTheFieldsAreAvailableForInitiateHearing() throws Exception {
         final JsonEnvelope command = createInitiateHearingCommand();
 
-        hearingCommandHandler.initiateHearing(command);
+        this.hearingCommandHandler.initiateHearing(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_INITIATED_EVENT),
@@ -258,9 +290,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseCourtAssignedEvent() throws Exception {
         final JsonEnvelope command = createAllocateCourtCommand();
 
-        hearingCommandHandler.allocateCourt(command);
+        this.hearingCommandHandler.allocateCourt(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(COURT_ASSIGNED_EVENT),
@@ -275,9 +307,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseRoomBookedEvent() throws Exception {
         final JsonEnvelope command = createBookRoomCommand();
 
-        hearingCommandHandler.bookRoom(command);
+        this.hearingCommandHandler.bookRoom(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(ROOM_BOOKED_EVENT),
@@ -292,9 +324,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseHearingAdjournDateUpdatedEvent() throws Exception {
         final JsonEnvelope command = createAdjournHearingDateCommand();
 
-        hearingCommandHandler.adjournHearingDate(command);
+        this.hearingCommandHandler.adjournHearingDate(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(ADJOURN_DATE_UPDATED_EVENT),
@@ -309,9 +341,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseCaseAssociatedEvent() throws Exception {
         final JsonEnvelope command = createAddCaseCommand();
 
-        hearingCommandHandler.addCase(command);
+        this.hearingCommandHandler.addCase(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(CASE_ASSOCIATED_EVENT),
@@ -326,9 +358,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseProsecutionCounselAddedEvent() throws Exception {
         final JsonEnvelope command = createAddProsecutionCounselCommand();
 
-        hearingCommandHandler.addProsecutionCounsel(command);
+        this.hearingCommandHandler.addProsecutionCounsel(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(PROSECUTION_COUNSEL_ADDED_EVENT),
@@ -345,9 +377,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseDefenceCounselAddedEvent() throws Exception {
         final JsonEnvelope command = createAddDefenceCounselCommand();
 
-        hearingCommandHandler.addDefenceCounsel(command);
+        this.hearingCommandHandler.addDefenceCounsel(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(DEFENCE_COUNSEL_ADDED_EVENT),
@@ -366,9 +398,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseDraftResultSaved() throws Exception {
         final JsonEnvelope command = createSaveDraftResultCommand();
 
-        hearingCommandHandler.saveDraftResult(command);
+        this.hearingCommandHandler.saveDraftResult(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_DRAFT_RESULT_SAVED_EVENT),
@@ -386,9 +418,9 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseResultsSharedEventIfSharingForTheFirstTime() throws Exception {
         final JsonEnvelope command = prepareResultsToShareCommand();
 
-        hearingCommandHandler.shareResult(command);
+        this.hearingCommandHandler.shareResult(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_RESULTS_SHARED_EVENT),
@@ -402,10 +434,10 @@ public class HearingCommandHandlerTest {
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_LEVEL), equalTo(LEVEL)),
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT), equalTo(FIELD_COURT_VALUE)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES,FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT_ROOM), equalTo(FIELD_COURT_ROOM_VALUE)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_FIRST_NAME_VALUE)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(FIELD_CLERK_OF_THE_COURT_LAST_NAME_VALUE)),
+                                withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_ID), equalTo(FIELD_CLERK_OF_THE_COURT_ID_VALUE.toString())),
                                 withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
                                 withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
                                 withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
@@ -421,11 +453,11 @@ public class HearingCommandHandlerTest {
         final JsonEnvelope command = prepareAmendedResultsToShareCommand();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new ResultsShared(HEARING_ID, SHARED_TIME, prepareResultLines()));
-        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(this.aggregateService.get(this.eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
-        hearingCommandHandler.shareResult(command);
+        this.hearingCommandHandler.shareResult(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_RESULT_AMENDED_EVENT),
@@ -484,11 +516,11 @@ public class HearingCommandHandlerTest {
         hearingAggregate.apply(new ResultsShared(HEARING_ID, SHARED_TIME, prepareResultLines()));
         prepareAmendedResults().forEach(hearingAggregate::apply);
 
-        when(aggregateService.get(eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(this.aggregateService.get(this.eventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
-        hearingCommandHandler.shareResult(command);
+        this.hearingCommandHandler.shareResult(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName(HEARING_RESULT_AMENDED_EVENT),
@@ -517,28 +549,78 @@ public class HearingCommandHandlerTest {
     }
 
     @Test
-    public void shouldRaiseHearingInitiatedEventFromAddHearingsWhenOnlyRequiredFieldsAreAvailable() throws Exception {
-        final JsonEnvelope command = createAddHearingsCommandWithOnlyRequiredFields();
-        hearingCommandHandler.addHearing(command);
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
+    public void shouldRaisePleaAdded() throws Exception {
+        // Given
+
+        final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
+                "hearing.update-plea.json");
+         final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_UPDATE_PLEA),
+                publicHearingAddedPayload);
+         // When
+        this.hearingCommandHandler.updatePlea(addPleaCommand);
+        // Then
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName(HEARING_INITIATED_EVENT),
+                        withMetadataEnvelopedFrom(addPleaCommand)
+                                .withName(PLEA_ADDED),
                         payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
-                                withJsonPath("$.startDateTime", is(ZonedDateTimes.toString(START_DATE_TIME))),
-                                withJsonPath("$.duration", equalTo(DURATION)),
-                                withJsonPath("$.hearingType", equalTo(HEARING_TYPE))
-                        ))).thatMatchesSchema(),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName(CASE_ASSOCIATED_EVENT),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
-                                withJsonPath("$.caseId", equalTo(CASE_ID.toString()))
-                        ))).thatMatchesSchema()
+                                withJsonPath(format("$.%s",FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s",FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s.%s","plea","value"), equalTo(PLEA_VALUE))
+                        )))
         ));
+
     }
+
+    @Test
+    public void shouldRaiseHearingPleaAdded() throws Exception {
+        // Given
+
+        final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
+                "hearing.plea-add.json");
+        final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_PLEA_ADD),
+                publicHearingAddedPayload);
+        // When
+        this.hearingCommandHandler.pleaAdd(addPleaCommand);
+        // Then
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(addPleaCommand)
+                                .withName(HEARING_PLEA_ADDED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s",FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s",FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s.%s","plea","value"), equalTo(PLEA_VALUE))
+                        )))
+        ));
+
+    }
+
+    @Test
+    public void shouldRaiseHearingPleaChanged() throws Exception {
+        // Given
+
+        final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
+                "hearing.plea-change.json");
+        final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_PLEA_CHANGE),
+                publicHearingAddedPayload);
+        // When
+        this.hearingCommandHandler.pleaChange(addPleaCommand);
+        // Then
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(addPleaCommand)
+                                .withName(HEARING_PLEA_CHANGED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s",FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s",FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s.%s","plea","value"), equalTo(PLEA_VALUE))
+                        )))
+        ));
+
+    }
+
+
     private JsonEnvelope createInitiateHearingCommandWithOnlyRequiredFields() {
         return envelope()
                 .with(metadataWithRandomUUID(INITIATE_HEARING_COMMAND))
@@ -555,10 +637,11 @@ public class HearingCommandHandlerTest {
                 .add(FIELD_DURATION, DURATION)
                 .add(FIELD_HEARING_TYPE, HEARING_TYPE)
                 .build();
-        final JsonArray hearings = createArrayBuilder().add(hearing).build();
-        final JsonObject addHearings = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).add("hearings", hearings).build();
+
+        final JsonObject addHearings = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).add("hearing", hearing).build();
         return new DefaultJsonEnvelope(metadataWithRandomUUID(INITIATE_HEARING_COMMAND).build(), addHearings);
     }
+
     private JsonEnvelope createInitiateHearingCommand() {
         return envelope()
                 .with(metadataWithRandomUUID(INITIATE_HEARING_COMMAND))
@@ -766,4 +849,22 @@ public class HearingCommandHandlerTest {
                         .build());
     }
 
+    private JsonObject getSendCaseForListingPayload(final String resource) throws IOException {
+        String sendCaseForListingEventPayloadString = getStringFromResource(resource);
+        sendCaseForListingEventPayloadString =
+                sendCaseForListingEventPayloadString.replace("RANDOM_CASE_ID", CASE_ID.toString()).
+                        replace("RANDOM_HEARING_ID", HEARING_ID.toString()).
+                        replace("RANDOM_DEFEDANT_ID", DEFEDANT_ID).
+                        replace("RANDOM_PERSON_ID", PERSON_ID.toString()).
+                        replace("RANDOM_OFFENCE_ID", OFFENCE_ID.toString()).
+                        replace("RANDOM_PLEA_ID", PLEA_ID).
+                        replace("RANDOM_PLEA_DATE", PLEA_DATE);
+
+        return new StringToJsonObjectConverter().convert(sendCaseForListingEventPayloadString);
+    }
+
+    private String getStringFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path), defaultCharset());
+    }
 }
+

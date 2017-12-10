@@ -27,6 +27,7 @@ public class DefenceCounsel {
     public DefenceCounsel() {
         // for JPA
     }
+
     public DefenceCounsel(final UUID attendeeId, final UUID hearingId, final UUID personId, final String status) {
         this.attendeeId = attendeeId;
         this.hearingId = hearingId;

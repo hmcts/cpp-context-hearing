@@ -20,10 +20,19 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.hearing-event-logged+json:
             schema: !include json/schema/hearing.hearing-event-logged.json
             example: !include json/hearing.hearing-event-logged.json
+        application/vnd.hearing.confirmed-recorded+json:
+            schema: !include json/schema/hearing.confirmed-recorded.json
+            example: !include json/hearing.confirmed-recorded.json
+        application/vnd.hearing.case.plea-added+json:
+            schema: !include json/schema/hearing.case.plea-added.json
+            example: !include json/hearing.case.plea-added.json
+        application/vnd.hearing.case.plea-changed+json:
+            schema: !include json/schema/hearing.case.plea-changed.json
+            example: !include json/hearing.case.plea-changed.json
 
 /public.event:
   post:
     body:
-        application/vnd.public.hearing-added+json:
-            schema: !include json/schema/public.hearing-added.json
-            example: !include json/public.hearing-added.json
+        application/vnd.public.hearing-confirmed+json:
+            schema: !include json/schema/public.hearing-confirmed.json
+            example: !include json/public.hearing-confirmed.json

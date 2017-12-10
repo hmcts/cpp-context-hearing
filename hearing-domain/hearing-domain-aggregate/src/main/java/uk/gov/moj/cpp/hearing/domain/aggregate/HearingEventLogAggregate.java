@@ -42,8 +42,8 @@ public class HearingEventLogAggregate implements Aggregate {
     }
 
     private Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final UUID lastHearingEventId, final UUID hearingEventDefinitionId,
-                                          final String recordedLabel, final ZonedDateTime eventTime,
-                                          final ZonedDateTime lastModifiedTime, final boolean alterable) {
+                                           final String recordedLabel, final ZonedDateTime eventTime,
+                                           final ZonedDateTime lastModifiedTime, final boolean alterable) {
         if (hearingEventPreviouslyLogged(hearingEventId)) {
             return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, REASON_ALREADY_LOGGED, alterable)));
         } else if (hearingEventPreviouslyDeleted(hearingEventId)) {

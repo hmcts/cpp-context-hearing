@@ -19,6 +19,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_ADJOURN_HEARING_DATE = "hearing.adjourn-date";
     private static final String ACTION_NAME_BOOK_ROOM = "hearing.book-room";
     private static final String ACTION_NAME_ALLOCATE_COURT = "hearing.allocate-court";
+    private static final String ACTION_NAME_UPDATE_PLEA = "hearing.update-plea";
     private static final String ACTION_NAME_ADD_PROSECUTION_COUNSEL = "hearing.add-prosecution-counsel";
     private static final String ACTION_NAME_SAVE_DRAFT_RESULT = "hearing.save-draft-result";
     private static final String ACTION_NAME_LOG_HEARING_EVENT = "hearing.log-hearing-event";
@@ -99,6 +100,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToAllocateCourt() {
         final Action action = createActionFor(ACTION_NAME_ALLOCATE_COURT);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToUpdatePlea() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_PLEA);
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToUpdatePlea() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_PLEA);
         given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

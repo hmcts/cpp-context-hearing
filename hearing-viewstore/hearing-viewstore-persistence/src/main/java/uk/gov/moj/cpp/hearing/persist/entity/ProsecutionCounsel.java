@@ -25,7 +25,7 @@ public class ProsecutionCounsel {
     @Column(name = "status")
     private String status;
 
-    public ProsecutionCounsel(){
+    public ProsecutionCounsel() {
         // for JPA
     }
 

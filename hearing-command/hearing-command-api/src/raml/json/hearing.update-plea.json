@@ -1,0 +1,19 @@
+{
+  "caseId": "bf537ed1-4648-4a68-8429-96a69d5db49d",
+  "defendants": [
+    {
+      "id": "a6a5a1fd-67c8-42ee-9995-a10165ab3dbe",
+      "personId": "d3a0d0f9-78b0-47c6-a362-5febf0485d0f",
+      "offences": [
+        {
+          "id": "6da4527f-474a-47a8-82c5-21ea607aa9c3",
+          "plea": {
+            "id": "0baecac5-222b-402d-9047-84803679edae",
+            "value": "GUILTY",
+            "pleaDate": "2017-02-02"
+          }
+        }
+      ]
+    }
+  ]
+}

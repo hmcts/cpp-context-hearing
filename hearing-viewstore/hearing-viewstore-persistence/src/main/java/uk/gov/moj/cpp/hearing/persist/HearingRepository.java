@@ -18,7 +18,7 @@ import org.apache.deltaspike.data.api.SingleResultType;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 @Repository
-public abstract class HearingRepository extends AbstractEntityRepository<Hearing, UUID>{
+public abstract class HearingRepository extends AbstractEntityRepository<Hearing, UUID> {
 
 
     /**
@@ -31,8 +31,8 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     abstract Hearing findByHearingId(final UUID hearingId);
 
     public Optional<Hearing> getByHearingId(final UUID hearingId) {
-        final Hearing hearing  = findByHearingId(hearingId);
-        return hearing != null ? Optional.of(hearing) :  Optional.empty();
+        final Hearing hearing = findByHearingId(hearingId);
+        return hearing != null ? Optional.of(hearing) : Optional.empty();
     }
 
     /**
@@ -45,7 +45,7 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     public abstract List<Hearing> findByStartDate(final LocalDate startDate);
 
 
-   /**
+    /**
      * Find {@link Hearing} by hearingIds.
      *
      * @param hearingIds list of hearing ids.

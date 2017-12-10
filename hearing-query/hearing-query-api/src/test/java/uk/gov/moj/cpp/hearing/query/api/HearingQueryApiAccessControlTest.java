@@ -22,6 +22,7 @@ import org.mockito.Mock;
 public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTest {
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
+    private static final String ACTION_NAME_GET_HEARING_PLEAS = "hearing.get.pleas";
     private static final String ACTION_NAME_GET_HEARINGS_BY_START_DATE = "hearing.get.hearings-by-startdate";
     private static final String ACTION_NAME_GET_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid";
     private static final String ACTION_NAME_GET_PROSECUTION_COUNSELS = "hearing.get.prosecution-counsels";
@@ -45,6 +46,16 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearing() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "System Users");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingPleas() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_PLEAS, "Listing Officers", "Court Clerks", "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingPleas() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_PLEAS, "Listing Officers", "Court Clerks", "System Users");
     }
 
     @Test

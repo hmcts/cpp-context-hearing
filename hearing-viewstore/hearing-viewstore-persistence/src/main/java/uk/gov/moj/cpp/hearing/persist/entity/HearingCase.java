@@ -16,10 +16,10 @@ public class HearingCase {
     @Column(name = "id", nullable = false)
     private UUID id;
 
-    @Column(name = "hearingid",nullable = false)
+    @Column(name = "hearingid", nullable = false)
     private UUID hearingId;
 
-    @Column(name = "caseid",nullable = false)
+    @Column(name = "caseid", nullable = false)
     private UUID caseId;
 
     public HearingCase() {
