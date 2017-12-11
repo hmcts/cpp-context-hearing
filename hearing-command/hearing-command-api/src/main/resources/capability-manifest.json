@@ -61,9 +61,9 @@
       "action": "hearing.share-results"
     },
     {
-      "name": "record-hearing-confirmed",
+      "name": "hearing.record-confirmed-hearing",
       "type": "action",
-      "action": "record-hearing-confirmed"
+      "action": "hearing.record-confirmed-hearing"
     },
     {
       "name": "hearing.update-plea",

@@ -8,7 +8,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Event("hearing.confirmed-recorded")
+@Event("hearing.hearing.confirmed-recorded")
 public class HearingConfirmedRecorded {
 
     private final UUID caseId;

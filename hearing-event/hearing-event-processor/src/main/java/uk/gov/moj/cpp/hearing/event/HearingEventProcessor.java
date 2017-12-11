@@ -102,9 +102,9 @@ public class HearingEventProcessor {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.confirmed-recorded")
+    @Handles("hearing.hearing.confirmed-recorded")
     public void createInitiateHearingCommandFromHearingConfirmedRecorded(final JsonEnvelope event) {
-        LOGGER.trace("Received hearing.confirmed-recorded event, processing");
+        LOGGER.trace("Received hearing.hearing.confirmed-recorded event, processing");
         final JsonObject payload = event.payloadAsJsonObject();
         final Hearing hearing = this.jsonObjectToObjectConverter.convert(payload.getJsonObject(FIELD_HEARING),Hearing.class);
         final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));

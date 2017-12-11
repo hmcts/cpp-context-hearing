@@ -23,7 +23,7 @@ public class ListingPublicEventProcessor {
     @Inject
     private Sender sender;
 
-    private static final String COMMAND_ADD_HEARINGS = "record-hearing-confirmed";
+    private static final String COMMAND_ADD_HEARINGS = "hearing.record-confirmed-hearing";
 
     @Handles("public.hearing-confirmed")
     public void recordHearingConfirmed(final JsonEnvelope event) {

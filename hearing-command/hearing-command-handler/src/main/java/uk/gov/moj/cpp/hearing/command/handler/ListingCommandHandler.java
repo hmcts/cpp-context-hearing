@@ -48,9 +48,9 @@ public class ListingCommandHandler {
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
 
-    @Handles("record-hearing-confirmed")
+    @Handles("hearing.record-confirmed-hearing")
     public void recordHearingConfirmed(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.trace("Processing record-hearing-confirmed event");
+        LOGGER.trace("Processing hearing.record-confirmed-hearing event");
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
         final String urn = payload.getString(FIELD_CASE_URN);

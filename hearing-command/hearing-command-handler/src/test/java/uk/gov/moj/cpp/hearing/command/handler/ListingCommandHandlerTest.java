@@ -47,7 +47,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ListingCommandHandlerTest {
 
-    private static final String RECORD_HEARING_CONFIRMED = "hearing.confirmed-recorded";
+    private static final String RECORD_HEARING_CONFIRMED = "hearing.hearing.confirmed-recorded";
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_GENERIC_ID = "id";
@@ -106,7 +106,7 @@ public class ListingCommandHandlerTest {
         // Given
 
         final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
-                "record-hearing-confirmed.json");
+                "hearing.record-confirmed-hearing.json");
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID(RECORD_HEARING_CONFIRMED),
                 publicHearingAddedPayload);
         // When
