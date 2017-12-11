@@ -4,6 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
+import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
@@ -11,6 +12,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.core.Is.is;
@@ -40,6 +42,12 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
+
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
@@ -49,24 +57,26 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.json.JsonObject;
 
+import com.google.common.io.Resources;
+import com.jayway.jsonpath.matchers.IsJson;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
 import org.junit.Test;
 
-import com.google.common.io.Resources;
-import com.jayway.jsonpath.matchers.IsJson;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
-
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
-
 
 public class HearingIT extends AbstractIT {
+    private static final String PLEA_COLLECTION = "pleas";
+    private static final String FIELD_PLEA_ID = "pleaId";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_CASE_ID = "caseId";
+    private static final String FIELD_DEFENDANT_ID = "defendantId";
+    private static final String FIELD_OFFENCE_ID = "offenceId";
+    private static final String FIELD_VALUE = "value";
+    private static final String FIELD_PLEA_DATE = "pleaDate";
+    private static final String FIELD_PERSON_ID = "personId";
 
     @Test
     public void hearingHavingMultipleCasesTest() throws IOException, InterruptedException {
@@ -512,6 +522,318 @@ public class HearingIT extends AbstractIT {
                                 withJsonPath("$.hearingId", is(hearingId))
                         )));
     }
+
+    @Test
+    public void hearingAddPlea() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
+        final String pleaId = randomUUID().toString();
+        final String pleaValue = "GUILTY";
+        final String pleaDateString = "2017-02-01";
+        final String offenceId = randomUUID().toString();
+        final String defendantId = randomUUID().toString();
+        final String personId = "d3a0d0f9-78b0-47c6-a362-5febf0485d0f";
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+        final String body = getStringFromResource("hearing.update-plea.json").replace("RANDOM_CASE_ID", caseId)
+                .replace("RANDOM_PLEA_ID", pleaId)
+                .replace("PLEA_VALUE", pleaValue)
+                .replace("PLEA_DATE", pleaDateString)
+                .replace("RANDOM_OFFENCE_ID", offenceId)
+                .replace("RANDOM_DEFENDANT_ID", defendantId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas"), caseId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.pleas+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), is(pleaId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), is(offenceId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(pleaValue)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(pleaDateString)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PERSON_ID), is(personId))
+                        )));
+    }
+
+    @Test
+    public void hearingAddMultiplePlea() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
+        final String pleaId_1 = randomUUID().toString();
+        final String pleaValue_1 = "GUILTY";
+        final String pleaDateString_1 = "2017-02-01";
+        final String offenceId_1 = randomUUID().toString();
+        final String pleaId_2 = randomUUID().toString();
+        final String pleaValue_2 = "NOT GUILTY";
+        final String pleaDateString_2 = "2017-02-02";
+        final String offenceId_2 = randomUUID().toString();
+        final String defendantId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+        final String body = getStringFromResource("hearing.update-multiple-plea.json").replace("RANDOM_CASE_ID", caseId)
+                .replace("RANDOM_PLEA_ID_1", pleaId_1)
+                .replace("PLEA_VALUE_1", pleaValue_1)
+                .replace("PLEA_DATE_1", pleaDateString_1)
+                .replace("RANDOM_OFFENCE_ID_1", offenceId_1)
+                .replace("RANDOM_PLEA_ID_2", pleaId_2)
+                .replace("PLEA_VALUE_2", pleaValue_2)
+                .replace("PLEA_DATE_2", pleaDateString_2)
+                .replace("RANDOM_OFFENCE_ID_2", offenceId_2)
+                .replace("RANDOM_DEFENDANT_ID", defendantId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas"), caseId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.pleas+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(pleaValue_1, pleaValue_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(pleaDateString_1, pleaDateString_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(pleaValue_1, pleaValue_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(pleaDateString_1, pleaDateString_2))
+                        )));
+    }
+
+    @Test
+    public void hearingUpdatePlea() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
+        final String pleaId = randomUUID().toString();
+        final String originalPleaValue = "NOT GUILTY";
+        final String originalPleaDateString = "2017-02-01";
+        final String updatedPleaValue = "GUILTY";
+        final String updatedPleaDateString = "2017-02-02";
+        final String offenceId = randomUUID().toString();
+        final String defendantId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+        String body = getStringFromResource("hearing.update-plea.json").replace("RANDOM_CASE_ID", caseId)
+                .replace("RANDOM_PLEA_ID", pleaId)
+                .replace("PLEA_VALUE", originalPleaValue)
+                .replace("PLEA_DATE", originalPleaDateString)
+                .replace("RANDOM_OFFENCE_ID", offenceId)
+                .replace("RANDOM_DEFENDANT_ID", defendantId);
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas"), caseId);
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.pleas+json";
+
+        Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract
+
+                        ().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), is(pleaId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), is(offenceId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(originalPleaValue)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(originalPleaDateString))
+                        )));
+
+        // Update plea and call the endpoint again
+        body = body.replace(originalPleaValue, updatedPleaValue).replace(originalPleaDateString, updatedPleaDateString);
+        writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf
+                                (
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), is(pleaId)),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), is(offenceId)),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(updatedPleaValue)),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(updatedPleaDateString))
+                                )));
+
+    }
+
+    @Test
+    public void hearingAddMultipleUpdateSinglePlea() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
+        final String pleaId_1 = randomUUID().toString();
+        final String originalPleaValue = "NOT GUILTY";
+        final String originalPleaDateString = "2017-02-01";
+        final String offenceId_1 = randomUUID().toString();
+        final String pleaId_2 = randomUUID().toString();
+        final String updatedPleaValue = "GUILTY";
+        final String updatedPleaDateString = "2017-02-02";
+        final String offenceId_2 = randomUUID().toString();
+        final String defendantId = randomUUID().toString();
+
+        String body = getStringFromResource("hearing.update-multiple-plea.json").replace("RANDOM_CASE_ID", caseId)
+                .replace("RANDOM_PLEA_ID_1", pleaId_1)
+                .replace("PLEA_VALUE_1", originalPleaValue)
+                .replace("PLEA_DATE_1", originalPleaDateString)
+                .replace("RANDOM_OFFENCE_ID_1", offenceId_1)
+                .replace("RANDOM_PLEA_ID_2", pleaId_2)
+                .replace("PLEA_VALUE_2", originalPleaValue)
+                .replace("PLEA_DATE_2", originalPleaDateString)
+                .replace("RANDOM_OFFENCE_ID_2", offenceId_2)
+                .replace("RANDOM_DEFENDANT_ID", defendantId);
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas"), caseId);
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+
+        final String mediaType = "application/vnd.hearing.get.pleas+json";
+
+        Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(originalPleaValue)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(originalPleaDateString)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_VALUE), is(originalPleaValue)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(originalPleaDateString))
+                        )));
+
+        // Update only one plea and call the endpoint again ( with both the pleas )
+        body = body.replaceFirst(originalPleaValue, updatedPleaValue).replaceFirst(originalPleaDateString, updatedPleaDateString);
+
+        writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(originalPleaValue, updatedPleaValue)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(originalPleaDateString, updatedPleaDateString)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(originalPleaValue, updatedPleaValue)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(originalPleaDateString, updatedPleaDateString))
+                        )));
+
+    }
+
+    @Test
+    public void hearingAddMultiplePleaSameOffenceId() throws IOException, InterruptedException {
+        final String hearingId = randomUUID().toString();
+        final String caseId = randomUUID().toString();
+        final String pleaId_1 = randomUUID().toString();
+        final String pleaValue_1 = "GUILTY";
+        final String pleaDateString_1 = "2017-02-01";
+        // Use same offenceId to simulate a reject condition. In this case
+        // entire update command will be rejected , no add / updates will be performed.
+        final String offenceId = randomUUID().toString();
+        final String pleaId_2 = randomUUID().toString();
+        final String pleaValue_2 = "NOT GUILTY";
+        final String pleaDateString_2 = "2017-02-02";
+        final String defendantId = randomUUID().toString();
+
+        final String commandAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+        final String body = getStringFromResource("hearing.update-multiple-plea.json").replace("RANDOM_CASE_ID", caseId)
+                .replace("RANDOM_PLEA_ID_1", pleaId_1)
+                .replace("PLEA_VALUE_1", pleaValue_1)
+                .replace("PLEA_DATE_1", pleaDateString_1)
+                .replace("RANDOM_OFFENCE_ID_1", offenceId)
+                .replace("RANDOM_PLEA_ID_2", pleaId_2)
+                .replace("PLEA_VALUE_2", pleaValue_2)
+                .replace("PLEA_DATE_2", pleaDateString_2)
+                .replace("RANDOM_OFFENCE_ID_2", offenceId)
+                .replace("RANDOM_DEFENDANT_ID", defendantId);
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas"), caseId);
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.pleas+json";
+
+        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath(format("$.%s", PLEA_COLLECTION), is(emptyIterable()))
+                        )));
+    }
+
+
     private String createAddProsecutionCounselCommandPayload(final String personId, final String attendeeId, final String status) throws IOException {
         String addProsecutionCounselPayload = Resources.toString(
                 getResource("hearing.command.add-prosecution-counsel.json"),
