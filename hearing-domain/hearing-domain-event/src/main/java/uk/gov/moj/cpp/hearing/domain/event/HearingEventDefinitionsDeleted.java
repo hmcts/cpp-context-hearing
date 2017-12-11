@@ -7,10 +7,14 @@ import java.util.UUID;
 @Event("hearing.hearing-event-definitions-deleted")
 public class HearingEventDefinitionsDeleted {
 
-    private final UUID id;
+    private UUID id;
 
     public HearingEventDefinitionsDeleted(final UUID id) {
         this.id = id;
+    }
+
+    public HearingEventDefinitionsDeleted() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getId() {

@@ -11,12 +11,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Event("hearing.case.plea-added")
 public class PleaAdded {
 
-    private final UUID hearingId;
-    private final UUID caseId;
-    private final UUID defendantId;
-    private final UUID personId;
-    private final UUID offenceId;
-    private final Plea plea;
+    private UUID hearingId;
+    private UUID caseId;
+    private UUID defendantId;
+    private UUID personId;
+    private UUID offenceId;
+    private Plea plea;
 
     @JsonCreator
     public PleaAdded(@JsonProperty(value = "caseId") final UUID caseId,
@@ -31,6 +31,10 @@ public class PleaAdded {
         this.plea = plea;
         this.hearingId = hearingId;
         this.personId = personId;
+    }
+
+    public PleaAdded() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getCaseId() {

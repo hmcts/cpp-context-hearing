@@ -15,7 +15,7 @@ public class RoomBooked {
 
     private UUID hearingId;
     private UUID roomId;
-    private final String roomName;
+    private String roomName;
 
     public RoomBooked(@JsonProperty("hearingId")final UUID hearingId,
                         @JsonProperty("roomName")final String roomName) {
@@ -27,6 +27,10 @@ public class RoomBooked {
         this.hearingId = hearingId;
         this.roomId = roomId;
         this.roomName = roomName;
+    }
+
+    public RoomBooked() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingId() {

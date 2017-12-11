@@ -10,13 +10,17 @@
     },
     "hearingEvent": {
       "$ref": "#/definitions/hearingEvent"
+    },
+    "hearing": {
+      "$ref": "#/definitions/hearing"
     }
   },
   "additionalProperties": false,
   "required": [
     "case",
     "hearingEventDefinition",
-    "hearingEvent"
+    "hearingEvent",
+    "hearing"
   ],
   "definitions": {
     "uuid": {
@@ -78,6 +82,42 @@
         "recordedLabel",
         "eventTime",
         "lastModifiedTime"
+      ]
+    },
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "courtCentre": {
+          "$ref": "#/definitions/courtCentre"
+        },
+        "hearingType": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "courtCentre",
+        "hearingType"
+      ]
+    },
+    "courtCentre": {
+      "type": "object",
+      "properties": {
+        "courtCentreId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "courtCentreName": {
+          "type": "string"
+        },
+        "roomNumber": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "courtCentreId",
+        "courtCentreName",
+        "roomNumber"
       ]
     }
   }

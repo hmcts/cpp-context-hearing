@@ -10,21 +10,21 @@ import java.util.UUID;
 @Event("hearing.result-amended")
 public class ResultAmended {
 
-    private final UUID id;
-    private final UUID lastSharedResultId;
-    private final ZonedDateTime sharedTime;
-    private final UUID hearingId;
-    private final UUID caseId;
-    private final UUID personId;
-    private final UUID offenceId;
-    private final String level;
-    private final String resultLabel;
-    private final List<ResultPrompt> prompts;
-    private final String court;
-    private final String courtRoom;
-    private final UUID clerkOfTheCourtId;
-    private final String clerkOfTheCourtFirstName;
-    private final String clerkOfTheCourtLastName;
+    private UUID id;
+    private UUID lastSharedResultId;
+    private ZonedDateTime sharedTime;
+    private UUID hearingId;
+    private UUID caseId;
+    private UUID personId;
+    private UUID offenceId;
+    private String level;
+    private String resultLabel;
+    private List<ResultPrompt> prompts;
+    private String court;
+    private String courtRoom;
+    private UUID clerkOfTheCourtId;
+    private String clerkOfTheCourtFirstName;
+    private String clerkOfTheCourtLastName;
 
     public ResultAmended(final UUID id, final UUID lastSharedResultId, final ZonedDateTime sharedTime,
                          final UUID hearingId, final UUID caseId, final UUID personId, final UUID offenceId,
@@ -44,6 +44,10 @@ public class ResultAmended {
         this.clerkOfTheCourtId = clerkOfTheCourtId;
         this.clerkOfTheCourtFirstName = clerkOfTheCourtFirstName;
         this.clerkOfTheCourtLastName = clerkOfTheCourtLastName;
+    }
+
+    public ResultAmended() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getId() {

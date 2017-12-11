@@ -7,12 +7,16 @@ import java.util.UUID;
 @Event("hearing.hearing-event-deletion-ignored")
 public class HearingEventDeletionIgnored {
 
-    private final UUID hearingEventId;
-    private final String reason;
+    private UUID hearingEventId;
+    private String reason;
 
     public HearingEventDeletionIgnored(final UUID hearingEventId, final String reason) {
         this.hearingEventId = hearingEventId;
         this.reason = reason;
+    }
+
+    public HearingEventDeletionIgnored() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingEventId() {

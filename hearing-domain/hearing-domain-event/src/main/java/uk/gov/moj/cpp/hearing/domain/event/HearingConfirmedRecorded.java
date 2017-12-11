@@ -11,9 +11,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Event("hearing.hearing.confirmed-recorded")
 public class HearingConfirmedRecorded {
 
-    private final UUID caseId;
-    private final String urn;
-    private final Hearing hearing;
+    private UUID caseId;
+    private String urn;
+    private Hearing hearing;
 
     @JsonCreator
     public HearingConfirmedRecorded(@JsonProperty(value = "caseId") final UUID caseId,
@@ -22,6 +22,10 @@ public class HearingConfirmedRecorded {
         this.caseId = caseId;
         this.urn = urn;
         this.hearing = hearing;
+    }
+
+    public HearingConfirmedRecorded() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getCaseId() {

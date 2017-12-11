@@ -11,12 +11,16 @@ import java.util.UUID;
 @Event("hearing.hearing-event-definitions-created")
 public class HearingEventDefinitionsCreated {
 
-    private final UUID id;
-    private final List<HearingEventDefinition> eventDefinitions;
+    private UUID id;
+    private List<HearingEventDefinition> eventDefinitions;
 
     public HearingEventDefinitionsCreated(final UUID uuid, final List<HearingEventDefinition> eventDefinitions) {
         this.id = uuid;
         this.eventDefinitions = unmodifiableList(eventDefinitions);
+    }
+
+    public HearingEventDefinitionsCreated() {
+        // default constructor for Jackson serialisation
     }
 
     public List<HearingEventDefinition> getEventDefinitions() {
