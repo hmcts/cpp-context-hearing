@@ -134,7 +134,7 @@ public class HearingEventProcessor {
 
     }
     @Handles("hearing.case.plea-changed")
-    public void createHearingPleaChangeFromPleaAdded(final JsonEnvelope event) {
+    public void createHearingPleaChangeFromPleaChanged(final JsonEnvelope event) {
         LOGGER.trace("Received plea-changed event, processing");
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_CHANGE)
                 .apply(event.payloadAsJsonObject()));;

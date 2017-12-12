@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
+import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
@@ -26,6 +28,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -35,6 +38,7 @@ import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -43,6 +47,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
+import com.google.common.io.Resources;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
@@ -60,6 +65,10 @@ import org.mockito.Spy;
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
 public class HearingEventProcessorTest {
+
+
+    @InjectMocks
+    private HearingEventProcessor hearingEventProcessor;
 
     @Mock
     private Sender sender;
@@ -87,8 +96,6 @@ public class HearingEventProcessorTest {
     @InjectMocks
     private ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(objectMapper);
 
-    @InjectMocks
-    private HearingEventProcessor hearingEventProcessor;
 
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String RESULT_AMENDED_EVENT = "hearing.result-amended";
@@ -103,7 +110,7 @@ public class HearingEventProcessorTest {
     private static final String FIELD_RESULT_LABEL = "resultLabel";
     private static final String FIELD_PROMPTS = "prompts";
     private static final String FIELD_PROMPT_LABEL = "label";
-    private static final String FIELD_PROMPT_VALUE = "value";
+    private static final String FIELD_VALUE = "value";
     private static final String FIELD_PERSON_ID = "personId";
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_CASE = "case";
@@ -148,9 +155,14 @@ public class HearingEventProcessorTest {
     private static final UUID CLERK_OF_THE_COURT_ID = randomUUID();
     private static final String CLERK_OF_THE_COURT_FIRST_NAME = STRING.next();
     private static final String CLERK_OF_THE_COURT_LAST_NAME = STRING.next();
-
+    private static final String FIELD_DEFENDANT_ID = "defendantId";
+    private static final UUID PLEA_ID = randomUUID();
+    private static final UUID DEFENDANT_ID = randomUUID();
     private static final UUID GENERIC_ID = randomUUID();
     private static final UUID LAST_SHARED_RESULT_ID = randomUUID();
+    private static final String OBJECT_PLEA = "plea";
+    private static final String FIELD_PLEA_DATE = "pleaDate";
+    private static final String PLEA_VALUE = "GUILTY";
     private static final String LEVEL = "OFFENCE";
     private static final String RESULT_LABEL = "Imprisonment";
     private static final String PROMPT_LABEL_1 = "Imprisonment duration";
@@ -224,9 +236,9 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(CLERK_OF_THE_COURT_LAST_NAME)),
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_ID), equalTo(CLERK_OF_THE_COURT_ID.toString())),
                         withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
+                        withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_1)),
                         withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
-                        withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_2))
+                        withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_2))
                         )
                 )).thatMatchesSchema());
     }
@@ -257,9 +269,9 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(CLERK_OF_THE_COURT_LAST_NAME)),
                         withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_ID), equalTo(CLERK_OF_THE_COURT_ID.toString())),
                         withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_1)),
                         withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_2))
+                        withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_2))
                         )
                 )).thatMatchesSchema());
     }
@@ -401,6 +413,45 @@ public class HearingEventProcessorTest {
                 )));
     }
 
+    @Test
+    public void processHearingCasePleaAdded() throws IOException {
+
+        this.hearingEventProcessor.createHearingPleaAddFromPleaAdded(getJsonHearingCasePleaAddedOrChangedEnvelope());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("hearing.plea-add"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_GENERIC_ID), equalTo(PLEA_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_VALUE), equalTo(PLEA_VALUE)),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_PLEA_DATE), equalTo(START_DATE.toString()))
+                        )
+                )));
+    }
+
+    @Test
+    public void processHearingCasePleaChanged() throws IOException {
+
+        this.hearingEventProcessor.createHearingPleaChangeFromPleaChanged(getJsonHearingCasePleaAddedOrChangedEnvelope());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("hearing.plea-change"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_GENERIC_ID), equalTo(PLEA_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_VALUE), equalTo(PLEA_VALUE)),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_PLEA_DATE), equalTo(START_DATE.toString()))
+                        )
+                )));
+    }
 
     private JsonEnvelope createResultsSharedEvent() {
         final JsonArray resultLines = createArrayBuilder().add(
@@ -419,10 +470,10 @@ public class HearingEventProcessorTest {
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
-                                        .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_1))
+                                        .add(FIELD_VALUE, PROMPT_VALUE_1))
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
-                                        .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_2))))
+                                        .add(FIELD_VALUE, PROMPT_VALUE_2))))
                 .build();
 
         final JsonObject shareResult = createObjectBuilder()
@@ -480,10 +531,10 @@ public class HearingEventProcessorTest {
                 .add(FIELD_PROMPTS, createArrayBuilder()
                         .add(createObjectBuilder()
                                 .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
-                                .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_1))
+                                .add(FIELD_VALUE, PROMPT_VALUE_1))
                         .add(createObjectBuilder()
                                 .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
-                                .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_2)));
+                                .add(FIELD_VALUE, PROMPT_VALUE_2)));
 
         return envelopeFrom(metadataWithRandomUUID(RESULT_AMENDED_EVENT), amendedResult.build());
     }
@@ -540,5 +591,23 @@ public class HearingEventProcessorTest {
         final Metadata metadata = metadataWithDefaults().build();
         return new DefaultJsonEnvelope(metadata, jsonObject);
 
+    }
+
+    public JsonEnvelope getJsonHearingCasePleaAddedOrChangedEnvelope() throws IOException {
+        final String hearingCasePleaAddOrUpdate = getStringFromResource("hearing.case.plea-added-or-changed.json").replace("RANDOM_CASE_ID", CASE_ID.toString())
+                .replace("RANDOM_HEARING_ID", HEARING_ID.toString())
+                .replace("RANDOM_OFFENCE_ID", OFFENCE_ID.toString())
+                .replace("RANDOM_PERSON_ID", PERSON_ID.toString())
+                .replace("RANDOM_DEFENDANT_ID", DEFENDANT_ID.toString())
+                .replace("RANDOM_PLEA_ID", PLEA_ID.toString())
+                .replace("RANDOM_PLEA_DATE", START_DATE.toString());
+
+        final Metadata metadata = metadataWithDefaults().build();
+        return new DefaultJsonEnvelope(metadata, new StringToJsonObjectConverter().convert(hearingCasePleaAddOrUpdate));
+    }
+
+    private String getStringFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path),
+                defaultCharset());
     }
 }
