@@ -497,7 +497,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 withJsonPath("$.hearingEvent.eventTime", equalTo(hearingEvent.getEventTime().toString())),
                 withJsonPath("$.hearingEvent.lastModifiedTime", equalTo(hearingEvent.getLastModifiedTime().toString())),
                 withJsonPath("$.case.caseUrn", is(notNullValue())),
-                withJsonPath("$.hearingEventDefinition.priority", equalTo(hearingEvent.isAlterable()))
+                withJsonPath("$.hearingEventDefinition.priority", equalTo(!hearingEvent.isAlterable()))
         )));
     }
 
@@ -519,7 +519,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 withJsonPath("$.hearingEvent.eventTime", equalTo(ZonedDateTimes.toString(newEventTime))),
                 withJsonPath("$.hearingEvent.lastModifiedTime", equalTo(ZonedDateTimes.toString(newLastModifiedTime))),
                 withJsonPath("$.case.caseUrn", is(notNullValue())),
-                withJsonPath("$.hearingEventDefinition.priority", equalTo(hearingEvent.isAlterable()))
+                withJsonPath("$.hearingEventDefinition.priority", equalTo(!hearingEvent.isAlterable()))
         )));
     }
 

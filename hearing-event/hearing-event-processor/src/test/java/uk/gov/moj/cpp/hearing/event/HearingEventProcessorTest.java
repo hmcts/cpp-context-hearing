@@ -312,7 +312,7 @@ public class HearingEventProcessorTest {
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(true)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(false)),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_EVENT_TIME), equalTo(EVENT_TIME)),
@@ -386,7 +386,7 @@ public class HearingEventProcessorTest {
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(true)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(false)),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),

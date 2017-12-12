@@ -150,7 +150,7 @@ public class HearingEventProcessor {
         final String recordedLabel = jsonObject.getString(FIELD_RECORDED_LABEL);
         final String eventTime = jsonObject.getString(FIELD_EVENT_TIME);
         final String lastModifiedTime = jsonObject.getString(FIELD_LAST_MODIFIED_TIME);
-        final boolean priority = jsonObject.getBoolean(FIELD_ALTERABLE);
+        final boolean priority = !jsonObject.getBoolean(FIELD_ALTERABLE);
         final Optional<HearingDetails> optionalCaseDetails = getHearingDetails(event);
 
         if (optionalCaseDetails.isPresent()) {
