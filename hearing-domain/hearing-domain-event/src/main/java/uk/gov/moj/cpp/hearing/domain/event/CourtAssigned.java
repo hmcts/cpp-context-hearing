@@ -14,9 +14,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CourtAssigned {
 
-    private final UUID hearingId;
-    private final UUID courtCentreId;
-    private final String courtCentreName;
+    private UUID hearingId;
+    private UUID courtCentreId;
+    private String courtCentreName;
 
     @JsonCreator
     public CourtAssigned(@JsonProperty("hearingId")final UUID hearingId,
@@ -30,6 +30,10 @@ public class CourtAssigned {
         this.hearingId = hearingId;
         this.courtCentreId = courtCentreId;
         this.courtCentreName = courtCentreName;
+    }
+
+    public CourtAssigned() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingId() {

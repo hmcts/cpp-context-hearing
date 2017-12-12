@@ -34,7 +34,6 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -44,6 +43,10 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,15 +54,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @SuppressWarnings({"unchecked", "unused"})
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(DataProviderRunner.class)
 public class HearingEventProcessorTest {
-
-    @InjectMocks
-    private HearingEventProcessor hearingEventProcessor;
 
     @Mock
     private Sender sender;
@@ -77,12 +77,26 @@ public class HearingEventProcessorTest {
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
 
     @Spy
-    private JsonObjectToObjectConverter jsonObjectConverter;
+    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
+    @Spy
+    @InjectMocks
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
+
+    @Spy
+    @InjectMocks
+    private ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(objectMapper);
+
+    @InjectMocks
+    private HearingEventProcessor hearingEventProcessor;
 
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String RESULT_AMENDED_EVENT = "hearing.result-amended";
 
     private static final String FIELD_GENERIC_ID = "id";
+    private static final String FIELD_GENERIC_TYPE = "type";
+
+
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_LEVEL = "level";
     private static final String FIELD_RESULT_LINES = "resultLines";
@@ -99,6 +113,7 @@ public class HearingEventProcessorTest {
     private static final String FIELD_HEARING_DEFINITION = "hearingEventDefinition";
     private static final String FIELD_HEARING_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_HEARING_EVENT = "hearingEvent";
+    private static final String FIELD_HEARING = "hearing";
     private static final String FIELD_EVENT_TIME = "eventTime";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_ALTERABLE = "alterable";
@@ -115,11 +130,15 @@ public class HearingEventProcessorTest {
 
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String FIELD_CASE_URN = "caseUrn";
-    private static final String FIELD_TYPE = "type";
     private static final String FIELD_DURATION = "duration";
     private static final String FIELD_HEARING_TYPE = "hearingType";
     private static final String FIELD_START_DATE_TIME = "startDateTime";
     private static final String FIELD_ESTIMATE_MINUTES = "estimateMinutes";
+
+    private static final String FIELD_COURT_CENTRE = "courtCentre";
+    private static final String FIELD_COURT_NAME = "courtCentreName";
+    private static final String FIELD_COURT_CENTER_ID = "courtCentreId";
+    private static final String FIELD_ROOM_NUMBER = "roomNumber";
 
     private static final int DURATION = 15;
     private static final String START_DATE_TIME = PAST_ZONED_DATE_TIME.next().toString();
@@ -148,21 +167,24 @@ public class HearingEventProcessorTest {
     private static final String START_DATE = ZonedDateTimes.toString(now());
     private static final String LAST_MODIFIED_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
     private static final String EVENT_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    private static final UUID COURT_CENTER_ID = randomUUID();
+    private static final String COURT_CENTER_NAME = STRING.next();
+
+
     private static final String FIELD_JUDGE = "judge";
     private static final String FIELD_JUDGE_ID = "id";
     private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
     private static final String FIELD_JUDGE_LAST_NAME = "lastName";
     private static final String FIELD_JUDGE_TITLE = "title";
 
+
     @Before
-    public void setUp() {
-        this.hearingEventProcessor.objectToJsonValueConverter = new ObjectToJsonValueConverter(new ObjectMapperProducer().objectMapper());
-        ReflectionUtils.setField(this.jsonObjectConverter, "mapper",
-                new ObjectMapperProducer().objectMapper());
+    public void initMocks() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void publishCaseStartedPublicEvent() throws Exception {
+    public void publishCaseStartedPublicEvent() {
         final JsonEnvelope event = createEnvelope("hearing.hearing-initiated",
                 createObjectBuilder().add("hearingId", HEARING_ID.toString()).build());
 
@@ -178,7 +200,7 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void publishHearingResultedPublicEvent() throws Exception {
+    public void publishHearingResultedPublicEvent() {
         final JsonEnvelope event = createResultsSharedEvent();
 
         this.hearingEventProcessor.publishHearingResultsSharedPublicEvent(event);
@@ -210,7 +232,7 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void publishHearingResultAmendedPublicEvent() throws Exception {
+    public void publishHearingResultAmendedPublicEvent() {
         final JsonEnvelope event = createResultAmendedEvent();
 
         this.hearingEventProcessor.publishHearingResultAmendedPublicEvent(event);
@@ -243,7 +265,7 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void publishAdjournDateUpdatedPublicEvent() throws Exception {
+    public void publishAdjournDateUpdatedPublicEvent() {
         // given
         final JsonEnvelope event = createEnvelope("hearing.adjourn-date-updated", createObjectBuilder().add(FIELD_START_DATE, START_DATE).build());
 
@@ -261,7 +283,7 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void shouldPublishHearingEventLoggedPublicEvent() throws Exception {
+    public void shouldPublishHearingEventLoggedPublicEvent() {
         // given
         final JsonEnvelope event = prepareHearingEventLoggedEvent();
 
@@ -282,17 +304,34 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_EVENT_TIME), equalTo(EVENT_TIME)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME))
-                        )
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_NAME), equalTo(COURT_CENTER_NAME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_ROOM_NUMBER), equalTo(COURT_ROOM)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(TYPE)))
                 )).thatMatchesSchema());
     }
 
+    @DataProvider
+    public static Object[][] provideListOfRequiredHearingField() {
+        // @formatter:off
+        return new Object[][] {
+                {FIELD_CASE_URN},
+                {FIELD_COURT_CENTER_ID},
+                {FIELD_COURT_NAME},
+                {FIELD_ROOM_NUMBER},
+                { FIELD_HEARING_TYPE}
+        };
+        // @formatter:on
+    }
+
     @Test
-    public void shouldNotPublishHearingEventLoggedPublicEventWhenCaseIsNotAvailable() throws Exception {
+    @UseDataProvider("provideListOfRequiredHearingField")
+    public void shouldNotPublishHearingEventLoggedPublicEventWhenRequiredHearingDataIsNotAvailable(String fieldToRemove) {
         // given
         final JsonEnvelope event = prepareHearingEventLoggedEvent();
 
-        fakeCaseResponseWithoutUrn();
+        fakeCaseResponseWithHearingDetailsWithoutField(fieldToRemove);
 
         //when
         this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
@@ -302,7 +341,22 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void shouldPublishHearingEventTimeStampCorrectedPublicEvent() throws Exception {
+    @UseDataProvider("provideListOfRequiredHearingField")
+    public void shouldNotPublishHearingEventTimeStampCorrectedPublicEventWhenRequiredHearingDataIsNotAvailable(String fieldToRemove) {
+        // given
+        final JsonEnvelope event = prepareHearingEventUpdatedEvent();
+
+        fakeCaseResponseWithHearingDetailsWithoutField(fieldToRemove);
+
+        //when
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+
+        // then
+        verifyZeroInteractions(this.sender);
+    }
+
+    @Test
+    public void shouldPublishHearingEventTimeStampCorrectedPublicEvent() {
         // given
         final JsonEnvelope event = prepareHearingEventUpdatedEvent();
 
@@ -325,23 +379,12 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_EVENT_TIME), equalTo(EVENT_TIME)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME))
-                        )
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_NAME), equalTo(COURT_CENTER_NAME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_ROOM_NUMBER), equalTo(COURT_ROOM)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(TYPE)))
                 )).thatMatchesSchema());
-    }
-
-    @Test
-    public void shouldNotPublishHearingEventTimeStampCorrectedPublicEventWhenCaseIsNotAvailable() throws Exception {
-        // given
-        final JsonEnvelope event = prepareHearingEventUpdatedEvent();
-
-        fakeCaseResponseWithoutUrn();
-
-        //when
-        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
-
-        // then
-        verifyZeroInteractions(this.sender);
     }
 
     @Test
@@ -352,7 +395,7 @@ public class HearingEventProcessorTest {
                 metadata().withName("hearing.initiate-hearing"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                        withJsonPath(format("$.%s",  "hearingId"), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", "hearingId"), equalTo(GENERIC_ID.toString())),
                         withJsonPath(format("$.%s", FIELD_HEARING_TYPE), equalTo(TYPE)),
                         withJsonPath(format("$.%s", FIELD_DURATION), equalTo(DURATION)))
                 )));
@@ -449,24 +492,45 @@ public class HearingEventProcessorTest {
         final JsonObject jsonObject = createObjectBuilder()
                 .add("urn", URN_VALUE)
                 .add("caseIds", createArrayBuilder().add(CASE_ID.toString()))
+                .add("courtCentreId", COURT_CENTER_ID.toString())
+                .add("courtCentreName", COURT_CENTER_NAME)
+                .add("roomName", COURT_ROOM)
+                .add("hearingType", TYPE)
                 .build();
         when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);
         when(this.responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
     }
 
-    private void fakeCaseResponseWithoutUrn() {
-        final JsonObject jsonObject = createObjectBuilder()
-                .add("urn", JsonValue.NULL)
-                .add("caseIds", createArrayBuilder().add(CASE_ID.toString()))
-                .build();
-        when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);
-        when(this.responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
+    private void fakeCaseResponseWithHearingDetailsWithoutField(final String fieldToRemove) {
+        final JsonObjectBuilder objectBuilder = createObjectBuilder()
+                .add("caseIds", createArrayBuilder().add(CASE_ID.toString()));
+
+        if (!FIELD_CASE_URN.equals(fieldToRemove)) {
+            objectBuilder.add("urn", JsonValue.NULL);
+        }
+
+        if (!FIELD_COURT_CENTER_ID.equals(fieldToRemove)) {
+            objectBuilder.add("courtCentreId", randomUUID().toString());
+        }
+
+        if (!FIELD_COURT_NAME.equals(fieldToRemove)) {
+            objectBuilder.add("courtCentreName", STRING.next());
+        }
+
+        if (!FIELD_COURT_NAME.equals(fieldToRemove)) {
+            objectBuilder.add("roomName", STRING.next());
+        }
+
+        final JsonObject jsonObject = objectBuilder.build();
+
+        when(requester.request(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
+        when(responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
     }
 
     private JsonEnvelope getJsonHearingAddedEnvelope() {
         final JsonObjectBuilder hearing = createObjectBuilder();
         hearing.add(FIELD_GENERIC_ID, GENERIC_ID.toString());
-        hearing.add(FIELD_TYPE, TYPE);
+        hearing.add(FIELD_GENERIC_TYPE, TYPE);
         hearing.add(FIELD_START_DATE_TIME, START_DATE_TIME);
         hearing.add(FIELD_ESTIMATE_MINUTES, DURATION);
         hearing.add(FIELD_CASE_ID, CASE_ID.toString());

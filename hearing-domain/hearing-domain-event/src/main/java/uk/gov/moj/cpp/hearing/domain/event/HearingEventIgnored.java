@@ -8,13 +8,13 @@ import java.util.UUID;
 @Event("hearing.hearing-event-ignored")
 public class HearingEventIgnored {
 
-    private final UUID hearingEventId;
-    private final UUID hearingId;
-    private final UUID hearingEventDefinitionId;
-    private final String recordedLabel;
-    private final ZonedDateTime eventTime;
-    private final String reason;
-    private final boolean alterable;
+    private UUID hearingEventId;
+    private UUID hearingId;
+    private UUID hearingEventDefinitionId;
+    private String recordedLabel;
+    private ZonedDateTime eventTime;
+    private String reason;
+    private boolean alterable;
 
     public HearingEventIgnored(final UUID hearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final String recordedLabel,
                                final ZonedDateTime eventTime, final String reason, final boolean alterable) {
@@ -25,6 +25,10 @@ public class HearingEventIgnored {
         this.eventTime = eventTime;
         this.reason = reason;
         this.alterable = alterable;
+    }
+
+    public HearingEventIgnored() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingEventId() {

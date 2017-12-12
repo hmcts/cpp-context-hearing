@@ -8,14 +8,14 @@ import java.util.UUID;
 @Event("hearing.hearing-event-logged")
 public class HearingEventLogged {
 
-    private final UUID hearingEventId;
-    private final UUID lastHearingEventId;
-    private final UUID hearingId;
-    private final UUID hearingEventDefinitionId;
-    private final String recordedLabel;
-    private final ZonedDateTime eventTime;
-    private final ZonedDateTime lastModifiedTime;
-    private final boolean alterable;
+    private UUID hearingEventId;
+    private UUID lastHearingEventId;
+    private UUID hearingId;
+    private UUID hearingEventDefinitionId;
+    private String recordedLabel;
+    private ZonedDateTime eventTime;
+    private ZonedDateTime lastModifiedTime;
+    private boolean alterable;
 
     public HearingEventLogged(final UUID hearingEventId, final UUID lastHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final String recordedLabel,
                               final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime, final boolean alterable) {
@@ -28,6 +28,10 @@ public class HearingEventLogged {
         this.eventTime = eventTime;
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
+    }
+
+    public HearingEventLogged() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingEventId() {

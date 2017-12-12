@@ -22,6 +22,7 @@
         <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
         <authorisation.service.version>0.1.19</authorisation.service.version>
         <structure.version>2.0.312</structure.version>
+        <junit-dataprovider.version>1.10.0</junit-dataprovider.version>
     </properties>
     <modules>
         <module>hearing-query</module>
@@ -34,6 +35,16 @@
         <module>hearing-notepad-parsing-service</module>
         <module>hearing-service</module>
     </modules>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.tngtech.java</groupId>
+                <artifactId>junit-dataprovider</artifactId>
+                <version>${junit-dataprovider.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>

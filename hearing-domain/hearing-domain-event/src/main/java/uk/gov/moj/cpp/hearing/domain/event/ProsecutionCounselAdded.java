@@ -6,19 +6,21 @@ import java.util.UUID;
 
 @Event("hearing.prosecution-counsel-added")
 public class ProsecutionCounselAdded {
-
-    private final UUID personId;
-    private final UUID attendeeId;
-    private final UUID hearingId;
-    private final String status;
+    private UUID personId;
+    private UUID attendeeId;
+    private UUID hearingId;
+    private String status;
 
     public ProsecutionCounselAdded(final UUID hearingId, final UUID attendeeId, final UUID personId,
                                    final String status) {
-
         this.hearingId = hearingId;
         this.attendeeId = attendeeId;
         this.personId = personId;
         this.status = status;
+    }
+
+    public ProsecutionCounselAdded() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingId() {

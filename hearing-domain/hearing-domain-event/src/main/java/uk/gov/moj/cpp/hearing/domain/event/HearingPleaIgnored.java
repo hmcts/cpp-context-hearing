@@ -5,12 +5,16 @@ import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 
 @Event("hearing.hearing-update-plea-ignored")
 public class HearingPleaIgnored {
-    private final String reason;
-    private final HearingUpdatePleaCommand hearingUpdatePleaCommand;
+    private String reason;
+    private HearingUpdatePleaCommand hearingUpdatePleaCommand;
 
     public HearingPleaIgnored(final String reason, final HearingUpdatePleaCommand hearingUpdatePleaCommand) {
         this.reason = reason;
         this.hearingUpdatePleaCommand = hearingUpdatePleaCommand;
+    }
+
+    public HearingPleaIgnored() {
+        // default constructor for Jackson serialisation
     }
 
     public String getReason() {
