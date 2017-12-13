@@ -22,7 +22,9 @@ import javax.json.JsonArray;
 @ServiceComponent(Component.QUERY_VIEW)
 public class PleaQueryView {
     private static final String FIELD_CASE_ID = "caseId";
-    private static final String RESPONSE_NAME_HEARING_PLEA = "hearing.get-pleas";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String RESPONSE_NAME_HEARING_PLEA = "hearing.get.hearing-pleas";
+    private static final String RESPONSE_NAME_CASE_PLEA = "hearing.get.case-pleas";
 
 
     @Inject
@@ -34,12 +36,23 @@ public class PleaQueryView {
     @Inject
     private Converter<List<PleaHearing>, JsonArray> jsonConverter;
 
-    @Handles("hearing.get.pleas")
-    public JsonEnvelope getPleas(final JsonEnvelope envelope) {
+    @Handles("hearing.get.case.pleas")
+    public JsonEnvelope getCasePleas(final JsonEnvelope envelope) {
         final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), FIELD_CASE_ID);
-        return enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING_PLEA).apply(
+        return this.enveloper.withMetadataFrom(envelope, RESPONSE_NAME_CASE_PLEA).apply(
                 Json.createObjectBuilder()
-                        .add("pleas", jsonConverter.convert(pleaService.getPleaHearingByCaseId(caseId.get())))
+                        .add("pleas", this.jsonConverter.convert(this.pleaService.getPleaHearingByCaseId(caseId.get())))
+                        .build()
+        );
+
+    }
+
+    @Handles("hearing.get.hearing.pleas")
+    public JsonEnvelope getHearingPleas(final JsonEnvelope envelope) {
+        final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
+        return this.enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING_PLEA).apply(
+                Json.createObjectBuilder()
+                        .add("pleas", this.jsonConverter.convert(this.pleaService.getPleaHearingByHearingId(hearingId.get())))
                         .build()
         );
 
