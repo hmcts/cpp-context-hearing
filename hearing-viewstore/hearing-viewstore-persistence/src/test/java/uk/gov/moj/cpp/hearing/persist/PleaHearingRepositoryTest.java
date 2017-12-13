@@ -37,55 +37,72 @@ public class PleaHearingRepositoryTest extends BaseTransactionalTest {
 
     @Test
     public void findAllTest() {
-        final PleaHearing pleaHearingRandom = new PleaHearing(pleaId, hearingId, caseId, defendantId, offenceId, pleaDate, value);
-        pleaHearingRandom.setPersonId(personId);
-        pleaHearingRepository.save(pleaHearingRandom);
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value);
+        pleaHearingRandom.setPersonId(this.personId);
+        this.pleaHearingRepository.save(pleaHearingRandom);
 
-        final List<PleaHearing> pleaHearings = pleaHearingRepository.findAll();
+        final List<PleaHearing> pleaHearings = this.pleaHearingRepository.findAll();
 
-        assertThat(pleaHearings.get(0).getPleaId(), is(pleaId));
-        assertThat(pleaHearings.get(0).getHearingId(), is(hearingId));
-        assertThat(pleaHearings.get(0).getCaseId(), is(caseId));
-        assertThat(pleaHearings.get(0).getDefendantId(), is(defendantId));
-        assertThat(pleaHearings.get(0).getPersonId(), is(personId));
-        assertThat(pleaHearings.get(0).getOffenceId(), is(offenceId));
-        assertThat(pleaHearings.get(0).getPleaDate(), is(pleaDate));
-        assertThat(pleaHearings.get(0).getValue(), is(value));
+        assertThat(pleaHearings.get(0).getPleaId(), is(this.pleaId));
+        assertThat(pleaHearings.get(0).getHearingId(), is(this.hearingId));
+        assertThat(pleaHearings.get(0).getCaseId(), is(this.caseId));
+        assertThat(pleaHearings.get(0).getDefendantId(), is(this.defendantId));
+        assertThat(pleaHearings.get(0).getPersonId(), is(this.personId));
+        assertThat(pleaHearings.get(0).getOffenceId(), is(this.offenceId));
+        assertThat(pleaHearings.get(0).getPleaDate(), is(this.pleaDate));
+        assertThat(pleaHearings.get(0).getValue(), is(this.value));
     }
 
     @Test
     public void findWithPK() {
-        final PleaHearing pleaHearingRandom = new PleaHearing(pleaId, hearingId, caseId, defendantId,  offenceId, pleaDate, value);
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value);
 
-        pleaHearingRepository.save(pleaHearingRandom);
+        this.pleaHearingRepository.save(pleaHearingRandom);
 
-        final PleaHearing pleaHearing = pleaHearingRepository.findBy(pleaId);
+        final PleaHearing pleaHearing = this.pleaHearingRepository.findBy(this.pleaId);
 
-        assertThat(pleaHearing.getPleaId(), is(pleaId));
-        assertThat(pleaHearing.getHearingId(), is(hearingId));
-        assertThat(pleaHearing.getCaseId(), is(caseId));
-        assertThat(pleaHearing.getDefendantId(), is(defendantId));
+        assertThat(pleaHearing.getPleaId(), is(this.pleaId));
+        assertThat(pleaHearing.getHearingId(), is(this.hearingId));
+        assertThat(pleaHearing.getCaseId(), is(this.caseId));
+        assertThat(pleaHearing.getDefendantId(), is(this.defendantId));
         assertThat(pleaHearing.getPersonId()==null, is(true));
-        assertThat(pleaHearing.getOffenceId(), is(offenceId));
-        assertThat(pleaHearing.getPleaDate(), is(pleaDate));
-        assertThat(pleaHearing.getValue(), is(value));
+        assertThat(pleaHearing.getOffenceId(), is(this.offenceId));
+        assertThat(pleaHearing.getPleaDate(), is(this.pleaDate));
+        assertThat(pleaHearing.getValue(), is(this.value));
     }
 
     @Test
     public void findWithCaseId() {
-        final PleaHearing pleaHearingRandom = new PleaHearing(pleaId, hearingId, caseId, defendantId, offenceId, pleaDate, value);
-        pleaHearingRandom.setPersonId(personId);
-        pleaHearingRepository.save(pleaHearingRandom);
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value);
+        pleaHearingRandom.setPersonId(this.personId);
+        this.pleaHearingRepository.save(pleaHearingRandom);
 
-        final List<PleaHearing> pleaHearings = pleaHearingRepository.findByCaseId(caseId);
+        final List<PleaHearing> pleaHearings = this.pleaHearingRepository.findByCaseId(this.caseId);
 
-        assertThat(pleaHearings.get(0).getPleaId(), is(pleaId));
-        assertThat(pleaHearings.get(0).getHearingId(), is(hearingId));
-        assertThat(pleaHearings.get(0).getCaseId(), is(caseId));
-        assertThat(pleaHearings.get(0).getDefendantId(), is(defendantId));
-        assertThat(pleaHearings.get(0).getPersonId(), is(personId));
-        assertThat(pleaHearings.get(0).getOffenceId(), is(offenceId));
-        assertThat(pleaHearings.get(0).getPleaDate(), is(pleaDate));
-        assertThat(pleaHearings.get(0).getValue(), is(value));
+        assertThat(pleaHearings.get(0).getPleaId(), is(this.pleaId));
+        assertThat(pleaHearings.get(0).getHearingId(), is(this.hearingId));
+        assertThat(pleaHearings.get(0).getCaseId(), is(this.caseId));
+        assertThat(pleaHearings.get(0).getDefendantId(), is(this.defendantId));
+        assertThat(pleaHearings.get(0).getPersonId(), is(this.personId));
+        assertThat(pleaHearings.get(0).getOffenceId(), is(this.offenceId));
+        assertThat(pleaHearings.get(0).getPleaDate(), is(this.pleaDate));
+        assertThat(pleaHearings.get(0).getValue(), is(this.value));
+    }
+    @Test
+    public void findWithHearingId() {
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value);
+        pleaHearingRandom.setPersonId(this.personId);
+        this.pleaHearingRepository.save(pleaHearingRandom);
+
+        final List<PleaHearing> pleaHearings = this.pleaHearingRepository.findByHearingId(this.hearingId);
+
+        assertThat(pleaHearings.get(0).getPleaId(), is(this.pleaId));
+        assertThat(pleaHearings.get(0).getHearingId(), is(this.hearingId));
+        assertThat(pleaHearings.get(0).getCaseId(), is(this.caseId));
+        assertThat(pleaHearings.get(0).getDefendantId(), is(this.defendantId));
+        assertThat(pleaHearings.get(0).getPersonId(), is(this.personId));
+        assertThat(pleaHearings.get(0).getOffenceId(), is(this.offenceId));
+        assertThat(pleaHearings.get(0).getPleaDate(), is(this.pleaDate));
+        assertThat(pleaHearings.get(0).getValue(), is(this.value));
     }
 }
