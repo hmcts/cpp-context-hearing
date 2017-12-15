@@ -6,10 +6,7 @@ import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldNotBePublished;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventTimeStampCorrectedPublicEventShouldBePublished;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingHasInitiated;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingIsNotStarted;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andLogsAnotherEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andUserLogsAnEvent;
@@ -21,7 +18,6 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHeari
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenItFailsForMissingEventTime;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenOnlySpecifiedHearingEventIsRecorded;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheEventsShouldBeListedInTheSpecifiedOrder;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheHearingEventHasTheUpdatedEventTime;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenHearingEventDefinitionsAreUpdated;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserAttemptsToLogAHearingEvent;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserCorrectsTheTimeOfTheHearingEvent;
@@ -43,10 +39,6 @@ import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.mitigationEvent;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
-import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
-
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -54,8 +46,13 @@ import java.util.UUID;
 
 import javax.jms.MessageConsumer;
 
-import com.jayway.restassured.response.Response;
 import org.junit.Test;
+
+import com.jayway.restassured.response.Response;
+
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
+import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
 public class HearingEventsIT extends AbstractIT {
 
@@ -70,34 +67,16 @@ public class HearingEventsIT extends AbstractIT {
     private final ZonedDateTime pastEventTime = PAST_ZONED_DATE_TIME.next();
     private final ZonedDateTime currentLastModifiedTime = ZonedDateTime.now();
     private static final String HEARING_LOGGED_PUBLIC_EVENT ="public.hearing.event-logged";
-    private static final String HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT="public.hearing.event-timestamp-corrected";
-
-    @Test
-    public void shouldBeAbleToStartAHearingByAnAuthorisedUserAndRaisePublicEvent() throws IOException, InterruptedException {
-        final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_LOGGED_PUBLIC_EVENT);
-
-        givenAUserHasLoggedInAsACourtClerk(userId);
-        andHearingHasInitiated(hearingId);
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-        andHearingIsNotStarted(hearingId);
-
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
-        whenUserLogsAnEvent(hearingStartedEvent);
-
-        thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
-
-        andHearingEventLoggedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent);
-    }
 
     @Test
     public void shouldNotRaiseHearingEventLoggedPublicEventWhenHearingNotInitiated() throws IOException, InterruptedException {
         final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_LOGGED_PUBLIC_EVENT);
 
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-        andHearingIsNotStarted(hearingId);
+        andHearingIsNotStarted(this.hearingId);
 
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
+        final HearingEvent hearingStartedEvent = hearingStartedEvent(this.hearingId);
         whenUserLogsAnEvent(hearingStartedEvent);
 
         thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
@@ -107,69 +86,51 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void shouldRejectAnHearingEventWhenEventTimeIsMissing() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-        andHearingIsNotStarted(hearingId);
+        andHearingIsNotStarted(this.hearingId);
 
-        final Response response = whenUserAttemptsToLogAHearingEvent(hearingEventWithMissingEventTime(hearingId));
+        final Response response = whenUserAttemptsToLogAHearingEvent(hearingEventWithMissingEventTime(this.hearingId));
         thenItFailsForMissingEventTime(response);
     }
 
-    @Test
-    public void shouldBeAbleToCorrectTimeOfAHearingEventAndRaisedPublicEventTimeStampCorrected() throws IOException, InterruptedException {
-        final MessageConsumer messageConsumer = publicEvents.createConsumer(HEARING_TIMESTAMP_CORRECTED_PUBLIC_EVENT);
-
-        givenAUserHasLoggedInAsACourtClerk(userId);
-        andHearingHasInitiated(hearingId);
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
-        andUserLogsAnEvent(hearingStartedEvent);
-
-        final UUID newHearingEventId = randomUUID();
-        whenUserCorrectsTheTimeOfTheHearingEvent(hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
-
-        thenTheHearingEventHasTheUpdatedEventTime(hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
-
-        andHearingEventTimeStampCorrectedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
-    }
 
     @Test
     public void shouldCorrectTimeOfASpecificHearingEventAndReturnHearingEventsInChronologicalOrderByEventTime() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
 
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
+        final HearingEvent hearingStartedEvent = hearingStartedEvent(this.hearingId);
         andUserLogsAnEvent(hearingStartedEvent);
 
-        final HearingEvent identifyDefendantEvent = identifyDefendantEvent(hearingId);
+        final HearingEvent identifyDefendantEvent = identifyDefendantEvent(this.hearingId);
         andLogsAnotherEvent(identifyDefendantEvent);
 
         final UUID newHearingEventId = randomUUID();
-        whenUserCorrectsTheTimeOfTheHearingEvent(identifyDefendantEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
+        whenUserCorrectsTheTimeOfTheHearingEvent(identifyDefendantEvent, this.pastEventTime, this.currentLastModifiedTime, newHearingEventId);
 
         final HearingEvent updatedIdentifyDefendantEvent = identifyDefendantEvent.builder()
                 .withId(newHearingEventId)
-                .withEventTime(pastEventTime)
-                .withLastModifiedTime(currentLastModifiedTime)
+                .withEventTime(this.pastEventTime)
+                .withLastModifiedTime(this.currentLastModifiedTime)
                 .build();
-        thenTheEventsShouldBeListedInTheSpecifiedOrder(hearingId, asList(updatedIdentifyDefendantEvent, hearingStartedEvent));
+        thenTheEventsShouldBeListedInTheSpecifiedOrder(this.hearingId, asList(updatedIdentifyDefendantEvent, hearingStartedEvent));
     }
 
     @Test
     public void shouldBeAbleToGenerateAndRecordMitigationEventsThatRequireDefendantAndDefenceCounselAlongWithGroupLabelAndActionLabelExtension() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
 
-        final List<DefenceCounselData> defenceCounsels = newArrayList(defenceCounsel(defenceCounselId, defendantId),
-                defenceCounsel(defenceCounselId2, defendantId2));
-        whenHearingHasDefendantsWithDefenceCounsels(hearingId, defenceCounsels);
+        final List<DefenceCounselData> defenceCounsels = newArrayList(defenceCounsel(this.defenceCounselId, this.defendantId),
+                defenceCounsel(this.defenceCounselId2, this.defendantId2));
+        whenHearingHasDefendantsWithDefenceCounsels(this.hearingId, defenceCounsels);
 
-        thenHearingEventDefinitionsShouldProvideOptionToLogEventWithDefendantAndDefenceCouncil(hearingId, defenceCounsels);
+        thenHearingEventDefinitionsShouldProvideOptionToLogEventWithDefendantAndDefenceCouncil(this.hearingId, defenceCounsels);
 
         final DefenceCounselData randomDefenceCounsel = values(defenceCounsels).next();
-        final HearingEvent mitigationEvent = mitigationEvent(hearingId, randomDefenceCounsel);
+        final HearingEvent mitigationEvent = mitigationEvent(this.hearingId, randomDefenceCounsel);
         whenUserLogsAnEvent(mitigationEvent);
 
         thenHearingEventIsRecorded(mitigationEvent);
@@ -177,54 +138,54 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void shouldRecordAndReturnBothSequencedAndNonSequencedHearingEventDefinitions() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
 
-        thenHearingEventDefinitionsAreRecorded(hearingId, eventDefinitions);
+        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
     }
 
     @Test
     public void shouldRecordAndReturnOnlyNonSequencedHearingEventDefinitions() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithOnlyNonSequencedEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
 
-        thenHearingEventDefinitionsAreRecorded(hearingId, eventDefinitions);
+        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
     }
 
     @Test
     public void shouldRecordAndReturnPauseAndResumeEventsInHearingEventDefinitions() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithPauseAndResumeEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
 
-        thenHearingEventDefinitionsAreRecorded(hearingId, eventDefinitions);
+        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
     }
 
     @Test
     public void shouldRecordAndReturnNotRegisteredSequenceTypeEventsWhichAppearAfterTheRegisteredSequenceTypeEventsInHearingEventDefinitions() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
 
-        thenHearingEventDefinitionsAreRecorded(hearingId, eventDefinitions);
+        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
     }
 
     @Test
     public void shouldIndicateIfALoggedHearingEventIsAlterable() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithPauseAndResumeEvents());
 
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
-        final HearingEvent hearingPausedEvent = hearingPausedEvent(hearingId);
-        final HearingEvent hearingResumedEvent = hearingResumedEvent(hearingId);
-        final HearingEvent hearingEndedEvent = hearingEndedEvent(hearingId);
+        final HearingEvent hearingStartedEvent = hearingStartedEvent(this.hearingId);
+        final HearingEvent hearingPausedEvent = hearingPausedEvent(this.hearingId);
+        final HearingEvent hearingResumedEvent = hearingResumedEvent(this.hearingId);
+        final HearingEvent hearingEndedEvent = hearingEndedEvent(this.hearingId);
         andUserLogsAnEvent(hearingStartedEvent);
         andUserLogsAnEvent(hearingPausedEvent);
         andUserLogsAnEvent(hearingResumedEvent);
@@ -235,7 +196,7 @@ public class HearingEventsIT extends AbstractIT {
         thenHearingEventAlterableFlagIs(hearingResumedEvent, false);
         thenHearingEventAlterableFlagIs(hearingEndedEvent, false);
 
-        final HearingEvent identifyDefendantEvent = identifyDefendantEvent(hearingId);
+        final HearingEvent identifyDefendantEvent = identifyDefendantEvent(this.hearingId);
         andUserLogsAnEvent(identifyDefendantEvent);
 
         thenHearingEventAlterableFlagIs(identifyDefendantEvent, true);
@@ -243,7 +204,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void shouldBeAbleToQueryForADeletedHearingEventDefinition() {
-        givenAUserHasLoggedInAsACourtClerk(userId);
+        givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         final HearingEventDefinitionData initialHearingEventDefinitions = hearingEventDefinitionsWithOnlySequencedEvents();
         andHearingEventDefinitionsAreAvailable(initialHearingEventDefinitions);

@@ -33,31 +33,6 @@ public class HearingCommandApi {
     @Inject
     private Clock clock;
 
-    @Handles("hearing.initiate-hearing")
-    public void initiateHearing(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
-    }
-
-    @Handles("hearing.allocate-court")
-    public void allocateCourt(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
-    }
-
-    @Handles("hearing.book-room")
-    public void bookRoom(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
-    }
-
-    @Handles("hearing.add-case")
-    public void addCase(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
-    }
-
-    @Handles("hearing.adjourn-date")
-    public void adjournHearingDate(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
-    }
-
     @Handles("hearing.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) {
         this.sender.send(envelope);

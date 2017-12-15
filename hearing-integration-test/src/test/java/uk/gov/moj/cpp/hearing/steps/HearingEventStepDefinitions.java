@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.steps;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
@@ -10,7 +9,6 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
-import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
@@ -34,7 +32,6 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
-import static uk.gov.moj.cpp.hearing.utils.StructureStub.stubForCaseDetails;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
@@ -43,7 +40,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
 import java.time.ZonedDateTime;
@@ -62,12 +58,10 @@ import javax.json.JsonReader;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
-import com.google.common.io.Resources;
 import com.jayway.jsonpath.ReadContext;
 import com.jayway.jsonpath.matchers.IsJson;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
-import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 
 public class HearingEventStepDefinitions extends AbstractIT {
@@ -316,7 +310,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
         assertThat(response.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl(randomUUID());
+        final String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl(randomUUID());
         poll(requestParams(queryEventDefinitionsUrl, MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
                 .until(
                         status().is(OK),
@@ -521,33 +515,6 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 withJsonPath("$.case.caseUrn", is(notNullValue())),
                 withJsonPath("$.hearingEventDefinition.priority", equalTo(!hearingEvent.isAlterable()))
         )));
-    }
-
-    public static void andHearingHasInitiated(final UUID hearingId) throws IOException, InterruptedException {
-        final String caseId = randomUUID().toString();
-        stubForCaseDetails();
-        final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId.toString());
-
-        final Response writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.initiate-hearing+json")
-                .body(Resources.toString(getResource("hearing.initiate-hearing.json"),
-                        defaultCharset()).replace("RANDOM_CASE_ID", caseId)).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(
-                                withJsonPath("$.caseIds[0]", is(caseId))
-                        ));
     }
 
 }

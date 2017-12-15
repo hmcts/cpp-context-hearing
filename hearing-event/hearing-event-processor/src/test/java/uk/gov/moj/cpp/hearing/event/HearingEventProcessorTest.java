@@ -47,8 +47,8 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-import com.google.common.io.Resources;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -86,15 +86,15 @@ public class HearingEventProcessorTest {
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @Spy
     @InjectMocks
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
 
     @Spy
     @InjectMocks
-    private ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(objectMapper);
+    private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(this.objectMapper);
 
 
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
@@ -195,21 +195,6 @@ public class HearingEventProcessorTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void publishCaseStartedPublicEvent() {
-        final JsonEnvelope event = createEnvelope("hearing.hearing-initiated",
-                createObjectBuilder().add("hearingId", HEARING_ID.toString()).build());
-
-        this.hearingEventProcessor.publishHearingInitiatedPublicEvent(event);
-
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.hearing-initiated"),
-                payloadIsJson(
-                        withJsonPath(format("$.%s", "hearingId"), equalTo(HEARING_ID.toString()))
-                )).thatMatchesSchema());
-    }
 
     @Test
     public void publishHearingResultedPublicEvent() {
@@ -277,24 +262,6 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void publishAdjournDateUpdatedPublicEvent() {
-        // given
-        final JsonEnvelope event = createEnvelope("hearing.adjourn-date-updated", createObjectBuilder().add(FIELD_START_DATE, START_DATE).build());
-
-        //when
-        this.hearingEventProcessor.publishHearingDateAdjournedPublicEvent(event);
-
-        // then
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.adjourn-date-updated"),
-                payloadIsJson(
-                        withJsonPath(format("$.%s", FIELD_START_DATE), equalTo(START_DATE))
-                )).thatMatchesSchema());
-    }
-
-    @Test
     public void shouldPublishHearingEventLoggedPublicEvent() {
         // given
         final JsonEnvelope event = prepareHearingEventLoggedEvent();
@@ -339,7 +306,7 @@ public class HearingEventProcessorTest {
 
     @Test
     @UseDataProvider("provideListOfRequiredHearingField")
-    public void shouldNotPublishHearingEventLoggedPublicEventWhenRequiredHearingDataIsNotAvailable(String fieldToRemove) {
+    public void shouldNotPublishHearingEventLoggedPublicEventWhenRequiredHearingDataIsNotAvailable(final String fieldToRemove) {
         // given
         final JsonEnvelope event = prepareHearingEventLoggedEvent();
 
@@ -354,7 +321,7 @@ public class HearingEventProcessorTest {
 
     @Test
     @UseDataProvider("provideListOfRequiredHearingField")
-    public void shouldNotPublishHearingEventTimeStampCorrectedPublicEventWhenRequiredHearingDataIsNotAvailable(String fieldToRemove) {
+    public void shouldNotPublishHearingEventTimeStampCorrectedPublicEventWhenRequiredHearingDataIsNotAvailable(final String fieldToRemove) {
         // given
         final JsonEnvelope event = prepareHearingEventUpdatedEvent();
 
@@ -574,8 +541,8 @@ public class HearingEventProcessorTest {
 
         final JsonObject jsonObject = objectBuilder.build();
 
-        when(requester.request(any(JsonEnvelope.class))).thenReturn(responseEnvelope);
-        when(responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
+        when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);
+        when(this.responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
     }
 
     private JsonEnvelope getJsonHearingAddedEnvelope() {

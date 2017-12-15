@@ -5,6 +5,16 @@ import static java.util.UUID.fromString;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -16,26 +26,14 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.listing.Hearing;
 import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
 public class HearingEventProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
 
-    private static final String PUBLIC_HEARING_HEARING_INITIATED = "public.hearing.hearing-initiated";
     private static final String PUBLIC_HEARING_RESULTED = "public.hearing.resulted";
     private static final String PUBLIC_HEARING_RESULT_AMENDED = "public.hearing.result-amended";
-    private static final String PUBLIC_HEARING_HEARING_ADJOURNED = "public.hearing.adjourn-date-updated";
     private static final String PUBLIC_HEARING_EVENT_LOGGED = "public.hearing.event-logged";
     private static final String PUBLIC_HEARING_TIMESTAMP_CORRECTED = "public.hearing.event-timestamp-corrected";
 
@@ -87,12 +85,6 @@ public class HearingEventProcessor {
     @Inject
     private ObjectToJsonValueConverter objectToJsonValueConverter;
 
-    @Handles("hearing.hearing-initiated")
-    public void publishHearingInitiatedPublicEvent(final JsonEnvelope event) {
-        final String hearingId = event.payloadAsJsonObject().getString(FIELD_HEARING_ID);
-        final JsonObject payload = createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build();
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_INITIATED).apply(payload));
-    }
 
     @Handles("hearing.results-shared")
     public void publishHearingResultsSharedPublicEvent(final JsonEnvelope event) {
@@ -100,12 +92,6 @@ public class HearingEventProcessor {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(event.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.adjourn-date-updated")
-    public void publishHearingDateAdjournedPublicEvent(final JsonEnvelope event) {
-        final String startDate = event.payloadAsJsonObject().getString("startDate");
-        final JsonObject payload = createObjectBuilder().add("startDate", startDate).build();
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_HEARING_ADJOURNED).apply(payload));
-    }
 
     @Handles("hearing.result-amended")
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
@@ -200,7 +186,7 @@ public class HearingEventProcessor {
         Optional<HearingDetails> hearingDetails = Optional.empty();
 
         final String hearingId = event.payloadAsJsonObject().getString(FIELD_HEARING_ID);
-        final JsonEnvelope hearingQuery = enveloper.withMetadataFrom(event, HEARING_QUERY).apply(
+        final JsonEnvelope hearingQuery = this.enveloper.withMetadataFrom(event, HEARING_QUERY).apply(
                 createObjectBuilder()
                         .add(FIELD_HEARING_ID, hearingId)
                         .build()
@@ -259,23 +245,23 @@ public class HearingEventProcessor {
         }
 
         public String getCaseUrn() {
-            return caseUrn;
+            return this.caseUrn;
         }
 
         public UUID getCourtCenterId() {
-            return courtCenterId;
+            return this.courtCenterId;
         }
 
         public String getCourtCenterName() {
-            return courtCenterName;
+            return this.courtCenterName;
         }
 
         public String getRoomNumber() {
-            return roomNumber;
+            return this.roomNumber;
         }
 
         public String getHearingType() {
-            return hearingType;
+            return this.hearingType;
         }
     }
 

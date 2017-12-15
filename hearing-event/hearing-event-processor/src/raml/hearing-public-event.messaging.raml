@@ -7,12 +7,6 @@ baseUri: message://event/processor/message/hearing
       responses:
           200:
               body:
-                  application/vnd.public.hearing.hearing-initiated+json:
-                      schema: !include json/schema/public.hearing.hearing-initiated.json
-                      example: !include json/public.hearing.hearing-initiated.json
-                  application/vnd.public.hearing.adjourn-date-updated+json:
-                      schema: !include json/schema/public.hearing.adjourn-date-updated.json
-                      example: !include json/public.hearing.adjourn-date-updated.json
                   application/vnd.public.hearing.resulted+json:
                       schema: !include json/schema/public.hearing.resulted.json
                       example: !include json/public.hearing.resulted.json
