@@ -66,7 +66,6 @@ import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
 import org.junit.Test;
 
-
 public class HearingIT extends AbstractIT {
     private static final String PLEA_COLLECTION = "pleas";
     private static final String FIELD_PLEA_ID = "pleaId";
@@ -77,7 +76,6 @@ public class HearingIT extends AbstractIT {
     private static final String FIELD_VALUE = "value";
     private static final String FIELD_PLEA_DATE = "pleaDate";
     private static final String FIELD_PERSON_ID = "personId";
-
 
     @Test
     public void getHearing_CapabilityDisabled() throws IOException, InterruptedException {

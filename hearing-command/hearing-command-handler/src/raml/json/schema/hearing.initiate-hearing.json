@@ -42,5 +42,6 @@
     "startDateTime",
     "duration",
     "hearingType"
-  ]
+  ],
+  "additionalProperties": false
 }

@@ -14,7 +14,8 @@
         "type": "object",
         "properties": {
           "defendantId": {
-            "$ref": "#/definitions/uuid"
+            "$ref": "#/definitions/uuid",
+            "description": "a personId is actually required here, NOT a defendantId. This incorrect naming is a tech debt issue"
           }
         },
         "required": [

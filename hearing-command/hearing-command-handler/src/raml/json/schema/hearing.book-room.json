@@ -10,5 +10,9 @@
       "type": "string",
       "maxLength": 200
     }
-  }
+  },
+  "required": [
+    "roomName"
+  ],
+  "additionalProperties": false
 }

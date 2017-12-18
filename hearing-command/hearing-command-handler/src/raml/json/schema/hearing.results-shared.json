@@ -28,9 +28,6 @@
         "id": {
           "$ref": "#/definitions/uuid"
         },
-        "lastSharedResultId": {
-          "$ref": "#/definitions/uuid"
-        },
         "personId": {
           "$ref": "#/definitions/uuid"
         },

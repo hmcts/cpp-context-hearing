@@ -44,25 +44,20 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@SuppressWarnings("unused")
 @RunWith(MockitoJUnitRunner.class)
 public class ListingCommandHandlerTest {
 
     private static final String RECORD_HEARING_CONFIRMED = "hearing.hearing.confirmed-recorded";
 
-    private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_GENERIC_ID = "id";
-    private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
-    private static final String FIELD_START_DATE_TIME = "startDateTime";
     private static final String FIELD_DURATION = "estimateMinutes";
     private static final String FIELD_HEARING_TYPE = "type";
     private static final String FIELD_CASE_ID = "caseId";
-    private static final String FIELD_ROOM_ID = "courtRoomId";
-    private static final String FIELD_ROOM_NAME = "courtRoomName";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
     private static final String CASE_ID = UUID.randomUUID().toString();
     private static final String HEARING_ID = UUID.randomUUID().toString();
-    private static final String USER_ID = UUID.randomUUID().toString();
     private static final String COURT_CENTRE_ID = UUID.randomUUID().toString();
     private static final String ROOM_ID = UUID.randomUUID().toString();
     private static final String COURT_CENTRE_NAME = "Liverppol Crown Court";
@@ -82,9 +77,11 @@ public class ListingCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
 
-
     @Spy
     private JsonObjectToObjectConverter jsonObjectConverter;
+
+    @Spy
+    private final Enveloper enveloper = createEnveloperWithEvents(HearingConfirmedRecorded.class);
 
     @Before
     public void setup() {
@@ -96,10 +93,6 @@ public class ListingCommandHandlerTest {
         when(this.aggregateService.get(this.eventStream, HearingsPleaAggregate.class))
                 .thenReturn(new HearingsPleaAggregate());
     }
-
-    @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(HearingConfirmedRecorded.class);
-
 
     @Test
     public void shouldRaiseRecordHearingConfirmed() throws Exception {

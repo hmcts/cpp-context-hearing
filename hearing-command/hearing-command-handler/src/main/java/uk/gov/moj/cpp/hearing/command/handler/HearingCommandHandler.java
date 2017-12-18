@@ -41,10 +41,10 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("WeakerAccess")
 @ServiceComponent(COMMAND_HANDLER)
 public class HearingCommandHandler {
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(HearingCommandHandler.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingCommandHandler.class);
 
     private static final String FIELD_HEARING_ID = "hearingId";
 
@@ -87,9 +87,8 @@ public class HearingCommandHandler {
     @Inject
     private AggregateService aggregateService;
 
-
     @Inject
-    JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Handles("hearing.initiate-hearing")
     public void initiateHearing(final JsonEnvelope command) throws EventStreamException {
@@ -108,7 +107,6 @@ public class HearingCommandHandler {
 
         applyToHearingAggregate(hearingId, aggregate -> aggregate.initiateHearing(hearingDetails), command);
     }
-
 
     @Handles("hearing.allocate-court")
     public void allocateCourt(final JsonEnvelope command) throws EventStreamException {
@@ -223,6 +221,7 @@ public class HearingCommandHandler {
                 this.jsonObjectToObjectConverter.convert(payload, HearingPlea.class);
         applyToHearingAggregate(hearingId, aggregate -> aggregate.addPlea(hearingPlea), command);
     }
+
     @Handles("hearing.plea-change")
     public void pleaChange(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
@@ -248,6 +247,7 @@ public class HearingCommandHandler {
         final Stream<Object> events = function.apply(hearingsPleaAggregate);
         eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
     }
+
     private ResultLine extractResultLine(final JsonObject resultLine) {
         return new ResultLine(fromString(resultLine.getString(FIELD_GENERIC_ID)),
                 resultLine.containsKey(FIELD_LAST_SHARED_RESULT_ID) ? fromString(resultLine.getString(FIELD_LAST_SHARED_RESULT_ID)) : null,

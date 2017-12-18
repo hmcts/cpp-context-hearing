@@ -5,16 +5,6 @@ import static java.util.UUID.fromString;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -25,6 +15,16 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.listing.Hearing;
 import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
@@ -92,7 +92,6 @@ public class HearingEventProcessor {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(event.payloadAsJsonObject()));
     }
 
-
     @Handles("hearing.result-amended")
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
@@ -106,25 +105,26 @@ public class HearingEventProcessor {
         final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
 
         final InitiateHearingCommand initiateHearingCommand =
-                        getInitiateHearingCommand(caseId, hearing);
+                getInitiateHearingCommand(caseId, hearing);
 
 
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
-                .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));;
+                .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
     }
+
     @Handles("hearing.case.plea-added")
     public void createHearingPleaAddFromPleaAdded(final JsonEnvelope event) {
         LOGGER.trace("Received plea-added event, processing");
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_ADD)
-                .apply(event.payloadAsJsonObject()));;
+                .apply(event.payloadAsJsonObject()));
 
     }
+
     @Handles("hearing.case.plea-changed")
     public void createHearingPleaChangeFromPleaChanged(final JsonEnvelope event) {
         LOGGER.trace("Received plea-changed event, processing");
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_CHANGE)
-                .apply(event.payloadAsJsonObject()));;
-
+                .apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.hearing-event-logged")
@@ -266,14 +266,12 @@ public class HearingEventProcessor {
     }
 
     private InitiateHearingCommand getInitiateHearingCommand(final UUID caseId,
-                    final Hearing hearing) {
+                                                             final Hearing hearing) {
         final InitiateHearingCommand command = new InitiateHearingCommand();
         command.setHearingId(hearing.getId());
         command.setCaseId(caseId);
-        command.setCourtCentreId(hearing.getCourtCentreId() == null ? null
-                        : UUID.fromString(hearing.getCourtCentreId()));
-        command.setRoomId(hearing.getCourtRoomId() == null ? null
-                        : UUID.fromString(hearing.getCourtRoomId()));
+        command.setCourtCentreId(hearing.getCourtCentreId() == null ? null : fromString(hearing.getCourtCentreId()));
+        command.setRoomId(hearing.getCourtRoomId() == null ? null : fromString(hearing.getCourtRoomId()));
         command.setCourtCentreName(hearing.getCourtCentreName());
         command.setRoomName(hearing.getCourtRoomName());
         command.setDuration(hearing.getEstimateMinutes());
