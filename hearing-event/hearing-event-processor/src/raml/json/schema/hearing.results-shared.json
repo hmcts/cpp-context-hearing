@@ -45,6 +45,9 @@
             "OFFENCE"
           ]
         },
+        "resultLabel": {
+          "type": "string"
+        },
         "court": {
           "type": "string"
         },
@@ -58,9 +61,6 @@
           "type": "string"
         },
         "clerkOfTheCourtLastName": {
-          "type": "string"
-        },
-        "resultLabel": {
           "type": "string"
         },
         "prompts": {

@@ -41,7 +41,7 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "CdiInjectionPointsInspection"})
 @ServiceComponent(COMMAND_HANDLER)
 public class HearingCommandHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingCommandHandler.class);
@@ -203,9 +203,9 @@ public class HearingCommandHandler {
         eventStream.append(events.map(this.enveloper.withMetadataFrom(command)));
     }
 
-    @Handles("hearing.update-plea")
+    @Handles("hearing.command.update-plea")
     public void updatePlea(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.trace("Processing hearing.update-plea event");
+        LOGGER.trace("Processing hearing.command.update-plea command");
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
         final HearingUpdatePleaCommand hearingUpdatePleaCommand =

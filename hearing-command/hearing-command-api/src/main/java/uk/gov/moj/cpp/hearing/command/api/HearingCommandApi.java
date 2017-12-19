@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+@SuppressWarnings("WeakerAccess")
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
 
@@ -49,8 +50,8 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.update-plea")
-    public void updatePlea(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
+    public void updatePlea(final JsonEnvelope command) {
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-plea").apply(command.payloadAsJsonObject()));
     }
 
     @Handles(COMMAND_SHARE_RESULTS)

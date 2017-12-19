@@ -12,9 +12,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class HearingUpdatePleaCommand implements Serializable {
-    final private UUID hearingId;
-    final private UUID caseId;
-    final private List<Defendant> defendants;
+
+    private final UUID hearingId;
+    private final UUID caseId;
+    private final List<Defendant> defendants;
 
     @JsonCreator
     public HearingUpdatePleaCommand(@JsonProperty("hearingId") final UUID hearingId,

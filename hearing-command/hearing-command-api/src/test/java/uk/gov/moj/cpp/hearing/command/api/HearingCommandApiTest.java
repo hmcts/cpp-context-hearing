@@ -58,6 +58,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@SuppressWarnings("unused")
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandApiTest {
 
@@ -94,16 +95,14 @@ public class HearingCommandApiTest {
     private static final String VALUE = STRING.next();
 
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
-    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent", "correctEvent");
+    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList(
+            "shareResults", "logHearingEvent", "correctEvent", "updatePlea");
 
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
 
     @Mock
     private Sender sender;
-
-    @Mock
-    private JsonEnvelope envelope;
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
@@ -116,9 +115,6 @@ public class HearingCommandApiTest {
 
     @InjectMocks
     private HearingCommandApi hearingCommandApi;
-
-    @InjectMocks
-    private HearingEventCommandApi hearingEventCommandApi;
 
     @Before
     public void setup() {

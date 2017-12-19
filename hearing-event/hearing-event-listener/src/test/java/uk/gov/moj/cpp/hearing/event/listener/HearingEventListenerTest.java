@@ -223,7 +223,6 @@ public class HearingEventListenerTest {
 
     @Before
     public void setUp() {
-//        this.hearingEventListener.jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
         setField(this.jsonObjectToObjectConverter, "mapper",
                 new ObjectMapperProducer().objectMapper());
     }

@@ -39,7 +39,6 @@ import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
@@ -106,7 +105,6 @@ public class HearingCommandHandlerTest {
     private static final String HEARING_PLEA_ADDED = "hearing.plea-added";
     private static final String HEARING_PLEA_CHANGED = "hearing.plea-changed";
     private static final String PLEA_ADDED = "hearing.case.plea-added";
-    private static final String PLEA_CHANGED = "hearing.case.plea-changed";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
@@ -186,11 +184,9 @@ public class HearingCommandHandlerTest {
     private static final String PROMPT_LABEL_4 = "Creditor name";
     private static final String PROMPT_VALUE_4 = "Roger Stokes";
 
-    private static final String DEFEDANT_ID = UUID.randomUUID().toString();
     private static final String PLEA_ID = UUID.randomUUID().toString();
     private static final String PLEA_DATE = "2017-02-02";
     private static final String PLEA_VALUE = "GUILTY";
-    private static final String FIELD_PLEA = "plea";
 
     @Mock
     private EventStream eventStream;
@@ -202,7 +198,7 @@ public class HearingCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
-    JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
@@ -569,7 +565,6 @@ public class HearingCommandHandlerTest {
                                 withJsonPath(format("$.%s.%s","plea","value"), equalTo(PLEA_VALUE))
                         )))
         ));
-
     }
 
     @Test
@@ -620,7 +615,6 @@ public class HearingCommandHandlerTest {
 
     }
 
-
     private JsonEnvelope createInitiateHearingCommandWithOnlyRequiredFields() {
         return envelope()
                 .with(metadataWithRandomUUID(INITIATE_HEARING_COMMAND))
@@ -629,17 +623,6 @@ public class HearingCommandHandlerTest {
                 .withPayloadOf(DURATION, FIELD_DURATION)
                 .withPayloadOf(HEARING_TYPE, FIELD_HEARING_TYPE)
                 .build();
-    }
-
-    private JsonEnvelope createAddHearingsCommandWithOnlyRequiredFields() {
-        final JsonObject hearing = createObjectBuilder().add(FIELD_GENERIC_ID, HEARING_ID.toString())
-                .add(FIELD_START_DATE_TIME, ZonedDateTimes.toString(START_DATE_TIME))
-                .add(FIELD_DURATION, DURATION)
-                .add(FIELD_HEARING_TYPE, HEARING_TYPE)
-                .build();
-
-        final JsonObject addHearings = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).add("hearing", hearing).build();
-        return new DefaultJsonEnvelope(metadataWithRandomUUID(INITIATE_HEARING_COMMAND).build(), addHearings);
     }
 
     private JsonEnvelope createInitiateHearingCommand() {
@@ -854,7 +837,7 @@ public class HearingCommandHandlerTest {
         sendCaseForListingEventPayloadString =
                 sendCaseForListingEventPayloadString.replace("RANDOM_CASE_ID", CASE_ID.toString()).
                         replace("RANDOM_HEARING_ID", HEARING_ID.toString()).
-                        replace("RANDOM_DEFEDANT_ID", DEFEDANT_ID).
+                        replace("RANDOM_DEFENDANT_ID", DEFENDANT_ID.toString()).
                         replace("RANDOM_PERSON_ID", PERSON_ID.toString()).
                         replace("RANDOM_OFFENCE_ID", OFFENCE_ID.toString()).
                         replace("RANDOM_PLEA_ID", PLEA_ID).

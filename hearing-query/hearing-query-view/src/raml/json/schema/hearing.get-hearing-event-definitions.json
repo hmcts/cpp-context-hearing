@@ -22,14 +22,14 @@
           "recordedLabel": {
             "type": "string"
           },
-          "alterable": {
-            "type": "boolean"
-          },
           "caseAttributes": {
             "type": "array",
             "items": {
               "type": "object"
             }
+          },
+          "alterable": {
+            "type": "boolean"
           },
           "sequence": {
             "type": "object",

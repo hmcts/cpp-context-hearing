@@ -33,10 +33,10 @@
   "required": [
     "hearingEventId",
     "hearingId",
+    "hearingEventDefinitionId",
     "recordedLabel",
     "eventTime",
     "lastModifiedTime",
-    "hearingEventDefinitionId",
     "alterable"
   ],
   "definitions": {

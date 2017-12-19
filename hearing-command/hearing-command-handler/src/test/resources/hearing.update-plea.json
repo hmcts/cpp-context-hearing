@@ -3,7 +3,7 @@
   "hearingId": "RANDOM_HEARING_ID",
   "defendants": [
     {
-      "id": "RANDOM_DEFEDANT_ID",
+      "id": "RANDOM_DEFENDANT_ID",
       "personId": "RANDOM_PERSON_ID",
       "offences": [
         {
