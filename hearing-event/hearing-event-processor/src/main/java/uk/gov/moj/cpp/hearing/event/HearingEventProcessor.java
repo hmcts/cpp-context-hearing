@@ -57,7 +57,7 @@ public class HearingEventProcessor {
     private static final String FIELD_COURT_CENTER_ID = "courtCentreId";
 
     private static final String HEARING_QUERY = "hearing.get.hearing";
-    private static final String CASE_QUERY = "structure.query.case";
+    private static final String CASE_QUERY = "progression.query.caseprogressiondetail";
     private static final String HEARING_INITIATE_HEARING = "hearing.initiate-hearing";
     private static final String HEARING_PLEA_ADD = "hearing.plea-add";
     private static final String HEARING_PLEA_CHANGE = "hearing.plea-change";
@@ -65,7 +65,7 @@ public class HearingEventProcessor {
     private static final String FIELD_HEARING_ID = "hearingId";
 
     private static final String FIELD_CASE_ID = "caseId";
-    public static final String FIELD_URN = "urn";
+    public static final String FIELD_URN = "caseUrn";
     public static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     public static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
     public static final String FIELD_ROOM_NAME = "roomName";

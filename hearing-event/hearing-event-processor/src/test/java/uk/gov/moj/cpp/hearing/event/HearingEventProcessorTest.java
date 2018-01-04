@@ -508,7 +508,7 @@ public class HearingEventProcessorTest {
 
     private void fakeCaseResponse() {
         final JsonObject jsonObject = createObjectBuilder()
-                .add("urn", URN_VALUE)
+                .add("caseUrn", URN_VALUE)
                 .add("caseIds", createArrayBuilder().add(CASE_ID.toString()))
                 .add("courtCentreId", COURT_CENTER_ID.toString())
                 .add("courtCentreName", COURT_CENTER_NAME)
