@@ -35,16 +35,6 @@
         <module>hearing-notepad-parsing-service</module>
         <module>hearing-service</module>
     </modules>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.tngtech.java</groupId>
-                <artifactId>junit-dataprovider</artifactId>
-                <version>${junit-dataprovider.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>

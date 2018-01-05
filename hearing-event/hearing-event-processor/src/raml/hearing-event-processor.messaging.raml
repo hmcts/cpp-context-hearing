@@ -23,6 +23,12 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.case.plea-changed+json:
             schema: !include json/schema/hearing.case.plea-changed.json
             example: !include json/hearing.case.plea-changed.json
+        application/vnd.hearing.sending-sheet-recorded+json:
+            schema: !include json/schema/hearing.sending-sheet-recorded.json
+            example: !include json/hearing.sending-sheet-recorded.json
+        application/vnd.hearing.mags-court-hearing-recorded+json:
+            schema: !include json/schema/hearing.mags-court-hearing-recorded.json
+            example: !include json/hearing.mags-court-hearing-recorded.json
 
 /public.event:
   post:
@@ -30,3 +36,6 @@ baseUri: message://event/processor/message/hearing
         application/vnd.public.hearing-confirmed+json:
             schema: !include json/schema/public.hearing-confirmed.json
             example: !include json/public.hearing-confirmed.json
+        application/vnd.public.progression.events.sending-sheet-completed+json:
+            schema: !include json/schema/public.progression.events.sending-sheet-completed.json
+            example: !include json/public.progression.events.sending-sheet-completed.json

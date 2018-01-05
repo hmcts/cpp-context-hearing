@@ -14,21 +14,28 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.listing.Hearing;
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
 
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
-public class HearingEventProcessor {
+public class HearingEventProcessor   {
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
 
@@ -50,15 +57,14 @@ public class HearingEventProcessor {
     private static final String FIELD_HEARING_EVENT_DEFINITION = "hearingEventDefinition";
     private static final String FIELD_HEARING_EVENT = "hearingEvent";
     private static final String FIELD_HEARING = "hearing";
-    private static final String FIELD_COURT_CENTER_NAME = "courtCentreName";
     private static final String FIELD_ROOM_NUMBER = "roomNumber";
     private static final String FIELD_HEARING_TYPE = "hearingType";
     private static final String FIELD_COURT_CENTRE = "courtCentre";
-    private static final String FIELD_COURT_CENTER_ID = "courtCentreId";
 
     private static final String HEARING_QUERY = "hearing.get.hearing";
     private static final String CASE_QUERY = "progression.query.caseprogressiondetail";
     private static final String HEARING_INITIATE_HEARING = "hearing.initiate-hearing";
+    private static final String HEARING_RECORD_MAGS_COURT_HEARING = "hearing.record-mags-court-hearing";
     private static final String HEARING_PLEA_ADD = "hearing.plea-add";
     private static final String HEARING_PLEA_CHANGE = "hearing.plea-change";
 
@@ -69,6 +75,7 @@ public class HearingEventProcessor {
     public static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     public static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
     public static final String FIELD_ROOM_NAME = "roomName";
+    public static final int DEFAULT_HEARING_DURATION_MINUTES = 15;
 
     @Inject
     private Enveloper enveloper;
@@ -88,14 +95,18 @@ public class HearingEventProcessor {
 
     @Handles("hearing.results-shared")
     public void publishHearingResultsSharedPublicEvent(final JsonEnvelope event) {
-        LOGGER.debug(format("'public.hearing.resulted' event received %s", event.payloadAsJsonObject()));
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(event.payloadAsJsonObject()));
+        JsonObject payload =  event.payloadAsJsonObject();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(format("'public.hearing.resulted' event received %s", payload));
+        }
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULTED).apply(payload));
     }
 
     @Handles("hearing.result-amended")
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
     }
+
 
     @Handles("hearing.hearing.confirmed-recorded")
     public void createInitiateHearingCommandFromHearingConfirmedRecorded(final JsonEnvelope event) {
@@ -110,6 +121,19 @@ public class HearingEventProcessor {
 
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
                 .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
+    }
+
+    @Handles("hearing.sending-sheet-recorded")
+    public void processSendingSheetRecordedRecordMags(final JsonEnvelope event) {
+        LOGGER.trace("Received hearing.sending-sheet-recorded event, processing");
+        final JsonObject payload = event.payloadAsJsonObject();
+        SendingSheetCompletedRecorded sendingSheetCompletedRecorded = this.jsonObjectToObjectConverter.convert(payload,SendingSheetCompletedRecorded.class);
+
+        final RecordMagsCourtHearingCommand command  = new RecordMagsCourtHearingCommand(sendingSheetCompletedRecorded.getHearing());
+
+        JsonValue newPayload = this.objectToJsonValueConverter.convert(command);
+        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_RECORD_MAGS_COURT_HEARING)
+                .apply(newPayload));
     }
 
     @Handles("hearing.case.plea-added")
@@ -151,8 +175,8 @@ public class HearingEventProcessor {
             }
 
             final JsonObjectBuilder courtHouseJsonBuilder = createObjectBuilder()
-                    .add(FIELD_COURT_CENTER_ID, hearingDetails.getCourtCenterId().toString())
-                    .add(FIELD_COURT_CENTER_NAME, hearingDetails.getCourtCenterName())
+                    .add(FIELD_COURT_CENTRE_ID, hearingDetails.getCourtCenterId().toString())
+                    .add(FIELD_COURT_CENTRE_NAME, hearingDetails.getCourtCenterName())
                     .add(FIELD_ROOM_NUMBER, hearingDetails.getRoomNumber());
 
             final JsonObjectBuilder hearingJsonBuilder = createObjectBuilder();
@@ -182,9 +206,24 @@ public class HearingEventProcessor {
         }
     }
 
+    @Handles("hearing.mags-court-hearing-recorded")
+    public void magsCourtProcessed(final JsonEnvelope event) {
+
+        LOGGER.trace("Received hearing.mags-court-hearing-recorded event, processing");
+        final JsonObject payload = event.payloadAsJsonObject();
+        final MagsCourtHearingRecorded preceding = this.jsonObjectToObjectConverter.convert(payload,MagsCourtHearingRecorded.class);
+        final UUID caseId = preceding.getOriginatingHearing().getCaseId();
+
+        final InitiateHearingCommand initiateHearingCommand =
+                getInitiateHearingCommand(caseId, preceding.getOriginatingHearing(), preceding.getHearingId(), preceding.getConvictionDate());
+
+        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
+                .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
+
+    }
+
     private Optional<HearingDetails> getHearingDetails(final JsonEnvelope event) {
         Optional<HearingDetails> hearingDetails = Optional.empty();
-
         final String hearingId = event.payloadAsJsonObject().getString(FIELD_HEARING_ID);
         final JsonEnvelope hearingQuery = this.enveloper.withMetadataFrom(event, HEARING_QUERY).apply(
                 createObjectBuilder()
@@ -279,4 +318,20 @@ public class HearingEventProcessor {
         command.setStartDateTime(hearing.getStartDateTime());
         return command;
     }
+
+    private InitiateHearingCommand getInitiateHearingCommand(final UUID caseId,
+                                                             final uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing originatingHearing,
+                                                             UUID newHearingId, LocalDate convictionDate) {
+        //this is actaully a create hearing command - the hearing may be historical
+        final InitiateHearingCommand command = new InitiateHearingCommand();
+        command.setHearingId(newHearingId);
+        command.setCaseId(caseId);
+        command.setCourtCentreId(originatingHearing.getCourtCentreId() == null ? null : fromString(originatingHearing.getCourtCentreId()));
+        command.setCourtCentreName(originatingHearing.getCourtCentreName());
+        command.setDuration(DEFAULT_HEARING_DURATION_MINUTES);
+        command.setHearingType(originatingHearing.getType());
+        command.setStartDateTime(convictionDate.atStartOfDay(ZoneOffset.UTC));
+        return command;
+    }
+
 }

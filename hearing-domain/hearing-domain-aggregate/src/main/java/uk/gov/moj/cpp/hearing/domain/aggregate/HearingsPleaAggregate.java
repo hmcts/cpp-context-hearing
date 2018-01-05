@@ -6,16 +6,15 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.external.domain.listing.Hearing;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Offence;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
-import uk.gov.moj.cpp.hearing.domain.event.HearingConfirmedRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -27,23 +26,56 @@ import java.util.stream.Stream.Builder;
 public class HearingsPleaAggregate implements Aggregate {
     private UUID caseId;
     private String urn;
-    private Boolean sendingSheetComplete;
+    private Boolean sendingSheetCompleteProcessed=false;
     private Map<UUID, Hearing> hearing = new HashMap<>();
     private Map<UUID, Plea> pleas = new HashMap<>();
-
 
     @Override
     public Object apply(final Object event) {
         return match(event).with(
+                when(SendingSheetCompletedRecorded.class).apply(e->sendingSheetCompleteProcessed=true),
                 when(HearingConfirmedRecorded.class).apply(this::onHearingConfirmedRecorded),
                 when(PleaAdded.class).apply(this::onPleaAdded),
                 when(PleaChanged.class).apply(this::onPleaChanged),
                 otherwiseDoNothing());
     }
 
-
     public Stream<Object> recordHearingConfirmed(final UUID caseId, final String urn, final Hearing hearing) {
         return apply(Stream.of(new HearingConfirmedRecorded(caseId, urn, hearing)));
+    }
+
+    public Stream<Object> recordSendingSheetComplete(final SendingSheetCompleted sendingSheetCompleted) {
+        if (!sendingSheetCompleteProcessed) {
+            return apply(Stream.of(new SendingSheetCompletedRecorded(sendingSheetCompleted.getCrownCourtHearing(), sendingSheetCompleted.getHearing())));
+        } else {
+            return Stream.empty();
+        }
+
+    }
+    public Stream<Object> recordMagsCourtHearing(final uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing originatingHearing) {
+        final Builder<Object> streamBuilder = builder();
+
+             final List<MagsCourtHearingRecorded> hearings2Initiate = HearingTransformer.transform(originatingHearing);
+             hearings2Initiate.forEach(e-> {
+                 streamBuilder.add(e);
+                     e.getOriginatingHearing().getDefendants().stream().forEach(
+                             defendant ->
+                                  defendant.getOffences().stream().forEach(
+                                          offence->{
+                                              uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea fromPlea = offence.getPlea();
+                                              final Plea plea = new Plea(offence.getPlea().getId(), fromPlea.getValue().name(), fromPlea.getPleaDate());
+
+                                              final PleaAdded pleaAdded = new PleaAdded(originatingHearing.getCaseId(), e.getHearingId(), defendant.getId(), defendant.getPersonId(),
+                                                       offence.getId(), plea);
+                                              streamBuilder.add(pleaAdded);
+
+                                          }
+                                  )
+                     );
+                     }
+             );
+
+        return streamBuilder.build();
     }
 
 

@@ -31,6 +31,8 @@ public class HearingCommandHandlerRamlConfigTest {
     public void setup() {
         handlerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingCommandHandler.class);
         handlerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(ListingCommandHandler.class));
+        handlerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(ProgressionCommandHandler.class));
+
         eventHandlerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingEventCommandHandler.class);
     }
 

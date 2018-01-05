@@ -123,6 +123,7 @@ public class HearingEventCommandHandlerTest {
     private static final boolean ALTERABLE_2 = BOOLEAN.next();
     private static final boolean ALTERABLE_3 = BOOLEAN.next();
 
+
     @Mock
     private EventStream eventStream;
 
@@ -131,7 +132,6 @@ public class HearingEventCommandHandlerTest {
 
     @Mock
     private AggregateService aggregateService;
-
     @Spy
     private Enveloper enveloper = createEnveloperWithEvents(
             HearingEventLogged.class, HearingEventDefinitionsCreated.class,

@@ -9,14 +9,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.moj.cpp.hearing.domain.event.HearingConfirmedRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
-import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +37,11 @@ public class HearingEventListenerRamlConfigTest {
             HearingPleaIgnored.class.getAnnotation(Event.class).value(),
             PleaAdded.class.getAnnotation(Event.class).value(),
             PleaChanged.class.getAnnotation(Event.class).value(),
-            HearingEventDeletionIgnored.class.getAnnotation(Event.class).value()
-    );
+            HearingEventDeletionIgnored.class.getAnnotation(Event.class).value(),
+            SendingSheetCompletedRecorded.class.getAnnotation(Event.class).value(),
+            MagsCourtHearingRecorded.class.getAnnotation(Event.class).value()
+
+            );
 
     private List<String> ramlActionNames;
 

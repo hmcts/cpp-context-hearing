@@ -79,5 +79,10 @@
             <artifactId>hearing-domain-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-domain-event</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
