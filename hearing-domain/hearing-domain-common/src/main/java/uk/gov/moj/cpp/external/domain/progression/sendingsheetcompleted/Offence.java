@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class Offences {
+public class Offence {
   private String category;
 
   private LocalDate convictionDate;
@@ -26,51 +26,51 @@ public class Offences {
 
   private LocalDate startDate;
 
-  private void setCategory(String category) {
+  private void setCategory(final String category) {
     this.category = category;
   }
 
-  private void setConvictionDate(LocalDate convictionDate) {
+  private void setConvictionDate(final LocalDate convictionDate) {
     this.convictionDate = convictionDate;
   }
 
-  private void setDescription(String description) {
+  private void setDescription(final String description) {
     this.description = description;
   }
 
-  private void setEndDate(LocalDate endDate) {
+  private void setEndDate(final LocalDate endDate) {
     this.endDate = endDate;
   }
 
-  private void setId(UUID id) {
+  private void setId(final UUID id) {
     this.id = id;
   }
 
-  private void setIndicatedPlea(IndicatedPlea indicatedPlea) {
+  private void setIndicatedPlea(final IndicatedPlea indicatedPlea) {
     this.indicatedPlea = indicatedPlea;
   }
 
-  private void setOffenceCode(String offenceCode) {
+  private void setOffenceCode(final String offenceCode) {
     this.offenceCode = offenceCode;
   }
 
-  private void setPlea(Plea plea) {
+  private void setPlea(final Plea plea) {
     this.plea = plea;
   }
 
-  private void setReason(String reason) {
+  private void setReason(final String reason) {
     this.reason = reason;
   }
 
-  private void setSection(String section) {
+  private void setSection(final String section) {
     this.section = section;
   }
 
-  private void setStartDate(LocalDate startDate) {
+  private void setStartDate(final LocalDate startDate) {
     this.startDate = startDate;
   }
 
-  private void setWording(String wording) {
+  private void setWording(final String wording) {
     this.wording = wording;
   }
 
@@ -125,7 +125,7 @@ public class Offences {
   }
 
   public static Builder offences() {
-    return new Offences.Builder();
+    return new Offence.Builder();
   }
 
   public static class Builder {
@@ -213,8 +213,8 @@ public class Offences {
       return this;
     }
 
-    public Offences build() {
-      Offences offence = new Offences();
+    public Offence build() {
+      final Offence offence = new Offence();
 
       offence.setCategory(category);
       offence.setConvictionDate(convictionDate);

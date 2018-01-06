@@ -1,12 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.*;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Address;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Interpreter;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -19,6 +21,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
+
 @RunWith(MockitoJUnitRunner.class)
 public class HearingsPleaAggregateTest {
 
@@ -28,14 +36,14 @@ public class HearingsPleaAggregateTest {
 
     @Test
     public void testRecordSendingSheetComplete() throws Exception {
-         SendingSheetCompleted sendingSheetCompleted = createSendingSheet();
+         final SendingSheetCompleted sendingSheetCompleted = createSendingSheet();
 
          Stream<Object> events = hearingsPleaAggregate.recordSendingSheetComplete(sendingSheetCompleted );
          List<Object> lEvents = events.collect(Collectors.toList());
          Assert.assertEquals(1, lEvents.size());
-         Object event = lEvents.get(0);
+         final Object event = lEvents.get(0);
          Assert.assertEquals(event.getClass(), SendingSheetCompletedRecorded.class);
-         SendingSheetCompletedRecorded typedEvent  = (SendingSheetCompletedRecorded) event;
+         final SendingSheetCompletedRecorded typedEvent  = (SendingSheetCompletedRecorded) event;
          Assert.assertEquals(typedEvent.getCrownCourtHearing(), sendingSheetCompleted.getCrownCourtHearing() );
          Assert.assertEquals(typedEvent.getHearing(), sendingSheetCompleted.getHearing() );
 
@@ -49,12 +57,12 @@ public class HearingsPleaAggregateTest {
 
     private SendingSheetCompleted createSendingSheet() {
 
-        List<Defendants> arrDefendants = new ArrayList<>();
-            List lOffences = new ArrayList<>();
-                Plea plea = (new Plea.Builder()).withId(UUID.randomUUID()).withPleaValue(PleaValue.GUILTY).withPleaDate(LocalDate.now()).build();
-                LocalDate convictionDate = plea!=null && plea.getValue().equals(PleaValue.GUILTY) ? plea.getPleaDate() : null;
-                UUID offenceId = UUID.randomUUID();
-                Offences offence = (new Offences.Builder()).withId(offenceId).withCategory("category").withConvictionDate(convictionDate).
+        final List<Defendant> arrDefendants = new ArrayList<>();
+            final List lOffences = new ArrayList<>();
+                final Plea plea = (new Plea.Builder()).withId(UUID.randomUUID()).withPleaValue(PleaValue.GUILTY).withPleaDate(LocalDate.now()).build();
+                final LocalDate convictionDate = plea!=null && plea.getValue().equals(PleaValue.GUILTY) ? plea.getPleaDate() : null;
+                final UUID offenceId = UUID.randomUUID();
+                final Offence offence = (new Offence.Builder()).withId(offenceId).withCategory("category").withConvictionDate(convictionDate).
                         withDescription("testOffence").withEndDate(LocalDate.now()).withPlea(plea)
                         .withReason("Reason")
                         .withSection("section")
@@ -63,28 +71,28 @@ public class HearingsPleaAggregateTest {
                         .build();
                 lOffences.add(offence);
 
-            Address address = (new Address.Builder()).withAddress1("addr1").withAddress2("addr2").withAddress3("addr3").
+            final Address address = (new Address.Builder()).withAddress1("addr1").withAddress2("addr2").withAddress3("addr3").
                     withAddress4("addr4").withPostcode("AA1 1AA").build();
-            UUID defendantId = UUID.randomUUID();
-            Interpreter interpreter = (new Interpreter.Builder()).withLanguage("English").withNeeded(true).build();
-            Defendants defendant = (new Defendants.Builder()).withOffences(lOffences).withAddress(address).withBailStatus("bailStatus").
+            final UUID defendantId = UUID.randomUUID();
+            final Interpreter interpreter = (new Interpreter.Builder()).withLanguage("English").withNeeded(true).build();
+            final Defendant defendant = (new Defendant.Builder()).withOffences(lOffences).withAddress(address).withBailStatus("bailStatus").
                     withDateOfBirth(LocalDate.now()).withDefenceOrganisation("CPP").
-                    withFirstName("Geoff").withLastName("ssdfsf").withGender(Gender.MALE).withId(defendantId).
+                    withFirstName("Geoff").withLastName("ssdfsf").withGender("Male").withId(defendantId).
                     withInterpreter(interpreter).withNationality("UK").withPersonId(UUID.randomUUID()).
                     build();
             arrDefendants.add(defendant);
 
-        UUID caseId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
 
-        Hearing hearing = (new Hearing.Builder()).withCaseId(caseId).withCaseUrn("caseUrn").
+        final Hearing hearing = (new Hearing.Builder()).withCaseId(caseId).withCaseUrn("caseUrn").
                 withCourtCentreId("courtCentreId").withCourtCentreName("courtCentreName").
                 withDefendants(arrDefendants).build();
 
-        UUID courtCentreId = UUID.randomUUID();
-        CrownCourtHearing crownCourtHearing = (new CrownCourtHearing.Builder()).withCcHearingDate("ccHearingDate").
+        final UUID courtCentreId = UUID.randomUUID();
+        final CrownCourtHearing crownCourtHearing = (new CrownCourtHearing.Builder()).withCcHearingDate("ccHearingDate").
                 withCourtCentreId(courtCentreId).withCourtCentreName("courtCentrName").build();
 
-        SendingSheetCompleted  sendingSheetCompleted =   (new SendingSheetCompleted.Builder()).withHearing(hearing).
+        final SendingSheetCompleted  sendingSheetCompleted =   (new SendingSheetCompleted.Builder()).withHearing(hearing).
                 withCrownCourtHearing(crownCourtHearing).build();
         return sendingSheetCompleted;
     }
@@ -93,40 +101,40 @@ public class HearingsPleaAggregateTest {
     public void testRecordMagsCourtHearing() {
 
         LocalDate convictionDate;
-        List<Defendants> defendants=new ArrayList<>();
-        List<Offences> offences;
-        Defendants defendant;
-        Offences offence;
+        final List<Defendant> defendants=new ArrayList<>();
+        List<Offence> offences;
+        Defendant defendant;
+        Offence offence;
 
-        List<UUID> pleaIds = new ArrayList<>();
-        List<LocalDate> convictionDates = new ArrayList<>();
-        List<UUID> caseIds = new ArrayList<>();
+        final List<UUID> pleaIds = new ArrayList<>();
+        final List<LocalDate> convictionDates = new ArrayList<>();
+        final List<UUID> caseIds = new ArrayList<>();
 
         //instead of making separate pleas etc
 
-        UUID caseId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
 
-        int convictionCount =2;
+        final int convictionCount =2;
 
         for (int done=0; done<convictionCount; done++) {
             convictionDate = LocalDate.now().plusDays(done);
             convictionDates.add(convictionDate);
-            UUID pleaId = UUID.randomUUID();
+            final UUID pleaId = UUID.randomUUID();
             pleaIds.add(pleaId);
-            Plea plea = (new Plea.Builder()).withPleaDate(convictionDate).withPleaValue(PleaValue.GUILTY).withId(pleaId).build();
-            offence = (new Offences.Builder()).withPlea(plea).build();
+            final Plea plea = (new Plea.Builder()).withPleaDate(convictionDate).withPleaValue(PleaValue.GUILTY).withId(pleaId).build();
+            offence = (new Offence.Builder()).withPlea(plea).build();
             offences = Arrays.asList(offence);
-            defendant = (new Defendants.Builder()).withOffences(offences).build();
+            defendant = (new Defendant.Builder()).withOffences(offences).build();
             defendants.add(defendant);
             caseIds.add(caseId);
         }
 
-        Hearing originatingHearing = (new Hearing.Builder()).withDefendants(defendants).withCaseId(caseId).build();
+        final Hearing originatingHearing = (new Hearing.Builder()).withDefendants(defendants).withCaseId(caseId).build();
 
         //Mockito.when(HearingTransformer.transform(originatingHearing)).thenReturn(magsCourtHearingRecordeds);
 
-        Stream<Object> events =  hearingsPleaAggregate.recordMagsCourtHearing(originatingHearing);
-        List<Object> lEvents = events.collect(Collectors.toList());
+        final Stream<Object> events =  hearingsPleaAggregate.recordMagsCourtHearing(originatingHearing);
+        final List<Object> lEvents = events.collect(Collectors.toList());
         Assert.assertEquals(2*convictionCount, lEvents.size() );
 
         //assume that the plea added events appear insequence after the magscourthearingrecorded events
@@ -134,11 +142,11 @@ public class HearingsPleaAggregateTest {
         for (int done=0; done<convictionCount; done++) {
             Assert.assertEquals(lEvents.get(done*2).getClass(), MagsCourtHearingRecorded.class);
             Assert.assertEquals(lEvents.get(done*2+1).getClass(), PleaAdded.class);
-            MagsCourtHearingRecorded magsCourtHearingRecorded = (MagsCourtHearingRecorded) lEvents.get(done*2);
+            final MagsCourtHearingRecorded magsCourtHearingRecorded = (MagsCourtHearingRecorded) lEvents.get(done*2);
             //TODO add more field level checks
             Assert.assertEquals(magsCourtHearingRecorded.getOriginatingHearing().getCaseId(), caseIds.get(done));
             Assert.assertEquals(magsCourtHearingRecorded.getConvictionDate(), convictionDates.get(done));
-            PleaAdded pleaAdded = (PleaAdded) lEvents.get(done*2+1);
+            final PleaAdded pleaAdded = (PleaAdded) lEvents.get(done*2+1);
             Assert.assertEquals(pleaAdded.getPlea().getId(), pleaIds.get(done));
         }
     }

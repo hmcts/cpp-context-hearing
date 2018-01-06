@@ -13,13 +13,13 @@ public class Hearing {
 
   private final String courtCentreName;
 
-  private final List<Defendants> defendants;
+  private final List<Defendant> defendants;
 
   private final LocalDate sendingCommittalDate;
 
   private final String type;
 
-  public Hearing(final UUID caseId, final String caseUrn, final String courtCentreId, final String courtCentreName, final List<Defendants> defendants, final LocalDate sendingCommittalDate, final String type) {
+  public Hearing(final UUID caseId, final String caseUrn, final String courtCentreId, final String courtCentreName, final List<Defendant> defendants, final LocalDate sendingCommittalDate, final String type) {
     this.caseId = caseId;
     this.caseUrn = caseUrn;
     this.courtCentreId = courtCentreId;
@@ -45,7 +45,7 @@ public class Hearing {
     return courtCentreName;
   }
 
-  public List<Defendants> getDefendants() {
+  public List<Defendant> getDefendants() {
     return defendants;
   }
 
@@ -70,7 +70,7 @@ public class Hearing {
 
     private String courtCentreName;
 
-    private List<Defendants> defendants;
+    private List<Defendant> defendants;
 
     private LocalDate sendingCommittalDate;
 
@@ -96,7 +96,7 @@ public class Hearing {
       return this;
     }
 
-    public Builder withDefendants(final List<Defendants> defendants) {
+    public Builder withDefendants(final List<Defendant> defendants) {
       this.defendants = defendants;
       return this;
     }

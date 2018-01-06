@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public class Defendants {
+public class Defendant {
   private Address address;
 
   private String bailStatus;
@@ -17,7 +17,7 @@ public class Defendants {
 
   private String firstName;
 
-  private Gender gender;
+  private String gender;
 
   private UUID id;
 
@@ -27,7 +27,7 @@ public class Defendants {
 
   private String nationality;
 
-  private List<Offences> offences;
+  private List<Offence> offences;
 
   private UUID personId;
 
@@ -55,7 +55,7 @@ public class Defendants {
     return firstName;
   }
 
-  public Gender getGender() {
+  public String getGender() {
     return gender;
   }
 
@@ -75,7 +75,7 @@ public class Defendants {
     return nationality;
   }
 
-  public List<Offences> getOffences() {
+  public List<Offence> getOffences() {
     return offences;
   }
 
@@ -84,7 +84,7 @@ public class Defendants {
   }
 
   public static Builder defendants() {
-    return new Defendants.Builder();
+    return new Defendant.Builder();
   }
 
   public static class Builder {
@@ -100,7 +100,7 @@ public class Defendants {
 
     private String firstName;
 
-    private Gender gender;
+    private String gender;
 
     private UUID id;
 
@@ -110,7 +110,7 @@ public class Defendants {
 
     private String nationality;
 
-    private List<Offences> offences;
+    private List<Offence> offences;
 
     private UUID personId;
 
@@ -144,7 +144,7 @@ public class Defendants {
       return this;
     }
 
-    public Builder withGender(final Gender gender) {
+    public Builder withGender(final String gender) {
       this.gender = gender;
       return this;
     }
@@ -169,7 +169,7 @@ public class Defendants {
       return this;
     }
 
-    public Builder withOffences(final List<Offences> offences) {
+    public Builder withOffences(final List<Offence> offences) {
       this.offences = offences;
       return this;
     }
@@ -179,8 +179,8 @@ public class Defendants {
       return this;
     }
 
-    public Defendants build() {
-      Defendants defendants = new Defendants();
+    public Defendant build() {
+      final Defendant defendants = new Defendant();
       defendants.address=address;
       defendants.bailStatus=bailStatus;
       defendants.custodyTimeLimitDate=custodyTimeLimitDate;

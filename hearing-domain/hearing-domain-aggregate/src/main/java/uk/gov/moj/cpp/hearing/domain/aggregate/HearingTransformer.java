@@ -1,10 +1,17 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.*;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HearingTransformer {
@@ -14,8 +21,8 @@ public class HearingTransformer {
     private HearingTransformer() {
     }
 
-    private static Map<LocalDate, Map<Defendants, List<Offences>>  > extractPleaDate2DefendantOffence(Hearing originatingHearing) {
-        final Map<LocalDate, Map<Defendants, List<Offences>>  > pleaDate2DefendantOffence = new HashMap<>();
+    private static Map<LocalDate, Map<Defendant, List<Offence>>  > extractPleaDate2DefendantOffence(final Hearing originatingHearing) {
+        final Map<LocalDate, Map<Defendant, List<Offence>>  > pleaDate2DefendantOffence = new HashMap<>();
         originatingHearing.getDefendants().forEach(
                 defendants ->
                         defendants.getOffences().forEach(
@@ -25,12 +32,12 @@ public class HearingTransformer {
                                         if (!pleaDate2DefendantOffence.containsKey(pleaDate)) {
                                             pleaDate2DefendantOffence.put(pleaDate, new HashMap<>());
                                         }
-                                        final Map<Defendants, List<Offences>> defendants4pleaDate = pleaDate2DefendantOffence.get(pleaDate);
+                                        final Map<Defendant, List<Offence>> defendants4pleaDate = pleaDate2DefendantOffence.get(pleaDate);
 
                                         if (!defendants4pleaDate.containsKey(defendants)) {
                                             defendants4pleaDate.put(defendants, new ArrayList<>());
                                         }
-                                        final List<Offences> offences4Defendant = defendants4pleaDate.get(defendants);
+                                        final List<Offence> offences4Defendant = defendants4pleaDate.get(defendants);
                                         offences4Defendant.add(offence);
                                     }
                                 }
@@ -39,14 +46,14 @@ public class HearingTransformer {
         return pleaDate2DefendantOffence;
     }
 
-    private static MagsCourtHearingRecorded map(Map.Entry<LocalDate, Map<Defendants, List<Offences>>> entryT, Hearing originatingHearing) {
-        final List<Defendants> defendants = new ArrayList<>();
+    private static MagsCourtHearingRecorded map(final Map.Entry<LocalDate, Map<Defendant, List<Offence>>> entryT, final Hearing originatingHearing) {
+        final List<Defendant> defendants = new ArrayList<>();
         //clone each defendant,
         entryT.getValue().entrySet().forEach(
                 entry->{
-                    final Defendants defendant = entry.getKey();
-                    final List<Offences> filteredOffences = entry.getValue();
-                    final Defendants defendantClone = (new Defendants.Builder()).withAddress(defendant.getAddress()).withBailStatus(defendant.getBailStatus()).
+                    final Defendant defendant = entry.getKey();
+                    final List<Offence> filteredOffences = entry.getValue();
+                    final Defendant defendantClone = (new Defendant.Builder()).withAddress(defendant.getAddress()).withBailStatus(defendant.getBailStatus()).
                             withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate()).withDateOfBirth(defendant.getDateOfBirth()).withDefenceOrganisation(defendant.getDefenceOrganisation())
                             .withFirstName(defendant.getFirstName()).withGender(defendant.getGender()).withId(defendant.getId()).withInterpreter(defendant.getInterpreter()).withLastName(defendant.getLastName()).
                                     withNationality(defendant.getNationality()).withOffences(filteredOffences).withPersonId(defendant.getPersonId()).build();
@@ -63,7 +70,7 @@ public class HearingTransformer {
 
     public static List<MagsCourtHearingRecorded> transform(final Hearing originatingHearing) {
 
-        final Map<LocalDate, Map<Defendants, List<Offences>>  > pleaDate2DefendantOffence = extractPleaDate2DefendantOffence(originatingHearing);
+        final Map<LocalDate, Map<Defendant, List<Offence>>  > pleaDate2DefendantOffence = extractPleaDate2DefendantOffence(originatingHearing);
 
         final List<MagsCourtHearingRecorded> result;
 

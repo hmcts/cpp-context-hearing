@@ -26,7 +26,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-import org.junit.Assert;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -38,6 +37,13 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
+import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -57,6 +63,7 @@ import com.google.common.io.Resources;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -66,13 +73,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
-import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
-import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendants;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
@@ -432,27 +432,27 @@ public class HearingEventProcessorTest {
                 )));
     }
 
-    private <E, C> C transactEvent2Command(E typedEvent, Consumer<JsonEnvelope> methodUnderTest, Class commandClass) {
-        JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
+    private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class commandClass) {
+        final JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
         final Metadata metadata = metadataWithDefaults().build();
-        JsonEnvelope event = new DefaultJsonEnvelope(metadata, payload);
+        final JsonEnvelope event = new DefaultJsonEnvelope(metadata, payload);
         methodUnderTest.accept(event);
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        JsonEnvelope result =  this.envelopeArgumentCaptor.getValue();
-        JsonObject resultingPayload =  result.payloadAsJsonObject();
+        final JsonEnvelope result =  this.envelopeArgumentCaptor.getValue();
+        final JsonObject resultingPayload =  result.payloadAsJsonObject();
         return  (C) jsonObjectToObjectConverter.convert(resultingPayload, commandClass);
     }
 
     @Test
     public void testMagsCourtProcessed() {
-        UUID caseId = UUID.randomUUID();
-        UUID courtCentreId = UUID.randomUUID();
-        Hearing originatingHearing = (new Hearing.Builder()).withCaseId(caseId).withCourtCentreId(courtCentreId.toString()).build();
-        LocalDate convictionDate = LocalDate.now();
-        UUID followingHearingId = UUID.randomUUID();
-        MagsCourtHearingRecorded magsCourtHearingRecorded = new MagsCourtHearingRecorded(originatingHearing, convictionDate, followingHearingId);
+        final UUID caseId = UUID.randomUUID();
+        final UUID courtCentreId = UUID.randomUUID();
+        final Hearing originatingHearing = (new Hearing.Builder()).withCaseId(caseId).withCourtCentreId(courtCentreId.toString()).build();
+        final LocalDate convictionDate = LocalDate.now();
+        final UUID followingHearingId = UUID.randomUUID();
+        final MagsCourtHearingRecorded magsCourtHearingRecorded = new MagsCourtHearingRecorded(originatingHearing, convictionDate, followingHearingId);
 
-        InitiateHearingCommand command = transactEvent2Command(magsCourtHearingRecorded,
+        final InitiateHearingCommand command = transactEvent2Command(magsCourtHearingRecorded,
                 (event)->{this.hearingEventProcessor.magsCourtProcessed(event);}, InitiateHearingCommand.class );
 
         Assert.assertEquals(caseId, command.getCaseId());
@@ -463,19 +463,19 @@ public class HearingEventProcessorTest {
 
     @Test
     public void testProcessSendingSheetRecordedRecordMags() {
-        UUID caseId = UUID.randomUUID();
-        UUID courtCentreId = UUID.randomUUID();
-        Hearing originatingHearing = (new Hearing.Builder()).withCaseId(caseId).withCourtCentreId(courtCentreId.toString()).build();
-        LocalDate convictionDate = LocalDate.now();
-        UUID followingHearingId = UUID.randomUUID();
-        CrownCourtHearing crownCourtHearing = (new CrownCourtHearing.Builder()).build();
-        List<Defendants> defendants;
-        Defendants defendant = (new Defendants.Builder()).withFirstName("David").withLastName("Bowie").build();
+        final UUID caseId = UUID.randomUUID();
+        final UUID courtCentreId = UUID.randomUUID();
+        final Hearing originatingHearing = (new Hearing.Builder()).withCaseId(caseId).withCourtCentreId(courtCentreId.toString()).build();
+        final LocalDate convictionDate = LocalDate.now();
+        final UUID followingHearingId = UUID.randomUUID();
+        final CrownCourtHearing crownCourtHearing = (new CrownCourtHearing.Builder()).build();
+        final List<Defendant> defendants;
+        final Defendant defendant = (new Defendant.Builder()).withFirstName("David").withLastName("Bowie").build();
         defendants = Arrays.asList(defendant);
-        Hearing hearing = (new Hearing.Builder()).withCaseId(caseId).withDefendants(defendants).build();
-        SendingSheetCompletedRecorded sendingSheetCompletedRecorded = new SendingSheetCompletedRecorded(crownCourtHearing, hearing);
+        final Hearing hearing = (new Hearing.Builder()).withCaseId(caseId).withDefendants(defendants).build();
+        final SendingSheetCompletedRecorded sendingSheetCompletedRecorded = new SendingSheetCompletedRecorded(crownCourtHearing, hearing);
 
-        RecordMagsCourtHearingCommand command = transactEvent2Command(sendingSheetCompletedRecorded, (event)->{this.hearingEventProcessor.processSendingSheetRecordedRecordMags(event);}, RecordMagsCourtHearingCommand.class );
+        final RecordMagsCourtHearingCommand command = transactEvent2Command(sendingSheetCompletedRecorded, (event)->{this.hearingEventProcessor.processSendingSheetRecordedRecordMags(event);}, RecordMagsCourtHearingCommand.class );
 
         Assert.assertEquals(caseId, command.getHearing().getCaseId());
         Assert.assertEquals(defendant.getLastName(), command.getHearing().getDefendants().get(0).getLastName());

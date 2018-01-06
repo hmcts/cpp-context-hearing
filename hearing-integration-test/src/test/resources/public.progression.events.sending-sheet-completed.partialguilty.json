@@ -22,7 +22,7 @@
       "dateOfBirth" : "1978-11-12",
       "defenceOrganisation" : "CPP",
       "firstName" : "Geoff",
-      "gender" : "MALE",
+      "gender" : "Male",
       "id" : "14a00d5a-f1d1-46a8-997a-2df6c3d75a25",
       "interpreter" : {
         "language" : "English",
@@ -102,7 +102,7 @@
       "dateOfBirth" : "1978-11-12",
       "defenceOrganisation" : "CPP",
       "firstName" : "Geoff",
-      "gender" : "MALE",
+      "gender" : "Male",
       "id" : "4e617f25-3e54-4321-8174-bba87636dc18",
       "interpreter" : {
         "language" : "English",
@@ -182,7 +182,7 @@
       "dateOfBirth" : "1978-11-12",
       "defenceOrganisation" : "CPP",
       "firstName" : "Geoff",
-      "gender" : "MALE",
+      "gender" : "Male",
       "id" : "e84e51ea-9dba-47fe-8a38-0031f4faf80d",
       "interpreter" : {
         "language" : "English",
