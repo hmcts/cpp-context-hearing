@@ -244,6 +244,7 @@
       } ],
       "personId" : "cbdf6b36-af7a-4018-a117-784f3c74e40b"
     } ],
-    "sendingCommittalDate" : "2019-11-14"
+    "sendingCommittalDate" : "2019-11-14",
+    "type" : "Magistrate Court Hearing"
   }
 }

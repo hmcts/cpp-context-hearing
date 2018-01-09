@@ -381,10 +381,14 @@ public class HearingIT extends AbstractIT {
                             JSONObject pleaJson = pleaIdToJsonObject.get(pleaId);
                             //check the hearing
                             String hearingId = pleaJson.getString("hearingId");
-                            JSONObject hearing = getExistingHearing(hearingId);
+                            JSONObject hearingJson = getExistingHearing(hearingId);
                             //  now load up the hearing and do some checks !
-                            // bulk this up with more checks
-                            Assert.assertEquals(EXPECTED_DEFAULT_HEARING_LENGTH,  hearing.getInt("duration"));
+                            Assert.assertEquals(EXPECTED_DEFAULT_HEARING_LENGTH,  hearingJson.getInt("duration"));
+                            Assert.assertEquals("Magistrate Court Hearing",  hearingJson.getString("hearingType"));
+                            Assert.assertEquals("courtCentreName",  hearingJson.getString("courtCentreName"));
+                            JSONArray caseIds = hearingJson.getJSONArray("caseIds");
+                            Assert.assertEquals(1, caseIds.length());
+                            Assert.assertEquals( caseId, caseIds.getString(0));
                         }
         );
     }
