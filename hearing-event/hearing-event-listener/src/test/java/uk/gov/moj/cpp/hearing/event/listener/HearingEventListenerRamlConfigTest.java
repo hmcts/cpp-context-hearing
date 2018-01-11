@@ -39,8 +39,8 @@ public class HearingEventListenerRamlConfigTest {
             PleaChanged.class.getAnnotation(Event.class).value(),
             HearingEventDeletionIgnored.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedRecorded.class.getAnnotation(Event.class).value(),
+            SendingSheetCompletedPreviouslyRecorded.class.getAnnotation(Event.class).value(),
             MagsCourtHearingRecorded.class.getAnnotation(Event.class).value()
-
             );
 
     private List<String> ramlActionNames;

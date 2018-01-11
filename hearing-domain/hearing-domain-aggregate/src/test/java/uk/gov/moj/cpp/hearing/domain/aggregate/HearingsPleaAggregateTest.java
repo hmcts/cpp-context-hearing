@@ -20,6 +20,7 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Address;
 
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import java.time.LocalDate;
@@ -47,7 +48,9 @@ public class HearingsPleaAggregateTest {
         Stream<Object> events = hearingsPleaAggregate.recordSendingSheetComplete(sendingSheetCompleted );
         List<Object> lEvents = events.collect(Collectors.toList());
         Assert.assertEquals(1, lEvents.size());
-        final Object event = lEvents.get(0);
+        Object event;
+
+        event = lEvents.get(0);
         Assert.assertEquals(event.getClass(), SendingSheetCompletedRecorded.class);
         final SendingSheetCompletedRecorded typedEvent  = (SendingSheetCompletedRecorded) event;
         Assert.assertEquals(typedEvent.getCrownCourtHearing(), sendingSheetCompleted.getCrownCourtHearing() );
@@ -56,7 +59,12 @@ public class HearingsPleaAggregateTest {
         //check that the second call does not result in another recording !
         events = hearingsPleaAggregate.recordSendingSheetComplete(sendingSheetCompleted );
         lEvents = events.collect(Collectors.toList());
-        Assert.assertEquals(0, lEvents.size());
+        Assert.assertEquals(1, lEvents.size());
+        event = lEvents.get(0);
+        Assert.assertEquals(event.getClass(), SendingSheetCompletedPreviouslyRecorded.class);
+        final SendingSheetCompletedPreviouslyRecorded typedNonEvent  = (SendingSheetCompletedPreviouslyRecorded) event;
+        Assert.assertEquals(typedNonEvent.getCrownCourtHearing(), typedNonEvent.getCrownCourtHearing() );
+        Assert.assertEquals(typedNonEvent.getHearing(), sendingSheetCompleted.getHearing() );
 
     }
 

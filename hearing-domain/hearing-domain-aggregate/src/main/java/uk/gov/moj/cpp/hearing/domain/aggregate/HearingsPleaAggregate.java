@@ -49,7 +49,7 @@ public class HearingsPleaAggregate implements Aggregate {
         if (!sendingSheetCompleteProcessed) {
             return apply(Stream.of(new SendingSheetCompletedRecorded(sendingSheetCompleted.getCrownCourtHearing(), sendingSheetCompleted.getHearing())));
         } else {
-            return Stream.empty();
+            return apply(Stream.of(new SendingSheetCompletedPreviouslyRecorded(sendingSheetCompleted.getCrownCourtHearing(), sendingSheetCompleted.getHearing())));
         }
 
     }
