@@ -158,6 +158,7 @@ public class HearingEventProcessorTest {
     private static final String FIELD_COURT_NAME = "courtCentreName";
     private static final String FIELD_COURT_CENTER_ID = "courtCentreId";
     private static final String FIELD_ROOM_NUMBER = "roomNumber";
+    private static final String FIELD_COURT_ROOM_ID = "courtRoomId";
 
     private static final int DURATION = 15;
     private static final String START_DATE_TIME = PAST_ZONED_DATE_TIME.next().toString();
@@ -193,6 +194,7 @@ public class HearingEventProcessorTest {
     private static final String EVENT_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
     private static final UUID COURT_CENTER_ID = randomUUID();
     private static final String COURT_CENTER_NAME = STRING.next();
+    private static final UUID COURT_ROOM_ID = randomUUID();
 
 
     private static final String FIELD_JUDGE = "judge";
@@ -299,6 +301,7 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_NAME), equalTo(COURT_CENTER_NAME)),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_ROOM_NUMBER), equalTo(COURT_ROOM)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(TYPE)))
                 )).thatMatchesSchema());
     }
@@ -311,6 +314,7 @@ public class HearingEventProcessorTest {
                 {FIELD_COURT_CENTER_ID},
                 {FIELD_COURT_NAME},
                 {FIELD_ROOM_NUMBER},
+                {FIELD_COURT_ROOM_ID},
                 { FIELD_HEARING_TYPE}
         };
         // @formatter:on
@@ -374,6 +378,7 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_NAME), equalTo(COURT_CENTER_NAME)),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_ROOM_NUMBER), equalTo(COURT_ROOM)),
+                        //withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(TYPE)))
                 )).thatMatchesSchema());
     }
@@ -575,6 +580,7 @@ public class HearingEventProcessorTest {
                 .add("courtCentreId", COURT_CENTER_ID.toString())
                 .add("courtCentreName", COURT_CENTER_NAME)
                 .add("roomName", COURT_ROOM)
+                .add("courtRoomId", COURT_ROOM_ID.toString())
                 .add("hearingType", TYPE)
                 .build();
         when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);

@@ -58,6 +58,7 @@ public class HearingEventProcessor   {
     private static final String FIELD_HEARING_EVENT = "hearingEvent";
     private static final String FIELD_HEARING = "hearing";
     private static final String FIELD_ROOM_NUMBER = "roomNumber";
+    private static final String FIELD_COURT_ROOM_ID = "courtRoomId";
     private static final String FIELD_HEARING_TYPE = "hearingType";
     private static final String FIELD_COURT_CENTRE = "courtCentre";
 
@@ -179,6 +180,10 @@ public class HearingEventProcessor   {
                     .add(FIELD_COURT_CENTRE_NAME, hearingDetails.getCourtCenterName())
                     .add(FIELD_ROOM_NUMBER, hearingDetails.getRoomNumber());
 
+            if(lastHearingEventId == null) {
+                courtHouseJsonBuilder.add(FIELD_COURT_ROOM_ID, hearingDetails.getCourtRoomId().toString());
+            }
+
             final JsonObjectBuilder hearingJsonBuilder = createObjectBuilder();
             hearingJsonBuilder
                     .add(FIELD_HEARING_TYPE, hearingDetails.getHearingType())
@@ -251,9 +256,10 @@ public class HearingEventProcessor   {
                     final UUID courtCenterId = fromString(hearingResponsePayload.getString(FIELD_COURT_CENTRE_ID));
                     final String courtCenterName = hearingResponsePayload.getString(FIELD_COURT_CENTRE_NAME);
                     final String roomName = hearingResponsePayload.getString(FIELD_ROOM_NAME);
+                    final UUID courtRoomId = fromString(hearingResponsePayload.getString(FIELD_COURT_ROOM_ID));
                     final String hearingType = hearingResponsePayload.getString(FIELD_HEARING_TYPE);
 
-                    final HearingDetails details = new HearingDetails(caseUrn, courtCenterId, courtCenterName, roomName, hearingType);
+                    final HearingDetails details = new HearingDetails(caseUrn, courtCenterId, courtCenterName, roomName, courtRoomId, hearingType);
                     hearingDetails = Optional.of(details);
                 }
             } catch (final RuntimeException e) {
@@ -268,6 +274,7 @@ public class HearingEventProcessor   {
         private final UUID courtCenterId;
         private final String courtCenterName;
         private final String roomNumber;
+        private final UUID courtRoomId;
         private final String hearingType;
 
         public HearingDetails(
@@ -275,12 +282,14 @@ public class HearingEventProcessor   {
                 final UUID courtCenterId,
                 final String courtCenterName,
                 final String roomNumber,
+                final UUID courtRoomId,
                 final String hearingType) {
             this.caseUrn = caseUrn;
             this.courtCenterId = courtCenterId;
             this.courtCenterName = courtCenterName;
             this.roomNumber = roomNumber;
             this.hearingType = hearingType;
+            this.courtRoomId = courtRoomId;
         }
 
         public String getCaseUrn() {
@@ -297,6 +306,10 @@ public class HearingEventProcessor   {
 
         public String getRoomNumber() {
             return this.roomNumber;
+        }
+
+        public UUID getCourtRoomId() {
+            return this.courtRoomId;
         }
 
         public String getHearingType() {
