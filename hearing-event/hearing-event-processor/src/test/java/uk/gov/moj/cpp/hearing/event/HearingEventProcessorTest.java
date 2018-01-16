@@ -378,7 +378,7 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_NAME), equalTo(COURT_CENTER_NAME)),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_ROOM_NUMBER), equalTo(COURT_ROOM)),
-                        //withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(TYPE)))
                 )).thatMatchesSchema());
     }

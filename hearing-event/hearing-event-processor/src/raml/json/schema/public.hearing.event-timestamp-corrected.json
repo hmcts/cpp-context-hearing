@@ -115,13 +115,17 @@
         },
         "roomNumber": {
           "type": "string"
+        },
+        "courtRoomId": {
+          "$ref": "#/definitions/uuid"
         }
       },
       "additionalProperties": false,
       "required": [
         "courtCentreId",
         "courtCentreName",
-        "roomNumber"
+        "roomNumber",
+        "courtRoomId"
       ]
     }
   }

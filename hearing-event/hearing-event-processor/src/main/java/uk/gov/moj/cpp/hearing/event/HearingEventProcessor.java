@@ -178,11 +178,8 @@ public class HearingEventProcessor   {
             final JsonObjectBuilder courtHouseJsonBuilder = createObjectBuilder()
                     .add(FIELD_COURT_CENTRE_ID, hearingDetails.getCourtCenterId().toString())
                     .add(FIELD_COURT_CENTRE_NAME, hearingDetails.getCourtCenterName())
-                    .add(FIELD_ROOM_NUMBER, hearingDetails.getRoomNumber());
-
-            if(lastHearingEventId == null) {
-                courtHouseJsonBuilder.add(FIELD_COURT_ROOM_ID, hearingDetails.getCourtRoomId().toString());
-            }
+                    .add(FIELD_ROOM_NUMBER, hearingDetails.getRoomNumber())
+                    .add(FIELD_COURT_ROOM_ID, hearingDetails.getCourtRoomId().toString());
 
             final JsonObjectBuilder hearingJsonBuilder = createObjectBuilder();
             hearingJsonBuilder

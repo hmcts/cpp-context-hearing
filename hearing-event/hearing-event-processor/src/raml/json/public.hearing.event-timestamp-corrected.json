@@ -17,7 +17,8 @@
     "courtCentre": {
       "courtCentreId": "0a595ec7-554e-403f-b35d-f4dce26fcc5c",
       "courtCentreName": "CARDIFF",
-      "roomNumber": "2"
+      "roomNumber": "2",
+      "courtRoomId": "2a595ec7-554e-403f-b35d-f4dce26fcc5c"
     },
     "hearingType": "PTPH"
   }
