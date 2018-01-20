@@ -11,7 +11,14 @@ import uk.gov.moj.cpp.external.domain.listing.Hearing;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Offence;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
-import uk.gov.moj.cpp.hearing.domain.event.*;
+import uk.gov.moj.cpp.hearing.domain.event.HearingConfirmedRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUpdatePleaIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
+import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +33,7 @@ import java.util.stream.Stream.Builder;
 public class HearingsPleaAggregate implements Aggregate {
     private UUID caseId;
     private String urn;
-    private Boolean sendingSheetCompleteProcessed=false;
+    private Boolean sendingSheetCompleteProcessed = false;
     private Map<UUID, Hearing> hearing = new HashMap<>();
     private Map<UUID, Plea> pleas = new HashMap<>();
     private HearingTransformer hearingTransformer = new HearingTransformer();
@@ -34,7 +41,7 @@ public class HearingsPleaAggregate implements Aggregate {
     @Override
     public Object apply(final Object event) {
         return match(event).with(
-                when(SendingSheetCompletedRecorded.class).apply(e->sendingSheetCompleteProcessed=true),
+                when(SendingSheetCompletedRecorded.class).apply(e -> sendingSheetCompleteProcessed = true),
                 when(HearingConfirmedRecorded.class).apply(this::onHearingConfirmedRecorded),
                 when(PleaAdded.class).apply(this::onPleaAdded),
                 when(PleaChanged.class).apply(this::onPleaChanged),
@@ -53,28 +60,29 @@ public class HearingsPleaAggregate implements Aggregate {
         }
 
     }
+
     public Stream<Object> recordMagsCourtHearing(final uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing originatingHearing) {
         final Builder<Object> streamBuilder = builder();
 
-             final List<MagsCourtHearingRecorded> hearings2Initiate = hearingTransformer.transform(originatingHearing);
-             hearings2Initiate.forEach(e-> {
-                 streamBuilder.add(e);
-                     e.getOriginatingHearing().getDefendants().stream().forEach(
-                             defendant ->
-                                  defendant.getOffences().stream().forEach(
-                                          offence->{
-                                              uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea fromPlea = offence.getPlea();
-                                              final Plea plea = new Plea(offence.getPlea().getId(), fromPlea.getValue().name(), fromPlea.getPleaDate());
+        final List<MagsCourtHearingRecorded> hearings2Initiate = hearingTransformer.transform(originatingHearing);
+        hearings2Initiate.forEach(e -> {
+                    streamBuilder.add(e);
+                    e.getOriginatingHearing().getDefendants().stream().forEach(
+                            defendant ->
+                                    defendant.getOffences().stream().forEach(
+                                            offence -> {
+                                                uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea fromPlea = offence.getPlea();
+                                                final Plea plea = new Plea(offence.getPlea().getId(), fromPlea.getValue().name(), fromPlea.getPleaDate());
 
-                                              final PleaAdded pleaAdded = new PleaAdded(originatingHearing.getCaseId(), e.getHearingId(), defendant.getId(), defendant.getPersonId(),
-                                                       offence.getId(), plea);
-                                              streamBuilder.add(pleaAdded);
+                                                final PleaAdded pleaAdded = new PleaAdded(originatingHearing.getCaseId(), e.getHearingId(), defendant.getId(), defendant.getPersonId(),
+                                                        offence.getId(), plea);
+                                                streamBuilder.add(pleaAdded);
 
-                                          }
-                                  )
-                     );
-                     }
-             );
+                                            }
+                                    )
+                    );
+                }
+        );
 
         return streamBuilder.build();
     }
@@ -82,7 +90,7 @@ public class HearingsPleaAggregate implements Aggregate {
 
     public Stream<Object> updatePlea(final HearingUpdatePleaCommand hearingUpdatePleaCommand) {
         if (checkOffencePleaHavingOneToOneMapping(hearingUpdatePleaCommand)) {
-            return apply(Stream.of(new HearingPleaIgnored("Offence Plea association is inconsistent", hearingUpdatePleaCommand)));
+            return apply(Stream.of(new HearingUpdatePleaIgnored(hearingUpdatePleaCommand.getCaseId(),"Offence Plea association is inconsistent", hearingUpdatePleaCommand)));
         } else {
             final Builder<Object> streamBuilder = builder();
             final UUID hearingUpdatePleaCommandCaseId = hearingUpdatePleaCommand.getCaseId();
@@ -103,6 +111,9 @@ public class HearingsPleaAggregate implements Aggregate {
                 });
 
             }));
+
+            streamBuilder.add(new HearingPleaUpdated(hearingUpdatePleaCommand.getCaseId()));
+
             return apply(streamBuilder.build());
         }
 

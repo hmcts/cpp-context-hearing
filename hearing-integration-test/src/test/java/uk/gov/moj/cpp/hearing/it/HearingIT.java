@@ -24,7 +24,9 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserL
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.andHearingResultsHaveBeenShared;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.thenHearingAmendedPublicEventShouldBePublished;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.thenHearingPleaUpdatedPublicEventShouldBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.thenHearingResultedPublicEventShouldBePublished;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.thenHearingUpdatePleaIgnoredPublicEventShouldBePublished;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.whenTheUserSharesAmendedResultsForTheHearing;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.whenTheUserSharesResultsForAHearing;
 import static uk.gov.moj.cpp.hearing.steps.data.ResultLevel.CASE;
@@ -550,6 +552,8 @@ public class HearingIT extends AbstractIT {
 
         @Test
     public void hearingAddPlea() throws IOException, InterruptedException {
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
         final String hearingId = randomUUID().toString();
         final String caseId = randomUUID().toString();
         final String pleaId = randomUUID().toString();
@@ -593,10 +597,15 @@ public class HearingIT extends AbstractIT {
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(pleaDateString)),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PERSON_ID), is(personId))
                         )));
+
+        thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
+
     }
 
     @Test
     public void hearingAddMultiplePlea() throws IOException, InterruptedException {
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
         final String hearingId = randomUUID().toString();
         final String caseId = randomUUID().toString();
         final String pleaId_1 = randomUUID().toString();
@@ -650,10 +659,13 @@ public class HearingIT extends AbstractIT {
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(pleaValue_1, pleaValue_2)),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(pleaDateString_1, pleaDateString_2))
                         )));
+        thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
     }
 
     @Test
     public void hearingUpdatePlea() throws IOException, InterruptedException {
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
         final String hearingId = randomUUID().toString();
         final String caseId = randomUUID().toString();
         final String pleaId = randomUUID().toString();
@@ -699,6 +711,8 @@ public class HearingIT extends AbstractIT {
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(originalPleaDateString))
                         )));
 
+        thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
+
         // Update plea and call the endpoint again
         body = body.replace(originalPleaValue, updatedPleaValue).replace(originalPleaDateString, updatedPleaDateString);
         writeResponse = given().spec(requestSpec).and()
@@ -720,6 +734,19 @@ public class HearingIT extends AbstractIT {
                                         withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(updatedPleaValue)),
                                         withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(updatedPleaDateString))
                                 )));
+
+        thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
+
+        //Adding different Plea Id to same offence should ignore update plea
+        body = body.replace(pleaId, UUID.randomUUID().toString());
+        writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.update-plea+json")
+                .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        thenHearingUpdatePleaIgnoredPublicEventShouldBePublished(caseId);
+
 
     }
 

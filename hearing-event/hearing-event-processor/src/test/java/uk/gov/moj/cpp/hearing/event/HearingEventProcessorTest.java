@@ -437,6 +437,32 @@ public class HearingEventProcessorTest {
                 )));
     }
 
+    @Test
+    public void publishHearingPleaUpdatedIgnoredPublicEvent() throws IOException {
+
+        this.hearingEventProcessor.publishHearingUpdatePleaIgnoredPublicEvent(getJsonPublicHearingPleaUpdate());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.update-plea-ignored"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
+                        )
+                )));
+    }
+
+    @Test
+    public void publishHearingPleaUpdatedPublicEvent() throws IOException {
+
+        this.hearingEventProcessor.publishHearingPleaUpdatedPublicEvent(getJsonPublicHearingPleaUpdate());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.plea-updated"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
+                        )
+                )));
+    }
+
     private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class commandClass) {
         final JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
         final Metadata metadata = metadataWithDefaults().build();
@@ -636,6 +662,12 @@ public class HearingEventProcessorTest {
 
     }
 
+    private JsonEnvelope getJsonPublicHearingPleaUpdate() {
+        final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).build();
+        final Metadata metadata = metadataWithDefaults().build();
+        return new DefaultJsonEnvelope(metadata, jsonObject);
+
+    }
     public JsonEnvelope getJsonHearingCasePleaAddedOrChangedEnvelope() throws IOException {
         final String hearingCasePleaAddOrUpdate = getStringFromResource("hearing.case.plea-added-or-changed.json")
                 .replace("RANDOM_CASE_ID", CASE_ID.toString())

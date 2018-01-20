@@ -52,6 +52,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -187,6 +188,7 @@ public class HearingCommandHandlerTest {
     private static final String PLEA_ID = UUID.randomUUID().toString();
     private static final String PLEA_DATE = "2017-02-02";
     private static final String PLEA_VALUE = "GUILTY";
+    public static final String HEARING_HEARING_PLEA_UPDATED = "hearing.hearing-plea-updated";
 
     @Mock
     private EventStream eventStream;
@@ -205,7 +207,7 @@ public class HearingCommandHandlerTest {
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
             RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
             HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class, PleaAdded.class, PleaChanged.class,
-            HearingPleaAdded.class, HearingPleaChanged.class);
+            HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
@@ -550,9 +552,9 @@ public class HearingCommandHandlerTest {
 
         final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
                 "hearing.update-plea.json");
-         final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_UPDATE_PLEA),
+        final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_UPDATE_PLEA),
                 publicHearingAddedPayload);
-         // When
+        // When
         this.hearingCommandHandler.updatePlea(addPleaCommand);
         // Then
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
@@ -560,9 +562,15 @@ public class HearingCommandHandlerTest {
                         withMetadataEnvelopedFrom(addPleaCommand)
                                 .withName(PLEA_ADDED),
                         payloadIsJson(allOf(
-                                withJsonPath(format("$.%s",FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s",FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s","plea","value"), equalTo(PLEA_VALUE))
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_VALUE))
+                        ))),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(addPleaCommand)
+                                .withName(HEARING_HEARING_PLEA_UPDATED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
                         )))
         ));
     }
@@ -583,9 +591,9 @@ public class HearingCommandHandlerTest {
                         withMetadataEnvelopedFrom(addPleaCommand)
                                 .withName(HEARING_PLEA_ADDED),
                         payloadIsJson(allOf(
-                                withJsonPath(format("$.%s",FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s",FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s","plea","value"), equalTo(PLEA_VALUE))
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_VALUE))
                         )))
         ));
 
@@ -607,9 +615,9 @@ public class HearingCommandHandlerTest {
                         withMetadataEnvelopedFrom(addPleaCommand)
                                 .withName(HEARING_PLEA_CHANGED),
                         payloadIsJson(allOf(
-                                withJsonPath(format("$.%s",FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s",FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s","plea","value"), equalTo(PLEA_VALUE))
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_VALUE))
                         )))
         ));
 

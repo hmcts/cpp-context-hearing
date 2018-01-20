@@ -9,6 +9,7 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -44,6 +45,11 @@ public class HearingStepDefinitions extends AbstractIT {
 
     private static final String HEARING_RESULTED_PUBLIC_EVENT = "public.hearing.resulted";
     private static final String HEARING_RESULT_AMENDED_EVENT = "public.hearing.result-amended";
+    public static final String PUBLIC_HEARING_PLEA_UPDATED = "public.hearing.plea-updated";
+    public static final String PUBLIC_HEARING_UPDATE_PLEA_IGNORED = "public.hearing.update-plea-ignored";
+
+    public static final MessageConsumer PUBLIC_HEARING_PLEA_UPDATED_CONSUMER = publicEvents.createConsumer(PUBLIC_HEARING_PLEA_UPDATED);
+    public static final MessageConsumer PUBLIC_HEARING_UPDATE_PLEA_IGNORED_CONSUMER = publicEvents.createConsumer(PUBLIC_HEARING_UPDATE_PLEA_IGNORED);
     private static final MessageConsumer PUBLIC_HEARING_RESULTED_EVENTS_CONSUMER = publicEvents.createConsumer(HEARING_RESULTED_PUBLIC_EVENT);
     private static final MessageConsumer PUBLIC_HEARING_RESULT_AMENDED_EVENTS_CONSUMER = publicEvents.createConsumer(HEARING_RESULT_AMENDED_EVENT);
 
@@ -157,7 +163,24 @@ public class HearingStepDefinitions extends AbstractIT {
                 withJsonPath("$.resultLines[2].prompts[*].value", hasItems(resultLines.get(2).getPrompts().stream().map(ResultPrompt::getValue).collect(toList()).toArray()))
         )));
     }
+    public static void thenHearingPleaUpdatedPublicEventShouldBePublished(final String caseId) {
+        final JsonPath message = retrieveMessage(PUBLIC_HEARING_PLEA_UPDATED_CONSUMER);
 
+        assertThat(message.prettify(), new IsJson(anyOf(
+                withJsonPath("$._metadata.name", equalTo(PUBLIC_HEARING_PLEA_UPDATED)),
+
+                withJsonPath("$.caseId", equalTo(caseId))
+        )));
+    }
+    public static void thenHearingUpdatePleaIgnoredPublicEventShouldBePublished(final String caseId) {
+        final JsonPath message = retrieveMessage(PUBLIC_HEARING_UPDATE_PLEA_IGNORED_CONSUMER);
+
+        assertThat(message.prettify(), new IsJson(allOf(
+                withJsonPath("$._metadata.name", equalTo(PUBLIC_HEARING_UPDATE_PLEA_IGNORED)),
+
+                withJsonPath("$.caseId", equalTo(caseId))
+        )));
+    }
     public static void thenHearingAmendedPublicEventShouldBePublished(final UUID hearingId, final ResultLineData amendedResult) {
         final JsonPath message = retrieveMessage(PUBLIC_HEARING_RESULT_AMENDED_EVENTS_CONSUMER);
 

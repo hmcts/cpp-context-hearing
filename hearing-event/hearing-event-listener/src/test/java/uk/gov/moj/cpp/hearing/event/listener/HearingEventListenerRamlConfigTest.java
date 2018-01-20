@@ -34,7 +34,8 @@ public class HearingEventListenerRamlConfigTest {
     private final List<String> handlerNamesToIgnore = asList(
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
             HearingConfirmedRecorded.class.getAnnotation(Event.class).value(),
-            HearingPleaIgnored.class.getAnnotation(Event.class).value(),
+            HearingUpdatePleaIgnored.class.getAnnotation(Event.class).value(),
+            HearingPleaUpdated.class.getAnnotation(Event.class).value(),
             PleaAdded.class.getAnnotation(Event.class).value(),
             PleaChanged.class.getAnnotation(Event.class).value(),
             HearingEventDeletionIgnored.class.getAnnotation(Event.class).value(),
