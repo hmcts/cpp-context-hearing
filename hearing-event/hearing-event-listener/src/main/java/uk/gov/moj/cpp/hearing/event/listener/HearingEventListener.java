@@ -21,6 +21,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
@@ -29,6 +30,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
@@ -61,6 +63,10 @@ public class HearingEventListener {
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_TARGET_ID = "targetId";
+    private static final String FIELD_JUDGE_ID = "id";
+    private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
+    private static final String FIELD_JUDGE_LAST_NAME = "lastName";
+    private static final String FIELD_JUDGE_TITLE = "title";
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_DRAFT_RESULT = "draftResult";
     private static final String FIELD_START_DATE_TIME = "startDateTime";
@@ -102,6 +108,9 @@ public class HearingEventListener {
 
     @Inject
     private PleaHearingRepository pleaHearingRepository;
+
+    @Inject
+    private HearingJudgeRepository hearingJudgeRepository;
 
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -149,6 +158,19 @@ public class HearingEventListener {
                                 .withCourtCentreName(courtCentreName).build());
 
         this.hearingRepository.save(hearing);
+    }
+
+    @Transactional
+    @Handles("hearing.judge-assigned")
+    public void judgeAssigned(final JsonEnvelope event) {
+        final JsonObject payload = event.payloadAsJsonObject();
+        HearingJudge hearingJudge = new HearingJudge(fromString(payload.getString(FIELD_HEARING_ID)),
+                payload.getString(FIELD_JUDGE_ID),
+                payload.getString(FIELD_JUDGE_FIRST_NAME),
+                payload.getString(FIELD_JUDGE_LAST_NAME),
+                payload.getString(FIELD_JUDGE_TITLE));
+
+        this.hearingJudgeRepository.save(hearingJudge);
     }
 
     @Transactional
@@ -202,7 +224,7 @@ public class HearingEventListener {
 
     @Handles("hearing.plea-added")
     public void pleaAdded(final JsonEnvelope event) {
-        LOGGER.info("{}",event.payloadAsJsonObject());
+        LOGGER.info("{}", event.payloadAsJsonObject());
         final HearingPleaAdded hearingPleaAdded =
                 this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingPleaAdded.class);
         final PleaHearing pleaHearing = new PleaHearing(hearingPleaAdded.getPlea().getId(),
@@ -212,7 +234,7 @@ public class HearingEventListener {
                 hearingPleaAdded.getOffenceId(),
                 hearingPleaAdded.getPlea().getPleaDate(),
                 hearingPleaAdded.getPlea().getValue());
-        if(null != hearingPleaAdded.getPersonId()){
+        if (null != hearingPleaAdded.getPersonId()) {
             pleaHearing.setPersonId(hearingPleaAdded.getPersonId());
         }
         this.pleaHearingRepository.save(pleaHearing);
@@ -220,7 +242,7 @@ public class HearingEventListener {
 
     @Handles("hearing.plea-changed")
     public void pleaChanged(final JsonEnvelope event) {
-        LOGGER.info("{}",event.payloadAsJsonObject());
+        LOGGER.info("{}", event.payloadAsJsonObject());
         final HearingPleaChanged hearingPleaChanged =
                 this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingPleaChanged.class);
 
@@ -231,7 +253,7 @@ public class HearingEventListener {
                 hearingPleaChanged.getOffenceId(),
                 hearingPleaChanged.getPlea().getPleaDate(),
                 hearingPleaChanged.getPlea().getValue());
-        if(null != hearingPleaChanged.getPersonId()){
+        if (null != hearingPleaChanged.getPersonId()) {
             pleaHearing.setPersonId(hearingPleaChanged.getPersonId());
         }
         this.pleaHearingRepository.save(pleaHearing);

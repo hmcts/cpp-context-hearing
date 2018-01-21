@@ -545,7 +545,19 @@ public class HearingIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingId))
+                                withJsonPath("$.hearingId", is(hearingId)),
+                                withJsonPath("$.caseIds[0]", is(caseId)),
+                                withJsonPath("$.courtCentreName", is("Liverpool Crown Court")),
+                                withJsonPath("$.courtCentreId", is("e8821a38-546d-4b56-9992-ebdd772a561f")),
+                                withJsonPath("$.roomName", is("3")),
+                                withJsonPath("$.roomId", is("6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d")),
+                                withJsonPath("$.startDate", is("2016-06-01")),
+                                withJsonPath("$.hearingType", is("TRIAL")),
+                                withJsonPath("$.duration", is(7200)),
+                                withJsonPath("$.judge.id", is("1daefec3-2f76-8109-82d9-2e60544a6c01")),
+                                withJsonPath("$.judge.firstName", is("Neil")),
+                                withJsonPath("$.judge.lastName", is("Flewitt")),
+                                withJsonPath("$.judge.title", is("HHJ"))
                         )));
     }
 

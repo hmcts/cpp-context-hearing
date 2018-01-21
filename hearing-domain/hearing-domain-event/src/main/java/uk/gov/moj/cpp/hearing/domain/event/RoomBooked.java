@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.room-booked")
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -17,12 +16,6 @@ public class RoomBooked {
     private UUID roomId;
     private String roomName;
 
-    public RoomBooked(@JsonProperty("hearingId")final UUID hearingId,
-                        @JsonProperty("roomName")final String roomName) {
-        this.hearingId = hearingId;
-        this.roomName = roomName;
-    }
-
     public RoomBooked(final UUID hearingId, final UUID roomId, final String roomName) {
         this.hearingId = hearingId;
         this.roomId = roomId;
@@ -31,6 +24,11 @@ public class RoomBooked {
 
     public RoomBooked() {
         // default constructor for Jackson serialisation
+    }
+
+    public RoomBooked(UUID hearingId, String roomName) {
+        this.hearingId = hearingId;
+        this.roomName = roomName;
     }
 
     public UUID getHearingId() {

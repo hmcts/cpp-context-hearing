@@ -35,6 +35,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
@@ -43,6 +44,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
@@ -102,6 +104,12 @@ public class HearingEventListenerTest {
     private static final String FIELD_PROMPT_VALUE = "value";
     private static final String FIELD_SHARED_TIME = "sharedTime";
 
+    private static final String FIELD_JUDGE_ID = "id";
+    private static final String FIELD_JUDGE_TITLE = "title";
+    private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
+    private static final String FIELD_JUDGE_LAST_NAME = "lastName";
+
+
     private static final UUID HEARING_ID = randomUUID();
 
     private static final UUID DEFENDANT_ID = randomUUID();
@@ -142,6 +150,12 @@ public class HearingEventListenerTest {
     private static final UUID DEFENDANT_ID_3 = randomUUID();
     private static final UUID DEFENDANT_ID_4 = randomUUID();
 
+    private static final String JUDGE_ID = STRING.next();
+    private static final String JUDGE_TITLE = STRING.next();
+    private static final String JUDGE_FIRST_NAME = STRING.next();
+    private static final String JUDGE_LAST_NAME = STRING.next();
+
+
     private static final String LEVEL = "OFFENCE";
     private static final String RESULT_LABEL = "Imprisonment";
     private static final String PROMPT_LABEL_1 = "Imprisonment duration";
@@ -174,6 +188,9 @@ public class HearingEventListenerTest {
     private HearingRepository hearingRepository;
 
     @Mock
+    private HearingJudgeRepository hearingJudgeRepository;
+
+    @Mock
     private ProsecutionCounselRepository prosecutionCounselRepository;
 
     @Mock
@@ -193,6 +210,9 @@ public class HearingEventListenerTest {
 
     @Captor
     private ArgumentCaptor<Hearing> hearingArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<HearingJudge> hearingJudgeArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<HearingOutcome> hearingOutcomeArgumentCaptor;
@@ -279,6 +299,21 @@ public class HearingEventListenerTest {
         assertThat(actualHearing.getHearingType(), is(HEARING_TYPE_2));
         assertThat(actualHearing.getCourtCentreName(), is(COURT_CENTRE_NAME));
         assertThat(actualHearing.getRoomName(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldAssignJudgeToHearing() {
+        final JsonEnvelope event = getAssignJudgeJsonEnvelope();
+
+        this.hearingEventListener.judgeAssigned(event);
+
+        verify(this.hearingJudgeRepository).save(this.hearingJudgeArgumentCaptor.capture());
+        final HearingJudge hearingJudge = this.hearingJudgeArgumentCaptor.getValue();
+        assertThat(hearingJudge.getHearingId(), is(HEARING_ID));
+        assertThat(hearingJudge.getId(), is(JUDGE_ID));
+        assertThat(hearingJudge.getFirstName(), is(JUDGE_FIRST_NAME));
+        assertThat(hearingJudge.getLastName(), is(JUDGE_LAST_NAME));
+        assertThat(hearingJudge.getTitle(), is(JUDGE_TITLE));
     }
 
     @Test
@@ -628,6 +663,16 @@ public class HearingEventListenerTest {
                 .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
                 .withPayloadOf(COURT_CENTRE_NAME, FIELD_COURT_CENTRE_NAME)
                 .withPayloadOf(COURT_CENTRE_ID, FIELD_COURT_CENTRE_ID)
+                .build();
+    }
+
+    private JsonEnvelope getAssignJudgeJsonEnvelope() {
+        return envelope()
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(JUDGE_ID, FIELD_JUDGE_ID)
+                .withPayloadOf(JUDGE_FIRST_NAME, FIELD_JUDGE_FIRST_NAME)
+                .withPayloadOf(JUDGE_LAST_NAME, FIELD_JUDGE_LAST_NAME)
+                .withPayloadOf(JUDGE_TITLE, FIELD_JUDGE_TITLE)
                 .build();
     }
 

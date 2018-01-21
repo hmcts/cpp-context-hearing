@@ -21,6 +21,11 @@ public class InitiateHearingCommand implements Serializable {
     private UUID roomId;
     private String courtCentreName;
     private String roomName;
+    private String judgeId;
+    private String judgeTitle;
+    private String judgeFirstName;
+    private String judgeLastName;
+
 
     public UUID getCaseId() {
         return caseId;
@@ -99,13 +104,54 @@ public class InitiateHearingCommand implements Serializable {
         return hearingId;
     }
 
-    @Override
-    public String toString() {
-        return "InitiateHearingCommand [hearingId=" + hearingId.toString() + ", caseId=" + caseId + ", hearingType=" + hearingType
-                        + ", startDateTime=" + startDateTime + ", duration=" + duration
-                        + "courtCentreId= " + courtCentreId.toString() + "courtCentreName= "
-                        + courtCentreName + " roomId=" + roomId.toString() + "roomName=" + roomName
-                        + "]";
+    public String getJudgeId() {
+        return judgeId;
     }
 
+    public void setJudgeId(String judgeId) {
+        this.judgeId = judgeId;
+    }
+
+    public String getJudgeTitle() {
+        return judgeTitle;
+    }
+
+    public void setJudgeTitle(String judgeTitle) {
+        this.judgeTitle = judgeTitle;
+    }
+
+    public String getJudgeFirstName() {
+        return judgeFirstName;
+    }
+
+    public void setJudgeFirstName(String judgeFirstName) {
+        this.judgeFirstName = judgeFirstName;
+    }
+
+    public String getJudgeLastName() {
+        return judgeLastName;
+    }
+
+    public void setJudgeLastName(String judgeLastName) {
+        this.judgeLastName = judgeLastName;
+    }
+
+    @Override
+    public String toString() {
+        return "InitiateHearingCommand{" +
+                "hearingId=" + hearingId +
+                ", caseId=" + caseId +
+                ", hearingType='" + hearingType + '\'' +
+                ", startDateTime=" + startDateTime +
+                ", duration=" + duration +
+                ", courtCentreId=" + courtCentreId +
+                ", roomId=" + roomId +
+                ", courtCentreName='" + courtCentreName + '\'' +
+                ", roomName='" + roomName + '\'' +
+                ", judgeId='" + judgeId + '\'' +
+                ", judgeTitle='" + judgeTitle + '\'' +
+                ", judgeFirstName='" + judgeFirstName + '\'' +
+                ", judgeLastName='" + judgeLastName + '\'' +
+                '}';
+    }
 }

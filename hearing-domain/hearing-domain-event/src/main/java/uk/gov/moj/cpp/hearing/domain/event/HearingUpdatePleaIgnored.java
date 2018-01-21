@@ -13,7 +13,7 @@ public class HearingUpdatePleaIgnored {
 
     private HearingUpdatePleaCommand hearingUpdatePleaCommand;
 
-    public HearingUpdatePleaIgnored(final UUID caseId,final String reason, final HearingUpdatePleaCommand hearingUpdatePleaCommand) {
+    public HearingUpdatePleaIgnored(final UUID caseId, final String reason, final HearingUpdatePleaCommand hearingUpdatePleaCommand) {
         this.caseId = caseId;
         this.reason = reason;
         this.hearingUpdatePleaCommand = hearingUpdatePleaCommand;

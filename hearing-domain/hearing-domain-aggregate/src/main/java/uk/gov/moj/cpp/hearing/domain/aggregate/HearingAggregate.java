@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
@@ -41,21 +42,25 @@ public class HearingAggregate implements Aggregate {
     private LocalDate hearingDate;
     private final Set<UUID> sharedResultIds = new HashSet<>();
 
-    public Stream<Object> initiateHearing(final HearingDetails hearingDetails) {
+    public Stream<Object> initiateHearing(final HearingDetails hd) {
         final Builder<Object> streamBuilder = builder();
 
-        streamBuilder.add(new HearingInitiated(hearingDetails.getHearingId(), hearingDetails.getStartDateTime(), hearingDetails.getDuration(), hearingDetails.getHearingType()));
+        streamBuilder.add(new HearingInitiated(hd.getHearingId(), hd.getStartDateTime(), hd.getDuration(), hd.getHearingType()));
 
-        if (null != hearingDetails.getCaseId()) {
-            streamBuilder.add(new CaseAssociated(hearingDetails.getHearingId(), hearingDetails.getCaseId()));
+        if (null != hd.getCaseId()) {
+            streamBuilder.add(new CaseAssociated(hd.getHearingId(), hd.getCaseId()));
         }
 
-        if (!isNullOrEmpty(hearingDetails.getCourtCentreName())) {
-            streamBuilder.add(new CourtAssigned(hearingDetails.getHearingId(), hearingDetails.getCourtCentreId(), hearingDetails.getCourtCentreName()));
+        if (!isNullOrEmpty(hd.getCourtCentreName())) {
+            streamBuilder.add(new CourtAssigned(hd.getHearingId(), hd.getCourtCentreId(), hd.getCourtCentreName()));
         }
 
-        if (!isNullOrEmpty(hearingDetails.getRoomName())) {
-            streamBuilder.add(new RoomBooked(hearingDetails.getHearingId(), hearingDetails.getRoomId(), hearingDetails.getRoomName()));
+        if (!isNullOrEmpty(hd.getRoomName())) {
+            streamBuilder.add(new RoomBooked(hd.getHearingId(), hd.getRoomId(), hd.getRoomName()));
+        }
+
+        if (!isNullOrEmpty(hd.getJudgeId())) {
+            streamBuilder.add(new JudgeAssigned(hd.getHearingId(), hd.getJudgeId(), hd.getJudgeTitle(), hd.getJudgeFirstName(),hd.getJudgeLastName()));
         }
 
         return apply(streamBuilder.build());

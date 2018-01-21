@@ -109,7 +109,7 @@ public class HearingEventProcessor {
     }
 
     @Handles("hearing.hearing.confirmed-recorded")
-    public void createInitiateHearingCommandFromHearingConfirmedRecorded(final JsonEnvelope event) {
+    public void processHearingConfirmedRecorded(final JsonEnvelope event) {
         LOGGER.trace("Received hearing.hearing.confirmed-recorded event, processing");
         final JsonObject payload = event.payloadAsJsonObject();
         final Hearing hearing = this.jsonObjectToObjectConverter.convert(payload.getJsonObject(FIELD_HEARING), Hearing.class);
@@ -119,6 +119,8 @@ public class HearingEventProcessor {
 
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
                 .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
+
+
     }
 
     @Handles("hearing.sending-sheet-recorded")
@@ -135,7 +137,7 @@ public class HearingEventProcessor {
     }
 
     @Handles("hearing.case.plea-added")
-    public void createHearingPleaAddFromPleaAdded(final JsonEnvelope event) {
+    public void processCasePleaAdded(final JsonEnvelope event) {
         LOGGER.trace("Received plea-added event, processing");
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_ADD)
                 .apply(event.payloadAsJsonObject()));
@@ -143,7 +145,7 @@ public class HearingEventProcessor {
     }
 
     @Handles("hearing.case.plea-changed")
-    public void createHearingPleaChangeFromPleaChanged(final JsonEnvelope event) {
+    public void processCasePleaChanged(final JsonEnvelope event) {
 
         LOGGER.trace("Received plea-changed event, processing");
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_CHANGE)
@@ -336,6 +338,12 @@ public class HearingEventProcessor {
         command.setDuration(hearing.getEstimateMinutes());
         command.setHearingType(hearing.getType());
         command.setStartDateTime(hearing.getStartDateTime());
+        if(hearing.getJudge() != null) {
+            command.setJudgeId(hearing.getJudge().getId());
+            command.setJudgeFirstName(hearing.getJudge().getFirstName());
+            command.setJudgeLastName(hearing.getJudge().getLastName());
+            command.setJudgeTitle(hearing.getJudge().getTitle());
+        }
         return command;
     }
 

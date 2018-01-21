@@ -53,6 +53,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -93,6 +94,7 @@ public class HearingCommandHandlerTest {
     private static final String HEARING_INITIATED_EVENT = "hearing.hearing-initiated";
     private static final String CASE_ASSOCIATED_EVENT = "hearing.case-associated";
     private static final String COURT_ASSIGNED_EVENT = "hearing.court-assigned";
+    private static final String JUDGE_ASSIGNED_EVENT = "hearing.judge-assigned";
     private static final String ROOM_BOOKED_EVENT = "hearing.room-booked";
     private static final String PROSECUTION_COUNSEL_ADDED_EVENT = "hearing.prosecution-counsel-added";
     private static final String DEFENCE_COUNSEL_ADDED_EVENT = "hearing.defence-counsel-added";
@@ -138,6 +140,11 @@ public class HearingCommandHandlerTest {
     private static final String FIELD_CLERK_OF_THE_COURT_ID = "clerkOfTheCourtId";
     private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME = "clerkOfTheCourtFirstName";
     private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME = "clerkOfTheCourtLastName";
+    private static final String FIELD_JUDGE_ID = "judgeId";
+    private static final String FIELD_JUDGE_TITLE = "judgeTitle";
+    private static final String FIELD_JUDGE_FIRST_NAME = "judgeFirstName";
+    private static final String FIELD_JUDGE_LAST_NAME = "judgeLastName";
+
 
     private static final String FIELD_COURT_VALUE = STRING.next();
     private static final String FIELD_COURT_ROOM_VALUE = STRING.next();
@@ -171,6 +178,11 @@ public class HearingCommandHandlerTest {
     private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final String COURT_CENTRE_NAME = STRING.next();
     private static final String START_DATE = PAST_LOCAL_DATE.next().toString();
+    private static final String JUDGE_ID = STRING.next();
+    private static final String JUDGE_TITLE = STRING.next();
+    private static final String JUDGE_FIRST_NAME = STRING.next();
+    private static final String JUDGE_LAST_NAME = STRING.next();
+
 
     private static final String LEVEL = "OFFENCE";
     private static final String RESULT_LABEL = "Imprisonment";
@@ -207,7 +219,7 @@ public class HearingCommandHandlerTest {
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
             RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
             HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class, PleaAdded.class, PleaChanged.class,
-            HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class);
+            HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class, JudgeAssigned.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
@@ -280,6 +292,14 @@ public class HearingCommandHandlerTest {
                                 withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
                                 withJsonPath("$.roomName", equalTo(ROOM_NAME)),
                                 withJsonPath("$.roomId", equalTo(ROOM_ID.toString()))
+                        ))).thatMatchesSchema(),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(JUDGE_ASSIGNED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.id", equalTo(JUDGE_ID)),
+                                withJsonPath("$.firstName", equalTo(JUDGE_FIRST_NAME))
                         ))).thatMatchesSchema()
         ));
     }
@@ -645,6 +665,10 @@ public class HearingCommandHandlerTest {
                 .withPayloadOf(COURT_CENTRE_NAME, FIELD_COURT_CENTRE_NAME)
                 .withPayloadOf(ROOM_ID, FIELD_ROOM_ID)
                 .withPayloadOf(ROOM_NAME, FIELD_ROOM_NAME)
+                .withPayloadOf(JUDGE_ID, FIELD_JUDGE_ID)
+                .withPayloadOf(JUDGE_FIRST_NAME, FIELD_JUDGE_FIRST_NAME)
+                .withPayloadOf(JUDGE_LAST_NAME, FIELD_JUDGE_LAST_NAME)
+                .withPayloadOf(JUDGE_TITLE, FIELD_JUDGE_TITLE)
                 .build();
     }
 

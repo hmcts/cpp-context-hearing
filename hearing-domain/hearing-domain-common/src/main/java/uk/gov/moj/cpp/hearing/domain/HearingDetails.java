@@ -14,6 +14,27 @@ public class HearingDetails {
     private final UUID roomId;
     private final String roomName;
     private final UUID caseId;
+    private final String judgeId;
+    private final String judgeTitle;
+    private final String judgeFirstName;
+    private final String judgeLastName;
+
+
+    private HearingDetails(final Builder builder) {
+        this.hearingId = builder.hearingId;
+        this.startDateTime = builder.startDateTime;
+        this.duration = builder.duration;
+        this.hearingType = builder.hearingType;
+        this.courtCentreId = builder.courtCentreId;
+        this.courtCentreName = builder.courtCentreName;
+        this.roomId = builder.roomId;
+        this.roomName = builder.roomName;
+        this.caseId = builder.caseId;
+        this.judgeId = builder.judgeId;
+        this.judgeFirstName = builder.judgeFirstName;
+        this.judgeLastName = builder.judgeLastName;
+        this.judgeTitle = builder.judgeTitle;
+    }
 
     public UUID getHearingId() {
         return hearingId;
@@ -51,18 +72,21 @@ public class HearingDetails {
         return caseId;
     }
 
-    private HearingDetails(final Builder builder) {
-        this.hearingId = builder.hearingId;
-        this.startDateTime = builder.startDateTime;
-        this.duration = builder.duration;
-        this.hearingType = builder.hearingType;
-        this.courtCentreId = builder.courtCentreId;
-        this.courtCentreName = builder.courtCentreName;
-        this.roomId = builder.roomId;
-        this.roomName = builder.roomName;
-        this.caseId = builder.caseId;
+    public String getJudgeId() {
+        return judgeId;
     }
 
+    public String getJudgeTitle() {
+        return judgeTitle;
+    }
+
+    public String getJudgeFirstName() {
+        return judgeFirstName;
+    }
+
+    public String getJudgeLastName() {
+        return judgeLastName;
+    }
 
     public static class Builder {
         private UUID hearingId;
@@ -74,6 +98,11 @@ public class HearingDetails {
         private UUID roomId;
         private String roomName;
         private UUID caseId;
+        private String judgeId;
+        private String judgeTitle;
+        private String judgeFirstName;
+        private String judgeLastName;
+
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
@@ -117,6 +146,26 @@ public class HearingDetails {
 
         public Builder withCaseId(final UUID caseId) {
             this.caseId = caseId;
+            return this;
+        }
+
+        public Builder withJudgeId(final String judgeId) {
+            this.judgeId = judgeId;
+            return this;
+        }
+
+        public Builder withJudgeFirstName(final String judgeFirstName) {
+            this.judgeFirstName = judgeFirstName;
+            return this;
+        }
+
+        public Builder withJudgeLastName(final String judgeLastName) {
+            this.judgeLastName = judgeLastName;
+            return this;
+        }
+
+        public Builder withJudgeTitle(final String judgeTitle) {
+            this.judgeTitle = judgeTitle;
             return this;
         }
 

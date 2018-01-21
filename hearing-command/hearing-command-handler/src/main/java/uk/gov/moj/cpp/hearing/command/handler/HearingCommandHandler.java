@@ -49,6 +49,11 @@ public class HearingCommandHandler {
     private static final String FIELD_HEARING_ID = "hearingId";
 
     private static final String FIELD_GENERIC_ID = "id";
+    private static final String FIELD_JUDGE_ID = "judgeId";
+    private static final String FIELD_JUDGE_TITLE = "judgeTitle";
+    private static final String FIELD_JUDGE_FIRST_NAME = "judgeFirstName";
+    private static final String FIELD_JUDGE_LAST_NAME = "judgeLastName";
+
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_START_DATE = "startDate";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
@@ -102,8 +107,13 @@ public class HearingCommandHandler {
         final UUID roomId = getUUID(payload, FIELD_COURT_ROOM_ID).orElse(null);
         final String roomName = payload.getString(FIELD_ROOM_NAME, null);
         final UUID caseId = getUUID(payload, FIELD_CASE_ID).orElse(null);
+        final String judgeId = payload.getString(FIELD_JUDGE_ID, null);
+        final String judgeFirstName = payload.getString(FIELD_JUDGE_FIRST_NAME, null);
+        final String judgeLastName = payload.getString(FIELD_JUDGE_LAST_NAME, null);
+        final String judgeTitle = payload.getString(FIELD_JUDGE_TITLE, null);
         final HearingDetails hearingDetails = new HearingDetails.Builder().withHearingId(hearingId).withStartDateTime(startDateTime).withDuration(duration).withHearingType(hearingType)
-                .withCourtCentreId(courtCentreId).withCourtCentreName(courtCentreName).withRoomId(roomId).withRoomName(roomName).withCaseId(caseId).build();
+                .withCourtCentreId(courtCentreId).withCourtCentreName(courtCentreName).withRoomId(roomId).withRoomName(roomName).withCaseId(caseId)
+                .withJudgeId(judgeId).withJudgeFirstName(judgeFirstName).withJudgeLastName(judgeLastName).withJudgeTitle(judgeTitle).build();
 
         applyToHearingAggregate(hearingId, aggregate -> aggregate.initiateHearing(hearingDetails), command);
     }

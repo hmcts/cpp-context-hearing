@@ -8,18 +8,6 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -41,6 +29,18 @@ import uk.gov.moj.cpp.hearing.query.view.service.DefenceCounselService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ProsecutionCounselService;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 @ServiceComponent(Component.QUERY_VIEW)
 public class HearingQueryView {
@@ -110,9 +110,9 @@ public class HearingQueryView {
 
 
             hearings.forEach(hearing -> {
-                        final JsonArrayBuilder caseIdsJsonArrayBuilder = createArrayBuilder();
-                        hearingToCasesMap.get(hearing.getHearingId()).forEach(hearingCase ->
-                                caseIdsJsonArrayBuilder.add(hearingCase.getCaseId().toString()));
+                final JsonArrayBuilder caseIdsJsonArrayBuilder = createArrayBuilder();
+                hearingToCasesMap.get(hearing.getHearingId()).forEach(hearingCase ->
+                        caseIdsJsonArrayBuilder.add(hearingCase.getCaseId().toString()));
 
                 setHearingJsonArrayBuilder(hearingsJsonArrayBuilder, hearing, caseIdsJsonArrayBuilder);
             });
@@ -154,7 +154,7 @@ public class HearingQueryView {
         final JsonArrayBuilder hearingsJsonArrayBuilder = createArrayBuilder();
 
         hearings.forEach(hearing -> setHearingJsonArrayBuilder(hearingsJsonArrayBuilder, hearing,
-                        createArrayBuilder().add(caseId.toString())));
+                createArrayBuilder().add(caseId.toString())));
 
         return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARINGS)
                 .apply(createObjectBuilder()

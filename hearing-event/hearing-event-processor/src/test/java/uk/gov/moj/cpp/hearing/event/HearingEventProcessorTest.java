@@ -385,7 +385,7 @@ public class HearingEventProcessorTest {
 
     @Test
     public void processHearingAddedPublicEvent() {
-        this.hearingEventProcessor.createInitiateHearingCommandFromHearingConfirmedRecorded(getJsonHearingAddedEnvelope());
+        this.hearingEventProcessor.processHearingConfirmedRecorded(getJsonHearingAddedEnvelope());
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
         assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("hearing.initiate-hearing"),
@@ -400,7 +400,7 @@ public class HearingEventProcessorTest {
     @Test
     public void processHearingCasePleaAdded() throws IOException {
 
-        this.hearingEventProcessor.createHearingPleaAddFromPleaAdded(getJsonHearingCasePleaAddedOrChangedEnvelope());
+        this.hearingEventProcessor.processCasePleaAdded(getJsonHearingCasePleaAddedOrChangedEnvelope());
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
         assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("hearing.plea-add"),
@@ -420,7 +420,7 @@ public class HearingEventProcessorTest {
     @Test
     public void processHearingCasePleaChanged() throws IOException {
 
-        this.hearingEventProcessor.createHearingPleaChangeFromPleaChanged(getJsonHearingCasePleaAddedOrChangedEnvelope());
+        this.hearingEventProcessor.processCasePleaChanged(getJsonHearingCasePleaAddedOrChangedEnvelope());
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
         assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("hearing.plea-change"),

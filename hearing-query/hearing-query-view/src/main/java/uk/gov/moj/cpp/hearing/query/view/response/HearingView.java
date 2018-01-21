@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.response;
 
+import uk.gov.moj.cpp.external.domain.listing.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -21,6 +23,8 @@ public class HearingView {
     private String courtCentreName;
 
     private List<String> caseIds;
+
+    private Judge judge;
 
     private String roomId;
 
@@ -107,6 +111,14 @@ public class HearingView {
 
     public String getCourtCentreId() {
         return courtCentreId;
+    }
+
+    public Judge getJudge() {
+        return judge;
+    }
+
+    public void setJudge(Judge judge) {
+        this.judge = judge;
     }
 
     public void setCourtCentreId(final String courtCentreId) {

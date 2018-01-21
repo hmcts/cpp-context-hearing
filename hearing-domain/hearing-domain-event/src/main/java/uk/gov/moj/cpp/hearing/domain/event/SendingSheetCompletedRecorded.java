@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.sending-sheet-recorded")
 public class SendingSheetCompletedRecorded {
@@ -15,10 +16,14 @@ public class SendingSheetCompletedRecorded {
 
     @JsonCreator
     public SendingSheetCompletedRecorded(
-            @JsonProperty(value = "crownCourtHearing")  final CrownCourtHearing crownCourtHearing,
-            @JsonProperty(value = "hearing")  final Hearing hearing) {
+            @JsonProperty(value = "crownCourtHearing") final CrownCourtHearing crownCourtHearing,
+            @JsonProperty(value = "hearing") final Hearing hearing) {
         this.crownCourtHearing = crownCourtHearing;
         this.hearing = hearing;
+    }
+
+    public static Builder sendingSheetRecorded() {
+        return new Builder();
     }
 
     public CrownCourtHearing getCrownCourtHearing() {
@@ -27,10 +32,6 @@ public class SendingSheetCompletedRecorded {
 
     public Hearing getHearing() {
         return hearing;
-    }
-
-    public static Builder sendingSheetRecorded() {
-        return new Builder();
     }
 
     public static class Builder {
