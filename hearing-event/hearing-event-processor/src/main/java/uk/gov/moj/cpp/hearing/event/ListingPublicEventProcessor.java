@@ -27,7 +27,7 @@ public class ListingPublicEventProcessor {
 
     @Handles("public.hearing-confirmed")
     public void recordHearingConfirmed(final JsonEnvelope event) {
-        LOGGER.trace("Received hearing-added public event, processing");
+        LOGGER.trace("Received hearing-confirmed public event, processing");
 
         sender.send(enveloper.withMetadataFrom(event, COMMAND_ADD_HEARINGS)
                 .apply(event.payloadAsJsonObject()));

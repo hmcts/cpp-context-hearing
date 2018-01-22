@@ -1,9 +1,0 @@
-{
-  "caseId": "RANDOM_CASE_ID",
-  "hearingType": "TRIAL",
-  "startDateTime": "2016-06-01T10:00:00Z",
-  "duration" : 1,
-  "courtCentreId": "0f005c46-1f64-4091-8973-70f6b4aa40e2",
-  "courtCentreName": "Liverpool Crown court",
-  "roomName": "room 2"
-}

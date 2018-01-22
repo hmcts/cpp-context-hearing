@@ -22,6 +22,16 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import uk.gov.justice.services.common.converter.LocalDates;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -36,16 +46,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.services.common.converter.LocalDates;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
-import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingQueryViewTest {
@@ -119,9 +119,7 @@ public class HearingQueryViewTest {
         when(hearingRepository.findByStartDate(START_DATE)).thenReturn(hearings());
         when(hearingCaseRepository.findByHearingIds(newArrayList(HEARING_ID, HEARING_ID_2))).thenReturn(hearingCases());
 
-        final JsonEnvelope query = envelopeFrom(
-                metadataWithRandomUUIDAndName(),
-                //metadataWithRandomUUID(RESPONSE_NAME_HEARINGS),//TODO: conflict wth line above
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(),
                 createObjectBuilder().add(FIELD_START_DATE, LocalDates.to(START_DATE)).build());
 
         final JsonEnvelope actualHearings = hearingsQueryView.findHearingsByStartDate(query);
@@ -154,7 +152,7 @@ public class HearingQueryViewTest {
                         withJsonPath("$.hearings[1].caseIds[*]", containsInAnyOrder(CASE_ID_3.toString(), CASE_ID_4.toString(), CASE_ID_5.toString())),
                         withJsonPath("$.hearings[1].courtCentreId", equalTo(COURT_CENTRE_ID.toString())),
                         withJsonPath("$.hearings[1].roomId", equalTo(ROOM_ID_2.toString()))
-                        ))).thatMatchesSchema()
+                ))).thatMatchesSchema()
         ));
     }
 
@@ -202,9 +200,7 @@ public class HearingQueryViewTest {
         when(hearingCaseRepository.findByCaseId(CASE_ID)).thenReturn(caseHearings());
         when(hearingRepository.findByHearingIds(newArrayList(HEARING_ID, HEARING_ID_2))).thenReturn(hearings());
 
-        final JsonEnvelope query = envelopeFrom(
-                metadataWithRandomUUIDAndName(),
-                //metadataWithRandomUUID(RESPONSE_NAME_HEARINGS),//TODO
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(),
                 createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).build());
 
         final JsonEnvelope actualHearings = hearingsQueryView.findHearingsByCaseId(query);
@@ -246,9 +242,7 @@ public class HearingQueryViewTest {
         when(hearingCaseRepository.findByCaseId(CASE_ID)).thenReturn(caseHearings());
         when(hearingRepository.findByHearingIds(newArrayList(HEARING_ID, HEARING_ID_2))).thenReturn(hearingsWithMissingCourtCenterNameAndRoomName());
 
-        final JsonEnvelope query = envelopeFrom(
-                metadataWithRandomUUIDAndName(),
-                //metadataWithRandomUUID(RESPONSE_NAME_HEARINGS),//TODO
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(),
                 createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).build());
 
         final JsonEnvelope actualHearings = hearingsQueryView.findHearingsByCaseId(query);
@@ -304,24 +298,24 @@ public class HearingQueryViewTest {
     private List<Hearing> hearings() {
         return newArrayList(
                 new Hearing.Builder().withHearingId(HEARING_ID).withStartDate(START_DATE).withStartTime(START_TIME).withDuration(DURATION).withRoomId(ROOM_ID).withRoomName(ROOM_NAME).withHearingType(HEARING_TYPE).withCourtCentreId(COURT_CENTRE_ID).withCourtCentreName(COURT_CENTRE_NAME).build(),
-                        new Hearing.Builder().withHearingId(HEARING_ID_2).withStartDate(START_DATE)
-                                        .withStartTime(START_TIME_2).withDuration(DURATION_2)
-                                        .withRoomId(ROOM_ID_2).withRoomName(ROOM_NAME_2)
-                                        .withHearingType(HEARING_TYPE)
-                                        .withCourtCentreId(COURT_CENTRE_ID)
-                                        .withCourtCentreName(COURT_CENTRE_NAME).build()
+                new Hearing.Builder().withHearingId(HEARING_ID_2).withStartDate(START_DATE)
+                        .withStartTime(START_TIME_2).withDuration(DURATION_2)
+                        .withRoomId(ROOM_ID_2).withRoomName(ROOM_NAME_2)
+                        .withHearingType(HEARING_TYPE)
+                        .withCourtCentreId(COURT_CENTRE_ID)
+                        .withCourtCentreName(COURT_CENTRE_NAME).build()
         );
     }
 
     private List<Hearing> hearingsWithMissingCourtCenterNameAndRoomName() {
         return newArrayList(
-                        new Hearing.Builder().withHearingId(HEARING_ID).withStartDate(START_DATE)
-                                        .withStartTime(START_TIME).withDuration(DURATION)
-                                        .withHearingType(HEARING_TYPE).build(),
-                        new Hearing.Builder().withHearingId(HEARING_ID_2)
-                                        .withStartDate(START_DATE).withStartTime(START_TIME_2)
-                                        .withDuration(DURATION_2).withHearingType(HEARING_TYPE)
-                                        .build()
+                new Hearing.Builder().withHearingId(HEARING_ID).withStartDate(START_DATE)
+                        .withStartTime(START_TIME).withDuration(DURATION)
+                        .withHearingType(HEARING_TYPE).build(),
+                new Hearing.Builder().withHearingId(HEARING_ID_2)
+                        .withStartDate(START_DATE).withStartTime(START_TIME_2)
+                        .withDuration(DURATION_2).withHearingType(HEARING_TYPE)
+                        .build()
         );
     }
 

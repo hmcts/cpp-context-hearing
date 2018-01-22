@@ -178,10 +178,10 @@ public class HearingEventProcessor {
         final String eventTime = jsonObject.getString(FIELD_EVENT_TIME);
         final String lastModifiedTime = jsonObject.getString(FIELD_LAST_MODIFIED_TIME);
         final boolean priority = !jsonObject.getBoolean(FIELD_ALTERABLE);
-        final Optional<HearingDetails> optionalCaseDetails = getHearingDetails(event);
+        final Optional<HearingDetails> optionalHearingDetails = getHearingDetails(event);
 
-        if (optionalCaseDetails.isPresent()) {
-            final HearingDetails hearingDetails = optionalCaseDetails.get();
+        if (optionalHearingDetails.isPresent()) {
+            final HearingDetails hearingDetails = optionalHearingDetails.get();
             final JsonObjectBuilder hearingEventJsonBuilder = createObjectBuilder()
                     .add(FIELD_HEARING_EVENT_ID, hearingEventId)
                     .add(FIELD_RECORDED_LABEL, recordedLabel)
@@ -220,7 +220,8 @@ public class HearingEventProcessor {
                 this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_EVENT_LOGGED).apply(payload));
             }
         } else {
-            LOGGER.error("case urn is null for hearingId {} and hearingEventId {}", event.payloadAsJsonObject().getString(FIELD_HEARING_ID), hearingEventId);
+            LOGGER.error("Missing hearing details/case details for hearingId {} and hearingEventId {}. Hearing event won't be published!",
+                    event.payloadAsJsonObject().getString(FIELD_HEARING_ID), hearingEventId);
         }
     }
 
@@ -260,7 +261,7 @@ public class HearingEventProcessor {
             try {
                 final JsonObject caseResponsePayload = this.requester.request(caseQuery).payloadAsJsonObject();
 
-                if (!caseResponsePayload.isEmpty()) {
+                if (caseResponsePayload != null && !caseResponsePayload.isEmpty()) {
                     final String caseUrn = caseResponsePayload.getString(FIELD_CASE_URN);
                     final UUID courtCenterId = fromString(hearingResponsePayload.getString(FIELD_COURT_CENTRE_ID));
                     final String courtCenterName = hearingResponsePayload.getString(FIELD_COURT_CENTRE_NAME);
@@ -270,10 +271,14 @@ public class HearingEventProcessor {
 
                     final HearingDetails details = new HearingDetails(caseUrn, courtCenterId, courtCenterName, roomName, roomId, hearingType);
                     hearingDetails = Optional.of(details);
+                } else {
+                    LOGGER.error("Could not find case details for case id {}, hearing id {} from action {}:", caseId, hearingId, CASE_QUERY);
                 }
             } catch (final RuntimeException e) {
-                LOGGER.error(format("Could not find case details for case id %s, hearing id %s:", caseId, hearingId), e);
+                LOGGER.error(format("Error while retrieving case details/hearing details for case id %s, hearing id %s:", caseId, hearingId), e);
             }
+        } else {
+            LOGGER.error("Could not find hearing details for hearing id {} from action {}:", hearingId, HEARING_QUERY);
         }
         return hearingDetails;
     }
