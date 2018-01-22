@@ -11,5 +11,4 @@ import org.apache.deltaspike.data.api.Repository;
 @Repository
 public interface PleaHearingRepository extends EntityRepository<PleaHearing, UUID> {
     List<PleaHearing> findByCaseId(final UUID caseId);
-    List<PleaHearing> findByHearingId(final UUID hearingId);
 }

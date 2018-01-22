@@ -44,11 +44,6 @@
       "name": "hearing.get.case.pleas",
       "type": "action",
       "action": "hearing.get.case.pleas"
-    },
-    {
-      "name": "hearing.get.hearing.pleas",
-      "type": "action",
-      "action": "hearing.get.hearing.pleas"
     }
   ]
 }

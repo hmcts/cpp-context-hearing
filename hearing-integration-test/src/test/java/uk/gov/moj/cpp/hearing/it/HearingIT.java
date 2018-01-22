@@ -11,7 +11,11 @@ import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isOneOf;
@@ -54,11 +58,10 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
@@ -95,7 +98,6 @@ public class HearingIT extends AbstractIT {
         stubSetStatusForCapability("hearing.get.hearing", false);
 
         final String hearingId = randomUUID().toString();
-        final String caseId = randomUUID().toString();
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
@@ -372,29 +374,24 @@ public class HearingIT extends AbstractIT {
         thenHearingResultAmendedPublicEventShouldBePublished(hearingId, amendedResultForOffence);
     }
 
-    private void checkSendingSheetCompleteFlow(String caseId, List<String> pleaIds) {
-        JSONArray pleas = waitForPleasForCase(caseId, pleaIds.size());
-        Map<String, JSONObject> pleaIdToJsonObject = new HashMap<>();
-        for (int done = 0; done < pleas.length(); done++) {
-            JSONObject pleaJson = pleas.getJSONObject(done);
-            pleaIdToJsonObject.put(pleaJson.getString("pleaId"), pleaJson);
-        }
-        pleaIds.stream().forEach(
-                pleaId -> {
-                    Assert.assertTrue("expected pleaId " + pleaId, pleaIdToJsonObject.containsKey(pleaId));
-                    JSONObject pleaJson = pleaIdToJsonObject.get(pleaId);
-                    //check the hearing
-                    String hearingId = pleaJson.getString("hearingId");
-                    JSONObject hearingJson = getExistingHearing(hearingId);
-                    //  now load up the hearing and do some checks !
-                    Assert.assertEquals(EXPECTED_DEFAULT_HEARING_LENGTH, hearingJson.getInt("duration"));
-                    Assert.assertEquals("Magistrate Court Hearing", hearingJson.getString("hearingType"));
-                    Assert.assertEquals("courtCentreName", hearingJson.getString("courtCentreName"));
-                    JSONArray caseIds = hearingJson.getJSONArray("caseIds");
-                    Assert.assertEquals(1, caseIds.length());
-                    Assert.assertEquals(caseId, caseIds.getString(0));
-                }
-        );
+    private void checkSendingSheetCompleteFlow(final String caseId, final List<String> pleaIds) {
+
+        List<String> pleaIdsToCheck = new ArrayList<>(pleaIds);
+
+        StreamSupport.stream(waitForPleasForCase(caseId, pleaIds.size()).spliterator(), false)
+                .map(JSONObject.class::cast)
+                .forEach(pleaJson -> {
+                    pleaIdsToCheck.remove(pleaJson.getString("pleaId"));
+
+                    JSONObject hearingJson = getExistingHearing(pleaJson.getString("hearingId"));
+
+                    assertThat(hearingJson.getInt("duration"), is(EXPECTED_DEFAULT_HEARING_LENGTH));
+                    assertThat(hearingJson.getString("hearingType"), is("Magistrate Court Hearing"));
+                    assertThat(hearingJson.getString("courtCentreName"), is("courtCentreName"));
+                    assertThat(hearingJson.getJSONArray("caseIds"), contains(caseId));
+                });
+
+        assertThat("Not all expected pleas were present", pleaIdsToCheck, is(empty()));
     }
 
     @Test
@@ -410,8 +407,7 @@ public class HearingIT extends AbstractIT {
         //could use builders instead
         UUID caseID = UUID.randomUUID();
 
-        String eventPayloadString = getStringFromResource(resource).
-                replaceAll("CASE_ID", caseID.toString());
+        String eventPayloadString = getStringFromResource(resource).replaceAll("CASE_ID", caseID.toString());
         final JsonObject eventPayload = new StringToJsonObjectConverter().convert(eventPayloadString);
         sendMessage(messageProducer, eventName, eventPayload, metadata);
         ConditionTimeoutException timeout = null;
@@ -420,9 +416,8 @@ public class HearingIT extends AbstractIT {
         } catch (ConditionTimeoutException ex) {
             timeout = ex;
         }
-        Assert.assertTrue("exepected a timeout exception", timeout != null);
+        assertThat("expected a timeout", timeout, is(not(nullValue())));
     }
-
 
     @Test
     public void progressionSendingSheetComplete1GuiltyPlea() throws IOException {
@@ -434,7 +429,7 @@ public class HearingIT extends AbstractIT {
                 .withUserId(userId)
                 .build();
         String resource = eventName + ".json";
-        //could use builders instead
+
         UUID caseID = UUID.randomUUID();
         UUID pleaID = UUID.randomUUID();
         UUID courtCentreID = UUID.randomUUID();
@@ -705,9 +700,7 @@ public class HearingIT extends AbstractIT {
         Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.update-plea+json")
                 .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract
-
-                        ().response();
+                .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
@@ -917,16 +910,14 @@ public class HearingIT extends AbstractIT {
 
         // Use get plea by hearingId query endpoint
         final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.hearing.id"), hearingId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), caseId);
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing.pleas+json";
+        final String mediaType = "application/vnd.hearing.get.case.pleas+json";
 
         Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.update-plea+json")
                 .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract
-
-                        ().response();
+                .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())

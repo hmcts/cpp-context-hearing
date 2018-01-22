@@ -18,9 +18,4 @@ public class PleaService {
     public List<PleaHearing> getPleaHearingByCaseId(final UUID caseId) {
         return this.pleaHearingRepository.findByCaseId(caseId);
     }
-    @Transactional
-    public List<PleaHearing> getPleaHearingByHearingId(final UUID hearingId) {
-        return this.pleaHearingRepository.findByHearingId(hearingId);
-    }
-
 }

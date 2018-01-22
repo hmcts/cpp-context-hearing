@@ -46,16 +46,4 @@ public class PleaQueryView {
         );
 
     }
-
-    @Handles("hearing.get.hearing.pleas")
-    public JsonEnvelope getHearingPleas(final JsonEnvelope envelope) {
-        final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        return this.enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING_PLEA).apply(
-                Json.createObjectBuilder()
-                        .add("pleas", this.jsonConverter.convert(this.pleaService.getPleaHearingByHearingId(hearingId.get())))
-                        .build()
-        );
-
-    }
-
 }
