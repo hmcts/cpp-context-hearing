@@ -113,7 +113,7 @@
         "courtCentreName": {
           "type": "string"
         },
-        "roomNumber": {
+        "courtRoomName": {
           "type": "string"
         },
         "courtRoomId": {
@@ -124,7 +124,7 @@
       "required": [
         "courtCentreId",
         "courtCentreName",
-        "roomNumber",
+        "courtRoomName",
         "courtRoomId"
       ]
     }

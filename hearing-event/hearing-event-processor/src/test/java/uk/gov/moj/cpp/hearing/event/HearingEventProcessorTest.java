@@ -156,7 +156,7 @@ public class HearingEventProcessorTest {
     private static final String FIELD_COURT_CENTRE = "courtCentre";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
     private static final String FIELD_COURT_CENTER_ID = "courtCentreId";
-    private static final String FIELD_ROOM_NUMBER = "roomNumber";
+    private static final String FIELD_COURT_ROOM_NAME = "courtRoomName";
     private static final String FIELD_COURT_ROOM_ID = "courtRoomId";
     private static final String FIELD_ROOM_ID = "roomId";
 
@@ -300,7 +300,7 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTRE_NAME), equalTo(COURT_CENTER_NAME)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_ROOM_NUMBER), equalTo(COURT_ROOM_NUMBER)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_NAME), equalTo(COURT_ROOM_NUMBER)),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)))
                 )).thatMatchesSchema());
@@ -313,7 +313,7 @@ public class HearingEventProcessorTest {
                 {FIELD_CASE_URN},
                 {FIELD_COURT_CENTER_ID},
                 {FIELD_COURT_CENTRE_NAME},
-                {FIELD_ROOM_NUMBER},
+                {FIELD_COURT_ROOM_NAME},
                 {FIELD_ROOM_ID},
                 {FIELD_HEARING_TYPE}
         };
@@ -377,7 +377,7 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTRE_NAME), equalTo(COURT_CENTER_NAME)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_ROOM_NUMBER), equalTo(COURT_ROOM_NUMBER)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_NAME), equalTo(COURT_ROOM_NUMBER)),
                         withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
                         withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)))
                 )).thatMatchesSchema());

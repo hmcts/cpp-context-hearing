@@ -43,8 +43,8 @@ public class HearingEventProcessor {
     private static final String PUBLIC_HEARING_RESULT_AMENDED = "public.hearing.result-amended";
     private static final String PUBLIC_HEARING_EVENT_LOGGED = "public.hearing.event-logged";
     private static final String PUBLIC_HEARING_TIMESTAMP_CORRECTED = "public.hearing.event-timestamp-corrected";
-    public static final String PUBLIC_HEARING_PLEA_UPDATED = "public.hearing.plea-updated";
-    public static final String PUBLIC_HEARING_UPDATE_PLEA_IGNORED = "public.hearing.update-plea-ignored";
+    private static final String PUBLIC_HEARING_PLEA_UPDATED = "public.hearing.plea-updated";
+    private static final String PUBLIC_HEARING_UPDATE_PLEA_IGNORED = "public.hearing.update-plea-ignored";
 
 
     private static final String FIELD_HEARING_DEFINITION_ID = "hearingEventDefinitionId";
@@ -60,9 +60,10 @@ public class HearingEventProcessor {
     private static final String FIELD_HEARING_EVENT_DEFINITION = "hearingEventDefinition";
     private static final String FIELD_HEARING_EVENT = "hearingEvent";
     private static final String FIELD_HEARING = "hearing";
-    private static final String FIELD_ROOM_NUMBER = "roomNumber";
-    private static final String FIELD_ROOM_ID = "roomId";
+    private static final String FIELD_COURT_ROOM_NAME = "courtRoomName";
     private static final String FIELD_COURT_ROOM_ID = "courtRoomId";
+    private static final String FIELD_ROOM_ID = "roomId";
+    private static final String FIELD_ROOM_NAME = "roomName";
     private static final String FIELD_HEARING_TYPE = "hearingType";
     private static final String FIELD_COURT_CENTRE = "courtCentre";
 
@@ -76,9 +77,9 @@ public class HearingEventProcessor {
     private static final String FIELD_HEARING_ID = "hearingId";
 
     private static final String FIELD_CASE_ID = "caseId";
+    private static final String FIELD_CASE_IDS = "caseIds";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
-    private static final String FIELD_ROOM_NAME = "roomName";
     private static final int DEFAULT_HEARING_DURATION_MINUTES = 15;
 
     @Inject
@@ -119,8 +120,6 @@ public class HearingEventProcessor {
 
         this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
                 .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
-
-
     }
 
     @Handles("hearing.sending-sheet-recorded")
@@ -194,7 +193,7 @@ public class HearingEventProcessor {
             final JsonObjectBuilder courtHouseJsonBuilder = createObjectBuilder()
                     .add(FIELD_COURT_CENTRE_ID, hearingDetails.getCourtCenterId().toString())
                     .add(FIELD_COURT_CENTRE_NAME, hearingDetails.getCourtCenterName())
-                    .add(FIELD_ROOM_NUMBER, hearingDetails.getRoomNumber())
+                    .add(FIELD_COURT_ROOM_NAME, hearingDetails.getCourtRoomName())
                     .add(FIELD_COURT_ROOM_ID, hearingDetails.getCourtRoomId().toString());
 
             final JsonObjectBuilder hearingJsonBuilder = createObjectBuilder();
@@ -252,7 +251,7 @@ public class HearingEventProcessor {
         final JsonObject hearingResponsePayload = this.requester.request(hearingQuery).payloadAsJsonObject();
 
         if (!hearingResponsePayload.isEmpty()) {
-            final String caseId = hearingResponsePayload.getJsonArray("caseIds").getString(0);
+            final String caseId = hearingResponsePayload.getJsonArray(FIELD_CASE_IDS).getString(0);
 
             final JsonEnvelope caseQuery = this.enveloper.withMetadataFrom(event, CASE_QUERY).apply(
                     createObjectBuilder().add(FIELD_CASE_ID, caseId).build()
@@ -287,7 +286,7 @@ public class HearingEventProcessor {
         private final String caseUrn;
         private final UUID courtCenterId;
         private final String courtCenterName;
-        private final String roomNumber;
+        private final String courtRoomName;
         private final UUID courtRoomId;
         private final String hearingType;
 
@@ -295,13 +294,13 @@ public class HearingEventProcessor {
                 final String caseUrn,
                 final UUID courtCenterId,
                 final String courtCenterName,
-                final String roomNumber,
+                final String courtRoomName,
                 final UUID courtRoomId,
                 final String hearingType) {
             this.caseUrn = caseUrn;
             this.courtCenterId = courtCenterId;
             this.courtCenterName = courtCenterName;
-            this.roomNumber = roomNumber;
+            this.courtRoomName = courtRoomName;
             this.hearingType = hearingType;
             this.courtRoomId = courtRoomId;
         }
@@ -318,8 +317,8 @@ public class HearingEventProcessor {
             return this.courtCenterName;
         }
 
-        public String getRoomNumber() {
-            return this.roomNumber;
+        public String getCourtRoomName() {
+            return this.courtRoomName;
         }
 
         public UUID getCourtRoomId() {

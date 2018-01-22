@@ -477,7 +477,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
         assertThat(message.prettify(), new IsJson(allOf(
                 withJsonPath("$._metadata.name", equalTo(PUBLIC_EVENT_HEARING_EVENT_LOGGED)),
                 withJsonPath("$.hearing.hearingType", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_HEARING_TYPE))),
-                withJsonPath("$.hearing.courtCentre.roomNumber", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_NAME))),
+                withJsonPath("$.hearing.courtCentre.courtRoomName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_NAME))),
                 withJsonPath("$.hearing.courtCentre.courtRoomId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_ID))),
                 withJsonPath("$.hearing.courtCentre.courtCentreName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_NAME))),
                 withJsonPath("$.hearing.courtCentre.courtCentreId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_ID))),
@@ -509,7 +509,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
         assertThat(message.prettify(), new IsJson(allOf(
                 withJsonPath("$._metadata.name", equalTo(PUBLIC_EVENT_HEARING_EVENT_TIMESTAMP_CORRECTED)),
                 withJsonPath("$.hearing.hearingType", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_HEARING_TYPE))),
-                withJsonPath("$.hearing.courtCentre.roomNumber", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_NAME))),
+                withJsonPath("$.hearing.courtCentre.courtRoomName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_NAME))),
                 withJsonPath("$.hearing.courtCentre.courtRoomId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_ID))),
                 withJsonPath("$.hearing.courtCentre.courtCentreName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_NAME))),
                 withJsonPath("$.hearing.courtCentre.courtCentreId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_ID))),
