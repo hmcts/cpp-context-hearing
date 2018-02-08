@@ -10,7 +10,7 @@
 
     <properties>
         <cpp.service-component>QUERY_API</cpp.service-component>
-        <referencedata.version>2.0.114-CCR-SNAPSHOT</referencedata.version>
+        <referencedata.version>2.0.139</referencedata.version>
     </properties>
 
     <dependencies>
