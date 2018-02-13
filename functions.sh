@@ -123,6 +123,7 @@ function deployAndTest {
   startVagrant
   createEventLog
   runLiquibase
+  runEventBufferLiquibase
   healthCheck
   integrationTests
 }

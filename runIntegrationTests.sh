@@ -6,6 +6,7 @@ ${VAGRANT_DIR:?"Please export VAGRANT_DIR environment variable to point at atcm-
 WILDFLY_DEPLOYMENT_DIR="${VAGRANT_DIR}/deployments"
 CONTEXT_NAME=hearing
 FRAMEWORK_VERSION=1.0.0
+EVENT_BUFFER_VERSION=1.0.0
 
 #fail script on error
 set -e
