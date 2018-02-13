@@ -110,6 +110,8 @@ public class HearingEventProcessorTest {
 
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String RESULT_AMENDED_EVENT = "hearing.result-amended";
+    private static final String DRAFT_RESULT_SAVED_PRIVATE_EVENT = "hearing.draft-result-saved";
+
 
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_GENERIC_TYPE = "type";
@@ -159,6 +161,10 @@ public class HearingEventProcessorTest {
     private static final String FIELD_COURT_ROOM_NAME = "courtRoomName";
     private static final String FIELD_COURT_ROOM_ID = "courtRoomId";
     private static final String FIELD_ROOM_ID = "roomId";
+    private static final String FIELD_TARGET_ID = "targetId";
+    private static final String FIELD_DEFENDANT_ID = "defendantId";
+    private static final String FIELD_DRAFT_RESULT = "draftResult";
+
 
     private static final int DURATION = 15;
     private static final String START_DATE_TIME = PAST_ZONED_DATE_TIME.next().toString();
@@ -168,7 +174,6 @@ public class HearingEventProcessorTest {
     private static final UUID CLERK_OF_THE_COURT_ID = randomUUID();
     private static final String CLERK_OF_THE_COURT_FIRST_NAME = STRING.next();
     private static final String CLERK_OF_THE_COURT_LAST_NAME = STRING.next();
-    private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final UUID PLEA_ID = randomUUID();
     private static final UUID DEFENDANT_ID = randomUUID();
     private static final UUID GENERIC_ID = randomUUID();
@@ -187,6 +192,7 @@ public class HearingEventProcessorTest {
     private static final UUID OFFENCE_ID = randomUUID();
     private static final UUID CASE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
+    private static final UUID TARGET_ID = randomUUID();
     private static final String LABEL_VALUE = "hearing started";
     private static final String URN_VALUE = "47GD7822616";
     private static final String START_DATE = ZonedDateTimes.toString(now());
@@ -276,6 +282,27 @@ public class HearingEventProcessorTest {
     }
 
     @Test
+    public void publicDraftResultSavedPublicEvent() {
+        final String draftResult = "some random text";
+        final JsonEnvelope event = createDraftResultSavedPrivateEvent(draftResult);
+
+        this.hearingEventProcessor.publicDraftResultSavedPublicEvent(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.draft-result-saved"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_TARGET_ID), equalTo(TARGET_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_DRAFT_RESULT), equalTo(draftResult)),
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
+                        )
+                )).thatMatchesSchema());
+    }
+
+    @Test
     public void shouldPublishHearingEventLoggedPublicEvent() {
         // given
         final JsonEnvelope event = prepareHearingEventLoggedEvent();
@@ -309,7 +336,7 @@ public class HearingEventProcessorTest {
     @DataProvider
     public static Object[][] provideListOfRequiredHearingField() {
         // @formatter:off
-        return new Object[][] {
+        return new Object[][]{
                 {FIELD_CASE_URN},
                 {FIELD_COURT_CENTER_ID},
                 {FIELD_COURT_CENTRE_NAME},
@@ -598,6 +625,17 @@ public class HearingEventProcessorTest {
         return envelopeFrom(metadataWithRandomUUID(RESULT_AMENDED_EVENT), amendedResult.build());
     }
 
+    private JsonEnvelope createDraftResultSavedPrivateEvent(String draftResult) {
+        final JsonObjectBuilder result = createObjectBuilder()
+                .add(FIELD_TARGET_ID, TARGET_ID.toString())
+                .add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString())
+                .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
+                .add(FIELD_DRAFT_RESULT, draftResult)
+                .add(FIELD_HEARING_ID, HEARING_ID.toString());
+        return envelopeFrom(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT), result.build());
+    }
+
+
     private void fakeHearingDetailsAndProgressionCaseDetails() {
         final JsonObject hearingDetailsResponse = createObjectBuilder()
                 .add("hearingId", HEARING_ID.toString())
@@ -668,6 +706,7 @@ public class HearingEventProcessorTest {
         return new DefaultJsonEnvelope(metadata, jsonObject);
 
     }
+
     public JsonEnvelope getJsonHearingCasePleaAddedOrChangedEnvelope() throws IOException {
         final String hearingCasePleaAddOrUpdate = getStringFromResource("hearing.case.plea-added-or-changed.json")
                 .replace("RANDOM_CASE_ID", CASE_ID.toString())

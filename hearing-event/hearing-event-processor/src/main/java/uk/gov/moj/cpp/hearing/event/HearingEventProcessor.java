@@ -41,6 +41,7 @@ public class HearingEventProcessor {
 
     private static final String PUBLIC_HEARING_RESULTED = "public.hearing.resulted";
     private static final String PUBLIC_HEARING_RESULT_AMENDED = "public.hearing.result-amended";
+    private static final String PUBLIC_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
     private static final String PUBLIC_HEARING_EVENT_LOGGED = "public.hearing.event-logged";
     private static final String PUBLIC_HEARING_TIMESTAMP_CORRECTED = "public.hearing.event-timestamp-corrected";
     private static final String PUBLIC_HEARING_PLEA_UPDATED = "public.hearing.plea-updated";
@@ -108,6 +109,12 @@ public class HearingEventProcessor {
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_RESULT_AMENDED).apply(event.payloadAsJsonObject()));
     }
+
+    @Handles("hearing.draft-result-saved")
+    public void publicDraftResultSavedPublicEvent(final JsonEnvelope event) {
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_DRAFT_RESULT_SAVED).apply(event.payloadAsJsonObject()));
+    }
+
 
     @Handles("hearing.hearing.confirmed-recorded")
     public void processHearingConfirmedRecorded(final JsonEnvelope event) {

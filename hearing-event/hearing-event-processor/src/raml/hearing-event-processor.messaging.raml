@@ -38,6 +38,9 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.hearing-update-plea-ignored+json:
             schema: !include json/schema/hearing.hearing-update-plea-ignored.json
             example: !include json/hearing.hearing-update-plea-ignored.json
+        application/vnd.hearing.draft-result-saved+json:
+            schema: !include json/schema/hearing.draft-result-saved.json
+            example: !include json/hearing.draft-result-saved.json
 
 /public.event:
   post:

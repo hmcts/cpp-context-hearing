@@ -122,11 +122,23 @@ public class HearingIT extends AbstractIT {
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
 
+        final String publicConfirmEventName = "public.hearing.draft-result-saved";
+        final MessageConsumer messageConsumer = publicEvents.createConsumer(publicConfirmEventName);
+
         final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.save-draft-result+json")
                 .body(draftResultCommandPayload).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        final JsonPath message = retrieveMessage(messageConsumer);
+
+        assertThat(message.prettify(), new IsJson<>(
+                AllOf.allOf(
+                        withJsonPath("$._metadata.name", IsEqual.equalTo(publicConfirmEventName)),
+                        withJsonPath("$.hearingId", IsEqual.equalTo(hearingId)),
+                        withJsonPath("$.targetId", IsEqual.equalTo(targetId))
+                )));
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing-query-api-draft-result"), hearingId);
