@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "plea_hearing")
+@SuppressWarnings("squid:S00107")
 public class PleaHearing implements Serializable {
 
     @Id
@@ -48,7 +49,8 @@ public class PleaHearing implements Serializable {
                        final UUID defendantId,
                        final UUID offenceId,
                        final LocalDate pleaDate,
-                       final String value) {
+                       final String value,
+                       final UUID personId) {
         this.pleaId = pleaId;
         this.hearingId = hearingId;
         this.caseId = caseId;
@@ -56,6 +58,7 @@ public class PleaHearing implements Serializable {
         this.offenceId = offenceId;
         this.pleaDate = pleaDate;
         this.value = value;
+        this.personId = personId;
     }
 
     public UUID getPleaId() {
@@ -88,9 +91,5 @@ public class PleaHearing implements Serializable {
 
     public String getValue() {
         return value;
-    }
-
-    public void setPersonId(UUID personId) {
-        this.personId = personId;
     }
 }

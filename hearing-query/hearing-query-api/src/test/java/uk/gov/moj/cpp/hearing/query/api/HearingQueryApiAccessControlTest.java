@@ -31,6 +31,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
+    private static final String ACTION_NAME_GET_VERDICTS_BY_CASE_ID = "hearing.get.case.verdicts";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -138,6 +139,17 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinition() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks");
     }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetVerdicts() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_VERDICTS_BY_CASE_ID, "Listing Officers", "Court Clerks","System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetVerdicts() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_VERDICTS_BY_CASE_ID, "Listing Officers", "Court Clerks","System Users");
+    }
+
 
     @Override
     protected Map<Class, Object> getProviderMocks() {

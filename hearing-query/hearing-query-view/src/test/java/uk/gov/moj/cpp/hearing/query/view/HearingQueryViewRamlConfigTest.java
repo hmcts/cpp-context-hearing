@@ -27,12 +27,14 @@ public class HearingQueryViewRamlConfigTest {
     private Map<String, String> viewMethodsToHandlerNames;
     private Map<String, String> eventViewMethodsToHandlerNames;
     private Map<String, String> pleaMethodsToHandlerNames;
+    private Map<String,String> verdictMethodsToHandlerNames;
 
     @Before
     public void setup() throws IOException {
         viewMethodsToHandlerNames = viewMethodsToHandlerNames(HearingQueryView.class);
         eventViewMethodsToHandlerNames = viewMethodsToHandlerNames(HearingEventQueryView.class);
         pleaMethodsToHandlerNames = viewMethodsToHandlerNames(PleaQueryView.class);
+        verdictMethodsToHandlerNames = viewMethodsToHandlerNames(VerdictQueryView.class);
     }
 
     @Test
@@ -44,7 +46,8 @@ public class HearingQueryViewRamlConfigTest {
                 .collect(toList());
 
         final List<String> allHandlerNames = concat(viewMethodsToHandlerNames.values().stream(), eventViewMethodsToHandlerNames.values().stream()).collect(toList());
-        allHandlerNames.addAll(pleaMethodsToHandlerNames.values());
+        allHandlerNames.addAll(pleaMethodsToHandlerNames.values()) ;
+        allHandlerNames.addAll(verdictMethodsToHandlerNames.values()) ;
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames.toArray()));
     }
 

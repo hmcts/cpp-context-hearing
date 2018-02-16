@@ -45,7 +45,9 @@ public class HearingEventProcessor {
     private static final String PUBLIC_HEARING_EVENT_LOGGED = "public.hearing.event-logged";
     private static final String PUBLIC_HEARING_TIMESTAMP_CORRECTED = "public.hearing.event-timestamp-corrected";
     private static final String PUBLIC_HEARING_PLEA_UPDATED = "public.hearing.plea-updated";
+    private static final String PUBLIC_HEARING_VERDICT_UPDATED = "public.hearing.verdict-updated";
     private static final String PUBLIC_HEARING_UPDATE_PLEA_IGNORED = "public.hearing.update-plea-ignored";
+    private static final String PUBLIC_HEARING_UPDATE_VERDICT_IGNORED = "public.hearing.update-verdict-ignored";
 
 
     private static final String FIELD_HEARING_DEFINITION_ID = "hearingEventDefinitionId";
@@ -166,12 +168,28 @@ public class HearingEventProcessor {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_PLEA_UPDATED).apply(Json.createObjectBuilder().add(FIELD_CASE_ID, caseId).build()));
     }
 
+    @Handles("hearing.hearing-verdict-updated")
+    public void publishHearingVerdictUpdatedPublicEvent(final JsonEnvelope event) {
+        final JsonObject payload = event.payloadAsJsonObject();
+        LOGGER.trace("'hearing.hearing-verdict-updated' event received {}", payload);
+        final String hearingId = payload.getString(FIELD_HEARING_ID);
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_VERDICT_UPDATED).apply(Json.createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build()));
+    }
+
     @Handles("hearing.hearing-update-plea-ignored")
     public void publishHearingUpdatePleaIgnoredPublicEvent(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
         LOGGER.trace("'hearing.hearing-update-plea-ignored' event received {}", payload);
         final String caseId = payload.getString(FIELD_CASE_ID);
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_UPDATE_PLEA_IGNORED).apply(Json.createObjectBuilder().add(FIELD_CASE_ID, caseId).build()));
+    }
+
+    @Handles("hearing.hearing-update-verdict-ignored")
+    public void publishHearingUpdateVerdictIgnoredPublicEvent(final JsonEnvelope event) {
+        final JsonObject payload = event.payloadAsJsonObject();
+        LOGGER.trace("'hearing.hearing-update-verdict-ignored' event received {}", payload);
+        final String hearingId = payload.getString(FIELD_HEARING_ID);
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_UPDATE_VERDICT_IGNORED).apply(Json.createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build()));
     }
 
     @Handles("hearing.hearing-event-logged")

@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "verdicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/verdict"
+      }
+    }
+  },
+  "required": [
+    "verdicts"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "verdict": {
+      "type": "object",
+      "properties": {
+        "verdictId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "value": {
+          "type": "string"
+        },
+        "caseId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "defendantId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "offenceId": {
+          "$ref": "#/definitions/uuid"
+        }
+      },
+      "required": [
+        "verdictId",
+        "hearingId",
+        "value",
+        "caseId",
+        "defendantId",
+        "personId",
+        "offenceId"
+      ],
+      "additionalProperties": false
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

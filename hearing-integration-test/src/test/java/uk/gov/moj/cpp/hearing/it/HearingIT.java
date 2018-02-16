@@ -388,14 +388,14 @@ public class HearingIT extends AbstractIT {
 
     private void checkSendingSheetCompleteFlow(final String caseId, final List<String> pleaIds) {
 
-        List<String> pleaIdsToCheck = new ArrayList<>(pleaIds);
+        final List<String> pleaIdsToCheck = new ArrayList<>(pleaIds);
 
         StreamSupport.stream(waitForPleasForCase(caseId, pleaIds.size()).spliterator(), false)
                 .map(JSONObject.class::cast)
                 .forEach(pleaJson -> {
                     pleaIdsToCheck.remove(pleaJson.getString("pleaId"));
 
-                    JSONObject hearingJson = getExistingHearing(pleaJson.getString("hearingId"));
+                    final JSONObject hearingJson = getExistingHearing(pleaJson.getString("hearingId"));
 
                     assertThat(hearingJson.getInt("duration"), is(EXPECTED_DEFAULT_HEARING_LENGTH));
                     assertThat(hearingJson.getString("hearingType"), is("Magistrate Court Hearing"));
@@ -415,17 +415,17 @@ public class HearingIT extends AbstractIT {
         final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), eventName)
                 .withUserId(userId)
                 .build();
-        String resource = eventName + ".noguilty" + ".json";
+        final String resource = eventName + ".noguilty" + ".json";
         //could use builders instead
-        UUID caseID = UUID.randomUUID();
+        final UUID caseID = UUID.randomUUID();
 
-        String eventPayloadString = getStringFromResource(resource).replaceAll("CASE_ID", caseID.toString());
+        final String eventPayloadString = getStringFromResource(resource).replaceAll("CASE_ID", caseID.toString());
         final JsonObject eventPayload = new StringToJsonObjectConverter().convert(eventPayloadString);
         sendMessage(messageProducer, eventName, eventPayload, metadata);
         ConditionTimeoutException timeout = null;
         try {
             waitForPleasForCase(caseID.toString(), 1);
-        } catch (ConditionTimeoutException ex) {
+        } catch (final ConditionTimeoutException ex) {
             timeout = ex;
         }
         assertThat("expected a timeout", timeout, is(not(nullValue())));
@@ -440,11 +440,11 @@ public class HearingIT extends AbstractIT {
         final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), eventName)
                 .withUserId(userId)
                 .build();
-        String resource = eventName + ".json";
+        final String resource = eventName + ".json";
 
-        UUID caseID = UUID.randomUUID();
-        UUID pleaID = UUID.randomUUID();
-        UUID courtCentreID = UUID.randomUUID();
+        final UUID caseID = UUID.randomUUID();
+        final UUID pleaID = UUID.randomUUID();
+        final UUID courtCentreID = UUID.randomUUID();
 
         String eventPayloadString = getStringFromResource(resource).
                 replaceAll("CASE_ID", caseID.toString()).replaceAll("PLEA_ID", pleaID.toString());
@@ -463,22 +463,22 @@ public class HearingIT extends AbstractIT {
         final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), eventName)
                 .withUserId(userId)
                 .build();
-        String resource = eventName + ".partialguilty" + ".json";
+        final String resource = eventName + ".partialguilty" + ".json";
         //could use builders instead
 
-        UUID caseID = UUID.randomUUID();
-        UUID courtCentreID = UUID.randomUUID();
+        final UUID caseID = UUID.randomUUID();
+        final UUID courtCentreID = UUID.randomUUID();
 
-        List<UUID> offenceIDs = new ArrayList<>();
-        List<UUID> pleaIDs = new ArrayList<>();
+        final List<UUID> offenceIDs = new ArrayList<>();
+        final List<UUID> pleaIDs = new ArrayList<>();
 
         String payloadString = getStringFromResource(resource);
         payloadString = payloadString.replaceAll("CASE_ID", caseID.toString());
         payloadString = payloadString.replaceAll("COURT_CENTRE_ID", courtCentreID.toString());
 
         for (int done = 0; done <= 4; done++) {
-            UUID offenceID = UUID.randomUUID();
-            UUID pleaID = UUID.randomUUID();
+            final UUID offenceID = UUID.randomUUID();
+            final UUID pleaID = UUID.randomUUID();
             offenceIDs.add(offenceID);
             pleaIDs.add(pleaID);
             payloadString = payloadString.replaceAll("OFFENCE_ID_" + done, offenceID.toString());
@@ -492,31 +492,31 @@ public class HearingIT extends AbstractIT {
     }
 
 
-    private JSONArray waitForPleasForCase(String caseId, int pleaCount) {
+    private JSONArray waitForPleasForCase(final String caseId, final int pleaCount) {
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), caseId);
 
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.get.case.pleas+json";
-        String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(withJsonPath("$.pleas[" + (pleaCount - 1) + "]")))
                 ).getPayload();
-        JSONObject jsonObject = new JSONObject(payload);
-        JSONArray jsonPleas = jsonObject.getJSONArray("pleas");
+        final JSONObject jsonObject = new JSONObject(payload);
+        final JSONArray jsonPleas = jsonObject.getJSONArray("pleas");
         Assert.assertEquals("expected plea count", pleaCount, jsonPleas.length());
         return jsonPleas;
     }
 
-    private JSONObject getExistingHearing(String hearingId) {
+    private JSONObject getExistingHearing(final String hearingId) {
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
 
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.get.hearing+json";
 
-        String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK)).getPayload();
         return new JSONObject(payload);
     }
@@ -969,6 +969,7 @@ public class HearingIT extends AbstractIT {
 
     }
 
+
     private String createAddProsecutionCounselCommandPayload(final String personId, final String attendeeId, final String status) throws IOException {
         String addProsecutionCounselPayload = Resources.toString(
                 getResource("hearing.command.add-prosecution-counsel.json"),
@@ -1011,8 +1012,5 @@ public class HearingIT extends AbstractIT {
         return new StringToJsonObjectConverter().convert(sendCaseForListingEventPayloadString);
     }
 
-    private String getStringFromResource(final String path) throws IOException {
-        return Resources.toString(getResource(path),
-                defaultCharset());
-    }
+
 }

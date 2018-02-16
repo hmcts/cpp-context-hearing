@@ -37,8 +37,7 @@ public class PleaHearingRepositoryTest extends BaseTransactionalTest {
 
     @Test
     public void findAllTest() {
-        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value);
-        pleaHearingRandom.setPersonId(this.personId);
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value,this.personId);
         this.pleaHearingRepository.save(pleaHearingRandom);
 
         final List<PleaHearing> pleaHearings = this.pleaHearingRepository.findAll();
@@ -55,7 +54,7 @@ public class PleaHearingRepositoryTest extends BaseTransactionalTest {
 
     @Test
     public void findWithPK() {
-        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value);
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value,this.personId);
 
         this.pleaHearingRepository.save(pleaHearingRandom);
 
@@ -65,7 +64,7 @@ public class PleaHearingRepositoryTest extends BaseTransactionalTest {
         assertThat(pleaHearing.getHearingId(), is(this.hearingId));
         assertThat(pleaHearing.getCaseId(), is(this.caseId));
         assertThat(pleaHearing.getDefendantId(), is(this.defendantId));
-        assertThat(pleaHearing.getPersonId()==null, is(true));
+        assertThat(pleaHearing.getPersonId(), is(this.personId));
         assertThat(pleaHearing.getOffenceId(), is(this.offenceId));
         assertThat(pleaHearing.getPleaDate(), is(this.pleaDate));
         assertThat(pleaHearing.getValue(), is(this.value));
@@ -73,8 +72,7 @@ public class PleaHearingRepositoryTest extends BaseTransactionalTest {
 
     @Test
     public void findWithCaseId() {
-        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value);
-        pleaHearingRandom.setPersonId(this.personId);
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value,this.personId);
         this.pleaHearingRepository.save(pleaHearingRandom);
 
         final List<PleaHearing> pleaHearings = this.pleaHearingRepository.findByCaseId(this.caseId);

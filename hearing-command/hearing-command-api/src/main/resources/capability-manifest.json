@@ -44,6 +44,11 @@
       "name": "hearing.update-plea",
       "type": "action",
       "action": "hearing.update-plea"
+    },
+    {
+      "name": "hearing.update-verdict",
+      "type": "action",
+      "action": "hearing.update-verdict"
     }
   ]
 }

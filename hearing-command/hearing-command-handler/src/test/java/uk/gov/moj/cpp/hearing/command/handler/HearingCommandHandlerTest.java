@@ -45,6 +45,8 @@ import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingsPleaAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
@@ -53,6 +55,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
@@ -60,6 +63,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictAdded;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -103,10 +107,14 @@ public class HearingCommandHandlerTest {
     private static final String HEARING_RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String HEARING_RESULT_AMENDED_EVENT = "hearing.result-amended";
     private static final String HEARING_UPDATE_PLEA = "hearing.update-plea";
+    private static final String HEARING_UPDATE_VERDICT = "hearing.update-verdict";
+    private static final String HEARING_CONVICTION_DATE_ADDED = "hearing.conviction-date-added";
+    private static final String HEARING_VERDICT_ADDED = "hearing.verdict-added";
     private static final String HEARING_PLEA_ADD = "hearing.plea-add";
     private static final String HEARING_PLEA_CHANGE = "hearing.plea-change";
     private static final String HEARING_PLEA_ADDED = "hearing.plea-added";
     private static final String HEARING_PLEA_CHANGED = "hearing.plea-changed";
+    private static final String HEARING_CONVICTION_DATE_REMOVED = "hearing.conviction-date-removed";
     private static final String PLEA_ADDED = "hearing.case.plea-added";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_GENERIC_ID = "id";
@@ -144,7 +152,7 @@ public class HearingCommandHandlerTest {
     private static final String FIELD_JUDGE_TITLE = "judgeTitle";
     private static final String FIELD_JUDGE_FIRST_NAME = "judgeFirstName";
     private static final String FIELD_JUDGE_LAST_NAME = "judgeLastName";
-
+    private static final String FIELD_CONVICTION_DATE = "convictionDate";
 
     private static final String FIELD_COURT_VALUE = STRING.next();
     private static final String FIELD_COURT_ROOM_VALUE = STRING.next();
@@ -198,9 +206,13 @@ public class HearingCommandHandlerTest {
     private static final String PROMPT_VALUE_4 = "Roger Stokes";
 
     private static final String PLEA_ID = UUID.randomUUID().toString();
+    private static final String VERDICT_ID = UUID.randomUUID().toString();
+    private static final String VERDICT_VALUE = "GUILTY";
     private static final String PLEA_DATE = "2017-02-02";
-    private static final String PLEA_VALUE = "GUILTY";
+    private static final String PLEA_GUILTY = "GUILTY";
+    private static final String PLEA_NOT_GUILTY = "NOT GUILTY";
     public static final String HEARING_HEARING_PLEA_UPDATED = "hearing.hearing-plea-updated";
+    public static final String HEARING_HEARING_VERDICT_UPDATED = "hearing.hearing-verdict-updated";
 
     @Mock
     private EventStream eventStream;
@@ -219,7 +231,8 @@ public class HearingCommandHandlerTest {
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
             RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
             HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class, PleaAdded.class, PleaChanged.class,
-            HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class, JudgeAssigned.class);
+            HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class, JudgeAssigned.class,
+            VerdictAdded.class, ConvictionDateAdded.class, HearingVerdictUpdated.class, ConvictionDateRemoved.class);
 
     @InjectMocks
     private HearingCommandHandler hearingCommandHandler;
@@ -571,7 +584,7 @@ public class HearingCommandHandlerTest {
         // Given
 
         final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
-                "hearing.update-plea.json");
+                "hearing.update-plea.json", PLEA_GUILTY);
         final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_UPDATE_PLEA),
                 publicHearingAddedPayload);
         // When
@@ -584,7 +597,7 @@ public class HearingCommandHandlerTest {
                         payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_VALUE))
+                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_GUILTY))
                         ))),
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(addPleaCommand)
@@ -596,11 +609,47 @@ public class HearingCommandHandlerTest {
     }
 
     @Test
+    public void shouldRaiseVerdictUpdated() throws Exception {
+        // Given
+
+        final JsonObject updateVerdictPayload = getHearingUpdateVerdictPayload(
+                "hearing.update-verdict.json");
+        final JsonEnvelope updateVerdictCommand = envelopeFrom(metadataWithRandomUUID(HEARING_UPDATE_VERDICT),
+                updateVerdictPayload);
+        // When
+        this.hearingCommandHandler.updateVerdict(updateVerdictCommand);
+        // Then
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(updateVerdictCommand)
+                                .withName(HEARING_CONVICTION_DATE_ADDED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
+                        ))),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(updateVerdictCommand)
+                                .withName(HEARING_VERDICT_ADDED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s.%s", "verdict", "value"), equalTo(VERDICT_VALUE))
+                        ))),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(updateVerdictCommand)
+                                .withName(HEARING_HEARING_VERDICT_UPDATED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
+                        )))
+        ));
+    }
+
+    @Test
     public void shouldRaiseHearingPleaAdded() throws Exception {
         // Given
 
         final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
-                "hearing.plea-add.json");
+                "hearing.plea.json", PLEA_GUILTY);
         final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_PLEA_ADD),
                 publicHearingAddedPayload);
         // When
@@ -609,11 +658,22 @@ public class HearingCommandHandlerTest {
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(addPleaCommand)
+                                .withName(HEARING_CONVICTION_DATE_ADDED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_CONVICTION_DATE), equalTo(PLEA_DATE))
+                        ))),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(addPleaCommand)
                                 .withName(HEARING_PLEA_ADDED),
                         payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_VALUE))
+                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_GUILTY))
                         )))
         ));
 
@@ -624,20 +684,30 @@ public class HearingCommandHandlerTest {
         // Given
 
         final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
-                "hearing.plea-change.json");
-        final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_PLEA_CHANGE),
+                "hearing.plea.json", PLEA_NOT_GUILTY);
+        final JsonEnvelope changePleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_PLEA_CHANGE),
                 publicHearingAddedPayload);
         // When
-        this.hearingCommandHandler.pleaChange(addPleaCommand);
+        this.hearingCommandHandler.pleaChange(changePleaCommand);
         // Then
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
-                        withMetadataEnvelopedFrom(addPleaCommand)
+                        withMetadataEnvelopedFrom(changePleaCommand)
+                                .withName(HEARING_CONVICTION_DATE_REMOVED),
+                        payloadIsJson(allOf(
+                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString()))
+                        ))),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(changePleaCommand)
                                 .withName(HEARING_PLEA_CHANGED),
                         payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_VALUE))
+                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_NOT_GUILTY))
                         )))
         ));
 
@@ -864,7 +934,7 @@ public class HearingCommandHandlerTest {
                         .build());
     }
 
-    private JsonObject getSendCaseForListingPayload(final String resource) throws IOException {
+    private JsonObject getSendCaseForListingPayload(final String resource, final String pleaValue) throws IOException {
         String sendCaseForListingEventPayloadString = getStringFromResource(resource);
         sendCaseForListingEventPayloadString =
                 sendCaseForListingEventPayloadString.replace("RANDOM_CASE_ID", CASE_ID.toString()).
@@ -873,10 +943,25 @@ public class HearingCommandHandlerTest {
                         replace("RANDOM_PERSON_ID", PERSON_ID.toString()).
                         replace("RANDOM_OFFENCE_ID", OFFENCE_ID.toString()).
                         replace("RANDOM_PLEA_ID", PLEA_ID).
-                        replace("RANDOM_PLEA_DATE", PLEA_DATE);
+                        replace("RANDOM_PLEA_DATE", PLEA_DATE).
+                        replace("PLEA_VALUE", pleaValue);
 
         return new StringToJsonObjectConverter().convert(sendCaseForListingEventPayloadString);
     }
+
+    private JsonObject getHearingUpdateVerdictPayload(final String resource) throws IOException {
+        String sendCaseForListingEventPayloadString = getStringFromResource(resource);
+        sendCaseForListingEventPayloadString =
+                sendCaseForListingEventPayloadString.replace("RANDOM_CASE_ID", CASE_ID.toString()).
+                        replace("RANDOM_HEARING_ID", HEARING_ID.toString()).
+                        replace("RANDOM_DEFENDANT_ID", DEFENDANT_ID.toString()).
+                        replace("RANDOM_PERSON_ID", PERSON_ID.toString()).
+                        replace("RANDOM_OFFENCE_ID", OFFENCE_ID.toString()).
+                        replace("RANDOM_VERDICT_ID", VERDICT_ID);
+
+        return new StringToJsonObjectConverter().convert(sendCaseForListingEventPayloadString);
+    }
+
 
     private String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path), defaultCharset());

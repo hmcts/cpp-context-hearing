@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
+import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -17,6 +19,7 @@ import java.util.UUID;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.google.common.io.Resources;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -70,11 +73,15 @@ public class AbstractIT {
         } catch (final IOException e) {
             LOGGER.warn("Error reading properties from {}", ENDPOINT_PROPERTIES_FILE, e);
         }
-        String baseUriProp = System.getProperty("INTEGRATION_HOST_KEY");
+        final String baseUriProp = System.getProperty("INTEGRATION_HOST_KEY");
         baseUri = isNotEmpty(baseUriProp) ? format("http://%s:8080", baseUriProp) : ENDPOINT_PROPERTIES.getProperty("base-uri");
     }
 
     private static void setRequestSpecification() {
         requestSpec = new RequestSpecBuilder().setBaseUri(baseUri).build();
+    }
+    protected String getStringFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path),
+                defaultCharset());
     }
 }

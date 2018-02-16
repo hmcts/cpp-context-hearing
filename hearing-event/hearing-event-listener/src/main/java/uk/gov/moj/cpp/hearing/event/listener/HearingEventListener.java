@@ -18,6 +18,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictAdded;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictChanged;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
@@ -26,6 +28,7 @@ import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
+import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
@@ -53,6 +56,7 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
@@ -110,6 +114,9 @@ public class HearingEventListener {
     private PleaHearingRepository pleaHearingRepository;
 
     @Inject
+    private VerdictHearingRepository verdictHearingRepository;
+
+    @Inject
     private HearingJudgeRepository hearingJudgeRepository;
 
     @Inject
@@ -164,7 +171,7 @@ public class HearingEventListener {
     @Handles("hearing.judge-assigned")
     public void judgeAssigned(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
-        HearingJudge hearingJudge = new HearingJudge(fromString(payload.getString(FIELD_HEARING_ID)),
+        final HearingJudge hearingJudge = new HearingJudge(fromString(payload.getString(FIELD_HEARING_ID)),
                 payload.getString(FIELD_JUDGE_ID),
                 payload.getString(FIELD_JUDGE_FIRST_NAME),
                 payload.getString(FIELD_JUDGE_LAST_NAME),
@@ -233,10 +240,8 @@ public class HearingEventListener {
                 hearingPleaAdded.getDefendantId(),
                 hearingPleaAdded.getOffenceId(),
                 hearingPleaAdded.getPlea().getPleaDate(),
-                hearingPleaAdded.getPlea().getValue());
-        if (null != hearingPleaAdded.getPersonId()) {
-            pleaHearing.setPersonId(hearingPleaAdded.getPersonId());
-        }
+                hearingPleaAdded.getPlea().getValue(),
+                hearingPleaAdded.getPersonId());
         this.pleaHearingRepository.save(pleaHearing);
     }
 
@@ -252,12 +257,40 @@ public class HearingEventListener {
                 hearingPleaChanged.getDefendantId(),
                 hearingPleaChanged.getOffenceId(),
                 hearingPleaChanged.getPlea().getPleaDate(),
-                hearingPleaChanged.getPlea().getValue());
-        if (null != hearingPleaChanged.getPersonId()) {
-            pleaHearing.setPersonId(hearingPleaChanged.getPersonId());
-        }
+                hearingPleaChanged.getPlea().getValue(),
+                hearingPleaChanged.getPersonId());
         this.pleaHearingRepository.save(pleaHearing);
 
+    }
+
+    @Handles("hearing.verdict-added")
+    public void verdictAdded(final JsonEnvelope event) {
+        LOGGER.info("{}", event.payloadAsJsonObject());
+        VerdictAdded verdictAdded =
+                this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), VerdictAdded.class);
+        final VerdictHearing verdictHearing = new VerdictHearing(verdictAdded.getVerdict().getId(),
+                verdictAdded.getHearingId(),
+                verdictAdded.getCaseId(),
+                verdictAdded.getPersonId(),
+                verdictAdded.getDefendantId(),
+                verdictAdded.getOffenceId(),
+                verdictAdded.getVerdict().getValue());
+        this.verdictHearingRepository.save(verdictHearing);
+    }
+
+    @Handles("hearing.verdict-changed")
+    public void verdictChanged(final JsonEnvelope event) {
+        LOGGER.info("{}", event.payloadAsJsonObject());
+        VerdictChanged verdictChanged =
+                this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), VerdictChanged.class);
+        final VerdictHearing verdictHearing = new VerdictHearing(verdictChanged.getVerdict().getId(),
+                verdictChanged.getHearingId(),
+                verdictChanged.getCaseId(),
+                verdictChanged.getPersonId(),
+                verdictChanged.getDefendantId(),
+                verdictChanged.getOffenceId(),
+                verdictChanged.getVerdict().getValue());
+        this.verdictHearingRepository.save(verdictHearing);
     }
 
     @Transactional

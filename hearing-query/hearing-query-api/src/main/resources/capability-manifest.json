@@ -44,6 +44,11 @@
       "name": "hearing.get.case.pleas",
       "type": "action",
       "action": "hearing.get.case.pleas"
+    },
+    {
+      "name": "hearing.get.case.verdicts",
+      "type": "action",
+      "action": "hearing.get.case.verdicts"
     }
   ]
 }

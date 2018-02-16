@@ -478,6 +478,19 @@ public class HearingEventProcessorTest {
     }
 
     @Test
+    public void publishHearingVerdictUpdatedIgnoredPublicEvent() throws IOException {
+
+        this.hearingEventProcessor.publishHearingUpdateVerdictIgnoredPublicEvent(getJsonPublicHearingVerdictUpdate());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.update-verdict-ignored"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
+                        )
+                )));
+    }
+
+    @Test
     public void publishHearingPleaUpdatedPublicEvent() throws IOException {
 
         this.hearingEventProcessor.publishHearingPleaUpdatedPublicEvent(getJsonPublicHearingPleaUpdate());
@@ -486,6 +499,19 @@ public class HearingEventProcessorTest {
                 metadata().withName("public.hearing.plea-updated"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
+                        )
+                )));
+    }
+
+    @Test
+    public void publishHearingVerdictUpdatedPublicEvent() throws IOException {
+
+        this.hearingEventProcessor.publishHearingVerdictUpdatedPublicEvent(getJsonPublicHearingVerdictUpdate());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.verdict-updated"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
                         )
                 )));
     }
@@ -702,6 +728,14 @@ public class HearingEventProcessorTest {
 
     private JsonEnvelope getJsonPublicHearingPleaUpdate() {
         final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).build();
+        final Metadata metadata = metadataWithDefaults().build();
+        return new DefaultJsonEnvelope(metadata, jsonObject);
+
+    }
+
+
+    private JsonEnvelope getJsonPublicHearingVerdictUpdate() {
+        final JsonObject jsonObject = createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString()).build();
         final Metadata metadata = metadataWithDefaults().build();
         return new DefaultJsonEnvelope(metadata, jsonObject);
 

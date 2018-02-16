@@ -40,6 +40,7 @@ import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
+import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
@@ -68,6 +69,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
@@ -179,6 +181,8 @@ public class HearingEventListenerTest {
     private static final String DRAFT_RESULT_4 = "{\"targetId\":\"" + TARGET_ID_4 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\""+ randomUUID() + "\",\"resultLineId\":\"" + RESULT_LINE_ID_4 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final String UPDATED_DRAFT_RESULT_4 = "{\"targetId\":\"" + TARGET_ID_4 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\""+ RESULT_LINE_ID_4 + "\",\"resultLineId\":\"" + RESULT_LINE_ID_4 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final UUID PLEA_ID = randomUUID();
+    private static final UUID VERDICT_ID = randomUUID();
+    private static final String VERDICT_VALUE = "GUILTY";
 
     private static final String PLEA_VALUE = "GUILTY";
     private static final String FIELD_VALUE = "value";
@@ -204,6 +208,9 @@ public class HearingEventListenerTest {
 
     @Mock
     private PleaHearingRepository pleaHearingRepository;
+
+    @Mock
+    private VerdictHearingRepository verdictHearingRepository;
 
     @Mock
     private HearingCaseRepository hearingCaseRepository;
@@ -233,7 +240,10 @@ public class HearingEventListenerTest {
     private ArgumentCaptor<DefenceCounselDefendant> defenceCounselDefendantRemoveArgumentCaptor;
 
     @Captor
-    private ArgumentCaptor<PleaHearing> pleaHEaringArgumentCaptor;
+    private ArgumentCaptor<PleaHearing> pleaHearingArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<VerdictHearing> verdictHearingArgumentCaptor;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -585,8 +595,8 @@ public class HearingEventListenerTest {
     public void shouldPersistPleaHearingForPleaAdded() {
         final JsonEnvelope event = getHearingPleaEnvelope();
         this.hearingEventListener.pleaAdded(event);
-        verify(this.pleaHearingRepository).save(this.pleaHEaringArgumentCaptor.capture());
-        final PleaHearing pleaHearing = this.pleaHEaringArgumentCaptor.getValue();
+        verify(this.pleaHearingRepository).save(this.pleaHearingArgumentCaptor.capture());
+        final PleaHearing pleaHearing = this.pleaHearingArgumentCaptor.getValue();
         assertThat(pleaHearing.getHearingId(), is(HEARING_ID));
         assertThat(pleaHearing.getCaseId(), is(CASE_ID));
         assertThat(pleaHearing.getDefendantId(), is(DEFENDANT_ID));
@@ -601,8 +611,8 @@ public class HearingEventListenerTest {
     public void shouldPersistPleaHearingForPleaChanged() {
         final JsonEnvelope event = getHearingPleaEnvelope();
         this.hearingEventListener.pleaChanged(event);
-        verify(this.pleaHearingRepository).save(this.pleaHEaringArgumentCaptor.capture());
-        final PleaHearing pleaHearing = this.pleaHEaringArgumentCaptor.getValue();
+        verify(this.pleaHearingRepository).save(this.pleaHearingArgumentCaptor.capture());
+        final PleaHearing pleaHearing = this.pleaHearingArgumentCaptor.getValue();
         assertThat(pleaHearing.getHearingId(), is(HEARING_ID));
         assertThat(pleaHearing.getCaseId(), is(CASE_ID));
         assertThat(pleaHearing.getDefendantId(), is(DEFENDANT_ID));
@@ -611,6 +621,36 @@ public class HearingEventListenerTest {
         assertThat(pleaHearing.getPleaId(), is(PLEA_ID));
         assertThat(pleaHearing.getPleaDate(), is(START_DATE));
         assertThat(pleaHearing.getValue(), is(PLEA_VALUE));
+    }
+
+    @Test
+    public void shouldPersistVerdictHearingForVerdictAdded() {
+        final JsonEnvelope event = getHearingVerdictEnvelope();
+        this.hearingEventListener.verdictAdded(event);
+        verify(this.verdictHearingRepository).save(this.verdictHearingArgumentCaptor.capture());
+        final VerdictHearing verdictHearing = this.verdictHearingArgumentCaptor.getValue();
+        assertThat(verdictHearing.getHearingId(), is(HEARING_ID));
+        assertThat(verdictHearing.getCaseId(), is(CASE_ID));
+        assertThat(verdictHearing.getDefendantId(), is(DEFENDANT_ID));
+        assertThat(verdictHearing.getOffenceId(), is(OFFENCE_ID));
+        assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
+        assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
+        assertThat(verdictHearing.getValue(), is(PLEA_VALUE));
+    }
+
+    @Test
+    public void shouldPersistVerdictHearingForVerdictChanged() {
+        final JsonEnvelope event = getHearingVerdictEnvelope();
+        this.hearingEventListener.verdictChanged(event);
+        verify(this.verdictHearingRepository).save(this.verdictHearingArgumentCaptor.capture());
+        final VerdictHearing verdictHearing = this.verdictHearingArgumentCaptor.getValue();
+        assertThat(verdictHearing.getHearingId(), is(HEARING_ID));
+        assertThat(verdictHearing.getCaseId(), is(CASE_ID));
+        assertThat(verdictHearing.getDefendantId(), is(DEFENDANT_ID));
+        assertThat(verdictHearing.getOffenceId(), is(OFFENCE_ID));
+        assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
+        assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
+        assertThat(verdictHearing.getValue(), is(PLEA_VALUE));
     }
 
     private List<HearingOutcome> getHearingOutcomesForSharedResults() {
@@ -800,5 +840,16 @@ public class HearingEventListenerTest {
                 .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                 .add("plea", pleaObject).build();
         return envelopeFrom(metadataWithRandomUUIDAndName(), hearingPlea);
+    }
+
+    public JsonEnvelope getHearingVerdictEnvelope() {
+        final JsonObject verdictObject = createObjectBuilder().add(FIELD_GENERIC_ID, VERDICT_ID.toString()).add(FIELD_VALUE, VERDICT_VALUE).build();
+        final JsonObject hearingVerdict = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
+                .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                .add(FIELD_PERSON_ID, PERSON_ID.toString())
+                .add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString())
+                .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
+                .add("verdict", verdictObject).build();
+        return envelopeFrom(metadataWithRandomUUIDAndName(), hearingVerdict);
     }
 }

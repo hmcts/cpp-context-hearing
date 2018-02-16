@@ -1,0 +1,22 @@
+{
+  "verdicts": [
+    {
+      "verdictId": "0161a828-cfd1-4608-8616-d92870bada3d",
+      "hearingId": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "value": "GUILTY",
+      "caseId": "4bb4cd5a-ce2a-467d-8984-76b62ec92072",
+      "defendantId": "1b8e3c17-a699-4798-80b8-5e6f72510473",
+      "personId": "1daefec3-2f76-8109-82d9-2e60544a6c03",
+      "offenceId": "1daefec3-2f76-8109-82d9-2e60544a6c02"
+    },
+    {
+      "verdictId": "0161a828-cfd1-4608-8616-d92870baba3d",
+      "hearingId": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "value": "GUILTY",
+      "caseId": "4bb4cd5a-ce2a-467d-8984-76b62ec92072",
+      "defendantId": "1b8e3c17-a699-4798-80b8-5e6f72510473",
+      "personId": "1daefec3-2f76-8109-82d9-2e60544a6c03",
+      "offenceId": "1daefec3-2f76-8109-82d9-2e60544a6c02"
+    }
+    ]
+}

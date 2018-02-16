@@ -78,3 +78,12 @@ rule "Command - API - Action - hearing.update-plea"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.update-verdict"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-verdict");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

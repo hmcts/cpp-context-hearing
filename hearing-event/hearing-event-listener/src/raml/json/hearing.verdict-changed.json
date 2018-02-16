@@ -4,9 +4,8 @@
   "defendantId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
   "personId": "e085c62c-dc4a-11e7-9296-cec278b6b50a",
   "offenceId": "e085c62c-dc4a-11e7-9296-cec278b6b50a",
-  "plea": {
+  "verdict": {
     "id": "RANDOM_PLEA_ID",
-    "value": "GUILTY",
-    "pleaDate": "RANDOM_PLEA_DATE"
+    "value": "GUILTY"
   }
 }

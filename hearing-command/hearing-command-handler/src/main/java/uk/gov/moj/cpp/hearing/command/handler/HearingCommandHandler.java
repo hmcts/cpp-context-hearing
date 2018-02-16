@@ -19,6 +19,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.plea.HearingPlea;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingDetails;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
@@ -241,6 +242,15 @@ public class HearingCommandHandler {
         applyToHearingAggregate(hearingId, aggregate -> aggregate.changePlea(hearingPlea), command);
     }
 
+    @Handles("hearing.command.update-verdict")
+    public void updateVerdict(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.trace("Processing hearing.command.update-verdict command");
+        final JsonObject payload = command.payloadAsJsonObject();
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
+        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand =
+                this.jsonObjectToObjectConverter.convert(payload, HearingUpdateVerdictCommand.class);
+        applyToHearingAggregate(hearingId, aggregate -> aggregate.updateVerdict(hearingUpdateVerdictCommand), command);
+    }
 
     private void applyToHearingAggregate(final UUID streamId, final Function<HearingAggregate, Stream<Object>> function,
                                          final JsonEnvelope envelope) throws EventStreamException {

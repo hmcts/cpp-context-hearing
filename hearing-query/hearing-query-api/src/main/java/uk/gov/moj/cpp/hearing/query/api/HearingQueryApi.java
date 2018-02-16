@@ -64,4 +64,8 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.get.case.verdicts")
+    public JsonEnvelope getCaseVerdicts(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
 }
