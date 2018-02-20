@@ -38,19 +38,25 @@ public class HearingEventLogAggregate implements Aggregate {
     public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final UUID hearingEventDefinitionId,
                                           final String recordedLabel, final ZonedDateTime eventTime,
                                           final ZonedDateTime lastModifiedTime, final boolean alterable) {
+        return logHearingEvent(hearingId, hearingEventId, null, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable);
+    }
+
+    private Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventId, final UUID lastHearingEventId, final UUID hearingEventDefinitionId,
+                                           final String recordedLabel, final ZonedDateTime eventTime,
+                                           final ZonedDateTime lastModifiedTime, final boolean alterable) {
         if (hearingEventPreviouslyLogged(hearingEventId)) {
             return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, REASON_ALREADY_LOGGED, alterable)));
         } else if (hearingEventPreviouslyDeleted(hearingEventId)) {
             return apply(Stream.of(new HearingEventIgnored(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, REASON_ALREADY_DELETED, alterable)));
         }
 
-        return apply(Stream.of(new HearingEventLogged(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable)));
+        return apply(Stream.of(new HearingEventLogged(hearingEventId, lastHearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable)));
     }
 
     public Stream<Object> correctEvent(final UUID hearingId, final UUID hearingEventId, final UUID hearingEventDefinitionId,
                                        final String recordedLabel, final ZonedDateTime eventTime, ZonedDateTime lastModifiedTime,
                                        final UUID latestHearingEventId, final boolean alterable) {
-        return concat(logHearingEvent(hearingId, latestHearingEventId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable), deleteHearingEvent(hearingEventId));
+        return concat(logHearingEvent(hearingId, latestHearingEventId, hearingEventId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable), deleteHearingEvent(hearingEventId));
     }
 
     private Stream<Object> deleteHearingEvent(final UUID hearingEventId) {

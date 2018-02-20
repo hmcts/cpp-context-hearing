@@ -16,7 +16,6 @@ public abstract class DefenceCounselDefendantRepository extends AbstractEntityRe
      * Find {@link DefenceCounselDefendant}s by defenceCounselAttendeeId.
      *
      * @param defenceCounselAttendeeId of the {@link DefenceCounselDefendant} retrieve.
-     *
      * @return List of DefenceCounselDefendant.
      */
     public abstract List<DefenceCounselDefendant> findByDefenceCounselAttendeeId(final UUID defenceCounselAttendeeId);

@@ -1,14 +1,23 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -17,34 +26,57 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
+import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@SuppressWarnings({"unused", "unchecked"})
-@RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings({"unchecked", "unused"})
+@RunWith(DataProviderRunner.class)
 public class HearingEventProcessorTest {
-
-    private static final String STARTDATE = "2018-11-11";
 
     @InjectMocks
     private HearingEventProcessor hearingEventProcessor;
@@ -52,31 +84,98 @@ public class HearingEventProcessorTest {
     @Mock
     private Sender sender;
 
+    @Mock
+    private Requester requester;
+
+    @Mock
+    private JsonEnvelope responseEnvelope;
+
     @Spy
-    private Enveloper enveloper = createEnveloper();
+    private final Enveloper enveloper = createEnveloper();
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Spy
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
+    @Spy
+    @InjectMocks
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
+
+    @Spy
+    @InjectMocks
+    private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(this.objectMapper);
+
 
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String RESULT_AMENDED_EVENT = "hearing.result-amended";
 
     private static final String FIELD_GENERIC_ID = "id";
+    private static final String FIELD_GENERIC_TYPE = "type";
+
+
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_LEVEL = "level";
     private static final String FIELD_RESULT_LINES = "resultLines";
     private static final String FIELD_RESULT_LABEL = "resultLabel";
     private static final String FIELD_PROMPTS = "prompts";
     private static final String FIELD_PROMPT_LABEL = "label";
-    private static final String FIELD_PROMPT_VALUE = "value";
+    private static final String FIELD_VALUE = "value";
     private static final String FIELD_PERSON_ID = "personId";
     private static final String FIELD_OFFENCE_ID = "offenceId";
+    private static final String FIELD_CASE = "case";
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_SHARED_TIME = "sharedTime";
+    private static final String FIELD_HEARING_DEFINITION = "hearingEventDefinition";
+    private static final String FIELD_HEARING_DEFINITION_ID = "hearingEventDefinitionId";
+    private static final String FIELD_HEARING_EVENT = "hearingEvent";
+    private static final String FIELD_HEARING = "hearing";
+    private static final String FIELD_EVENT_TIME = "eventTime";
+    private static final String FIELD_RECORDED_LABEL = "recordedLabel";
+    private static final String FIELD_ALTERABLE = "alterable";
+    private static final String FIELD_PRIORITY = "priority";
+    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_LAST_HEARING_EVENT_ID = "lastHearingEventId";
+    private static final String FIELD_COURT = "court";
+    private static final String FIELD_COURT_ROOM = "courtRoom";
+    private static final String FIELD_CLERK_OF_THE_COURT_ID = "clerkOfTheCourtId";
+    private static final String FIELD_CLERK_OF_THE_COURT_FIRST_NAME = "clerkOfTheCourtFirstName";
+    private static final String FIELD_CLERK_OF_THE_COURT_LAST_NAME = "clerkOfTheCourtLastName";
 
+    private static final String FIELD_START_DATE = "startDate";
+
+    private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
+    private static final String FIELD_CASE_URN = "caseUrn";
+    private static final String FIELD_DURATION = "duration";
+    private static final String FIELD_HEARING_TYPE = "hearingType";
+    private static final String FIELD_START_DATE_TIME = "startDateTime";
+    private static final String FIELD_ESTIMATE_MINUTES = "estimateMinutes";
+
+    private static final String FIELD_COURT_CENTRE = "courtCentre";
+    private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_COURT_CENTER_ID = "courtCentreId";
+    private static final String FIELD_COURT_ROOM_NAME = "courtRoomName";
+    private static final String FIELD_COURT_ROOM_ID = "courtRoomId";
+    private static final String FIELD_ROOM_ID = "roomId";
+
+    private static final int DURATION = 15;
+    private static final String START_DATE_TIME = PAST_ZONED_DATE_TIME.next().toString();
+    private static final String HEARING_TYPE = "TRIAL";
+    private static final String COURT = STRING.next();
+    private static final String COURT_ROOM_NUMBER = STRING.next();
+    private static final UUID CLERK_OF_THE_COURT_ID = randomUUID();
+    private static final String CLERK_OF_THE_COURT_FIRST_NAME = STRING.next();
+    private static final String CLERK_OF_THE_COURT_LAST_NAME = STRING.next();
+    private static final String FIELD_DEFENDANT_ID = "defendantId";
+    private static final UUID PLEA_ID = randomUUID();
+    private static final UUID DEFENDANT_ID = randomUUID();
     private static final UUID GENERIC_ID = randomUUID();
     private static final UUID LAST_SHARED_RESULT_ID = randomUUID();
+    private static final String OBJECT_PLEA = "plea";
+    private static final String FIELD_PLEA_DATE = "pleaDate";
+    private static final String PLEA_VALUE = "GUILTY";
     private static final String LEVEL = "OFFENCE";
     private static final String RESULT_LABEL = "Imprisonment";
     private static final String PROMPT_LABEL_1 = "Imprisonment duration";
@@ -88,33 +187,38 @@ public class HearingEventProcessorTest {
     private static final UUID OFFENCE_ID = randomUUID();
     private static final UUID CASE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
+    private static final String LABEL_VALUE = "hearing started";
+    private static final String URN_VALUE = "47GD7822616";
+    private static final String START_DATE = ZonedDateTimes.toString(now());
+    private static final String LAST_MODIFIED_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    private static final String EVENT_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    private static final UUID COURT_CENTER_ID = randomUUID();
+    private static final String COURT_CENTER_NAME = STRING.next();
+    private static final UUID COURT_ROOM_ID = randomUUID();
 
-    @Test
-    public void publishCaseStartedPublicEvent() throws Exception {
-        final JsonEnvelope event = createEnvelope("hearing.hearing-initiated",
-                createObjectBuilder().add("hearingId", HEARING_ID.toString()).build());
 
-        hearingEventProcessor.publishHearingInitiatedPublicEvent(event);
+    private static final String FIELD_JUDGE = "judge";
+    private static final String FIELD_JUDGE_ID = "id";
+    private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
+    private static final String FIELD_JUDGE_LAST_NAME = "lastName";
+    private static final String FIELD_JUDGE_TITLE = "title";
 
-        final ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        verify(sender).send(envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.hearing-initiated"),
-                payloadIsJson(
-                        withJsonPath(format("$.%s", "hearingId"), equalTo(HEARING_ID.toString()))
-                )).thatMatchesSchema());
+    @Before
+    public void initMocks() {
+        MockitoAnnotations.initMocks(this);
     }
 
+
     @Test
-    public void publishHearingResultedPublicEvent() throws Exception {
+    public void publishHearingResultedPublicEvent() {
         final JsonEnvelope event = createResultsSharedEvent();
 
-        hearingEventProcessor.publishHearingResultsSharedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingResultsSharedPublicEvent(event);
 
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.resulted"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
@@ -125,23 +229,28 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
                         withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_LEVEL), equalTo(LEVEL)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT), equalTo(COURT)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT_ROOM), equalTo(COURT_ROOM_NUMBER)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(CLERK_OF_THE_COURT_FIRST_NAME)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(CLERK_OF_THE_COURT_LAST_NAME)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_ID), equalTo(CLERK_OF_THE_COURT_ID.toString())),
                         withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
+                        withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_1)),
                         withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
-                        withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_2))
+                        withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_2))
                         )
                 )).thatMatchesSchema());
     }
 
     @Test
-    public void publishHearingResultAmendedPublicEvent() throws Exception {
+    public void publishHearingResultAmendedPublicEvent() {
         final JsonEnvelope event = createResultAmendedEvent();
 
-        hearingEventProcessor.publishHearingResultAmendedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingResultAmendedPublicEvent(event);
 
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.result-amended"),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_GENERIC_ID), equalTo(GENERIC_ID.toString())),
@@ -153,33 +262,254 @@ public class HearingEventProcessorTest {
                         withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                         withJsonPath(format("$.%s", FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
                         withJsonPath(format("$.%s", FIELD_LEVEL), equalTo(LEVEL)),
+                        withJsonPath(format("$.%s", FIELD_COURT), equalTo(COURT)),
+                        withJsonPath(format("$.%s", FIELD_COURT_ROOM), equalTo(COURT_ROOM_NUMBER)),
+                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(CLERK_OF_THE_COURT_FIRST_NAME)),
+                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(CLERK_OF_THE_COURT_LAST_NAME)),
+                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_ID), equalTo(CLERK_OF_THE_COURT_ID.toString())),
                         withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_1)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_1)),
                         withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_VALUE), equalTo(PROMPT_VALUE_2))
+                        withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_2))
                         )
                 )).thatMatchesSchema());
     }
 
     @Test
-    public void publishAdjournDateUpdatedPublicEvent() throws Exception {
+    public void shouldPublishHearingEventLoggedPublicEvent() {
         // given
-        final JsonEnvelope event = EnvelopeFactory.createEnvelope("hearing.adjourn-date-updated", createObjectBuilder().add("startDate", STARTDATE).build());
+        final JsonEnvelope event = prepareHearingEventLoggedEvent();
+
+        fakeHearingDetailsAndProgressionCaseDetails();
 
         //when
-        hearingEventProcessor.publishHearingDateAdjournedPublicEvent(event);
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
 
         // then
-        final ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor = ArgumentCaptor.forClass(JsonEnvelope.class);
-        verify(sender).send(envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.adjourn-date-updated"),
-                payloadIsJson(
-                        withJsonPath(format("$.%s", "startDate"), equalTo(STARTDATE))
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.event-logged"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(false)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_EVENT_TIME), equalTo(EVENT_TIME)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTRE_NAME), equalTo(COURT_CENTER_NAME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_NAME), equalTo(COURT_ROOM_NUMBER)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)))
+                )).thatMatchesSchema());
+    }
+
+    @DataProvider
+    public static Object[][] provideListOfRequiredHearingField() {
+        // @formatter:off
+        return new Object[][] {
+                {FIELD_CASE_URN},
+                {FIELD_COURT_CENTER_ID},
+                {FIELD_COURT_CENTRE_NAME},
+                {FIELD_COURT_ROOM_NAME},
+                {FIELD_ROOM_ID},
+                {FIELD_HEARING_TYPE}
+        };
+        // @formatter:on
+    }
+
+    @Test
+    @UseDataProvider("provideListOfRequiredHearingField")
+    public void shouldNotPublishHearingEventLoggedPublicEventWhenRequiredHearingDataIsNotAvailable(final String fieldToRemove) {
+        // given
+        final JsonEnvelope event = prepareHearingEventLoggedEvent();
+
+        fakeCaseResponseWithHearingDetailsWithoutField(fieldToRemove);
+
+        //when
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+
+        // then
+        verifyZeroInteractions(this.sender);
+    }
+
+    @Test
+    @UseDataProvider("provideListOfRequiredHearingField")
+    public void shouldNotPublishHearingEventTimeStampCorrectedPublicEventWhenRequiredHearingDataIsNotAvailable(final String fieldToRemove) {
+        // given
+        final JsonEnvelope event = prepareHearingEventUpdatedEvent();
+
+        fakeCaseResponseWithHearingDetailsWithoutField(fieldToRemove);
+
+        //when
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+
+        // then
+        verifyZeroInteractions(this.sender);
+    }
+
+    @Test
+    public void shouldPublishHearingEventTimeStampCorrectedPublicEvent() {
+        // given
+        final JsonEnvelope event = prepareHearingEventUpdatedEvent();
+
+        fakeHearingDetailsAndProgressionCaseDetails();
+
+        //when
+        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
+
+        // then
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.event-timestamp-corrected"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(false)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_EVENT_TIME), equalTo(EVENT_TIME)),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTRE_NAME), equalTo(COURT_CENTER_NAME)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_NAME), equalTo(COURT_ROOM_NUMBER)),
+                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
+                        withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)))
+                )).thatMatchesSchema());
+    }
+
+    @Test
+    public void processHearingAddedPublicEvent() {
+        this.hearingEventProcessor.processHearingConfirmedRecorded(getJsonHearingAddedEnvelope());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("hearing.initiate-hearing"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                        withJsonPath(format("$.%s", "hearingId"), equalTo(GENERIC_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)),
+                        withJsonPath(format("$.%s", FIELD_DURATION), equalTo(DURATION)))
                 )));
+    }
 
+    @Test
+    public void processHearingCasePleaAdded() throws IOException {
 
+        this.hearingEventProcessor.processCasePleaAdded(getJsonHearingCasePleaAddedOrChangedEnvelope());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("hearing.plea-add"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_GENERIC_ID), equalTo(PLEA_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_VALUE), equalTo(PLEA_VALUE)),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_PLEA_DATE), equalTo(START_DATE))
+                        )
+                )));
+    }
+
+    @Test
+    public void processHearingCasePleaChanged() throws IOException {
+
+        this.hearingEventProcessor.processCasePleaChanged(getJsonHearingCasePleaAddedOrChangedEnvelope());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("hearing.plea-change"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_GENERIC_ID), equalTo(PLEA_ID.toString())),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_VALUE), equalTo(PLEA_VALUE)),
+                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_PLEA_DATE), equalTo(START_DATE))
+                        )
+                )));
+    }
+
+    @Test
+    public void publishHearingPleaUpdatedIgnoredPublicEvent() throws IOException {
+
+        this.hearingEventProcessor.publishHearingUpdatePleaIgnoredPublicEvent(getJsonPublicHearingPleaUpdate());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.update-plea-ignored"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
+                        )
+                )));
+    }
+
+    @Test
+    public void publishHearingPleaUpdatedPublicEvent() throws IOException {
+
+        this.hearingEventProcessor.publishHearingPleaUpdatedPublicEvent(getJsonPublicHearingPleaUpdate());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                metadata().withName("public.hearing.plea-updated"),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
+                        )
+                )));
+    }
+
+    private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class commandClass) {
+        final JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
+        final Metadata metadata = metadataWithDefaults().build();
+        final JsonEnvelope event = new DefaultJsonEnvelope(metadata, payload);
+        methodUnderTest.accept(event);
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope result = this.envelopeArgumentCaptor.getValue();
+        final JsonObject resultingPayload = result.payloadAsJsonObject();
+        return (C) jsonObjectToObjectConverter.convert(resultingPayload, commandClass);
+    }
+
+    @Test
+    public void testMagsCourtProcessed() {
+        final UUID caseId = UUID.randomUUID();
+        final UUID courtCentreId = UUID.randomUUID();
+        final Hearing originatingHearing = (new Hearing.Builder()).withCaseId(caseId).withCourtCentreId(courtCentreId.toString()).build();
+        final LocalDate convictionDate = LocalDate.now();
+        final UUID followingHearingId = UUID.randomUUID();
+        final MagsCourtHearingRecorded magsCourtHearingRecorded = new MagsCourtHearingRecorded(originatingHearing, convictionDate, followingHearingId);
+
+        final InitiateHearingCommand command = transactEvent2Command(magsCourtHearingRecorded,
+                (event) -> this.hearingEventProcessor.magsCourtProcessed(event), InitiateHearingCommand.class);
+
+        assertEquals(caseId, command.getCaseId());
+        assertEquals(UUID.fromString(originatingHearing.getCourtCentreId()), command.getCourtCentreId());
+        assertEquals(magsCourtHearingRecorded.getHearingId(), command.getHearingId());
+        assertEquals(magsCourtHearingRecorded.getOriginatingHearing().getType(), command.getHearingType());
+    }
+
+    @Test
+    public void testProcessSendingSheetRecordedRecordMags() {
+        final UUID caseId = UUID.randomUUID();
+        final UUID courtCentreId = UUID.randomUUID();
+        final Hearing originatingHearing = (new Hearing.Builder()).withCaseId(caseId).withCourtCentreId(courtCentreId.toString()).build();
+        final LocalDate convictionDate = LocalDate.now();
+        final UUID followingHearingId = UUID.randomUUID();
+        final CrownCourtHearing crownCourtHearing = (new CrownCourtHearing.Builder()).build();
+        final Defendant defendant = (new Defendant.Builder()).withFirstName("David").withLastName("Bowie").build();
+        final List<Defendant> defendants = newArrayList(defendant);
+        final Hearing hearing = (new Hearing.Builder()).withCaseId(caseId).withDefendants(defendants).build();
+        final SendingSheetCompletedRecorded sendingSheetCompletedRecorded = new SendingSheetCompletedRecorded(crownCourtHearing, hearing);
+
+        final RecordMagsCourtHearingCommand command = transactEvent2Command(sendingSheetCompletedRecorded,
+                (event) -> this.hearingEventProcessor.processSendingSheetRecordedRecordMags(event), RecordMagsCourtHearingCommand.class);
+
+        assertEquals(caseId, command.getHearing().getCaseId());
+        assertEquals(defendant.getLastName(), command.getHearing().getDefendants().get(0).getLastName());
     }
 
     private JsonEnvelope createResultsSharedEvent() {
@@ -191,13 +521,18 @@ public class HearingEventProcessorTest {
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                         .add(FIELD_LEVEL, LEVEL)
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                        .add(FIELD_COURT, COURT)
+                        .add(FIELD_COURT_ROOM, COURT_ROOM_NUMBER)
+                        .add(FIELD_CLERK_OF_THE_COURT_ID, CLERK_OF_THE_COURT_ID.toString())
+                        .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, CLERK_OF_THE_COURT_FIRST_NAME)
+                        .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, CLERK_OF_THE_COURT_LAST_NAME)
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
-                                        .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_1))
+                                        .add(FIELD_VALUE, PROMPT_VALUE_1))
                                 .add(createObjectBuilder()
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
-                                        .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_2))))
+                                        .add(FIELD_VALUE, PROMPT_VALUE_2))))
                 .build();
 
         final JsonObject shareResult = createObjectBuilder()
@@ -207,6 +542,33 @@ public class HearingEventProcessorTest {
                 .build();
 
         return envelopeFrom(metadataWithRandomUUID(RESULTS_SHARED_EVENT), shareResult);
+    }
+
+    private JsonEnvelope prepareHearingEventLoggedEvent() {
+        return createEnvelope("hearing.hearing-event-logged",
+                createObjectBuilder()
+                        .add(FIELD_EVENT_TIME, EVENT_TIME)
+                        .add(FIELD_RECORDED_LABEL, LABEL_VALUE)
+                        .add(FIELD_HEARING_EVENT_ID, GENERIC_ID.toString())
+                        .add(FIELD_HEARING_ID, GENERIC_ID.toString())
+                        .add(FIELD_HEARING_DEFINITION_ID, GENERIC_ID.toString())
+                        .add(FIELD_LAST_MODIFIED_TIME, LAST_MODIFIED_TIME)
+                        .add(FIELD_ALTERABLE, true)
+                        .build());
+    }
+
+    private JsonEnvelope prepareHearingEventUpdatedEvent() {
+        return createEnvelope("hearing.hearing-event-logged",
+                createObjectBuilder()
+                        .add(FIELD_EVENT_TIME, EVENT_TIME)
+                        .add(FIELD_RECORDED_LABEL, LABEL_VALUE)
+                        .add(FIELD_HEARING_EVENT_ID, GENERIC_ID.toString())
+                        .add(FIELD_LAST_HEARING_EVENT_ID, GENERIC_ID.toString())
+                        .add(FIELD_HEARING_DEFINITION_ID, GENERIC_ID.toString())
+                        .add(FIELD_HEARING_ID, GENERIC_ID.toString())
+                        .add(FIELD_LAST_MODIFIED_TIME, LAST_MODIFIED_TIME)
+                        .add(FIELD_ALTERABLE, true)
+                        .build());
     }
 
     private JsonEnvelope createResultAmendedEvent() {
@@ -220,15 +582,107 @@ public class HearingEventProcessorTest {
                 .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                 .add(FIELD_LEVEL, LEVEL)
                 .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                .add(FIELD_COURT, COURT)
+                .add(FIELD_COURT_ROOM, COURT_ROOM_NUMBER)
+                .add(FIELD_CLERK_OF_THE_COURT_ID, CLERK_OF_THE_COURT_ID.toString())
+                .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, CLERK_OF_THE_COURT_FIRST_NAME)
+                .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, CLERK_OF_THE_COURT_LAST_NAME)
                 .add(FIELD_PROMPTS, createArrayBuilder()
                         .add(createObjectBuilder()
                                 .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
-                                .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_1))
+                                .add(FIELD_VALUE, PROMPT_VALUE_1))
                         .add(createObjectBuilder()
                                 .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
-                                .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_2)));
+                                .add(FIELD_VALUE, PROMPT_VALUE_2)));
 
         return envelopeFrom(metadataWithRandomUUID(RESULT_AMENDED_EVENT), amendedResult.build());
     }
 
+    private void fakeHearingDetailsAndProgressionCaseDetails() {
+        final JsonObject hearingDetailsResponse = createObjectBuilder()
+                .add("hearingId", HEARING_ID.toString())
+                .add("caseIds", createArrayBuilder().add(CASE_ID.toString()))
+                .add("courtCentreId", COURT_CENTER_ID.toString())
+                .add("courtCentreName", COURT_CENTER_NAME)
+                .add("roomName", COURT_ROOM_NUMBER)
+                .add("roomId", COURT_ROOM_ID.toString())
+                .add("hearingType", HEARING_TYPE)
+                .build();
+
+        final JsonObject caseResponse = createObjectBuilder()
+                .add("caseUrn", URN_VALUE)
+                .add("caseIds", createArrayBuilder().add(CASE_ID.toString()))
+                .build();
+        when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);
+        when(this.responseEnvelope.payloadAsJsonObject()).thenReturn(hearingDetailsResponse).thenReturn(caseResponse);
+    }
+
+    private void fakeCaseResponseWithHearingDetailsWithoutField(final String fieldToRemove) {
+        final JsonObjectBuilder objectBuilder = createObjectBuilder()
+                .add("caseIds", createArrayBuilder().add(CASE_ID.toString()));
+
+        if (!FIELD_CASE_URN.equals(fieldToRemove)) {
+            objectBuilder.add("caseUrn", JsonValue.NULL);
+        }
+
+        if (!FIELD_COURT_CENTER_ID.equals(fieldToRemove)) {
+            objectBuilder.add("courtCentreId", randomUUID().toString());
+        }
+
+        if (!FIELD_COURT_CENTRE_NAME.equals(fieldToRemove)) {
+            objectBuilder.add("courtCentreName", STRING.next());
+        }
+
+        if (!FIELD_COURT_CENTRE_NAME.equals(fieldToRemove)) {
+            objectBuilder.add("roomName", STRING.next());
+        }
+
+        if (!FIELD_ROOM_ID.equals(fieldToRemove)) {
+            objectBuilder.add("roomId", randomUUID().toString());
+        }
+
+        final JsonObject jsonObject = objectBuilder.build();
+
+        when(this.requester.request(any(JsonEnvelope.class))).thenReturn(this.responseEnvelope);
+        when(this.responseEnvelope.payloadAsJsonObject()).thenReturn(jsonObject);
+    }
+
+    private JsonEnvelope getJsonHearingAddedEnvelope() {
+        final JsonObjectBuilder hearing = createObjectBuilder();
+        hearing.add(FIELD_GENERIC_ID, GENERIC_ID.toString());
+        hearing.add(FIELD_GENERIC_TYPE, HEARING_TYPE);
+        hearing.add(FIELD_START_DATE_TIME, START_DATE_TIME);
+        hearing.add(FIELD_ESTIMATE_MINUTES, DURATION);
+        hearing.add(FIELD_CASE_ID, CASE_ID.toString());
+        final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
+                .add("hearing", hearing).build();
+
+        final Metadata metadata = metadataWithDefaults().build();
+        return new DefaultJsonEnvelope(metadata, jsonObject);
+
+    }
+
+    private JsonEnvelope getJsonPublicHearingPleaUpdate() {
+        final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).build();
+        final Metadata metadata = metadataWithDefaults().build();
+        return new DefaultJsonEnvelope(metadata, jsonObject);
+
+    }
+    public JsonEnvelope getJsonHearingCasePleaAddedOrChangedEnvelope() throws IOException {
+        final String hearingCasePleaAddOrUpdate = getStringFromResource("hearing.case.plea-added-or-changed.json")
+                .replace("RANDOM_CASE_ID", CASE_ID.toString())
+                .replace("RANDOM_HEARING_ID", HEARING_ID.toString())
+                .replace("RANDOM_OFFENCE_ID", OFFENCE_ID.toString())
+                .replace("RANDOM_PERSON_ID", PERSON_ID.toString())
+                .replace("RANDOM_DEFENDANT_ID", DEFENDANT_ID.toString())
+                .replace("RANDOM_PLEA_ID", PLEA_ID.toString())
+                .replace("RANDOM_PLEA_DATE", START_DATE);
+
+        final Metadata metadata = metadataWithDefaults().build();
+        return new DefaultJsonEnvelope(metadata, new StringToJsonObjectConverter().convert(hearingCasePleaAddOrUpdate));
+    }
+
+    private String getStringFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path), defaultCharset());
+    }
 }

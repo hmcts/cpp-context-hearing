@@ -95,7 +95,8 @@ public class HearingCommandApiTest {
     private static final String VALUE = STRING.next();
 
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
-    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent", "correctEvent");
+    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList(
+            "shareResults", "logHearingEvent", "correctEvent", "updatePlea");
 
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
@@ -104,19 +105,16 @@ public class HearingCommandApiTest {
     private Sender sender;
 
     @Spy
-    private Enveloper enveloper = createEnveloper();
+    private final Enveloper enveloper = createEnveloper();
 
     @Spy
-    private Clock clock = new StoppedClock(ZonedDateTime.now());
+    private final Clock clock = new StoppedClock(ZonedDateTime.now());
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> senderArgumentCaptor;
 
     @InjectMocks
     private HearingCommandApi hearingCommandApi;
-
-    @InjectMocks
-    private HearingEventCommandApi hearingEventCommandApi;
 
     @Before
     public void setup() {

@@ -6,24 +6,28 @@ import java.util.UUID;
 
 @Event("hearing.draft-result-saved")
 public class DraftResultSaved {
-    private final UUID targetId;
-    private final UUID defendantId;
-    private final UUID offenceId;
-    private final String draftResult;
-    private final UUID hearingId;
+    private UUID targetId;
+    private UUID defendantId;
+    private UUID offenceId;
+    private String draftResult;
+    private UUID hearingId;
 
     public DraftResultSaved(
-                            final UUID targetId,
-                            final UUID defendantId,
-                            final UUID offenceId,
-                            final String draftResult,
-                            final UUID hearingId
-                            ) {
+            final UUID targetId,
+            final UUID defendantId,
+            final UUID offenceId,
+            final String draftResult,
+            final UUID hearingId
+    ) {
         this.targetId = targetId;
         this.defendantId = defendantId;
         this.offenceId = offenceId;
         this.draftResult = draftResult;
         this.hearingId = hearingId;
+    }
+
+    public DraftResultSaved() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getTargetId() {

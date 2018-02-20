@@ -5,16 +5,46 @@ baseUri: message://event/processor/message/hearing
 /hearing.event:
   post:
     body:
-        application/vnd.hearing.hearing-initiated+json:
-            schema: !include json/schema/hearing.hearing-initiated.json
-            example: !include json/hearing.hearing-initiated.json
-        application/vnd.hearing.adjourn-date-updated+json:
-            schema: !include json/schema/hearing.adjourn-date-updated.json
-            example: !include json/hearing.adjourn-date-updated.json
         application/vnd.hearing.results-shared+json:
             schema: !include json/schema/hearing.results-shared.json
             example: !include json/hearing.results-shared.json
         application/vnd.hearing.result-amended+json:
             schema: !include json/schema/hearing.result-amended.json
             example: !include json/hearing.result-amended.json
+        application/vnd.hearing.hearing-event-logged+json:
+            schema: !include json/schema/hearing.hearing-event-logged.json
+            example: !include json/hearing.hearing-event-logged.json
+        application/vnd.hearing.hearing.confirmed-recorded+json:
+            schema: !include json/schema/hearing.hearing.confirmed-recorded.json
+            example: !include json/hearing.hearing.confirmed-recorded.json
+        application/vnd.hearing.case.plea-added+json:
+            schema: !include json/schema/hearing.case.plea-added.json
+            example: !include json/hearing.case.plea-added.json
+        application/vnd.hearing.case.plea-changed+json:
+            schema: !include json/schema/hearing.case.plea-changed.json
+            example: !include json/hearing.case.plea-changed.json
+        application/vnd.hearing.sending-sheet-recorded+json:
+            schema: !include json/schema/hearing.sending-sheet-recorded.json
+            example: !include json/hearing.sending-sheet-recorded.json
+        application/vnd.hearing.sending-sheet-previously-recorded+json:
+            schema: !include json/schema/hearing.sending-sheet-previously-recorded.json
+            example: !include json/hearing.sending-sheet-previously-recorded.json
+        application/vnd.hearing.mags-court-hearing-recorded+json:
+            schema: !include json/schema/hearing.mags-court-hearing-recorded.json
+            example: !include json/hearing.mags-court-hearing-recorded.json
+        application/vnd.hearing.hearing-plea-updated+json:
+            schema: !include json/schema/hearing.hearing-plea-updated.json
+            example: !include json/hearing.hearing-plea-updated.json
+        application/vnd.hearing.hearing-update-plea-ignored+json:
+            schema: !include json/schema/hearing.hearing-update-plea-ignored.json
+            example: !include json/hearing.hearing-update-plea-ignored.json
 
+/public.event:
+  post:
+    body:
+        application/vnd.public.hearing-confirmed+json:
+            schema: !include json/schema/public.hearing-confirmed.json
+            example: !include json/public.hearing-confirmed.json
+        application/vnd.public.progression.events.sending-sheet-completed+json:
+            schema: !include json/schema/public.progression.events.sending-sheet-completed.json
+            example: !include json/public.progression.events.sending-sheet-completed.json

@@ -1,0 +1,24 @@
+{
+  "case": {
+    "caseUrn": "47GD7822616"
+  },
+  "hearingEventDefinition": {
+    "hearingEventDefinitionId": "4daefec6-5938-4109-82d9-1e60544a6c04",
+    "priority": true
+  },
+  "hearingEvent": {
+    "hearingEventId": "4daefec6-5938-4109-82d9-1e60544a6c05",
+    "recordedLabel": "Hearing Started",
+    "eventTime": "2016-11-12T09:25:00Z",
+    "lastModifiedTime": "2016-11-12T09:27:12Z"
+  },
+  "hearing": {
+    "courtCentre": {
+      "courtCentreId": "0a595ec7-554e-403f-b35d-f4dce26fcc5c",
+      "courtCentreName": "CARDIFF",
+      "courtRoomName": "2",
+      "courtRoomId": "2a595ec7-554e-403f-b35d-f4dce26fcc5c"
+    },
+    "hearingType": "PTPH"
+  }
+}

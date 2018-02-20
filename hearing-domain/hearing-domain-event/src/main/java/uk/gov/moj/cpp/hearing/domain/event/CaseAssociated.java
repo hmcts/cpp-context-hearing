@@ -16,6 +16,10 @@ public class CaseAssociated {
         this.caseId = caseId;
     }
 
+    public CaseAssociated() {
+        // default constructor for Jackson serialisation
+    }
+
     public UUID getHearingId() {
         return hearingId;
     }

@@ -34,6 +34,10 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.court-assigned.json
                     example: !include json/hearing.court-assigned.json
 
+                application/vnd.hearing.judge-assigned+json:
+                    schema: !include json/schema/hearing.judge-assigned.json
+                    example: !include json/hearing.judge-assigned.json
+
                 application/vnd.hearing.room-booked+json:
                     schema: !include json/schema/hearing.room-booked.json
                     example: !include json/hearing.room-booked.json
@@ -61,3 +65,7 @@ baseUri: message://command/handler/message/hearing
                 application/vnd.hearing.result-amended+json:
                     schema: !include json/schema/hearing.result-amended.json
                     example: !include json/hearing.result-amended.json
+
+                application/vnd.hearing.hearing.confirmed-recorded+json:
+                    schema: !include json/schema/hearing.hearing.confirmed-recorded.json
+                    example: !include json/hearing.hearing.confirmed-recorded.json

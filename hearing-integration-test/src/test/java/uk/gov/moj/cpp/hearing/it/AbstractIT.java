@@ -33,6 +33,7 @@ public class AbstractIT {
 
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
     protected static final Properties ENDPOINT_PROPERTIES = new Properties();
+    protected static final String PUBLIC_EVENT_TOPIC = "public.event";
 
     protected static RequestSpecification requestSpec;
     protected static String baseUri;

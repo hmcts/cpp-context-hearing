@@ -39,6 +39,11 @@
       "name": "hearing.get-hearing-event-log",
       "type": "action",
       "action": "hearing.get-hearing-event-log"
+    },
+    {
+      "name": "hearing.get.case.pleas",
+      "type": "action",
+      "action": "hearing.get.case.pleas"
     }
   ]
 }

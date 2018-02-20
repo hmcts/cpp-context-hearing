@@ -23,6 +23,25 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearing.json
                     schema:  !include  json/schema/hearing.get.hearing.json
 
+/cases/{caseId}/pleas:
+  uriParameters:
+        caseId:
+          description: get all pleas by caseId
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.case.pleas+json
+            name: hearing.get.case.pleas
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.case.pleas+json:
+                    example:  !include json/hearing.get.pleas.json
+                    schema:  !include  json/schema/hearing.get.pleas.json
 
 /hearings:
    get:

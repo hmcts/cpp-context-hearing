@@ -27,7 +27,7 @@ public class HearingOutcome implements Serializable {
     @Column(name = "draft_result")
     private String draftResult;
 
-    public HearingOutcome(){
+    public HearingOutcome() {
         //For JPA
     }
 

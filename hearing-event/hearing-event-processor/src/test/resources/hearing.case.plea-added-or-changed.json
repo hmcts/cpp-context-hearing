@@ -1,0 +1,12 @@
+{
+  "caseId": "RANDOM_CASE_ID",
+  "hearingId": "RANDOM_HEARING_ID",
+  "defendantId": "RANDOM_DEFENDANT_ID",
+  "personId": "RANDOM_PERSON_ID",
+  "offenceId": "RANDOM_OFFENCE_ID",
+  "plea": {
+    "id": "RANDOM_PLEA_ID",
+    "value": "GUILTY",
+    "pleaDate": "RANDOM_PLEA_DATE"
+  }
+}

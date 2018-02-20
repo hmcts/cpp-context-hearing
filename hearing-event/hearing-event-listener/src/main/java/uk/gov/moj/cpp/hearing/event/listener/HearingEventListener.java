@@ -9,22 +9,30 @@ import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
+import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
+import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import java.io.StringReader;
@@ -43,20 +51,31 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.transaction.Transactional;
 
-@SuppressWarnings("WeakerAccess")
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(HearingEventListener.class.getName());
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_TARGET_ID = "targetId";
+    private static final String FIELD_JUDGE_ID = "id";
+    private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
+    private static final String FIELD_JUDGE_LAST_NAME = "lastName";
+    private static final String FIELD_JUDGE_TITLE = "title";
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_DRAFT_RESULT = "draftResult";
     private static final String FIELD_START_DATE_TIME = "startDateTime";
     private static final String FIELD_DURATION = "duration";
     private static final String FIELD_HEARING_TYPE = "hearingType";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_ROOM_NAME = "roomName";
+    private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_START_DATE = "startDate";
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_PERSON_ID = "personId";
@@ -87,6 +106,15 @@ public class HearingEventListener {
     @Inject
     private HearingOutcomeRepository hearingOutcomeRepository;
 
+    @Inject
+    private PleaHearingRepository pleaHearingRepository;
+
+    @Inject
+    private HearingJudgeRepository hearingJudgeRepository;
+
+    @Inject
+    JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
     @Transactional
     @Handles("hearing.hearing-initiated")
     public void hearingInitiated(final JsonEnvelope event) {
@@ -96,19 +124,20 @@ public class HearingEventListener {
         final Integer duration = payload.getInt(FIELD_DURATION);
         final ZonedDateTime startDateTime = fromJsonString(payload.getJsonString(FIELD_START_DATE_TIME));
 
-        final Optional<Hearing> existingHearing = hearingRepository.getByHearingId(hearingId);
+        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
         final Hearing hearing = existingHearing.map(item ->
                 item.builder()
+                        .withHearingId(item.getHearingId())
                         .withStartDate(startDateTime.toLocalDate())
                         .withStartTime(startDateTime.toLocalTime())
                         .withDuration(duration)
                         .withHearingType(hearingType)
                         .build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, startDateTime.toLocalDate(), startDateTime.toLocalTime(),
-                                duration, null, hearingType, null));
+                        new Hearing(hearingId, startDateTime.toLocalDate(), startDateTime.toLocalTime(), duration,
+                                null, hearingType, null));
 
-        hearingRepository.save(hearing);
+        this.hearingRepository.save(hearing);
     }
 
     @Transactional
@@ -117,16 +146,31 @@ public class HearingEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String courtCentreName = payload.getString(FIELD_COURT_CENTRE_NAME);
-
-        final Optional<Hearing> existingHearing = hearingRepository.getByHearingId(hearingId);
+        final UUID courtCentreId = getUUID(payload, FIELD_COURT_CENTRE_ID).orElse(null);
+        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
 
         final Hearing hearing = existingHearing.map(item ->
-                item.builder().withCourtCentreName(courtCentreName).build())
+                item.builder().withHearingId(item.getHearingId()).withCourtCentreName(courtCentreName)
+                        .withCourtCentreId(courtCentreId)
+                        .build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, null, null, null, null, null,
-                                courtCentreName));
+                        new Hearing.Builder().withHearingId(hearingId).withCourtCentreId(courtCentreId)
+                                .withCourtCentreName(courtCentreName).build());
 
-        hearingRepository.save(hearing);
+        this.hearingRepository.save(hearing);
+    }
+
+    @Transactional
+    @Handles("hearing.judge-assigned")
+    public void judgeAssigned(final JsonEnvelope event) {
+        final JsonObject payload = event.payloadAsJsonObject();
+        HearingJudge hearingJudge = new HearingJudge(fromString(payload.getString(FIELD_HEARING_ID)),
+                payload.getString(FIELD_JUDGE_ID),
+                payload.getString(FIELD_JUDGE_FIRST_NAME),
+                payload.getString(FIELD_JUDGE_LAST_NAME),
+                payload.getString(FIELD_JUDGE_TITLE));
+
+        this.hearingJudgeRepository.save(hearingJudge);
     }
 
     @Transactional
@@ -135,16 +179,17 @@ public class HearingEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String roomName = payload.getString(FIELD_ROOM_NAME);
-
-        final Optional<Hearing> existingHearing = hearingRepository.getByHearingId(hearingId);
+        final UUID roomId = getUUID(payload, FIELD_ROOM_ID).orElse(null);
+        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
 
         final Hearing hearing = existingHearing.map(item ->
-                item.builder().withRoomName(roomName).build())
+                item.builder().withHearingId(item.getHearingId()).withRoomName(roomName).withRoomId(roomId)
+                        .build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, null, null, null, roomName, null,
-                                null));
+                        new Hearing.Builder().withHearingId(hearingId).withRoomId(roomId).withRoomName(roomName)
+                                .build());
 
-        hearingRepository.save(hearing);
+        this.hearingRepository.save(hearing);
     }
 
     @Transactional
@@ -154,7 +199,7 @@ public class HearingEventListener {
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final LocalDate startDate = LocalDate.parse(payload.getString(FIELD_START_DATE));
 
-        final Optional<Hearing> existingHearing = hearingRepository.getByHearingId(hearingId);
+        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
 
         final Hearing hearing = existingHearing.map(item ->
                 item.builder().withStartDate(startDate).build())
@@ -162,7 +207,7 @@ public class HearingEventListener {
                         new Hearing(hearingId, startDate, null, null, null,
                                 null, null));
 
-        hearingRepository.save(hearing);
+        this.hearingRepository.save(hearing);
     }
 
     @Transactional
@@ -174,7 +219,45 @@ public class HearingEventListener {
         final UUID attendeeId = fromString(payload.getString(FIELD_ATTENDEE_ID));
         final String status = payload.getString(FIELD_STATUS);
 
-        prosecutionCounselRepository.save(new ProsecutionCounsel(attendeeId, hearingId, personId, status));
+        this.prosecutionCounselRepository.save(new ProsecutionCounsel(attendeeId, hearingId, personId, status));
+    }
+
+    @Handles("hearing.plea-added")
+    public void pleaAdded(final JsonEnvelope event) {
+        LOGGER.info("{}", event.payloadAsJsonObject());
+        final HearingPleaAdded hearingPleaAdded =
+                this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingPleaAdded.class);
+        final PleaHearing pleaHearing = new PleaHearing(hearingPleaAdded.getPlea().getId(),
+                hearingPleaAdded.getHearingId(),
+                hearingPleaAdded.getCaseId(),
+                hearingPleaAdded.getDefendantId(),
+                hearingPleaAdded.getOffenceId(),
+                hearingPleaAdded.getPlea().getPleaDate(),
+                hearingPleaAdded.getPlea().getValue());
+        if (null != hearingPleaAdded.getPersonId()) {
+            pleaHearing.setPersonId(hearingPleaAdded.getPersonId());
+        }
+        this.pleaHearingRepository.save(pleaHearing);
+    }
+
+    @Handles("hearing.plea-changed")
+    public void pleaChanged(final JsonEnvelope event) {
+        LOGGER.info("{}", event.payloadAsJsonObject());
+        final HearingPleaChanged hearingPleaChanged =
+                this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingPleaChanged.class);
+
+        final PleaHearing pleaHearing = new PleaHearing(hearingPleaChanged.getPlea().getId(),
+                hearingPleaChanged.getHearingId(),
+                hearingPleaChanged.getCaseId(),
+                hearingPleaChanged.getDefendantId(),
+                hearingPleaChanged.getOffenceId(),
+                hearingPleaChanged.getPlea().getPleaDate(),
+                hearingPleaChanged.getPlea().getValue());
+        if (null != hearingPleaChanged.getPersonId()) {
+            pleaHearing.setPersonId(hearingPleaChanged.getPersonId());
+        }
+        this.pleaHearingRepository.save(pleaHearing);
+
     }
 
     @Transactional
@@ -188,17 +271,17 @@ public class HearingEventListener {
 
         final List<UUID> defendantIds = JsonObjects.getUUIDs(payload, FIELD_DEFENDANT_IDS);
 
-        defenceCounselRepository.save(new DefenceCounsel(attendeeId, hearingId, personId, status));
+        this.defenceCounselRepository.save(new DefenceCounsel(attendeeId, hearingId, personId, status));
 
         final List<DefenceCounselDefendant> existingDefendants =
-                defenceCounselDefendantRepository.findByDefenceCounselAttendeeId(attendeeId);
+                this.defenceCounselDefendantRepository.findByDefenceCounselAttendeeId(attendeeId);
 
         existingDefendants.stream()
                 .filter(defendant -> !defendantIds.contains(defendant.getDefendantId()))
-                .forEach(defenceCounselDefendantRepository::remove);
+                .forEach(this.defenceCounselDefendantRepository::remove);
 
         defendantIds.forEach(defendantId ->
-                defenceCounselDefendantRepository.save(new DefenceCounselDefendant(attendeeId, defendantId)));
+                this.defenceCounselDefendantRepository.save(new DefenceCounselDefendant(attendeeId, defendantId)));
     }
 
     @Transactional
@@ -208,10 +291,10 @@ public class HearingEventListener {
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
 
-        final List<HearingCase> existingHearingCases = hearingCaseRepository.findByHearingId(hearingId);
+        final List<HearingCase> existingHearingCases = this.hearingCaseRepository.findByHearingId(hearingId);
         if (existingHearingCases.stream().map(HearingCase::getCaseId)
                 .noneMatch(id -> id.equals(caseId))) {
-            hearingCaseRepository.save(new HearingCase(randomUUID(), hearingId, caseId));
+            this.hearingCaseRepository.save(new HearingCase(randomUUID(), hearingId, caseId));
         }
     }
 
@@ -225,13 +308,13 @@ public class HearingEventListener {
         final UUID offenceId = fromString(payload.getString(FIELD_OFFENCE_ID));
         final String draftResult = payload.getString(FIELD_DRAFT_RESULT);
 
-        hearingOutcomeRepository.save(new HearingOutcome(offenceId, hearingId, defendantId, targetId, draftResult));
+        this.hearingOutcomeRepository.save(new HearingOutcome(offenceId, hearingId, defendantId, targetId, draftResult));
     }
 
     @Handles("hearing.results-shared")
     public void updateDraftResultWithLastSharedResultIdFromSharedResults(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
-        final List<HearingOutcome> hearingOutcomes = hearingOutcomeRepository.findByHearingId(fromString(payload.getString(FIELD_HEARING_ID)));
+        final List<HearingOutcome> hearingOutcomes = this.hearingOutcomeRepository.findByHearingId(fromString(payload.getString(FIELD_HEARING_ID)));
         final Map<UUID, JsonObject> hearingOutcomeToDraftResultMap = newHashMap();
 
         payload.getJsonArray(FIELD_RESULT_LINES).getValuesAs(JsonObject.class).forEach(resultLine -> {
@@ -257,7 +340,7 @@ public class HearingEventListener {
     @Handles("hearing.result-amended")
     public void updateDraftResultWithLastSharedResultIdFromAmendedResult(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
-        final List<HearingOutcome> hearingOutcomes = hearingOutcomeRepository.findByHearingId(fromString(payload.getString(FIELD_HEARING_ID)));
+        final List<HearingOutcome> hearingOutcomes = this.hearingOutcomeRepository.findByHearingId(fromString(payload.getString(FIELD_HEARING_ID)));
         final Map<UUID, JsonObject> hearingOutcomeToDraftResultMap = newHashMap();
 
         final String sharedResultLineId = payload.getString(FIELD_GENERIC_ID);
@@ -316,7 +399,7 @@ public class HearingEventListener {
     private void persistModifiedHearingOutcomes(final List<HearingOutcome> hearingOutcomes, final Map<UUID, JsonObject> hearingOutcomeToDraftResult) {
         hearingOutcomes.forEach(hearingOutcome -> {
             if (hearingOutcomeToDraftResult.containsKey(hearingOutcome.getId())) {
-                hearingOutcomeRepository.save(new HearingOutcome(hearingOutcome.getOffenceId(),
+                this.hearingOutcomeRepository.save(new HearingOutcome(hearingOutcome.getOffenceId(),
                         hearingOutcome.getHearingId(), hearingOutcome.getDefendantId(), hearingOutcome.getId(),
                         hearingOutcomeToDraftResult.get(hearingOutcome.getId()).toString()));
             }

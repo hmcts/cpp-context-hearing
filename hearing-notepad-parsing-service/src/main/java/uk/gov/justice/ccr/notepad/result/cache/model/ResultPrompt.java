@@ -4,7 +4,6 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ResultPrompt {
@@ -17,7 +16,7 @@ public class ResultPrompt {
     private String durationElement;
     private Set<String> keywords = new TreeSet<>();
     private Set<String> fixedList;
-
+    private Integer promptOrder;
 
     public String getResultDefinitionLabel() {
         return resultDefinitionLabel;
@@ -85,6 +84,14 @@ public class ResultPrompt {
         this.id = id;
     }
 
+    public Integer getPromptOrder() {
+        return promptOrder;
+    }
+
+    public void setPromptOrder(Integer promptOrder) {
+        this.promptOrder = promptOrder;
+    }
+
     @Override
     public String toString() {
         return "ResultPrompt{" +
@@ -96,6 +103,7 @@ public class ResultPrompt {
                 ", durationElement='" + durationElement + '\'' +
                 ", keywords=" + keywords +
                 ", fixedList=" + fixedList +
+                ", promptOrder=" + promptOrder +
                 '}';
     }
 }

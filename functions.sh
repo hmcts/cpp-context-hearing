@@ -31,7 +31,9 @@ function deleteAndDeployWars {
   sleep 10
 
   rm -rf $WILDFLY_DEPLOYMENT_DIR/*.undeployed
-  find . \( -iname "*.war" ! -iname "${CONTEXT_NAME}-service-*.war" \) -exec cp {} $WILDFLY_DEPLOYMENT_DIR \;
+  find . \( -iname "${CONTEXT_NAME}-service-*.war" \) -exec cp {} $WILDFLY_DEPLOYMENT_DIR \;
+  find . \( -iname "${CONTEXT_NAME}-notepad-*.war" \) -exec cp {} $WILDFLY_DEPLOYMENT_DIR \;
+
   echo "Copied wars to $WILDFLY_DEPLOYMENT_DIR"
 }
 
@@ -98,7 +100,12 @@ function createEventLog() {
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:aggregate-snapshot-repository-liquibase:${FRAMEWORK_VERSION}:jar
     java -jar target/aggregate-snapshot-repository-liquibase-${FRAMEWORK_VERSION}.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}eventstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
 }
-
+function runEventBufferLiquibase() {
+    echo "running event buffer liquibase"
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:event-buffer-liquibase:${EVENT_BUFFER_VERSION}:jar
+    java -jar target/event-buffer-liquibase-${EVENT_BUFFER_VERSION}.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}viewstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
+    echo "finished running event buffer liquibase"
+}
 function runLiquibase {
   #run liquibase for context
   mvn -f ${CONTEXT_NAME}-viewstore/${CONTEXT_NAME}-viewstore-liquibase/pom.xml -Dliquibase.url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}viewstore -Dliquibase.username=${CONTEXT_NAME} -Dliquibase.password=${CONTEXT_NAME} -Dliquibase.logLevel=info resources:resources liquibase:update

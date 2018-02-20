@@ -82,6 +82,7 @@ public class ReadStoreResultLoaderTest {
         //then
         assertThat(resultPrompts.size(), is(1));
         assertThat(resultPrompts.get(0).getFixedList(), is(Sets.newHashSet("Acquittal", "Convicted")));
+        assertThat(resultPrompts.get(0).getPromptOrder(), is(1));
     }
 
 

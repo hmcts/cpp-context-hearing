@@ -86,3 +86,12 @@ rule "Query - API - hearing.get-draft-result"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.get.case.pleas"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.case.pleas");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users"));
+  then
+    $outcome.setSuccess(true);
+end

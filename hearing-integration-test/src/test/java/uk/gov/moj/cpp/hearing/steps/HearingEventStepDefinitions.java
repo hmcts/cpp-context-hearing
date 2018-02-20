@@ -23,12 +23,14 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNull;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
@@ -46,6 +48,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import javax.jms.MessageConsumer;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
@@ -55,6 +58,8 @@ import javax.json.JsonReader;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
 import com.jayway.jsonpath.ReadContext;
+import com.jayway.jsonpath.matchers.IsJson;
+import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 import org.hamcrest.Matcher;
 
@@ -67,39 +72,36 @@ public class HearingEventStepDefinitions extends AbstractIT {
     private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions+json";
     private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITION = "application/vnd.hearing.hearing-event-definition+json";
 
+    private static final String PUBLIC_EVENT_HEARING_EVENT_LOGGED ="public.hearing.event-logged";
+    private static final String PUBLIC_EVENT_HEARING_EVENT_TIMESTAMP_CORRECTED ="public.hearing.event-timestamp-corrected";
+
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_EVENT_TIME = "eventTime";
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
-    private static final String FIELD_ID = "id";
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
+    private static final String FIELD_GENERIC_ID = "id";
+    private static final String FIELD_CASE_ATTRIBUTE = "caseAttribute";
+    private static final String FIELD_SEQUENCE = "sequence";
+    private static final String FIELD_SEQUENCE_TYPE = "sequenceType";
+    private static final String FIELD_GROUP_LABEL = "groupLabel";
+    private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
+    private static final String FIELD_ALTERABLE = "alterable";
+    private static final String FIELD_ACTION_LABEL = "actionLabel";
+
+    private static final String FIELD_HEARING = "hearing";
+    private static final String FIELD_HEARING_TYPE = "type";
+    private static final String FIELD_COURT_ROOM_NAME = "courtRoomName";
+    private static final String FIELD_COURT_ROOM_ID = "courtRoomId";
+    private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
+    private static final String FIELD_URN = "urn";
 
     private static final String SEQUENCE_TYPE_SENTENCING = "SENTENCING";
     private static final String SEQUENCE_TYPE_PAUSE_RESUME = "PAUSE_RESUME";
     private static final String SEQUENCE_TYPE_NOT_REGISTERED = "NOT_REGISTERED";
-
-    public static void andHearingIsNotStarted(final UUID hearingId) {
-        final String queryEventLogUrl = getQueryEventLogUrl(hearingId);
-
-        // fail fast when hearing already has some events to begin with
-        poll(requestParams(queryEventLogUrl, MEDIA_TYPE_QUERY_EVENT_LOG).withHeader(USER_ID, getLoggedInUser()))
-                .ignoring(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", equalTo(hearingId.toString())),
-                                withJsonPath("$.events", hasSize(0))
-                        ))
-                )
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", equalTo(hearingId.toString())),
-                                withJsonPath("$.events", hasSize(0))
-                        ))
-                );
-    }
 
     public static Response whenUserAttemptsToLogAHearingEvent(final HearingEvent hearingEvent) {
         final String createEventLogEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.log-hearing-event"), hearingEvent.getHearingId());
@@ -257,39 +259,35 @@ public class HearingEventStepDefinitions extends AbstractIT {
         hearingEventDefinitions.getEventDefinitions().forEach(eventDefinition -> {
                     final JsonObjectBuilder eventDefinitionBuilder = createObjectBuilder();
 
-                    eventDefinitionBuilder.add("id", eventDefinition.getId().toString());
+                    eventDefinitionBuilder.add(FIELD_GENERIC_ID, eventDefinition.getId().toString());
 
                     if (eventDefinition.getCaseAttribute() != null) {
-                        eventDefinitionBuilder.add("caseAttribute", eventDefinition.getCaseAttribute());
+                        eventDefinitionBuilder.add(FIELD_CASE_ATTRIBUTE, eventDefinition.getCaseAttribute());
                     }
                     if (eventDefinition.getSequence() != null) {
-                        eventDefinitionBuilder.add("sequence", eventDefinition.getSequence());
+                        eventDefinitionBuilder.add(FIELD_SEQUENCE, eventDefinition.getSequence());
                     }
                     if (eventDefinition.getSequenceType() != null) {
-                        eventDefinitionBuilder.add("sequenceType", eventDefinition.getSequenceType());
+                        eventDefinitionBuilder.add(FIELD_SEQUENCE_TYPE, eventDefinition.getSequenceType());
                     }
                     if (eventDefinition.getGroupLabel() != null) {
-                        eventDefinitionBuilder.add("groupLabel", eventDefinition.getGroupLabel());
+                        eventDefinitionBuilder.add(FIELD_GROUP_LABEL, eventDefinition.getGroupLabel());
                     }
                     if (eventDefinition.getActionLabelExtension() != null) {
-                        eventDefinitionBuilder.add("actionLabelExtension", eventDefinition.getActionLabelExtension());
+                        eventDefinitionBuilder.add(FIELD_ACTION_LABEL_EXTENSION, eventDefinition.getActionLabelExtension());
                     }
 
-                    eventDefinitionBuilder.add("alterable", eventDefinition.isAlterable());
-
-                    if (eventDefinition.getActionLabelExtension() != null) {
-                        eventDefinitionBuilder.add("actionLabelExtension", eventDefinition.getActionLabelExtension());
-                    }
+                    eventDefinitionBuilder.add(FIELD_ALTERABLE, eventDefinition.isAlterable());
 
                     eventDefinitionsArrayBuilder.add(eventDefinitionBuilder
-                            .add("actionLabel", eventDefinition.getActionLabel())
-                            .add("recordedLabel", eventDefinition.getRecordedLabel())
+                            .add(FIELD_ACTION_LABEL, eventDefinition.getActionLabel())
+                            .add(FIELD_RECORDED_LABEL, eventDefinition.getRecordedLabel())
                     );
                 }
         );
 
         final JsonObjectBuilder hearingEventDefinitionsPayloadBuilder = createObjectBuilder()
-                .add(FIELD_ID, hearingEventDefinitions.getId().toString())
+                .add(FIELD_GENERIC_ID, hearingEventDefinitions.getId().toString())
                 .add(FIELD_EVENT_DEFINITIONS, eventDefinitionsArrayBuilder);
 
         final Response response = given().spec(requestSpec)
@@ -301,7 +299,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
         assertThat(response.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl(randomUUID());
+        final String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl(randomUUID());
         poll(requestParams(queryEventDefinitionsUrl, MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
                 .until(
                         status().is(OK),
@@ -384,6 +382,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
         assertThat(actualAlterableFlag, is(alterableExpectation));
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void thenHearingEventDefinitionsShouldProvideOptionToLogEventWithDefendantAndDefenceCouncil(final UUID hearingId, final List<DefenceCounselData> defenceCounsels) {
         final List<String> counselIds = defenceCounsels.stream().map(defenceCounsel -> defenceCounsel.getPersonId().toString()).collect(toList());
         final List<String> defendantIds = defenceCounsels.stream().map(defenceCounsel -> defenceCounsel.getMapOfDefendantIdToNames().keySet().stream().findFirst().get().toString()).collect(toList());
@@ -467,6 +466,62 @@ public class HearingEventStepDefinitions extends AbstractIT {
         try (final JsonReader reader = Json.createReader(new StringReader(message))) {
             return reader.readObject();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void andHearingEventLoggedPublicEventShouldBePublished(final MessageConsumer messageConsumer,
+                                                                         final HearingEvent hearingEvent,
+                                                                         final JsonObject hearingConfirmed) {
+        final JsonPath message = retrieveMessage(messageConsumer);
+
+        assertThat(message.prettify(), new IsJson(allOf(
+                withJsonPath("$._metadata.name", equalTo(PUBLIC_EVENT_HEARING_EVENT_LOGGED)),
+                withJsonPath("$.hearing.hearingType", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_HEARING_TYPE))),
+                withJsonPath("$.hearing.courtCentre.courtRoomName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_NAME))),
+                withJsonPath("$.hearing.courtCentre.courtRoomId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_ID))),
+                withJsonPath("$.hearing.courtCentre.courtCentreName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_NAME))),
+                withJsonPath("$.hearing.courtCentre.courtCentreId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_ID))),
+                withJsonPath("$.case.caseUrn", equalTo(hearingConfirmed.getString(FIELD_URN))),
+                withJsonPath("$.hearingEvent.hearingEventId", equalTo(hearingEvent.getId().toString())),
+                withJsonPath("$.hearingEvent.lastModifiedTime", equalTo(hearingEvent.getLastModifiedTime().toString())),
+                withJsonPath("$.hearingEvent.recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
+                withJsonPath("$.hearingEvent.eventTime", equalTo(hearingEvent.getEventTime().toString())),
+                withJsonPath("$.hearingEventDefinition.hearingEventDefinitionId", equalTo(hearingEvent.getHearingEventDefinitionId().toString())),
+                withJsonPath("$.hearingEventDefinition.priority", equalTo(!hearingEvent.isAlterable()))
+
+        )));
+    }
+
+    public static void andHearingEventLoggedPublicEventShouldNotBePublished(final MessageConsumer messageConsumer) {
+        final JsonPath message = retrieveMessage(messageConsumer);
+        assertNull(message);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void andHearingEventTimeStampCorrectedPublicEventShouldBePublished(final MessageConsumer messageConsumer,
+                                                                                     final HearingEvent hearingEvent,
+                                                                                     final ZonedDateTime newEventTime,
+                                                                                     final ZonedDateTime newLastModifiedTime,
+                                                                                     final UUID newHearingEventId,
+                                                                                     final JsonObject hearingConfirmed) {
+        final JsonPath message = retrieveMessage(messageConsumer);
+
+        assertThat(message.prettify(), new IsJson(allOf(
+                withJsonPath("$._metadata.name", equalTo(PUBLIC_EVENT_HEARING_EVENT_TIMESTAMP_CORRECTED)),
+                withJsonPath("$.hearing.hearingType", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_HEARING_TYPE))),
+                withJsonPath("$.hearing.courtCentre.courtRoomName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_NAME))),
+                withJsonPath("$.hearing.courtCentre.courtRoomId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_ROOM_ID))),
+                withJsonPath("$.hearing.courtCentre.courtCentreName", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_NAME))),
+                withJsonPath("$.hearing.courtCentre.courtCentreId", equalTo(hearingConfirmed.getJsonObject(FIELD_HEARING).getString(FIELD_COURT_CENTRE_ID))),
+                withJsonPath("$.case.caseUrn", equalTo(hearingConfirmed.getString(FIELD_URN))),
+                withJsonPath("$.hearingEvent.lastHearingEventId",  equalTo(hearingEvent.getId().toString())),
+                withJsonPath("$.hearingEvent.hearingEventId", equalTo(newHearingEventId.toString())),
+                withJsonPath("$.hearingEvent.recordedLabel", equalTo(hearingEvent.getRecordedLabel())),
+                withJsonPath("$.hearingEvent.eventTime", equalTo(ZonedDateTimes.toString(newEventTime))),
+                withJsonPath("$.hearingEvent.lastModifiedTime", equalTo(ZonedDateTimes.toString(newLastModifiedTime))),
+                withJsonPath("$.hearingEventDefinition.hearingEventDefinitionId", equalTo(hearingEvent.getHearingEventDefinitionId().toString())),
+                withJsonPath("$.hearingEventDefinition.priority", equalTo(!hearingEvent.isAlterable()))
+        )));
     }
 
 }

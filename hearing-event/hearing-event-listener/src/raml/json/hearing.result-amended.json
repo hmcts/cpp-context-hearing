@@ -8,6 +8,11 @@
   "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
   "level": "OFFENCE",
   "resultLabel": "Imprisonment",
+  "court": "aCourt",
+  "courtRoom": "courtRoom",
+  "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+  "clerkOfTheCourtFirstName": "David",
+  "clerkOfTheCourtLastName": "Walliams",
   "prompts": [
     {
       "label": "Imprisonment duration",

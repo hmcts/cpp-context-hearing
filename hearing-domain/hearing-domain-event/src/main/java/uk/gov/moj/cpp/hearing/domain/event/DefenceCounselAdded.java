@@ -10,11 +10,11 @@ import java.util.UUID;
 @Event("hearing.defence-counsel-added")
 public class DefenceCounselAdded {
 
-    private final UUID personId;
-    private final UUID attendeeId;
-    private final List<UUID> defendantIds;
-    private final UUID hearingId;
-    private final String status;
+    private UUID personId;
+    private UUID attendeeId;
+    private List<UUID> defendantIds;
+    private UUID hearingId;
+    private String status;
 
     public DefenceCounselAdded(final UUID hearingId, final UUID attendeeId, final UUID personId,
                                final List<UUID> defendantIds, final String status) {
@@ -24,6 +24,10 @@ public class DefenceCounselAdded {
         this.personId = personId;
         this.defendantIds = unmodifiableList(defendantIds);
         this.status = status;
+    }
+
+    public DefenceCounselAdded() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingId() {

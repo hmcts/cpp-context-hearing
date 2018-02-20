@@ -5,6 +5,9 @@
     "hearingEventId": {
       "$ref": "#/definitions/uuid"
     },
+    "lastHearingEventId": {
+      "$ref": "#/definitions/uuid"
+    },
     "hearingId": {
       "$ref": "#/definitions/uuid"
     },

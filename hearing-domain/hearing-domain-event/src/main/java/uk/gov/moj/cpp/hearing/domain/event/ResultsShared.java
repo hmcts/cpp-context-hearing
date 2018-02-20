@@ -10,14 +10,18 @@ import java.util.UUID;
 @Event("hearing.results-shared")
 public class ResultsShared {
 
-    private final UUID hearingId;
-    private final ZonedDateTime sharedTime;
-    private final List<ResultLine> resultLines;
+    private UUID hearingId;
+    private ZonedDateTime sharedTime;
+    private List<ResultLine> resultLines;
 
     public ResultsShared(final UUID hearingId, final ZonedDateTime sharedTime, final List<ResultLine> resultLines) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.resultLines = resultLines;
+    }
+
+    public ResultsShared() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingId() {

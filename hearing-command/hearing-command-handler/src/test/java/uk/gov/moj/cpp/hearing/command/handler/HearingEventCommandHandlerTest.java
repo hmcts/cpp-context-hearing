@@ -73,6 +73,7 @@ public class HearingEventCommandHandlerTest {
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_LAST_HEARING_EVENT_ID = "lastHearingEventId";
     private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
     private static final String FIELD_EVENT_TIME = "eventTime";
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
@@ -93,6 +94,7 @@ public class HearingEventCommandHandlerTest {
     private static final UUID HEARING_ID = randomUUID();
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
+    private static final UUID LAST_HEARING_EVENT_ID = randomUUID();
     private static final UUID LATEST_HEARING_EVENT_ID = randomUUID();
     private static final String EVENT_TIME = ZonedDateTimes.toString(PAST_UTC_DATE_TIME.next());
     private static final String LAST_MODIFIED_TIME = ZonedDateTimes.toString(PAST_UTC_DATE_TIME.next());
@@ -121,6 +123,7 @@ public class HearingEventCommandHandlerTest {
     private static final boolean ALTERABLE_2 = BOOLEAN.next();
     private static final boolean ALTERABLE_3 = BOOLEAN.next();
 
+
     @Mock
     private EventStream eventStream;
 
@@ -129,7 +132,6 @@ public class HearingEventCommandHandlerTest {
 
     @Mock
     private AggregateService aggregateService;
-
     @Spy
     private Enveloper enveloper = createEnveloperWithEvents(
             HearingEventLogged.class, HearingEventDefinitionsCreated.class,
@@ -218,6 +220,7 @@ public class HearingEventCommandHandlerTest {
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
                                 withJsonPath(format("$.%s", FIELD_EVENT_TIME), is(EVENT_TIME)),
+                                withoutJsonPath(format("$.%s", FIELD_LAST_HEARING_EVENT_ID)),
                                 withJsonPath(format("$.%s", FIELD_LAST_MODIFIED_TIME), is(LAST_MODIFIED_TIME))
                         ))
                 ).thatMatchesSchema()
@@ -227,7 +230,7 @@ public class HearingEventCommandHandlerTest {
     @Test
     public void shouldIgnoreLogHearingEventIfItsAlreadyBeenLogged() throws Exception {
         final HearingEventLogAggregate hearingEventLogAggregate = new HearingEventLogAggregate();
-        hearingEventLogAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, HEARING_ID, HEARING_EVENT_DEFINITION_ID, RECORDED_LABEL, fromString(EVENT_TIME), fromString(LAST_MODIFIED_TIME), ALTERABLE));
+        hearingEventLogAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, LAST_HEARING_EVENT_ID, HEARING_ID, HEARING_EVENT_DEFINITION_ID, RECORDED_LABEL, fromString(EVENT_TIME), fromString(LAST_MODIFIED_TIME), ALTERABLE));
         when(aggregateService.get(eventStream, HearingEventLogAggregate.class)).thenReturn(hearingEventLogAggregate);
 
         final JsonEnvelope command = createLogHearingEventCommand();
@@ -282,7 +285,7 @@ public class HearingEventCommandHandlerTest {
     @Test
     public void shouldRaiseLoggedAndDeletedHearingEventsWhenEventTimeOfExistingHearingEventIsCorrected() throws Exception {
         final HearingEventLogAggregate hearingEventLogAggregate = new HearingEventLogAggregate();
-        hearingEventLogAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, HEARING_ID, HEARING_EVENT_DEFINITION_ID, RECORDED_LABEL, fromString(EVENT_TIME), fromString(LAST_MODIFIED_TIME), ALTERABLE));
+        hearingEventLogAggregate.apply(new HearingEventLogged(HEARING_EVENT_ID, LAST_HEARING_EVENT_ID, HEARING_ID, HEARING_EVENT_DEFINITION_ID, RECORDED_LABEL, fromString(EVENT_TIME), fromString(LAST_MODIFIED_TIME), ALTERABLE));
         when(aggregateService.get(eventStream, HearingEventLogAggregate.class)).thenReturn(hearingEventLogAggregate);
 
         final JsonEnvelope command = createCorrectHearingEventCommand();
@@ -296,6 +299,7 @@ public class HearingEventCommandHandlerTest {
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_EVENT_DEFINITION_ID), equalTo(HEARING_EVENT_DEFINITION_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(LATEST_HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_LAST_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
                                 withJsonPath(format("$.%s", FIELD_EVENT_TIME), is(DIFFERENT_EVENT_TIME)),
                                 withJsonPath(format("$.%s", FIELD_LAST_MODIFIED_TIME), is(DIFFERENT_LAST_MODIFIED_TIME))
@@ -323,6 +327,7 @@ public class HearingEventCommandHandlerTest {
                         payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_EVENT_ID), equalTo(LATEST_HEARING_EVENT_ID.toString())),
+                                withJsonPath(format("$.%s", FIELD_LAST_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
                                 withJsonPath(format("$.%s", FIELD_EVENT_TIME), is(DIFFERENT_EVENT_TIME)),
                                 withJsonPath(format("$.%s", FIELD_LAST_MODIFIED_TIME), is(DIFFERENT_LAST_MODIFIED_TIME))

@@ -1,18 +1,25 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.builder;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.command.plea.HearingPlea;
+import uk.gov.moj.cpp.hearing.domain.HearingDetails;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
+import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
@@ -26,30 +33,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
-
+import java.util.stream.Stream.Builder;
+@SuppressWarnings("squid:S1068")
 public class HearingAggregate implements Aggregate {
 
     private UUID hearingId;
     private boolean resultsShared;
-    private Set<UUID> sharedResultIds = new HashSet<>();
+    private LocalDate hearingDate;
+    private final Set<UUID> sharedResultIds = new HashSet<>();
 
-    public Stream<Object> initiateHearing(final UUID hearingId, final ZonedDateTime startDateTime,
-                                          final int duration, final String hearingType, final String courtCentreName,
-                                          final String roomName, final UUID caseId) {
-        final Stream.Builder<Object> streamBuilder = Stream.builder();
+    public Stream<Object> initiateHearing(final HearingDetails hd) {
+        final Builder<Object> streamBuilder = builder();
 
-        streamBuilder.add(new HearingInitiated(hearingId, startDateTime, duration, hearingType));
+        streamBuilder.add(new HearingInitiated(hd.getHearingId(), hd.getStartDateTime(), hd.getDuration(), hd.getHearingType()));
 
-        if (caseId != null) {
-            streamBuilder.add(new CaseAssociated(hearingId, caseId));
+        if (null != hd.getCaseId()) {
+            streamBuilder.add(new CaseAssociated(hd.getHearingId(), hd.getCaseId()));
         }
 
-        if (courtCentreName != null) {
-            streamBuilder.add(new CourtAssigned(hearingId, courtCentreName));
+        if (!isNullOrEmpty(hd.getCourtCentreName())) {
+            streamBuilder.add(new CourtAssigned(hd.getHearingId(), hd.getCourtCentreId(), hd.getCourtCentreName()));
         }
 
-        if (roomName != null) {
-            streamBuilder.add(new RoomBooked(hearingId, roomName));
+        if (!isNullOrEmpty(hd.getRoomName())) {
+            streamBuilder.add(new RoomBooked(hd.getHearingId(), hd.getRoomId(), hd.getRoomName()));
+        }
+
+        if (!isNullOrEmpty(hd.getJudgeId())) {
+            streamBuilder.add(new JudgeAssigned(hd.getHearingId(), hd.getJudgeId(), hd.getJudgeTitle(), hd.getJudgeFirstName(),hd.getJudgeLastName()));
         }
 
         return apply(streamBuilder.build());
@@ -71,6 +82,16 @@ public class HearingAggregate implements Aggregate {
         return apply(Stream.of(new CaseAssociated(hearingId, caseId)));
     }
 
+    public Stream<Object> addPlea(final HearingPlea hearingPlea) {
+        return apply(Stream.of(new HearingPleaAdded(hearingPlea.getCaseId(), hearingPlea.getHearingId(),
+                hearingPlea.getDefendantId(), hearingPlea.getPersonId(), hearingPlea.getOffenceId(), hearingPlea.getPlea())));
+    }
+
+    public Stream<Object> changePlea(final HearingPlea hearingPlea) {
+        return apply(Stream.of(new HearingPleaChanged(hearingPlea.getCaseId(), hearingPlea.getHearingId(),
+                hearingPlea.getDefendantId(), hearingPlea.getPersonId(), hearingPlea.getOffenceId(), hearingPlea.getPlea())));
+    }
+
     public Stream<Object> addProsecutionCounsel(final UUID hearingId, final UUID attendeeId,
                                                 final UUID personId, final String status) {
         return apply(Stream.of(new ProsecutionCounselAdded(hearingId, attendeeId, personId, status)));
@@ -84,14 +105,14 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> shareResults(final UUID hearingId, final ZonedDateTime sharedTime, final List<ResultLine> resultLines) {
         final LinkedList<Object> events = new LinkedList<>();
 
-        if (resultsShared) {
+        if (this.resultsShared) {
             events.addAll(resultLines.stream()
-                    .filter(resultLine -> !sharedResultIds.contains(resultLine.getLastSharedResultId())
+                    .filter(resultLine -> !this.sharedResultIds.contains(resultLine.getLastSharedResultId())
                             ||
-                            !sharedResultIds.contains(resultLine.getId()))
+                            !this.sharedResultIds.contains(resultLine.getId()))
                     .map(resultLine -> new ResultAmended(resultLine.getId(), resultLine.getLastSharedResultId(),
                             sharedTime, hearingId, resultLine.getCaseId(), resultLine.getPersonId(), resultLine.getOffenceId(),
-                            resultLine.getLevel(), resultLine.getResultLabel(), resultLine.getPrompts())
+                            resultLine.getLevel(), resultLine.getResultLabel(), resultLine.getPrompts(), resultLine.getCourt(), resultLine.getCourtRoom(), resultLine.getClerkOfTheCourtId(), resultLine.getClerkOfTheCourtFirstName(), resultLine.getClerkOfTheCourtLastName())
                     )
                     .collect(toList()));
         } else {
@@ -102,22 +123,26 @@ public class HearingAggregate implements Aggregate {
     }
 
     @Override
-    public Object apply(Object event) {
+    public Object apply(final Object event) {
         return match(event).with(
                 when(HearingInitiated.class)
-                        .apply(hearingInitiated -> this.hearingId = hearingInitiated.getHearingId()),
+                        .apply(this::onHearingInitiated),
                 when(CourtAssigned.class)
                         .apply(courtAssigned -> this.hearingId = courtAssigned.getHearingId()),
                 when(RoomBooked.class)
                         .apply(roomBooked -> this.hearingId = roomBooked.getHearingId()),
                 when(CaseAssociated.class)
                         .apply(caseAssociated -> this.hearingId = caseAssociated.getHearingId()),
+                when(HearingPleaAdded.class)
+                        .apply(hearingPleaAdded -> this.hearingId = hearingPleaAdded.getHearingId()),
+                when(HearingPleaChanged.class)
+                        .apply(hearingPleaChanged -> this.hearingId = hearingPleaChanged.getHearingId()),
                 when(ProsecutionCounselAdded.class)
                         .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId()),
                 when(DefenceCounselAdded.class)
                         .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
                 when(ResultsShared.class)
-                        .apply(resultsShared -> recordSharedResults(resultsShared.getResultLines())),
+                        .apply(resultsSharedResult -> recordSharedResults(resultsSharedResult.getResultLines())),
                 when(ResultAmended.class)
                         .apply(this::recordAmendedResult),
                 otherwiseDoNothing()
@@ -125,11 +150,16 @@ public class HearingAggregate implements Aggregate {
     }
 
     private void recordAmendedResult(final ResultAmended resultAmended) {
-        sharedResultIds.add(resultAmended.getId());
+        this.sharedResultIds.add(resultAmended.getId());
     }
 
     private void recordSharedResults(final List<ResultLine> resultLines) {
-        resultsShared = true;
-        sharedResultIds.addAll(resultLines.stream().map(ResultLine::getId).collect(toSet()));
+        this.resultsShared = true;
+        this.sharedResultIds.addAll(resultLines.stream().map(ResultLine::getId).collect(toSet()));
+    }
+
+    private void onHearingInitiated(final HearingInitiated event) {
+        this.hearingId = event.getHearingId();
+        this.hearingDate = event.getStartDateTime().toLocalDate();
     }
 }

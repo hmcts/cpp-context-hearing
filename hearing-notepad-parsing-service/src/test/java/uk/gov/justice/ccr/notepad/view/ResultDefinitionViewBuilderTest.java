@@ -360,5 +360,34 @@ public class ResultDefinitionViewBuilderTest {
                 , containsInAnyOrder(Arrays.asList(89, "Weeks", INT).toArray()));
     }
 
+    @Test
+    public void testWhenNoResultFoundAllPartsShouldTXT() throws Exception {
+        List<Part> parts = new PartsResolver().getParts("aaaAAaaaa 34 £23.00 conc");
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
 
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+
+        Part p1 = result.getParts().get(0);
+        Part p2 = result.getParts().get(1);
+        Part p3 = result.getParts().get(2);
+        Part p4 = result.getParts().get(3);
+        assertThat(result.getResultCode() == null
+                , is(true)
+        );
+        assertThat(result.getResultLevel() == null
+                , is(true)
+        );
+        assertThat(result.getParts().size()
+                , is(4)
+        );
+
+        assertThat(Arrays.asList(p1.getValue(), p2.getState(), p3.getType())
+                , containsInAnyOrder(Arrays.asList("aaaAAaaaa", UNRESOLVED, TXT).toArray()));
+        assertThat(Arrays.asList( p2.getState(), p2.getValue(), p2.getType())
+                , containsInAnyOrder(Arrays.asList( UNRESOLVED,"34", TXT).toArray()));
+        assertThat(Arrays.asList(p3.getState(), p3.getType(),p3.getValue())
+                , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "£23.00").toArray()));
+        assertThat(Arrays.asList(p4.getState(), p4.getType(),p4.getValue())
+                , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "conc").toArray()));
+    }
 }

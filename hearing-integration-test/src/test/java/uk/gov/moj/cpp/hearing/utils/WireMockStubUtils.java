@@ -8,6 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.text.MessageFormat.format;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
@@ -21,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
 
 import java.util.UUID;
 
+import javax.json.JsonObject;
 import javax.ws.rs.core.Response.Status;
 
 /**
@@ -29,7 +31,8 @@ import javax.ws.rs.core.Response.Status;
 public class WireMockStubUtils {
 
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
-    private static final String MEDIA_TYPE_QUERY_GROUPS = "application/vnd.usersgroups.groups+json";
+    private static final String CONTENT_TYPE_QUERY_GROUPS = "application/vnd.usersgroups.groups+json";
+    private static final String CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS = "application/vnd.progression.query.caseprogressiondetail+json";
 
     static {
         configureFor(HOST, 8080);
@@ -45,8 +48,21 @@ public class WireMockStubUtils {
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(getPayload("stub-data/usersgroups.get-groups-by-user.json"))));
 
-        waitForStubToBeReady(format("/usersgroups-query-api/query/api/rest/usersgroups/users/{0}/groups", userId), MEDIA_TYPE_QUERY_GROUPS);
+        waitForStubToBeReady(format("/usersgroups-query-api/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
+
+    public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
+        stubPingFor("progression-query-api");
+
+        stubFor(get(urlPathEqualTo(format("/progression-query-api/query/api/rest/progression/cases/{0}", caseId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS)
+                        .withBody(getProgressionCaseJson(caseId, caseUrn).toString())));
+
+        waitForStubToBeReady(format("/progression-query-api/query/api/rest/progression/cases/{0}", caseId), CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS);
+    }
+
 
     static void waitForStubToBeReady(final String resource, final String mediaType) {
         waitForStubToBeReady(resource, mediaType, Status.OK);
@@ -54,6 +70,13 @@ public class WireMockStubUtils {
 
     private static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
         poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType)).until(status().is(expectedStatus));
+    }
+
+    private static JsonObject getProgressionCaseJson(final UUID caseId, final String caseUrn) {
+        return createObjectBuilder()
+                .add("caseId", caseId.toString())
+                .add("caseUrn", caseUrn)
+                .build();
     }
 
 }

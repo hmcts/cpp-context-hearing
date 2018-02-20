@@ -22,6 +22,7 @@ import org.mockito.Mock;
 public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTest {
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
+    private static final String ACTION_NAME_GET_CASE_PLEAS = "hearing.get.case.pleas";
     private static final String ACTION_NAME_GET_HEARINGS_BY_START_DATE = "hearing.get.hearings-by-startdate";
     private static final String ACTION_NAME_GET_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid";
     private static final String ACTION_NAME_GET_PROSECUTION_COUNSELS = "hearing.get.prosecution-counsels";
@@ -46,6 +47,17 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearing() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "System Users");
     }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetCasePleas() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_CASE_PLEAS, "Listing Officers", "Court Clerks", "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetCasePleas() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_CASE_PLEAS, "Listing Officers", "Court Clerks", "System Users");
+    }
+
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearingsByStartDate() {
@@ -129,31 +141,31 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Override
     protected Map<Class, Object> getProviderMocks() {
-        return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, userAndGroupProvider).build();
+        return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, this.userAndGroupProvider).build();
     }
 
     private void assertFailureOutcomeOnActionForTheSuppliedGroups(final String actionName, final String... groupNames) {
         final Action action = createActionFor(actionName);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, groupNames))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, groupNames))
                 .willReturn(false);
 
         assertFailureOutcome(executeRulesWith(action));
 
-        verify(userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), arrayCaptor.capture());
-        assertThat(arrayCaptor.getAllValues(), containsInAnyOrder(groupNames));
-        verifyNoMoreInteractions(userAndGroupProvider);
+        verify(this.userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), this.arrayCaptor.capture());
+        assertThat(this.arrayCaptor.getAllValues(), containsInAnyOrder(groupNames));
+        verifyNoMoreInteractions(this.userAndGroupProvider);
     }
 
     private void assertSuccessfulOutcomeOnActionForTheSuppliedGroups(final String actionName, final String... groupNames) {
         final Action action = createActionFor(actionName);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, groupNames))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, groupNames))
                 .willReturn(true);
 
         assertSuccessfulOutcome(executeRulesWith(action));
 
-        verify(userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), arrayCaptor.capture());
-        assertThat(arrayCaptor.getAllValues(), containsInAnyOrder(groupNames));
-        verifyNoMoreInteractions(userAndGroupProvider);
+        verify(this.userAndGroupProvider).isMemberOfAnyOfTheSuppliedGroups(eq(action), this.arrayCaptor.capture());
+        assertThat(this.arrayCaptor.getAllValues(), containsInAnyOrder(groupNames));
+        verifyNoMoreInteractions(this.userAndGroupProvider);
     }
 
 }

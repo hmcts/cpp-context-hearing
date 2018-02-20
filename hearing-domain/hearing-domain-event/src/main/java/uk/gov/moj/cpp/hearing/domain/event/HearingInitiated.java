@@ -8,10 +8,10 @@ import java.util.UUID;
 @Event("hearing.hearing-initiated")
 public class HearingInitiated {
 
-    private final UUID hearingId;
-    private final ZonedDateTime startDateTime;
-    private final Integer duration;
-    private final String hearingType;
+    private UUID hearingId;
+    private ZonedDateTime startDateTime;
+    private Integer duration;
+    private String hearingType;
 
     public HearingInitiated(final UUID hearingId, final ZonedDateTime startDateTime, final Integer duration,
                             final String hearingType) {
@@ -19,6 +19,10 @@ public class HearingInitiated {
         this.startDateTime = startDateTime;
         this.duration = duration;
         this.hearingType = hearingType;
+    }
+
+    public HearingInitiated() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getHearingId() {

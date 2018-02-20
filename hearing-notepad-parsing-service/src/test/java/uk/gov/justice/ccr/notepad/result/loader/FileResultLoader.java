@@ -23,7 +23,14 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FileResultLoader implements ResultLoader {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileResultLoader.class);
+
+
     @Override
     public List<ResultDefinition> loadResultDefinition() {
         StringToResultDefinitionConverter converter = new StringToResultDefinitionConverter();
@@ -44,8 +51,16 @@ public class FileResultLoader implements ResultLoader {
         Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList();
         
         StringToResultPromptConverter resultPromptConverter = new StringToResultPromptConverter(resultPromptFixedListMap);
-        return Collections.unmodifiableList(new ResourceFileReader().getLines("/file-store/7afc734b-ea8c-4458-8790-a8d2fb4db30f", true)
-                .stream().map(resultPromptConverter::convert).filter(Objects::nonNull).collect(toList()));
+
+        List<String> lines = new ResourceFileReader().getLines("/file-store/7afc734b-ea8c-4458-8790-a8d2fb4db30f", true);
+        ResultPromptsProcessor resultPromptsProcessor = new ResultPromptsProcessor(resultPromptConverter);
+        Map<String, List<ResultPrompt>> promptsGroupedByResultDefinition = resultPromptsProcessor.groupByResultDefinition(lines);
+        LOGGER.debug("promptsGroupedByResultDefinition:"+promptsGroupedByResultDefinition);
+
+        Map<String, List<ResultPrompt>> orderedResultPrompts = resultPromptsProcessor.order(promptsGroupedByResultDefinition);
+        LOGGER.debug("orderedResultPrompts:"+orderedResultPrompts);
+
+        return orderedResultPrompts.values().stream().flatMap(List::stream).filter(Objects::nonNull).collect(toList());
     }
 
     private Map<String, Set<String>> loadResultPromptFixedList() {

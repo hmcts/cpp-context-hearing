@@ -1,0 +1,175 @@
+{
+  "crownCourtHearing" : {
+    "ccHearingDate" : "ccHearingDate",
+    "courtCentreId" : "12d9d09a-3bd6-4eba-a966-7573bd7061f3",
+    "courtCentreName" : "courtCentrName"
+  },
+  "hearing" : {
+    "caseId" : "CASE_ID",
+    "caseUrn" : "caseUrn",
+    "courtCentreId" : "1daefec3-2f76-8109-82d9-2e60544a6c03",
+    "courtCentreName" : "courtCentreName",
+    "defendants" : [ {
+      "address" : {
+        "address1" : "addr1",
+        "address2" : "addr2",
+        "address3" : "addr3",
+        "address4" : "addr4",
+        "postcode" : "AA1 1AA"
+      },
+      "bailStatus" : "bailStatus",
+      "custodyTimeLimitDate" : "2017-12-11",
+      "dateOfBirth" : "1978-11-12",
+      "defenceOrganisation" : "CPP",
+      "firstName" : "Geoff",
+      "gender" : "Male",
+      "id" : "0baecac5-222b-402d-9047-84803679edac",
+      "interpreter" : {
+        "language" : "English",
+        "needed" : true
+      },
+      "lastName" : "ssdfsf",
+      "nationality" : "UK",
+      "offences" : [ {
+        "category" : "category",
+        "convictionDate" : "2017-11-12",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "d3ab931c-17a6-4291-8058-77477ca3d64a",
+        "offenceCode" : "offenceCode",
+        "plea" : {
+          "id" : "PLEA_ID",
+          "pleaDate" : "2017-11-12",
+          "value" : "GUILTY"
+        },
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      }, {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "18a60336-7b29-4f48-aac9-c6a070186854",
+        "offenceCode" : "offenceCode",
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      }, {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "bb79e8c2-7440-4002-a70b-746b808c01bb",
+        "offenceCode" : "offenceCode",
+        "plea" : null,
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      } ],
+      "personId" : "cd1a46ef-ceff-49fc-9f95-93d24faa57ef"
+    }, {
+      "address" : {
+        "address1" : "addr1",
+        "address2" : "addr2",
+        "address3" : "addr3",
+        "address4" : "addr4",
+        "postcode" : "AA1 1AA"
+      },
+      "bailStatus" : "bailStatus",
+      "custodyTimeLimitDate" : "2017-12-11",
+      "dateOfBirth" : "1978-11-12",
+      "defenceOrganisation" : "CPP",
+      "firstName" : "Geoff",
+      "gender" : "Male",
+      "id" : "bda1f84c-f822-4f2a-b887-a84323d72f17",
+      "interpreter" : {
+        "language" : "English",
+        "needed" : true
+      },
+      "lastName" : "ssdfsf",
+      "nationality" : "UK",
+      "offences" : [ {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "5af8503c-73b5-4171-b4a8-35d520422d9b",
+        "offenceCode" : "offenceCode",
+        "plea" : null,
+        "reason" : "Reason",
+        "section" : "section",
+        "startDate" : null,
+        "wording" : "wording"
+      }, {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "2da6868a-34df-4359-8120-261e12b5bb3e",
+        "offenceCode" : "offenceCode",
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      }, {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "f126c349-8cc9-4ae1-a706-f0353ee7acc1",
+        "offenceCode" : "offenceCode",
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      } ],
+      "personId" : "3128ce90-de8e-4d55-ab98-ce429a90b36a"
+    }, {
+      "address" : {
+        "address1" : "addr1",
+        "address2" : "addr2",
+        "address3" : "addr3",
+        "address4" : "addr4",
+        "postcode" : "AA1 1AA"
+      },
+      "bailStatus" : "bailStatus",
+      "custodyTimeLimitDate" : "2017-12-11",
+      "dateOfBirth" : "1978-11-12",
+      "defenceOrganisation" : "CPP",
+      "firstName" : "Geoff",
+      "gender" : "Male",
+      "id" : "5c5bbb08-18a4-4607-90c2-65c932fa0083",
+      "interpreter" : {
+        "language" : "English",
+        "needed" : true
+      },
+      "lastName" : "ssdfsf",
+      "nationality" : "UK",
+      "offences" : [ {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "39592191-f105-4022-8674-e65c2420202a",
+        "offenceCode" : "offenceCode",
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      }, {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "96a716f4-a66a-4d79-a536-d8c2c4175bf0",
+        "offenceCode" : "offenceCode",
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      }, {
+        "category" : "category",
+        "description" : "testOffence",
+        "endDate" : "2016-11-12",
+        "id" : "41c29f59-0b36-4e62-8f97-28c342641b69",
+        "offenceCode" : "offenceCode",
+        "reason" : "Reason",
+        "section" : "section",
+        "wording" : "wording"
+      } ],
+      "personId" : "68b93124-0f0f-46e2-a8a0-bb22b1d309ee"
+    } ],
+    "sendingCommittalDate" : "2019-11-14",
+    "type" : "Magistrate Court Hearing"
+  }
+}

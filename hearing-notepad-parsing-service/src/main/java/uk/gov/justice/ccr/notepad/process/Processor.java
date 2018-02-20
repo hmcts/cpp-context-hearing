@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
@@ -38,6 +39,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processor class will match List of provided values with resulting metadata and return Knowledge
@@ -49,6 +52,8 @@ import org.apache.commons.lang3.StringUtils;
 public class Processor {
 
     private final Pattern alphaNumericRegex = Pattern.compile("[a-z]+|\\d+");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
 
     @Inject
     ResultDefinitionMatcher resultDefinitionMatcher;
@@ -76,17 +81,31 @@ public class Processor {
         List<String> values = partsValues.stream().map(String::toLowerCase).collect(Collectors.toList());
 
         Knowledge knowledge = getKnowledge(values);
-        //remove all result definition parts from the list
-        values.removeAll(knowledge.getResultDefinitionParts().keySet());
+
+        if (checkKnowledgeHavingResultDefintion(knowledge).get()) {
+            //remove all result definition parts from the list and only process parse for prompt
+            values.removeAll(knowledge.getResultDefinitionParts().keySet());
+        } else {
+            //in case no result definition found treat all parts as TXT
+            addAllPartsAsTxt(knowledge,values);
+        }
 
         knowledge = processPrompts(knowledge, values);
         return knowledge;
     }
 
+    private Optional<Boolean> checkKnowledgeHavingResultDefintion(Knowledge knowledge) {
+        return Optional.of(knowledge.getResultDefinitionParts().size() > 0);
+    }
+
     public Knowledge processResultPrompt(final String resultDefinitionId) throws ExecutionException {
         Knowledge knowledge = new Knowledge();
         List<ResultPrompt> resultPrompts = resultCache.getResultPromptByResultDefinitionId(resultDefinitionId);
+        LOGGER.debug("resultPrompts unordered:" + resultPrompts);
+        resultPrompts = new ResultPromptsOrder().process(resultPrompts);
+        LOGGER.debug("resultPrompts ordered:" + resultPrompts);
         knowledge.setPromptChoices(resultPrompts.stream().map(resultPrompt -> {
+
             PromptChoice promptChoice = new PromptChoice();
             promptChoice.setCode(resultPrompt.getId());
             promptChoice.setDurationElement(resultPrompt.getDurationElement());
@@ -210,6 +229,18 @@ public class Processor {
                     } else {
                         p.setType(TXT);
                     }
+                    p.setState(UNRESOLVED);
+                    knowledge.addResultPromptParts(s, p);
+                }
+
+        );
+        values.removeAll(knowledge.getResultPromptParts().keySet());
+    }
+
+    private void addAllPartsAsTxt(final Knowledge knowledge, final List<String> values) {
+        values.forEach(s -> {
+                    Part p = new Part();
+                    p.setType(TXT);
                     p.setState(UNRESOLVED);
                     knowledge.addResultPromptParts(s, p);
                 }

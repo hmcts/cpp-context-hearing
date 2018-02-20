@@ -89,6 +89,7 @@ public class ReadStoreResultLoader implements ResultLoader {
             } else {
                 resultPrompt.setType(valueOf(((JsonObject) jsonValue).getString("promptType").trim().toUpperCase()));
             }
+            resultPrompt.setPromptOrder(((JsonObject) jsonValue).getInt("promptOrder"));
             resultPrompt.setMandatory(((JsonObject) jsonValue).getString("mandatory"));
             resultPrompt.setDurationElement(durationElement);
             resultPrompt.setKeywords(Arrays.asList(COMMA_SPLITTER.split(((JsonObject) jsonValue).getString("keywords").replaceAll(" ", "").toLowerCase())));

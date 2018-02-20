@@ -73,7 +73,7 @@ public class HearingEventCommandHandler {
                         hearingDefinitionJson.getString(FIELD_GROUP_LABEL, null),
                         hearingDefinitionJson.getString(FIELD_ACTION_LABEL_EXTENSION, null),
                         hearingDefinitionJson.getBoolean(FIELD_ALTERABLE)
-            )).collect(toList());
+                )).collect(toList());
 
         final EventStream eventStream = eventSource.getStreamById(hearingEventDefinitionsId);
         final HearingEventDefinitionAggregate aggregate = aggregateService.get(eventStream, HearingEventDefinitionAggregate.class);

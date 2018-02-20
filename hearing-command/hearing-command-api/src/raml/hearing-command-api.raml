@@ -8,18 +8,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
       description: |
         ...
         (mapping):
-            requestType: application/vnd.hearing.initiate-hearing+json
-            name: hearing.initiate-hearing
-        (mapping):
-            requestType: application/vnd.hearing.allocate-court+json
-            name: hearing.allocate-court
-         (mapping):
-             requestType: application/vnd.hearing.book-room+json
-             name: hearing.book-room
-         (mapping):
-             requestType: application/vnd.hearing.add-case+json
-             name: hearing.add-case
-        (mapping):
             requestType: application/vnd.hearing.add-prosecution-counsel+json
             name: hearing.add-prosecution-counsel
         (mapping):
@@ -29,30 +17,10 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             requestType: application/vnd.hearing.save-draft-result+json
             name: hearing.save-draft-result
         (mapping):
-            requestType: application/vnd.hearing.adjourn-date+json
-            name: hearing.adjourn-date
+            requestType: application/vnd.hearing.update-plea+json
+            name: hearing.update-plea
         ...
       body:
-        application/vnd.hearing.initiate-hearing+json:
-            example:
-             !include json/hearing.initiate-hearing.json
-            schema:
-             !include json/schema/hearing.initiate-hearing.json
-        application/vnd.hearing.allocate-court+json:
-            example:
-             !include json/hearing.allocate-court.json
-            schema:
-             !include json/schema/hearing.allocate-court.json
-        application/vnd.hearing.book-room+json:
-            example:
-             !include json/hearing.book-room.json
-            schema:
-             !include json/schema/hearing.book-room.json
-        application/vnd.hearing.add-case+json:
-            example:
-             !include json/hearing.add-case.json
-            schema:
-             !include json/schema/hearing.add-case.json
         application/vnd.hearing.save-draft-result+json:
             example:
              !include json/hearing.save-draft-result.json
@@ -68,11 +36,11 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.add-defence-counsel.json
             schema:
              !include json/schema/hearing.add-defence-counsel.json
-        application/vnd.hearing.adjourn-date+json:
+        application/vnd.hearing.update-plea+json:
             example:
-             !include json/hearing.adjourn-date.json
+             !include json/hearing.update-plea.json
             schema:
-             !include json/schema/hearing.adjourn-date.json
+             !include json/schema/hearing.update-plea.json
       responses:
             202:
                 description: OK
