@@ -87,4 +87,21 @@ public class PleaHearingRepositoryTest extends BaseTransactionalTest {
         assertThat(pleaHearings.get(0).getValue(), is(this.value));
     }
 
+
+    @Test
+    public void findWithHearingId() {
+        final PleaHearing pleaHearingRandom = new PleaHearing(this.pleaId, this.hearingId, this.caseId, this.defendantId, this.offenceId, this.pleaDate, this.value,this.personId);
+        this.pleaHearingRepository.save(pleaHearingRandom);
+
+        final List<PleaHearing> pleaHearings = this.pleaHearingRepository.findByHearingId(this.hearingId);
+
+        assertThat(pleaHearings.get(0).getPleaId(), is(this.pleaId));
+        assertThat(pleaHearings.get(0).getCaseId(), is(this.caseId));
+        assertThat(pleaHearings.get(0).getDefendantId(), is(this.defendantId));
+        assertThat(pleaHearings.get(0).getPersonId(), is(this.personId));
+        assertThat(pleaHearings.get(0).getOffenceId(), is(this.offenceId));
+        assertThat(pleaHearings.get(0).getPleaDate(), is(this.pleaDate));
+        assertThat(pleaHearings.get(0).getValue(), is(this.value));
+    }
+
 }

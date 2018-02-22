@@ -62,6 +62,23 @@ public class VerdictHearingRepositoryTest {
         assertThat(verdictsRetrieved.get(0).getValue(), is(this.value));
 
     }
+
+
+    @Test
+    public void shouldFindVerdictByHearingId() {
+        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value);
+        verdictHearingRepository.save(verdictHearingToSave);
+
+        final List<VerdictHearing> verdictsRetrieved = verdictHearingRepository.findByHearingId(this.hearingId);
+
+        assertThat(verdictsRetrieved.get(0).getVerdictId(), is(this.verdictId));
+        assertThat(verdictsRetrieved.get(0).getCaseId(), is(this.caseId));
+        assertThat(verdictsRetrieved.get(0).getDefendantId(), is(this.defendantId));
+        assertThat(verdictsRetrieved.get(0).getPersonId(), is(this.personId));
+        assertThat(verdictsRetrieved.get(0).getOffenceId(), is(this.offenceId));
+        assertThat(verdictsRetrieved.get(0).getValue(), is(this.value));
+
+    }
     @Test
     public void shouldFindVerdictByPrimaryKey() {
         final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value);

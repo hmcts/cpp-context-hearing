@@ -213,3 +213,23 @@ protocols: [ HTTP, HTTPS ]
                      application/vnd.hearing.hearing-event-log+json:
                         example: !include json/hearing.hearing-event-log.json
                         schema: !include json/schema/hearing.get-hearing-event-log.json
+
+/hearings/{hearingId}/offences:
+    uriParameters:
+        hearingId:
+            description: ID of hearing to fetch the offences for
+            type: string
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.get.offences+json
+                name: hearing.get.offences
+            ...
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.get.offences+json:
+                        example: !include json/hearing.get.offences.json
+                        schema: !include json/schema/hearing.get.offences.json

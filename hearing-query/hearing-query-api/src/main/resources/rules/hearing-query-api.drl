@@ -104,3 +104,12 @@ rule "Query - API - hearing.get.case.verdicts"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.get.offences"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.offences");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users"));
+  then
+    $outcome.setSuccess(true);
+end

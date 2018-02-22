@@ -32,6 +32,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String ACTION_NAME_GET_VERDICTS_BY_CASE_ID = "hearing.get.case.verdicts";
+    private static final String ACTION_NAME_GET_OFFENCES_BY_HEARING_ID = "hearing.get.offences";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -148,6 +149,16 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetVerdicts() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_VERDICTS_BY_CASE_ID, "Listing Officers", "Court Clerks","System Users");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetOffences() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_OFFENCES_BY_HEARING_ID, "Listing Officers", "Court Clerks","System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetOffences() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_OFFENCES_BY_HEARING_ID, "Listing Officers", "Court Clerks","System Users");
     }
 
 

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist;
 
+import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
 import java.util.List;
@@ -11,4 +12,6 @@ import org.apache.deltaspike.data.api.Repository;
 @Repository
 public interface VerdictHearingRepository extends EntityRepository<VerdictHearing, UUID> {
     List<VerdictHearing> findByCaseId(final UUID caseId);
+    List<VerdictHearing>  findByHearingId(final UUID hearingId);
+
 }
