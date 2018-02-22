@@ -10,7 +10,8 @@
           "id": "RANDOM_OFFENCE_ID",
           "verdict": {
             "id": "RANDOM_VERDICT_ID",
-            "value": "GUILTY"
+            "value": "GUILTY",
+            "verdictDate": "2017-02-20"
           }
         }
       ]

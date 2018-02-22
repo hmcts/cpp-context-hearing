@@ -9,14 +9,16 @@
           "id": "RANDOM_OFFENCE_ID_1",
           "verdict": {
             "id": "RANDOM_VERDICT_ID_1",
-            "value": "VERDICT_VALUE_1"
+            "value": "VERDICT_VALUE_1",
+            "verdictDate": "VERDICT_DATE_1"
           }
         },
         {
           "id": "RANDOM_OFFENCE_ID_2",
           "verdict": {
             "id": "RANDOM_VERDICT_ID_2",
-            "value": "VERDICT_VALUE_2"
+            "value": "VERDICT_VALUE_2",
+            "verdictDate": "VERDICT_DATE_2"
           }
         }
       ]

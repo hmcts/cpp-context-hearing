@@ -6,6 +6,7 @@
   "offenceId": "e085c62c-dc4a-11e7-9296-cec278b6b50a",
   "verdict": {
     "id": "RANDOM_VERDICT_ID",
-    "value": "GUILTY"
+    "value": "GUILTY",
+    "verdictDate":  "RANDOM_VERDICT_DATE"
   }
 }

@@ -9,7 +9,8 @@
           "id": "6da4527f-474a-47a8-82c5-21ea607aa9c3",
           "verdict": {
             "id": "0baecac5-222b-402d-9047-84803679edae",
-            "value": "GUILTY"
+            "value": "GUILTY",
+            "verdictDate": "2017-02-20"
           }
         }
       ]

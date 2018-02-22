@@ -77,8 +77,8 @@ public class OffenceServiceTest {
         final UUID offenceIdTwo = randomUUID();
         final UUID personId = randomUUID();
         final ArrayList<VerdictHearing> verdicts = new ArrayList<>();
-        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY"));
-        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdTwo, "NOT GUILTY"));
+        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY", LocalDate.now()));
+        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdTwo, "NOT GUILTY", LocalDate.now()));
 
         final ArrayList<PleaHearing> pleaHearings = new ArrayList<>();
         pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, LocalDate.now(), "NOT GUILTY", personId));
@@ -162,7 +162,7 @@ public class OffenceServiceTest {
         final UUID offenceIdTwo = randomUUID();
         final UUID personId = randomUUID();
         final ArrayList<VerdictHearing> verdicts = new ArrayList<>();
-        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY"));
+        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY", LocalDate.now()));
 
         final ArrayList<PleaHearing> pleaHearings = new ArrayList<>();
         pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, LocalDate.now(), "NOT GUILTY", personId));

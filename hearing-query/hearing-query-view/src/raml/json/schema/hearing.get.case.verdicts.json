@@ -26,6 +26,9 @@
         "value": {
           "type": "string"
         },
+        "verdictDate": {
+          "type": "string"
+        },
         "caseId": {
           "$ref": "#/definitions/uuid"
         },
@@ -43,6 +46,7 @@
         "verdictId",
         "hearingId",
         "value",
+        "verdictDate",
         "caseId",
         "defendantId",
         "personId",

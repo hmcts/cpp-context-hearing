@@ -7,12 +7,14 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,13 +28,18 @@ public class VerdictHearingRepositoryTest {
     final UUID personId = randomUUID();
     final UUID offenceId = randomUUID();
     final String value = STRING.next();
+    LocalDate verdictDate;
 
     @Inject
     private VerdictHearingRepository verdictHearingRepository;
 
+    @Before
+    public void setUp() {
+        verdictDate = LocalDate.now();
+    }
     @Test
     public void shouldFindAllVerdicts() {
-        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value);
+        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value,verdictDate);
         verdictHearingRepository.save(verdictHearingToSave);
 
         final List<VerdictHearing> verdictsRetrieved = verdictHearingRepository.findAll();
@@ -44,11 +51,12 @@ public class VerdictHearingRepositoryTest {
         assertThat(verdictsRetrieved.get(0).getPersonId(), is(this.personId));
         assertThat(verdictsRetrieved.get(0).getOffenceId(), is(this.offenceId));
         assertThat(verdictsRetrieved.get(0).getValue(), is(this.value));
+        assertThat(verdictsRetrieved.get(0).getVerdictDate(),is(this.verdictDate));
     }
 
     @Test
     public void shouldFindVerdictByCaseId() {
-        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value);
+        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value, verdictDate);
         verdictHearingRepository.save(verdictHearingToSave);
 
         final List<VerdictHearing> verdictsRetrieved = verdictHearingRepository.findByCaseId(this.caseId);
@@ -60,13 +68,14 @@ public class VerdictHearingRepositoryTest {
         assertThat(verdictsRetrieved.get(0).getPersonId(), is(this.personId));
         assertThat(verdictsRetrieved.get(0).getOffenceId(), is(this.offenceId));
         assertThat(verdictsRetrieved.get(0).getValue(), is(this.value));
+        assertThat(verdictsRetrieved.get(0).getVerdictDate(),is(this.verdictDate));
 
     }
 
 
     @Test
     public void shouldFindVerdictByHearingId() {
-        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value);
+        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value, verdictDate);
         verdictHearingRepository.save(verdictHearingToSave);
 
         final List<VerdictHearing> verdictsRetrieved = verdictHearingRepository.findByHearingId(this.hearingId);
@@ -79,9 +88,12 @@ public class VerdictHearingRepositoryTest {
         assertThat(verdictsRetrieved.get(0).getValue(), is(this.value));
 
     }
+
+
+
     @Test
     public void shouldFindVerdictByPrimaryKey() {
-        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value);
+        final VerdictHearing verdictHearingToSave = new VerdictHearing(this.verdictId, this.hearingId, this.caseId, this.personId, this.defendantId, this.offenceId, value, verdictDate);
         verdictHearingRepository.save(verdictHearingToSave);
 
         final VerdictHearing verdictsRetrieved = verdictHearingRepository.findBy(this.verdictId);
@@ -93,5 +105,6 @@ public class VerdictHearingRepositoryTest {
         assertThat(verdictsRetrieved.getPersonId(), is(this.personId));
         assertThat(verdictsRetrieved.getOffenceId(), is(this.offenceId));
         assertThat(verdictsRetrieved.getValue(), is(this.value));
+        assertThat(verdictsRetrieved.getVerdictDate() ,is(this.verdictDate));
     }
 }

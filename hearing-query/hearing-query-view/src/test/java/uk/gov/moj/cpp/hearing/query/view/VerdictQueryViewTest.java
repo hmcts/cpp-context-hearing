@@ -25,6 +25,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 import uk.gov.moj.cpp.hearing.query.view.service.VerdictService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -69,8 +70,9 @@ public class VerdictQueryViewTest {
         final UUID caseId = randomUUID();
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().add(FIELD_CASE_ID, caseId.toString()).build());
         final ArrayList<VerdictHearing> verdicts = new ArrayList<>();
-        final VerdictHearing verdictOne = new VerdictHearing(randomUUID(), randomUUID(), caseId, randomUUID(), randomUUID(), randomUUID(), "GUILTY");
-        final VerdictHearing verdictTwo = new VerdictHearing(randomUUID(), randomUUID(), caseId, randomUUID(), randomUUID(), randomUUID(), "NOT GUILTY");
+        final LocalDate verdictDate = LocalDate.now();
+        final VerdictHearing verdictOne = new VerdictHearing(randomUUID(), randomUUID(), caseId, randomUUID(), randomUUID(), randomUUID(), "GUILTY", verdictDate);
+        final VerdictHearing verdictTwo = new VerdictHearing(randomUUID(), randomUUID(), caseId, randomUUID(), randomUUID(), randomUUID(), "NOT GUILTY", verdictDate);
         verdicts.add(verdictOne);
         verdicts.add(verdictTwo);
         when(verdictService.getVerdictHearingByCaseId(caseId)).thenReturn(verdicts);
@@ -83,6 +85,7 @@ public class VerdictQueryViewTest {
                         withJsonPath("$.verdicts[0].verdictId", equalTo(verdictOne.getVerdictId().toString())),
                         withJsonPath("$.verdicts[0].hearingId", equalTo(verdictOne.getHearingId().toString())),
                         withJsonPath("$.verdicts[0].value", equalTo(verdictOne.getValue())),
+                        withJsonPath("$.verdicts[0].verdictDate", equalTo(verdictOne.getVerdictDate().toString())),
                         withJsonPath("$.verdicts[0].caseId", equalTo(verdictOne.getCaseId().toString())),
                         withJsonPath("$.verdicts[0].defendantId", equalTo(verdictOne.getDefendantId().toString())),
                         withJsonPath("$.verdicts[0].personId", equalTo(verdictOne.getPersonId().toString())),
@@ -91,6 +94,7 @@ public class VerdictQueryViewTest {
                         withJsonPath("$.verdicts[1].verdictId", equalTo(verdictTwo.getVerdictId().toString())),
                         withJsonPath("$.verdicts[1].hearingId", equalTo(verdictTwo.getHearingId().toString())),
                         withJsonPath("$.verdicts[1].value", equalTo(verdictTwo.getValue())),
+                        withJsonPath("$.verdicts[1].verdictDate", equalTo(verdictOne.getVerdictDate().toString())),
                         withJsonPath("$.verdicts[1].caseId", equalTo(verdictTwo.getCaseId().toString())),
                         withJsonPath("$.verdicts[1].defendantId", equalTo(verdictTwo.getDefendantId().toString())),
                         withJsonPath("$.verdicts[1].personId", equalTo(verdictTwo.getPersonId().toString())),

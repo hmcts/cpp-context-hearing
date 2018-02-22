@@ -274,7 +274,8 @@ public class HearingEventListener {
                 verdictAdded.getPersonId(),
                 verdictAdded.getDefendantId(),
                 verdictAdded.getOffenceId(),
-                verdictAdded.getVerdict().getValue());
+                verdictAdded.getVerdict().getValue(),
+                verdictAdded.getVerdict().getVerdictDate());
         this.verdictHearingRepository.save(verdictHearing);
     }
 
@@ -289,7 +290,8 @@ public class HearingEventListener {
                 verdictChanged.getPersonId(),
                 verdictChanged.getDefendantId(),
                 verdictChanged.getOffenceId(),
-                verdictChanged.getVerdict().getValue());
+                verdictChanged.getVerdict().getValue(),
+                verdictChanged.getVerdict().getVerdictDate());
         this.verdictHearingRepository.save(verdictHearing);
     }
 

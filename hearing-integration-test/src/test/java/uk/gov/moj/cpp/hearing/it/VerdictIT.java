@@ -21,6 +21,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.thenHearingVer
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 
 import com.jayway.jsonassert.impl.matcher.IsCollectionWithSize;
 import com.jayway.restassured.response.Response;
@@ -36,6 +37,7 @@ public class VerdictIT extends AbstractIT {
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_VALUE = "value";
+    private static final String FIELD_VERDICT_DATE = "verdictDate";
     private static final String FIELD_PERSON_ID = "personId";
     private static final String VERDICT_COLLECTION = "verdicts";
     private static final String FIELD_VERDICT_ID = "verdictId";
@@ -48,6 +50,7 @@ public class VerdictIT extends AbstractIT {
     private String verdictId_2;
     private String offenceId_1;
     private String offenceId_2;
+    private String verdictDate;
 
 
     @Before
@@ -60,6 +63,7 @@ public class VerdictIT extends AbstractIT {
         offenceId_1 = randomUUID().toString();
         offenceId_2 = randomUUID().toString();
         verdictId_2 = randomUUID().toString();
+        verdictDate = LocalDate.now().toString();
     }
 
     @Test
@@ -73,6 +77,7 @@ public class VerdictIT extends AbstractIT {
         final String body = getStringFromResource("hearing.update-verdict.json").replace("RANDOM_CASE_ID", caseId)
                 .replace("RANDOM_VERDICT_ID", verdictId_1)
                 .replace("VERDICT_VALUE", verdictValue)
+                .replace("VERDICT_DATE", verdictDate)
                 .replace("RANDOM_OFFENCE_ID", offenceId_1)
                 .replace("RANDOM_DEFENDANT_ID", defendantId)
                 .replace("RANDOM_PERSON_ID", personId);
@@ -100,6 +105,7 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_OFFENCE_ID), is(offenceId_1)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VALUE), is(verdictValue)),
+                                withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VERDICT_DATE), is(verdictDate)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_PERSON_ID), is(personId))
                         )));
 
@@ -119,9 +125,11 @@ public class VerdictIT extends AbstractIT {
         String body = getStringFromResource("hearing.update-multiple-verdicts.json").replace("RANDOM_CASE_ID", caseId)
                 .replace("RANDOM_VERDICT_ID_1", verdictId_1)
                 .replace("VERDICT_VALUE_1", originalVerdictValue)
+                .replace("VERDICT_DATE_1", verdictDate)
                 .replace("RANDOM_OFFENCE_ID_1", offenceId_1)
                 .replace("RANDOM_VERDICT_ID_2", verdictId_2)
                 .replace("VERDICT_VALUE_2", originalVerdictValue)
+                .replace("VERDICT_DATE_2", verdictDate)
                 .replace("RANDOM_OFFENCE_ID_2", offenceId_2)
                 .replace("RANDOM_DEFENDANT_ID", defendantId)
                 .replace("RANDOM_PERSON_ID", personId);
@@ -150,6 +158,7 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VERDICT_ID), isOneOf(verdictId_1, verdictId_2)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VALUE), is(originalVerdictValue)),
+                                withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VERDICT_DATE), is(verdictDate)),
 
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_CASE_ID), is(caseId)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
@@ -157,6 +166,7 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_PERSON_ID), is(personId)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_VERDICT_ID), isOneOf(verdictId_1, verdictId_2)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_VERDICT_DATE), is(verdictDate)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_VALUE), is(originalVerdictValue))
 
                         )));
@@ -184,6 +194,7 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VERDICT_ID), isOneOf(verdictId_1, verdictId_2)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VALUE), is(updatedVerdictValue)),
+                                withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VERDICT_DATE), is(verdictDate)),
 
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_CASE_ID), is(caseId)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
@@ -191,6 +202,7 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_PERSON_ID), is(personId)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_VERDICT_ID), isOneOf(verdictId_1, verdictId_2)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VERDICT_DATE), is(verdictDate)),
                                 withJsonPath(format("$.%s[1].%s", VERDICT_COLLECTION, FIELD_VALUE), is(updatedVerdictValue))
 
                         )));
@@ -208,6 +220,7 @@ public class VerdictIT extends AbstractIT {
         String body = getStringFromResource("hearing.update-verdict.json").replace("RANDOM_CASE_ID", caseId)
                 .replace("RANDOM_VERDICT_ID", verdictId_1)
                 .replace("VERDICT_VALUE", verdictValue)
+                .replace("VERDICT_DATE", verdictDate)
                 .replace("RANDOM_OFFENCE_ID", offenceId_1)
                 .replace("RANDOM_DEFENDANT_ID", defendantId)
                 .replace("RANDOM_PERSON_ID", personId);
@@ -235,6 +248,7 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_OFFENCE_ID), is(offenceId_1)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VALUE), is(verdictValue)),
+                                withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_VERDICT_DATE), is(verdictDate)),
                                 withJsonPath(format("$.%s[0].%s", VERDICT_COLLECTION, FIELD_PERSON_ID), is(personId))
                         )));
 

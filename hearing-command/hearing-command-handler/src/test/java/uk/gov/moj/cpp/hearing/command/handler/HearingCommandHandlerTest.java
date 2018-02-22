@@ -213,6 +213,7 @@ public class HearingCommandHandlerTest {
     private static final String PLEA_NOT_GUILTY = "NOT GUILTY";
     public static final String HEARING_HEARING_PLEA_UPDATED = "hearing.hearing-plea-updated";
     public static final String HEARING_HEARING_VERDICT_UPDATED = "hearing.hearing-verdict-updated";
+    private static final String VERDICT_DATE = "2017-02-02";
 
     @Mock
     private EventStream eventStream;
@@ -608,6 +609,7 @@ public class HearingCommandHandlerTest {
         ));
     }
 
+
     @Test
     public void shouldRaiseVerdictUpdated() throws Exception {
         // Given
@@ -633,7 +635,8 @@ public class HearingCommandHandlerTest {
                         payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "verdict", "value"), equalTo(VERDICT_VALUE))
+                                withJsonPath(format("$.%s.%s", "verdict", "value"), equalTo(VERDICT_VALUE)),
+                                withJsonPath(format("$.%s.%s", "verdict", "verdictDate"), equalTo(VERDICT_DATE))
                         ))),
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(updateVerdictCommand)
@@ -948,6 +951,22 @@ public class HearingCommandHandlerTest {
 
         return new StringToJsonObjectConverter().convert(sendCaseForListingEventPayloadString);
     }
+
+    private JsonObject getSendCaseForListingVerdictPayload(final String resource, final String pleaValue) throws IOException {
+        String sendCaseForListingEventPayloadString = getStringFromResource(resource);
+        sendCaseForListingEventPayloadString =
+                sendCaseForListingEventPayloadString.replace("RANDOM_CASE_ID", CASE_ID.toString()).
+                        replace("RANDOM_HEARING_ID", HEARING_ID.toString()).
+                        replace("RANDOM_DEFENDANT_ID", DEFENDANT_ID.toString()).
+                        replace("RANDOM_PERSON_ID", PERSON_ID.toString()).
+                        replace("RANDOM_OFFENCE_ID", OFFENCE_ID.toString()).
+                        replace("RANDOM_VERDICT_ID", VERDICT_ID).
+                        replace("RANDOM_VERDICT_DATE", VERDICT_DATE).
+                        replace("VALUE", pleaValue);
+
+        return new StringToJsonObjectConverter().convert(sendCaseForListingEventPayloadString);
+    }
+
 
     private JsonObject getHearingUpdateVerdictPayload(final String resource) throws IOException {
         String sendCaseForListingEventPayloadString = getStringFromResource(resource);

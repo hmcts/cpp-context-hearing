@@ -183,7 +183,7 @@ public class HearingEventListenerTest {
     private static final UUID PLEA_ID = randomUUID();
     private static final UUID VERDICT_ID = randomUUID();
     private static final String VERDICT_VALUE = "GUILTY";
-
+    private static final String FIELD_VERDICT_DATE = "verdictDate";
     private static final String PLEA_VALUE = "GUILTY";
     private static final String FIELD_VALUE = "value";
     private static final String FIELD_PLEA_DATE = "pleaDate";
@@ -636,6 +636,7 @@ public class HearingEventListenerTest {
         assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
         assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
         assertThat(verdictHearing.getValue(), is(PLEA_VALUE));
+        assertThat(verdictHearing.getVerdictDate(), is(START_DATE));
     }
 
     @Test
@@ -651,6 +652,7 @@ public class HearingEventListenerTest {
         assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
         assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
         assertThat(verdictHearing.getValue(), is(PLEA_VALUE));
+        assertThat(verdictHearing.getVerdictDate(), is(START_DATE));
     }
 
     private List<HearingOutcome> getHearingOutcomesForSharedResults() {
@@ -843,7 +845,7 @@ public class HearingEventListenerTest {
     }
 
     public JsonEnvelope getHearingVerdictEnvelope() {
-        final JsonObject verdictObject = createObjectBuilder().add(FIELD_GENERIC_ID, VERDICT_ID.toString()).add(FIELD_VALUE, VERDICT_VALUE).build();
+        final JsonObject verdictObject = createObjectBuilder().add(FIELD_GENERIC_ID, VERDICT_ID.toString()).add(FIELD_VALUE, VERDICT_VALUE).add(FIELD_VERDICT_DATE, START_DATE.toString()).build();
         final JsonObject hearingVerdict = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
                 .add(FIELD_PERSON_ID, PERSON_ID.toString())

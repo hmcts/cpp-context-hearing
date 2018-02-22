@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -34,11 +35,14 @@ public class VerdictHearing implements Serializable {
     @Column(name = "value")
     private String value;
 
+    @Column(name = "verdict_date")
+    private LocalDate verdictDate;
+
     public VerdictHearing() {
         //For JPA
     }
 
-    public VerdictHearing(final UUID verdictId, final UUID hearingId, final UUID caseId, final UUID personId, final UUID defendantId, final UUID offenceId, final String value) {
+    public VerdictHearing(final UUID verdictId, final UUID hearingId, final UUID caseId, final UUID personId, final UUID defendantId, final UUID offenceId, final String value, final LocalDate verdictDate) {
         this.verdictId = verdictId;
         this.hearingId = hearingId;
         this.caseId = caseId;
@@ -46,6 +50,7 @@ public class VerdictHearing implements Serializable {
         this.defendantId = defendantId;
         this.offenceId = offenceId;
         this.value = value;
+        this.verdictDate = verdictDate;
     }
 
     public UUID getVerdictId() {
@@ -76,4 +81,7 @@ public class VerdictHearing implements Serializable {
         return value;
     }
 
+    public LocalDate getVerdictDate() {
+        return verdictDate;
+    }
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class VerdictServiceTest {
     public void shouldGetVerdictsByCaseId(){
         final ArrayList<VerdictHearing> verdicts = new ArrayList<>();
         final UUID caseId = randomUUID();
-        final VerdictHearing verdict = new VerdictHearing(randomUUID(),randomUUID(),caseId,randomUUID(),randomUUID(),randomUUID(),"GUILTY");
+        final VerdictHearing verdict = new VerdictHearing(randomUUID(),randomUUID(),caseId,randomUUID(),randomUUID(),randomUUID(),"GUILTY", LocalDate.now());
         verdicts.add(verdict);
         when(verdictHearingRepository.findByCaseId(caseId)).thenReturn(verdicts);
         final List<VerdictHearing> verdictsReturned = verdictService.getVerdictHearingByCaseId(caseId);
