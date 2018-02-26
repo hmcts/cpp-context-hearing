@@ -12,7 +12,8 @@
       },
       "verdict":{
         "verdictId":"4c1ed820-f8d7-41fc-9650-09200ddbc15d",
-        "value":"GUILTY"
+        "value":"GUILTY",
+        "verdictDate": "2018-02-21"
       }
     }
   ]

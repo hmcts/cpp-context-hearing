@@ -42,7 +42,8 @@ public class OffenceService {
             JsonObjectBuilder verdicts = Json.createObjectBuilder();
             if (v != null) {
                 verdicts.add("verdictId", v.getVerdictId().toString())
-                        .add("value", v.getValue().toString());
+                        .add("value", v.getValue().toString())
+                        .add("verdictDate", v.getVerdictDate().toString());
             }
 
             JsonObject offence = Json.createObjectBuilder()

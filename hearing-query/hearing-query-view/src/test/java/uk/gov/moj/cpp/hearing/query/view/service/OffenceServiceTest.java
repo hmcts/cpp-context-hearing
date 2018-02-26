@@ -77,12 +77,13 @@ public class OffenceServiceTest {
         final UUID offenceIdTwo = randomUUID();
         final UUID personId = randomUUID();
         final ArrayList<VerdictHearing> verdicts = new ArrayList<>();
-        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY", LocalDate.now()));
-        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdTwo, "NOT GUILTY", LocalDate.now()));
+        final LocalDate now=LocalDate.now();
+        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY", now));
+        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdTwo, "NOT GUILTY", now));
 
         final ArrayList<PleaHearing> pleaHearings = new ArrayList<>();
-        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, LocalDate.now(), "NOT GUILTY", personId));
-        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, LocalDate.now(), "NOT GUILTY", personId));
+        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, now, "NOT GUILTY", personId));
+        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, now, "NOT GUILTY", personId));
 
 
         when(this.pleaHearingRepository.findByHearingId(hearingId)).thenReturn(pleaHearings);
@@ -104,7 +105,8 @@ public class OffenceServiceTest {
                         withJsonPath("$.offences[1].offenceId", equalTo(offenceIdTwo.toString())),
                         withJsonPath("$.offences[1].personId", equalTo(personId.toString())),
                         withJsonPath("$.offences[1].plea.value", equalTo("NOT GUILTY")),
-                        withJsonPath("$.offences[1].verdict.value", equalTo("NOT GUILTY"))
+                        withJsonPath("$.offences[1].verdict.value", equalTo("NOT GUILTY")),
+                        withJsonPath("$.offences[1].verdict.verdictDate", equalTo(now.toString()))
                 ))
         ));
 
@@ -121,10 +123,10 @@ public class OffenceServiceTest {
         final UUID offenceIdTwo = randomUUID();
         final UUID personId = randomUUID();
         final ArrayList<VerdictHearing> verdicts = new ArrayList<>();
-
+        final LocalDate now=LocalDate.now();
         final ArrayList<PleaHearing> pleaHearings = new ArrayList<>();
-        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, LocalDate.now(), "NOT GUILTY", personId));
-        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, LocalDate.now(), "NOT GUILTY", personId));
+        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, now, "NOT GUILTY", personId));
+        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, now, "NOT GUILTY", personId));
 
 
         when(this.pleaHearingRepository.findByHearingId(hearingId)).thenReturn(pleaHearings);
@@ -141,6 +143,7 @@ public class OffenceServiceTest {
                         withJsonPath("$.offences[0].offenceId", equalTo(offenceIdOne.toString())),
                         withJsonPath("$.offences[0].personId", equalTo(personId.toString())),
                         withJsonPath("$.offences[0].plea.value", equalTo("NOT GUILTY")),
+                        withJsonPath("$.offences[0].plea.pleaDate", equalTo(now.toString())),
                         withJsonPath("$.offences[1].caseId", equalTo(caseId.toString())),
                         withJsonPath("$.offences[1].defendantId", equalTo(defendantId.toString())),
                         withJsonPath("$.offences[1].offenceId", equalTo(offenceIdTwo.toString())),
@@ -162,11 +165,12 @@ public class OffenceServiceTest {
         final UUID offenceIdTwo = randomUUID();
         final UUID personId = randomUUID();
         final ArrayList<VerdictHearing> verdicts = new ArrayList<>();
-        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY", LocalDate.now()));
+        final LocalDate now=LocalDate.now();
+        verdicts.add(new VerdictHearing(randomUUID(), hearingId, caseId, personId, defendantId, offenceIdOne, "GUILTY", now));
 
         final ArrayList<PleaHearing> pleaHearings = new ArrayList<>();
-        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, LocalDate.now(), "NOT GUILTY", personId));
-        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, LocalDate.now(), "NOT GUILTY", personId));
+        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdOne, now, "NOT GUILTY", personId));
+        pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, now, "NOT GUILTY", personId));
 
 
         when(this.pleaHearingRepository.findByHearingId(hearingId)).thenReturn(pleaHearings);
@@ -182,7 +186,9 @@ public class OffenceServiceTest {
                         withJsonPath("$.offences[0].offenceId", equalTo(offenceIdOne.toString())),
                         withJsonPath("$.offences[0].personId", equalTo(personId.toString())),
                         withJsonPath("$.offences[0].plea.value", equalTo("NOT GUILTY")),
+                        withJsonPath("$.offences[0].plea.pleaDate", equalTo(now.toString())),
                         withJsonPath("$.offences[0].verdict.value", equalTo("GUILTY")),
+                        withJsonPath("$.offences[0].verdict.verdictDate", equalTo(now.toString())),
                         withJsonPath("$.offences[1].caseId", equalTo(caseId.toString())),
                         withJsonPath("$.offences[1].defendantId", equalTo(defendantId.toString())),
                         withJsonPath("$.offences[1].offenceId", equalTo(offenceIdTwo.toString())),
