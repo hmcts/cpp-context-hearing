@@ -15,7 +15,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 @ServiceComponent(Component.QUERY_VIEW)
 public class OffenceQueryView {
-    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String CASE_ID = "caseId";
     private static final String RESPONSE_NAME = "hearing.get.offences";
 
 
@@ -27,9 +27,9 @@ public class OffenceQueryView {
 
     @Handles("hearing.get.offences")
     public JsonEnvelope getOffences(final JsonEnvelope envelope) {
-        final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
+        final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), CASE_ID);
         return this.enveloper.withMetadataFrom(envelope, RESPONSE_NAME).apply(
-                offenceService.getOffencesByHearingId(hearingId.get())
+                offenceService.getOffencesByCaseId(caseId.get())
         );
 
     }

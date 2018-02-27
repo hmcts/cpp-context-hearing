@@ -1,35 +1,20 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import com.jayway.jsonassert.impl.matcher.IsCollectionWithSize;
-import com.jayway.jsonpath.JsonPath;
-import com.sun.org.apache.xpath.internal.operations.String;
-import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
-import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 
-import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.json.JsonString;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
@@ -37,20 +22,15 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.getHearing;
 
 /**
  * Unit tests for the HearingServiceTest class.
@@ -86,10 +66,10 @@ public class OffenceServiceTest {
         pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, now, "NOT GUILTY", personId));
 
 
-        when(this.pleaHearingRepository.findByHearingId(hearingId)).thenReturn(pleaHearings);
-        when(this.verdictHearingRepository.findByHearingId(hearingId)).thenReturn(verdicts);
+        when(this.pleaHearingRepository.findByCaseId(hearingId)).thenReturn(pleaHearings);
+        when(this.verdictHearingRepository.findByCaseId(hearingId)).thenReturn(verdicts);
 
-        JsonObject jsonObject = this.offenceService.getOffencesByHearingId(hearingId);
+        JsonObject jsonObject = this.offenceService.getOffencesByCaseId(hearingId);
 
         assertThat(jsonObject, is(
                 payloadIsJson(allOf(
@@ -129,10 +109,10 @@ public class OffenceServiceTest {
         pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, now, "NOT GUILTY", personId));
 
 
-        when(this.pleaHearingRepository.findByHearingId(hearingId)).thenReturn(pleaHearings);
-        when(this.verdictHearingRepository.findByHearingId(hearingId)).thenReturn(verdicts);
+        when(this.pleaHearingRepository.findByCaseId(hearingId)).thenReturn(pleaHearings);
+        when(this.verdictHearingRepository.findByCaseId(hearingId)).thenReturn(verdicts);
 
-        JsonObject jsonObject = this.offenceService.getOffencesByHearingId(hearingId);
+        JsonObject jsonObject = this.offenceService.getOffencesByCaseId(hearingId);
         System.out.println(jsonObject);
 
         assertThat(jsonObject, is(
@@ -173,10 +153,10 @@ public class OffenceServiceTest {
         pleaHearings.add(new PleaHearing(randomUUID(), hearingId, caseId, defendantId, offenceIdTwo, now, "NOT GUILTY", personId));
 
 
-        when(this.pleaHearingRepository.findByHearingId(hearingId)).thenReturn(pleaHearings);
-        when(this.verdictHearingRepository.findByHearingId(hearingId)).thenReturn(verdicts);
+        when(this.pleaHearingRepository.findByCaseId(hearingId)).thenReturn(pleaHearings);
+        when(this.verdictHearingRepository.findByCaseId(hearingId)).thenReturn(verdicts);
 
-        JsonObject jsonObject = this.offenceService.getOffencesByHearingId(hearingId);
+        JsonObject jsonObject = this.offenceService.getOffencesByCaseId(hearingId);
 
         assertThat(jsonObject, is(
                 payloadIsJson(allOf(

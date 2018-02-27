@@ -214,10 +214,10 @@ protocols: [ HTTP, HTTPS ]
                         example: !include json/hearing.hearing-event-log.json
                         schema: !include json/schema/hearing.get-hearing-event-log.json
 
-/hearings/{hearingId}/offences:
+/cases/{caseId}/offences:
     uriParameters:
-        hearingId:
-            description: ID of hearing to fetch the offences for
+        caseId:
+            description: ID of case to fetch the offences for
             type: string
     get:
         description: |

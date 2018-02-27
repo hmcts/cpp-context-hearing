@@ -26,10 +26,10 @@ public class OffenceService {
     private VerdictHearingRepository verdictHearingRepository;
 
     @Transactional
-    public JsonObject getOffencesByHearingId(final UUID hearingId) {
+    public JsonObject getOffencesByCaseId(final UUID hearingId) {
 
-        List<PleaHearing> pleaHearings = pleaHearingRepository.findByHearingId(hearingId);
-        List<VerdictHearing> verdictHearings = verdictHearingRepository.findByHearingId(hearingId);
+        List<PleaHearing> pleaHearings = pleaHearingRepository.findByCaseId(hearingId);
+        List<VerdictHearing> verdictHearings = verdictHearingRepository.findByCaseId(hearingId);
         Map<UUID, VerdictHearing> verdictHearingMap = new HashMap<>();
         verdictHearings.forEach(v -> verdictHearingMap.put(v.getOffenceId(), v));
 
