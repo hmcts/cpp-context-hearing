@@ -207,7 +207,7 @@ public class HearingCommandHandlerTest {
 
     private static final String PLEA_ID = UUID.randomUUID().toString();
     private static final String VERDICT_ID = UUID.randomUUID().toString();
-    private static final String VERDICT_VALUE = "GUILTY";
+    private static final String VERDICT_CATEGORY = "GUILTY";
     private static final String PLEA_DATE = "2017-02-02";
     private static final String PLEA_GUILTY = "GUILTY";
     private static final String PLEA_NOT_GUILTY = "NOT GUILTY";
@@ -609,7 +609,6 @@ public class HearingCommandHandlerTest {
         ));
     }
 
-
     @Test
     public void shouldRaiseVerdictUpdated() throws Exception {
         // Given
@@ -635,7 +634,7 @@ public class HearingCommandHandlerTest {
                         payloadIsJson(allOf(
                                 withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
                                 withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "verdict", "value"), equalTo(VERDICT_VALUE)),
+                                withJsonPath(format("$.%s.%s.%s", "verdict", "value", "category"), equalTo(VERDICT_CATEGORY)),
                                 withJsonPath(format("$.%s.%s", "verdict", "verdictDate"), equalTo(VERDICT_DATE))
                         ))),
                 jsonEnvelope(

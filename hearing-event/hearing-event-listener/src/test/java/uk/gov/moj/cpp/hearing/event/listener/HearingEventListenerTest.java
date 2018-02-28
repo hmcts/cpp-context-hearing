@@ -49,6 +49,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -69,12 +70,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
 
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_NUMBER_OF_JURORS = "numberOfJurors";
+    private static final String FIELD_NUMBER_OF_SPLIT_JURORS = "numberOfSplitJurors";
+    private static final String FIELD_UNANIMOUS = "unanimous";
 
     private static final String FIELD_START_DATE_TIME = "startDateTime";
     private static final String FIELD_DURATION = "duration";
@@ -112,6 +115,11 @@ public class HearingEventListenerTest {
     private static final String FIELD_JUDGE_LAST_NAME = "lastName";
 
 
+    private static final String FIELD_VALUE_ID = "id";
+    private static final String FIELD_VALUE_CATEGORY = "category";
+    private static final String FIELD_VALUE_CODE = "code";
+    private static final String FIELD_VALUE_DESCRIPTION = "description";
+
     private static final UUID HEARING_ID = randomUUID();
 
     private static final UUID DEFENDANT_ID = randomUUID();
@@ -141,6 +149,9 @@ public class HearingEventListenerTest {
     private static final String HEARING_TYPE_2 = STRING.next();
 
     private static final LocalDate START_DATE_3 = PAST_LOCAL_DATE.next();
+    private static final int NUMBER_OF_JURORS = 10;
+    private static final int NUMBER_OF_SPLIT_JURORS = 2;
+    private static final boolean UNANIMOUS = false;
     private static final UUID CASE_ID = randomUUID();
     private static final UUID CASE_ID_2 = randomUUID();
     private static final UUID CASE_ID_3 = randomUUID();
@@ -182,7 +193,10 @@ public class HearingEventListenerTest {
     private static final String UPDATED_DRAFT_RESULT_4 = "{\"targetId\":\"" + TARGET_ID_4 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\""+ RESULT_LINE_ID_4 + "\",\"resultLineId\":\"" + RESULT_LINE_ID_4 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final UUID PLEA_ID = randomUUID();
     private static final UUID VERDICT_ID = randomUUID();
-    private static final String VERDICT_VALUE = "GUILTY";
+    private static final UUID VERDICT_VALUE_ID = randomUUID();
+    private static final String VERDICT_VALUE_CATEGORY = STRING.next();
+    private static final String VERDICT_VALUE_CODE = STRING.next();
+    private static final String VERDICT_VALUE_DESCRIPTION = STRING.next();
     private static final String FIELD_VERDICT_DATE = "verdictDate";
     private static final String PLEA_VALUE = "GUILTY";
     private static final String FIELD_VALUE = "value";
@@ -626,6 +640,7 @@ public class HearingEventListenerTest {
     @Test
     public void shouldPersistVerdictHearingForVerdictAdded() {
         final JsonEnvelope event = getHearingVerdictEnvelope();
+        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
         this.hearingEventListener.verdictAdded(event);
         verify(this.verdictHearingRepository).save(this.verdictHearingArgumentCaptor.capture());
         final VerdictHearing verdictHearing = this.verdictHearingArgumentCaptor.getValue();
@@ -635,13 +650,14 @@ public class HearingEventListenerTest {
         assertThat(verdictHearing.getOffenceId(), is(OFFENCE_ID));
         assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
         assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
-        assertThat(verdictHearing.getValue(), is(PLEA_VALUE));
+        assertThat(verdictHearing.getValue().getCategory(), is(VERDICT_VALUE_CATEGORY));
         assertThat(verdictHearing.getVerdictDate(), is(START_DATE));
     }
 
     @Test
     public void shouldPersistVerdictHearingForVerdictChanged() {
         final JsonEnvelope event = getHearingVerdictEnvelope();
+        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
         this.hearingEventListener.verdictChanged(event);
         verify(this.verdictHearingRepository).save(this.verdictHearingArgumentCaptor.capture());
         final VerdictHearing verdictHearing = this.verdictHearingArgumentCaptor.getValue();
@@ -651,8 +667,8 @@ public class HearingEventListenerTest {
         assertThat(verdictHearing.getOffenceId(), is(OFFENCE_ID));
         assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
         assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
-        assertThat(verdictHearing.getValue(), is(PLEA_VALUE));
         assertThat(verdictHearing.getVerdictDate(), is(START_DATE));
+        assertThat(verdictHearing.getValue().getCategory(), is(VERDICT_VALUE_CATEGORY));
     }
 
     private List<HearingOutcome> getHearingOutcomesForSharedResults() {
@@ -682,7 +698,7 @@ public class HearingEventListenerTest {
     }
 
     private Hearing getHearingWithOnlyRequiredFields(final UUID hearingId) {
-        return new Hearing(hearingId, START_DATE_2, START_TIME_2, DURATION_2, null, HEARING_TYPE_2, null);
+        return (new Hearing.Builder()).withHearingId(hearingId).withStartDate(START_DATE_2).withStartTime(START_TIME_2).withDuration(DURATION_2).withHearingType(HEARING_TYPE_2).build();
     }
 
     private List<HearingCase> getHearingCases() {
@@ -845,7 +861,21 @@ public class HearingEventListenerTest {
     }
 
     public JsonEnvelope getHearingVerdictEnvelope() {
-        final JsonObject verdictObject = createObjectBuilder().add(FIELD_GENERIC_ID, VERDICT_ID.toString()).add(FIELD_VALUE, VERDICT_VALUE).add(FIELD_VERDICT_DATE, START_DATE.toString()).build();
+        final JsonObject verdictValueObject = createObjectBuilder()
+                .add(FIELD_VALUE_ID, VERDICT_VALUE_ID.toString())
+                .add(FIELD_VALUE_CATEGORY, VERDICT_VALUE_CATEGORY)
+                .add(FIELD_VALUE_CODE, VERDICT_VALUE_CODE)
+                .add(FIELD_VALUE_DESCRIPTION, VERDICT_VALUE_DESCRIPTION)
+                .build();
+
+        final JsonObject verdictObject = createObjectBuilder().add(FIELD_GENERIC_ID, VERDICT_ID.toString())
+                .add(FIELD_VALUE, verdictValueObject)
+                .add(FIELD_VERDICT_DATE, START_DATE.toString())
+                .add(FIELD_NUMBER_OF_JURORS, NUMBER_OF_JURORS)
+                .add(FIELD_NUMBER_OF_SPLIT_JURORS, NUMBER_OF_SPLIT_JURORS)
+                .add(FIELD_UNANIMOUS, UNANIMOUS)
+                .build();
+
         final JsonObject hearingVerdict = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
                 .add(FIELD_PERSON_ID, PERSON_ID.toString())

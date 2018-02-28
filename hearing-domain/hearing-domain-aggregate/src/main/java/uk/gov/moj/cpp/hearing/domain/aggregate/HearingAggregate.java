@@ -47,6 +47,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
+
 @SuppressWarnings("squid:S1068")
 public class HearingAggregate implements Aggregate {
 
@@ -75,7 +76,7 @@ public class HearingAggregate implements Aggregate {
         }
 
         if (!isNullOrEmpty(hd.getJudgeId())) {
-            streamBuilder.add(new JudgeAssigned(hd.getHearingId(), hd.getJudgeId(), hd.getJudgeTitle(), hd.getJudgeFirstName(),hd.getJudgeLastName()));
+            streamBuilder.add(new JudgeAssigned(hd.getHearingId(), hd.getJudgeId(), hd.getJudgeTitle(), hd.getJudgeFirstName(), hd.getJudgeLastName()));
         }
 
         return apply(streamBuilder.build());
@@ -145,7 +146,7 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> updateVerdict(final HearingUpdateVerdictCommand hearingUpdateVerdictCommand) {
         if (checkOffenceVerdictHavingOneToOneMapping(hearingUpdateVerdictCommand)) {
-            return apply(Stream.of(new HearingUpdateVerdictIgnored(hearingUpdateVerdictCommand.getHearingId(),"Offence Verdict association is inconsistent", hearingUpdateVerdictCommand)));
+            return apply(Stream.of(new HearingUpdateVerdictIgnored(hearingUpdateVerdictCommand.getHearingId(), "Offence Verdict association is inconsistent", hearingUpdateVerdictCommand)));
         } else {
             final Builder<Object> streamBuilder = builder();
             final UUID hearingUpdateVerdictCommandCaseId = hearingUpdateVerdictCommand.getCaseId();
@@ -174,11 +175,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     private void updateConvictionDate(final Builder<Object> streamBuilder, final UUID hearingUpdateVerdictCommandCaseId, final UUID hearingId, final Defendant defendant, final Offence offence) {
-        if(offence.getVerdict().getValue().equalsIgnoreCase(PLEA_GUILTY)){
+        if (offence.getVerdict().getValue().getCategory().equalsIgnoreCase(PLEA_GUILTY)) {
             // set conviction date to hearing date when verdict = Found guilty
             final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(hearingUpdateVerdictCommandCaseId, hearingId, defendant.getId(), defendant.getPersonId(), offence.getId(), hearingDate);
             streamBuilder.add(convictionDateAdded);
-        }else{
+        } else {
             //set conviction date to null when verdict = Found Not Guilty
             final ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(hearingUpdateVerdictCommandCaseId, hearingId, defendant.getId(), defendant.getPersonId(), offence.getId());
             streamBuilder.add(convictionDateRemoved);

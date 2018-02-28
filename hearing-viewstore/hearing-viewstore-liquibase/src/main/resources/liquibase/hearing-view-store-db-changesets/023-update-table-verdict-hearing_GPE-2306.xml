@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="23" author="CCR" logicalFilePath="023-update-table-verdict-hearing_GPE-2306.xml">
+
+        <dropColumn tableName="verdict_hearing" columnName="value"/>
+
+        <addColumn tableName="verdict_hearing">
+            <column name="verdict_date" type="date"/>
+            <column name="number_of_jurors" type="INT"/>
+            <column name="number_of_split_jurors" type="INT"/>
+            <column name="unanimous" type="boolean"/>
+            <column name="value_id" type="uuid"/>
+            <column name="value_code" type="text"/>
+            <column name="value_description" type="text"/>
+            <column name="value_category" type="text"/>
+        </addColumn>
+
+    </changeSet>
+</databaseChangeLog>

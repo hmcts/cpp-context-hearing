@@ -9,8 +9,16 @@
           "id": "RANDOM_OFFENCE_ID",
           "verdict": {
             "id": "RANDOM_VERDICT_ID",
-            "value": "VERDICT_VALUE",
-            "verdictDate": "VERDICT_DATE"
+            "value": {
+              "id": "0baecac5-222b-402d-9047-84803679edab",
+              "category": "VERDICT_CATEGORY",
+              "code": "A1",
+              "description": "Guilty By Jury On Judges Direction"
+            },
+            "verdictDate": "VERDICT_DATE",
+            "numberOfJurors": 10,
+            "numberOfSplitJurors": 54321,
+            "unanimous": false
           }
         }
       ]

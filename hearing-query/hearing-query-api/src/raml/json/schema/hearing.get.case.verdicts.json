@@ -24,7 +24,8 @@
           "$ref": "#/definitions/uuid"
         },
         "value": {
-          "type": "string"
+          "type": "object",
+          "$ref": "#/definitions/value"
         },
         "verdictDate": {
           "type": "string"
@@ -40,6 +41,15 @@
         },
         "offenceId": {
           "$ref": "#/definitions/uuid"
+        },
+        "numberOfJurors": {
+          "type": "integer"
+        },
+        "numberOfSplitJurors": {
+          "type": "integer"
+        },
+        "unanimous": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -50,13 +60,32 @@
         "caseId",
         "defendantId",
         "personId",
-        "offenceId"
+        "offenceId",
+        "numberOfJurors",
+        "numberOfSplitJurors",
+        "unanimous"
       ],
       "additionalProperties": false
     },
     "uuid": {
       "type": "string",
       "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "value": {
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuidPattern"
+        },
+        "category": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
     }
   }
 }

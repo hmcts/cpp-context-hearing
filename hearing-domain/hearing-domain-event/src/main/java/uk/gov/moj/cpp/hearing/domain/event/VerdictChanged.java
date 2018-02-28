@@ -1,11 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.verdict-changed")
 public class VerdictChanged {
@@ -60,4 +61,5 @@ public class VerdictChanged {
     public UUID getHearingId() {
         return hearingId;
     }
+
 }

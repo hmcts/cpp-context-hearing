@@ -56,6 +56,7 @@ public class HearingQueryViewTest {
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_START_DATE = "startDate";
     private static final String FIELD_CASE_ID = "caseId";
+    private static final String FIELD_NUMBEROFJURORS = "numberOfJurors";
 
     private static final UUID HEARING_ID = randomUUID();
     private static final LocalDate START_DATE = PAST_LOCAL_DATE.next();
@@ -282,7 +283,9 @@ public class HearingQueryViewTest {
         final JsonObject jsonObject = createObjectBuilder()
                 .add(FIELD_HEARING_ID,
                         hearingId.toString())
-                .add(FIELD_START_DATE, now).build();
+                .add(FIELD_START_DATE, now)
+                .build();
+
         when(query.payloadAsJsonObject()).thenReturn(jsonObject);
 
         when(hearingService.getHearingById(hearingId)).thenReturn(hearingView);
@@ -297,13 +300,22 @@ public class HearingQueryViewTest {
 
     private List<Hearing> hearings() {
         return newArrayList(
-                new Hearing.Builder().withHearingId(HEARING_ID).withStartDate(START_DATE).withStartTime(START_TIME).withDuration(DURATION).withRoomId(ROOM_ID).withRoomName(ROOM_NAME).withHearingType(HEARING_TYPE).withCourtCentreId(COURT_CENTRE_ID).withCourtCentreName(COURT_CENTRE_NAME).build(),
+                new Hearing.Builder().withHearingId(HEARING_ID).withStartDate(START_DATE)
+                        .withStartTime(START_TIME)
+                        .withDuration(DURATION)
+                        .withRoomId(ROOM_ID)
+                        .withRoomName(ROOM_NAME)
+                        .withHearingType(HEARING_TYPE)
+                        .withCourtCentreId(COURT_CENTRE_ID)
+                        .withCourtCentreName(COURT_CENTRE_NAME)
+                        .build(),
                 new Hearing.Builder().withHearingId(HEARING_ID_2).withStartDate(START_DATE)
                         .withStartTime(START_TIME_2).withDuration(DURATION_2)
                         .withRoomId(ROOM_ID_2).withRoomName(ROOM_NAME_2)
                         .withHearingType(HEARING_TYPE)
                         .withCourtCentreId(COURT_CENTRE_ID)
-                        .withCourtCentreName(COURT_CENTRE_NAME).build()
+                        .withCourtCentreName(COURT_CENTRE_NAME)
+                        .build()
         );
     }
 

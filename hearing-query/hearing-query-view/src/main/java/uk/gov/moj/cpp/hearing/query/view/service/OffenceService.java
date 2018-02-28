@@ -4,12 +4,14 @@ import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictValue;
 
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.persistence.Column;
 import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +44,7 @@ public class OffenceService {
             JsonObjectBuilder verdicts = Json.createObjectBuilder();
             if (v != null) {
                 verdicts.add("verdictId", v.getVerdictId().toString())
-                        .add("value", v.getValue().toString())
+                        .add("value", this.toJsonObjectBuilder(v.getValue()))
                         .add("verdictDate", v.getVerdictDate() == null ? "" : v.getVerdictDate().toString());
             }
 
@@ -60,6 +62,16 @@ public class OffenceService {
         offences.forEach(o -> builder.add(o));
         return Json.createObjectBuilder().add("offences", builder.build()).build();
     }
+    
+    private JsonObjectBuilder toJsonObjectBuilder(VerdictValue verdictValue) {
+        JsonObjectBuilder result = Json.createObjectBuilder();
+        result.add("id", verdictValue.getId().toString())
+        .add("category", verdictValue.getCategory())
+        .add("description",verdictValue.getDescription())
+        .add("code", verdictValue.getCode());
+        return result;
+    }
+    
 
 
 }

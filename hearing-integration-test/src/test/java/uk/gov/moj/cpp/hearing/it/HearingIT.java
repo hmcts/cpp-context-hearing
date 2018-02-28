@@ -509,17 +509,6 @@ public class HearingIT extends AbstractIT {
         return jsonPleas;
     }
 
-    private JSONObject getExistingHearing(final String hearingId) {
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(status().is(OK)).getPayload();
-        return new JSONObject(payload);
-    }
 
     @Test
     public void hearingAddHearingsTest() throws Exception {

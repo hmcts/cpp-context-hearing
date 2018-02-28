@@ -9,16 +9,32 @@
           "id": "RANDOM_OFFENCE_ID_1",
           "verdict": {
             "id": "RANDOM_VERDICT_ID_1",
-            "value": "VERDICT_VALUE_1",
-            "verdictDate": "VERDICT_DATE_1"
+            "value": {
+              "id": "0baecac5-222b-402d-9047-84803679edab",
+              "category": "VERDICT_CATEGORY_1",
+              "code": "A1",
+              "description": "Guilty By Jury On Judges Direction"
+            },
+            "verdictDate": "VERDICT_DATE_1",
+            "numberOfJurors": 10,
+            "numberOfSplitJurors": 54321,
+            "unanimous": false
           }
         },
         {
           "id": "RANDOM_OFFENCE_ID_2",
           "verdict": {
             "id": "RANDOM_VERDICT_ID_2",
-            "value": "VERDICT_VALUE_2",
-            "verdictDate": "VERDICT_DATE_2"
+            "value": {
+              "id": "0baecac5-222b-402d-9047-84803679edab",
+              "category": "VERDICT_CATEGORY_2",
+              "code": "A1",
+              "description": "Guilty By Jury On Judges Direction"
+            },
+            "verdictDate": "VERDICT_DATE_2",
+            "numberOfJurors": 10,
+            "numberOfSplitJurors": 54321,
+            "unanimous": false
           }
         }
       ]

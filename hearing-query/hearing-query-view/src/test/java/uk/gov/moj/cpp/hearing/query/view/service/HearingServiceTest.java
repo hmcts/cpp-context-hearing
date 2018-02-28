@@ -51,7 +51,7 @@ public class HearingServiceTest {
 
         final HearingCase arbitraryCase1 = new HearingCase(randomUUID(), hearing.get().getHearingId(), randomUUID());
         final HearingCase arbitraryCase2 = new HearingCase(randomUUID(), hearing.get().getHearingId(), randomUUID());
-        final HearingJudge hearingJudge = new HearingJudge(hearing.get().getHearingId(), STRING.next(),STRING.next(),STRING.next(),STRING.next());
+        final HearingJudge hearingJudge = new HearingJudge(hearing.get().getHearingId(), STRING.next(), STRING.next(), STRING.next(), STRING.next());
 
         final List<HearingCase> cases = new ArrayList<>();
         cases.add(arbitraryCase1);

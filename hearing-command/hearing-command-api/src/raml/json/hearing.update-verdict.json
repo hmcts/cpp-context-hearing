@@ -9,8 +9,16 @@
           "id": "6da4527f-474a-47a8-82c5-21ea607aa9c3",
           "verdict": {
             "id": "0baecac5-222b-402d-9047-84803679edae",
-            "value": "GUILTY",
-            "verdictDate": "2017-02-20"
+            "value": {
+              "id": "0baecac5-222b-402d-9047-84803679edab",
+              "category": "GUILTY",
+              "code": "A1",
+              "description": "Guilty By Jury On Judges Direction"
+            },
+	    "verdictDate": "2017-02-20",
+            "numberOfJurors": 10,
+            "numberOfSplitJurors": 2,
+            "unanimous": false
           }
         }
       ]

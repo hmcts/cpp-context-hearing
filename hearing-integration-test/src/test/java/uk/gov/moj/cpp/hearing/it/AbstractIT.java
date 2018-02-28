@@ -4,15 +4,22 @@ import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
+import org.json.JSONObject;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -51,6 +58,19 @@ public class AbstractIT {
         setupAsAuthorisedUser(USER_ID_VALUE);
         stubEnableAllCapabilities();
     }
+
+    protected JSONObject getExistingHearing(final String hearingId) {
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK)).getPayload();
+        return new JSONObject(payload);
+    }
+
 
     protected static void setLoggedInUser(final UUID userId) {
         USER_CONTEXT.set(userId);

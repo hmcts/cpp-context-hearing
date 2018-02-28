@@ -2,7 +2,13 @@ package uk.gov.moj.cpp.hearing.it;
 
 import com.jayway.jsonassert.impl.matcher.IsCollectionWithSize;
 import com.jayway.restassured.response.Response;
+
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
+
 import org.apache.http.HttpStatus;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,6 +31,18 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 
 public class OffencesIT extends AbstractIT {
+    
+    private Matcher<ResponseData> print = new BaseMatcher<ResponseData>() {
+        @Override
+        public boolean matches(Object o) {
+            System.out.println("matching " + ((ResponseData)o).getPayload());
+            return true;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+        }
+    };
 
 
     @Before
@@ -46,7 +64,7 @@ public class OffencesIT extends AbstractIT {
         final String personId = "d3a0d0f9-78b0-47c6-a362-5febf0485d0f";
         final String verdictId = randomUUID().toString();
         final String verdictDate = LocalDate.now().toString();
-        final String verdictValue = "GUILTY";
+        final String verdictCategory = "GUILTY";
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
@@ -68,7 +86,7 @@ public class OffencesIT extends AbstractIT {
 
         final String verditsJson = getStringFromResource("hearing.update-verdict.json").replace("RANDOM_CASE_ID", caseId)
                 .replace("RANDOM_VERDICT_ID", verdictId)
-                .replace("VERDICT_VALUE", verdictValue)
+                .replace("VERDICT_CATEGORY", verdictCategory)
                 .replace("VERDICT_DATE", verdictDate)
                 .replace("RANDOM_OFFENCE_ID", offenceId)
                 .replace("RANDOM_DEFENDANT_ID", defendantId)
@@ -89,6 +107,7 @@ public class OffencesIT extends AbstractIT {
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
+                        print,
                         payload().isJson(allOf(
                                 withJsonPath("$.offences", IsCollectionWithSize.hasSize(1)),
                                 withJsonPath("$.offences[0].caseId", equalTo(caseId)),
@@ -99,7 +118,7 @@ public class OffencesIT extends AbstractIT {
                                 withJsonPath("$.offences[0].plea.value", equalTo("NOT GUILTY")),
                                 withJsonPath("$.offences[0].plea.pleaDate", equalTo(originalPleaDateString)),
                                 withJsonPath("$.offences[0].verdict.verdictId", equalTo(verdictId)),
-                                withJsonPath("$.offences[0].verdict.value", equalTo("GUILTY")),
+                                withJsonPath("$.offences[0].verdict.value.category", equalTo("GUILTY")),
                                 withJsonPath("$.offences[0].verdict.verdictDate", equalTo(verdictDate))
 
                         )));

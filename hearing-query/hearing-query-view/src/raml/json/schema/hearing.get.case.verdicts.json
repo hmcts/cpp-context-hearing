@@ -24,7 +24,8 @@
           "$ref": "#/definitions/uuid"
         },
         "value": {
-          "type": "string"
+          "type": "object",
+          "$ref": "#/definitions/value"
         },
         "verdictDate": {
           "type": "string"
@@ -57,6 +58,22 @@
     "uuid": {
       "type": "string",
       "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "value": {
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuidPattern"
+        },
+        "category": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
     }
   }
 }

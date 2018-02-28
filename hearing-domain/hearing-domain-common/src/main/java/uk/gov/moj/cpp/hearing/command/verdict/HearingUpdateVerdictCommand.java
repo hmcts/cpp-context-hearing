@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Created by jchondig on 26/01/2018.
- */
 public class HearingUpdateVerdictCommand implements Serializable {
 
     private final UUID hearingId;
@@ -19,12 +16,11 @@ public class HearingUpdateVerdictCommand implements Serializable {
 
     @JsonCreator
     public HearingUpdateVerdictCommand(@JsonProperty("hearingId") final UUID hearingId,
-                                    @JsonProperty("caseId") final UUID caseId,
-                                    @JsonProperty("defendants") final List<Defendant> defendants) {
+                                       @JsonProperty("caseId") final UUID caseId,
+                                       @JsonProperty("defendants") final List<Defendant> defendants) {
         this.caseId = caseId;
         this.hearingId = hearingId;
         this.defendants = (null == defendants) ? new ArrayList<>() : new ArrayList<>(defendants);
-
     }
 
     public UUID getHearingId() {

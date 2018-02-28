@@ -37,6 +37,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictValue;
 
 import java.io.StringReader;
 import java.time.LocalDate;
@@ -56,7 +58,6 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
@@ -268,14 +269,23 @@ public class HearingEventListener {
         LOGGER.info("{}", event.payloadAsJsonObject());
         VerdictAdded verdictAdded =
                 this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), VerdictAdded.class);
-        final VerdictHearing verdictHearing = new VerdictHearing(verdictAdded.getVerdict().getId(),
-                verdictAdded.getHearingId(),
-                verdictAdded.getCaseId(),
-                verdictAdded.getPersonId(),
-                verdictAdded.getDefendantId(),
-                verdictAdded.getOffenceId(),
-                verdictAdded.getVerdict().getValue(),
-                verdictAdded.getVerdict().getVerdictDate());
+        final VerdictValue verdictValue = new VerdictValue.Builder()
+                .withId(verdictAdded.getVerdict().getValue().getId())
+                .withCategory(verdictAdded.getVerdict().getValue().getCategory())
+                .withCode(verdictAdded.getVerdict().getValue().getCode())
+                .withDescription(verdictAdded.getVerdict().getValue().getDescription()).build();
+        final VerdictHearing verdictHearing = new VerdictHearing.Builder()
+                .withVerdictId(verdictAdded.getVerdict().getId())
+                .withHearingId(verdictAdded.getHearingId())
+                .withCaseId(verdictAdded.getCaseId())
+                .withPersonId(verdictAdded.getPersonId())
+                .withDefendantId(verdictAdded.getDefendantId())
+                .withOffenceId(verdictAdded.getOffenceId())
+                .withValue(verdictValue)
+                .withVerdictDate(verdictAdded.getVerdict().getVerdictDate())
+                .withNumberOfSplitJurors(verdictAdded.getVerdict().getNumberOfSplitJurors())
+                .withNumberOfJurors(verdictAdded.getVerdict().getNumberOfJurors())
+                .withUnanimous(verdictAdded.getVerdict().getUnanimous()).build();
         this.verdictHearingRepository.save(verdictHearing);
     }
 
@@ -284,14 +294,23 @@ public class HearingEventListener {
         LOGGER.info("{}", event.payloadAsJsonObject());
         VerdictChanged verdictChanged =
                 this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), VerdictChanged.class);
-        final VerdictHearing verdictHearing = new VerdictHearing(verdictChanged.getVerdict().getId(),
-                verdictChanged.getHearingId(),
-                verdictChanged.getCaseId(),
-                verdictChanged.getPersonId(),
-                verdictChanged.getDefendantId(),
-                verdictChanged.getOffenceId(),
-                verdictChanged.getVerdict().getValue(),
-                verdictChanged.getVerdict().getVerdictDate());
+        final VerdictValue verdictValue = new VerdictValue.Builder()
+                .withId(verdictChanged.getVerdict().getValue().getId())
+                .withCategory(verdictChanged.getVerdict().getValue().getCategory())
+                .withCode(verdictChanged.getVerdict().getValue().getCode())
+                .withDescription(verdictChanged.getVerdict().getValue().getDescription()).build();
+        final VerdictHearing verdictHearing = new VerdictHearing.Builder()
+                .withVerdictId(verdictChanged.getVerdict().getId())
+                .withHearingId(verdictChanged.getHearingId())
+                .withCaseId(verdictChanged.getCaseId())
+                .withPersonId(verdictChanged.getPersonId())
+                .withDefendantId(verdictChanged.getDefendantId())
+                .withOffenceId(verdictChanged.getOffenceId())
+                .withValue(verdictValue)
+                .withVerdictDate(verdictChanged.getVerdict().getVerdictDate())
+                .withNumberOfSplitJurors(verdictChanged.getVerdict().getNumberOfSplitJurors())
+                .withNumberOfJurors(verdictChanged.getVerdict().getNumberOfJurors())
+                .withUnanimous(verdictChanged.getVerdict().getUnanimous()).build();
         this.verdictHearingRepository.save(verdictHearing);
     }
 
