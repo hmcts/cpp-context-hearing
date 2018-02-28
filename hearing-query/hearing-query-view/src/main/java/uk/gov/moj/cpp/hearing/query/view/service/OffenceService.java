@@ -36,14 +36,14 @@ public class OffenceService {
         List<JsonObject> offences = pleaHearings.stream().map(p -> {
             JsonObject plea = Json.createObjectBuilder()
                     .add("pleaId", p.getPleaId().toString())
-                    .add("pleaDate", p.getPleaDate().toString())
+                    .add("pleaDate", p.getPleaDate() == null ? "" : p.getPleaDate().toString())
                     .add("value", p.getValue().toString()).build();
             VerdictHearing v = verdictHearingMap.get(p.getOffenceId());
             JsonObjectBuilder verdicts = Json.createObjectBuilder();
             if (v != null) {
                 verdicts.add("verdictId", v.getVerdictId().toString())
                         .add("value", v.getValue().toString())
-                        .add("verdictDate", v.getVerdictDate().toString());
+                        .add("verdictDate", v.getVerdictDate() == null ? "" : v.getVerdictDate().toString());
             }
 
             JsonObject offence = Json.createObjectBuilder()
