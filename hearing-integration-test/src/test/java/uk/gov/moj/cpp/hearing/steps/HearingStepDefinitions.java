@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.steps;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.text.MessageFormat.format;
@@ -14,7 +15,9 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.CombinableMatcher.both;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -29,6 +32,7 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockProgressionCaseDetails;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
+import com.jayway.jsonpath.matchers.JsonPathMatchers;
 import uk.gov.justice.services.test.utils.core.messaging.MessageProducerClient;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
@@ -238,13 +242,18 @@ public class HearingStepDefinitions extends AbstractIT {
     }
 
     public static void thenHearingVerdictUpdatedPublicEventShouldBePublished(final String hearingId) {
-        final JsonPath message = retrieveMessage(CONSUMER_FOR_PUBLIC_EVENT_HEARING_VERDICT_UPDATED);
+        JsonPath message = retrieveMessage(CONSUMER_FOR_PUBLIC_EVENT_HEARING_VERDICT_UPDATED);
 
-        assertThat(message.prettify(), new IsJson(allOf(
+        Matcher matcher = isJson(allOf(
                 withJsonPath("$._metadata.name", equalTo(PUBLIC_EVENT_HEARING_VERDICT_UPDATED)),
-
                 withJsonPath("$.hearingId", equalTo(hearingId))
-        )));
+        ));
+
+        while (message != null && !matcher.matches(message.prettify())) {
+            message = retrieveMessage(CONSUMER_FOR_PUBLIC_EVENT_HEARING_VERDICT_UPDATED);
+        }
+
+        assertThat(message, is(not(nullValue())));
     }
 
     public static void thenHearingUpdateVerdictIgnoredPublicEventShouldBePublished(final String hearingId) {
