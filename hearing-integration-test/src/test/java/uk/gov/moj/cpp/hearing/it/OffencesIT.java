@@ -31,24 +31,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 
 public class OffencesIT extends AbstractIT {
-    
-    private Matcher<ResponseData> print = new BaseMatcher<ResponseData>() {
-        @Override
-        public boolean matches(Object o) {
-            System.out.println("matching " + ((ResponseData)o).getPayload());
-            return true;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-        }
-    };
-
-
-    @Before
-    public void setup() {
-
-    }
 
     @Test
     public void hearingGetOffenceViewTest() throws IOException {
@@ -107,7 +89,6 @@ public class OffencesIT extends AbstractIT {
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(
                         status().is(OK),
-                        print,
                         payload().isJson(allOf(
                                 withJsonPath("$.offences", IsCollectionWithSize.hasSize(1)),
                                 withJsonPath("$.offences[0].caseId", equalTo(caseId)),

@@ -14,7 +14,11 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.json.JSONObject;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
 import java.io.IOException;
@@ -88,7 +92,7 @@ public class AbstractIT {
 
     private static void readConfig() {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try(final InputStream stream = loader.getResourceAsStream(ENDPOINT_PROPERTIES_FILE)) {
+        try (final InputStream stream = loader.getResourceAsStream(ENDPOINT_PROPERTIES_FILE)) {
             ENDPOINT_PROPERTIES.load(stream);
         } catch (final IOException e) {
             LOGGER.warn("Error reading properties from {}", ENDPOINT_PROPERTIES_FILE, e);
@@ -100,8 +104,27 @@ public class AbstractIT {
     private static void setRequestSpecification() {
         requestSpec = new RequestSpecBuilder().setBaseUri(baseUri).build();
     }
+
     protected String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path),
                 defaultCharset());
+    }
+
+    public Matcher<ResponseData> print() {
+        return new BaseMatcher<ResponseData>() {
+            @Override
+            public boolean matches(Object o) {
+                if (o instanceof ResponseData) {
+                    ResponseData responseData = (ResponseData) o;
+                    System.out.println(responseData.getPayload());
+                }
+                return true;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+            }
+        };
+
     }
 }
