@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonObject;
 
@@ -100,6 +101,7 @@ public class VerdictIT extends AbstractIT {
         final String mediaType = "application/vnd.hearing.get.case.verdicts+json";
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -170,6 +172,7 @@ public class VerdictIT extends AbstractIT {
         final String mediaType = "application/vnd.hearing.get.case.verdicts+json";
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -203,6 +206,7 @@ public class VerdictIT extends AbstractIT {
 
         //query for updated values
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(

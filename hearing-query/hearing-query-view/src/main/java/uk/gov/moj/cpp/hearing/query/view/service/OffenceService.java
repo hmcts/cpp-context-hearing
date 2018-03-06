@@ -62,16 +62,17 @@ public class OffenceService {
         offences.forEach(o -> builder.add(o));
         return Json.createObjectBuilder().add("offences", builder.build()).build();
     }
-    
+
     private JsonObjectBuilder toJsonObjectBuilder(VerdictValue verdictValue) {
         JsonObjectBuilder result = Json.createObjectBuilder();
-        result.add("id", verdictValue.getId().toString())
-        .add("category", verdictValue.getCategory())
-        .add("description",verdictValue.getDescription())
-        .add("code", verdictValue.getCode());
+        result.add("id", verdictValue.getId().toString());
+        result.add("category", verdictValue.getCategory());
+        if (verdictValue.getDescription() != null) {
+            result.add("description", verdictValue.getDescription());
+        }
+        result.add("code", verdictValue.getCode());
         return result;
     }
-    
 
 
 }
