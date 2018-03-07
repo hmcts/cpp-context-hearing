@@ -67,10 +67,14 @@ public class OffenceService {
         JsonObjectBuilder result = Json.createObjectBuilder();
         result.add("id", verdictValue.getId().toString());
         result.add("category", verdictValue.getCategory());
+
+        //these null checks will be resolved properly in an uncoming bug fix.
         if (verdictValue.getDescription() != null) {
             result.add("description", verdictValue.getDescription());
         }
-        result.add("code", verdictValue.getCode());
+        if (verdictValue.getCode() != null) {
+            result.add("code", verdictValue.getCode());
+        }
         return result;
     }
 
