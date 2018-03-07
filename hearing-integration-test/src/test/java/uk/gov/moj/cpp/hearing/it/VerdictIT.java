@@ -39,11 +39,14 @@ import org.junit.Test;
 import com.jayway.jsonassert.impl.matcher.IsCollectionWithSize;
 import com.jayway.restassured.response.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 
 public class VerdictIT extends AbstractIT {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(VerdictIT.class);
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
@@ -87,6 +90,7 @@ public class VerdictIT extends AbstractIT {
                 .replace("54321", numberOfSplitJurors.toString())
                 .replace("false", unanimous.toString())
                 .replace("RANDOM_PERSON_ID", personId);
+        LOGGER.info("UPDATE VERDICTS " + body);
 
         final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.update-verdict+json")
@@ -157,7 +161,7 @@ public class VerdictIT extends AbstractIT {
                 .replace("54321", numberOfSplitJurors.toString())
                 .replace("false", unanimous.toString())
                 .replace("10", numberOfJurors.toString());
-
+        LOGGER.info("UPDATE VERDICTS " + body);
 
         Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.update-verdict+json")
@@ -258,6 +262,7 @@ public class VerdictIT extends AbstractIT {
                 .replace("RANDOM_OFFENCE_ID", offenceId_1)
                 .replace("RANDOM_DEFENDANT_ID", defendantId)
                 .replace("RANDOM_PERSON_ID", personId);
+        LOGGER.info("UPDATE VERDICTS " + body);
 
         Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.update-verdict+json")
