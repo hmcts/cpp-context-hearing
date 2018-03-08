@@ -163,17 +163,23 @@ public class VerdictIT extends AbstractIT {
                 .replace("10", numberOfJurors.toString());
         LOGGER.info("UPDATE VERDICTS " + body);
 
+        LOGGER.info("Offence ID 1 (1) " + offenceId_1);
+
         Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.update-verdict+json")
                 .body(body).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
+        LOGGER.info("Offence ID 1 (2)" + offenceId_1);
+
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.verdicts.by.case.id"), caseId);
 
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.get.case.verdicts+json";
+
+        LOGGER.info("Offence ID 1 (3)" + offenceId_1);
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
