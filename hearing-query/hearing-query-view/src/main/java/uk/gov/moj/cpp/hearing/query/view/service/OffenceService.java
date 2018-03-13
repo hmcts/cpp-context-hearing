@@ -44,10 +44,16 @@ public class OffenceService {
             if (v != null) {
                 verdicts.add("verdictId", v.getVerdictId().toString())
                         .add("value", this.toJsonObjectBuilder(v.getValue()))
-                        .add("verdictDate", v.getVerdictDate() == null ? "" : v.getVerdictDate().toString())
-                        .add("numberOfSplitJurors", v.getNumberOfSplitJurors())
-                        .add("numberOfJurors", v.getNumberOfJurors())
-                        .add("unanimous", v.getUnanimous());
+                        .add("verdictDate", v.getVerdictDate() == null ? "" : v.getVerdictDate().toString());
+
+                if (v.getNumberOfSplitJurors() != null)
+                        verdicts.add("numberOfSplitJurors", v.getNumberOfSplitJurors());
+
+                if (v.getNumberOfJurors() != null)
+                        verdicts.add("numberOfJurors", v.getNumberOfJurors());
+
+                if (v.getUnanimous() != null)
+                        verdicts.add("unanimous", v.getUnanimous());
             }
 
             JsonObject offence = Json.createObjectBuilder()
