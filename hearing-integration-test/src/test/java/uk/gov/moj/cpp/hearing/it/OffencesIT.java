@@ -95,15 +95,21 @@ public class OffencesIT extends AbstractIT {
                                 withJsonPath("$.offences[0].defendantId", equalTo(defendantId)),
                                 withJsonPath("$.offences[0].offenceId", equalTo(offenceId)),
                                 withJsonPath("$.offences[0].personId", equalTo(personId)),
+
                                 withJsonPath("$.offences[0].plea.pleaId", equalTo(pleaId)),
                                 withJsonPath("$.offences[0].plea.value", equalTo("NOT GUILTY")),
                                 withJsonPath("$.offences[0].plea.pleaDate", equalTo(originalPleaDateString)),
+
                                 withJsonPath("$.offences[0].verdict.verdictId", equalTo(verdictId)),
+                                withJsonPath("$.offences[0].verdict.value.id", equalTo("0baecac5-222b-402d-9047-84803679edab")),
                                 withJsonPath("$.offences[0].verdict.value.category", equalTo("GUILTY")),
-                                withJsonPath("$.offences[0].verdict.verdictDate", equalTo(verdictDate))
+                                withJsonPath("$.offences[0].verdict.value.description", equalTo("Guilty By Jury On Judges Direction")),
+                                withJsonPath("$.offences[0].verdict.value.code", equalTo("A1")),
 
+                                withJsonPath("$.offences[0].verdict.verdictDate", equalTo(verdictDate)),
+                                withJsonPath("$.offences[0].verdict.numberOfSplitJurors", equalTo(54321)),
+                                withJsonPath("$.offences[0].verdict.numberOfJurors", equalTo(10)),
+                                withJsonPath("$.offences[0].verdict.unanimous", equalTo(false))
                         )));
-
     }
-
 }

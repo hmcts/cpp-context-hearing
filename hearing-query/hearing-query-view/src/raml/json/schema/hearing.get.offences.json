@@ -54,8 +54,25 @@
             },
             "verdictDate": {
               "type": "string"
+            },
+            "numberOfSplitJurors": {
+              "type": "number"
+            },
+            "numberOfJurors": {
+              "type": "number"
+            },
+            "unanimous": {
+              "type": "boolean"
             }
-          }
+          },
+          "required": [
+            "verdictId",
+            "value",
+            "verdictDate",
+            "numberOfSplitJurors",
+            "numberOfJurors",
+            "unanimous"
+          ]
         }
       },
       "required": [

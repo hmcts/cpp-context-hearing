@@ -11,7 +11,6 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.persistence.Column;
 import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +44,10 @@ public class OffenceService {
             if (v != null) {
                 verdicts.add("verdictId", v.getVerdictId().toString())
                         .add("value", this.toJsonObjectBuilder(v.getValue()))
-                        .add("verdictDate", v.getVerdictDate() == null ? "" : v.getVerdictDate().toString());
+                        .add("verdictDate", v.getVerdictDate() == null ? "" : v.getVerdictDate().toString())
+                        .add("numberOfSplitJurors", v.getNumberOfSplitJurors())
+                        .add("numberOfJurors", v.getNumberOfJurors())
+                        .add("unanimous", v.getUnanimous());
             }
 
             JsonObject offence = Json.createObjectBuilder()

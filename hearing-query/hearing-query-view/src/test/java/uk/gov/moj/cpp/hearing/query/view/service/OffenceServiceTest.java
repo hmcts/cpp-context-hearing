@@ -89,6 +89,7 @@ public class OffenceServiceTest {
                 .withCategory(verdictValueCategory)
                 .withCode(verdictValueCode)
                 .withDescription(verdictValueDescription).build();
+
         final VerdictHearing verdict2 = new VerdictHearing.Builder()
                 .withVerdictId(randomUUID())
                 .withHearingId(hearingId)
@@ -125,15 +126,30 @@ public class OffenceServiceTest {
                         withJsonPath("$.offences[0].offenceId", equalTo(offenceIdOne.toString())),
                         withJsonPath("$.offences[0].personId", equalTo(personId.toString())),
                         withJsonPath("$.offences[0].plea.value", equalTo("NOT GUILTY")),
-                        //withJsonPath("$.offences[0].verdict.value", equalTo("GUILTY")), //FIXME
+                        withJsonPath("$.offences[0].verdict.value.id", equalTo(verdictValue1.getId().toString())),
+                        withJsonPath("$.offences[0].verdict.value.code", equalTo(verdictValue1.getCode())),
+                        withJsonPath("$.offences[0].verdict.value.category", equalTo(verdictValue1.getCategory())),
+                        withJsonPath("$.offences[0].verdict.value.description", equalTo(verdictValue1.getDescription())),
+
+                        withJsonPath("$.offences[0].verdict.numberOfJurors", equalTo(numberOfJurors)),
+                        withJsonPath("$.offences[0].verdict.numberOfSplitJurors", equalTo(numberOfSplitJurors)),
+                        withJsonPath("$.offences[0].verdict.unanimous", equalTo(unanimous)),
+
                         withJsonPath("$.offences[0].verdict.verdictDate", equalTo(verdictDate.toString())),
                         withJsonPath("$.offences[1].caseId", equalTo(caseId.toString())),
                         withJsonPath("$.offences[1].defendantId", equalTo(defendantId.toString())),
                         withJsonPath("$.offences[1].offenceId", equalTo(offenceIdTwo.toString())),
                         withJsonPath("$.offences[1].personId", equalTo(personId.toString())),
                         withJsonPath("$.offences[1].plea.value", equalTo("NOT GUILTY")),
-                        //withJsonPath("$.offences[1].verdict.value", equalTo("NOT GUILTY")),
-                        withJsonPath("$.offences[1].verdict.verdictDate", equalTo(verdictDate.toString()))
+                        withJsonPath("$.offences[1].verdict.value.id", equalTo(verdictValue2.getId().toString())),
+                        withJsonPath("$.offences[1].verdict.value.code", equalTo(verdictValue2.getCode())),
+                        withJsonPath("$.offences[1].verdict.value.category", equalTo(verdictValue2.getCategory())),
+                        withJsonPath("$.offences[1].verdict.value.description", equalTo(verdictValue2.getDescription())),
+
+                        withJsonPath("$.offences[1].verdict.verdictDate", equalTo(verdictDate.toString())),
+                        withJsonPath("$.offences[1].verdict.numberOfJurors", equalTo(numberOfJurors)),
+                        withJsonPath("$.offences[1].verdict.numberOfSplitJurors", equalTo(numberOfSplitJurors)),
+                        withJsonPath("$.offences[1].verdict.unanimous", equalTo(unanimous))
                 ))
         ));
 
