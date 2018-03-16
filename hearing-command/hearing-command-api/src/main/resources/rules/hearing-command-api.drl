@@ -6,6 +6,14 @@ import java.util.Arrays;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
 
+rule "Command - API - Action - hearing.initiate"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.initiate");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
 
 rule "Command - API - Action - hearing.add-prosecution-counsel"
   when

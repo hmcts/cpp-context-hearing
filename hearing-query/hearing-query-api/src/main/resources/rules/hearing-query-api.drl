@@ -15,10 +15,28 @@ rule "Query - API - hearing.get.hearing"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get.hearing.v2"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.hearing.v2");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Query - API - hearing.get.hearings-by-startdate"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.hearings-by-startdate");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get.hearings-by-startdate.v2"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.hearings-by-startdate.v2");
     eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
   then
     $outcome.setSuccess(true);

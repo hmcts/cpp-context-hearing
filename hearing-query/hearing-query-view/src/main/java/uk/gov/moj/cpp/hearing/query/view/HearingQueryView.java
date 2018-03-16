@@ -25,6 +25,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.convertor.DefenceCounselToDefendantMapConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ProsecutionCounselListConverter;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.DefenceCounselService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
@@ -123,6 +125,14 @@ public class HearingQueryView {
                         .build());
     }
 
+    @Handles("hearing.get.hearings-by-startdate.v2")
+    public JsonEnvelope findHearingsByStartDateV2(final JsonEnvelope envelope) {
+        final LocalDate startDate = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_START_DATE));
+        final HearingListResponse hearingListResponse = hearingService.getHearingByStartDateV2(startDate);
+        return enveloper.withMetadataFrom(envelope, "hearing.get.hearings.v2")
+                .apply(hearingListResponse);
+    }
+
     private void setHearingJsonArrayBuilder(final JsonArrayBuilder hearingsJsonArrayBuilder, final Hearing hearing, final JsonArrayBuilder caseIdsJsonArrayBuilder) {
         final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
                 .add(FIELD_HEARING_ID, hearing.getHearingId().toString())
@@ -167,6 +177,14 @@ public class HearingQueryView {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
         return enveloper.withMetadataFrom(envelope, RESPONSE_NAME_HEARING)
                 .apply(hearingService.getHearingById(hearingId.get()));
+    }
+
+    @Handles("hearing.get.hearing.v2")
+    public JsonEnvelope findHearingV2(final JsonEnvelope envelope) {
+        final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
+        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingByIdV2(hearingId.get());
+        return enveloper.withMetadataFrom(envelope, "hearing.get-hearing.v2")
+                .apply(hearingDetailsResponse);
     }
 
     @Handles("hearing.get.prosecution-counsels")

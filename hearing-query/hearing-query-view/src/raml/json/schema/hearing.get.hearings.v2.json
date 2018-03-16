@@ -1,0 +1,42 @@
+{
+  "hearings": [
+    {
+      "hearingId": "23EF34EC-63E5-422E-8071-9B3753008C10",
+      "hearingType": "TRIAL",
+      "caseUrn": [
+        "32GD9387517"
+      ],
+      "defendants": [
+        {
+          "firstName": "Mark",
+          "lastName": "Zuckerberg"
+        },
+        {
+          "firstName": "Sean",
+          "lastName": "Parker"
+        }
+      ]
+    },
+    {
+      "hearingId": "1DAEFEC3-2F76-8109-82D9-2E60544A6C01",
+      "hearingType": "TRIAL",
+      "caseUrn": [
+        "32GD9387518"
+      ],
+      "defendants": [
+        {
+          "firstName": "Larry",
+          "lastName": "Wall"
+        },
+        {
+          "firstName": "Dennis",
+          "lastName": "Ritchie"
+        },
+        {
+          "firstName": "James",
+          "lastName": "Gosling"
+        }
+      ]
+    }
+  ]
+}

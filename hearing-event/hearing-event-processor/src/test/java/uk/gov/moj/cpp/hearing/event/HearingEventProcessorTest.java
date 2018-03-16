@@ -11,6 +11,7 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -108,6 +109,7 @@ public class HearingEventProcessorTest {
     private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(this.objectMapper);
 
 
+    private static final String HEARING_INITIATED_EVENT = "hearing.initiated";
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String RESULT_AMENDED_EVENT = "hearing.result-amended";
     private static final String DRAFT_RESULT_SAVED_PRIVATE_EVENT = "hearing.draft-result-saved";
@@ -215,6 +217,30 @@ public class HearingEventProcessorTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    @Test
+    public void publishHearingInitiatedEvent() {
+
+        final String hearingId = randomUUID().toString();
+
+        final JsonObject hearingInitiated = createObjectBuilder()
+                .add("hearing", createObjectBuilder()
+                        .add("id", hearingId)
+                        .build())
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_INITIATED_EVENT), hearingInitiated);
+
+        this.hearingEventProcessor.hearingInitiated(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(
+                this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                        metadata().withName("public.hearing.initiated"),
+                        payloadIsJson(withJsonPath(format("$.%s", FIELD_HEARING_ID), is(hearingId))))
+                        .thatMatchesSchema()
+        );
+    }
 
     @Test
     public void publishHearingResultedPublicEvent() {

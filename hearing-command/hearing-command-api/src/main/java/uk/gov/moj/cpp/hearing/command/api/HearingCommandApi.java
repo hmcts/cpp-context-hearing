@@ -34,6 +34,11 @@ public class HearingCommandApi {
     @Inject
     private Clock clock;
 
+    @Handles("hearing.initiate")
+    public void initiateHearing(final JsonEnvelope envelope) {
+        this.sender.send(envelope);
+    }
+
     @Handles("hearing.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) {
         this.sender.send(envelope);
@@ -49,6 +54,7 @@ public class HearingCommandApi {
         this.sender.send(envelope);
     }
 
+    //TODO - CLEANUP - why have the new event name. - why not just keep hearing.command.update-plea?
     @Handles("hearing.update-plea")
     public void updatePlea(final JsonEnvelope command) {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-plea").apply(command.payloadAsJsonObject()));

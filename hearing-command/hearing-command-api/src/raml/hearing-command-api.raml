@@ -2,6 +2,25 @@
 title: Hearing API
 baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
 
+
+/hearings:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.initiate+json
+            name: hearing.initiate
+        ...
+      body:
+        application/vnd.hearing.initiate+json:
+            example:
+             !include json/hearing.initiate.json
+            schema:
+             !include json/schema/hearing.initiate.json
+      responses:
+            202:
+                description: OK
+
 /hearings/{hearingId}:
   displayName: Hearing
   post:

@@ -5,6 +5,9 @@ baseUri:  message://command/handler/message/hearing
 /hearing.handler.command:
   post:
       body:
+        application/vnd.hearing.initiate+json:
+                  example: !include json/hearing.initiate.json
+                  schema:  !include json/schema/hearing.initiate.json
         application/vnd.hearing.initiate-hearing+json:
             example: !include json/hearing.initiate-hearing.json
             schema:  !include json/schema/hearing.initiate-hearing.json

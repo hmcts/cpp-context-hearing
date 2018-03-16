@@ -7,6 +7,9 @@ baseUri: message://event/processor/message/hearing
       responses:
           200:
               body:
+                  application/vnd.public.hearing.initiated+json:
+                      schema: !include json/schema/public.hearing.initiated.json
+                      example: !include json/public.hearing.initiated.json
                   application/vnd.public.hearing.resulted+json:
                       schema: !include json/schema/public.hearing.resulted.json
                       example: !include json/public.hearing.resulted.json

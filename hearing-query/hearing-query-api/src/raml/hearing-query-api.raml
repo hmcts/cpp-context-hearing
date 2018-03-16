@@ -234,3 +234,45 @@ protocols: [ HTTP, HTTPS ]
                      application/vnd.hearing.get.offences+json:
                         example: !include json/hearing.get.offences.json
                         schema: !include json/schema/hearing.get.offences.json  
+
+/v2/hearings/{hearingId}:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearing.v2+json
+            name: hearing.get.hearing.v2
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearing.v2+json:
+                    example:  !include json/hearing.get.hearing.v2.json
+                    schema:  !include  json/schema/hearing.get.hearing.v2.json
+
+/v2/hearings:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearings-by-startdate.v2+json
+            name: hearing.get.hearings-by-startdate.v2
+        ...
+      queryParameters:
+        startDate:
+          description: startDate of hearing
+          type: string
+          required: false
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearings-by-startdate.v2+json:
+                    example:  !include json/hearing.get.hearings.v2.json
+                    schema:  !include  json/schema/hearing.get.hearings.v2.json

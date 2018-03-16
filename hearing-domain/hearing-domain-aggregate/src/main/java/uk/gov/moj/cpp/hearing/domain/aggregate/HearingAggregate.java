@@ -9,31 +9,17 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.plea.HearingPlea;
+import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Offence;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.HearingDetails;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
-import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingUpdateVerdictIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
-import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
-import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictAdded;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictChanged;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -57,6 +43,37 @@ public class HearingAggregate implements Aggregate {
     private final Set<UUID> sharedResultIds = new HashSet<>();
     private final Map<UUID, Verdict> verdicts = new HashMap<>();
     private final static String PLEA_GUILTY = "GUILTY";
+
+    @Override
+    public Object apply(final Object event) {
+        return match(event).with(
+                when(HearingInitiated.class)
+                        .apply(this::onHearingInitiated),
+                when(CourtAssigned.class)
+                        .apply(courtAssigned -> this.hearingId = courtAssigned.getHearingId()),
+                when(RoomBooked.class)
+                        .apply(roomBooked -> this.hearingId = roomBooked.getHearingId()),
+                when(CaseAssociated.class)
+                        .apply(caseAssociated -> this.hearingId = caseAssociated.getHearingId()),
+                when(HearingPleaAdded.class)
+                        .apply(hearingPleaAdded -> this.hearingId = hearingPleaAdded.getHearingId()),
+                when(HearingPleaChanged.class)
+                        .apply(hearingPleaChanged -> this.hearingId = hearingPleaChanged.getHearingId()),
+                when(VerdictAdded.class)
+                        .apply(this::onVerdictAdded),
+                when(VerdictChanged.class)
+                        .apply(this::onVerdictChanged),
+                when(ProsecutionCounselAdded.class)
+                        .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId()),
+                when(DefenceCounselAdded.class)
+                        .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
+                when(ResultsShared.class)
+                        .apply(resultsSharedResult -> recordSharedResults(resultsSharedResult.getResultLines())),
+                when(ResultAmended.class)
+                        .apply(this::recordAmendedResult),
+                otherwiseDoNothing()
+        );
+    }
 
     public Stream<Object> initiateHearing(final HearingDetails hd) {
         final Builder<Object> streamBuilder = builder();
@@ -215,36 +232,7 @@ public class HearingAggregate implements Aggregate {
         return result;
     }
 
-    @Override
-    public Object apply(final Object event) {
-        return match(event).with(
-                when(HearingInitiated.class)
-                        .apply(this::onHearingInitiated),
-                when(CourtAssigned.class)
-                        .apply(courtAssigned -> this.hearingId = courtAssigned.getHearingId()),
-                when(RoomBooked.class)
-                        .apply(roomBooked -> this.hearingId = roomBooked.getHearingId()),
-                when(CaseAssociated.class)
-                        .apply(caseAssociated -> this.hearingId = caseAssociated.getHearingId()),
-                when(HearingPleaAdded.class)
-                        .apply(hearingPleaAdded -> this.hearingId = hearingPleaAdded.getHearingId()),
-                when(HearingPleaChanged.class)
-                        .apply(hearingPleaChanged -> this.hearingId = hearingPleaChanged.getHearingId()),
-                when(VerdictAdded.class)
-                        .apply(this::onVerdictAdded),
-                when(VerdictChanged.class)
-                        .apply(this::onVerdictChanged),
-                when(ProsecutionCounselAdded.class)
-                        .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId()),
-                when(DefenceCounselAdded.class)
-                        .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
-                when(ResultsShared.class)
-                        .apply(resultsSharedResult -> recordSharedResults(resultsSharedResult.getResultLines())),
-                when(ResultAmended.class)
-                        .apply(this::recordAmendedResult),
-                otherwiseDoNothing()
-        );
-    }
+
 
     private void recordAmendedResult(final ResultAmended resultAmended) {
         this.sharedResultIds.add(resultAmended.getId());
@@ -270,5 +258,4 @@ public class HearingAggregate implements Aggregate {
         this.hearingId = verdictChanged.getHearingId();
         verdicts.put(verdictChanged.getOffenceId(), verdictChanged.getVerdict());
     }
-
 }

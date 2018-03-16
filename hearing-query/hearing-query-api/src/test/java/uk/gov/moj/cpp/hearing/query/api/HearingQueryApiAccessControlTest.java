@@ -22,8 +22,10 @@ import org.mockito.Mock;
 public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTest {
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
+    private static final String ACTION_NAME_GET_HEARING_V2 = "hearing.get.hearing.v2";
     private static final String ACTION_NAME_GET_CASE_PLEAS = "hearing.get.case.pleas";
     private static final String ACTION_NAME_GET_HEARINGS_BY_START_DATE = "hearing.get.hearings-by-startdate";
+    private static final String ACTION_NAME_GET_HEARINGS_BY_START_DATE_V2 = "hearing.get.hearings-by-startdate.v2";
     private static final String ACTION_NAME_GET_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid";
     private static final String ACTION_NAME_GET_PROSECUTION_COUNSELS = "hearing.get.prosecution-counsels";
     private static final String ACTION_NAME_GET_DEFENCE_COUNSELS = "hearing.get.defence-counsels";
@@ -44,10 +46,19 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     public void shouldAllowUserInAuthorisedGroupToGetHearing() {
         assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "System Users");
     }
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingV2() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_V2, "Listing Officers", "Court Clerks", "System Users");
+    }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearing() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "System Users");
+    }
+    
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingV2() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_V2, "Listing Officers", "Court Clerks", "System Users");
     }
 
     @Test
@@ -67,8 +78,18 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingsByStartDateV2() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_START_DATE_V2, "Listing Officers", "Court Clerks");
+    }
+
+    @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByStartDate() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_START_DATE, "Listing Officers", "Court Clerks");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByStartDateV2() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_START_DATE_V2, "Listing Officers", "Court Clerks");
     }
 
     @Test

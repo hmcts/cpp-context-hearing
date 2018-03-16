@@ -25,6 +25,10 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.InitiateHearingIT.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserLogsMultipleEvents;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.andHearingResultsHaveBeenShared;
@@ -48,10 +52,15 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
 
 import java.io.IOException;
@@ -60,6 +69,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -160,7 +170,16 @@ public class HearingIT extends AbstractIT {
 
     @Test
     public void hearingAddProsecutionCounselTest() throws IOException {
-        final String hearingId = randomUUID().toString();
+
+        InitiateHearingCommand initiateHearingCommand = InitiateHearingIT.initiateHearingCommandTemplate().build();
+
+        makeCommand("hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
+
+        final String hearingId = initiateHearingCommand.getHearing().getId().toString();
+
         final String personId1 = randomUUID().toString();
         final String attendeeId1 = randomUUID().toString();
         final String status1 = RandomGenerator.STRING.next();
@@ -563,13 +582,20 @@ public class HearingIT extends AbstractIT {
     public void hearingAddPlea() throws IOException {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final String hearingId = randomUUID().toString();
-        final String caseId = randomUUID().toString();
+        InitiateHearingCommand initiateHearingCommand = InitiateHearingIT.initiateHearingCommandTemplate().build();
+
+        makeCommand("hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
+
+        final String hearingId = initiateHearingCommand.getHearing().getId().toString();
+        final String caseId = initiateHearingCommand.getCases().get(0).getCaseId().toString();
         final String pleaId = randomUUID().toString();
         final String pleaValue = "GUILTY";
         final String pleaDateString = "2017-02-01";
-        final String offenceId = randomUUID().toString();
-        final String defendantId = randomUUID().toString();
+        final String offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString();
+        final String defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString();
         final String personId = "d3a0d0f9-78b0-47c6-a362-5febf0485d0f";
 
         final String commandAPIEndPoint = MessageFormat
@@ -614,30 +640,47 @@ public class HearingIT extends AbstractIT {
     public void hearingAddMultiplePlea() throws IOException {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final String hearingId = randomUUID().toString();
-        final String caseId = randomUUID().toString();
+
         final String pleaId_1 = randomUUID().toString();
         final String pleaValue_1 = "GUILTY";
         final String pleaDateString_1 = "2017-02-01";
-        final String offenceId_1 = randomUUID().toString();
         final String pleaId_2 = randomUUID().toString();
         final String pleaValue_2 = "NOT GUILTY";
         final String pleaDateString_2 = "2017-02-02";
-        final String offenceId_2 = randomUUID().toString();
-        final String defendantId = randomUUID().toString();
+
+        InitiateHearingCommand.Builder builder = InitiateHearingIT.initiateHearingCommandTemplate();
+
+        builder.getHearing().getDefendants().get(0).addOffence(Offence.builder()
+                .withId(randomUUID())
+                .withCaseId(builder.getCases().get(0).getCaseId())
+                .withOffenceCode(STRING.next())
+                .withWording(STRING.next())
+                .withSection(STRING.next())
+                .withStartDate(PAST_LOCAL_DATE.next())
+                .withEndDate(PAST_LOCAL_DATE.next())
+                .withOrderIndex(INTEGER.next())
+                .withCount(INTEGER.next())
+                .withConvictionDate(PAST_LOCAL_DATE.next()));
+
+        InitiateHearingCommand initiateHearingCommand = builder.build();
+
+        makeCommand("hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
 
         final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
-        final String body = getStringFromResource("hearing.update-multiple-plea.json").replace("RANDOM_CASE_ID", caseId)
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), initiateHearingCommand.getHearing().getId().toString());
+        final String body = getStringFromResource("hearing.update-multiple-plea.json").replace("RANDOM_CASE_ID", initiateHearingCommand.getCases().get(0).getCaseId().toString())
                 .replace("RANDOM_PLEA_ID_1", pleaId_1)
                 .replace("PLEA_VALUE_1", pleaValue_1)
                 .replace("PLEA_DATE_1", pleaDateString_1)
-                .replace("RANDOM_OFFENCE_ID_1", offenceId_1)
+                .replace("RANDOM_OFFENCE_ID_1", initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())
                 .replace("RANDOM_PLEA_ID_2", pleaId_2)
                 .replace("PLEA_VALUE_2", pleaValue_2)
                 .replace("PLEA_DATE_2", pleaDateString_2)
-                .replace("RANDOM_OFFENCE_ID_2", offenceId_2)
-                .replace("RANDOM_DEFENDANT_ID", defendantId);
+                .replace("RANDOM_OFFENCE_ID_2", initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString())
+                .replace("RANDOM_DEFENDANT_ID", initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString());
 
         final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.update-plea+json")
@@ -646,55 +689,65 @@ public class HearingIT extends AbstractIT {
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), caseId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), initiateHearingCommand.getCases().get(0).getCaseId().toString());
 
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.get.case.pleas+json";
 
         poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString(),
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString()
+                                )),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(pleaValue_1, pleaValue_2)),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(pleaDateString_1, pleaDateString_2)),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
-                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString(),
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString()
+                                )),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(pleaValue_1, pleaValue_2)),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(pleaDateString_1, pleaDateString_2))
                         )));
-        thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
+        thenHearingPleaUpdatedPublicEventShouldBePublished(initiateHearingCommand.getCases().get(0).getCaseId().toString());
     }
 
     @Test
     public void hearingUpdatePlea() throws IOException {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final String hearingId = randomUUID().toString();
-        final String caseId = randomUUID().toString();
         final String pleaId = randomUUID().toString();
         final String originalPleaValue = "NOT GUILTY";
         final String originalPleaDateString = "2017-02-01";
         final String updatedPleaValue = "GUILTY";
         final String updatedPleaDateString = "2017-02-02";
-        final String offenceId = randomUUID().toString();
-        final String defendantId = randomUUID().toString();
+
+        InitiateHearingCommand initiateHearingCommand = InitiateHearingIT.initiateHearingCommandTemplate().build();
+
+        makeCommand("hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
 
         final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
-        String body = getStringFromResource("hearing.update-plea.json").replace("RANDOM_CASE_ID", caseId)
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), initiateHearingCommand.getHearing().getId().toString());
+        String body = getStringFromResource("hearing.update-plea.json").replace("RANDOM_CASE_ID", initiateHearingCommand.getCases().get(0).getCaseId().toString())
                 .replace("RANDOM_PLEA_ID", pleaId)
                 .replace("PLEA_VALUE", originalPleaValue)
                 .replace("PLEA_DATE", originalPleaDateString)
-                .replace("RANDOM_OFFENCE_ID", offenceId)
-                .replace("RANDOM_DEFENDANT_ID", defendantId);
+                .replace("RANDOM_OFFENCE_ID", initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())
+                .replace("RANDOM_DEFENDANT_ID", initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString());
 
         final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), caseId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), initiateHearingCommand.getCases().get(0).getCaseId().toString());
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.get.case.pleas+json";
 
@@ -709,15 +762,15 @@ public class HearingIT extends AbstractIT {
                         status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), is(pleaId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), is(offenceId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(originalPleaValue)),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(originalPleaDateString))
                         )));
 
-        thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
+        thenHearingPleaUpdatedPublicEventShouldBePublished(initiateHearingCommand.getCases().get(0).getCaseId().toString());
 
         // Update plea and call the endpoint again
         body = body.replace(originalPleaValue, updatedPleaValue).replace(originalPleaDateString, updatedPleaDateString);
@@ -733,15 +786,15 @@ public class HearingIT extends AbstractIT {
                         payload().isJson(allOf
                                 (
                                         withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), is(pleaId)),
-                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
-                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
-                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), is(offenceId)),
-                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(initiateHearingCommand.getHearing().getId().toString())),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
+                                        withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                                         withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(updatedPleaValue)),
                                         withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(updatedPleaDateString))
                                 )));
 
-        thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
+        thenHearingPleaUpdatedPublicEventShouldBePublished(initiateHearingCommand.getCases().get(0).getCaseId().toString());
 
         //Adding different Plea Id to same offence should ignore update plea
         body = body.replace(pleaId, UUID.randomUUID().toString());
@@ -751,39 +804,58 @@ public class HearingIT extends AbstractIT {
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
-        thenHearingUpdatePleaIgnoredPublicEventShouldBePublished(caseId);
+        thenHearingUpdatePleaIgnoredPublicEventShouldBePublished(initiateHearingCommand.getCases().get(0).getCaseId().toString());
     }
 
     @Test
     public void hearingAddMultipleUpdateSinglePlea() throws IOException {
-        final String hearingId = randomUUID().toString();
-        final String caseId = randomUUID().toString();
+
+        InitiateHearingCommand.Builder builder = InitiateHearingIT.initiateHearingCommandTemplate();
+
+        builder.getHearing().getDefendants().get(0).addOffence(Offence.builder()
+                .withId(randomUUID())
+                .withCaseId(builder.getCases().get(0).getCaseId())
+                .withOffenceCode(STRING.next())
+                .withWording(STRING.next())
+                .withSection(STRING.next())
+                .withStartDate(PAST_LOCAL_DATE.next())
+                .withEndDate(PAST_LOCAL_DATE.next())
+                .withOrderIndex(INTEGER.next())
+                .withCount(INTEGER.next())
+                .withConvictionDate(PAST_LOCAL_DATE.next()));
+
+        InitiateHearingCommand initiateHearingCommand = builder.build();
+
+        makeCommand("hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
+
         final String pleaId_1 = randomUUID().toString();
         final String originalPleaValue = "NOT GUILTY";
         final String originalPleaDateString = "2017-02-01";
-        final String offenceId_1 = randomUUID().toString();
         final String pleaId_2 = randomUUID().toString();
         final String updatedPleaValue = "GUILTY";
         final String updatedPleaDateString = "2017-02-02";
-        final String offenceId_2 = randomUUID().toString();
-        final String defendantId = randomUUID().toString();
 
-        String body = getStringFromResource("hearing.update-multiple-plea.json").replace("RANDOM_CASE_ID", caseId)
+        String body = getStringFromResource("hearing.update-multiple-plea.json").replace("RANDOM_CASE_ID", initiateHearingCommand.getCases().get(0).getCaseId().toString())
                 .replace("RANDOM_PLEA_ID_1", pleaId_1)
                 .replace("PLEA_VALUE_1", originalPleaValue)
                 .replace("PLEA_DATE_1", originalPleaDateString)
-                .replace("RANDOM_OFFENCE_ID_1", offenceId_1)
+                .replace("RANDOM_OFFENCE_ID_1", initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())
                 .replace("RANDOM_PLEA_ID_2", pleaId_2)
                 .replace("PLEA_VALUE_2", originalPleaValue)
                 .replace("PLEA_DATE_2", originalPleaDateString)
-                .replace("RANDOM_OFFENCE_ID_2", offenceId_2)
-                .replace("RANDOM_DEFENDANT_ID", defendantId);
+                .replace("RANDOM_OFFENCE_ID_2", initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString())
+                .replace("RANDOM_DEFENDANT_ID", initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString());
+
+
 
         final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), initiateHearingCommand.getHearing().getId().toString());
 
         final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), caseId);
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), initiateHearingCommand.getCases().get(0).getCaseId().toString());
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
 
         final String mediaType = "application/vnd.hearing.get.case.pleas+json";
@@ -799,15 +871,21 @@ public class HearingIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString(),
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString()
+                                )),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), is(originalPleaValue)),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(originalPleaDateString)),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
-                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString(),
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString()
+                                )),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_VALUE), is(originalPleaValue)),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), is(originalPleaDateString))
                         )));
@@ -826,15 +904,21 @@ public class HearingIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(caseId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(hearingId)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(defendantId)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_CASE_ID), is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_HEARING_ID), is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_DEFENDANT_ID), is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
-                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString(),
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString()
+                                )),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(originalPleaValue, updatedPleaValue)),
                                 withJsonPath(format("$.%s[0].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(originalPleaDateString, updatedPleaDateString)),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_ID), isOneOf(pleaId_1, pleaId_2)),
-                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(offenceId_1, offenceId_2)),
+                                withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_OFFENCE_ID), isOneOf(
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString(),
+                                        initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId().toString()
+                                )),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_VALUE), isOneOf(originalPleaValue, updatedPleaValue)),
                                 withJsonPath(format("$.%s[1].%s", PLEA_COLLECTION, FIELD_PLEA_DATE), isOneOf(originalPleaDateString, updatedPleaDateString))
                         )));
@@ -843,18 +927,27 @@ public class HearingIT extends AbstractIT {
 
     @Test
     public void hearingAddMultiplePleaSameOffenceId() throws IOException {
-        final String hearingId = randomUUID().toString();
-        final String caseId = randomUUID().toString();
+
+        InitiateHearingCommand initiateHearingCommand = InitiateHearingIT.initiateHearingCommandTemplate().build();
+
+        makeCommand("hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
+
+
+        final String hearingId = initiateHearingCommand.getHearing().getId().toString();
+        final String caseId = initiateHearingCommand.getCases().get(0).getCaseId().toString();
         final String pleaId_1 = randomUUID().toString();
         final String pleaValue_1 = "GUILTY";
         final String pleaDateString_1 = "2017-02-01";
         // Use same offenceId to simulate a reject condition. In this case
         // entire update command will be rejected , no add / updates will be performed.
-        final String offenceId = randomUUID().toString();
+        final String offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString();
         final String pleaId_2 = randomUUID().toString();
         final String pleaValue_2 = "NOT GUILTY";
         final String pleaDateString_2 = "2017-02-02";
-        final String defendantId = randomUUID().toString();
+        final String defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString();
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);
@@ -891,14 +984,22 @@ public class HearingIT extends AbstractIT {
 
     @Test
     public void hearingUpdatePleaOnlyPleaDateUpdate() throws IOException {
-        final String hearingId = randomUUID().toString();
-        final String caseId = randomUUID().toString();
+
+        InitiateHearingCommand initiateHearingCommand = InitiateHearingIT.initiateHearingCommandTemplate().build();
+
+        makeCommand("hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
+
+        final String hearingId = initiateHearingCommand.getHearing().getId().toString();
+        final String caseId = initiateHearingCommand.getCases().get(0).getCaseId().toString();
         final String pleaId = randomUUID().toString();
         final String originalPleaValue = "NOT GUILTY";
         final String originalPleaDateString = "2017-02-01";
         final String updatedPleaDateString = "2017-02-02";
-        final String offenceId = randomUUID().toString();
-        final String defendantId = randomUUID().toString();
+        final String offenceId =  initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString();
+        final String defendantId =  initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString();
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId);

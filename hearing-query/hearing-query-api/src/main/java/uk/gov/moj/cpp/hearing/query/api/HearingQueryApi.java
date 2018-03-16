@@ -18,6 +18,11 @@ public class HearingQueryApi {
     public JsonEnvelope findHearingsByStartDate(final JsonEnvelope query) {
        return this.requester.request(query);
     }
+    
+    @Handles("hearing.get.hearings-by-startdate.v2")
+    public JsonEnvelope findHearingsByStartDateV2(final JsonEnvelope query) {
+       return this.requester.request(query);
+    }
 
     @Handles("hearing.get.hearings-by-caseid")
     public JsonEnvelope findHearingsByCaseId(final JsonEnvelope query) {
@@ -26,6 +31,11 @@ public class HearingQueryApi {
 
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
+    @Handles("hearing.get.hearing.v2")
+    public JsonEnvelope findHearingV2(final JsonEnvelope query) {
         return this.requester.request(query);
     }
 

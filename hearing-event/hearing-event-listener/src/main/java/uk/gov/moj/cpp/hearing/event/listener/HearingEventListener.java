@@ -16,6 +16,8 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.moj.cpp.hearing.command.initiate.Judge;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictAdded;
@@ -31,7 +33,6 @@ import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
@@ -43,10 +44,15 @@ import uk.gov.moj.cpp.hearing.persist.entity.VerdictValue;
 import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
@@ -58,6 +64,17 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
@@ -93,6 +110,11 @@ public class HearingEventListener {
     private static final String FIELD_RESULTS = "results";
     private static final String FIELD_RESULT_LINE_ID = "resultLineId";
 
+
+    @Inject
+    JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+
     @Inject
     private HearingRepository hearingRepository;
 
@@ -120,9 +142,6 @@ public class HearingEventListener {
     @Inject
     private HearingJudgeRepository hearingJudgeRepository;
 
-    @Inject
-    JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Transactional
     @Handles("hearing.hearing-initiated")
     public void hearingInitiated(final JsonEnvelope event) {
@@ -132,8 +151,8 @@ public class HearingEventListener {
         final Integer duration = payload.getInt(FIELD_DURATION);
         final ZonedDateTime startDateTime = fromJsonString(payload.getJsonString(FIELD_START_DATE_TIME));
 
-        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
-        final Hearing hearing = existingHearing.map(item ->
+        final Optional<uk.gov.moj.cpp.hearing.persist.entity.Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing hearing = existingHearing.map(item ->
                 item.builder()
                         .withHearingId(item.getHearingId())
                         .withStartDate(startDateTime.toLocalDate())
@@ -142,7 +161,7 @@ public class HearingEventListener {
                         .withHearingType(hearingType)
                         .build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, startDateTime.toLocalDate(), startDateTime.toLocalTime(), duration,
+                        new uk.gov.moj.cpp.hearing.persist.entity.Hearing(hearingId, startDateTime.toLocalDate(), startDateTime.toLocalTime(), duration,
                                 null, hearingType, null));
 
         this.hearingRepository.save(hearing);
@@ -155,14 +174,14 @@ public class HearingEventListener {
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String courtCentreName = payload.getString(FIELD_COURT_CENTRE_NAME);
         final UUID courtCentreId = getUUID(payload, FIELD_COURT_CENTRE_ID).orElse(null);
-        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
+        final Optional<uk.gov.moj.cpp.hearing.persist.entity.Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
 
-        final Hearing hearing = existingHearing.map(item ->
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing hearing = existingHearing.map(item ->
                 item.builder().withHearingId(item.getHearingId()).withCourtCentreName(courtCentreName)
                         .withCourtCentreId(courtCentreId)
                         .build())
                 .orElseGet(() ->
-                        new Hearing.Builder().withHearingId(hearingId).withCourtCentreId(courtCentreId)
+                        new uk.gov.moj.cpp.hearing.persist.entity.Hearing.Builder().withHearingId(hearingId).withCourtCentreId(courtCentreId)
                                 .withCourtCentreName(courtCentreName).build());
 
         this.hearingRepository.save(hearing);
@@ -188,13 +207,13 @@ public class HearingEventListener {
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String roomName = payload.getString(FIELD_ROOM_NAME);
         final UUID roomId = getUUID(payload, FIELD_ROOM_ID).orElse(null);
-        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
+        final Optional<uk.gov.moj.cpp.hearing.persist.entity.Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
 
-        final Hearing hearing = existingHearing.map(item ->
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing hearing = existingHearing.map(item ->
                 item.builder().withHearingId(item.getHearingId()).withRoomName(roomName).withRoomId(roomId)
                         .build())
                 .orElseGet(() ->
-                        new Hearing.Builder().withHearingId(hearingId).withRoomId(roomId).withRoomName(roomName)
+                        new uk.gov.moj.cpp.hearing.persist.entity.Hearing.Builder().withHearingId(hearingId).withRoomId(roomId).withRoomName(roomName)
                                 .build());
 
         this.hearingRepository.save(hearing);
@@ -207,12 +226,12 @@ public class HearingEventListener {
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final LocalDate startDate = LocalDate.parse(payload.getString(FIELD_START_DATE));
 
-        final Optional<Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
+        final Optional<uk.gov.moj.cpp.hearing.persist.entity.Hearing> existingHearing = this.hearingRepository.getByHearingId(hearingId);
 
-        final Hearing hearing = existingHearing.map(item ->
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing hearing = existingHearing.map(item ->
                 item.builder().withStartDate(startDate).build())
                 .orElseGet(() ->
-                        new Hearing(hearingId, startDate, null, null, null,
+                        new uk.gov.moj.cpp.hearing.persist.entity.Hearing(hearingId, startDate, null, null, null,
                                 null, null));
 
         this.hearingRepository.save(hearing);
@@ -336,6 +355,7 @@ public class HearingEventListener {
 
         defendantIds.forEach(defendantId ->
                 this.defenceCounselDefendantRepository.save(new DefenceCounselDefendant(attendeeId, defendantId)));
+        (new NewHearingEventListener()).defenceCounselAdded(event);
     }
 
     @Transactional

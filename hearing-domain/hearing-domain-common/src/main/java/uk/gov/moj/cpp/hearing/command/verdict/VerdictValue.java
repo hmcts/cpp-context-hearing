@@ -61,4 +61,63 @@ public class VerdictValue implements Serializable {
     public int hashCode() {
         return Objects.hash(getId(), getCategory(), getCode(), getDescription());
     }
+
+    public static Builder from(VerdictValue value) {
+        return new Builder()
+                .withId(value.getId())
+                .withCategory(value.getCategory())
+                .withCode(value.getCode())
+                .withDescription(value.getDescription());
+    }
+
+    public static class Builder {
+        private UUID id;
+        private String category;
+        private String code;
+        private String description;
+
+        public UUID getId() {
+            return id;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public Builder withId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withCategory(String category) {
+            this.category = category;
+            return this;
+        }
+
+        public Builder withCode(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public VerdictValue build() {
+            return new VerdictValue(id, category, code, description);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 }

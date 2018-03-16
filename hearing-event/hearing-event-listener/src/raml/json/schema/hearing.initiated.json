@@ -1,0 +1,244 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "caseId": {
+      "type": "string"
+    },
+    "urn": {
+      "type": "string"
+    },
+    "hearing": {
+      "$ref": "#/definitions/hearing"
+    }
+  },
+  "required": [
+    "caseId",
+    "urn"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "address3": {
+          "type": "string"
+        },
+        "address4": {
+          "type": "string"
+        },
+        "postCode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address1",
+        "address2",
+        "address3",
+        "address4",
+        "postCode"
+      ]
+    },
+    "judge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "firstName",
+        "lastName"
+      ]
+    },
+    "defendant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/address"
+        },
+        "dateOfBirth": {
+          "type": "string"
+        },
+        "bailStatus": {
+          "type": "string"
+        },
+        "custodyTimeLimitDate": {
+          "type": "string"
+        },
+        "defenceOrganisation": {
+          "type": "string"
+        },
+        "interpreter": {
+          "type": "object",
+          "properties": {
+            "needed": {
+              "type": "boolean"
+            },
+            "language": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "needed"
+          ]
+        },
+        "offences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/offence"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "personId",
+        "firstName",
+        "lastName",
+        "nationality",
+        "gender",
+        "address",
+        "dateOfBirth",
+        "bailStatus",
+        "custodyTimeLimitDate",
+        "defenceOrganisation",
+        "interpreter"
+      ]
+    },
+    "offence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "offenceCode": {
+          "type": "string"
+        },
+        "wording": {
+          "type": "string"
+        },
+        "section": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "endDate": {
+          "type": "string"
+        },
+        "orderIndex": {
+          "type": "number"
+        },
+        "count": {
+          "type": "number"
+        },
+        "convictionDate": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "offenceCode",
+        "wording",
+        "section",
+        "startDate",
+        "endDate",
+        "orderIndex",
+        "count",
+        "convictionDate"
+      ]
+    },
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "type": {
+          "type": "string"
+        },
+        "courtCentreId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "courtCentreName": {
+          "type": "string"
+        },
+        "courtRoomId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "courtRoomName": {
+          "type": "string"
+        },
+        "judge": {
+          "$ref": "#/definitions/judge"
+        },
+        "startDateTime": {
+          "type": "string"
+        },
+        "notBefore": {
+          "type": "boolean"
+        },
+        "estimateMinutes": {
+          "type": "number"
+        },
+        "defendants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/defendant"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "courtCentreId",
+        "courtRoomId",
+        "courtRoomName",
+        "judge",
+        "startDateTime",
+        "notBefore",
+        "estimateMinutes",
+        "defendants"
+      ]
+    }
+  }
+}
+

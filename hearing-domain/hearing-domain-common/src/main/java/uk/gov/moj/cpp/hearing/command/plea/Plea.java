@@ -50,4 +50,57 @@ public class Plea implements Serializable {
     public int hashCode() {
         return Objects.hash(getId(), getValue(), getPleaDate());
     }
+
+    public static class Builder {
+
+        private UUID id;
+        private String value;
+        private LocalDate pleaDate;
+
+        private Builder() {
+
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public LocalDate getPleaDate() {
+            return pleaDate;
+        }
+
+        public Plea.Builder withId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Plea.Builder withValue(String value) {
+            this.value = value;
+            return this;
+        }
+
+        public Plea.Builder withPleaDate(LocalDate pleaDate) {
+            this.pleaDate = pleaDate;
+            return this;
+        }
+
+        public Plea build() {
+            return new Plea(this.id, this.value, this.pleaDate);
+        }
+    }
+
+    public static Plea.Builder builder() {
+        return new Plea.Builder();
+    }
+
+    public static Plea.Builder from(Plea plea) {
+        return builder()
+                .withId(plea.getId())
+                .withValue(plea.getValue())
+                .withPleaDate(plea.getPleaDate());
+    }
 }

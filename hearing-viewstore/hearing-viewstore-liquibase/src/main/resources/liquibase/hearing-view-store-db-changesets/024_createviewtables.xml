@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="24" author="CCR" logicalFilePath="024_createviewtables.xml">
+
+        <createTable tableName="a_hearing">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="hearing_type" type="TEXT"/>
+            <column name="start_date_time" type="DATETIME"/>
+            <column name="court_centre_id" type="UUID"/>
+            <column name="court_centre_name" type="TEXT"/>
+            <column name="room_id" type="UUID"/>
+            <column name="room_name" type="TEXT"/>
+        </createTable>
+
+        <createTable tableName="a_hearing_event">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="recorded_label" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_time" type="DATETIME TZ">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_event_definition_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_modified_time" type="DATETIME TZ"/>
+            <column name="alterable" type="boolean"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_hearing_event"
+                                 constraintName="fk_hearingex_event_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+
+        <createTable tableName="a_attendee">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="person_id" type="UUID"/>
+            <column name="type" type="TEXT"/>
+            <column name="first_name" type="TEXT"/>
+            <column name="last_name" type="TEXT"/>
+            <column name="status" type="TEXT"/>
+            <column name="title" type="TEXT"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_attendee" tableName="a_attendee"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_attendee"
+                                 constraintName="fk_attendee_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+
+
+        <createTable tableName="a_hearing_date">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID"/>
+            <column name="date" type="DATETIME"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_hearing_date" tableName="a_hearing_date"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_hearing_date"
+                                 constraintName="fk_hearingdate_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+
+        <createTable tableName="a_attendee_hearing_date">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attendee_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_date_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="id,hearing_id" constraintName="pk_attendee_hearing_date"
+                       tableName="a_attendee_hearing_date"/>
+
+        <addForeignKeyConstraint baseColumnNames="hearing_date_id,hearing_id" baseTableName="a_attendee_hearing_date"
+                                 constraintName="fk_attendee_hearing_date_hearing_date"
+                                 referencedColumnNames="id,hearing_id" referencedTableName="a_hearing_date"/>
+        <addForeignKeyConstraint baseColumnNames="attendee_id,hearing_id" baseTableName="a_attendee_hearing_date"
+                                 constraintName="fk_attendee_hearing_date_attendee"
+                                 referencedColumnNames="id,hearing_id" referencedTableName="a_attendee"/>
+
+
+        <createTable tableName="a_defendant">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="person_id" type="UUID"/>
+            <column name="first_name" type="TEXT"/>
+            <column name="last_name" type="TEXT"/>
+            <column name="date_of_birth" type="DATETIME"/>
+            <column name="nationality" type="TEXT"/>
+            <column name="gender" type="TEXT"/>
+            <column name="address_1" type="TEXT"/>
+            <column name="address_2" type="TEXT"/>
+            <column name="address_3" type="TEXT"/>
+            <column name="address_4" type="TEXT"/>
+            <column name="post_code" type="TEXT"/>
+            <column name="work_telephone" type="TEXT"/>
+            <column name="home_telephone" type="TEXT"/>
+            <column name="mobile_telephone" type="TEXT"/>
+            <column name="fax" type="TEXT"/>
+            <column name="email" type="TEXT"/>
+            <column name="bail_status" type="TEXT"/>
+            <column name="custody_time_limit_date" type="date"/>
+            <column name="defence_solicitor_firm" type="TEXT"/>
+            <column name="interpreter_name" type="TEXT"/>
+            <column name="interpreter_language" type="TEXT"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_defendant" tableName="a_defendant"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_defendant"
+                                 constraintName="fk_defendant_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+
+        <createTable tableName="a_case">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="caseurn" type="TEXT"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="pk_case" tableName="a_case"/>
+
+
+        <createTable tableName="a_offence">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defendant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="case_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="TEXT"/>
+            <column name="count" type="INT"/>
+            <column name="wording" type="TEXT"/>
+            <column name="title" type="TEXT"/>
+            <column name="legislation" type="TEXT"/>
+            <column name="start_date" type="DATETIME"/>
+            <column name="end_date" type="DATETIME"/>
+            <column name="conviction_date" type="DATETIME"/>
+            <column name="plea_id" type="UUID"/>
+            <column name="plea_date" type="DATETIME"/>
+            <column name="plea_value" type="TEXT"/>
+            <column name="verdict_id" type="UUID"/>
+            <column name="verdict_code" type="TEXT"/>
+            <column name="verdict_category" type="TEXT"/>
+            <column name="verdict_description" type="TEXT"/>
+            <column name="verdict_date" type="DATETIME"/>
+            <column name="number_of_jurors" type="SMALLINT"/>
+            <column name="number_of_split_jurors" type="SMALLINT"/>
+            <column name="unanimous" type="boolean"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_offence" tableName="a_offence"/>
+        <addForeignKeyConstraint baseColumnNames="case_id" baseTableName="a_offence"
+                                 constraintName="fk_offence_case" referencedColumnNames="id"
+                                 referencedTableName="a_case"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_offence"
+                                 constraintName="fk_offence_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id" baseTableName="a_offence"
+                                 constraintName="fk_offence_defendant" referencedColumnNames="id, hearing_id"
+                                 referencedTableName="a_defendant"/>
+
+
+        <createTable tableName="a_attendee_defendant">
+            <column name="attendee_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defendant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <!-- this holds the same value as hearing id , it gets round a problem with jpa implementation
+            preventing  a column in a join table being used on both sides
+            -->
+            <column name="attendee_hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="attendee_id, hearing_id, defendant_id" constraintName="pk_attendee_defendant"
+                       tableName="a_attendee_defendant"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_attendee_defendant"
+                                 constraintName="fk_attendee_defendant_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id" baseTableName="a_attendee_defendant"
+                                 constraintName="fk_attendee_defendant_defendant" referencedColumnNames="id, hearing_id"
+                                 referencedTableName="a_defendant"/>
+
+        <createTable tableName="a_attendee_case">
+            <column name="attendee_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="case_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey columnNames="attendee_id, hearing_id, case_id" constraintName="pk_attendee_case"
+                       tableName="a_attendee_case"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_attendee_case"
+                                 constraintName="fk_attendee_case_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+        <addForeignKeyConstraint baseColumnNames="case_id" baseTableName="a_attendee_case"
+                                 constraintName="fk_attendee_case_case" referencedColumnNames="id"
+                                 referencedTableName="a_case"/>
+
+
+    </changeSet>
+</databaseChangeLog>

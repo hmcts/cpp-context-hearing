@@ -78,4 +78,90 @@ public class Verdict implements Serializable {
     public int hashCode() {
         return Objects.hash(getId(), getValue(), getVerdictDate(), getNumberOfJurors(), getNumberOfSplitJurors(), getUnanimous());
     }
+
+    public static class Builder {
+
+        private UUID id;
+        private VerdictValue.Builder value;
+        private LocalDate verdictDate;
+        private Integer numberOfJurors;
+        private Integer numberOfSplitJurors;
+        private Boolean unanimous;
+
+        private Builder() {
+
+        }
+
+        public UUID getId() {
+            return id;
+        }
+
+        public VerdictValue.Builder getValue() {
+            return value;
+        }
+
+        public LocalDate getVerdictDate() {
+            return verdictDate;
+        }
+
+        public Integer getNumberOfJurors() {
+            return numberOfJurors;
+        }
+
+        public Integer getNumberOfSplitJurors() {
+            return numberOfSplitJurors;
+        }
+
+        public Boolean getUnanimous() {
+            return unanimous;
+        }
+
+        public Builder withId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withValue(VerdictValue.Builder value) {
+            this.value = value;
+            return this;
+        }
+
+        public Builder withVerdictDate(LocalDate verdictDate) {
+            this.verdictDate = verdictDate;
+            return this;
+        }
+
+        public Builder withNumberOfJurors(Integer numberOfJurors) {
+            this.numberOfJurors = numberOfJurors;
+            return this;
+        }
+
+        public Builder withNumberOfSplitJurors(Integer numberOfSplitJurors) {
+            this.numberOfSplitJurors = numberOfSplitJurors;
+            return this;
+        }
+
+        public Builder withUnanimous(Boolean unanimous) {
+            this.unanimous = unanimous;
+            return this;
+        }
+
+        public Verdict build() {
+            return new Verdict(this.id, this.value.build(), this.verdictDate, this.numberOfJurors, this.numberOfSplitJurors, this.unanimous);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder from(Verdict verdict) {
+        return builder()
+                .withId(verdict.getId())
+                .withValue(VerdictValue.from(verdict.getValue()))
+                .withVerdictDate(verdict.getVerdictDate())
+                .withNumberOfJurors(verdict.getNumberOfJurors())
+                .withNumberOfSplitJurors(verdict.getNumberOfSplitJurors())
+                .withUnanimous(verdict.getUnanimous());
+    }
 }

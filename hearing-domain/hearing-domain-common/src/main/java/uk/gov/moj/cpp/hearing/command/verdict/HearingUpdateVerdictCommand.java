@@ -7,6 +7,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.unmodifiableList;
 
 public class HearingUpdateVerdictCommand implements Serializable {
 
@@ -33,5 +36,62 @@ public class HearingUpdateVerdictCommand implements Serializable {
 
     public List<Defendant> getDefendants() {
         return defendants;
+    }
+
+    public static class Builder {
+
+        private UUID caseId;
+        private UUID hearingId;
+        private List<Defendant.Builder> defendants = new ArrayList<>();
+
+        private Builder() {
+        }
+
+        public UUID getCaseId() {
+            return caseId;
+        }
+
+        public UUID getHearingId() {
+            return hearingId;
+        }
+
+        public Builder withCaseId(UUID caseId) {
+            this.caseId = caseId;
+            return this;
+        }
+
+        public Builder withHearingId(UUID hearingId) {
+            this.hearingId = hearingId;
+            return this;
+        }
+
+        public Builder addDefendant(Defendant.Builder defendant) {
+            this.defendants.add(defendant);
+            return this;
+        }
+
+        public List<Defendant.Builder> getDefendants() {
+            return defendants;
+        }
+
+        public HearingUpdateVerdictCommand build() {
+            return new HearingUpdateVerdictCommand(hearingId, caseId,
+                    unmodifiableList(defendants.stream().map(Defendant.Builder::build).collect(Collectors.toList()))
+            );
+        }
+    }
+
+    public static HearingUpdateVerdictCommand.Builder builder() {
+        return new HearingUpdateVerdictCommand.Builder();
+    }
+
+    public static HearingUpdateVerdictCommand.Builder from(HearingUpdateVerdictCommand hearingUpdateVerdictCommand) {
+        HearingUpdateVerdictCommand.Builder builder = builder()
+                .withCaseId(hearingUpdateVerdictCommand.getCaseId())
+                .withHearingId(hearingUpdateVerdictCommand.getHearingId());
+
+        hearingUpdateVerdictCommand.getDefendants().forEach(defendant -> builder.addDefendant(Defendant.from(defendant)));
+        return builder;
+
     }
 }

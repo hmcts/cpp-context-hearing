@@ -27,8 +27,12 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -43,7 +47,6 @@ import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
@@ -51,6 +54,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 
+import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -70,6 +74,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
@@ -230,7 +237,10 @@ public class HearingEventListenerTest {
     private HearingCaseRepository hearingCaseRepository;
 
     @Captor
-    private ArgumentCaptor<Hearing> hearingArgumentCaptor;
+    private ArgumentCaptor<uk.gov.moj.cpp.hearing.persist.entity.Hearing> hearingArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Ahearing> hearingexArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<HearingJudge> hearingJudgeArgumentCaptor;
@@ -262,6 +272,9 @@ public class HearingEventListenerTest {
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
     @InjectMocks
     private HearingEventListener hearingEventListener;
 
@@ -279,7 +292,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.hearingInitiated(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(START_DATE));
         assertThat(actualHearing.getStartTime(), is(START_TIME));
@@ -297,7 +310,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.hearingInitiated(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(START_DATE));
         assertThat(actualHearing.getStartTime(), is(START_TIME));
@@ -308,6 +321,12 @@ public class HearingEventListenerTest {
     }
 
     @Test
+    public void shouldUpdateCaseWhenAdded() {
+
+    }
+
+
+    @Test
     public void shouldAssignCourtCentreNameToAnExistingHearing() {
         final JsonEnvelope event = getAssignCourtJsonEnvelope();
         when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
@@ -315,7 +334,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.courtAssigned(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(START_DATE_2));
         assertThat(actualHearing.getStartTime(), is(START_TIME_2));
@@ -348,7 +367,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.courtAssigned(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(nullValue()));
         assertThat(actualHearing.getStartTime(), is(nullValue()));
@@ -367,7 +386,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.roomBooked(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(START_DATE_2));
         assertThat(actualHearing.getStartTime(), is(START_TIME_2));
@@ -385,7 +404,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.roomBooked(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(nullValue()));
         assertThat(actualHearing.getStartTime(), is(nullValue()));
@@ -404,7 +423,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.hearingAdjournDateUpdated(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(START_DATE_3));
         assertThat(actualHearing.getStartTime(), is(START_TIME_2));
@@ -422,7 +441,7 @@ public class HearingEventListenerTest {
         this.hearingEventListener.hearingAdjournDateUpdated(event);
 
         verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final Hearing actualHearing = this.hearingArgumentCaptor.getValue();
+        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
         assertThat(actualHearing.getHearingId(), is(HEARING_ID));
         assertThat(actualHearing.getStartDate(), is(START_DATE_3));
         assertThat(actualHearing.getStartTime(), is(nullValue()));
@@ -697,8 +716,8 @@ public class HearingEventListenerTest {
                 .build();
     }
 
-    private Hearing getHearingWithOnlyRequiredFields(final UUID hearingId) {
-        return (new Hearing.Builder()).withHearingId(hearingId).withStartDate(START_DATE_2).withStartTime(START_TIME_2).withDuration(DURATION_2).withHearingType(HEARING_TYPE_2).build();
+    private uk.gov.moj.cpp.hearing.persist.entity.Hearing getHearingWithOnlyRequiredFields(final UUID hearingId) {
+        return new uk.gov.moj.cpp.hearing.persist.entity.Hearing(hearingId, START_DATE_2, START_TIME_2, DURATION_2, null, HEARING_TYPE_2, null);
     }
 
     private List<HearingCase> getHearingCases() {
