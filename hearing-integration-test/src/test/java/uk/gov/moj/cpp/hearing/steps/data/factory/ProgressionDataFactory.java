@@ -21,10 +21,14 @@ import org.fluttercode.datafactory.impl.DataFactory;
 public class ProgressionDataFactory {
 
     public static JsonObject hearingConfirmedFor(final UUID hearingId) {
+        return hearingConfirmedFor(hearingId, randomUUID());
+    }
+
+    public static JsonObject hearingConfirmedFor(final UUID hearingId, final UUID caseId) {
         final DataFactory dataFactory = new DataFactory();
 
         return createObjectBuilder()
-                .add("caseId", randomUUID().toString())
+                .add("caseId", caseId.toString())
                 .add("urn", STRING.next())
                 .add("hearing", createObjectBuilder()
                         .add("id", hearingId.toString())

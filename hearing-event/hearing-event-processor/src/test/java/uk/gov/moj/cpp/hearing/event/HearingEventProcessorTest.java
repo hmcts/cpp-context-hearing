@@ -217,30 +217,6 @@ public class HearingEventProcessorTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void publishHearingInitiatedEvent() {
-
-        final String hearingId = randomUUID().toString();
-
-        final JsonObject hearingInitiated = createObjectBuilder()
-                .add("hearing", createObjectBuilder()
-                        .add("id", hearingId)
-                        .build())
-                .build();
-
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_INITIATED_EVENT), hearingInitiated);
-
-        this.hearingEventProcessor.hearingInitiated(event);
-
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(
-                this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                        metadata().withName("public.hearing.initiated"),
-                        payloadIsJson(withJsonPath(format("$.%s", FIELD_HEARING_ID), is(hearingId))))
-                        .thatMatchesSchema()
-        );
-    }
 
     @Test
     public void publishHearingResultedPublicEvent() {

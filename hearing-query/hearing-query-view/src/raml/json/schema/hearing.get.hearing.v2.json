@@ -1,366 +1,363 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "$ref": "#/definitions/HearingDetailsResponse",
-    "definitions": {
-        "Judge": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "firstName",
-                "id",
-                "lastName",
-                "title"
-            ]
-        },
-        "ProsecutionCounsel": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "attendeeId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "attendeeId",
-                "firstName",
-                "lastName",
-                "status",
-                "title"
-            ]
-        },
-        "DefenceCounsel": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "attendeeId": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "defendantId": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "attendeeId",
-                "firstName",
-                "lastName",
-                "status",
-                "title"
-            ]
-        },
-        "Attendees": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "prosecutionCounsels": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ProsecutionCounsel"
-                    }
-                },
-                "defenceCounsels": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/DefenceCounsel"
-                    }
-                }
-            },
-            "required": [
-                "defenceCounsels",
-                "prosecutionCounsels"
-            ]
-        },
-        "Address": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "formatedAddress": {
-                    "type": "string"
-                },
-                "address1": {
-                    "type": "string"
-                },
-                "address2": {
-                    "type": "string"
-                },
-                "address3": {
-                    "type": "string"
-                },
-                "address4": {
-                    "type": "string"
-                },
-                "postCode": {
-                    "type": "string"
-                }
-            }
-        },
-        "Offence": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "wording": {
-                    "type": "string"
-                },
-                "count": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "legislation": {
-                    "type": "string"
-                },
-                "plea" : {
-                    "$ref": "#/definitions/Plea"
-                },
-                "verdict" : {
-                    "$ref": "#/definitions/Verdict"
-                }
-            },
-            "required": [
-                "count",
-                "id",
-                "legislation",
-                "title",
-                "wording"
-            ]
-        },
-        "Defendant": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "defendantId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "personId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "homeTelephone": {
-                    "type": "string"
-                },
-                "mobile": {
-                    "type": "string"
-                },
-                "fax": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "address": {
-                    "$ref": "#/definitions/Address"
-                },
-                "dateOfBirth": {
-                    "type": "string"
-                },
-                "offences": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Offence"
-                    }
-                }
-            },
-            "required": [
-                "address",
-                "dateOfBirth",
-                "defendantId",
-                "email",
-                "fax",
-                "firstName",
-                "homeTelephone",
-                "lastName",
-                "mobile",
-                "offences",
-                "personId"
-            ]
-        },
-        "Case": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "caseId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "caseUrn": {
-                    "type": "string"
-                },
-                "defendants": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Defendant"
-                    }
-                }
-            },
-            "required": [
-                "caseId",
-                "caseUrn",
-                "defendants"
-            ]
-        },
-        "Plea": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "pleaId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "pleaDate": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        },
-        "Value": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "category": {
-                    "type": "string"
-                },
-                "code": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                }
-            }
-        },
-        "Verdict": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "verdictId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "hearingId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "value": {
-                    "$ref": "#/definitions/Value"
-                },
-                "verdictDate": {
-                    "type": "string"
-                },
-                "numberOfSplitJurors": {
-                    "type": "integer"
-                },
-                "numberOfJurors": {
-                    "type": "integer"
-                },
-                "unanimous": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "uuid": {
-            "type": "string",
-            "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-        },
-        "HearingDetailsResponse": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "hearingId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "startDate": {
-                    "type": "string"
-                },
-                "startTime": {
-                    "type": "string"
-                },
-                "roomName": {
-                    "type": "string"
-                },
-                "hearingType": {
-                    "type": "string"
-                },
-                "courtCentreName": {
-                    "type": "string"
-                },
-                "judge": {
-                    "$ref": "#/definitions/Judge"
-                },
-                "roomId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "courtCentreId": {
-                    "$ref": "#/definitions/uuid"
-                },
-                "attendees": {
-                    "$ref": "#/definitions/Attendees"
-                },
-                "cases": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Case"
-                    }
-                }
-            },
-            "required": [
-                "attendees",
-                "cases",
-                "courtCentreId",
-                "courtCentreName",
-                "hearingId",
-                "hearingType",
-                "judge",
-                "roomId",
-                "roomName",
-                "startDate",
-                "startTime"
-            ]
-        }
+  "$schema":"http://json-schema.org/draft-04/schema#",
+  "type":"object",
+  "additionalProperties":false,
+  "properties":{
+    "hearingId":{
+      "$ref":"#/definitions/uuid"
+    },
+    "startDate":{
+      "type":"string"
+    },
+    "startTime":{
+      "type":"string"
+    },
+    "roomName":{
+      "type":"string"
+    },
+    "hearingType":{
+      "type":"string"
+    },
+    "courtCentreName":{
+      "type":"string"
+    },
+    "judge":{
+      "$ref":"#/definitions/judge"
+    },
+    "roomId":{
+      "$ref":"#/definitions/uuid"
+    },
+    "courtCentreId":{
+      "$ref":"#/definitions/uuid"
+    },
+    "attendees":{
+      "$ref":"#/definitions/attendees"
+    },
+    "cases":{
+      "type":"array",
+      "items":{
+        "$ref":"#/definitions/case"
+      }
     }
+  },
+  "required":[
+    "attendees",
+    "cases",
+    "courtCentreId",
+    "courtCentreName",
+    "hearingId",
+    "hearingType",
+    "judge",
+    "roomId",
+    "roomName",
+    "startDate",
+    "startTime"
+  ],
+  "definitions":{
+    "judge":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "id":{
+          "$ref":"#/definitions/uuid"
+        },
+        "title":{
+          "type":"string"
+        },
+        "firstName":{
+          "type":"string"
+        },
+        "lastName":{
+          "type":"string"
+        }
+      },
+      "required":[
+        "firstName",
+        "id",
+        "lastName",
+        "title"
+      ]
+    },
+    "prosecutionCounsel":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "attendeeId":{
+          "$ref":"#/definitions/uuid"
+        },
+        "status":{
+          "type":"string"
+        },
+        "title":{
+          "type":"string"
+        },
+        "firstName":{
+          "type":"string"
+        },
+        "lastName":{
+          "type":"string"
+        }
+      },
+      "required":[
+        "attendeeId",
+        "firstName",
+        "lastName",
+        "status",
+        "title"
+      ]
+    },
+    "defenceCounsel":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "attendeeId":{
+          "type":"string"
+        },
+        "status":{
+          "type":"string"
+        },
+        "defendantId":{
+          "type":"string"
+        },
+        "title":{
+          "type":"string"
+        },
+        "firstName":{
+          "type":"string"
+        },
+        "lastName":{
+          "type":"string"
+        }
+      },
+      "required":[
+        "attendeeId",
+        "firstName",
+        "lastName",
+        "status",
+        "title"
+      ]
+    },
+    "attendees":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "prosecutionCounsels":{
+          "type":"array",
+          "items":{
+            "$ref":"#/definitions/prosecutionCounsel"
+          }
+        },
+        "defenceCounsels":{
+          "type":"array",
+          "items":{
+            "$ref":"#/definitions/defenceCounsel"
+          }
+        }
+      },
+      "required":[
+        "defenceCounsels",
+        "prosecutionCounsels"
+      ]
+    },
+    "address":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "formattedAddress":{
+          "type":"string"
+        },
+        "address1":{
+          "type":"string"
+        },
+        "address2":{
+          "type":"string"
+        },
+        "address3":{
+          "type":"string"
+        },
+        "address4":{
+          "type":"string"
+        },
+        "postCode":{
+          "type":"string"
+        }
+      }
+    },
+    "offence":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "id":{
+          "$ref":"#/definitions/uuid"
+        },
+        "wording":{
+          "type":"string"
+        },
+        "count":{
+          "type":"integer"
+        },
+        "title":{
+          "type":"string"
+        },
+        "legislation":{
+          "type":"string"
+        },
+        "plea":{
+          "$ref":"#/definitions/plea"
+        },
+        "verdict":{
+          "$ref":"#/definitions/verdict"
+        }
+      },
+      "required":[
+        "count",
+        "id",
+        "legislation",
+        "title",
+        "wording"
+      ]
+    },
+    "defendant":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "defendantId":{
+          "$ref":"#/definitions/uuid"
+        },
+        "personId":{
+          "$ref":"#/definitions/uuid"
+        },
+        "firstName":{
+          "type":"string"
+        },
+        "lastName":{
+          "type":"string"
+        },
+        "homeTelephone":{
+          "type":"string"
+        },
+        "mobile":{
+          "type":"string"
+        },
+        "fax":{
+          "type":"string"
+        },
+        "email":{
+          "type":"string"
+        },
+        "address":{
+          "$ref":"#/definitions/address"
+        },
+        "dateOfBirth":{
+          "type":"string"
+        },
+        "offences":{
+          "type":"array",
+          "items":{
+            "$ref":"#/definitions/offence"
+          }
+        }
+      },
+      "required":[
+        "address",
+        "dateOfBirth",
+        "defendantId",
+        "email",
+        "fax",
+        "firstName",
+        "homeTelephone",
+        "lastName",
+        "mobile",
+        "offences",
+        "personId"
+      ]
+    },
+    "case":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "caseId":{
+          "$ref":"#/definitions/uuid"
+        },
+        "caseUrn":{
+          "type":"string"
+        },
+        "defendants":{
+          "type":"array",
+          "items":{
+            "$ref":"#/definitions/defendant"
+          }
+        }
+      },
+      "required":[
+        "caseId",
+        "caseUrn",
+        "defendants"
+      ]
+    },
+    "plea":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "pleaId":{
+          "$ref":"#/definitions/uuid"
+        },
+        "pleaDate":{
+          "type":"string"
+        },
+        "value":{
+          "type":"string"
+        }
+      }
+    },
+    "value":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "id":{
+          "$ref":"#/definitions/uuid"
+        },
+        "category":{
+          "type":"string"
+        },
+        "code":{
+          "type":"string"
+        },
+        "description":{
+          "type":"string"
+        }
+      }
+    },
+    "verdict":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "verdictId":{
+          "$ref":"#/definitions/uuid"
+        },
+        "hearingId":{
+          "$ref":"#/definitions/uuid"
+        },
+        "value":{
+          "$ref":"#/definitions/value"
+        },
+        "verdictDate":{
+          "type":"string"
+        },
+        "numberOfSplitJurors":{
+          "type":"integer"
+        },
+        "numberOfJurors":{
+          "type":"integer"
+        },
+        "unanimous":{
+          "type":"boolean"
+        }
+      }
+    },
+    "uuid":{
+      "type":"string",
+      "pattern":"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }

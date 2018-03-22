@@ -18,6 +18,8 @@ public class ProsecutionAdvocate extends Advocate {
     }
 
     public static class Builder extends Advocate.Builder {
+
+        protected Builder() {}
         
         @Override
         public ProsecutionAdvocate.Builder withStatus(String status) {
@@ -58,5 +60,9 @@ public class ProsecutionAdvocate extends Advocate {
         public ProsecutionAdvocate build() {
              return new ProsecutionAdvocate(this);
          }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 }

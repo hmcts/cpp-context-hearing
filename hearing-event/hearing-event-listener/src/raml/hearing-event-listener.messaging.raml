@@ -9,6 +9,10 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.hearing-initiated.json
             example: !include json/hearing.hearing-initiated.json
 
+        application/vnd.hearing.initiate-hearing-offence-plead+json:
+            schema: !include json/schema/hearing.initiate-hearing-offence-plead.json
+            example: !include json/hearing.initiate-hearing-offence-plead.json
+
         application/vnd.hearing.plea-added+json:
             schema: !include json/schema/hearing.plea-added.json
             example: !include json/hearing.plea-added.json
@@ -45,9 +49,17 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.prosecution-counsel-added.json
             example: !include json/hearing.prosecution-counsel-added.json
 
+        application/vnd.hearing.newprosecution-counsel-added+json:
+            schema: !include json/schema/hearing.newprosecution-counsel-added.json
+            example: !include json/hearing.newprosecution-counsel-added.json
+
         application/vnd.hearing.defence-counsel-added+json:
             schema: !include json/schema/hearing.defence-counsel-added.json
             example: !include json/hearing.defence-counsel-added.json
+
+        application/vnd.hearing.newdefence-counsel-added+json:
+            schema: !include json/schema/hearing.newdefence-counsel-added.json
+            example: !include json/hearing.newdefence-counsel-added.json
 
         application/vnd.hearing.hearing-event-definitions-created+json:
             schema:  !include json/schema/hearing.hearing-event-definitions-created.json

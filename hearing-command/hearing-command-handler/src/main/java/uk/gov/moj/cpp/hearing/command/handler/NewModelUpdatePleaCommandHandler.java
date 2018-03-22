@@ -63,6 +63,7 @@ public class NewModelUpdatePleaCommandHandler {
             applyToOffenceAggregate(offence.getId(), offenceAggregate ->
                     offenceAggregate.updatePlea(
                             hearingUpdatePleaCommand.getHearingId(),
+                            offence.getId(),
                             offence.getPlea()
                     ), command);
         }

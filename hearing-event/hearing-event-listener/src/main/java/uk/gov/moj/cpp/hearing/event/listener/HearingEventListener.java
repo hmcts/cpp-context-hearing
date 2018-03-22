@@ -114,7 +114,6 @@ public class HearingEventListener {
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-
     @Inject
     private HearingRepository hearingRepository;
 
@@ -141,6 +140,7 @@ public class HearingEventListener {
 
     @Inject
     private HearingJudgeRepository hearingJudgeRepository;
+
 
     @Transactional
     @Handles("hearing.hearing-initiated")
@@ -355,7 +355,7 @@ public class HearingEventListener {
 
         defendantIds.forEach(defendantId ->
                 this.defenceCounselDefendantRepository.save(new DefenceCounselDefendant(attendeeId, defendantId)));
-        (new NewHearingEventListener()).defenceCounselAdded(event);
+       // (new NewHearingEventListener()).defenceCounselAdded(event);
     }
 
     @Transactional

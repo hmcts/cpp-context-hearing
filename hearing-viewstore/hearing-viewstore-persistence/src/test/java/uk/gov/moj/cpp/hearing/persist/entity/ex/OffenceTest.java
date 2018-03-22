@@ -35,7 +35,7 @@ public class OffenceTest {
 
     public static Offence buildOffence1(final Ahearing ahearing, final Defendant defendant,
             final LegalCase legalCase) {
-        return new Offence.Builder()
+        return Offence.builder()
                 .withId(new HearingSnapshotKey(UUID.fromString("4b1318e4-1517-4e4f-a89d-6af0eafa5058"), ahearing.getId()))
                 .withDefendant(defendant)
                 .withCase(legalCase)

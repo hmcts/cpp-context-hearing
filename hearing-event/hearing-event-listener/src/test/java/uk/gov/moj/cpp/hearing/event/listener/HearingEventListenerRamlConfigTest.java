@@ -32,11 +32,8 @@ public class HearingEventListenerRamlConfigTest {
     private Map<String, String> hearingLogListenerMethodsToHandlerNames;
 
     private final List<String> handlerNamesToIgnore = asList(
-            //CaseCreated.class.getAnnotation(Event.class).value(),
-            CaseOffenceAdded.class.getAnnotation(Event.class).value(),
-            CaseHearingAdded.class.getAnnotation(Event.class).value(),
 
-            OffenceCreated.class.getAnnotation(Event.class).value(),
+            InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
             OffencePleaUpdated.class.getAnnotation(Event.class).value(),
             OffenceVerdictUpdated.class.getAnnotation(Event.class).value(),
 

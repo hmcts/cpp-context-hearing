@@ -166,6 +166,10 @@ public class Defendant {
             return offences;
         }
 
+        public List<DefendantCase.Builder> getDefendantCases() {
+            return defendantCases;
+        }
+
         public Builder withId(UUID id) {
             this.id = id;
             return this;

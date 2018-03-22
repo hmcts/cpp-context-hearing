@@ -5,12 +5,20 @@ baseUri: message://event/processor/message/hearing
 /hearing.event:
   post:
     body:
+        application/vnd.hearing.initiate-hearing-offence+json:
+            schema: !include json/schema/hearing.command.initiate-hearing-offence.json
+            example: !include json/hearing.command.initiate-hearing-offence.json
+        application/vnd.hearing.initiate-hearing-offence-plea+json:
+            schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
+            example: !include json/hearing.command.initiate-hearing-offence-plea.json
+
         application/vnd.hearing.initiated+json:
             schema: !include json/schema/hearing.initiated.json
             example: !include json/hearing.initiated.json
-        application/vnd.case.added+json:
-            schema: !include json/schema/hearing.case-created.json
-            example: !include json/hearing.case-created.json
+        application/vnd.hearing.initiate-hearing-offence-enriched+json:
+            schema: !include json/schema/hearing.initiate-hearing-offence-enriched.json
+            example: !include json/hearing.initiate-hearing-offence-enriched.json
+
         application/vnd.hearing.results-shared+json:
             schema: !include json/schema/hearing.results-shared.json
             example: !include json/hearing.results-shared.json

@@ -57,7 +57,7 @@
                "fax":"021111111",
                "email":"ken.thompson@acme.me",
                "address":{
-                  "formatedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
+                  "formattedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
                   "address1":"222 Furze Road Exeter",
                   "address2":"Lorem Ipsum",
                   "address3":"Solor",
@@ -103,7 +103,7 @@
                "fax":"021111111",
                "email":"william-nelson.joy@acme.me",
                "address":{
-                  "formatedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
+                  "formattedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
                   "address1":"222 Furze Road Exeter",
                   "address2":"Lorem Ipsum",
                   "address3":"Solor",

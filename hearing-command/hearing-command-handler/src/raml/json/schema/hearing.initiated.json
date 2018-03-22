@@ -153,7 +153,8 @@
         "address",
         "dateOfBirth",
         "defenceOrganisation",
-        "interpreter"
+        "interpreter",
+        "offences"
       ]
     },
     "offence": {

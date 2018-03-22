@@ -1,6 +1,8 @@
 {
-  "caseId": "RANDOM_CASE_ID",
-  "urn": "87GD9945217",
+  "cases": [{
+    "caseId": "000000-0000-0000-000000000000",
+    "urn": "87GD9945217"
+  }],
   "hearing": {
     "id": "f6541c25-825c-6a98-1764-caee654c763a",
     "type": "TRIAL",
@@ -33,16 +35,22 @@
           "postCode": "W1T 1JY"
         },
         "dateOfBirth": "1995-03-23",
-        "bailStatus": "bailed",
-        "custodyTimeLimitDate": "2018-01-30",
         "defenceOrganisation": "Solicitor XYZ",
         "interpreter": {
           "needed": false,
           "language": "English"
         },
+        "defendantCases": [
+          {
+            "caseId": "000000-0000-0000-000000000000",
+            "bailStatus": "bailed",
+            "custodyTimeLimitDate": "2018-01-30",
+          }
+        ],
         "offences": [
           {
             "id": "7e2f843e-d639-40b3-8611-8015f3a18958",
+            "caseId": "000000-0000-0000-000000000000",
             "offenceCode": "H8198",
             "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
             "section": "Section 51",

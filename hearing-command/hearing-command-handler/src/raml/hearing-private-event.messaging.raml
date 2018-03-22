@@ -6,6 +6,18 @@ baseUri: message://command/handler/message/hearing
       responses:
           200:
               body:
+                application/vnd.hearing.initiated+json:
+                    example: !include json/hearing.initiated.json
+                    schema:  !include json/schema/hearing.initiated.json
+
+                application/vnd.hearing.initiate-hearing-offence-enriched+json:
+                    schema: !include json/schema/hearing.initiate-hearing-offence-enriched.json
+                    example: !include json/hearing.initiate-hearing-offence-enriched.json
+
+                application/vnd.hearing.initiate-hearing-offence-plea+json:
+                    schema: !include json/schema/hearing.initiate-hearing-offence-plead.json
+                    example: !include json/hearing.initiate-hearing-offence-plead.json
+
                 application/vnd.hearing.hearing-event-logged+json:
                     schema: !include json/schema/hearing.hearing-event-logged.json
                     example: !include json/hearing.hearing-event-logged.json
@@ -50,9 +62,17 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.prosecution-counsel-added.json
                     example: !include json/hearing.prosecution-counsel-added.json
 
+                application/vnd.hearing.newprosecution-counsel-added+json:
+                    schema: !include json/schema/hearing.newprosecution-counsel-added.json
+                    example: !include json/hearing.newprosecution-counsel-added.json
+
                 application/vnd.hearing.defence-counsel-added+json:
                     schema: !include json/schema/hearing.defence-counsel-added.json
                     example: !include json/hearing.defence-counsel-added.json
+
+                application/vnd.hearing.newdefence-counsel-added+json:
+                    schema: !include json/schema/hearing.newdefence-counsel-added.json
+                    example: !include json/hearing.newdefence-counsel-added.json
 
                 application/vnd.hearing.adjourn-date-updated+json:
                     schema: !include json/schema/hearing.adjourn-date-updated.json

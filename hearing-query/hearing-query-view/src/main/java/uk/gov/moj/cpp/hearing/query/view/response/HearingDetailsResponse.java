@@ -377,7 +377,7 @@ public class HearingDetailsResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonPropertyOrder({
-        "formatedAddress",
+        "formattedAddress",
         "address1",
         "address2",
         "address3",
@@ -386,8 +386,8 @@ public class HearingDetailsResponse {
     })
     public static class Address {
 
-        @JsonProperty("formatedAddress")
-        private String formatedAddress;
+        @JsonProperty("formattedAddress")
+        private String formattedAddress;
         @JsonProperty("address1")
         private String address1;
         @JsonProperty("address2")
@@ -399,18 +399,18 @@ public class HearingDetailsResponse {
         @JsonProperty("postCode")
         private String postCode;
 
-        @JsonProperty("formatedAddress")
-        public String getFormatedAddress() {
-            return formatedAddress;
+        @JsonProperty("formattedAddress")
+        public String getformattedAddress() {
+            return formattedAddress;
         }
 
-        @JsonProperty("formatedAddress")
-        public void setFormatedAddress(String formatedAddress) {
-            this.formatedAddress = formatedAddress;
+        @JsonProperty("formattedAddress")
+        public void setformattedAddress(String formattedAddress) {
+            this.formattedAddress = formattedAddress;
         }
 
-        public Address withFormatedAddress(String formatedAddress) {
-            this.formatedAddress = formatedAddress;
+        public Address withformattedAddress(String formattedAddress) {
+            this.formattedAddress = formattedAddress;
             return this;
         }
 

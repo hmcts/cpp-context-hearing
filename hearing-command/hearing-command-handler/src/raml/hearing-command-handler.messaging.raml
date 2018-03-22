@@ -6,8 +6,17 @@ baseUri:  message://command/handler/message/hearing
   post:
       body:
         application/vnd.hearing.initiate+json:
-                  example: !include json/hearing.initiate.json
-                  schema:  !include json/schema/hearing.initiate.json
+            example: !include json/hearing.initiate.json
+            schema:  !include json/schema/hearing.initiate.json
+
+        application/vnd.hearing.command.initiate-hearing-offence+json:
+            schema: !include json/schema/hearing.command.initiate-hearing-offence.json
+            example: !include json/hearing.command.initiate-hearing-offence.json
+
+        application/vnd.hearing.command.initiate-hearing-offence-plea+json:
+            schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
+            example: !include json/hearing.command.initiate-hearing-offence-plea.json
+
         application/vnd.hearing.initiate-hearing+json:
             example: !include json/hearing.initiate-hearing.json
             schema:  !include json/schema/hearing.initiate-hearing.json

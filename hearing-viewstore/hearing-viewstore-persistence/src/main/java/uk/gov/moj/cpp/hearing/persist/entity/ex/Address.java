@@ -59,6 +59,8 @@ public class Address {
         private String address4;
         private String postCode;
 
+        protected Builder() {}
+
         public Builder withAddress1(String address1) {
             this.address1=address1;
             return this;
@@ -89,6 +91,11 @@ public class Address {
         }
 
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
 
 
 

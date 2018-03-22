@@ -36,8 +36,8 @@ public class DefendantTest {
 
     public static Defendant buildDefendant1(final Ahearing ahearing, final DefenceAdvocate defenseAdvocate1,
             final DefenceAdvocate defenseAdvocate2) {
-        return new Defendant.Builder()
-                        .withId(new HearingSnapshotKey(UUID.fromString("dbd45b1d-cd60-41cf-9cde-7501128fbfe0"), ahearing.getId()))
+              return Defendant.builder()
+                        .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), ahearing.getId()))
                         .withHearing(ahearing)
                         .withPersonId(UUID.fromString("5a6e2001-91ed-4af2-99af-f30ddc9ef5af"))
                         .withFirstName("Ken")
@@ -45,7 +45,7 @@ public class DefendantTest {
                         .withDateOfBirth(parse("1943-02-04T00:00:00Z").toLocalDate())
                         .withNationality("United States")
                         .withGender("M")
-                        .withAddress(new Address.Builder()
+                        .withAddress(Address.builder()
                                 .withAddress1("222 Furze Road Exeter")
                                 .withAddress2("Lorem Ipsum")
                                 .withAddress3("Solor")
@@ -63,8 +63,8 @@ public class DefendantTest {
     
     public static Defendant buildDefendant2(final Ahearing ahearing, final DefenceAdvocate defenseAdvocate1,
             final DefenceAdvocate defenseAdvocate2) {
-        return new Defendant.Builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("dc08d6c5-2e12-4beb-ac7a-4b5de83af657"), ahearing.getId()))
+        return Defendant.builder()
+                .withId(new HearingSnapshotKey(UUID.fromString("3739b4e3-1f81-4d12-a99d-ad27ae672566"), ahearing.getId()))
                 .withHearing(ahearing)
                 .withPersonId(UUID.fromString("98583be4-8d4a-4552-9252-ceccd61d32db"))
                 .withFirstName("William Nelson")
@@ -72,7 +72,7 @@ public class DefendantTest {
                 .withDateOfBirth(parse("1954-11-08T00:00:00Z").toLocalDate())
                 .withNationality("United States")
                 .withGender("M")
-                .withAddress(new Address.Builder()
+                .withAddress(Address.builder()
                         .withAddress1("222 Furze Road Exeter")
                         .withAddress2("Lorem Ipsum")
                         .withAddress3("Solor")

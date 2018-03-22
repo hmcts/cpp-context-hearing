@@ -263,6 +263,8 @@ public class Defendant {
 
         private List<DefenceAdvocate> defenceAdvocates;
 
+        protected Builder() {}
+
         public Builder withId(final HearingSnapshotKey id) {
             this.id = id;
             return this;
@@ -371,6 +373,10 @@ public class Defendant {
         public Defendant build() {
             return new Defendant(this);
         }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
 

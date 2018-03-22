@@ -33,7 +33,7 @@ public class LegalCaseTest {
     }
 
     public static LegalCase buildLegalCase1() {
-        return new LegalCase.Builder()
+        return LegalCase.builder()
                 .withId(UUID.fromString("9b70743c-69b3-4ac2-a362-8c720b32e45b"))
                 .withCaseurn("8C720B32E45B")
                 .build();

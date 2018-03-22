@@ -19,9 +19,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
-import uk.gov.moj.cpp.hearing.domain.event.CaseCreated;
-import uk.gov.moj.cpp.hearing.domain.event.CaseHearingAdded;
-import uk.gov.moj.cpp.hearing.domain.event.CaseOffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
@@ -35,8 +32,8 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceCreated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -87,10 +84,10 @@ public class NewModelUpdatePleaCommandHandlerTest {
     private final Enveloper enveloper = createEnveloperWithEvents(
             //new events.
             Initiated.class,
-            CaseCreated.class,
-            CaseOffenceAdded.class,
-            CaseHearingAdded.class,
+
             OffencePleaUpdated.class,
+            OffenceVerdictUpdated.class,
+
             //TODO - GPE-3032 CLEANUP - remove old events.
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
             RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
@@ -133,13 +130,7 @@ public class NewModelUpdatePleaCommandHandlerTest {
                 )
                 .build();
 
-        setupMockedEventStream(hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getId(), this.offenceEventStream, new OffenceAggregate(), offenceAggregate -> {
-            offenceAggregate.apply(new OffenceCreated(
-                    hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getId(),
-                    hearingUpdatePleaCommand.getCaseId(),
-                    hearingUpdatePleaCommand.getDefendants().get(0).getId()
-            ));
-        });
+        setupMockedEventStream(hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getId(), this.offenceEventStream, new OffenceAggregate());
 
         final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID("hearing.update-plea"), objectToJsonObjectConverter.convert(hearingUpdatePleaCommand));
 
@@ -150,10 +141,8 @@ public class NewModelUpdatePleaCommandHandlerTest {
                         withMetadataEnvelopedFrom(addPleaCommand)
                                 .withName("hearing.offence-plea-updated"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.caseId", equalTo(hearingUpdatePleaCommand.getCaseId().toString())),
                                 withJsonPath("$.originHearingId", equalTo(hearingUpdatePleaCommand.getHearingId().toString())),
                                 withJsonPath("$.offenceId", equalTo(hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
-                                withJsonPath("$.pleaId", equalTo(hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea().getId().toString())),
                                 withJsonPath("$.pleaDate", equalTo(hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea().getPleaDate().toString())),
                                 withJsonPath("$.value", equalTo(hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea().getValue()))
                         )))

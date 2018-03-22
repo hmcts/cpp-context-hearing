@@ -1,42 +1,97 @@
 {
-  "hearings": [
-    {
-      "hearingId": "23EF34EC-63E5-422E-8071-9B3753008C10",
-      "hearingType": "TRIAL",
-      "caseUrn": [
-        "32GD9387517"
-      ],
-      "defendants": [
-        {
-          "firstName": "Mark",
-          "lastName": "Zuckerberg"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties":false,
+  "properties": {
+    "hearings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/hearing"
+      }
+    }
+  },
+  "required": [
+    "hearings"
+  ],
+  "definitions": {
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "hearingId": {
+        "$ref": "#/definitions/uuid"
         },
-        {
-          "firstName": "Sean",
-          "lastName": "Parker"
+        "hearingType": {
+          "type": "string"
+        },
+        "caseUrn": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "defendants": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "firstName",
+                "lastName"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "firstName",
+                "lastName"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "firstName",
+                "lastName"
+              ]
+            }
+          ]
         }
+      },
+      "required": [
+        "hearingId",
+        "hearingType",
+        "caseUrn",
+        "defendants"
       ]
     },
-    {
-      "hearingId": "1DAEFEC3-2F76-8109-82D9-2E60544A6C01",
-      "hearingType": "TRIAL",
-      "caseUrn": [
-        "32GD9387518"
-      ],
-      "defendants": [
-        {
-          "firstName": "Larry",
-          "lastName": "Wall"
-        },
-        {
-          "firstName": "Dennis",
-          "lastName": "Ritchie"
-        },
-        {
-          "firstName": "James",
-          "lastName": "Gosling"
-        }
-      ]
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
-  ]
+  }
 }

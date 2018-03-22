@@ -48,6 +48,8 @@ public class LegalCase {
 
         private String caseurn;
 
+        private Builder() {}
+
         public Builder withId(final java.util.UUID id) {
             this.id = id;
             return this;
@@ -64,4 +66,9 @@ public class LegalCase {
 
 
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
 }

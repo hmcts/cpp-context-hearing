@@ -82,6 +82,8 @@ public class Attendee {
         private String lastName;
         private String title;
 
+        protected Builder() {}
+
         public Attendee.Builder withId(HearingSnapshotKey id) {
             this.id = id;
             return this;

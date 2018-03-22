@@ -42,6 +42,7 @@ import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import javax.jms.MessageConsumer;
@@ -115,6 +116,7 @@ public class HearingStepDefinitions extends AbstractIT {
 
         poll(requestParams(getQueryForHearingDetailsUrl(hearingId), MEDIA_TYPE_GET_HEARING_DETAILS)
                 .withHeader(USER_ID, getLoggedInUser()))
+                .timeout(30, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(

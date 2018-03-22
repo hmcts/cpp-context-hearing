@@ -10,15 +10,21 @@ import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.domain.event.CaseCreated;
+import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 
@@ -27,7 +33,10 @@ import javax.json.JsonObject;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -49,83 +58,95 @@ public class NewHearingEventListener {
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
+    private Offence.Builder translateOffence(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.initiate.Offence offenceIn, final Map<UUID, LegalCase> id2Case) {
+        final HearingSnapshotKey offenceId = new HearingSnapshotKey(offenceIn.getId(), hearingId);
+        if (!id2Case.containsKey(offenceIn.getCaseId())) {
+            //should not happen
+            final String strMessage = String.format("hearing %s offence %s unknown case %s", hearingId, offenceIn.getId(), offenceIn.getCaseId() );
+            LOGGER.error(strMessage);
+            throw new RuntimeException(strMessage);
+        }
+        return Offence.builder().withId(offenceId)
+                //TODO review this loss of information
+                .withConvictionDate(offenceIn.getConvictionDate()==null?null:offenceIn.getConvictionDate().atStartOfDay())
+                //TODO review where legislation is coming from
+                //.withLegislation(offenceIn.g)
+                .withCase(id2Case.get(offenceIn.getCaseId()))
+                .withCode(offenceIn.getOffenceCode()).withCount(offenceIn.getCount());
+    }
+
+    private Defendant.Builder translateDefendant(UUID hearingId, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendantIn) {
+
+
+        Address address = null;
+
+        uk.gov.moj.cpp.hearing.command.initiate.Address addressIn = defendantIn.getAddress();
+        if (addressIn != null) {
+            address = Address.builder()
+                    .withAddress1(addressIn.getAddress1())
+                    .withAddress2(addressIn.getAddress2())
+                    .withAddress3(addressIn.getAddress3())
+                    .withAddress4(addressIn.getAddress4())
+                    .withPostCode(addressIn.getPostCode()).build();
+        }
+        return Defendant.builder().withAddress(address)
+                .withDateOfBirth(defendantIn.getDateOfBirth())
+                //TODO where should email + fax + homeTelephone come from ?
+                //.withEmail(defendantIn.getEmail)
+                //.withFax(defendantIn.getFax)
+                //.withHomeTelephone(defendantIn.get..)
+                //TODO remove this - see comment above
+                //.withDefenceAdvocates(Arrays.asList(defenceAdvocateBuilder.build()))
+                .withNationality(defendantIn.getNationality())
+                .withFirstName(defendantIn.getFirstName())
+                .withLastName(defendantIn.getLastName())
+                .withGender(defendantIn.getGender())
+                .withId(new HearingSnapshotKey(defendantIn.getId(), hearingId));
+    }
+
+
     @Transactional
     @Handles("hearing.initiated")
     public void newHearingInitiated(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.error("TODO remove me 2 *************************hearing.initiated payload:" + payload);
         final InitiateHearingCommand initiated = jsonObjectToObjectConverter.convert(payload, InitiateHearingCommand.class);
         final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing = initiated.getHearing();
         final List<Defendant> defendants = new ArrayList<>();
+        final Map<UUID, LegalCase> id2Case = new HashMap<>();
+        initiated.getCases().forEach(
+                (caseIn) -> {
+                    LegalCase legalCase = legalCaseRepository.findById(caseIn.getCaseId());
+                    if (null==legalCase) {
+                        legalCase = LegalCase.builder().withId(caseIn.getCaseId()).withCaseurn(caseIn.getUrn()).build();
+                        id2Case.put(legalCase.getId(), legalCase);
+                        legalCaseRepository.save(legalCase);
+                    }
+                }
+        );
 
-        final UUID hearingId = initiated.getHearing().getId();
-
-///        final String caseurn = initiated.getCases().get(0).getUrn();
-        //TODO move this to offence level
-   ///     final UUID caseId = initiated.getCases().get(0).getCaseId();
-
-        //TODO attach legalcase to offence
-
-        //this.legalCaseRepository.save(legalCase);
-
-        Function<uk.gov.moj.cpp.hearing.command.initiate.Offence, Offence.Builder> translateOffence = (offenceIn) -> {
-            final HearingSnapshotKey offenceId = new HearingSnapshotKey(offenceIn.getId(), hearing.getId());
-            LegalCase legalCase = this.legalCaseRepository.findBy(offenceIn.getCaseId());
-            if (legalCase==null) {
-                //TODO determine if this is an error conditons
-                LOGGER.error("got offence before case is known caseId: " + offenceIn.getCaseId());
-                legalCase = new LegalCase.Builder().withId(offenceIn.getCaseId()).build();
-            }
-            return new Offence.Builder().withId(offenceId).withCase(legalCase).withCode(offenceIn.getOffenceCode()).withCount(offenceIn.getCount());
-        };
-
-        Function<uk.gov.moj.cpp.hearing.command.initiate.Defendant, Defendant.Builder> translateDefendant = (defendantIn) -> {
-            //TODO - ugly null checks !
-            //TODO get this form somewhere real !
-            DefenceAdvocate.Builder defenceAdvocateBuilder = (DefenceAdvocate.Builder)
-                    new DefenceAdvocate.Builder().withLastName("Bowie").withFirstName("David").withId(
-                            new HearingSnapshotKey( UUID.randomUUID(), hearing.getId())
-                    ).withPersonId(UUID.randomUUID());
-
-            Address address = null;
-
-            uk.gov.moj.cpp.hearing.command.initiate.Address addressIn = defendantIn.getAddress();
-            if (addressIn!=null) {
-                address = new Address.Builder()
-                        .withAddress1(addressIn.getAddress1())
-                        .withAddress2(addressIn.getAddress2())
-                        .withAddress3(addressIn.getAddress3())
-                        .withAddress4(addressIn.getAddress4())
-                        .withPostCode(addressIn.getPostCode()).build();
-            }
-            return new Defendant.Builder().withAddress(address)
-                    .withDefenceAdvocates(Arrays.asList(defenceAdvocateBuilder.build()))
-                    .withId(new HearingSnapshotKey(defendantIn.getId(), hearing.getId()));
-        };
 
         Function<Judge, uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.Builder> translateJudge = (judgeIn) -> {
-            return (uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.Builder) new uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.Builder()
+            return (uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.Builder) uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.builder()
                     .withFirstName(judgeIn.getFirstName())
                     .withLastName(judgeIn.getLastName())
                     .withTitle(judgeIn.getTitle());
-        } ;
+        };
 
 
         hearing.getDefendants().forEach(
                 defendantIn -> {
-                    Defendant defendant = translateDefendant.apply(defendantIn).build();
+                    Defendant defendant = translateDefendant(hearing.getId(), defendantIn).build();
                     defendants.add(defendant);
                     defendant.setOffences(new ArrayList<>());
                     defendantIn.getOffences().forEach(
-                            offenceIn -> defendant.getOffences().add(translateOffence.apply(offenceIn).withDefendant(defendant).build())
+                            offenceIn -> defendant.getOffences().add(translateOffence(hearing.getId(), offenceIn, id2Case).withDefendant(defendant).build())
                     );
                 }
         );
 
-        //TODO resolve whether this can be an update !
         uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.Builder judgeBuilder = translateJudge.apply(hearing.getJudge());
         judgeBuilder.withId(new HearingSnapshotKey(hearing.getJudge().getId(), hearing.getId()));
-        Ahearing hearingex = (new Ahearing.Builder()).withId(hearing.getId())
+        Ahearing hearingex = Ahearing.builder().withId(hearing.getId())
                 .withHearingType(hearing.getType())
                 .withCourtCentreId(hearing.getCourtCentreId())
                 .withCourtCentreName(hearing.getCourtCentreName())
@@ -134,69 +155,111 @@ public class NewHearingEventListener {
                 .withDefendants(defendants)
                 .withJudge(judgeBuilder)
                 .build();
-        //make sure the defence advocates are included
-        defendants.forEach(
-                d->hearingex.getAttendees().addAll(d.getDefenceAdvocates())
-        );
+
         this.ahearingRepository.save(hearingex);
         //TODO resnapshot
     }
 
 
+    //TODO remove this
+    @Transactional
+    @Handles("hearing.initiate-hearing-offence-plead")
+    public void hearingInitiatedPleaData(final JsonEnvelope event) {
+        LOGGER.error("HERE HERE HERE - we have received plea info");
+    }
+
+
+
     @Transactional
     @Handles("hearing.case-created")
     public void caseCreated(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.error("TODO remove me START *************************hearing.case-created payload:" + payload);
-        final CaseCreated caseCreated = jsonObjectToObjectConverter.convert(payload, CaseCreated.class);
-        LegalCase legalCase =  legalCaseRepository.findBy(caseCreated.getCaseId());
-        if (legalCase==null) {
-            LOGGER.error("TODO remove me CREATing CASE *************************hearing.case-created creating case " + caseCreated.getCaseId());
-            legalCase = new LegalCase.Builder().withId(caseCreated.getCaseId()).withCaseurn(caseCreated.getUrn()).build();
-            LOGGER.error("TODO remove me CREATED CASE *************************hearing.case-created created case "  + caseCreated.getCaseId());
+    }
 
+    private DefenceAdvocate findDefenceAdvocateByAttendeeId(Ahearing hearing, UUID attendeeId) {
+        Optional<Attendee> oAttendee = hearing.getAttendees().stream().filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(attendeeId)).findFirst();
+        DefenceAdvocate defenceAdvocate = null;
+        if (oAttendee.isPresent()) {
+            defenceAdvocate = (DefenceAdvocate) oAttendee.get();
         } else {
-            //TODO acept a new caseurn or does a different caseurn indicate an error ?
-            LOGGER.error("TODO remove me 2 updateing CASE *************************hearing.case-created updating case " + caseCreated.getCaseId());
-            legalCase.setCaseurn(caseCreated.getUrn());
-            LOGGER.error("TODO remove me 2 UPDATED CASE *************************hearing.case-created updated case " + caseCreated.getCaseId());
-
+            //TODO extend command to include these
+            defenceAdvocate = DefenceAdvocate.builder().withId(new HearingSnapshotKey(attendeeId, hearing.getId())).withTitle("QC").withLastName("unknown").withFirstName("firstName").build();
+            hearing.getAttendees().add(defenceAdvocate);
         }
-        LOGGER.error("TODO remove me 2 SAVING CASE *************************hearing.case-created saving case " + caseCreated.getCaseId());
-        this.legalCaseRepository.save(legalCase);
-        LOGGER.error("TODO remove me 2 SAVED CASE *************************hearing.case-created saved case " + caseCreated.getCaseId());
+        return defenceAdvocate;
     }
 
     @Transactional
-    //@Handles("hearing.defence-counsel-addedNEW")
-    public void defenceCounselAdded(final JsonEnvelope event) {
+    @Handles("hearing.newdefence-counsel-added")
+    public void newDefenceCounselAdded(final JsonEnvelope event) {
+        String strContext = getClass().getSimpleName() + "::" + "hearing.newdefence-counsel-added";
         final JsonObject payload = event.payloadAsJsonObject();
+        NewDefenceCounselAdded newDefenceCounselAdded = jsonObjectToObjectConverter.convert(payload, NewDefenceCounselAdded.class);
 
-        LOGGER.error("TODO remove me 2 *************************hearing.defence-counsel-added payload:" + payload);
+        Ahearing hearing = ahearingRepository.findBy(newDefenceCounselAdded.getHearingId());
+        if (null == hearing) {
+            throw new RuntimeException(strContext + "  cant find hearing " + newDefenceCounselAdded.getHearingId());
+        }
+        final DefenceAdvocate defenceAdvocate = findDefenceAdvocateByAttendeeId(hearing, newDefenceCounselAdded.getAttendeeId());
+        defenceAdvocate.setStatus(newDefenceCounselAdded.getStatus());
 
-        /*final JsonObject payload = event.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
-        final UUID attendeeId = fromString(payload.getString(FIELD_ATTENDEE_ID));
-        final String status = payload.getString(FIELD_STATUS);
+        newDefenceCounselAdded.getDefendantIds().forEach(
+                did->{
+                    Optional<Defendant> defendant = hearing.getDefendants().stream().filter(d->d.getId().getId().equals(did)).findFirst();
+                    if (!defendant.isPresent()) {
+                         String message = String.format("hearing %s defence counsel %s added for unkown defendant %s ", hearing.getId(), newDefenceCounselAdded.getAttendeeId(), did  );
+                         LOGGER.error(message);
+                         //TODO should throw an exception ?
+                        throw new RuntimeException(message);
+                    } else {
+                        //TODO should check whether its already been added ?
+                        defenceAdvocate.getDefendants().add(defendant.get());
+                    }
+                }
+        );
 
-        final List<UUID> defendantIds = JsonObjects.getUUIDs(payload, FIELD_DEFENDANT_IDS);
+        ahearingRepository.save(hearing);
 
-        this.defenceCounselRepository.save(new DefenceCounsel(attendeeId, hearingId, personId, status));
-
-        final List<DefenceCounselDefendant> existingDefendants =
-                this.defenceCounselDefendantRepository.findByDefenceCounselAttendeeId(attendeeId);
-
-        existingDefendants.stream()
-                .filter(defendant -> !defendantIds.contains(defendant.getDefendantId()))
-                .forEach(this.defenceCounselDefendantRepository::remove);
-
-        defendantIds.forEach(defendantId ->
-                this.defenceCounselDefendantRepository.save(new DefenceCounselDefendant(attendeeId, defendantId)));
-                */
     }
 
+    @Transactional
+    @Handles("hearing.newprosecution-counsel-added")
+    public void newProsecutionCounselAdded(final JsonEnvelope event) {
+        String context = getClass().getSimpleName() + "::newProsecutionCounselAdded: ";
+        NewProsecutionCounselAdded prosecutionCounselAdded = (NewProsecutionCounselAdded) jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NewProsecutionCounselAdded.class);
+        LOGGER.error(context + prosecutionCounselAdded);
 
+        if (ahearingRepository == null) {
+            throw new RuntimeException(context + " ahearingRepository not available ");
+        }
 
+        Ahearing hearing = ahearingRepository.findBy(prosecutionCounselAdded.getHearingId());
+
+        // assume there is 1 case only
+        if (hearing == null) {
+            throw new RuntimeException(context + " hearing not found " + prosecutionCounselAdded.getHearingId());
+        }
+
+        Optional<ProsecutionAdvocate> existing = hearing.getAttendees().stream().filter(a -> a instanceof ProsecutionAdvocate)
+                .map(a -> (ProsecutionAdvocate) a).filter(a -> a.getId().getId().equals(prosecutionCounselAdded.getAttendeeId())).findFirst();
+        existing.ifPresent(
+                p -> p.setStatus(prosecutionCounselAdded.getStatus())
+        );
+        if (!existing.isPresent()) {
+            HearingSnapshotKey id = new HearingSnapshotKey(prosecutionCounselAdded.getAttendeeId(), prosecutionCounselAdded.getHearingId());
+            ProsecutionAdvocate prosecutionAdvocate = ProsecutionAdvocate.builder()
+                    .withStatus(prosecutionCounselAdded.getStatus())
+                    .withFirstName(prosecutionCounselAdded.getFirstName())
+                    .withLastName(prosecutionCounselAdded.getLastName())
+                    .withTitle(prosecutionCounselAdded.getTitle())
+                    .withPersonId(prosecutionCounselAdded.getPersonId()).withId(id).build();
+            if (hearing.getAttendees() == null) {
+                hearing.setAttendees(new ArrayList<>());
+            }
+            hearing.getAttendees().add(prosecutionAdvocate);
+        }
+
+        //TODO link counsel to case ?
+        ahearingRepository.save(hearing);
+    }
 
 }

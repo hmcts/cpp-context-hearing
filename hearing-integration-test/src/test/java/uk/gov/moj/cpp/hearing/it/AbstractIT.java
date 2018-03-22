@@ -4,8 +4,11 @@ import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -14,6 +17,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -24,8 +29,15 @@ import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -105,12 +117,59 @@ public class AbstractIT {
         requestSpec = new RequestSpecBuilder().setBaseUri(baseUri).build();
     }
 
+    protected static Matcher<String> equalStr(final Object bean, final String name) {
+        return equalTo(getString(bean, name));
+    }
+
+    protected static Matcher<String> equalStr(final Object bean, final char separator, String... names) {
+        return equalTo(StringUtils.join(Stream.of(names).map(name -> getString(bean, name).trim()).collect(toList()), separator).trim());
+    }
+
+    protected static Matcher<String> equalStr(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {
+        return equalTo(getString(bean, name, dateTimeFormatter));
+    }
+
+    protected static Matcher<Integer> equalInt(final Object bean, final String name) {
+        return equalTo(getInteger(bean, name));
+    }
+
+    protected static String getString(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {
+        try {
+            final Temporal dateTime = (Temporal) PropertyUtils.getNestedProperty(bean, name);
+            if (dateTime instanceof LocalDate) {
+                return dateTimeFormatter.format(((LocalDate) dateTime).atStartOfDay());
+            }
+            return dateTimeFormatter.format(dateTime);
+        } catch (Exception e) {
+            LOGGER.error("Cannot get string property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
+            return EMPTY;
+        }
+    }
+
+    protected static String getString(final Object bean, final String name) {
+        try {
+            return EMPTY + PropertyUtils.getNestedProperty(bean, name);
+        } catch (Exception e) {
+            LOGGER.error("Cannot get string property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
+            return EMPTY;
+        }
+    }
+
+    protected static Integer getInteger(final Object bean, final String name) {
+        try {
+            return Integer.parseInt(getString(bean, name));
+        } catch (Exception e) {
+            LOGGER.error("Cannot get integer property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
+            return null;
+        }
+    }
+
     protected String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path),
                 defaultCharset());
     }
 
-    public Matcher<ResponseData> print() {
+    public static Matcher<ResponseData> print() {
         return new BaseMatcher<ResponseData>() {
             @Override
             public boolean matches(Object o) {

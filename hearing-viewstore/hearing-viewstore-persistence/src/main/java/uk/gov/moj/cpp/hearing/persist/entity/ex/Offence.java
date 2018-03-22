@@ -226,6 +226,8 @@ public class Offence {
 
         private String wording;
 
+        protected Builder() {}
+
         public String title;
 
         public String legislation;
@@ -374,5 +376,8 @@ public class Offence {
         }
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
 
 }

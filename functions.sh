@@ -3,8 +3,8 @@
 function buildWars {
   echo
   echo "Building wars."
-  mvn clean install -nsu
-  echo "\n"
+  mvn clean install -nsu ${@}
+  echo
   echo "Finished building wars"
 }
 
@@ -113,8 +113,31 @@ function runLiquibase {
 }
 
 function buildDeployAndTest {
-  buildWars
-  deployAndTest
+
+  local OPTIND
+  local SKIP_UNIT_TESTS
+  local SKIP_INTEGRATION_TESTS="false"
+
+  while getopts ":miA" OPTION; do
+    case "${OPTION}" in
+      m)
+        SKIP_UNIT_TESTS="-DskiptTests"
+	printf '\e[1;92m%-6s\e[m' "${0##*/}: Skiping the maven unit tests" ;;
+      i)
+	printf '\e[1;92m%-6s\e[m' "${0##*/}: Skiping the health check and integration tests" ;;
+      A)
+        SKIP_UNIT_TESTS="-DskiptTests"
+        SKIP_INTEGRATION_TESTS="true"
+	printf '\e[1;92m%-6s\e[m' "${0##*/} Skiping all tests" ;;
+      *) 
+        usage ;;
+    esac
+  done
+
+  shift $((OPTIND-1))
+
+  buildWars ${SKIP_UNIT_TESTS}
+  deployAndTest ${SKIP_INTEGRATION_TESTS}
 }
 
 function deployAndTest {
@@ -124,7 +147,27 @@ function deployAndTest {
   createEventLog
   runLiquibase
   runEventBufferLiquibase
-  healthCheck
-  integrationTests
+  if [[ "false" == "${1}" ]]; then
+    healthCheck
+    integrationTests
+  fi
 }
 
+
+function usage() {
+  cat <<EOF
+Usage: ${0##*/} [OPTION]
+
+  -A	equivalent to -si
+  -m	skip the maven unit tests
+  -i	skip the health check and integration tests
+  -h	show this help usage
+
+Examples:
+${0##*/} -A	Skip all tests
+${0##*/} -m	Skip only the maven unit tests
+${0##*/} -i	Skip the helth check and integration tests 
+
+EOF
+  exit 1
+}

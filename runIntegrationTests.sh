@@ -20,7 +20,7 @@ declare -rx EVENT_BUFFER_VERSION=1.0.0
 #fail script on error
 set -e
 
-. functions.sh
+source functions.sh
 
-buildDeployAndTest
+buildDeployAndTest ${@}
 

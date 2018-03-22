@@ -14,76 +14,54 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse.Hearing;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponseDefendant;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponseHearing;
 
-/**
- * HearingDetailsResponseConverter. Deep conversion from a list of objects {@link Ahearing} to an object {@link HearingListResponse}
- */
 public final class HearingListResponseConverter implements Converter<List<Ahearing>, HearingListResponse> {
     
     private static final HearingListResponseConverter HEARING_LIST_RESPONSE_CONVERTER = new HearingListResponseConverter();
     private static final HearingConverter HEARING_CONVERTER = new HearingConverter();
     
-    /**
-     * @param source
-     * @return
-     */
     public static HearingListResponse toHearingListResponse(final List<Ahearing> source) {
         return HEARING_LIST_RESPONSE_CONVERTER.convert(source);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see uk.gov.justice.services.common.converter.Converter#convert(java.lang.Object)
-     */
     @Override
     public HearingListResponse convert(final List<Ahearing> source) {
         if (CollectionUtils.isEmpty(source)) {
-            return new HearingListResponse();
+            return null;
         }
-        return new HearingListResponse()
-                .withHearings(source.stream().map(h -> convert(h)).collect(toList()));
+        return HearingListResponse.builder()
+                .withHearings(source.stream().map(h -> convert(h)).collect(toList()))
+                .build();
     }
 
-    /**
-     * @param hearing
-     * @return
-     */
-    private Hearing convert(final Ahearing hearing) {
+    private HearingListResponseHearing convert(final Ahearing hearing) {
         return HEARING_CONVERTER.convert(hearing);
     }
     
     // HearingConverter
     //-----------------------------------------------------------------------
-    /**
-     * HearingConverter. Converts an object {@link Ahearing} to an object {@link HearingListResponse.Hearing}
-     */
-    private static final class HearingConverter implements Converter<Ahearing, HearingListResponse.Hearing> {
+    private static final class HearingConverter implements Converter<Ahearing, HearingListResponseHearing> {
 
         private static final DefendantConverter DEFENDANT_CONVERTER = new DefendantConverter();
 
-        /*
-         * (non-Javadoc)
-         * @see uk.gov.justice.services.common.converter.Converter#convert(java.lang.Object)
-         */
         @Override
-        public HearingListResponse.Hearing convert(final Ahearing source) {
+        public HearingListResponseHearing convert(final Ahearing source) {
             if (null == source || null == source.getId()) {
                 return null;
             }
             final List<Defendant> defendants = source.getDefendants();
             final Set<Offence> offences = defendants.stream().flatMap(d -> d.getOffences().stream()).collect(toSet());
-            return new HearingListResponse.Hearing()
+            return HearingListResponseHearing.builder()
                     .withHearingId(source.getId().toString())
                     .withHearingType(source.getHearingType())
                     .withCaseUrn(offences.stream().map(o -> o.getLegalCase().getCaseurn()).collect(toList()))
-                    .withDefendants(defendants.stream().map(convert()).collect(toList()));
+                    .withDefendants(defendants.stream().map(convert()).collect(toList()))
+                    .build();
         }
 
-        /**
-         * @return
-         */
-        private Function<? super Defendant, ? extends HearingListResponse.Defendant> convert() {
+        private Function<? super Defendant, ? extends HearingListResponseDefendant> convert() {
             return d -> DEFENDANT_CONVERTER.convert(d);
         }
         
@@ -91,19 +69,17 @@ public final class HearingListResponseConverter implements Converter<List<Aheari
     
     // DefendantConverter
     //-----------------------------------------------------------------------
-    /**
-     * DefendantConverter. Converts an object {@link Defendant} to an object {@link HearingListResponse.Defendant} 
-     */
-    private static final class DefendantConverter implements Converter<Defendant, HearingListResponse.Defendant> {
+    private static final class DefendantConverter implements Converter<Defendant, HearingListResponseDefendant> {
 
         @Override
-        public HearingListResponse.Defendant convert(final Defendant source) {
+        public HearingListResponseDefendant convert(final Defendant source) {
             if (null == source) {
                 return null;
             }
-            return new HearingListResponse.Defendant()
+            return HearingListResponseDefendant.builder()
                     .withFirstName(source.getFirstName())
-                    .withLastName(source.getLastName());
+                    .withLastName(source.getLastName())
+                    .build();
         }
     }
 }

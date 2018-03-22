@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,8 +13,8 @@ import javax.persistence.ManyToMany;
 public class DefenceAdvocate extends Advocate {
 
     @ManyToMany(mappedBy = "defenceAdvocates")
-    private List<Defendant> defendants;
-    
+    private List<Defendant> defendants=new ArrayList<>();
+
     public DefenceAdvocate() {
 
     }
@@ -24,13 +25,13 @@ public class DefenceAdvocate extends Advocate {
     public List<Defendant> getDefendants() {
         return defendants;
     }
-    
+
     public void setDefendants(final List<Defendant> defendants) {
         this.defendants = defendants;
     }
 
     public static class Builder extends Advocate.Builder {
-        
+
         @Override
         public DefenceAdvocate.Builder withStatus(String status) {
             super.withStatus(status);
@@ -67,9 +68,15 @@ public class DefenceAdvocate extends Advocate {
             return this;
         }
 
+
+        protected Builder() {}
         @Override
         public DefenceAdvocate build() {
             return new DefenceAdvocate(this);
         }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 }

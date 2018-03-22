@@ -36,7 +36,6 @@ public class HearingEventProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
 
-    private static final String PUBLIC_HEARING_INITIATED = "public.hearing.initiated";
     private static final String PUBLIC_HEARING_RESULTED = "public.hearing.resulted";
     private static final String PUBLIC_HEARING_RESULT_AMENDED = "public.hearing.result-amended";
     private static final String PUBLIC_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
@@ -47,8 +46,6 @@ public class HearingEventProcessor {
     private static final String PUBLIC_HEARING_UPDATE_PLEA_IGNORED = "public.hearing.update-plea-ignored";
     private static final String PUBLIC_HEARING_UPDATE_VERDICT_IGNORED = "public.hearing.update-verdict-ignored";
 
-
-    private static final String FIELD_ID = "id";
     private static final String FIELD_HEARING_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_LAST_HEARING_EVENT_ID = "lastHearingEventId";
@@ -114,15 +111,6 @@ public class HearingEventProcessor {
     @Handles("hearing.draft-result-saved")
     public void publicDraftResultSavedPublicEvent(final JsonEnvelope event) {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_DRAFT_RESULT_SAVED).apply(event.payloadAsJsonObject()));
-    }
-
-    @Handles("hearing.initiated")
-    public void hearingInitiated(final JsonEnvelope event) {
-        JsonString hearingId = event.payloadAsJsonObject().getJsonObject(FIELD_HEARING).getJsonString(FIELD_ID);
-
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_INITIATED).apply(createObjectBuilder()
-                .add(FIELD_HEARING_ID, hearingId)
-                .build()));
     }
 
     @Handles("hearing.hearing.confirmed-recorded")

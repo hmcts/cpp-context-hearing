@@ -33,7 +33,7 @@ public class JudgeTest {
     }
 
     public static Judge buildJudge(final Ahearing ahearing) {
-        return new Judge.Builder()
+        return Judge.builder()
                 .withId(new HearingSnapshotKey(UUID.fromString("a38d0d5f-a26c-436b-9b5e-4dc58f28878d"), ahearing.getId()))
                 .withPersonId(UUID.fromString("c8912678-213f-421a-89c8-d0dc87ac3558"))
                 .withFirstName("Alan")

@@ -387,9 +387,20 @@ public class HearingEventStepDefinitions extends AbstractIT {
         final List<String> counselIds = defenceCounsels.stream().map(defenceCounsel -> defenceCounsel.getPersonId().toString()).collect(toList());
         final List<String> defendantIds = defenceCounsels.stream().map(defenceCounsel -> defenceCounsel.getMapOfDefendantIdToNames().keySet().stream().findFirst().get().toString()).collect(toList());
 
+        System.out.println("defendant ids ");
+        for (String defendantId: defendantIds){
+            System.out.println(defendantId);
+        }
+
+        System.out.println("counsel ids ");
+        for (String counselId: counselIds){
+            System.out.println(counselId);
+        }
+
         poll(requestParams(getQueryEventDefinitionsUrl(hearingId), MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
                 .until(
                         status().is(OK),
+                        print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.eventDefinitions[*].actionLabel", hasItems("<counsel.name>")),
                                 withJsonPath("$.eventDefinitions[*].recordedLabel", hasItems("Defence <counsel.name> mitigated for <defendant.name>")),

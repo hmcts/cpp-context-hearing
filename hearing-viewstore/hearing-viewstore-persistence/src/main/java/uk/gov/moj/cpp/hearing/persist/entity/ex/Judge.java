@@ -19,15 +19,25 @@ public class Judge extends Attendee {
     }
 
     public static class Builder extends Attendee.Builder {
-        
+
+        protected Builder() {}
+
+         @SuppressWarnings("unchecked")
+
         public Judge.Builder withId(HearingSnapshotKey id) {
             super.withId(id);
             return this;
         }
-        
+
         @SuppressWarnings("unchecked")
         public Judge build() {
-            return new Judge(this);
-        }
+             return new Judge(this);
+         }
+
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
 }

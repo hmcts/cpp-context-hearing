@@ -61,6 +61,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
@@ -77,6 +78,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
@@ -235,6 +238,13 @@ public class HearingEventListenerTest {
 
     @Mock
     private HearingCaseRepository hearingCaseRepository;
+
+    //TODO eventually these become part of NewHearingEventListener
+    @Mock
+    private AhearingRepository ahearingRepository;
+
+    @Mock
+    private LegalCaseRepository legalCaseRepository;
 
     @Captor
     private ArgumentCaptor<uk.gov.moj.cpp.hearing.persist.entity.Hearing> hearingArgumentCaptor;
@@ -494,6 +504,8 @@ public class HearingEventListenerTest {
     @Test
     public void shouldHandleProsecutionCounselAddedEvent() {
         final JsonEnvelope event = getAddProsecutionCounselJsonEnvelope();
+
+        when(ahearingRepository.findBy(HEARING_ID)).thenReturn(Ahearing.builder().build());
 
         this.hearingEventListener.prosecutionCounselAdded(event);
 

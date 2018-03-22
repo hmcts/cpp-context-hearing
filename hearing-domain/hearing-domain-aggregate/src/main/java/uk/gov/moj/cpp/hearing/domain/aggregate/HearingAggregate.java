@@ -65,7 +65,11 @@ public class HearingAggregate implements Aggregate {
                         .apply(this::onVerdictChanged),
                 when(ProsecutionCounselAdded.class)
                         .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId()),
+                when(NewProsecutionCounselAdded.class)
+                        .apply(prosecutionCounselAdded -> this.hearingId = prosecutionCounselAdded.getHearingId()),
                 when(DefenceCounselAdded.class)
+                        .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
+                when(NewDefenceCounselAdded.class)
                         .apply(defenceCounselAdded -> this.hearingId = defenceCounselAdded.getHearingId()),
                 when(ResultsShared.class)
                         .apply(resultsSharedResult -> recordSharedResults(resultsSharedResult.getResultLines())),
@@ -133,12 +137,19 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> addProsecutionCounsel(final UUID hearingId, final UUID attendeeId,
                                                 final UUID personId, final String status) {
-        return apply(Stream.of(new ProsecutionCounselAdded(hearingId, attendeeId, personId, status)));
+        return apply(Stream.of(new ProsecutionCounselAdded(hearingId, attendeeId, personId, status), new NewProsecutionCounselAdded(hearingId, attendeeId, personId, status)));
+    }
+
+    public Stream<Object> addProsecutionCounsel(final NewProsecutionCounselAdded prosecutionCounselAdded) {
+        return apply(Stream.of(
+                new ProsecutionCounselAdded(prosecutionCounselAdded.getHearingId(), prosecutionCounselAdded.getAttendeeId(), prosecutionCounselAdded.getPersonId(), prosecutionCounselAdded.getStatus()),
+                       prosecutionCounselAdded));
     }
 
     public Stream<Object> addDefenceCounsel(final UUID hearingId, final UUID attendeeId,
                                             final UUID personId, final List<UUID> defendantIds, final String status) {
-        return apply(Stream.of(new DefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status)));
+        return apply(Stream.of(new DefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status),
+                new NewDefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status)));
     }
 
     public Stream<Object> shareResults(final UUID hearingId, final ZonedDateTime sharedTime, final List<ResultLine> resultLines) {

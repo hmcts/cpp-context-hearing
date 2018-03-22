@@ -18,8 +18,8 @@ import javax.persistence.Table;
 public class Ahearing {
     //TODO add judge relationship
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing",orphanRemoval = true)
-    private List<Defendant> defendants=new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private List<Defendant> defendants = new ArrayList<>();
 
     @Id
     @Column(name = "id", nullable = false)
@@ -28,28 +28,29 @@ public class Ahearing {
     @Column(name = "hearing_type")
     private String hearingType;
 
-    @Column(name="start_date_time")
+    @Column(name = "start_date_time")
     private LocalDateTime startDateTime;
 
-    @Column(name="court_centre_id")
+    @Column(name = "court_centre_id")
     private UUID courtCentreId;
 
-    @Column(name="court_centre_name")
+    @Column(name = "court_centre_name")
     private String courtCentreName;
 
-    @Column(name="room_id")
+    @Column(name = "room_id")
     private UUID roomId;
 
-    @Column(name="room_name")
+    @Column(name = "room_name")
     private String roomName;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing",orphanRemoval = true)
-    private List<Attendee> attendees;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private List<Attendee> attendees = new ArrayList<>();
 
-    public Ahearing() { }
+    public Ahearing() {
+    }
 
     public Ahearing(Builder builder) {
-        this.id=builder.id;
+        this.id = builder.id;
         this.hearingType = builder.hearingType;
         this.startDateTime = builder.startDateTime;
         this.courtCentreId = builder.courtCentreId;
@@ -57,14 +58,14 @@ public class Ahearing {
         this.roomId = builder.roomId;
         this.roomName = builder.roomName;
         this.setDefendants(builder.defendants);
-        if (builder.judgeBuilder!=null) {
+        if (builder.judgeBuilder != null) {
             this.attendees = new ArrayList<>();
             this.attendees.add(builder.judgeBuilder.build());
         }
     }
 
     public void setDefendants(List<Defendant> defendants) {
-        this.defendants=defendants;
+        this.defendants = defendants;
     }
 
     public List<Defendant> getDefendants() {
@@ -72,7 +73,7 @@ public class Ahearing {
     }
 
     public void setAttendees(List<Attendee> attendees) {
-       this.attendees=attendees;
+        this.attendees = attendees;
     }
 
     public List<Attendee> getAttendees() {
@@ -109,7 +110,7 @@ public class Ahearing {
 
     public static class Builder {
         private UUID id;
-        private List<Defendant> defendants=new ArrayList<>();
+        private List<Defendant> defendants = new ArrayList<>();
         private String hearingType;
         private LocalDateTime startDateTime;
         private UUID courtCentreId;
@@ -118,6 +119,7 @@ public class Ahearing {
         private String roomName;
         private Judge.Builder judgeBuilder;
 
+        protected Builder() {}
         public Builder withId(UUID id) {
             this.id = id;
             return this;
@@ -133,7 +135,6 @@ public class Ahearing {
             return this;
         }
 
-
         public Builder withHearingType(String hearingType) {
             this.hearingType = hearingType;
             return this;
@@ -143,6 +144,7 @@ public class Ahearing {
             this.startDateTime = startDateTime;
             return this;
         }
+
         public Builder withCourtCentreId(UUID courtCentreId) {
             this.courtCentreId = courtCentreId;
             return this;
@@ -167,6 +169,10 @@ public class Ahearing {
             return new Ahearing(this);
         }
 
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
 }

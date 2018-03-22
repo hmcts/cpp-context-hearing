@@ -1,13 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-import static uk.gov.justice.services.eventsourcing.source.core.Events.streamOf;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
-
-import uk.gov.justice.domain.annotation.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -17,21 +11,20 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Plea;
 import uk.gov.moj.cpp.hearing.command.plea.HearingPlea;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingDetails;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
-import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingsPleaAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
 
+import javax.inject.Inject;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -40,6 +33,14 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+
+import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import static uk.gov.justice.services.eventsourcing.source.core.Events.streamOf;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+
 import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -47,6 +48,7 @@ import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 
 @SuppressWarnings({"WeakerAccess", "CdiInjectionPointsInspection"})
 @ServiceComponent(COMMAND_HANDLER)
@@ -167,12 +169,15 @@ public class HearingCommandHandler {
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
+        NewProsecutionCounselAdded newProsecutionCounselAdded = jsonObjectToObjectConverter.convert(payload, NewProsecutionCounselAdded.class);
+        //newProsecutionCounselAdded.s
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
+        /*final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
         final UUID attendeeId = fromString(payload.getString(FIELD_ATTENDEE_ID));
-        final String status = payload.getString(FIELD_STATUS);
+        final String status = payload.getString(FIELD_STATUS);*/
 
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.addProsecutionCounsel(hearingId, attendeeId, personId, status), command);
+        //applyToHearingAggregate(hearingId, aggregate -> aggregate.addProsecutionCounsel(hearingId, attendeeId, personId, status), command);
+        applyToHearingAggregate(newProsecutionCounselAdded.getHearingId(), aggregate -> aggregate.addProsecutionCounsel(newProsecutionCounselAdded), command);
     }
 
     @Handles("hearing.add-defence-counsel")
@@ -263,19 +268,6 @@ public class HearingCommandHandler {
                                                      final JsonEnvelope envelope) throws EventStreamException {
         final EventStream eventStream = this.eventSource.getStreamById(streamId);
         final HearingAggregate aggregate = this.aggregateService.get(eventStream, HearingAggregate.class);
-        final Stream<Object> events = function.apply(aggregate);
-        eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
-        return aggregate;
-    }
-
-    private CaseAggregate applyToCaseAggregate(final UUID streamId, final Function<CaseAggregate, Stream<Object>> function,
-                                               final JsonEnvelope envelope) throws EventStreamException {
-
-        //TODO - GPE-3032 CLEANUP - get rid of temporaryStreamId. We won't have the hearingPlea stream, so we can use the caseId.
-        final UUID temporaryStreamId = new UUID(streamId.getLeastSignificantBits(), streamId.getMostSignificantBits());
-
-        final EventStream eventStream = this.eventSource.getStreamById(temporaryStreamId);
-        final CaseAggregate aggregate = this.aggregateService.get(eventStream, CaseAggregate.class);
         final Stream<Object> events = function.apply(aggregate);
         eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
         return aggregate;

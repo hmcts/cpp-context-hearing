@@ -28,8 +28,6 @@ import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
 public class HearingService {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
-    
     @Inject
     private HearingRepository hearingRepository;
 
@@ -38,7 +36,8 @@ public class HearingService {
 
     @Inject
     HearingJudgeRepository hearingJudgeRepository;
-    
+
+    //TODO - GPE-3032 - move 3032 functionality to new classes so that cleanup is easier.
     // new repositories for hearing and case
     //-----------------------------------------------------------------------
     @Inject
@@ -62,10 +61,10 @@ public class HearingService {
         return hearingView;
     }
 
+    //TODO - GPE-3032 - investigate proper validation.
     @Transactional
     public HearingListResponse getHearingByStartDateV2(final LocalDate startDate) {
         if (null == startDate) {
-            LOGGER.warn("The given startDate parameter was null. Returning an empty HearingListResponse");
             return new HearingListResponse();
         }
         return toHearingListResponse(ahearingRepository.findByStartDateTime(startDate.atStartOfDay()));
@@ -74,7 +73,6 @@ public class HearingService {
     @Transactional
     public HearingDetailsResponse getHearingByIdV2(final UUID hearingId) {
         if (null == hearingId) {
-            LOGGER.warn("The given hearingId parameter was null. Returning an empty HearingDetailsResponse");
             return new HearingDetailsResponse();
         }
         return toHearingDetailsResponse(ahearingRepository.findById(hearingId));

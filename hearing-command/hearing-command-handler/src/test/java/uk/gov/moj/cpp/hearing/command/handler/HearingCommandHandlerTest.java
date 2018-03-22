@@ -24,8 +24,6 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingsPleaAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseCreated;
-import uk.gov.moj.cpp.hearing.domain.event.CaseOffenceAdded;
-import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
@@ -39,6 +37,9 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
+import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
@@ -104,7 +105,9 @@ public class HearingCommandHandlerTest {
     private static final String JUDGE_ASSIGNED_EVENT = "hearing.judge-assigned";
     private static final String ROOM_BOOKED_EVENT = "hearing.room-booked";
     private static final String PROSECUTION_COUNSEL_ADDED_EVENT = "hearing.prosecution-counsel-added";
+    private static final String NEWPROSECUTION_COUNSEL_ADDED_EVENT = "hearing.newprosecution-counsel-added";
     private static final String DEFENCE_COUNSEL_ADDED_EVENT = "hearing.defence-counsel-added";
+    private static final String NEWDEFENCE_COUNSEL_ADDED_EVENT = "hearing.newdefence-counsel-added";
     private static final String ADJOURN_DATE_UPDATED_EVENT = "hearing.adjourn-date-updated";
     private static final String HEARING_DRAFT_RESULT_SAVED_EVENT = "hearing.draft-result-saved";
     private static final String HEARING_RESULTS_SHARED_EVENT = "hearing.results-shared";
@@ -135,6 +138,9 @@ public class HearingCommandHandlerTest {
     private static final String FIELD_PERSON_ID = "personId";
     private static final String FIELD_ATTENDEE_ID = "attendeeId";
     private static final String FIELD_STATUS = "status";
+    private static final String FIELD_TITLE= "title";
+    private static final String FIELD_FIRST_NAME="firstName";
+    private static final String FIELD_LAST_NAME="lastName";
     private static final String FIELD_DEFENDANT_IDS = "defendantIds";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_TARGET_ID = "targetId";
@@ -170,6 +176,8 @@ public class HearingCommandHandlerTest {
     private static final UUID GENERIC_ID_3 = randomUUID();
     private static final UUID GENERIC_ID_4 = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
+    private static final String FIRST_NAME = STRING.next();
+    private static final String LAST_NAME = STRING.next();
     private static final UUID DEFENDANT_ID = randomUUID();
     private static final UUID TARGET_ID = randomUUID();
     private static final UUID OFFENCE_ID = randomUUID();
@@ -179,6 +187,7 @@ public class HearingCommandHandlerTest {
     private static final UUID PERSON_ID = randomUUID();
     private static final UUID ATTENDEE_ID = randomUUID();
     private static final String STATUS = STRING.next();
+    private static final String TITLE = STRING.next();
 
     private static final ZonedDateTime START_DATE_TIME = PAST_UTC_DATE_TIME.next();
     private static final ZonedDateTime SHARED_TIME = PAST_UTC_DATE_TIME.next();
@@ -246,11 +255,11 @@ public class HearingCommandHandlerTest {
             //new events.
             Initiated.class,
             CaseCreated.class,
-            CaseOffenceAdded.class,
             OffencePleaUpdated.class,
             //TODO - GPE-3032 CLEANUP - remove old events.
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
-            RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
+            RoomBooked.class, ProsecutionCounselAdded.class, NewProsecutionCounselAdded.class,
+            DefenceCounselAdded.class, NewDefenceCounselAdded.class,
             HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class, PleaAdded.class, PleaChanged.class,
             HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class, JudgeAssigned.class,
             VerdictAdded.class, ConvictionDateAdded.class, HearingVerdictUpdated.class, ConvictionDateRemoved.class);
@@ -426,6 +435,18 @@ public class HearingCommandHandlerTest {
                                 withJsonPath("$.attendeeId", equalTo(ATTENDEE_ID.toString())),
                                 withJsonPath("$.status", equalTo(STATUS)),
                                 withJsonPath("$.hearingId", equalTo(HEARING_ID.toString()))
+                        ))).thatMatchesSchema(),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(NEWPROSECUTION_COUNSEL_ADDED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.personId", equalTo(PERSON_ID.toString())),
+                                withJsonPath("$.attendeeId", equalTo(ATTENDEE_ID.toString())),
+                                withJsonPath("$.status", equalTo(STATUS)),
+                                withJsonPath("$." + FIELD_FIRST_NAME, equalTo(FIRST_NAME)),
+                                withJsonPath("$." + FIELD_FIRST_NAME, equalTo(FIRST_NAME))
+                                //withJsonPath("$.lastName", equalTo(LAST_NAME.toString()))
                         ))).thatMatchesSchema()
         ));
     }
@@ -447,7 +468,19 @@ public class HearingCommandHandlerTest {
                                 withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
                                 withJsonPath("$.defendantIds", hasSize(2)),
                                 withJsonPath("$.defendantIds", hasItems(DEFENDANT_ID.toString(), DEFENDANT_ID_2.toString()))
+                        ))).thatMatchesSchema(),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName(NEWDEFENCE_COUNSEL_ADDED_EVENT),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.personId", equalTo(PERSON_ID.toString())),
+                                withJsonPath("$.attendeeId", equalTo(ATTENDEE_ID.toString())),
+                                withJsonPath("$.status", equalTo(STATUS)),
+                                withJsonPath("$.hearingId", equalTo(HEARING_ID.toString())),
+                                withJsonPath("$.defendantIds", hasSize(2)),
+                                withJsonPath("$.defendantIds", hasItems(DEFENDANT_ID.toString(), DEFENDANT_ID_2.toString()))
                         ))).thatMatchesSchema()
+
         ));
     }
 
@@ -943,6 +976,9 @@ public class HearingCommandHandlerTest {
                 .withPayloadOf(PERSON_ID, FIELD_PERSON_ID)
                 .withPayloadOf(ATTENDEE_ID, FIELD_ATTENDEE_ID)
                 .withPayloadOf(STATUS, FIELD_STATUS)
+                .withPayloadOf(TITLE, FIELD_TITLE)
+                .withPayloadOf(FIRST_NAME, FIELD_FIRST_NAME)
+                .withPayloadOf(LAST_NAME, FIELD_LAST_NAME)
                 .build();
     }
 

@@ -1,40 +1,40 @@
 {
-  "hearings": [
+  "hearings":[
     {
-      "hearingId": "23ef34ec-63e5-422e-8071-9b3753008c10",
-      "hearingType": "TRIAL",
-      "caseUrn": [
+      "hearingId":"23ef34ec-63e5-422e-8071-9b3753008c10",
+      "hearingType":"TRIAL",
+      "caseUrn":[
         "32GD9387517"
       ],
-      "defendants": [
+      "defendants":[
         {
-          "firstName": "Mark",
-          "lastName": "Zuckerberg"
+          "firstName":"Mark",
+          "lastName":"Zuckerberg"
         },
         {
-          "firstName": "Sean",
-          "lastName": "Parker"
+          "firstName":"Sean",
+          "lastName":"Parker"
         }
       ]
     },
     {
-      "hearingId": "1daefec3-2f76-8109-82d9-2e60544a6c01",
-      "hearingType": "TRIAL",
-      "caseUrn": [
+      "hearingId":"1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "hearingType":"TRIAL",
+      "caseUrn":[
         "32GD9387518"
       ],
-      "defendants": [
+      "defendants":[
         {
-          "firstName": "Larry",
-          "lastName": "Wall"
+          "firstName":"Larry",
+          "lastName":"Wall"
         },
         {
-          "firstName": "Dennis",
-          "lastName": "Ritchie"
+          "firstName":"Dennis",
+          "lastName":"Ritchie"
         },
         {
-          "firstName": "James",
-          "lastName": "Gosling"
+          "firstName":"James",
+          "lastName":"Gosling"
         }
       ]
     }

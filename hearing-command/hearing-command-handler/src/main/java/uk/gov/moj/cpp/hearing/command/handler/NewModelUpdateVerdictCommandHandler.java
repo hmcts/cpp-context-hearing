@@ -44,7 +44,6 @@ public class NewModelUpdateVerdictCommandHandler {
     public void updateVerdict(final JsonEnvelope command) throws EventStreamException {
 
         /*
-            //TODO
             This is the perfect update verdict packet.
                 [{
                     "offenceId": "a8a87b20-b8d7-4f04-9a5e-08b366b85723"
@@ -59,8 +58,6 @@ public class NewModelUpdateVerdictCommandHandler {
 						"category": "GUILTY"
 					},
                 }]
-
-               //TODO - this model is old, when you merge in changes from team/R2 this will change significantly - see packet above.
          */
 
         final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = this.jsonObjectToObjectConverter.convert(command.payloadAsJsonObject(), HearingUpdateVerdictCommand.class);
@@ -70,6 +67,8 @@ public class NewModelUpdateVerdictCommandHandler {
             applyToOffenceAggregate(offence.getId(), offenceAggregate ->
                     offenceAggregate.updateVerdict(
                             hearingUpdateVerdictCommand.getHearingId(),
+                            hearingUpdateVerdictCommand.getCaseId(),
+                            offence.getId(),
                             offence.getVerdict()
                     ), command);
         }
