@@ -19,14 +19,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
@@ -53,9 +50,6 @@ import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class HearingServiceTest {
-
-    public static final String EXPECTED_HEARING_LIST_RESPONSE = "{\"hearings\":[{\"hearingId\":\"23ef34ec-63e5-422e-8071-9b3753008c10\",\"hearingType\":\"TRIAL\",\"caseUrn\":[\"8C720B32E45B\"],\"defendants\":[{\"firstName\":\"Ken\",\"lastName\":\"Thompson\"},{\"firstName\":\"William Nelson\",\"lastName\":\"Joy\"}]}]}";
-    public static final String EXPECTED_HEARING_DETAILS_RESPONSE = "{\"hearingId\":\"23ef34ec-63e5-422e-8071-9b3753008c10\",\"startDate\":\"2018-02-22\",\"startTime\":\"10:30:00\",\"roomName\":\"3-1\",\"hearingType\":\"TRIAL\",\"courtCentreName\":\"Liverpool Crown Court\",\"judge\":{\"id\":\"a38d0d5f-a26c-436b-9b5e-4dc58f28878d\",\"title\":\"HHJ\",\"firstName\":\"Alan\",\"lastName\":\"Mathison Turing\"},\"roomId\":\"e7721a38-546d-4b56-9992-ebdd772a561b\",\"courtCentreId\":\"e8821a38-546d-4b56-9992-ebdd772a561f\",\"attendees\":{\"prosecutionCounsels\":[{\"attendeeId\":\"841164f6-13bc-46ff-8634-63cf9ae85d36\",\"status\":\"QC\",\"title\":\"MR\",\"firstName\":\"Brian J.\",\"lastName\":\"Fox\"}],\"defenceCounsels\":[{\"attendeeId\":\"743d333a-b270-4de6-a598-61abb64a8027\",\"status\":\"QC\",\"title\":\"MR\",\"firstName\":\"Mark\",\"lastName\":\"Zuckerberg\"},{\"attendeeId\":\"cdc14b89-6b4d-4e98-9641-826c355c51b8\",\"status\":\"QC\",\"title\":\"MR\",\"firstName\":\"Sean\",\"lastName\":\"Parker\"}]},\"cases\":[{\"caseId\":\"9b70743c-69b3-4ac2-a362-8c720b32e45b\",\"caseUrn\":\"8C720B32E45B\",\"defendants\":[{\"defendantId\":\"841164f6-13bc-46ff-8634-63cf9ae85d36\",\"personId\":\"5a6e2001-91ed-4af2-99af-f30ddc9ef5af\",\"firstName\":\"Ken\",\"lastName\":\"Thompson\",\"homeTelephone\":\"02070101010\",\"mobile\":\"07422263910\",\"fax\":\"021111111\",\"email\":\"ken.thompson@acme.me\",\"address\":{\"formatedAddress\":\"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG\",\"address1\":\"222 Furze Road Exeter\",\"address2\":\"Lorem Ipsum\",\"address3\":\"Solor\",\"address4\":\"Porro Quisquam\",\"postCode\":\"CR0 1XG\"},\"dateOfBirth\":\"1943-02-04\",\"offences\":[{\"id\":\"4b1318e4-1517-4e4f-a89d-6af0eafa5058\",\"wording\":\"on 01/08/2009 at the County public house, unlawfully and maliciously wounded, John Smith\",\"count\":1,\"title\":\"Wound / inflict grievous bodily harm without intent\",\"legislation\":\"Contrary to section 20 of the Offences Against the Person Act 1861.\",\"plea\":{\"pleaId\":\"0161a828-cfd1-4608-8616-d92870baba3d\",\"pleaDate\":\"2016-06-08\"},\"verdict\":{\"verdictId\":\"0161a828-cfd1-4608-8616-d92870bada3d\",\"value\":{\"id\":\"0161a828-cfd1-4608-8616-d92870bada3d\",\"category\":\"GUILTY\",\"code\":\"A1\",\"description\":\"Guilty By Jury On Judges Direction\"},\"verdictDate\":\"2018-02-21\",\"numberOfSplitJurors\":2,\"numberOfJurors\":10,\"unanimous\":false}}]},{\"defendantId\":\"3739b4e3-1f81-4d12-a99d-ad27ae672566\",\"personId\":\"98583be4-8d4a-4552-9252-ceccd61d32db\",\"firstName\":\"William Nelson\",\"lastName\":\"Joy\",\"homeTelephone\":\"02070101010\",\"mobile\":\"07422263910\",\"fax\":\"021111111\",\"email\":\"william-nelson.joy@acme.me\",\"address\":{\"formatedAddress\":\"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG\",\"address1\":\"222 Furze Road Exeter\",\"address2\":\"Lorem Ipsum\",\"address3\":\"Solor\",\"address4\":\"Porro Quisquam\",\"postCode\":\"CR0 1XG\"},\"dateOfBirth\":\"1954-11-08\",\"offences\":[{\"id\":\"4b1318e4-1517-4e4f-a89d-6af0eafa5058\",\"wording\":\"on 01/08/2009 at the County public house, unlawfully and maliciously wounded, John Smith\",\"count\":1,\"title\":\"Wound / inflict grievous bodily harm without intent\",\"legislation\":\"Contrary to section 20 of the Offences Against the Person Act 1861.\",\"plea\":{\"pleaId\":\"0161a828-cfd1-4608-8616-d92870baba3d\",\"pleaDate\":\"2016-06-08\"},\"verdict\":{\"verdictId\":\"0161a828-cfd1-4608-8616-d92870bada3d\",\"value\":{\"id\":\"0161a828-cfd1-4608-8616-d92870bada3d\",\"category\":\"GUILTY\",\"code\":\"A1\",\"description\":\"Guilty By Jury On Judges Direction\"},\"verdictDate\":\"2018-02-21\",\"numberOfSplitJurors\":2,\"numberOfJurors\":10,\"unanimous\":false}}]}]}]}";
 
     @Mock
     private HearingRepository hearingRepository;
@@ -114,8 +108,6 @@ public class HearingServiceTest {
 
         // 4. performing the assertions
         //-----------------------------------------------------------------------
-        final String json = new ObjectMapper().writeValueAsString(response);
-        assertEquals(EXPECTED_HEARING_LIST_RESPONSE, json);
         assertEquals(hearingList.get(0).getId().toString(), response.getHearings().get(0).getHearingId());
         assertEquals(hearingList.get(0).getHearingType(), response.getHearings().get(0).getHearingType());
         assertEquals(hearingList.get(0).getDefendants().get(0).getOffences().stream()
@@ -128,7 +120,6 @@ public class HearingServiceTest {
                         .map(d -> d.getFirstName() + " " + d.getLastName()).collect(Collectors.toList()));
     }
 
-    @Ignore
     @Test
     public void shouldFindHearingDetailsById() throws Exception {
         // 1. creating the mocked inputs and outputs objects
@@ -145,9 +136,6 @@ public class HearingServiceTest {
 
         // 4. performing assertions for hearing object attributes
         //-----------------------------------------------------------------------
-        final String json = new ObjectMapper().writeValueAsString(response);
-        System.out.println(json);
-        assertEquals(EXPECTED_HEARING_DETAILS_RESPONSE, json);
         assertEquals(hearing.getId().toString(), response.getHearingId());
         assertEquals(hearing.getHearingType(), response.getHearingType());
         assertEquals(hearing.getStartDateTime().format(ISO_LOCAL_DATE), response.getStartDate());

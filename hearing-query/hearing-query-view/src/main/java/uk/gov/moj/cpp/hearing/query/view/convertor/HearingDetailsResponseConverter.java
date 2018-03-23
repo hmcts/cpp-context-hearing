@@ -35,15 +35,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
 
 public final class HearingDetailsResponseConverter implements Converter<Ahearing, HearingDetailsResponse> {
 
-    private static final HearingDetailsResponseConverter HEARING_DETAILS_RESPONSE_CONVERTER = new HearingDetailsResponseConverter();
-    private static final AttendeesConverter ATTENDEE_CONVERTER = new AttendeesConverter();
-    private static final JudgeConverter JUDGE_CONVERTER = new JudgeConverter();
-    private static final CasesConverter CASES_CONVERTER = new CasesConverter();
-
-    public static HearingDetailsResponse toHearingDetailsResponse(final Ahearing source) {
-        return HEARING_DETAILS_RESPONSE_CONVERTER.convert(source);
-    }
-
     @Override
     public HearingDetailsResponse convert(final Ahearing source) {
         if (null == source || null == source.getId()) {
@@ -61,11 +52,11 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 .withRoomName(source.getRoomName())
                 .withHearingType(source.getHearingType())
                 .withCourtCentreName(source.getCourtCentreName())
-                .withJudge(toJudgeOrNull(source.getAttendees()))
+                .withJudge(new JudgeConverter().convert(source.getAttendees()))
                 .withRoomId(toStringOrNull(roomId))
                 .withCourtCentreId(toStringOrNull(courtCentreId))
-                .withAttendees(toAttendeesOrNull(source.getAttendees()))
-                .withCases(toCasesOrNull(source));
+                .withAttendees(new AttendeesConverter().convert(source.getAttendees()))
+                .withCases(new CasesConverter().convert(source));
     }
 
     // Private methods
@@ -80,18 +71,6 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
     private static String toDateStringOrNull(final Optional<Temporal> source) {
         return source.isPresent() ? ISO_LOCAL_DATE.format(source.get()) : null;
-    }
-
-    private static HearingDetailsResponse.Judge toJudgeOrNull(final List<Attendee> source) {
-        return JUDGE_CONVERTER.convert(source);
-    }
-
-    private static HearingDetailsResponse.Attendees toAttendeesOrNull(final List<Attendee> source) {
-        return ATTENDEE_CONVERTER.convert(source);
-    }
-
-    private static List<HearingDetailsResponse.Case> toCasesOrNull(final Ahearing source) {
-        return CASES_CONVERTER.convert(source);
     }
 
     // JudgeConverter
@@ -121,9 +100,6 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
     //-----------------------------------------------------------------------
     private static final class AttendeesConverter implements Converter<List<Attendee>, HearingDetailsResponse.Attendees> {
 
-        private static final ProsecutionCounselConverter PROSECUTION_COUNSEL_CONVERTER = new ProsecutionCounselConverter();
-        private static final DefenseCounselConverter DEFENSE_COUNSEL_CONVERTER = new DefenseCounselConverter();
-
         @Override
         public HearingDetailsResponse.Attendees convert(final List<Attendee> source) {
             if (isEmpty(source)) {
@@ -139,7 +115,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
         }
 
         private Function<? super Attendee, ? extends HearingDetailsResponse.DefenceCounsel> convertDefence() {
-            return d -> DEFENSE_COUNSEL_CONVERTER.convert((DefenceAdvocate) d);
+            return d -> new DefenseCounselConverter().convert((DefenceAdvocate) d);
         }
 
         private Predicate<? super Attendee> filterProcecutor() {
@@ -147,7 +123,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
         }
 
         private Function<? super Attendee, ? extends HearingDetailsResponse.ProsecutionCounsel> convertProcecutor() {
-            return p -> PROSECUTION_COUNSEL_CONVERTER.convert((ProsecutionAdvocate) p);
+            return p -> new ProsecutionCounselConverter().convert((ProsecutionAdvocate) p);
         }
     }
 
@@ -191,16 +167,10 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
     //-----------------------------------------------------------------------
     private static final class CasesConverter implements Converter<Ahearing, List<HearingDetailsResponse.Case>> {
 
-        private static final CaseConverter CASE_CONVERTER = new CaseConverter();
-
         @Override
         public List<HearingDetailsResponse.Case> convert(final Ahearing source) {
-            if (null == source || null == source.getId()) {
-                return null;
-            }
-
-            if (CollectionUtils.isEmpty(source.getDefendants())) {
-                return null;
+            if (null == source || null == source.getId() || CollectionUtils.isEmpty(source.getDefendants())) {
+                return new ArrayList<>();
             }
 
             // 1. building a set of legal cases to avoid duplications
@@ -211,7 +181,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .collect(toSet());
 
             if (CollectionUtils.isEmpty(legalCases)) {
-                return null;
+                return new ArrayList<>();
             }
 
             // 2. building a data structure map to build the expected response
@@ -244,15 +214,13 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
         }
 
         private Function<? super Entry<LegalCase, Map<Defendant, List<Offence>>>, ? extends HearingDetailsResponse.Case> convert() {
-            return e -> CASE_CONVERTER.convert(e);
+            return e -> new CaseConverter().convert(e);
         }
     }
 
     // CasesConverter
     //-----------------------------------------------------------------------
     private static final class CaseConverter implements Converter<Entry<LegalCase, Map<Defendant, List<Offence>>>, HearingDetailsResponse.Case> {
-
-        private static final DefendantConverter DEFENDANT_CONVERTER = new DefendantConverter();
 
         @Override
         public HearingDetailsResponse.Case convert(final Entry<LegalCase, Map<Defendant, List<Offence>>> source) {
@@ -270,16 +238,13 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
 
         private Function<? super Entry<Defendant, List<Offence>>, ? extends HearingDetailsResponse.Defendant> convert() {
-            return e -> DEFENDANT_CONVERTER.convert(e);
+            return e -> new DefendantConverter().convert(e);
         }
     }
 
     // DefendantConverter
     //-----------------------------------------------------------------------
     private static final class DefendantConverter implements Converter<Entry<Defendant, List<Offence>>, HearingDetailsResponse.Defendant> {
-
-        private static final AddressConverter ADDRESS_CONVERTER = new AddressConverter();
-        private static final OffenceConverter OFFENCE_CONVERTER = new OffenceConverter();
 
         @Override
         public HearingDetailsResponse.Defendant convert(final Entry<Defendant, List<Offence>> source) {
@@ -304,17 +269,13 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withMobile(defendant.getMobileTelephone())
                     .withFax(defendant.getFax())
                     .withEmail(defendant.getEmail())
-                    .withAddress(convert(defendant.getAddress()))
+                    .withAddress(new AddressConverter().convert(defendant.getAddress()))
                     .withDateOfBirth(toDateStringOrNull(dateOfBirth))
                     .withOffences(source.getValue().stream().map(convert()).collect(toList()));
         }
 
-        private HearingDetailsResponse.Address convert(final Address source) {
-            return ADDRESS_CONVERTER.convert(source);
-        }
-
         private Function<? super Offence, ? extends HearingDetailsResponse.Offence> convert() {
-            return o -> OFFENCE_CONVERTER.convert(o);
+            return o -> new OffenceConverter().convert(o);
         }
     }
 
@@ -352,9 +313,6 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
     //-----------------------------------------------------------------------
     private static final class OffenceConverter implements Converter<Offence, HearingDetailsResponse.Offence> {
 
-        private static final PleaConveter PLEA_CONVETER = new PleaConveter();
-        private static final VerdictConveter VERDICT_CONVETER = new VerdictConveter();
-
         @Override
         public HearingDetailsResponse.Offence convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
@@ -366,16 +324,8 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withCount(source.getCount())
                     .withTitle(source.getTitle())
                     .withLegislation(source.getLegislation())
-                    .withPlea(convertPlea(source))
-                    .withVerdict(convertVerdict(source));
-        }
-
-        private HearingDetailsResponse.Verdict convertVerdict(final Offence source) {
-            return VERDICT_CONVETER.convert(source);
-        }
-
-        private static HearingDetailsResponse.Plea convertPlea(final Offence source) {
-            return PLEA_CONVETER.convert(source);
+                    .withPlea(new PleaConveter().convert(source))
+                    .withVerdict(new VerdictConveter().convert(source));
         }
     }
 
@@ -401,8 +351,6 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
     //-----------------------------------------------------------------------
     private static final class VerdictConveter implements Converter<Offence, HearingDetailsResponse.Verdict> {
 
-        private static final ValueConveter VALUE_CONVETER = new ValueConveter();
-
         @Override
         public HearingDetailsResponse.Verdict convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
@@ -417,11 +365,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withNumberOfJurors(source.getNumberOfJurors())
                     .withNumberOfSplitJurors(source.getNumberOfSplitJurors())
                     .withUnanimous(source.getUnanimous())
-                    .withValue(convertValue(source));
-        }
-
-        private static HearingDetailsResponse.Value convertValue(final Offence source) {
-            return VALUE_CONVETER.convert(source);
+                    .withValue(new ValueConveter().convert(source));
         }
     }
 

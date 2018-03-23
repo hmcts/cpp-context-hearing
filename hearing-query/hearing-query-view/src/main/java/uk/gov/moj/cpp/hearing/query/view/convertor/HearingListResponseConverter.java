@@ -19,32 +19,23 @@ import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponseHearing;
 
 public final class HearingListResponseConverter implements Converter<List<Ahearing>, HearingListResponse> {
     
-    private static final HearingListResponseConverter HEARING_LIST_RESPONSE_CONVERTER = new HearingListResponseConverter();
-    private static final HearingConverter HEARING_CONVERTER = new HearingConverter();
-    
-    public static HearingListResponse toHearingListResponse(final List<Ahearing> source) {
-        return HEARING_LIST_RESPONSE_CONVERTER.convert(source);
-    }
-    
     @Override
     public HearingListResponse convert(final List<Ahearing> source) {
         if (CollectionUtils.isEmpty(source)) {
             return null;
         }
         return HearingListResponse.builder()
-                .withHearings(source.stream().map(h -> convert(h)).collect(toList()))
+                .withHearings(source.stream().map(convert()).collect(toList()))
                 .build();
     }
 
-    private HearingListResponseHearing convert(final Ahearing hearing) {
-        return HEARING_CONVERTER.convert(hearing);
+    private Function<? super Ahearing, ? extends HearingListResponseHearing> convert() {
+        return h -> new HearingConverter().convert(h);
     }
     
     // HearingConverter
     //-----------------------------------------------------------------------
     private static final class HearingConverter implements Converter<Ahearing, HearingListResponseHearing> {
-
-        private static final DefendantConverter DEFENDANT_CONVERTER = new DefendantConverter();
 
         @Override
         public HearingListResponseHearing convert(final Ahearing source) {
@@ -62,7 +53,7 @@ public final class HearingListResponseConverter implements Converter<List<Aheari
         }
 
         private Function<? super Defendant, ? extends HearingListResponseDefendant> convert() {
-            return d -> DEFENDANT_CONVERTER.convert(d);
+            return d -> new DefendantConverter().convert(d);
         }
         
     }

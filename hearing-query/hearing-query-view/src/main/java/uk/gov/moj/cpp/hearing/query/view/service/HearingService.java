@@ -1,8 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter.toHearingDetailsResponse;
-import static uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter.toHearingListResponse;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -11,15 +9,14 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
+import uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingEntityToHearing;
+import uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
@@ -67,7 +64,7 @@ public class HearingService {
         if (null == startDate) {
             return new HearingListResponse();
         }
-        return toHearingListResponse(ahearingRepository.findByStartDateTime(startDate.atStartOfDay()));
+        return new HearingListResponseConverter().convert(ahearingRepository.findByStartDateTime(startDate.atStartOfDay()));
     }
     
     @Transactional
@@ -75,6 +72,6 @@ public class HearingService {
         if (null == hearingId) {
             return new HearingDetailsResponse();
         }
-        return toHearingDetailsResponse(ahearingRepository.findById(hearingId));
+        return new HearingDetailsResponseConverter().convert(ahearingRepository.findById(hearingId));
     }
 }
