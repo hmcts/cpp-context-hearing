@@ -21,6 +21,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -87,7 +88,7 @@ public class NewModelHearingAggregateTest {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(FUTURE_LOCAL_DATE.next())
+                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
                         .withNotBefore(false)
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()

@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCaseTest.buildLegalCase1;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,9 +50,14 @@ public class AhearingRepositoryTest {
         legalCaseRepository.attachAndRemove(legalCaseRepository.findBy(legalCase1.getId()));
     }
 
+
+    private ZonedDateTime atStartOfDay(ZonedDateTime zdt) {
+        return zdt.toLocalDate().atStartOfDay(zdt.getZone());
+    }
+
     @Test
     public void shouldFindByStartDateTime() throws Exception {
-        final LocalDateTime localTime = AhearingRepositoryTestUtils.START_DATE_1.toLocalDate().atStartOfDay();
+        final ZonedDateTime localTime = atStartOfDay(AhearingRepositoryTestUtils.START_DATE_1);
         assertEquals(1, ahearingRepository.findByStartDateTime(localTime).size());
 
     }

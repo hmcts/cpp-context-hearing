@@ -51,6 +51,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -191,7 +192,7 @@ public class NewModelHearingEventProcessorTest {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(FUTURE_LOCAL_DATE.next())
+                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
                         .withNotBefore(false)
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()

@@ -32,6 +32,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -66,7 +67,7 @@ public class TestUtilities {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(FUTURE_LOCAL_DATE.next())
+                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
                         .withNotBefore(false)
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()
@@ -140,7 +141,7 @@ public class TestUtilities {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(FUTURE_LOCAL_DATE.next())
+                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()
                                 .withId(randomUUID())

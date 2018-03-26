@@ -4,7 +4,7 @@ import static java.time.ZonedDateTime.parse;
 import static java.util.UUID.randomUUID;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class HearingTestUtils {
     public static final LocalDate startDate = LocalDate.now();
     
     public static final UUID HEARING_ID_1 = UUID.fromString("23ef34ec-63e5-422e-8071-9b3753008c10");
-    public static final LocalDateTime START_DATE_1 = parse("2018-02-22T10:30:00Z").toLocalDateTime();
+    public static final ZonedDateTime START_DATE_1 = parse("2018-02-22T10:30:00Z");
 
     public static List<Ahearing> buildHearingList() {
         // 1. create the hearing object and set the attendees
@@ -57,7 +57,7 @@ public class HearingTestUtils {
         return Arrays.asList(ahearing);
     }
     
-    public static Ahearing buildHering1(final UUID hearingId, final LocalDateTime startDateTime) {
+    public static Ahearing buildHering1(final UUID hearingId, final ZonedDateTime startDateTime) {
         return Ahearing.builder()
                 .withId(hearingId)
                 .withHearingType("TRIAL")

@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,7 +66,8 @@ public class HearingService {
         if (null == startDate) {
             return new HearingListResponse();
         }
-        return new HearingListResponseConverter().convert(ahearingRepository.findByStartDateTime(startDate.atStartOfDay()));
+        ZonedDateTime zonedStartDatetime = startDate.atStartOfDay(ZoneOffset.systemDefault());
+        return new HearingListResponseConverter().convert(ahearingRepository.findByStartDateTime(zonedStartDatetime));
     }
     
     @Transactional

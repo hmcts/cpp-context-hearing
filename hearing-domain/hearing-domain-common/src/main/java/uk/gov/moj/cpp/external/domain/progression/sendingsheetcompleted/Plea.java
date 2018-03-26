@@ -4,11 +4,14 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public class Plea {
-  private final UUID id;
+  private UUID id;
 
-  private final LocalDate pleaDate;
+  private LocalDate pleaDate;
 
-  private final PleaValue value;
+  private PleaValue value;
+
+  public Plea() {
+  }
 
   public Plea(final UUID id, final LocalDate pleaDate, final PleaValue value) {
     this.id = id;

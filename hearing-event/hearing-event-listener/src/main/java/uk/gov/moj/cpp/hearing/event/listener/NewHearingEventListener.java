@@ -115,6 +115,7 @@ public class NewHearingEventListener {
                 .withCourtCentreName(hearing.getCourtCentreName())
                 .withRoomId(hearing.getCourtRoomId())
                 .withRoomName(hearing.getCourtRoomName())
+                .withStartDateTime(hearing.getStartDateTime())
                 .withDefendants(hearing.getDefendants().stream()
                         .map(defendantIn -> {
                             Defendant defendant = translateDefendant(hearing.getId(), defendantIn).build();

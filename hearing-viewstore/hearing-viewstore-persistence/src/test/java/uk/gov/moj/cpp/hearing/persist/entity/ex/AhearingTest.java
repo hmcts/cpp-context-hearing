@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static uk.gov.moj.cpp.hearing.utils.TestUtils.hasInnerStaticClass;
 import static uk.gov.moj.cpp.hearing.utils.TestUtils.hasParameterizedConstructor;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -33,7 +33,7 @@ public class AhearingTest {
         assertTrue(hasParameterizedConstructor(Ahearing.class, Ahearing.Builder.class));
     }
 
-    public static Ahearing buildHering1(final UUID hearingId, final LocalDateTime startDateTime) {
+    public static Ahearing buildHering1(final UUID hearingId, final ZonedDateTime startDateTime) {
         return new Ahearing.Builder()
                 .withId(hearingId)
                 .withHearingType("TRIAL")

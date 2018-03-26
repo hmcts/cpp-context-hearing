@@ -6,9 +6,13 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 
 @Event("public.progression.events.sending-sheet-completed")
 public class SendingSheetCompleted {
-  private final CrownCourtHearing crownCourtHearing;
+  private CrownCourtHearing crownCourtHearing;
 
-  private final Hearing hearing;
+  private Hearing hearing;
+
+  public SendingSheetCompleted() {
+
+  }
 
   public SendingSheetCompleted(final CrownCourtHearing crownCourtHearing, final Hearing hearing) {
     this.crownCourtHearing = crownCourtHearing;

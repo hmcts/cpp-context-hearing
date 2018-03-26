@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,7 +29,7 @@ public class Ahearing {
     private String hearingType;
 
     @Column(name = "start_date_time")
-    private LocalDateTime startDateTime;
+    private ZonedDateTime startDateTime;
 
     @Column(name = "court_centre_id")
     private UUID courtCentreId;
@@ -88,7 +88,7 @@ public class Ahearing {
         return hearingType;
     }
 
-    public LocalDateTime getStartDateTime() {
+    public ZonedDateTime getStartDateTime() {
         return startDateTime;
     }
 
@@ -112,7 +112,7 @@ public class Ahearing {
         private UUID id;
         private List<Defendant> defendants = new ArrayList<>();
         private String hearingType;
-        private LocalDateTime startDateTime;
+        private ZonedDateTime startDateTime;
         private UUID courtCentreId;
         private String courtCentreName;
         private UUID roomId;
@@ -140,7 +140,7 @@ public class Ahearing {
             return this;
         }
 
-        public Builder withStartDateTime(LocalDateTime startDateTime) {
+        public Builder withStartDateTime(ZonedDateTime startDateTime) {
             this.startDateTime = startDateTime;
             return this;
         }

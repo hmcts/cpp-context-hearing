@@ -1,15 +1,19 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
 public class Address {
-  private final String address1;
+  private String address1;
 
-  private final String address2;
+  private String address2;
 
-  private final String address3;
+  private String address3;
 
-  private final String address4;
+  private String address4;
 
-  private final String postcode;
+  private String postcode;
+
+  public Address() {
+
+  }
 
   public Address(final String address1, final String address2, final String address3, final String address4, final String postcode) {
     this.address1 = address1;

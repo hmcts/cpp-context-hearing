@@ -11,7 +11,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.getHearing;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -95,16 +96,16 @@ public class HearingServiceTest {
     public void shouldFindHearingListByStartDate() throws Exception {
         // 1. creating the mocked inputs and outputs objects
         //-----------------------------------------------------------------------
-        final LocalDate startDate = HearingTestUtils.START_DATE_1.toLocalDate();
+        ZonedDateTime startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate().atStartOfDay(ZoneOffset.systemDefault());
         final List<Ahearing> hearingList = HearingTestUtils.buildHearingList();
 
         // 2. setting the repository mock return
         //-----------------------------------------------------------------------
-        when(ahearingRepository.findByStartDateTime(startDate.atStartOfDay())).thenReturn(hearingList);
+        when(ahearingRepository.findByStartDateTime(startDateStartOfDay)).thenReturn(hearingList);
 
         // 3. invoking the service with the given input mock value
         //-----------------------------------------------------------------------
-        final HearingListResponse response = caseHearingService.getHearingByStartDateV2(startDate);
+        final HearingListResponse response = caseHearingService.getHearingByStartDateV2(HearingTestUtils.START_DATE_1.toLocalDate());
 
         // 4. performing the assertions
         //-----------------------------------------------------------------------

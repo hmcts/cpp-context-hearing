@@ -269,7 +269,8 @@
           "$ref": "#/definitions/judge"
         },
         "startDateTime": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "notBefore": {
           "type": "boolean"

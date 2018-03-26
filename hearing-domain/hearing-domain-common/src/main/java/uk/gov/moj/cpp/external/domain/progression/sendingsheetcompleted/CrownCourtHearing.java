@@ -3,11 +3,14 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import java.util.UUID;
 
 public class CrownCourtHearing {
-  private final String ccHearingDate;
+  private String ccHearingDate;
 
-  private final UUID courtCentreId;
+  private UUID courtCentreId;
 
-  private final String courtCentreName;
+  private String courtCentreName;
+
+  public CrownCourtHearing() {
+  }
 
   public CrownCourtHearing(final String ccHearingDate, final UUID courtCentreId, final String courtCentreName) {
     this.ccHearingDate = ccHearingDate;

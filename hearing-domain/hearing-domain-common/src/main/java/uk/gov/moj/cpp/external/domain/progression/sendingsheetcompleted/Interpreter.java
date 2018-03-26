@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
 public class Interpreter {
-  private final String language;
+  private String language;
 
-  private final Boolean needed;
+  private Boolean needed;
+
+  public Interpreter() {
+  }
 
   public Interpreter(final String language, final Boolean needed) {
     this.language = language;

@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static org.apache.deltaspike.data.api.SingleResultType.OPTIONAL;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +26,6 @@ public abstract class AhearingRepository extends AbstractEntityRepository<Aheari
     
 
     @Query(value = "from Ahearing h where h.startDateTime >= :startDateTime")
-    public abstract List<Ahearing> findByStartDateTime(@QueryParam("startDateTime") final LocalDateTime startDateTime);
+    public abstract List<Ahearing> findByStartDateTime(@QueryParam("startDateTime") final ZonedDateTime startDateTime);
 
 }

@@ -3,11 +3,14 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import java.util.UUID;
 
 public class IndicatedPlea {
-  private final AllocationDecision allocationDecision;
+  private AllocationDecision allocationDecision;
 
-  private final UUID id;
+  private UUID id;
 
-  private final IndicatedPleaValue value;
+  private IndicatedPleaValue value;
+
+  public IndicatedPlea() {
+  }
 
   public IndicatedPlea(final AllocationDecision allocationDecision, final UUID id, final IndicatedPleaValue value) {
     this.allocationDecision = allocationDecision;

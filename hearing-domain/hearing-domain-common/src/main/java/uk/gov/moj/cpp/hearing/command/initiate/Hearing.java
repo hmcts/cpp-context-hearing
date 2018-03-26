@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ public class Hearing {
     private final UUID courtRoomId;
     private final String courtRoomName;
     private final Judge judge;
-    private final LocalDate startDateTime;
+    private final ZonedDateTime startDateTime;
     private final Boolean notBefore;
     private final Integer estimateMinutes;
     private final List<Defendant> defendants;
@@ -32,7 +33,7 @@ public class Hearing {
                    @JsonProperty("courtRoomId") final UUID courtRoomId,
                    @JsonProperty("courtRoomName") final String courtRoomName,
                    @JsonProperty("judge") final Judge judge,
-                   @JsonProperty("startDateTime") final LocalDate startDateTime,
+                   @JsonProperty("startDateTime") final ZonedDateTime startDateTime,
                    @JsonProperty("notBefore") final Boolean notBefore,
                    @JsonProperty("estimateMinutes") final Integer estimateMinutes,
                    @JsonProperty("defendants") final List<Defendant> defendants) {
@@ -77,7 +78,7 @@ public class Hearing {
         return judge;
     }
 
-    public LocalDate getStartDateTime() {
+    public ZonedDateTime getStartDateTime() {
         return startDateTime;
     }
 
@@ -103,7 +104,7 @@ public class Hearing {
         private UUID courtRoomId;
         private String courtRoomName;
         private Judge.Builder judge;
-        private LocalDate startDateTime;
+        private ZonedDateTime startDateTime;
         private boolean notBefore;
         private Integer estimateMinutes;
         private List<Defendant.Builder> defendants = new ArrayList<>();
@@ -140,7 +141,7 @@ public class Hearing {
             return judge;
         }
 
-        public LocalDate getStartDateTime() {
+        public ZonedDateTime getStartDateTime() {
             return startDateTime;
         }
 
@@ -191,7 +192,7 @@ public class Hearing {
             return this;
         }
 
-        public Builder withStartDateTime(LocalDate startDateTime) {
+        public Builder withStartDateTime(ZonedDateTime startDateTime) {
             this.startDateTime = startDateTime;
             return this;
         }

@@ -5,20 +5,23 @@ import java.util.List;
 import java.util.UUID;
 
 public class Hearing {
-  private final UUID caseId;
+  private UUID caseId;
 
-  private final String caseUrn;
+  private String caseUrn;
 
-  private final String courtCentreId;
+  private String courtCentreId;
 
-  private final String courtCentreName;
+  private String courtCentreName;
 
-  private final List<Defendant> defendants;
+  private List<Defendant> defendants;
 
-  private final LocalDate sendingCommittalDate;
+  private LocalDate sendingCommittalDate;
 
-  private final String type;
+  private String type;
 
+  public Hearing() {
+
+  }
   public Hearing(final UUID caseId, final String caseUrn, final String courtCentreId, final String courtCentreName, final List<Defendant> defendants, final LocalDate sendingCommittalDate, final String type) {
     this.caseId = caseId;
     this.caseUrn = caseUrn;
