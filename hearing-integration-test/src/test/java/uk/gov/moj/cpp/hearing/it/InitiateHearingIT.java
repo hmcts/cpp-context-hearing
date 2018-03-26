@@ -7,6 +7,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
 
+import java.text.MessageFormat;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
@@ -18,6 +19,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -50,7 +52,9 @@ public class InitiateHearingIT extends AbstractIT {
 
         publicEventTopic.waitFor();
 
-        final String url = ENDPOINT_PROPERTIES.getProperty("base-uri") + "/" + format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId().toString());
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
 
         final String responseType = "application/vnd.hearing.get.hearing.v2+json";
 
@@ -94,7 +98,9 @@ public class InitiateHearingIT extends AbstractIT {
 
         publicEventTopic.waitFor();
 
-        final String url = ENDPOINT_PROPERTIES.getProperty("base-uri") + "/" + format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId().toString());
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
 
         final String responseType = "application/vnd.hearing.get.hearing.v2+json";
 
