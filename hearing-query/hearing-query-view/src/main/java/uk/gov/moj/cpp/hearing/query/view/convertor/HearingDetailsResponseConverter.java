@@ -1,26 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.convertor;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.join;
-
-import java.time.temporal.Temporal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import org.apache.commons.collections.CollectionUtils;
-
 import uk.gov.justice.services.common.converter.Converter;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
@@ -32,6 +12,28 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
+
+import java.time.temporal.Temporal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 public final class HearingDetailsResponseConverter implements Converter<Ahearing, HearingDetailsResponse> {
 
@@ -169,20 +171,17 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
         @Override
         public List<HearingDetailsResponse.Case> convert(final Ahearing source) {
-            if (null == source || null == source.getId() || CollectionUtils.isEmpty(source.getDefendants())) {
-                return new ArrayList<>();
+
+            if (null == source || null == source.getId()) {
+                return Collections.emptyList();
             }
 
             // 1. building a set of legal cases to avoid duplications
             final Set<LegalCase> legalCases = source.getDefendants()
-                    .stream().flatMap(defendant -> defendant.getOffences().stream())
-                    .collect(toList())
-                    .stream().map(offence -> offence.getLegalCase())
+                    .stream()
+                    .flatMap(defendant -> defendant.getOffences().stream())
+                    .map(Offence::getLegalCase)
                     .collect(toSet());
-
-            if (CollectionUtils.isEmpty(legalCases)) {
-                return new ArrayList<>();
-            }
 
             // 2. building a data structure map to build the expected response
             final Map<LegalCase, Map<Defendant, List<Offence>>> caseDefendants = new LinkedHashMap<>();
@@ -301,11 +300,9 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withAddress3(address3)
                     .withAddress4(address4)
                     .withPostCode(postCode)
-                    .withformattedAddress(format(address1, address2, address3, address4, postCode));
-        }
-
-        private static String format(final String... vals) {
-            return join(vals, ' ').trim();
+                    .withformattedAddress(Stream.of(address1, address2, address3, address4, postCode)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.joining(" ")));
         }
     }
 

@@ -23,7 +23,6 @@ import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingsPleaAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
-import uk.gov.moj.cpp.hearing.domain.event.CaseCreated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
@@ -254,7 +253,6 @@ public class HearingCommandHandlerTest {
     private final Enveloper enveloper = createEnveloperWithEvents(
             //new events.
             Initiated.class,
-            CaseCreated.class,
             OffencePleaUpdated.class,
             //TODO - GPE-3032 CLEANUP - remove old events.
             DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,

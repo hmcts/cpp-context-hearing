@@ -57,7 +57,6 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -104,7 +103,6 @@ public class NewModelInitiateHearingCommandHandlerTest {
     private final Enveloper enveloper = createEnveloperWithEvents(
             //new events.
             Initiated.class,
-
             InitiateHearingOffenceEnriched.class,
             InitiateHearingOffencePlead.class,
 
@@ -145,7 +143,9 @@ public class NewModelInitiateHearingCommandHandlerTest {
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName("hearing.initiated"),
+
                         payloadIsJson(allOf(
+
                                 withJsonPath("$.cases.[0].caseId", equalTo(caseId.toString())),
                                 withJsonPath("$.cases.[0].urn", is(initiateHearingCommand.getCases().get(0).getUrn())),
                                 withJsonPath("$.hearing.id", is(hearingId.toString())),
@@ -343,4 +343,5 @@ public class NewModelInitiateHearingCommandHandlerTest {
                         )
                 );
     }
+
 }

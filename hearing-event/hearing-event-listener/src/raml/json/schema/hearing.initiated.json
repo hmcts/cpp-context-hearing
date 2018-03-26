@@ -37,31 +37,42 @@
       ]
     },
     "address": {
-      "type": "object",
+      "type": [
+        "object",
+        "null"
+      ],
       "properties": {
         "address1": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "address2": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "address3": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "address4": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "postCode": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
-      },
-      "required": [
-        "address1",
-        "address2",
-        "address3",
-        "address4",
-        "postCode"
-      ]
+      }
     },
     "judge": {
       "type": "object",
@@ -102,22 +113,37 @@
           "type": "string"
         },
         "nationality": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "gender": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "address": {
           "$ref": "#/definitions/address"
         },
         "dateOfBirth": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "defenceOrganisation": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "interpreter": {
-          "type": "object",
+          "type": [
+            "object",
+            "null"
+          ],
           "properties": {
             "needed": {
               "type": "boolean"
@@ -125,10 +151,7 @@
             "language": {
               "type": "string"
             }
-          },
-          "required": [
-            "needed"
-          ]
+          }
         },
         "defendantCase": {
           "type": "array",
@@ -148,12 +171,6 @@
         "personId",
         "firstName",
         "lastName",
-        "nationality",
-        "gender",
-        "address",
-        "dateOfBirth",
-        "defenceOrganisation",
-        "interpreter",
         "offences"
       ]
     },
@@ -170,50 +187,62 @@
           "type": "string"
         },
         "section": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "startDate": {
           "type": "string"
         },
         "endDate": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "orderIndex": {
-          "type": "number"
+          "type": [
+            "number",
+            "null"
+          ]
         },
         "count": {
-          "type": "number"
+          "type": [
+            "number",
+            "null"
+          ]
         },
         "convictionDate": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
         "id",
         "offenceCode",
         "wording",
-        "section",
-        "startDate",
-        "endDate",
-        "orderIndex",
-        "count",
-        "convictionDate"
+        "startDate"
       ]
     },
     "defendantCase": {
       "type": "object",
       "properties": {
         "bailStatus": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "custodyTimeLimitDate": {
-          "type": "string"
+          "type": [
+            "string",
+            "null"
+          ]
         }
-      },
-      "required": [
-        "bailStatus",
-        "custodyTimeLimitDate"
-      ]
+      }
     },
     "hearing": {
       "type": "object",
@@ -263,7 +292,6 @@
         "courtRoomName",
         "judge",
         "startDateTime",
-        "notBefore",
         "estimateMinutes",
         "defendants"
       ]

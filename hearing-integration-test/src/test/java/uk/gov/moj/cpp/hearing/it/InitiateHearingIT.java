@@ -26,6 +26,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.initiateHearingCommandTemplateWithOnlyMandatoryFields;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.with;
@@ -33,10 +34,53 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.with;
 public class InitiateHearingIT extends AbstractIT {
 
     @Test
+    public void initiateHearing_withOnlyMandatoryFields(){
+
+        InitiateHearingCommand initiateHearing = initiateHearingCommandTemplateWithOnlyMandatoryFields().build();
+
+        final Hearing hearing = initiateHearing.getHearing();
+
+        TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
+
+        makeCommand(requestSpec, "hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearing)
+                .executeSuccessfully();
+
+        publicEventTopic.waitFor();
+
+        final String url = ENDPOINT_PROPERTIES.getProperty("base-uri") + "/" + format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId().toString());
+
+        final String responseType = "application/vnd.hearing.get.hearing.v2+json";
+
+        poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString())),
+                                withJsonPath("$.hearingType", equalStr(hearing, "type")),
+                                withJsonPath("$.courtCentreName", equalStr(hearing, "courtCentreName")),
+                                withJsonPath("$.roomName", equalStr(hearing, "courtRoomName")),
+                                withJsonPath("$.roomId", equalStr(hearing, "courtRoomId")),
+                                withJsonPath("$.courtCentreId", equalStr(hearing, "courtCentreId")),
+                                withJsonPath("$.judge.id", equalStr(hearing, "judge.id")),
+                                withJsonPath("$.judge.title", equalStr(hearing, "judge.title")),
+                                withJsonPath("$.judge.firstName", equalStr(hearing, "judge.firstName")),
+                                withJsonPath("$.judge.lastName", equalStr(hearing, "judge.lastName")),
+                                withJsonPath("$.cases[0].caseId", equalStr(initiateHearing, "cases[0].caseId")),
+                                withJsonPath("$.cases[0].caseUrn", equalStr(initiateHearing, "cases[0].urn")),
+                                withJsonPath("$.cases[0].defendants[0].defendantId", equalStr(hearing, "defendants[0].id")),
+                                withJsonPath("$.cases[0].defendants[0].firstName", equalStr(hearing, "defendants[0].firstName")),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].id", equalStr(hearing, "defendants[0].offences[0].id"))
+                        )));
+
+    }
+
+    @Test
     public void initiateHearing_shouldInitiateHearing_whenInitiateHearingCommandIsMade() {
 
         InitiateHearingCommand initiateHearing = initiateHearingCommandTemplate().build();
-
 
         final Hearing hearing = initiateHearing.getHearing();
 

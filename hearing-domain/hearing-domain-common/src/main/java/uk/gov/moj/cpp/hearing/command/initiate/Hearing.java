@@ -20,7 +20,7 @@ public class Hearing {
     private final String courtRoomName;
     private final Judge judge;
     private final LocalDate startDateTime;
-    private final boolean notBefore;
+    private final Boolean notBefore;
     private final Integer estimateMinutes;
     private final List<Defendant> defendants;
 
@@ -33,7 +33,7 @@ public class Hearing {
                    @JsonProperty("courtRoomName") final String courtRoomName,
                    @JsonProperty("judge") final Judge judge,
                    @JsonProperty("startDateTime") final LocalDate startDateTime,
-                   @JsonProperty("notBefore") final boolean notBefore,
+                   @JsonProperty("notBefore") final Boolean notBefore,
                    @JsonProperty("estimateMinutes") final Integer estimateMinutes,
                    @JsonProperty("defendants") final List<Defendant> defendants) {
         this.id = id;
@@ -81,7 +81,7 @@ public class Hearing {
         return startDateTime;
     }
 
-    public boolean isNotBefore() {
+    public Boolean isNotBefore() {
         return notBefore;
     }
 

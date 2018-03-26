@@ -47,7 +47,6 @@ public class TestUtilities {
 
         UUID caseId = randomUUID();
 
-
         InitiateHearingCommand.Builder result = InitiateHearingCommand.builder()
                 .addCase(Case.builder()
                         .withCaseId(caseId)
@@ -110,6 +109,55 @@ public class TestUtilities {
                                                 .withOrderIndex(INTEGER.next())
                                                 .withCount(INTEGER.next())
                                                 .withConvictionDate(PAST_LOCAL_DATE.next())
+                                )
+                        )
+                );
+
+
+        return result;
+    }
+
+    public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields() {
+
+        UUID caseId = randomUUID();
+
+        InitiateHearingCommand.Builder result = InitiateHearingCommand.builder()
+                .addCase(Case.builder()
+                        .withCaseId(caseId)
+                        .withUrn(STRING.next())
+                )
+                .withHearing(Hearing.builder()
+                        .withId(randomUUID())
+                        .withType(STRING.next())
+                        .withCourtCentreId(randomUUID())
+                        .withCourtCentreName(STRING.next())
+                        .withCourtRoomId(randomUUID())
+                        .withCourtRoomName(STRING.next())
+                        .withJudge(
+                                Judge.builder()
+                                        .withId(randomUUID())
+                                        .withTitle(STRING.next())
+                                        .withFirstName(STRING.next())
+                                        .withLastName(STRING.next())
+                        )
+                        .withStartDateTime(FUTURE_LOCAL_DATE.next())
+                        .withEstimateMinutes(INTEGER.next())
+                        .addDefendant(Defendant.builder()
+                                .withId(randomUUID())
+                                .withPersonId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .addDefendantCase(
+                                        DefendantCase.builder()
+                                                .withCaseId(caseId)
+                                )
+                                .addOffence(
+                                        Offence.builder()
+                                                .withId(randomUUID())
+                                                .withCaseId(caseId)
+                                                .withOffenceCode(STRING.next())
+                                                .withWording(STRING.next())
+                                                .withStartDate(PAST_LOCAL_DATE.next())
                                 )
                         )
                 );
@@ -190,13 +238,13 @@ public class TestUtilities {
             String url = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty(endpoint), arguments);
             ObjectMapper mapper = new ObjectMapper();
 
-
             mapper.registerModule(new JavaTimeModule());
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
             String output = "";
             try {
                 output = mapper.writeValueAsString(payload);
+                System.out.println(output);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
