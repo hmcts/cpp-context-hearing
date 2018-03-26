@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.persist.entity.ex;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -175,4 +176,19 @@ public class Ahearing {
         return new Builder();
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (null == o || getClass() != o.getClass()) {
+            return false;
+        }
+        return Objects.equals(this.id, ((Ahearing)o).id);
+    }
 }

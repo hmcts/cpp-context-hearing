@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -96,7 +98,24 @@ public class Address {
         return new Builder();
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.address1, this.address2, this.address3, this.address4, this.postCode);
+    }
 
-
-
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (null == o || getClass() != o.getClass()) {
+            return false;
+        }
+        final Address a = (Address) o;
+        return Objects.equals(this.address1, a.address1) 
+                && Objects.equals(this.address2, a.address2) 
+                && Objects.equals(this.address3, a.address3) 
+                && Objects.equals(this.address4, a.address4) 
+                && Objects.equals(this.postCode, a.postCode);
+    }
 }

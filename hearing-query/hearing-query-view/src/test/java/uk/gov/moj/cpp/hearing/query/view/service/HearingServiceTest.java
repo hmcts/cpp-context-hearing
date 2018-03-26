@@ -101,7 +101,7 @@ public class HearingServiceTest {
 
         // 2. setting the repository mock return
         //-----------------------------------------------------------------------
-        when(ahearingRepository.findByStartDateTime(startDateStartOfDay)).thenReturn(hearingList);
+        when(ahearingRepository.findByStartDate(startDateStartOfDay)).thenReturn(hearingList);
 
         // 3. invoking the service with the given input mock value
         //-----------------------------------------------------------------------

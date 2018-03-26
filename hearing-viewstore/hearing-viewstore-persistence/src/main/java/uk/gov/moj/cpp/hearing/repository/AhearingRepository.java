@@ -10,7 +10,6 @@ import org.apache.deltaspike.data.api.AbstractEntityRepository;
 import org.apache.deltaspike.data.api.Query;
 import org.apache.deltaspike.data.api.QueryParam;
 import org.apache.deltaspike.data.api.Repository;
-import org.apache.deltaspike.data.api.criteria.CriteriaSupport;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 
@@ -18,14 +17,12 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
  * Repository for accessing Ahearing data.
  */
 @Repository(forEntity = Ahearing.class)
-public abstract class AhearingRepository extends AbstractEntityRepository<Ahearing, UUID>
-        implements CriteriaSupport<Ahearing> {
+public abstract class AhearingRepository extends AbstractEntityRepository<Ahearing, UUID> {
 
     @Query(value = "from Ahearing h where h.id = :id", singleResult = OPTIONAL)
     public abstract Ahearing findById(@QueryParam("id") final UUID id);
-    
 
-    @Query(value = "from Ahearing h where h.startDateTime >= :startDateTime")
-    public abstract List<Ahearing> findByStartDateTime(@QueryParam("startDateTime") final ZonedDateTime startDateTime);
+    @Query(value = "from Ahearing h where date(h.startDateTime) = date(:startDateTime)")
+    public abstract List<Ahearing> findByStartDate(@QueryParam("startDateTime") final ZonedDateTime startDateTime);
 
 }

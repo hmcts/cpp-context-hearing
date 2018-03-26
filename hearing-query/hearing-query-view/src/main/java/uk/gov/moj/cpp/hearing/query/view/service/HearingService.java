@@ -67,7 +67,7 @@ public class HearingService {
             return new HearingListResponse();
         }
         ZonedDateTime zonedStartDatetime = startDate.atStartOfDay(ZoneOffset.systemDefault());
-        return new HearingListResponseConverter().convert(ahearingRepository.findByStartDateTime(zonedStartDatetime));
+        return new HearingListResponseConverter().convert(ahearingRepository.findByStartDate(zonedStartDatetime));
     }
     
     @Transactional

@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -110,5 +112,21 @@ public class Attendee {
         }
 
         public abstract <T> T build();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (null == o || getClass() != o.getClass()) {
+            return false;
+        }
+        return Objects.equals(this.id, ((Attendee)o).id);
     }
 }

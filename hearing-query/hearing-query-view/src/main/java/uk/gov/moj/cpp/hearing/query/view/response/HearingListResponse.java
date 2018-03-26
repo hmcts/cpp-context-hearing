@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.response;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -10,7 +11,7 @@ public final class HearingListResponse {
     private final List<HearingListResponseHearing> hearingListResponseHearings;
 
     public HearingListResponse() {
-        this.hearingListResponseHearings = null;
+        this.hearingListResponseHearings = Collections.emptyList();
     }
     
     @JsonCreator
