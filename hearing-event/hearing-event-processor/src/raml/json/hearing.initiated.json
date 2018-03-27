@@ -40,11 +40,11 @@
           "needed": false,
           "language": "English"
         },
-        "defendantCases": [
+        "defendantCase": [
           {
             "caseId": "000000-0000-0000-000000000000",
             "bailStatus": "bailed",
-            "custodyTimeLimitDate": "2018-01-30",
+            "custodyTimeLimitDate": "2018-01-30"
           }
         ],
         "offences": [
@@ -58,7 +58,9 @@
             "endDate": "2011-08-01",
             "orderIndex": 1,
             "count": 1,
-            "convictionDate": "2017-08-01"
+            "convictionDate": "2017-08-01",
+            "title": "Wounding with intent",
+            "legislation": "legislation"
           }
         ]
       }

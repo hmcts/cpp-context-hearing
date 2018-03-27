@@ -21,6 +21,8 @@ public class Offence {
     private final Integer count;
     private final LocalDate convictionDate;
     private Plea plea;
+    private final String title;
+    private final String legislation;
 
     @JsonCreator
     public Offence(@JsonProperty("id") final UUID id,
@@ -33,7 +35,10 @@ public class Offence {
                    @JsonProperty("orderIndex") final Integer orderIndex,
                    @JsonProperty("count") final Integer count,
                    @JsonProperty("convictionDate") final LocalDate convictionDate,
-                   @JsonProperty("plea") final Plea plea) {
+                   @JsonProperty("plea") final Plea plea,
+                   @JsonProperty("title") final String title,
+                   @JsonProperty("legislation") final String legislation
+    ) {
         this.id = id;
         this.caseId = caseId;
         this.offenceCode = offenceCode;
@@ -45,6 +50,8 @@ public class Offence {
         this.count = count;
         this.convictionDate = convictionDate;
         this.plea = plea;
+        this.title = title;
+        this.legislation = legislation;
     }
 
     public UUID getId() {
@@ -95,6 +102,14 @@ public class Offence {
         this.plea = plea;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public String getLegislation() {
+        return legislation;
+    }
+
     public static class Builder {
 
         private UUID id;
@@ -108,6 +123,8 @@ public class Offence {
         private LocalDate convictionDate;
         private Plea.Builder plea;
         private UUID caseId;
+        private String title;
+        private String legislation;
 
         private Builder() {
 
@@ -212,9 +229,20 @@ public class Offence {
             return this;
         }
 
+        public Builder withTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder withLegislation(String legislation) {
+            this.legislation = legislation;
+            return this;
+        }
+
         public Offence build() {
             return new Offence(id, caseId, offenceCode, wording, section, startDate, endDate, orderIndex, count, convictionDate,
-                    ofNullable(plea).map(Plea.Builder::build).orElse(null)
+                    ofNullable(plea).map(Plea.Builder::build).orElse(null),
+                    title, legislation
             );
         }
     }

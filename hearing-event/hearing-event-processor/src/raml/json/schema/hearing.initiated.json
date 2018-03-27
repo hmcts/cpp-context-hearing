@@ -218,6 +218,18 @@
             "string",
             "null"
           ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "legislation": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       },
       "required": [
@@ -269,7 +281,8 @@
           "$ref": "#/definitions/judge"
         },
         "startDateTime": {
-          "type": "string"
+          "type": "string",
+          "format": "date-time"
         },
         "notBefore": {
           "type": "boolean"

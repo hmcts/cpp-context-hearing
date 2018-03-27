@@ -41,13 +41,13 @@ public class Offence {
     private String legislation;
 
     @Column(name = "start_date")
-    private java.time.LocalDateTime startDate;
+    private java.time.LocalDate startDate;
 
     @Column(name = "end_date")
-    private java.time.LocalDateTime endDate;
+    private java.time.LocalDate endDate;
 
     @Column(name = "conviction_date")
-    private java.time.LocalDateTime convictionDate;
+    private java.time.LocalDate convictionDate;
     
     @Column(name = "plea_id")
     private UUID pleaId;
@@ -154,15 +154,15 @@ public class Offence {
         return legislation;
     }
 
-    public java.time.LocalDateTime getStartDate() {
+    public java.time.LocalDate getStartDate() {
         return startDate;
     }
 
-    public java.time.LocalDateTime getEndDate() {
+    public java.time.LocalDate getEndDate() {
         return endDate;
     }
 
-    public java.time.LocalDateTime getConvictionDate() {
+    public java.time.LocalDate getConvictionDate() {
         return convictionDate;
     }
 
@@ -232,11 +232,11 @@ public class Offence {
 
         public String legislation;
 
-        private java.time.LocalDateTime startDate;
+        private java.time.LocalDate startDate;
 
-        private java.time.LocalDateTime endDate;
+        private java.time.LocalDate endDate;
 
-        private java.time.LocalDateTime convictionDate;
+        private java.time.LocalDate convictionDate;
 
         public UUID pleaId;
 
@@ -302,17 +302,17 @@ public class Offence {
             return this;
         }
 
-        public Builder withStartDate(final java.time.LocalDateTime startDate) {
+        public Builder withStartDate(final java.time.LocalDate startDate) {
             this.startDate = startDate;
             return this;
         }
 
-        public Builder withEndDate(final java.time.LocalDateTime endDate) {
+        public Builder withEndDate(final java.time.LocalDate endDate) {
             this.endDate = endDate;
             return this;
         }
 
-        public Builder withConvictionDate(final java.time.LocalDateTime convictionDate) {
+        public Builder withConvictionDate(final java.time.LocalDate convictionDate) {
             this.convictionDate = convictionDate;
             return this;
         }
