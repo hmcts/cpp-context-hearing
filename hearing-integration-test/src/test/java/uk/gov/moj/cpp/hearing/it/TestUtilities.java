@@ -48,7 +48,7 @@ public class TestUtilities {
 
         UUID caseId = randomUUID();
 
-        InitiateHearingCommand.Builder result = InitiateHearingCommand.builder()
+        return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
                         .withCaseId(caseId)
                         .withUrn(STRING.next())
@@ -110,19 +110,18 @@ public class TestUtilities {
                                                 .withOrderIndex(INTEGER.next())
                                                 .withCount(INTEGER.next())
                                                 .withConvictionDate(PAST_LOCAL_DATE.next())
+                                                .withTitle(STRING.next())
+                                                .withLegislation(STRING.next())
                                 )
                         )
                 );
-
-
-        return result;
     }
 
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields() {
 
         UUID caseId = randomUUID();
 
-        InitiateHearingCommand.Builder result = InitiateHearingCommand.builder()
+        return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
                         .withCaseId(caseId)
                         .withUrn(STRING.next())
@@ -162,9 +161,6 @@ public class TestUtilities {
                                 )
                         )
                 );
-
-
-        return result;
     }
 
 

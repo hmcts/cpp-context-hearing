@@ -130,7 +130,10 @@ public class InitiateHearingIT extends AbstractIT {
                                 withJsonPath("$.cases[0].defendants[0].address.postCode", equalStr(hearing, "defendants[0].address.postCode")),
                                 withJsonPath("$.cases[0].defendants[0].dateOfBirth", equalStr(hearing, "defendants[0].dateOfBirth", ISO_LOCAL_DATE)),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].id", equalStr(hearing, "defendants[0].offences[0].id")),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].count", equalInt(hearing, "defendants[0].offences[0].count"))
+                                withJsonPath("$.cases[0].defendants[0].offences[0].count", equalInt(hearing, "defendants[0].offences[0].count")),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].wording", equalStr(hearing, "defendants[0].offences[0].wording")),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].title", equalStr(hearing, "defendants[0].offences[0].title")),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].legislation", equalStr(hearing, "defendants[0].offences[0].legislation"))
                         )));
     }
 

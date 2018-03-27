@@ -7,6 +7,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
@@ -53,14 +54,19 @@ public class NewHearingEventListener {
     private Offence.Builder translateOffence(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.initiate.Offence offenceIn, final Map<UUID, LegalCase> id2Case) {
         return Offence.builder()
                 .withId(new HearingSnapshotKey(offenceIn.getId(), hearingId))
-                .withConvictionDate(ofNullable(offenceIn.getConvictionDate()).map(LocalDate::atStartOfDay).orElse(null))
+                .withConvictionDate(offenceIn.getConvictionDate())
                 .withCase(id2Case.get(offenceIn.getCaseId()))
                 .withCode(offenceIn.getOffenceCode())
-                .withCount(offenceIn.getCount());
+                .withCount(offenceIn.getCount())
+                .withWording(offenceIn.getWording())
+                .withTitle(offenceIn.getTitle())
+                .withLegislation(offenceIn.getLegislation())
+                .withStartDate(offenceIn.getStartDate())
+                .withEndDate(offenceIn.getEndDate());
     }
 
     private Defendant.Builder translateDefendant(UUID hearingId, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendantIn) {
-        return Defendant.builder()
+        Defendant.Builder builder = Defendant.builder()
                 .withAddress(ofNullable(defendantIn.getAddress())
                         .map(a -> Address.builder()
                                 .withAddress1(a.getAddress1())
@@ -73,17 +79,20 @@ public class NewHearingEventListener {
                         .orElse(null)
                 )
                 .withDateOfBirth(defendantIn.getDateOfBirth())
-                //TODO where should email + fax + homeTelephone come from ?
-                //.withEmail(defendantIn.getEmail)
-                //.withFax(defendantIn.getFax)
-                //.withHomeTelephone(defendantIn.get..)
-                //TODO remove this - see comment above
-                //.withDefenceAdvocates(Arrays.asList(defenceAdvocateBuilder.build()))
                 .withNationality(defendantIn.getNationality())
                 .withFirstName(defendantIn.getFirstName())
                 .withLastName(defendantIn.getLastName())
                 .withGender(defendantIn.getGender())
+                .withInterpreterLanguage(ofNullable(defendantIn.getInterpreter()).map(Interpreter::getLanguage).orElse(null))
+                .withDefenceSolicitorFirm(defendantIn.getDefenceOrganisation())
                 .withId(new HearingSnapshotKey(defendantIn.getId(), hearingId));
+
+        if (!defendantIn.getDefendantCases().isEmpty()) {
+            builder.withBailStatus(defendantIn.getDefendantCases().get(0).getBailStatus()) //TODO - the FE needs to handle multiple cases
+                    .withCustodyTimeLimitDate(defendantIn.getDefendantCases().get(0).getCustodyTimeLimitDate());
+        }
+
+        return builder;
     }
 
 
