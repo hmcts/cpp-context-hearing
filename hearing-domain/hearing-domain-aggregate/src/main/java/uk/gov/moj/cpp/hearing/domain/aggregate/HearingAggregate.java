@@ -143,13 +143,13 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> addProsecutionCounsel(final NewProsecutionCounselAdded prosecutionCounselAdded) {
         return apply(Stream.of(
                 new ProsecutionCounselAdded(prosecutionCounselAdded.getHearingId(), prosecutionCounselAdded.getAttendeeId(), prosecutionCounselAdded.getPersonId(), prosecutionCounselAdded.getStatus()),
-                       prosecutionCounselAdded));
+                prosecutionCounselAdded));
     }
 
-    public Stream<Object> addDefenceCounsel(final UUID hearingId, final UUID attendeeId,
-                                            final UUID personId, final List<UUID> defendantIds, final String status) {
-        return apply(Stream.of(new DefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status),
-                new NewDefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status)));
+    public Stream<Object> addDefenceCounsel(NewDefenceCounselAdded newDefenceCounselAdded) {
+        return apply(Stream.of(new DefenceCounselAdded(newDefenceCounselAdded.getHearingId(), newDefenceCounselAdded.getAttendeeId(),
+                        newDefenceCounselAdded.getPersonId(), newDefenceCounselAdded.getDefendantIds(), newDefenceCounselAdded.getStatus()),
+                newDefenceCounselAdded));
     }
 
     public Stream<Object> shareResults(final UUID hearingId, final ZonedDateTime sharedTime, final List<ResultLine> resultLines) {
@@ -242,7 +242,6 @@ public class HearingAggregate implements Aggregate {
         }
         return result;
     }
-
 
 
     private void recordAmendedResult(final ResultAmended resultAmended) {

@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
@@ -29,12 +30,14 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +50,8 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.mockito.Mockito.reset;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
@@ -54,7 +59,6 @@ import static uk.gov.moj.cpp.hearing.event.listener.TestUtilities.initiateHearin
 
 @RunWith(MockitoJUnitRunner.class)
 public class NewHearingEventListenerTest {
-
 
     @Mock
     private AhearingRepository ahearingRepository;
@@ -107,6 +111,84 @@ public class NewHearingEventListenerTest {
         return new DefaultJsonEnvelope(null, jsonObject);
     }
 
+    private JsonEnvelope getAddProsecutionCounselJsonEnvelope(NewProsecutionCounselAdded newProsecutionCounselAdded) {
+        ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
+        String strJsonDocument;
+        try {
+            strJsonDocument = objectMapper.writer().writeValueAsString(newProsecutionCounselAdded);
+        } catch (JsonProcessingException jpe) {
+            throw new RuntimeException("failed to serialise " + newProsecutionCounselAdded, jpe);
+        }
+        JsonObject jsonObject = Json.createReader(new StringReader(strJsonDocument)).readObject();
+        return new DefaultJsonEnvelope(null, jsonObject);
+    }
+
+
+    @Test
+    public void shouldStoreProsecutionCounselOnAddEvent() {
+        NewProsecutionCounselAdded newProsecutionCounselAdded = NewProsecutionCounselAdded.builder()
+                .withAttendeeId(UUID.randomUUID())
+                .withFirstName("david")
+                .withHearingId(UUID.randomUUID())
+                .withStatus("QC")
+                .withLastName("Bowie")
+                .withTitle("Mr")
+                .build();
+        JsonEnvelope event = getAddProsecutionCounselJsonEnvelope(newProsecutionCounselAdded);
+
+        Ahearing ahearing = Ahearing.builder().withId(newProsecutionCounselAdded.getHearingId()).build();
+        when(this.ahearingRepository.findBy(newProsecutionCounselAdded.getHearingId())).thenReturn(ahearing);
+
+
+        this.newHearingEventListener.newProsecutionCounselAdded(event);
+
+        //check the hearing was saved and that it had the defence advocate
+        verify(this.ahearingRepository).save(this.hearingexArgumentCaptor.capture());
+        Assert.assertTrue(ahearing == this.hearingexArgumentCaptor.getValue());
+        Assert.assertEquals(ahearing.getAttendees().size(), 1);
+        Assert.assertTrue(ahearing.getAttendees().get(0) instanceof ProsecutionAdvocate);
+        ProsecutionAdvocate prosecutionAdvocate = (ProsecutionAdvocate) ahearing.getAttendees().get(0);
+        //check that the attendee has been added
+        Assert.assertEquals(prosecutionAdvocate.getId().getId(), newProsecutionCounselAdded.getAttendeeId());
+        Assert.assertEquals(prosecutionAdvocate.getId().getHearingId(), newProsecutionCounselAdded.getHearingId());
+        Assert.assertEquals(prosecutionAdvocate.getStatus(), newProsecutionCounselAdded.getStatus());
+        Assert.assertEquals(prosecutionAdvocate.getFirstName(), newProsecutionCounselAdded.getFirstName());
+        Assert.assertEquals(prosecutionAdvocate.getLastName(), newProsecutionCounselAdded.getLastName());
+        Assert.assertEquals(prosecutionAdvocate.getTitle(), newProsecutionCounselAdded.getTitle());
+
+        //  now check an update works
+        newProsecutionCounselAdded = NewProsecutionCounselAdded.builder()
+                .withAttendeeId(newProsecutionCounselAdded.getAttendeeId())
+                .withFirstName("Xdavid")
+                .withHearingId(newProsecutionCounselAdded.getHearingId())
+                .withStatus("Trainee")
+                .withLastName("XBowie")
+                .withTitle("XMr")
+                .build();
+
+        reset(this.ahearingRepository);
+        when(this.ahearingRepository.findBy(newProsecutionCounselAdded.getHearingId())).thenReturn(ahearing);
+
+        event = getAddProsecutionCounselJsonEnvelope(newProsecutionCounselAdded);
+
+        this.newHearingEventListener.newProsecutionCounselAdded(event);
+
+        //check the the status only was updated
+        verify(this.ahearingRepository).save(this.hearingexArgumentCaptor.capture());
+        Assert.assertTrue(ahearing == this.hearingexArgumentCaptor.getValue());
+        Assert.assertEquals(ahearing.getAttendees().size(), 1);
+        Assert.assertTrue(ahearing.getAttendees().get(0) instanceof ProsecutionAdvocate);
+        prosecutionAdvocate = (ProsecutionAdvocate) ahearing.getAttendees().get(0);
+        //check that the attendee has been added
+        Assert.assertEquals(prosecutionAdvocate.getId().getId(), newProsecutionCounselAdded.getAttendeeId());
+        Assert.assertEquals(prosecutionAdvocate.getId().getHearingId(), newProsecutionCounselAdded.getHearingId());
+        Assert.assertEquals(prosecutionAdvocate.getStatus(), newProsecutionCounselAdded.getStatus());
+        Assert.assertNotEquals(prosecutionAdvocate.getFirstName(), newProsecutionCounselAdded.getFirstName());
+        Assert.assertNotEquals(prosecutionAdvocate.getLastName(), newProsecutionCounselAdded.getLastName());
+        Assert.assertNotEquals(prosecutionAdvocate.getTitle(), newProsecutionCounselAdded.getTitle());
+
+    }
 
     @Test
     public void shouldStoreDefenceCounselOnAddEvent() {
@@ -115,14 +197,23 @@ public class NewHearingEventListenerTest {
         List<UUID> defendantIds = Arrays.asList(UUID.randomUUID(), UUID.randomUUID());
         UUID personId = null;
         String status = "QC";
-        NewDefenceCounselAdded newDefenceCounselAdded = new NewDefenceCounselAdded(hearingId, attendeeId, personId, defendantIds, status);
-        final JsonEnvelope event = getAddDefenceCounselJsonEnvelope(newDefenceCounselAdded);
+        NewDefenceCounselAdded newDefenceCounselAdded =
+                NewDefenceCounselAdded.builder()
+                        .withHearingId(hearingId)
+                        .withAttendeeId(attendeeId)
+                        .withPersonId(personId)
+                        .withDefendantIds(defendantIds)
+                        .withStatus(status)
+                        .withFirstName("David")
+                        .withLastName("Davidson")
+                        .withTitle("Colonel")
+                        .build();
+        JsonEnvelope event = getAddDefenceCounselJsonEnvelope(newDefenceCounselAdded);
         List<Defendant> defendants = Arrays.asList(
                 Defendant.builder().withId(new HearingSnapshotKey(defendantIds.get(0), hearingId)).build(),
                 Defendant.builder().withId(new HearingSnapshotKey(defendantIds.get(1), hearingId)).build());
         Ahearing ahearing = Ahearing.builder().withId(hearingId).withDefendants(defendants).build();
         when(this.ahearingRepository.findBy(hearingId)).thenReturn(ahearing);
-
 
         this.newHearingEventListener.newDefenceCounselAdded(event);
 
@@ -137,13 +228,54 @@ public class NewHearingEventListenerTest {
         Assert.assertEquals(defenceAdvocate.getId().getId(), attendeeId);
         Assert.assertEquals(defenceAdvocate.getId().getHearingId(), hearingId);
         Assert.assertEquals(defenceAdvocate.getStatus(), newDefenceCounselAdded.getStatus());
+
+        Assert.assertEquals(defenceAdvocate.getFirstName(), newDefenceCounselAdded.getFirstName());
+        Assert.assertEquals(defenceAdvocate.getLastName(), newDefenceCounselAdded.getLastName());
+        Assert.assertEquals(defenceAdvocate.getTitle(), newDefenceCounselAdded.getTitle());
         //compare the defendants linked with store
         Set<UUID> linkedDefendantIds = defenceAdvocate.getDefendants().stream().map(d -> d.getId().getId()).collect(Collectors.toSet());
         Assert.assertEquals(linkedDefendantIds, new HashSet<>(newDefenceCounselAdded.getDefendantIds()));
 
-        //TODO add the other fields of defenceAdvocate (add to command also!)
+        reset(this.ahearingRepository);
+        when(this.ahearingRepository.findBy(hearingId)).thenReturn(ahearing);
+
+        //check that an update only changes status
+        newDefenceCounselAdded = NewDefenceCounselAdded.builder()
+                .withStatus("changedStatus")
+                .withTitle("changedTitle")
+                .withFirstName("changedFirstName")
+                .withLastName("changedLastName")
+                .withAttendeeId(newDefenceCounselAdded.getAttendeeId())
+                .withHearingId(newDefenceCounselAdded.getHearingId())
+                .withDefendantIds(new ArrayList<>())
+                .build();
+
+        event = getAddDefenceCounselJsonEnvelope(newDefenceCounselAdded);
+        this.newHearingEventListener.newDefenceCounselAdded(event);
+
+        //check the hearing was saved and that it had the defence advocate
+        verify(this.ahearingRepository).save(this.hearingexArgumentCaptor.capture());
+        //check that the defendants a
+        Assert.assertTrue(ahearing == this.hearingexArgumentCaptor.getValue());
+        Assert.assertEquals(ahearing.getAttendees().size(), 1);
+        Assert.assertTrue(ahearing.getAttendees().get(0) instanceof DefenceAdvocate);
+        defenceAdvocate = (DefenceAdvocate) ahearing.getAttendees().get(0);
+        //check that the attendee has been added
+        Assert.assertEquals(defenceAdvocate.getId().getId(), attendeeId);
+        Assert.assertEquals(defenceAdvocate.getId().getHearingId(), hearingId);
+        Assert.assertEquals(defenceAdvocate.getStatus(), newDefenceCounselAdded.getStatus());
+
+        //check other fields were not changed
+        Assert.assertNotEquals(defenceAdvocate.getFirstName(), newDefenceCounselAdded.getFirstName());
+        Assert.assertNotEquals(defenceAdvocate.getLastName(), newDefenceCounselAdded.getLastName());
+        Assert.assertNotEquals(defenceAdvocate.getTitle(), newDefenceCounselAdded.getTitle());
+        //compare the defendants linked with store
+        linkedDefendantIds = defenceAdvocate.getDefendants().stream().map(d -> d.getId().getId()).collect(Collectors.toSet());
+        Assert.assertNotEquals(linkedDefendantIds, new HashSet<>(newDefenceCounselAdded.getDefendantIds()));
+
 
     }
+
 
     @Test
     public void shouldInsertAhearingWhenInitiated() {
@@ -252,4 +384,5 @@ public class NewHearingEventListenerTest {
         assertThat(actualLegalCase.getId(), is(legalCase.getCaseId()));
         assertThat(actualLegalCase.getCaseurn(), is(legalCase.getUrn()));
     }
+
 }

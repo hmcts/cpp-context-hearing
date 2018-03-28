@@ -149,14 +149,20 @@ public class NewHearingEventListener {
         LOGGER.error("HERE HERE HERE - we have received plea info");
     }
 
-    private DefenceAdvocate findDefenceAdvocateByAttendeeId(Ahearing hearing, UUID attendeeId) {
+    private DefenceAdvocate findOrCreateDefenceAdvocateByAttendeeId(Ahearing hearing, NewDefenceCounselAdded newDefenceCounselAdded) {
+        UUID attendeeId = newDefenceCounselAdded.getAttendeeId();
         Optional<Attendee> oAttendee = hearing.getAttendees().stream().filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(attendeeId)).findFirst();
         DefenceAdvocate defenceAdvocate = null;
         if (oAttendee.isPresent()) {
             defenceAdvocate = (DefenceAdvocate) oAttendee.get();
         } else {
-            //TODO extend command to include these
-            defenceAdvocate = DefenceAdvocate.builder().withId(new HearingSnapshotKey(attendeeId, hearing.getId())).withTitle("QC").withLastName("unknown").withFirstName("firstName").build();
+            defenceAdvocate = DefenceAdvocate.builder()
+                    .withId(new HearingSnapshotKey(attendeeId, hearing.getId()))
+                    .withTitle(newDefenceCounselAdded.getTitle())
+                    .withPersonId(newDefenceCounselAdded.getPersonId())
+                    .withStatus(newDefenceCounselAdded.getStatus())
+                    .withLastName(newDefenceCounselAdded.getLastName())
+                    .withFirstName(newDefenceCounselAdded.getFirstName()).build();
             hearing.getAttendees().add(defenceAdvocate);
         }
         return defenceAdvocate;
@@ -168,12 +174,11 @@ public class NewHearingEventListener {
         String strContext = getClass().getSimpleName() + "::" + "hearing.newdefence-counsel-added";
         final JsonObject payload = event.payloadAsJsonObject();
         NewDefenceCounselAdded newDefenceCounselAdded = jsonObjectToObjectConverter.convert(payload, NewDefenceCounselAdded.class);
-
         Ahearing hearing = ahearingRepository.findBy(newDefenceCounselAdded.getHearingId());
         if (null == hearing) {
             throw new RuntimeException(strContext + "  cant find hearing " + newDefenceCounselAdded.getHearingId());
         }
-        final DefenceAdvocate defenceAdvocate = findDefenceAdvocateByAttendeeId(hearing, newDefenceCounselAdded.getAttendeeId());
+        final DefenceAdvocate defenceAdvocate = findOrCreateDefenceAdvocateByAttendeeId(hearing, newDefenceCounselAdded);
         defenceAdvocate.setStatus(newDefenceCounselAdded.getStatus());
 
         newDefenceCounselAdded.getDefendantIds().forEach(
@@ -198,7 +203,6 @@ public class NewHearingEventListener {
     public void newProsecutionCounselAdded(final JsonEnvelope event) {
         String context = getClass().getSimpleName() + "::newProsecutionCounselAdded: ";
         NewProsecutionCounselAdded prosecutionCounselAdded = (NewProsecutionCounselAdded) jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NewProsecutionCounselAdded.class);
-        LOGGER.error(context + prosecutionCounselAdded);
 
         if (ahearingRepository == null) {
             throw new RuntimeException(context + " ahearingRepository not available ");
@@ -228,9 +232,8 @@ public class NewHearingEventListener {
                 hearing.setAttendees(new ArrayList<>());
             }
             hearing.getAttendees().add(prosecutionAdvocate);
-        }
 
-        //TODO link counsel to case ?
+        }
         ahearingRepository.save(hearing);
     }
 

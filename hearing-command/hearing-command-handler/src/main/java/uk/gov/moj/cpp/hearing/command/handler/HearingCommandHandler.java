@@ -48,6 +48,7 @@ import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 
 @SuppressWarnings({"WeakerAccess", "CdiInjectionPointsInspection"})
@@ -77,6 +78,9 @@ public class HearingCommandHandler {
     private static final String FIELD_PERSON_ID = "personId";
     private static final String FIELD_ATTENDEE_ID = "attendeeId";
     private static final String FIELD_STATUS = "status";
+    private static final String FIELD_FIRST_NAME = "firstName";
+    private static final String FIELD_LAST_NAME = "lastName";
+    private static final String FIELD_TITLE = "title";
     private static final String FIELD_DEFENDANT_IDS = "defendantIds";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_SHARED_TIME = "sharedTime";
@@ -170,13 +174,6 @@ public class HearingCommandHandler {
     public void addProsecutionCounsel(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
         NewProsecutionCounselAdded newProsecutionCounselAdded = jsonObjectToObjectConverter.convert(payload, NewProsecutionCounselAdded.class);
-        //newProsecutionCounselAdded.s
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        /*final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
-        final UUID attendeeId = fromString(payload.getString(FIELD_ATTENDEE_ID));
-        final String status = payload.getString(FIELD_STATUS);*/
-
-        //applyToHearingAggregate(hearingId, aggregate -> aggregate.addProsecutionCounsel(hearingId, attendeeId, personId, status), command);
         applyToHearingAggregate(newProsecutionCounselAdded.getHearingId(), aggregate -> aggregate.addProsecutionCounsel(newProsecutionCounselAdded), command);
     }
 
@@ -187,6 +184,9 @@ public class HearingCommandHandler {
         final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
         final UUID attendeeId = fromString(payload.getString(FIELD_ATTENDEE_ID));
         final String status = payload.getString(FIELD_STATUS);
+        final String firstName = payload.getString(FIELD_FIRST_NAME, null);
+        final String lastName = payload.getString(FIELD_LAST_NAME, null);
+        final String title = payload.getString(FIELD_TITLE, null);
         final JsonArray jsonArray = payload.getJsonArray(FIELD_DEFENDANT_IDS);
         final List<UUID> defendantIds = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
@@ -194,7 +194,18 @@ public class HearingCommandHandler {
             defendantIds.add(fromString(defendantIdString));
         }
 
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.addDefenceCounsel(hearingId, attendeeId, personId, defendantIds, status), command);
+        NewDefenceCounselAdded newDefenceCounselAdded = NewDefenceCounselAdded.builder()
+                .withAttendeeId(attendeeId)
+                .withDefendantIds(defendantIds)
+                .withFirstName(firstName)
+                .withHearingId(hearingId)
+                .withLastName(lastName)
+                .withPersonId(personId)
+                .withStatus(status)
+                .withTitle(title)
+                .build();
+
+        applyToHearingAggregate(hearingId, aggregate -> aggregate.addDefenceCounsel(newDefenceCounselAdded), command);
     }
 
     @Handles("hearing.save-draft-result")
