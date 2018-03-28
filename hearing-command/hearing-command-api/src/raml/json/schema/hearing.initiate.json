@@ -153,7 +153,7 @@
             }
           }
         },
-        "defendantCase": {
+        "defendantCases": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/defendantCase"
@@ -242,6 +242,9 @@
     "defendantCase": {
       "type": "object",
       "properties": {
+        "caseId": {
+          "$ref": "#/definitions/uuid"
+        },
         "bailStatus": {
           "type": [
             "string",

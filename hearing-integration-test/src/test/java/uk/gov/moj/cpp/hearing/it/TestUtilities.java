@@ -241,6 +241,7 @@ public class TestUtilities {
             String output = "";
             try {
                 output = mapper.writeValueAsString(payload);
+                System.out.println("Command Payload:");
                 System.out.println(output);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
