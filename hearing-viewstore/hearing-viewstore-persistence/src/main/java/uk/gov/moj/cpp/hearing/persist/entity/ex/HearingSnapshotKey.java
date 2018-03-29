@@ -11,19 +11,21 @@ public class HearingSnapshotKey implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Column(name ="id", nullable=false)
+    @Column(name = "id", nullable = false)
     private UUID id;
 
-    @Column(name="hearing_id", nullable=false)
+    @Column(name = "hearing_id", nullable = false)
     private UUID hearingId;
 
     public HearingSnapshotKey() {
 
     }
+
     public HearingSnapshotKey(final UUID id, final UUID hearingId) {
-        this.id=id;
+        this.id = id;
         this.hearingId = hearingId;
     }
+
     public UUID getId() {
         return id;
     }
@@ -53,7 +55,7 @@ public class HearingSnapshotKey implements Serializable {
         if (null == o || getClass() != o.getClass()) {
             return false;
         }
-        return Objects.equals(this.id, ((HearingSnapshotKey)o).id) 
-                && Objects.equals(this.hearingId, ((HearingSnapshotKey)o).hearingId);
+        return Objects.equals(this.id, ((HearingSnapshotKey) o).id)
+                && Objects.equals(this.hearingId, ((HearingSnapshotKey) o).hearingId);
     }
 }

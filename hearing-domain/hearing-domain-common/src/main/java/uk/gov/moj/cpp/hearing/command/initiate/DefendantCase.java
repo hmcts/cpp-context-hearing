@@ -3,19 +3,19 @@ package uk.gov.moj.cpp.hearing.command.initiate;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class DefendantCase {
 
     private final UUID caseId;
     private final String bailStatus;
-    private final LocalDate custodyTimeLimitDate;
+    private final ZonedDateTime custodyTimeLimitDate;
 
     @JsonCreator
     public DefendantCase(@JsonProperty("caseId") final UUID caseId,
                          @JsonProperty("bailStatus") final String bailStatus,
-                         @JsonProperty("custodyTimeLimitDate") final LocalDate custodyTimeLimitDate
+                         @JsonProperty("custodyTimeLimitDate") final ZonedDateTime custodyTimeLimitDate
     ) {
 
         this.caseId = caseId;
@@ -31,7 +31,7 @@ public class DefendantCase {
         return bailStatus;
     }
 
-    public LocalDate getCustodyTimeLimitDate() {
+    public ZonedDateTime getCustodyTimeLimitDate() {
         return custodyTimeLimitDate;
     }
 
@@ -39,7 +39,7 @@ public class DefendantCase {
 
         private UUID caseId;
         private String bailStatus;
-        private LocalDate custodyTimeLimitDate;
+        private ZonedDateTime custodyTimeLimitDate;
 
         private Builder() {
 
@@ -53,7 +53,7 @@ public class DefendantCase {
             return bailStatus;
         }
 
-        public LocalDate getCustodyTimeLimitDate() {
+        public ZonedDateTime getCustodyTimeLimitDate() {
             return custodyTimeLimitDate;
         }
 
@@ -67,7 +67,7 @@ public class DefendantCase {
             return this;
         }
 
-        public Builder withCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
+        public Builder withCustodyTimeLimitDate(ZonedDateTime custodyTimeLimitDate) {
             this.custodyTimeLimitDate = custodyTimeLimitDate;
             return this;
         }
