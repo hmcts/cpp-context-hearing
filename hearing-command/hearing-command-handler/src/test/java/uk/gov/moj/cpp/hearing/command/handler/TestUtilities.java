@@ -13,7 +13,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -71,7 +70,7 @@ public class TestUtilities {
                                         DefendantCase.builder()
                                                 .withCaseId(caseId)
                                                 .withBailStatus(STRING.next())
-                                                .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next())
+                                                .withCustodyTimeLimitDate(FUTURE_ZONED_DATE_TIME.next())
                                 )
                                 .addOffence(
                                         Offence.builder()

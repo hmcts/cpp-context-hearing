@@ -16,15 +16,12 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
@@ -334,8 +331,8 @@ public class NewHearingEventListenerTest {
         assertThat(actualDefendant.getNationality(), is(defendant.getNationality()));
         assertThat(actualDefendant.getInterpreterLanguage(), is(defendant.getInterpreter().getLanguage()));
         assertThat(actualDefendant.getDefenceSolicitorFirm(), is(defendant.getDefenceOrganisation()));
-        assertThat(actualDefendant.getBailStatus(), is(defendant.getDefendantCases().get(0).getBailStatus()));
-        assertThat(actualDefendant.getCustodyTimeLimitDate(), is(defendant.getDefendantCases().get(0).getCustodyTimeLimitDate()));
+        assertThat(actualDefendant.getDefendantCases().get(0).getBailStatus(), is(defendant.getDefendantCases().get(0).getBailStatus()));
+        assertThat(actualDefendant.getDefendantCases().get(0).getCustodyTimeLimitDate().toLocalDateTime(), is(defendant.getDefendantCases().get(0).getCustodyTimeLimitDate().toLocalDateTime()));
 
         //assertThat(actualDefendant.getEmail(), is(""));
         //assertThat(actualDefendant.getFax(), is(""));

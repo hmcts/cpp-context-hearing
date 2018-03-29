@@ -20,8 +20,8 @@ import javax.persistence.Table;
 /**
  * TODO action this:
  * Tim Cooke [12:25 PM]
- I think we need to add this to defendant - "defenceSolicitorFirm": "xyz solicitor",
- rather it is required for resulting and therefore should be part of the shared-results event
+ * I think we need to add this to defendant - "defenceSolicitorFirm": "xyz solicitor",
+ * rather it is required for resulting and therefore should be part of the shared-results event
  */
 @Entity
 @Table(name = "a_defendant")
@@ -31,22 +31,24 @@ public class Defendant {
     private HearingSnapshotKey id;
 
     @ManyToOne
-    @JoinColumn(name = "hearing_id", insertable=false, updatable=false)
+    @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
     private Ahearing hearing;
 
     @ManyToMany
     @JoinTable(name = "a_attendee_defendant",
-         joinColumns =
-                 {@JoinColumn(name = "defendant_id", referencedColumnName = "id"),
-                 @JoinColumn(name = "hearing_id", referencedColumnName = "hearing_id")},
-            inverseJoinColumns =  {
+            joinColumns = {
+                    @JoinColumn(name = "defendant_id", referencedColumnName = "id"),
+                    @JoinColumn(name = "hearing_id", referencedColumnName = "hearing_id")
+            },
+            inverseJoinColumns = {
                     @JoinColumn(name = "attendee_id", referencedColumnName = "id"),
-                    @JoinColumn(name = "attendee_hearing_id", referencedColumnName = "hearing_id")}
+                    @JoinColumn(name = "attendee_hearing_id", referencedColumnName = "hearing_id")
+            }
     )
-    private  List<DefenceAdvocate> defenceAdvocates = new ArrayList<>();
+    private List<DefenceAdvocate> defenceAdvocates = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant",orphanRemoval = true)
-    private List<Offence> offences=new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
+    private List<Offence> offences = new ArrayList<>();
 
     @Column(name = "person_id")
     private java.util.UUID personId;
@@ -80,12 +82,9 @@ public class Defendant {
 
     @Column(name = "email")
     private String email;
-    
-    @Column(name = "bail_status")
-    private String bailStatus;
 
-    @Column(name = "custody_time_limit_date")
-    private java.time.LocalDate custodyTimeLimitDate;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
+    private List<DefendantCase> defendantCases = new ArrayList<>();
 
     @Column(name = "defence_solicitor_firm")
     private String defenceSolicitorFirm;
@@ -98,7 +97,6 @@ public class Defendant {
 
     @Embedded
     private Address address;
-
 
     public Defendant() {
 
@@ -119,13 +117,12 @@ public class Defendant {
         this.mobileTelephone = builder.mobileTelephone;
         this.fax = builder.fax;
         this.email = builder.email;
-        this.bailStatus = builder.bailStatus;
-        this.custodyTimeLimitDate = builder.custodyTimeLimitDate;
         this.defenceSolicitorFirm = builder.defenceSolicitorFirm;
         this.interpreterName = builder.interpreterName;
         this.interpreterLanguage = builder.interpreterLanguage;
         this.offences = builder.offences;
         this.defenceAdvocates = builder.defenceAdvocates;
+        this.defendantCases = builder.defendantCases;
     }
 
     public List<Offence> getOffences() {
@@ -133,7 +130,7 @@ public class Defendant {
     }
 
     public void setOffences(List<Offence> offences) {
-        this.offences=offences;
+        this.offences = offences;
     }
 
     public HearingSnapshotKey getId() {
@@ -187,17 +184,17 @@ public class Defendant {
     public String getFax() {
         return fax;
     }
-    
+
     public String getEmail() {
         return email;
     }
 
-    public String getBailStatus() {
-        return bailStatus;
+    public List<DefendantCase> getDefendantCases() {
+        return defendantCases;
     }
 
-    public java.time.LocalDate getCustodyTimeLimitDate() {
-        return custodyTimeLimitDate;
+    public void setDefendantCases(List<DefendantCase> defendantCases) {
+        this.defendantCases = defendantCases;
     }
 
     public String getDefenceSolicitorFirm() {
@@ -250,9 +247,7 @@ public class Defendant {
 
         private String email;
 
-        private String bailStatus;
-
-        private java.time.LocalDate custodyTimeLimitDate;
+        private List<DefendantCase> defendantCases = new ArrayList<>();
 
         private String defenceSolicitorFirm;
 
@@ -264,7 +259,8 @@ public class Defendant {
 
         private List<DefenceAdvocate> defenceAdvocates;
 
-        protected Builder() {}
+        protected Builder() {
+        }
 
         public Builder withId(final HearingSnapshotKey id) {
             this.id = id;
@@ -341,13 +337,8 @@ public class Defendant {
             return this;
         }
 
-        public Builder withBailStatus(final String bailStatus) {
-            this.bailStatus = bailStatus;
-            return this;
-        }
-
-        public Builder withCustodyTimeLimitDate(final java.time.LocalDate custodyTimeLimitDate) {
-            this.custodyTimeLimitDate = custodyTimeLimitDate;
+        public Builder withDefendantCases(List<DefendantCase> defendantCases) {
+            this.defendantCases = defendantCases;
             return this;
         }
 
@@ -393,6 +384,6 @@ public class Defendant {
         if (null == o || getClass() != o.getClass()) {
             return false;
         }
-        return Objects.equals(this.id, ((Defendant)o).id);
+        return Objects.equals(this.id, ((Defendant) o).id);
     }
 }

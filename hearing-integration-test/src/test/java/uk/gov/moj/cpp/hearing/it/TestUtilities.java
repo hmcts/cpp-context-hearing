@@ -96,7 +96,7 @@ public class TestUtilities {
                                         DefendantCase.builder()
                                                 .withCaseId(caseId)
                                                 .withBailStatus(STRING.next())
-                                                .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next())
+                                                .withCustodyTimeLimitDate(FUTURE_ZONED_DATE_TIME.next())
                                 )
                                 .addOffence(
                                         Offence.builder()

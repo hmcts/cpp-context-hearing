@@ -4,7 +4,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
@@ -218,7 +218,7 @@ public class HearingEventsIT extends AbstractIT {
                                     DefendantCase.builder()
                                             .withCaseId(builder.getCases().get(0).getCaseId())
                                             .withBailStatus(STRING.next())
-                                            .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next())
+                                            .withCustodyTimeLimitDate(FUTURE_ZONED_DATE_TIME.next())
                             )
                             .addOffence(
                                     Offence.builder()

@@ -15,6 +15,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCaseKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
@@ -25,7 +27,6 @@ import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,12 +86,16 @@ public class NewHearingEventListener {
                 .withGender(defendantIn.getGender())
                 .withInterpreterLanguage(ofNullable(defendantIn.getInterpreter()).map(Interpreter::getLanguage).orElse(null))
                 .withDefenceSolicitorFirm(defendantIn.getDefenceOrganisation())
-                .withId(new HearingSnapshotKey(defendantIn.getId(), hearingId));
-
-        if (!defendantIn.getDefendantCases().isEmpty()) {
-            builder.withBailStatus(defendantIn.getDefendantCases().get(0).getBailStatus()) //TODO - the FE needs to handle multiple cases
-                    .withCustodyTimeLimitDate(defendantIn.getDefendantCases().get(0).getCustodyTimeLimitDate());
-        }
+                .withId(new HearingSnapshotKey(defendantIn.getId(), hearingId))
+                .withDefendantCases(defendantIn.getDefendantCases().stream()
+                        .map(dc -> DefendantCase.builder()
+                                .withId(new DefendantCaseKey(hearingId, dc.getCaseId(), defendantIn.getId()))
+                                .withBailStatus(dc.getBailStatus())
+                                .withCustodyTimeLimitDate(dc.getCustodyTimeLimitDate())
+                                .build()
+                        )
+                        .collect(Collectors.toList())
+                );
 
         return builder;
     }
@@ -115,7 +120,6 @@ public class NewHearingEventListener {
                     }
                 }
         );
-
 
         this.ahearingRepository.save(Ahearing.builder()
                 .withId(hearing.getId())
