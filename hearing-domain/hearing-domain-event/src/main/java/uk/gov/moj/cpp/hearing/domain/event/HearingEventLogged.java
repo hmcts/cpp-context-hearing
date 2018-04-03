@@ -17,8 +17,32 @@ public class HearingEventLogged {
     private ZonedDateTime lastModifiedTime;
     private boolean alterable;
 
-    public HearingEventLogged(final UUID hearingEventId, final UUID lastHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final String recordedLabel,
-                              final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime, final boolean alterable) {
+    private UUID courtCentreId;
+    private String courtCentreName;
+    private UUID courtRoomId;
+    private String courtRoomName;
+
+    private String hearingType;
+
+    private String caseUrn;
+    private UUID caseId;
+
+    public HearingEventLogged(
+            UUID hearingEventId,
+            UUID lastHearingEventId,
+            UUID hearingId,
+            UUID hearingEventDefinitionId,
+            String recordedLabel,
+            ZonedDateTime eventTime,
+            ZonedDateTime lastModifiedTime,
+            boolean alterable,
+            UUID courtCentreId,
+            String courtCentreName,
+            UUID courtRoomId,
+            String courtRoomName,
+            String hearingType,
+            String caseUrn,
+            UUID caseId) {
 
         this.hearingEventId = hearingEventId;
         this.lastHearingEventId = lastHearingEventId;
@@ -28,6 +52,13 @@ public class HearingEventLogged {
         this.eventTime = eventTime;
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
+        this.courtCentreId = courtCentreId;
+        this.courtCentreName = courtCentreName;
+        this.courtRoomId = courtRoomId;
+        this.courtRoomName = courtRoomName;
+        this.hearingType = hearingType;
+        this.caseUrn = caseUrn;
+        this.caseId = caseId;
     }
 
     public HearingEventLogged() {
@@ -64,5 +95,33 @@ public class HearingEventLogged {
 
     public UUID getHearingEventDefinitionId() {
         return hearingEventDefinitionId;
+    }
+
+    public UUID getCourtCentreId() {
+        return courtCentreId;
+    }
+
+    public String getCourtCentreName() {
+        return courtCentreName;
+    }
+
+    public UUID getCourtRoomId() {
+        return courtRoomId;
+    }
+
+    public String getCourtRoomName() {
+        return courtRoomName;
+    }
+
+    public String getHearingType() {
+        return hearingType;
+    }
+
+    public String getCaseUrn() {
+        return caseUrn;
+    }
+
+    public UUID getCaseId() {
+        return caseId;
     }
 }

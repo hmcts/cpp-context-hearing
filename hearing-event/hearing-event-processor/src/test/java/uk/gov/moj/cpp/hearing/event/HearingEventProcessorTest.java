@@ -11,12 +11,10 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
@@ -64,7 +62,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -204,7 +201,6 @@ public class HearingEventProcessorTest {
     private static final String COURT_CENTER_NAME = STRING.next();
     private static final UUID COURT_ROOM_ID = randomUUID();
 
-
     private static final String FIELD_JUDGE = "judge";
     private static final String FIELD_JUDGE_ID = "id";
     private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
@@ -304,37 +300,6 @@ public class HearingEventProcessorTest {
                 )).thatMatchesSchema());
     }
 
-    @Test
-    public void shouldPublishHearingEventLoggedPublicEvent() {
-        // given
-        final JsonEnvelope event = prepareHearingEventLoggedEvent();
-
-        fakeHearingDetailsAndProgressionCaseDetails();
-
-        //when
-        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
-
-        // then
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.event-logged"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(false)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_EVENT_TIME), equalTo(EVENT_TIME)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTRE_NAME), equalTo(COURT_CENTER_NAME)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_NAME), equalTo(COURT_ROOM_NUMBER)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)))
-                )).thatMatchesSchema());
-    }
-
     @DataProvider
     public static Object[][] provideListOfRequiredHearingField() {
         // @formatter:off
@@ -347,69 +312,6 @@ public class HearingEventProcessorTest {
                 {FIELD_HEARING_TYPE}
         };
         // @formatter:on
-    }
-
-    @Test
-    @UseDataProvider("provideListOfRequiredHearingField")
-    public void shouldNotPublishHearingEventLoggedPublicEventWhenRequiredHearingDataIsNotAvailable(final String fieldToRemove) {
-        // given
-        final JsonEnvelope event = prepareHearingEventLoggedEvent();
-
-        fakeCaseResponseWithHearingDetailsWithoutField(fieldToRemove);
-
-        //when
-        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
-
-        // then
-        verifyZeroInteractions(this.sender);
-    }
-
-    @Test
-    @UseDataProvider("provideListOfRequiredHearingField")
-    public void shouldNotPublishHearingEventTimeStampCorrectedPublicEventWhenRequiredHearingDataIsNotAvailable(final String fieldToRemove) {
-        // given
-        final JsonEnvelope event = prepareHearingEventUpdatedEvent();
-
-        fakeCaseResponseWithHearingDetailsWithoutField(fieldToRemove);
-
-        //when
-        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
-
-        // then
-        verifyZeroInteractions(this.sender);
-    }
-
-    @Test
-    public void shouldPublishHearingEventTimeStampCorrectedPublicEvent() {
-        // given
-        final JsonEnvelope event = prepareHearingEventUpdatedEvent();
-
-        fakeHearingDetailsAndProgressionCaseDetails();
-
-        //when
-        this.hearingEventProcessor.publishHearingEventLoggedPublicEvent(event);
-
-        // then
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.event-timestamp-corrected"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s.%s", FIELD_CASE, FIELD_CASE_URN), equalTo(URN_VALUE)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_HEARING_DEFINITION_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_DEFINITION, FIELD_PRIORITY), equalTo(false)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_HEARING_EVENT_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_RECORDED_LABEL), equalTo(LABEL_VALUE)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_EVENT_TIME), equalTo(EVENT_TIME)),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING_EVENT, FIELD_LAST_MODIFIED_TIME), equalTo(LAST_MODIFIED_TIME)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTER_ID), equalTo(COURT_CENTER_ID.toString())),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_CENTRE_NAME), equalTo(COURT_CENTER_NAME)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_NAME), equalTo(COURT_ROOM_NUMBER)),
-                        withJsonPath(format("$.%s.%s.%s", FIELD_HEARING, FIELD_COURT_CENTRE, FIELD_COURT_ROOM_ID), equalTo(COURT_ROOM_ID.toString())),
-                        withJsonPath(format("$.%s.%s", FIELD_HEARING, FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)))
-                )).thatMatchesSchema());
     }
 
     @Test

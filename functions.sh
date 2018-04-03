@@ -8,6 +8,15 @@ function buildWars {
   echo "Finished building wars"
 }
 
+
+function buildWithSonar {
+    echo
+    echo "Building with Sonar"
+    mvn -C -U verify sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.issuesReport.html.enable=true -Dsonar.exclusions=target/generated-sources/** -Dhttp.proxyHost=10.224.23.8 -Dhttp.proxyPort=3128 -Dsonar.host.url=http://10.124.22.71:9000
+    echo "\n"
+    echo "Finished building with Sonar. Reports are available at $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/target/sonar/issues-report/issues-report.html"
+}
+
 function startVagrant {
   set +e
   vagrant global-status | grep atcm-vagrant | grep running
