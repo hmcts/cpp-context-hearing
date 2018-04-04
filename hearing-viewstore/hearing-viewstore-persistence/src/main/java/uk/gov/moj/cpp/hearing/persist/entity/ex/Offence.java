@@ -49,7 +49,7 @@ public class Offence {
     @Column(name = "conviction_date")
     private java.time.LocalDate convictionDate;
     
-    @Column(name = "plea_id")
+    @Column(name = "plea_id") @Deprecated //TODO: GPE-3267: sanitise
     private UUID pleaId;
     
     @Column(name = "plea_date")
@@ -166,6 +166,7 @@ public class Offence {
         return convictionDate;
     }
 
+    @Deprecated //TODO: GPE-3267: sanitise
     public UUID getPleaId() {
         return pleaId;
     }
@@ -174,8 +175,16 @@ public class Offence {
         return pleaDate;
     }
 
+    public void setPleaDate(final LocalDateTime pleaDate) {
+        this.pleaDate = pleaDate;
+    }
+
     public String getPleaValue() {
         return pleaValue;
+    }
+
+    public void setPleaValue(final String pleaValue) {
+        this.pleaValue = pleaValue;
     }
 
     public java.util.UUID getVerdictId() {
@@ -238,6 +247,7 @@ public class Offence {
 
         private java.time.LocalDate convictionDate;
 
+        @Deprecated //TODO: GPE-3267: sanitise
         public UUID pleaId;
 
         public LocalDateTime pleaDate;
@@ -317,6 +327,7 @@ public class Offence {
             return this;
         }
 
+        @Deprecated //TODO: GPE-3267: sanitise
         public Builder withPleaId(final java.util.UUID pleaId) {
             this.pleaId = pleaId;
             return this;

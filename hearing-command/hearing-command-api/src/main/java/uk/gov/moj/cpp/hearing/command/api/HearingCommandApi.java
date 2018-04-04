@@ -54,10 +54,10 @@ public class HearingCommandApi {
         this.sender.send(envelope);
     }
 
-    //TODO - CLEANUP - why have the new event name. - why not just keep hearing.command.update-plea?
+    //TODO - CLEANUP - why have the new event name. - why not just keep hearing.offence-plea-update?
     @Handles("hearing.update-plea")
     public void updatePlea(final JsonEnvelope command) {
-        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-plea").apply(command.payloadAsJsonObject()));
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.offence-plea-update").apply(command.payloadAsJsonObject()));
     }
 
     @Handles("hearing.update-verdict")

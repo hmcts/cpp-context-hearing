@@ -1,87 +1,46 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
-import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Offence;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
-import javax.inject.Inject;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-
 @ServiceComponent(COMMAND_HANDLER)
-public class NewModelUpdatePleaCommandHandler {
+public class NewModelUpdatePleaCommandHandler extends AbstractCommandHandler {
 
     @Inject
-    private EventSource eventSource;
+    public NewModelUpdatePleaCommandHandler(final EventSource eventSource, final Enveloper enveloper,
+            final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter,
+            final HearingCommandHandler hearingCommandHandler) {
+        super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter, hearingCommandHandler);
+    }
 
-    @Inject
-    private Enveloper enveloper;
+    @Handles("hearing.offence-plea-update")
+    public void updatePlea(final JsonEnvelope envelope) throws EventStreamException {
+        
+        final HearingUpdatePleaCommand command = convertToObject(envelope, HearingUpdatePleaCommand.class);
+        final List<Offence> offences = command.getDefendants().stream().flatMap(d -> d.getOffences().stream()).collect(toList());
 
-    @Inject
-    private AggregateService aggregateService;
-
-    @Inject
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
-    @Inject
-    private HearingCommandHandler hearingCommandHandler;
-
-    @Handles("hearing.command.update-plea")
-    public void updatePlea(final JsonEnvelope command) throws EventStreamException {
-
-        /*
-        Would like to change the input document to be
-
-            [{
-				"offenceId": "e7392829-4e80-4486-adab-21f1a23cd18a",
-				"originalHearingId": "2b407bdc-e20e-4536-9fd9-d4cd5c4b30bf",
-				"plea": {
-					"pleaDate": "2017-02-01",
-					"value": "GUILTY"
-				}
-			}]
-
-         */
-
-        final HearingUpdatePleaCommand hearingUpdatePleaCommand = this.jsonObjectToObjectConverter.convert(command.payloadAsJsonObject(), HearingUpdatePleaCommand.class);
-
-        for (Offence offence : forAllOffences(hearingUpdatePleaCommand).collect(Collectors.toList())) {
-
-            applyToOffenceAggregate(offence.getId(), offenceAggregate ->
-                    offenceAggregate.updatePlea(
-                            hearingUpdatePleaCommand.getHearingId(),
-                            offence.getId(),
-                            offence.getPlea()
-                    ), command);
+        for (final Offence offence : offences) {
+            aggregate(offence.getId(), envelope, OffenceAggregate.class, 
+                    (a) -> a.updatePlea(command.getHearingId(), offence.getId(), offence.getPlea()));
         }
-
-        //TODO - GPE-3032 - cleanup
-        hearingCommandHandler.updatePlea(command);
-    }
-
-    private static Stream<Offence> forAllOffences(HearingUpdatePleaCommand command) {
-        return command.getDefendants().stream().flatMap(d -> d.getOffences().stream());
-    }
-
-    private OffenceAggregate applyToOffenceAggregate(final UUID streamId, final Function<OffenceAggregate, Stream<Object>> function,
-                                                     final JsonEnvelope envelope) throws EventStreamException {
-        final EventStream eventStream = this.eventSource.getStreamById(streamId);
-        final OffenceAggregate aggregate = this.aggregateService.get(eventStream, OffenceAggregate.class);
-        final Stream<Object> events = function.apply(aggregate);
-        eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
-        return aggregate;
+        
+        //TODO: GPE-3032: sanitise
+        hearingCommandHandler.updatePlea(envelope);
     }
 }

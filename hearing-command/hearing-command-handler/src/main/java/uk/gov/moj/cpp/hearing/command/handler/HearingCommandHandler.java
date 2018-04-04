@@ -33,7 +33,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
@@ -41,13 +40,6 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.eventsourcing.source.core.Events.streamOf;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 
@@ -239,6 +231,7 @@ public class HearingCommandHandler {
         eventStream.append(events.map(this.enveloper.withMetadataFrom(command)));
     }
 
+    @Deprecated //TODO: GPE-3032: sanitise
     public void updatePlea(final JsonEnvelope command) throws EventStreamException {
         LOGGER.trace("Processing hearing.command.update-plea command");
         final JsonObject payload = command.payloadAsJsonObject();
@@ -248,7 +241,7 @@ public class HearingCommandHandler {
         applyHearingPleaAggregate(caseId, aggregate -> aggregate.updatePlea(hearingUpdatePleaCommand), command);
     }
 
-    @Handles("hearing.plea-add")
+    @Handles("hearing.plea-add") @Deprecated //TODO: GPE-3032: sanitise
     public void pleaAdd(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
@@ -257,7 +250,7 @@ public class HearingCommandHandler {
         applyToHearingAggregate(hearingId, aggregate -> aggregate.addPlea(hearingPlea), command);
     }
 
-    @Handles("hearing.plea-change")
+    @Handles("hearing.plea-change") @Deprecated //TODO: GPE-3032: sanitise
     public void pleaChange(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));

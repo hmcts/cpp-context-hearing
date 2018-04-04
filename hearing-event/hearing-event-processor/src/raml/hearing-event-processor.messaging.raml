@@ -61,6 +61,9 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.hearing-update-verdict-ignored+json:
             schema: !include json/schema/hearing.hearing-update-verdict-ignored.json
             example: !include json/hearing.hearing-update-verdict-ignored.json
+        application/vnd.hearing.offence-plea-updated+json:
+            schema: !include json/schema/hearing.offence-plea-updated.json
+            example: !include json/hearing.offence-plea-updated.json
 
 /public.event:
   post:

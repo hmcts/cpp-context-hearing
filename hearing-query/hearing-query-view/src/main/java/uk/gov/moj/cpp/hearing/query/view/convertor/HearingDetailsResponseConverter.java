@@ -302,12 +302,10 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            if (null == source.getPleaId()) {
-                return null;
-            }
             return new HearingDetailsResponse.Plea()
-                    .withPleaId(source.getPleaId().toString())
-                    .withPleaDate(toDateStringOrNull(source.getPleaDate()));
+                    .withPleaId(toStringOrNull(source.getPleaId()))
+                    .withPleaDate(toDateStringOrNull(source.getPleaDate()))
+                    .withValue(source.getPleaValue());
         }
     }
 

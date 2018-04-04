@@ -1,5 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
+import java.util.UUID;
+import java.util.stream.Stream;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
@@ -8,53 +15,43 @@ import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
 public class OffenceAggregate implements Aggregate {
 
-    private OffencePleaUpdated plea;
-
-    private Verdict verdict;
+    private static final long serialVersionUID = 1L;
+    
+    private OffencePleaUpdated offencePleaUpdated;
 
     @Override
     public Object apply(Object event) {
         return match(event).with(
-                when(OffencePleaUpdated.class).apply(this::onOffencePleaUpdated),
+                when(OffencePleaUpdated.class).apply((offencePleaUpdated) -> this.offencePleaUpdated = offencePleaUpdated),
                 otherwiseDoNothing()
         );
     }
 
     public Stream<Object> initiateHearingOffence(InitiateHearingOffenceCommand initiateHearingOffenceCommand) {
 
-        if (this.plea != null) {
+        if (this.offencePleaUpdated != null) {
             return apply(Stream.of(new InitiateHearingOffenceEnriched(
                     initiateHearingOffenceCommand.getOffenceId(),
                     initiateHearingOffenceCommand.getCaseId(),
                     initiateHearingOffenceCommand.getDefendantId(),
                     initiateHearingOffenceCommand.getHearingId(),
-                    plea.getOriginHearingId(),
-                    plea.getPleaDate(),
-                    plea.getValue()
+                    offencePleaUpdated.getOriginHearingId(),
+                    offencePleaUpdated.getPleaDate(),
+                    offencePleaUpdated.getValue()
             )));
         }
         return apply(Stream.empty());
     }
 
-    public Stream<Object> updatePlea(UUID originHearingId, UUID offenceId, Plea plea) {
-
-        return apply(Stream.of(
-                new OffencePleaUpdated(
-                        originHearingId,
-                        offenceId,
-                        plea.getPleaDate(),
-                        plea.getValue()
-                )
-        ));
+    public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final Plea plea) {
+        return apply(OffencePleaUpdated.builder()
+                    .withOriginHearingId(originHearingId)
+                    .withOffenceId(offenceId)
+                    .withPleaDate(plea.getPleaDate())
+                    .withValue(plea.getValue())
+                    .buildStream());
     }
 
     public Stream<Object> updateVerdict(UUID hearingId, UUID caseId, UUID offenceId, Verdict verdict) {
@@ -73,11 +70,7 @@ public class OffenceAggregate implements Aggregate {
         ));
     }
 
-    private void onOffencePleaUpdated(OffencePleaUpdated offencePleaUpdated) {
-        this.plea = offencePleaUpdated;
-    }
-
     public OffencePleaUpdated getPlea() {
-        return plea;
+        return offencePleaUpdated;
     }
 }

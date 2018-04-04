@@ -34,7 +34,7 @@ public class HearingEventListenerRamlConfigTest {
     private final List<String> handlerNamesToIgnore = asList(
 
             InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
-            OffencePleaUpdated.class.getAnnotation(Event.class).value(),
+//            OffencePleaUpdated.class.getAnnotation(Event.class).value(), //TODO: GPE-3267: sanitise
             OffenceVerdictUpdated.class.getAnnotation(Event.class).value(),
 
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
@@ -58,7 +58,7 @@ public class HearingEventListenerRamlConfigTest {
     @Before
     public void setup() throws IOException {
         this.hearingListenerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingEventListener.class);
-        this.hearingListenerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(NewHearingEventListener.class));
+        this.hearingListenerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(NewHearingEventListener.class, NewPleaUpdateEventListener.class));
         this.hearingLogListenerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingLogEventListener.class);
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
@@ -95,12 +95,14 @@ public class HearingEventListenerRamlConfigTest {
         assertThat(this.ramlActionNames, containsInAnyOrder(eventHandlerNames.toArray()));
     }
 
-    private <T> Map<String, String> getMethodsToHandlerNamesMapFor(final Class<T> commandApiClass) {
+    private Map<String, String> getMethodsToHandlerNamesMapFor(final Class<?>... commandApiClasses) {
         final Map<String, String> methodToHandlerNamesMap = new HashMap<>();
-        for (final Method method : commandApiClass.getMethods()) {
-            final Handles handles = method.getAnnotation(Handles.class);
-            if (handles != null) {
-                methodToHandlerNamesMap.put(method.getName(), handles.value());
+        for (final Class<?> commandApiClass : commandApiClasses) {
+            for (final Method method : commandApiClass.getMethods()) {
+                final Handles handles = method.getAnnotation(Handles.class);
+                if (handles != null) {
+                    methodToHandlerNamesMap.put(method.getName(), handles.value());
+                }
             }
         }
         return methodToHandlerNamesMap;
