@@ -34,9 +34,8 @@ public class HearingEventListenerRamlConfigTest {
     private final List<String> handlerNamesToIgnore = asList(
 
             InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
-//            OffencePleaUpdated.class.getAnnotation(Event.class).value(), //TODO: GPE-3267: sanitise
+            OffencePleaUpdated.class.getAnnotation(Event.class).value(),
             OffenceVerdictUpdated.class.getAnnotation(Event.class).value(),
-
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
             HearingConfirmedRecorded.class.getAnnotation(Event.class).value(),
             HearingUpdatePleaIgnored.class.getAnnotation(Event.class).value(),
@@ -58,7 +57,7 @@ public class HearingEventListenerRamlConfigTest {
     @Before
     public void setup() throws IOException {
         this.hearingListenerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingEventListener.class);
-        this.hearingListenerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(NewHearingEventListener.class, NewPleaUpdateEventListener.class));
+        this.hearingListenerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(NewHearingEventListener.class, NewModelPleaUpdateEventListener.class));
         this.hearingLogListenerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingLogEventListener.class);
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));

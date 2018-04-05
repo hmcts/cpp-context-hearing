@@ -20,9 +20,9 @@ public class Offence {
     private HearingSnapshotKey id;
 
     @ManyToOne
-    @JoinColumns( {
-            @JoinColumn(name = "defendant_id", insertable=false, updatable=false, referencedColumnName = "id"),
-            @JoinColumn(name = "hearing_id", insertable=false, updatable=false, referencedColumnName = "hearing_id")})
+    @JoinColumns({
+            @JoinColumn(name = "defendant_id", insertable = false, updatable = false, referencedColumnName = "id"),
+            @JoinColumn(name = "hearing_id", insertable = false, updatable = false, referencedColumnName = "hearing_id")})
     private Defendant defendant;
 
     @Column(name = "code")
@@ -33,10 +33,10 @@ public class Offence {
 
     @Column(name = "wording")
     private String wording;
-    
+
     @Column(name = "title")
     private String title;
-    
+
     @Column(name = "legislation")
     private String legislation;
 
@@ -48,13 +48,13 @@ public class Offence {
 
     @Column(name = "conviction_date")
     private java.time.LocalDate convictionDate;
-    
+
     @Column(name = "plea_id") @Deprecated //TODO: GPE-3267: sanitise
     private UUID pleaId;
-    
+
     @Column(name = "plea_date")
     private LocalDateTime pleaDate;
-    
+
     @Column(name = "plea_value")
     private String pleaValue;
 
@@ -72,19 +72,19 @@ public class Offence {
 
     @Column(name = "verdict_date")
     private java.time.LocalDateTime verdictDate;
-    
+
     @Column(name = "number_of_jurors")
     private Integer numberOfJurors;
-    
+
     @Column(name = "number_of_split_jurors")
     private Integer numberOfSplitJurors;
-    
+
     @Column(name = "unanimous")
     private Boolean unanimous;
 
     //bi-directional many-to-one association to ACase
     @ManyToOne
-    @JoinColumn(name="case_id")
+    @JoinColumn(name = "case_id")
     private LegalCase legalCase;
 
     @Column(name = "defendant_id")
@@ -97,7 +97,7 @@ public class Offence {
     public Offence(Builder builder) {
         this.id = builder.id;
         this.defendant = builder.defendant;
-        if (defendant!=null) {
+        if (defendant != null) {
             this.defendantId = builder.defendant.getId().getId();
         }
         this.code = builder.code;
@@ -125,7 +125,7 @@ public class Offence {
     public HearingSnapshotKey getId() {
         return id;
     }
-    
+
     public LegalCase getLegalCase() {
         return legalCase;
     }
@@ -235,7 +235,8 @@ public class Offence {
 
         private String wording;
 
-        protected Builder() {}
+        protected Builder() {
+        }
 
         public String title;
 
@@ -251,7 +252,7 @@ public class Offence {
         public UUID pleaId;
 
         public LocalDateTime pleaDate;
-        
+
         public String pleaValue;
 
         private java.util.UUID verdictId;
@@ -382,6 +383,7 @@ public class Offence {
             this.unanimous = unanimous;
             return this;
         }
+
         public Offence build() {
             return new Offence(this);
         }
@@ -395,7 +397,7 @@ public class Offence {
     public int hashCode() {
         return Objects.hash(this.id);
     }
-    
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -404,6 +406,6 @@ public class Offence {
         if (null == o || getClass() != o.getClass()) {
             return false;
         }
-        return Objects.equals(this.id, ((Offence)o).id);
+        return Objects.equals(this.id, ((Offence) o).id);
     }
 }

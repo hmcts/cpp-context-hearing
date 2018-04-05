@@ -5,64 +5,35 @@
     "hearingEventId": {
       "$ref": "#/definitions/uuid"
     },
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
-    },
     "hearingEventDefinitionId": {
       "$ref": "#/definitions/uuid"
     },
     "recordedLabel": {
       "type": "string"
     },
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
+    },
     "eventTime": {
       "type": "string",
       "format": "date-time"
     },
-    "lastModifiedTime": {
-      "type": "string",
-      "format": "date-time"
+    "reason": {
+      "type": "string"
     },
     "alterable": {
       "type": "boolean"
-    },
-    "courtCentreId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "courtCentreName": {
-      "type": "string"
-    },
-    "courtRoomId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "courtRoomName": {
-      "type": "string"
-    },
-    "hearingType": {
-      "type": "string"
-    },
-    "caseUrn": {
-      "type": "string"
-    },
-    "caseId": {
-      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,
   "required": [
     "hearingEventId",
-    "hearingId",
     "hearingEventDefinitionId",
     "recordedLabel",
+    "hearingId",
     "eventTime",
-    "lastModifiedTime",
-    "alterable",
-    "courtCentreId",
-    "courtCentreName",
-    "courtRoomId",
-    "courtRoomName",
-    "hearingType",
-    "caseUrn",
-    "caseId"
+    "reason",
+    "alterable"
   ],
   "definitions": {
     "uuid": {

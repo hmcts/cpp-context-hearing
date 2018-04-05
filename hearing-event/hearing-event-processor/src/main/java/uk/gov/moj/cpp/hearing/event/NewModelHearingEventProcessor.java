@@ -5,7 +5,6 @@ import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
@@ -13,8 +12,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.json.JsonString;
 
 import static javax.json.Json.createObjectBuilder;
@@ -29,9 +26,6 @@ public class NewModelHearingEventProcessor {
 
     @Inject
     private Sender sender;
-
-    @Inject
-    private Requester requester;
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;

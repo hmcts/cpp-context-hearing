@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.System.out;
@@ -10,14 +11,18 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.initiateHearingCommandTemplateWithOnlyMandatoryFields;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpStatus;
 import org.junit.Test;
@@ -25,21 +30,36 @@ import org.junit.Test;
 import com.jayway.restassured.response.Response;
 
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 @SuppressWarnings("unchecked")
 public class NewOffencePleaUpdateIT extends AbstractIT {
 
     @Test
-    public void updateOffencePleaTest() throws IOException {
+    public void updateOffencePleaTest() throws Exception {
 
-        final InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearingMultipleDefendants(requestSpec, 1);
-        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplateWithOnlyMandatoryFields().build();
+
+        final Hearing hearing = initiateHearingCommand.getHearing();
+
+        EventListener eventListener = listenFor("public.hearing.initiated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
+
+        makeCommand(requestSpec, "hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
+
+        eventListener.waitFor();
+
+        final UUID hearingId = hearing.getId();
 
         out.println("updateOffencePleaTest hearingId: " + hearingId);
 
-        final Defendant defendant = initiateHearingCommand.getHearing().getDefendants().get(0);
+        final Defendant defendant = hearing.getDefendants().get(0);
         final Offence offence = defendant.getOffences().get(0);
         final UUID caseId = offence.getCaseId();
         final String pleaValue = "GUILTY";
@@ -64,6 +84,8 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                 .body(updatePleaPayload).header(CPP_UID_HEADER).when().post(updatePleaCommandURL).then().extract().response();
 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        TimeUnit.SECONDS.sleep(15);
         
         poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json")).until(
                 status().is(OK),

@@ -8,6 +8,15 @@ function buildWars {
   echo "Finished building wars"
 }
 
+
+function buildWithSonar {
+    echo
+    echo "Building with Sonar"
+    mvn -C -U verify sonar:sonar -Dsonar.analysis.mode=preview -Dsonar.issuesReport.html.enable=true -Dsonar.exclusions=target/generated-sources/** -Dhttp.proxyHost=10.224.23.8 -Dhttp.proxyPort=3128 -Dsonar.host.url=http://10.124.22.71:9000
+    echo "\n"
+    echo "Finished building with Sonar. Reports are available at $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/target/sonar/issues-report/issues-report.html"
+}
+
 function startVagrant {
   set +e
   vagrant global-status | grep atcm-vagrant | grep running
@@ -100,12 +109,14 @@ function createEventLog() {
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:aggregate-snapshot-repository-liquibase:${FRAMEWORK_VERSION}:jar
     java -jar target/aggregate-snapshot-repository-liquibase-${FRAMEWORK_VERSION}.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}eventstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
 }
+
 function runEventBufferLiquibase() {
     echo "running event buffer liquibase"
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:event-buffer-liquibase:${EVENT_BUFFER_VERSION}:jar
     java -jar target/event-buffer-liquibase-${EVENT_BUFFER_VERSION}.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}viewstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
     echo "finished running event buffer liquibase"
 }
+
 function runLiquibase {
   #run liquibase for context
   mvn -f ${CONTEXT_NAME}-viewstore/${CONTEXT_NAME}-viewstore-liquibase/pom.xml -Dliquibase.url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}viewstore -Dliquibase.username=${CONTEXT_NAME} -Dliquibase.password=${CONTEXT_NAME} -Dliquibase.logLevel=info resources:resources liquibase:update
@@ -118,14 +129,14 @@ function buildDeployAndTest {
   local SKIP_UNIT_TESTS
   local SKIP_INTEGRATION_TESTS="false"
 
-  while getopts ":miA" OPTION; do
+  while getopts ":aiu" OPTION; do
     case "${OPTION}" in
-      m)
+      u)
         SKIP_UNIT_TESTS="-DskiptTests"
 	printf '\e[1;92m%-6s\e[m' "${0##*/}: Skiping the maven unit tests" ;;
       i)
 	printf '\e[1;92m%-6s\e[m' "${0##*/}: Skiping the health check and integration tests" ;;
-      A)
+      a)
         SKIP_UNIT_TESTS="-DskiptTests"
         SKIP_INTEGRATION_TESTS="true"
 	printf '\e[1;92m%-6s\e[m' "${0##*/} Skiping all tests" ;;
@@ -158,14 +169,14 @@ function usage() {
   cat <<EOF
 Usage: ${0##*/} [OPTION]
 
-  -A	equivalent to -si
-  -m	skip the maven unit tests
-  -i	skip the health check and integration tests
+  -a	equivalent to -mi
+  -u	skip the unit tests
+  -i	skip the health check & integration tests
   -h	show this help usage
 
 Examples:
-${0##*/} -A	Skip all tests
-${0##*/} -m	Skip only the maven unit tests
+${0##*/} -a	Skip all tests
+${0##*/} -u	Skip the unit tests
 ${0##*/} -i	Skip the helth check and integration tests 
 
 EOF

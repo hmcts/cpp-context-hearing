@@ -4,12 +4,12 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
+import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
-import uk.gov.moj.cpp.hearing.command.plea.Plea;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
@@ -37,7 +37,7 @@ public class OffenceAggregate implements Aggregate {
                     initiateHearingOffenceCommand.getCaseId(),
                     initiateHearingOffenceCommand.getDefendantId(),
                     initiateHearingOffenceCommand.getHearingId(),
-                    offencePleaUpdated.getOriginHearingId(),
+                    offencePleaUpdated.getHearingId(),
                     offencePleaUpdated.getPleaDate(),
                     offencePleaUpdated.getValue()
             )));
@@ -45,12 +45,13 @@ public class OffenceAggregate implements Aggregate {
         return apply(Stream.empty());
     }
 
-    public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final Plea plea) {
+    public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final LocalDate pleaDate,
+            final String pleaValue) {
         return apply(OffencePleaUpdated.builder()
-                    .withOriginHearingId(originHearingId)
+                    .withHearingId(originHearingId)
                     .withOffenceId(offenceId)
-                    .withPleaDate(plea.getPleaDate())
-                    .withValue(plea.getValue())
+                    .withPleaDate(pleaDate)
+                    .withValue(pleaValue)
                     .buildStream());
     }
 

@@ -17,6 +17,10 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
             example: !include json/hearing.command.initiate-hearing-offence-plea.json
 
+        application/vnd.hearing.command.log-hearing-event+json:
+            example: !include json/hearing.command.log-hearing-event.json
+            schema: !include json/schema/hearing.command.log-hearing-event.json
+
         application/vnd.hearing.initiate-hearing+json:
             example: !include json/hearing.initiate-hearing.json
             schema:  !include json/schema/hearing.initiate-hearing.json
@@ -45,9 +49,6 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.create-hearing-event-definitions.json
             schema:  !include json/schema/hearing.create-hearing-event-definitions.json
 
-        application/vnd.hearing.command.log-hearing-event+json:
-            example: !include json/hearing.command.log-hearing-event.json
-            schema: !include json/schema/hearing.command.log-hearing-event.json
 
         application/vnd.hearing.save-draft-result+json:
             example: !include json/hearing.save-draft-result.json
@@ -69,9 +70,13 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.record-confirmed-hearing.json
             schema:  !include json/schema/hearing.record-confirmed-hearing.json
 
-        application/vnd.hearing.offence-plea-update+json:
-            example: !include json/hearing.offence-plea-update.json
-            schema:  !include json/schema/hearing.offence-plea-update.json
+        application/vnd.hearing.hearing-offence-plea-update+json:
+            example: !include json/hearing.hearing-offence-plea-update.json
+            schema:  !include json/schema/hearing.hearing-offence-plea-update.json
+
+        application/vnd.hearing.offence-plea-updated+json:
+            schema: !include json/schema/hearing.offence-plea-updated.json
+            example: !include json/hearing.offence-plea-updated.json
 
         application/vnd.hearing.command.update-verdict+json:
             example: !include json/hearing.command.update-verdict.json

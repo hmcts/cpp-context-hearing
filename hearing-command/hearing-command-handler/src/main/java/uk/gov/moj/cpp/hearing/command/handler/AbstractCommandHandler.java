@@ -19,23 +19,21 @@ abstract class AbstractCommandHandler {
     protected final Enveloper enveloper;
     protected final AggregateService aggregateService;
     protected final JsonObjectToObjectConverter jsonObjectToObjectConverter;
-    protected final HearingCommandHandler hearingCommandHandler;
     
     public AbstractCommandHandler(final EventSource eventSource, final Enveloper enveloper, final AggregateService aggregateService,
-            final JsonObjectToObjectConverter jsonObjectToObjectConverter, final HearingCommandHandler hearingCommandHandler) {
+            final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
+        assert null != eventSource && null != enveloper && null != aggregateService && null != jsonObjectToObjectConverter;
         this.eventSource = eventSource;
         this.enveloper = enveloper;
         this.aggregateService = aggregateService;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
-        this.hearingCommandHandler = hearingCommandHandler;
     }
 
-    protected <A extends Aggregate> A aggregate(final UUID streamId, final JsonEnvelope envelope,
-            final Class<A> clazz, final Function<A, Stream<Object>> function) throws EventStreamException {
-        final EventStream eventStream = this.eventSource.getStreamById(streamId);
-        final A aggregate = this.aggregateService.get(eventStream, clazz);
-        final Stream<Object> events = function.apply(aggregate);
-        eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
+    protected <A extends Aggregate> A aggregate(final Class<A> clazz, final UUID streamId,
+            final JsonEnvelope envelope, final Function<A, Stream<Object>> function) throws EventStreamException {
+        final EventStream eventStream = eventSource.getStreamById(streamId);
+        final A aggregate = aggregateService.get(eventStream, clazz);
+        eventStream.append(function.apply(aggregate).map(enveloper.withMetadataFrom(envelope)));
         return aggregate;
     }
     

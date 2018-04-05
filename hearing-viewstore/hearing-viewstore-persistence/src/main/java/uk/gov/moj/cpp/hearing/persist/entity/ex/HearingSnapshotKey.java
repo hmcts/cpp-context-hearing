@@ -18,7 +18,6 @@ public class HearingSnapshotKey implements Serializable {
     private UUID hearingId;
 
     public HearingSnapshotKey() {
-
     }
 
     public HearingSnapshotKey(final UUID id, final UUID hearingId) {
@@ -57,5 +56,10 @@ public class HearingSnapshotKey implements Serializable {
         }
         return Objects.equals(this.id, ((HearingSnapshotKey) o).id)
                 && Objects.equals(this.hearingId, ((HearingSnapshotKey) o).hearingId);
+    }
+
+    @Override
+    public String toString() {
+        return "HearingSnapshotKey [id=" + id + ", hearingId=" + hearingId + "]";
     }
 }

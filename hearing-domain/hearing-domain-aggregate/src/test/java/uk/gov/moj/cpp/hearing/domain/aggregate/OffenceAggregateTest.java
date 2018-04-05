@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
-import uk.gov.moj.cpp.hearing.command.plea.Plea;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
@@ -64,11 +63,11 @@ public class OffenceAggregateTest {
 
         OffenceAggregate offenceAggregate = new OffenceAggregate();
 
-        List<Object> events = offenceAggregate.updatePlea(hearingId, offenceId, new Plea(randomUUID(), value, pleaDate)).collect(Collectors.toList());
+        List<Object> events = offenceAggregate.updatePlea(hearingId, offenceId, pleaDate, value).collect(Collectors.toList());
 
         assertThat(events.get(0), is(offenceAggregate.getPlea()));
 
-        assertThat(offenceAggregate.getPlea().getOriginHearingId(), is(hearingId));
+        assertThat(offenceAggregate.getPlea().getHearingId(), is(hearingId));
         assertThat(offenceAggregate.getPlea().getOffenceId(), is(offenceId));
         assertThat(offenceAggregate.getPlea().getPleaDate(), is(pleaDate));
         assertThat(offenceAggregate.getPlea().getValue(), is(value));
