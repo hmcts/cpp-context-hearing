@@ -19,15 +19,22 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.initiate-hearing-offence-enriched.json
             example: !include json/hearing.initiate-hearing-offence-enriched.json
 
+        application/vnd.hearing.hearing-event-logged+json:
+            schema: !include json/schema/hearing.hearing-event-logged.json
+            example: !include json/hearing.hearing-event-logged.json
+        application/vnd.hearing.hearing-event-ignored+json:
+            schema: !include json/schema/hearing.hearing-event-ignored.json
+            example: !include json/hearing.hearing-event-ignored.json
+
+
+
+
         application/vnd.hearing.results-shared+json:
             schema: !include json/schema/hearing.results-shared.json
             example: !include json/hearing.results-shared.json
         application/vnd.hearing.result-amended+json:
             schema: !include json/schema/hearing.result-amended.json
             example: !include json/hearing.result-amended.json
-        application/vnd.hearing.hearing-event-logged+json:
-            schema: !include json/schema/hearing.hearing-event-logged.json
-            example: !include json/hearing.hearing-event-logged.json
         application/vnd.hearing.hearing.confirmed-recorded+json:
             schema: !include json/schema/hearing.hearing.confirmed-recorded.json
             example: !include json/hearing.hearing.confirmed-recorded.json

@@ -1,364 +1,232 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Arrays.asList;
-import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldBePublished;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventLoggedPublicEventShouldNotBePublished;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventTimeStampCorrectedPublicEventShouldBePublished;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andLogsAnotherEvent;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andUserLogsAnEvent;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventAlterableFlagIs;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionIsStillAvailable;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionsAreRecorded;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionsShouldProvideOptionToLogEventWithDefendantAndDefenceCouncil;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventIsRecorded;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenItFailsForMissingEventTime;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenOnlySpecifiedHearingEventIsRecorded;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheEventsShouldBeListedInTheSpecifiedOrder;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenTheHearingEventHasTheUpdatedEventTime;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenHearingEventDefinitionsAreUpdated;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserAttemptsToLogAHearingEvent;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserCorrectsTheTimeOfTheHearingEvent;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserLogsAnEvent;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.andHearingHasBeenConfirmed;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.andHearingHasNotBeenConfirmed;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.andProgressionCaseDetailsAreAvailable;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.whenHearingHasDefendantsWithDefenceCounsels;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.defenceCounsel;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEndedEvent;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithOnlyNonSequencedEvents;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithOnlySequencedEvents;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithPauseAndResumeEvents;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventWithMissingEventTime;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingPausedEvent;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingResumedEvent;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingStartedEvent;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.identifyDefendantEvent;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.mitigationEvent;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.ProgressionDataFactory.hearingConfirmedFor;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
-
-import uk.gov.moj.cpp.hearing.command.initiate.Address;
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
+import org.junit.Test;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
+import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
+import java.text.MessageFormat;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import javax.jms.MessageConsumer;
-import javax.json.JsonObject;
-
-import com.jayway.restassured.response.Response;
-import org.junit.Test;
+import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.AllOf.allOf;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
+import static uk.gov.moj.cpp.hearing.it.UseCases.correctLogEvent;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
+import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 
 public class HearingEventsIT extends AbstractIT {
 
-    private static final String PUBLIC_EVENT_HEARING_LOGGED = "public.hearing.event-logged";
-    private static final String PUBLIC_EVENT_HEARING_TIMESTAMP_CORRECTED = "public.hearing.event-timestamp-corrected";
-
-    private static final String FIELD_CASE_ID = "caseId";
-    private static final String FIELD_URN = "urn";
-
     private final UUID userId = randomUUID();
-    private UUID hearingId = randomUUID();
-
-    private final UUID defendantId = randomUUID();
-    private final UUID defenceCounselId = randomUUID();
-    private final UUID defendantId2 = randomUUID();
-    private final UUID defenceCounselId2 = randomUUID();
-
-    private final ZonedDateTime pastEventTime = PAST_ZONED_DATE_TIME.next();
-    private final ZonedDateTime currentLastModifiedTime = ZonedDateTime.now();
 
     @Test
-    public void shouldBeAbleLogAHearingEventAndPublishWithEnrichedInformation() {
-        final MessageConsumer messageConsumer = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_LOGGED);
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
+    public void publishEvent_givenStartOfHearing() {
+
+        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
         givenAUserHasLoggedInAsACourtClerk(userId);
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
 
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
-        whenUserLogsAnEvent(hearingStartedEvent);
+        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
+        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
 
-        andHearingEventLoggedPublicEventShouldBePublished(messageConsumer, hearingStartedEvent, hearingConfirmed);
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), false);
+
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
+                initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath("$.events", hasSize(1)),
+
+                                withJsonPath("$.events[0].hearingEventId", is(logEventCommand.getHearingEventId().toString())),
+                                withJsonPath("$.events[0].recordedLabel", is(logEventCommand.getRecordedLabel())),
+                                withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
+                                withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
+
+                                withJsonPath("$.events[0].alterable", is(false))
+                        ))
+                );
+
     }
 
     @Test
-    public void shouldBeAbleToCorrectTimeOfALoggedHearingEventAndPublishWithEnrichedInformation() {
-        final MessageConsumer messageConsumer = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_TIMESTAMP_CORRECTED);
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
+    public void publishHearingIgnoredEvent_givenNoHearing() {
+
+        UUID hearingId = randomUUID();
 
         givenAUserHasLoggedInAsACourtClerk(userId);
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
 
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(hearingId);
-        andUserLogsAnEvent(hearingStartedEvent);
+        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        final UUID newHearingEventId = randomUUID();
-        whenUserCorrectsTheTimeOfTheHearingEvent(hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
+        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
 
-        thenTheHearingEventHasTheUpdatedEventTime(hearingStartedEvent, pastEventTime, currentLastModifiedTime, newHearingEventId);
-
-        andHearingEventTimeStampCorrectedPublicEventShouldBePublished(
-                messageConsumer, hearingStartedEvent, pastEventTime, currentLastModifiedTime,
-                newHearingEventId, hearingConfirmed);
+        LogEventCommand logEventCommand = logEventThatIsIgnored(requestSpec, asDefault(), hearingId, hearingEventDefinition.getId(),
+                hearingEventDefinition.isAlterable(), "Hearing not found");
     }
 
     @Test
-    public void shouldNotRaiseHearingEventLoggedPublicEventWhenHearingHasNotBeenConfirmed() {
-        final MessageConsumer messageConsumer = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_LOGGED);
+    public void publishEvent_givenIdentifyDefendantEvent() {
 
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-        andHearingHasNotBeenConfirmed(this.hearingId);
+        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(this.hearingId);
-        whenUserLogsAnEvent(hearingStartedEvent);
+        givenAUserHasLoggedInAsACourtClerk(userId);
 
-        thenOnlySpecifiedHearingEventIsRecorded(hearingStartedEvent);
+        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        andHearingEventLoggedPublicEventShouldNotBePublished(messageConsumer);
+        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Identify defendant");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(true));
+
+        LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), true);
+
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
+                initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath("$.events", hasSize(1)),
+
+                                withJsonPath("$.events[0].hearingEventId", is(logEventCommand.getHearingEventId().toString())),
+                                withJsonPath("$.events[0].recordedLabel", is(logEventCommand.getRecordedLabel())),
+                                withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
+                                withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
+
+                                withJsonPath("$.events[0].alterable", is(true))
+                        ))
+                );
+
     }
 
     @Test
-    public void shouldRejectAnHearingEventWhenEventTimeIsMissing() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
+    public void publishEventCorrection_givenStartHearingEvent() {
 
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
+        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
-        final Response response = whenUserAttemptsToLogAHearingEvent(hearingEventWithMissingEventTime(this.hearingId));
-        thenItFailsForMissingEventTime(response);
-    }
+        givenAUserHasLoggedInAsACourtClerk(userId);
+
+        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+
+        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+        LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), false);
+
+        CorrectLogEventCommand correctLogEventCommand = correctLogEvent(requestSpec, logEventCommand.getHearingEventId(),
+                asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), false);
 
 
-    @Test
-    public void shouldCorrectTimeOfASpecificHearingEventAndReturnHearingEventsInChronologicalOrderByEventTime() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
+                initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
 
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath("$.events", hasSize(1)),
 
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(this.hearingId);
-        andUserLogsAnEvent(hearingStartedEvent);
+                                withJsonPath("$.events[0].hearingEventId", is(correctLogEventCommand.getLatestHearingEventId().toString())),
+                                withJsonPath("$.events[0].recordedLabel", is(correctLogEventCommand.getRecordedLabel())),
+                                withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(correctLogEventCommand.getEventTime()))),
+                                withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(correctLogEventCommand.getLastModifiedTime()))),
 
-        final HearingEvent identifyDefendantEvent = identifyDefendantEvent(this.hearingId);
-        andLogsAnotherEvent(identifyDefendantEvent);
-
-        final UUID newHearingEventId = randomUUID();
-        whenUserCorrectsTheTimeOfTheHearingEvent(identifyDefendantEvent, this.pastEventTime, this.currentLastModifiedTime, newHearingEventId);
-
-        final HearingEvent updatedIdentifyDefendantEvent = identifyDefendantEvent.builder()
-                .withId(newHearingEventId)
-                .withEventTime(this.pastEventTime)
-                .withLastModifiedTime(this.currentLastModifiedTime)
-                .build();
-        thenTheEventsShouldBeListedInTheSpecifiedOrder(this.hearingId, asList(updatedIdentifyDefendantEvent, hearingStartedEvent));
+                                withJsonPath("$.events[0].alterable", is(false))
+                        ))
+                );
     }
 
     @Test
-    public void shouldBeAbleToGenerateAndRecordMitigationEventsThatRequireDefendantAndDefenceCounselAlongWithGroupLabelAndActionLabelExtension() {
+    public void publishMultipleEventsAndCorrection_shouldReturnInEventTimeOrder() {
 
-        InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, builder-> {
+        ZonedDateTime zonedDateTime = PAST_ZONED_DATE_TIME.next();
 
-            builder.getHearing().addDefendant(
-                    Defendant.builder()
-                            .withId(defendantId2)
-                            .withPersonId(randomUUID())
-                            .withFirstName(STRING.next())
-                            .withLastName(STRING.next())
-                            .withNationality(STRING.next())
-                            .withGender(STRING.next())
-                            .withAddress(
-                                    Address.builder()
-                                            .withAddress1(STRING.next())
-                                            .withAddress2(STRING.next())
-                                            .withAddress3(STRING.next())
-                                            .withAddress4(STRING.next())
-                                            .withPostCode(STRING.next())
-                            )
-                            .withDateOfBirth(PAST_LOCAL_DATE.next())
-                            .withDefenceOrganisation(STRING.next())
-                            .withInterpreter(
-                                    Interpreter.builder()
-                                            .withNeeded(false)
-                                            .withLanguage(STRING.next())
-                            )
-                            .addDefendantCase(
-                                    DefendantCase.builder()
-                                            .withCaseId(builder.getCases().get(0).getCaseId())
-                                            .withBailStatus(STRING.next())
-                                            .withCustodyTimeLimitDate(FUTURE_ZONED_DATE_TIME.next())
-                            )
-                            .addOffence(
-                                    Offence.builder()
-                                            .withId(randomUUID())
-                                            .withCaseId(builder.getCases().get(0).getCaseId())
-                                            .withOffenceCode(STRING.next())
-                                            .withWording(STRING.next())
-                                            .withSection(STRING.next())
-                                            .withStartDate(PAST_LOCAL_DATE.next())
-                                            .withEndDate(PAST_LOCAL_DATE.next())
-                                            .withOrderIndex(INTEGER.next())
-                                            .withCount(INTEGER.next())
-                                            .withConvictionDate(PAST_LOCAL_DATE.next())
-                            )
+        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
-            );
-        });
+        givenAUserHasLoggedInAsACourtClerk(userId);
+
+        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+
+        HearingEventDefinition startHearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+        LogEventCommand startHearingLogEventCommand = logEvent(requestSpec,
+                e -> e.withEventTime(zonedDateTime),
+                initiateHearingCommand, startHearingEventDefinition.getId(), false);
+
+        CorrectLogEventCommand correctLogEventCommand = correctLogEvent(requestSpec, startHearingLogEventCommand.getHearingEventId(),
+                e -> e.withEventTime(zonedDateTime.plusMinutes(40)),
+                initiateHearingCommand, startHearingEventDefinition.getId(), false);
+
+        HearingEventDefinition identifyDefendantEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Identify defendant");
+        LogEventCommand identifyDefendantLogEventCommand = logEvent(requestSpec,
+                e -> e.withEventTime(zonedDateTime.plusMinutes(20)),
+                initiateHearingCommand, identifyDefendantEventDefinition.getId(), true);
 
 
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
+                initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
 
-        final JsonObject hearingConfirmed = hearingConfirmedFor(initiateHearingCommand.getHearing().getId(), initiateHearingCommand.getCases().get(0).getCaseId());
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath("$.events", hasSize(2)),
 
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithOnlySequencedEvents());
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(initiateHearingCommand.getCases().get(0).getCaseId(), hearingConfirmed.getString(FIELD_URN));
+                                withJsonPath("$.events[0].hearingEventId", is(identifyDefendantLogEventCommand.getHearingEventId().toString())),
+                                withJsonPath("$.events[1].hearingEventId", is(correctLogEventCommand.getLatestHearingEventId().toString()))
 
-
-
-        final List<DefenceCounselData> defenceCounsels = newArrayList(
-                defenceCounsel(this.defenceCounselId, initiateHearingCommand.getHearing().getDefendants().get(0).getId()),
-                defenceCounsel(this.defenceCounselId2, initiateHearingCommand.getHearing().getDefendants().get(1).getId()));
-
-        whenHearingHasDefendantsWithDefenceCounsels(initiateHearingCommand.getHearing().getId(), defenceCounsels);
-
-
-
-        thenHearingEventDefinitionsShouldProvideOptionToLogEventWithDefendantAndDefenceCouncil(initiateHearingCommand.getHearing().getId(), defenceCounsels);
-
-        final DefenceCounselData randomDefenceCounsel = values(defenceCounsels).next();
-        final HearingEvent mitigationEvent = mitigationEvent(this.hearingId, randomDefenceCounsel);
-        whenUserLogsAnEvent(mitigationEvent);
-
-        thenHearingEventIsRecorded(mitigationEvent);
+                        ))
+                );
     }
 
-    @Test
-    public void shouldRecordAndReturnBothSequencedAndNonSequencedHearingEventDefinitions() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
-
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents();
-        andHearingEventDefinitionsAreAvailable(eventDefinitions);
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-
-        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
+    private static HearingEventDefinition findEventDefinitionWithActionLabel(HearingEventDefinitionData hearingEventDefinitionData, String actionLabel) {
+        return hearingEventDefinitionData.getEventDefinitions().stream().filter(d -> d.getActionLabel().equals(actionLabel)).findFirst().get();
     }
 
-    @Test
-    public void shouldRecordAndReturnOnlyNonSequencedHearingEventDefinitions() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
-
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithOnlyNonSequencedEvents();
-        andHearingEventDefinitionsAreAvailable(eventDefinitions);
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-
-        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
+    public static HearingEventDefinitionData hearingDefinitionData(List<HearingEventDefinition> hearingEventDefinitions) {
+        return new HearingEventDefinitionData(randomUUID(), hearingEventDefinitions);
     }
 
-    @Test
-    public void shouldRecordAndReturnPauseAndResumeEventsInHearingEventDefinitions() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
+    public static List<HearingEventDefinition> hearingDefinitions() {
 
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithPauseAndResumeEvents();
-        andHearingEventDefinitionsAreAvailable(eventDefinitions);
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-
-        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
-    }
-
-    @Test
-    public void shouldRecordAndReturnNotRegisteredSequenceTypeEventsWhichAppearAfterTheRegisteredSequenceTypeEventsInHearingEventDefinitions() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
-
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents();
-        andHearingEventDefinitionsAreAvailable(eventDefinitions);
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-
-        thenHearingEventDefinitionsAreRecorded(this.hearingId, eventDefinitions);
-    }
-
-    @Test
-    public void shouldIndicateIfALoggedHearingEventIsAlterable() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
-
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithPauseAndResumeEvents());
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-
-        final HearingEvent hearingStartedEvent = hearingStartedEvent(this.hearingId);
-        final HearingEvent hearingPausedEvent = hearingPausedEvent(this.hearingId);
-        final HearingEvent hearingResumedEvent = hearingResumedEvent(this.hearingId);
-        final HearingEvent hearingEndedEvent = hearingEndedEvent(this.hearingId);
-        andUserLogsAnEvent(hearingStartedEvent);
-        andUserLogsAnEvent(hearingPausedEvent);
-        andUserLogsAnEvent(hearingResumedEvent);
-        andUserLogsAnEvent(hearingEndedEvent);
-
-        thenHearingEventAlterableFlagIs(hearingStartedEvent, false);
-        thenHearingEventAlterableFlagIs(hearingPausedEvent, false);
-        thenHearingEventAlterableFlagIs(hearingResumedEvent, false);
-        thenHearingEventAlterableFlagIs(hearingEndedEvent, false);
-
-        final HearingEvent identifyDefendantEvent = identifyDefendantEvent(this.hearingId);
-        andUserLogsAnEvent(identifyDefendantEvent);
-
-        thenHearingEventAlterableFlagIs(identifyDefendantEvent, true);
-    }
-
-    @Test
-    public void shouldBeAbleToQueryForADeletedHearingEventDefinition() {
-        final JsonObject hearingConfirmed = hearingConfirmedFor(hearingId);
-
-        givenAUserHasLoggedInAsACourtClerk(this.userId);
-        final HearingEventDefinitionData initialHearingEventDefinitions = hearingEventDefinitionsWithOnlySequencedEvents();
-        andHearingEventDefinitionsAreAvailable(initialHearingEventDefinitions);
-        andHearingHasBeenConfirmed(hearingConfirmed);
-        andProgressionCaseDetailsAreAvailable(fromString(hearingConfirmed.getString(FIELD_CASE_ID)), hearingConfirmed.getString(FIELD_URN));
-
-        whenHearingEventDefinitionsAreUpdated(hearingEventDefinitionsWithPauseAndResumeEvents());
-
-        thenHearingEventDefinitionIsStillAvailable(values(initialHearingEventDefinitions.getEventDefinitions()).next());
+        return asList(
+                new HearingEventDefinition(randomUUID(), "Start Hearing", "Call Case On", 1, "SENTENCING", null, null, null, false),
+                new HearingEventDefinition(randomUUID(), "Identify defendant", "Defendant Identified", 2, "SENTENCING", null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "Take Plea", "Plea", 3, "SENTENCING", null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "Prosecution Opening", "Prosecution Opening", 4, "SENTENCING", null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "<counsel.name>", "Defence <counsel.name> mitigated for <defendant.name>", 5, "SENTENCING", "defendant.name,counsel.name", "Mitigation by:", "defending <defendant.name>", true),
+                new HearingEventDefinition(randomUUID(), "Sentencing", "Sentencing", 6, "SENTENCING", null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "End Hearing", "Hearing Ended", 7, "SENTENCING", null, null, null, false),
+                new HearingEventDefinition(randomUUID(), "Pause", "Hearing paused", 1, "PAUSE_RESUME", null, null, null, false),
+                new HearingEventDefinition(randomUUID(), "Resume", "Hearing resumed", 2, "PAUSE_RESUME", null, null, null, false)
+        );
     }
 
 }
