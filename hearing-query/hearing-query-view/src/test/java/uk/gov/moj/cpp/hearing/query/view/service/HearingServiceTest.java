@@ -39,9 +39,10 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse.DefenceCounsel;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
@@ -220,7 +221,7 @@ public class HearingServiceTest {
         });
         
         // 7. performing assertions for defendant objects attributes
-        final Set<HearingDetailsResponse.Defendant> defendants = response.getCases().stream().flatMap(c -> c.getDefendants().stream()).collect(Collectors.toSet());
+        final Set<Defendant> defendants = response.getCases().stream().flatMap(c -> c.getDefendants().stream()).collect(Collectors.toSet());
         assertEquals(defendants.size(), hearing.getDefendants().size());
         
         defendants.forEach(responseObject -> {

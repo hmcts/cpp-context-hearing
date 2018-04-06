@@ -12,6 +12,7 @@ import org.hamcrest.core.IsEqual;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
@@ -205,6 +206,7 @@ public class HearingIT extends AbstractIT {
         thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines);
     }
 
+
     @Test
     public void shouldNotifyWhenASharedResultIsAmended() {
         final UUID hearingId = randomUUID();
@@ -271,6 +273,7 @@ public class HearingIT extends AbstractIT {
         assertThat("expected a timeout", timeout, is(not(nullValue())));
     }
 
+    @Ignore("GPE-3032 - depends on sending sheet complete refactor")
     @Test
     public void progressionSendingSheetComplete1GuiltyPlea() throws IOException {
         final MessageProducer messageProducer = publicEvents.createProducer();
@@ -294,6 +297,7 @@ public class HearingIT extends AbstractIT {
         checkSendingSheetCompleteFlow(caseID.toString(), Arrays.asList(pleaID.toString()));
     }
 
+    @Ignore("GPE-3032 - depends on sending sheet complete refactor")
     @Test
     public void progressionSendingSheetCompletePartialGuiltyThreeConvictionDates() throws IOException {
         final MessageProducer messageProducer = publicEvents.createProducer();

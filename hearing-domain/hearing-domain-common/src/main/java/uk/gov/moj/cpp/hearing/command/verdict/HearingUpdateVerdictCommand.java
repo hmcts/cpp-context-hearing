@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.verdict;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
@@ -26,6 +27,7 @@ public class HearingUpdateVerdictCommand implements Serializable {
         this.defendants = (null == defendants) ? new ArrayList<>() : new ArrayList<>(defendants);
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public UUID getHearingId() {
         return hearingId;
     }

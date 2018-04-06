@@ -1,0 +1,16 @@
+{
+  "caseId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "hearingId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "offenceId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "verdictId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "verdictValueId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "category": "GUILTY",
+  "code": "A4",
+  "description": "Guilty as sin",
+  "numberOfJurors": 12,
+  "numberOfSplitJurors": 2,
+  "unanimous": false,
+  "verdictDate": "2017-01-01"
+}
+
+

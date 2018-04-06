@@ -8,8 +8,11 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
@@ -145,6 +148,68 @@ public class NewHearingEventListener {
                         .withLastName(hearing.getJudge().getLastName())
                         .withTitle(hearing.getJudge().getTitle()))
                 .build());
+    }
+
+    @Transactional
+    @Handles("hearing.offence-verdict-updated")
+    public void verdictUpdate(final JsonEnvelope event) {
+        final OffenceVerdictUpdated verdictUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), OffenceVerdictUpdated.class);
+
+        Ahearing ahearing = ahearingRepository.findById(verdictUpdated.getHearingId());
+
+        Offence offence = ahearing.getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> o.getId().getId().equals(verdictUpdated.getOffenceId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + verdictUpdated.getOffenceId().toString()));
+
+        offence.setVerdictId(verdictUpdated.getVerdictId());
+        offence.setVerdictCode(verdictUpdated.getCode());
+        offence.setVerdictCategory(verdictUpdated.getCategory());
+        offence.setVerdictDescription(verdictUpdated.getDescription());
+        offence.setVerdictDate(verdictUpdated.getVerdictDate());
+        offence.setNumberOfJurors(verdictUpdated.getNumberOfJurors());
+        offence.setNumberOfSplitJurors(verdictUpdated.getNumberOfSplitJurors());
+        offence.setUnanimous(verdictUpdated.getUnanimous());
+
+        ahearingRepository.save(ahearing);
+    }
+
+    @Transactional
+    @Handles("hearing.conviction-date-added")
+    public void convictionDateUpdated(final JsonEnvelope event) {
+
+        final ConvictionDateAdded convictionDateAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateAdded.class);
+
+        Ahearing ahearing = ahearingRepository.findById(convictionDateAdded.getHearingId());
+
+        Offence offence = ahearing.getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> o.getId().getId().equals(convictionDateAdded.getOffenceId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + convictionDateAdded.getOffenceId().toString()));
+
+        offence.setConvictionDate(convictionDateAdded.getConvictionDate());
+
+        ahearingRepository.save(ahearing);
+    }
+
+    @Transactional
+    @Handles("hearing.conviction-date-removed")
+    public void convictionDateRemoved(final JsonEnvelope event) {
+        final ConvictionDateRemoved convictionDateRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);
+
+        Ahearing ahearing = ahearingRepository.findById(convictionDateRemoved.getHearingId());
+
+        Offence offence = ahearing.getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> o.getId().getId().equals(convictionDateRemoved.getOffenceId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + convictionDateRemoved.getOffenceId().toString()));
+
+        offence.setConvictionDate(null);
+
+        ahearingRepository.save(ahearing);
     }
 
     @Transactional

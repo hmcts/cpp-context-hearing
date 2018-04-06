@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
@@ -13,11 +14,14 @@ import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,11 +31,13 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 
 public class NewModelHearingAggregateTest {
 
@@ -361,6 +367,48 @@ public class NewModelHearingAggregateTest {
         assertThat(hearingEventIgnored.getHearingEventDefinitionId(), is(correctLogEventCommand.getHearingEventDefinitionId()));
         assertThat(hearingEventIgnored.getHearingEventId(), is(correctLogEventCommand.getHearingEventId()));
         assertThat(hearingEventIgnored.isAlterable(), is(false));
+    }
+
+    @Test
+    public void updateVerdict_shouldUpdateVerdict() {
+
+        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+
+        Verdict verdict = Verdict.builder()
+                .withId(randomUUID())
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withValue(VerdictValue.builder()
+                        .withId(randomUUID())
+                        .withDescription(STRING.next())
+                        .withCode(STRING.next())
+                        .withCategory(STRING.next())
+                )
+                .withNumberOfJurors(integer(9,12).next())
+                .withUnanimous(BOOLEAN.next())
+                .build();
+
+
+        NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+        hearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
+        OffenceVerdictUpdated offenceVerdictUpdated = (OffenceVerdictUpdated) hearingAggregate.updateVerdict(
+                initiateHearingCommand.getHearing().getId(),
+                initiateHearingCommand.getCases().get(0).getCaseId(),
+                initiateHearingCommand.getHearing().getDefendants().get(0).getId(),
+                initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
+                verdict
+        ).collect(Collectors.toList()).get(0);
+
+        assertThat(offenceVerdictUpdated.getCaseId(), Matchers.is(initiateHearingCommand.getCases().get(0).getCaseId()));
+        assertThat(offenceVerdictUpdated.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
+        assertThat(offenceVerdictUpdated.getHearingId(), Matchers.is(initiateHearingCommand.getHearing().getId()));
+
+        assertThat(offenceVerdictUpdated.getVerdictId(), Matchers.is(verdict.getId()));
+
+        assertThat(offenceVerdictUpdated.getVerdictValueId(), Matchers.is(verdict.getValue().getId()));
+        assertThat(offenceVerdictUpdated.getCode(), Matchers.is(verdict.getValue().getCode()));
+        assertThat(offenceVerdictUpdated.getDescription(), Matchers.is(verdict.getValue().getDescription()));
+        assertThat(offenceVerdictUpdated.getCategory(), Matchers.is(verdict.getValue().getCategory()));
     }
 
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplate() {

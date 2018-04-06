@@ -9,14 +9,14 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Offence;
-import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 
 import javax.inject.Inject;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
@@ -35,10 +35,6 @@ public class NewModelUpdateVerdictCommandHandler {
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
-    @Inject
-    private HearingCommandHandler hearingCommandHandler;
-
 
     @Handles("hearing.command.update-verdict")
     public void updateVerdict(final JsonEnvelope command) throws EventStreamException {
@@ -62,31 +58,26 @@ public class NewModelUpdateVerdictCommandHandler {
 
         final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = this.jsonObjectToObjectConverter.convert(command.payloadAsJsonObject(), HearingUpdateVerdictCommand.class);
 
-        for (Offence offence : forAllOffences(hearingUpdateVerdictCommand).collect(Collectors.toList())) {
+        for (Defendant defendant: hearingUpdateVerdictCommand.getDefendants()){
+            for (Offence offence: defendant.getOffences()){
 
-            applyToOffenceAggregate(offence.getId(), offenceAggregate ->
-                    offenceAggregate.updateVerdict(
-                            hearingUpdateVerdictCommand.getHearingId(),
-                            hearingUpdateVerdictCommand.getCaseId(),
-                            offence.getId(),
-                            offence.getVerdict()
-                    ), command);
+                applyToHearingAggregate(hearingUpdateVerdictCommand.getHearingId(), hearingAggregate ->
+                        hearingAggregate.updateVerdict(
+                                hearingUpdateVerdictCommand.getHearingId(),
+                                hearingUpdateVerdictCommand.getCaseId(),
+                                defendant.getId(),
+                                offence.getId(),
+                                offence.getVerdict()
+                        ), command);
+            }
         }
-
-        //TODO - GPE-3032 - cleanup
-        hearingCommandHandler.updateVerdict(command);
     }
 
-    private static Stream<Offence> forAllOffences(HearingUpdateVerdictCommand command) {
-        return command.getDefendants().stream().flatMap(d -> d.getOffences().stream());
-    }
-
-    private OffenceAggregate applyToOffenceAggregate(final UUID streamId, final Function<OffenceAggregate, Stream<Object>> function,
-                                                     final JsonEnvelope envelope) throws EventStreamException {
+    private void applyToHearingAggregate(final UUID streamId, final Function<NewModelHearingAggregate, Stream<Object>> function,
+                                         final JsonEnvelope envelope) throws EventStreamException {
         final EventStream eventStream = this.eventSource.getStreamById(streamId);
-        final OffenceAggregate aggregate = this.aggregateService.get(eventStream, OffenceAggregate.class);
+        final NewModelHearingAggregate aggregate = this.aggregateService.get(eventStream, NewModelHearingAggregate.class);
         final Stream<Object> events = function.apply(aggregate);
         eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
-        return aggregate;
     }
 }

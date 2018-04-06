@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingEntityToHearing;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 import uk.gov.moj.cpp.hearing.query.view.response.Judge;

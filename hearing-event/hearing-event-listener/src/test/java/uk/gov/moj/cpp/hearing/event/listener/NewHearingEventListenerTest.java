@@ -13,14 +13,18 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
@@ -31,9 +35,16 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 
+import static java.util.Arrays.asList;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.StringReader;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,6 +55,8 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.of;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -51,7 +64,10 @@ import static org.mockito.Mockito.reset;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.moj.cpp.hearing.event.listener.TestUtilities.initiateHearingCommandTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -69,13 +85,16 @@ public class NewHearingEventListenerTest {
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
     @Captor
     private ArgumentCaptor<Ahearing> hearingexArgumentCaptor;
 
     @Before
-    public void setUp() {
-        setField(this.jsonObjectToObjectConverter, "mapper",
-                new ObjectMapperProducer().objectMapper());
+    public void setup() {
+        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
 
@@ -125,9 +144,9 @@ public class NewHearingEventListenerTest {
     @Test
     public void shouldStoreProsecutionCounselOnAddEvent() {
         NewProsecutionCounselAdded newProsecutionCounselAdded = NewProsecutionCounselAdded.builder()
-                .withAttendeeId(UUID.randomUUID())
+                .withAttendeeId(randomUUID())
                 .withFirstName("david")
-                .withHearingId(UUID.randomUUID())
+                .withHearingId(randomUUID())
                 .withStatus("QC")
                 .withLastName("Bowie")
                 .withTitle("Mr")
@@ -189,9 +208,9 @@ public class NewHearingEventListenerTest {
 
     @Test
     public void shouldStoreDefenceCounselOnAddEvent() {
-        UUID hearingId = UUID.randomUUID();
-        UUID attendeeId = UUID.randomUUID();
-        List<UUID> defendantIds = Arrays.asList(UUID.randomUUID(), UUID.randomUUID());
+        UUID hearingId = randomUUID();
+        UUID attendeeId = randomUUID();
+        List<UUID> defendantIds = asList(randomUUID(), randomUUID());
         UUID personId = null;
         String status = "QC";
         NewDefenceCounselAdded newDefenceCounselAdded =
@@ -206,7 +225,7 @@ public class NewHearingEventListenerTest {
                         .withTitle("Colonel")
                         .build();
         JsonEnvelope event = getAddDefenceCounselJsonEnvelope(newDefenceCounselAdded);
-        List<Defendant> defendants = Arrays.asList(
+        List<Defendant> defendants = asList(
                 Defendant.builder().withId(new HearingSnapshotKey(defendantIds.get(0), hearingId)).build(),
                 Defendant.builder().withId(new HearingSnapshotKey(defendantIds.get(1), hearingId)).build());
         Ahearing ahearing = Ahearing.builder().withId(hearingId).withDefendants(defendants).build();
@@ -380,6 +399,112 @@ public class NewHearingEventListenerTest {
 
         assertThat(actualLegalCase.getId(), is(legalCase.getCaseId()));
         assertThat(actualLegalCase.getCaseurn(), is(legalCase.getUrn()));
+    }
+
+
+    @Test
+    public void verdictUpdate_shouldUpdateTheVerdict() throws Exception {
+
+        UUID hearingId = randomUUID();
+
+        OffenceVerdictUpdated offenceVerdictUpdated = new OffenceVerdictUpdated(randomUUID(), hearingId, randomUUID(),
+                randomUUID(), randomUUID(), STRING.next(), STRING.next(), STRING.next(), INTEGER.next(), INTEGER.next(),
+                BOOLEAN.next(), PAST_LOCAL_DATE.next());
+
+        Ahearing ahearing = Ahearing.builder().withId(hearingId)
+                .withDefendants(asList
+                        (Defendant.builder()
+                                .withOffences(asList(
+                                        Offence.builder()
+                                                .withId(new HearingSnapshotKey(offenceVerdictUpdated.getOffenceId(), hearingId))
+                                                .build()
+                                ))
+                                .build()))
+                .build();
+
+        when(this.ahearingRepository.findById(hearingId)).thenReturn(ahearing);
+
+        newHearingEventListener.verdictUpdate(envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
+                objectToJsonObjectConverter.convert(offenceVerdictUpdated)));
+
+        verify(this.ahearingRepository).save(ahearing);
+
+        Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+
+        assertThat(offence.getId().getId(), is(offenceVerdictUpdated.getOffenceId()));
+        assertThat(offence.getId().getHearingId(), is(offenceVerdictUpdated.getHearingId()));
+        assertThat(offence.getVerdictId(), is(offenceVerdictUpdated.getVerdictId()));
+        assertThat(offence.getVerdictCategory(), is(offenceVerdictUpdated.getCategory()));
+        assertThat(offence.getVerdictCode(), is(offenceVerdictUpdated.getCode()));
+        assertThat(offence.getVerdictDescription(), is(offenceVerdictUpdated.getDescription()));
+        assertThat(offence.getNumberOfJurors(), is(offenceVerdictUpdated.getNumberOfJurors()));
+        assertThat(offence.getNumberOfSplitJurors(), is(offenceVerdictUpdated.getNumberOfSplitJurors()));
+        assertThat(offence.getUnanimous(), is(offenceVerdictUpdated.getUnanimous()));
+        assertThat(offence.getVerdictDate(), is(offenceVerdictUpdated.getVerdictDate()));
+    }
+
+    @Test
+    public void convictionDateUpdated_shouldUpdateTheConvictionDate() throws Exception {
+
+        UUID hearingId = randomUUID();
+
+        ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(randomUUID(), hearingId, randomUUID(),
+                randomUUID(), PAST_LOCAL_DATE.next());
+
+        Ahearing ahearing = Ahearing.builder().withId(hearingId)
+                .withDefendants(asList
+                        (Defendant.builder()
+                                .withOffences(asList(
+                                        Offence.builder()
+                                                .withId(new HearingSnapshotKey(convictionDateAdded.getOffenceId(), hearingId))
+                                                .build()
+                                ))
+                                .build()))
+                .build();
+
+        when(this.ahearingRepository.findById(hearingId)).thenReturn(ahearing);
+
+        newHearingEventListener.convictionDateUpdated(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
+                objectToJsonObjectConverter.convert(convictionDateAdded)));
+
+        verify(this.ahearingRepository).save(ahearing);
+
+        Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        assertThat(offence.getId().getId(), is(convictionDateAdded.getOffenceId()));
+        assertThat(offence.getId().getHearingId(), is(convictionDateAdded.getHearingId()));
+        assertThat(offence.getConvictionDate(), is(convictionDateAdded.getConvictionDate()));
+    }
+
+
+    @Test
+    public void convictionDateRemoved_shouldSetConvictionDateToNull() throws Exception {
+
+        ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(randomUUID(), randomUUID(), randomUUID(),
+                randomUUID());
+
+        Ahearing ahearing = Ahearing.builder().withId(convictionDateRemoved.getHearingId())
+                .withDefendants(asList
+                        (Defendant.builder()
+                                .withOffences(asList(
+                                        Offence.builder()
+                                                .withId(new HearingSnapshotKey(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId()))
+                                                .withConvictionDate(LocalDate.now())
+                                                .build()
+                                ))
+                                .build()))
+                .build();
+
+        when(this.ahearingRepository.findById(convictionDateRemoved.getHearingId())).thenReturn(ahearing);
+
+        newHearingEventListener.convictionDateRemoved(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
+                objectToJsonObjectConverter.convert(convictionDateRemoved)));
+
+        verify(this.ahearingRepository).save(ahearing);
+
+        Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        assertThat(offence.getId().getId(), is(convictionDateRemoved.getOffenceId()));
+        assertThat(offence.getId().getHearingId(), is(convictionDateRemoved.getHearingId()));
+        assertThat(offence.getConvictionDate(), is(nullValue()));
     }
 
 }

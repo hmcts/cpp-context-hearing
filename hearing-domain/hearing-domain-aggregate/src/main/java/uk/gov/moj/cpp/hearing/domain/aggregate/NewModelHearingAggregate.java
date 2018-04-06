@@ -5,17 +5,28 @@ import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
+
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
+
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -131,7 +142,7 @@ public class NewModelHearingAggregate implements Aggregate {
             )));
         }
 
-        if (events.get(logEventCommand.getHearingEventId()).isDeleted()){
+        if (events.get(logEventCommand.getHearingEventId()).isDeleted()) {
             return apply(Stream.of(new HearingEventIgnored(
                     logEventCommand.getHearingEventId(),
                     logEventCommand.getHearingId(),
@@ -165,6 +176,37 @@ public class NewModelHearingAggregate implements Aggregate {
         ));
     }
 
+    public Stream<Object> updateVerdict(UUID hearingId, UUID caseId, UUID defendantId, UUID offenceId, Verdict verdict) {
+
+        List<Object> events = new ArrayList<>();
+
+        events.add(new OffenceVerdictUpdated(
+                caseId, //TODO - offenceId is unique within case, so do we need this?
+                hearingId,
+                offenceId,
+                verdict.getId(), //TODO - do we need verdictId
+                verdict.getValue().getId(),
+                verdict.getValue().getCategory(),
+                verdict.getValue().getCode(),
+                verdict.getValue().getDescription(),
+                verdict.getNumberOfJurors(),
+                verdict.getNumberOfSplitJurors(),
+                verdict.getUnanimous(),
+                verdict.getVerdictDate()
+        ));
+
+        if (verdict.getValue().getCategory().equalsIgnoreCase("GUILTY")){
+            events.add(new ConvictionDateAdded(caseId, hearingId, defendantId, offenceId, hearing.getStartDateTime().toLocalDate()));
+        } else {
+            events.add(new ConvictionDateRemoved(caseId, hearingId, defendantId, offenceId));
+        }
+
+        //TODO - GPE-3157 - update plea must do this conviction date stuff as well.
+
+        return apply(events.stream());
+    }
+
+
     public static class HearingEvent {
         private boolean deleted;
 
@@ -186,4 +228,5 @@ public class NewModelHearingAggregate implements Aggregate {
             return hearingEventLogged;
         }
     }
+
 }

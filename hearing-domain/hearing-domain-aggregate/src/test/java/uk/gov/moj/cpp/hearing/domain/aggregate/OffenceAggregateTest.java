@@ -3,11 +3,8 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
-import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -74,42 +71,4 @@ public class OffenceAggregateTest {
         assertThat(offenceAggregate.getPlea().getValue(), is(value));
     }
 
-    @Test
-    public void updateVerdict() {
-        UUID offenceId = randomUUID();
-        UUID hearingId = randomUUID();
-        UUID caseId = randomUUID();
-        Verdict verdict = Verdict.builder()
-                .withId(randomUUID())
-                .withVerdictDate(PAST_LOCAL_DATE.next())
-                .withValue(VerdictValue.builder()
-                        .withId(randomUUID())
-                        .withDescription(STRING.next())
-                        .withCode(STRING.next())
-                        .withCategory(STRING.next())
-                )
-                .withUnanimous(false)
-                .build();
-
-
-        OffenceAggregate offenceAggregate = new OffenceAggregate();
-
-        OffenceVerdictUpdated offenceVerdictUpdated = (OffenceVerdictUpdated) offenceAggregate.updateVerdict(
-                hearingId,
-                caseId,
-                offenceId,
-                verdict
-        ).collect(Collectors.toList()).get(0);
-
-        assertThat(offenceVerdictUpdated.getCaseId(), is(caseId));
-        assertThat(offenceVerdictUpdated.getOffenceId(), is(offenceId));
-        assertThat(offenceVerdictUpdated.getOriginHearingId(), is(hearingId));
-
-        assertThat(offenceVerdictUpdated.getVerdictId(), is(verdict.getId()));
-
-        assertThat(offenceVerdictUpdated.getVerdictValueId(), is(verdict.getValue().getId()));
-        assertThat(offenceVerdictUpdated.getCode(), is(verdict.getValue().getCode()));
-        assertThat(offenceVerdictUpdated.getDescription(), is(verdict.getValue().getDescription()));
-        assertThat(offenceVerdictUpdated.getCategory(), is(verdict.getValue().getCategory()));
-    }
 }

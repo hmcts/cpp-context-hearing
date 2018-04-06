@@ -34,21 +34,17 @@
     },
     "unanimous": {
       "type": "boolean"
-    },
-    "verdictDate": {
-      "type":"string"
     }
   },
   "required": [
     "caseId",
-    "hearingId",
+    "originHearingId",
     "offenceId",
     "verdictId",
     "verdictValueId",
     "category",
     "code",
-    "description",
-    "verdictDate"
+    "description"
   ],
   "definitions": {
     "uuid": {
