@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import com.jayway.jsonassert.impl.matcher.IsCollectionWithSize;
 import com.jayway.restassured.response.Response;
 
+import org.junit.Ignore;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 
 import org.apache.http.HttpStatus;
@@ -32,6 +33,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 
 public class OffencesIT extends AbstractIT {
 
+    @Ignore("deprecated now - keep this until cleanup - just incase it has some logic we might need to refer to")
     @Test
     public void hearingGetOffenceViewTest() throws IOException {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);

@@ -1,4 +1,5 @@
-package uk.gov.moj.cpp.hearing.event.listener;
+package uk.gov.moj.cpp.hearing.test;
+
 
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
@@ -9,6 +10,8 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
+import uk.gov.moj.cpp.hearing.command.plea.Plea;
 
 import java.util.UUID;
 
@@ -18,8 +21,58 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static java.util.UUID.randomUUID;
 
-public class TestUtilities {
+public class TestTemplates {
+
+
+    public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields() {
+
+        UUID caseId = randomUUID();
+
+        return InitiateHearingCommand.builder()
+                .addCase(Case.builder()
+                        .withCaseId(caseId)
+                        .withUrn(STRING.next())
+                )
+                .withHearing(Hearing.builder()
+                        .withId(randomUUID())
+                        .withType(STRING.next())
+                        .withCourtCentreId(randomUUID())
+                        .withCourtCentreName(STRING.next())
+                        .withCourtRoomId(randomUUID())
+                        .withCourtRoomName(STRING.next())
+                        .withJudge(
+                                Judge.builder()
+                                        .withId(randomUUID())
+                                        .withTitle(STRING.next())
+                                        .withFirstName(STRING.next())
+                                        .withLastName(STRING.next())
+                        )
+                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
+                        .withEstimateMinutes(INTEGER.next())
+                        .addDefendant(Defendant.builder()
+                                .withId(randomUUID())
+                                .withPersonId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .addDefendantCase(
+                                        DefendantCase.builder()
+                                                .withCaseId(caseId)
+                                )
+                                .addOffence(
+                                        Offence.builder()
+                                                .withId(randomUUID())
+                                                .withCaseId(caseId)
+                                                .withOffenceCode(STRING.next())
+                                                .withWording(STRING.next())
+                                                .withStartDate(PAST_LOCAL_DATE.next())
+                                )
+                        )
+                );
+    }
+
+
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplate() {
         UUID caseId = randomUUID();
         return InitiateHearingCommand.builder()
@@ -84,8 +137,29 @@ public class TestUtilities {
                                                 .withOrderIndex(INTEGER.next())
                                                 .withCount(INTEGER.next())
                                                 .withConvictionDate(PAST_LOCAL_DATE.next())
+                                                .withLegislation(STRING.next())
+                                                .withTitle(STRING.next())
                                 )
                         )
                 );
     }
+
+    public static HearingUpdatePleaCommand.Builder updatePleaTemplate() {
+        return HearingUpdatePleaCommand.builder()
+                .withCaseId(randomUUID())
+                .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
+                        .withId(randomUUID())
+                        .withPersonId(randomUUID())
+                        .addOffence(uk.gov.moj.cpp.hearing.command.plea.Offence.builder()
+                                .withId(randomUUID())
+                                .withPlea(Plea.builder()
+                                        .withId(randomUUID())
+                                        .withPleaDate(PAST_LOCAL_DATE.next())
+                                        .withValue(STRING.next())
+                                )
+                        )
+
+                );
+    }
+
 }

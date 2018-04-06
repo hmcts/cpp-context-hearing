@@ -17,43 +17,29 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Offence;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
-import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
-import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
-import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictAdded;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
@@ -62,15 +48,18 @@ import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelp
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NewModelUpdateVerdictCommandHandlerTest {
 
     @Mock
-    private EventStream offenceEventStream;
+    private EventStream hearingEventStream;
 
     @Mock
     private EventSource eventSource;
@@ -86,19 +75,11 @@ public class NewModelUpdateVerdictCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            //new events.
             Initiated.class,
-
             OffenceVerdictUpdated.class,
-            //TODO - GPE-3032 CLEANUP - remove old events.
-            DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
-            RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
-            HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class, PleaAdded.class, PleaChanged.class,
-            HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class, JudgeAssigned.class,
-            VerdictAdded.class, ConvictionDateAdded.class, HearingVerdictUpdated.class, ConvictionDateRemoved.class);
-
-    @Mock
-    private HearingCommandHandler oldHandler;
+            ConvictionDateAdded.class,
+            ConvictionDateRemoved.class
+    );
 
     @InjectMocks
     private NewModelUpdateVerdictCommandHandler hearingCommandHandler;
@@ -109,20 +90,19 @@ public class NewModelUpdateVerdictCommandHandlerTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
-    //TODO - handle multiple plea updates in a single call
-    //TODO - add assertions around split jurors and unanimous
-
     @Test
-    public void updateVerdict() throws EventStreamException {
+    public void updateVerdict_toGuilty() throws EventStreamException {
+
+        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.builder()
-                .withCaseId(randomUUID())
-                .withHearingId(randomUUID())
+                .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
+                .withHearingId(initiateHearingCommand.getHearing().getId())
                 .addDefendant(Defendant.builder()
-                        .withId(randomUUID())
+                        .withId(initiateHearingCommand.getHearing().getDefendants().get(0).getId())
                         .withPersonId(randomUUID())
                         .addOffence(Offence.builder()
-                                .withId(randomUUID())
+                                .withId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
                                 .withVerdict(Verdict.builder()
                                         .withId(randomUUID())
                                         .withValue(
@@ -131,34 +111,142 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                                                         .withCategory("GUILTY")
                                                         .withCode("A1")
                                                         .withDescription(STRING.next())
+
                                         )
+                                        .withNumberOfJurors(integer(9, 12).next())
+                                        .withNumberOfSplitJurors(integer(0, 3).next())
+                                        .withVerdictDate(PAST_LOCAL_DATE.next())
+                                        .withUnanimous(BOOLEAN.next())
                                 )
                         )
                 )
                 .build();
 
-        setupMockedEventStream(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId(), this.offenceEventStream, new OffenceAggregate());
+        NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
+        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
-        final JsonEnvelope addVerdictCommand = envelopeFrom(metadataWithRandomUUID("hearing.update-plea"), objectToJsonObjectConverter.convert(hearingUpdateVerdictCommand));
+        setupMockedEventStream(hearingUpdateVerdictCommand.getHearingId(), this.hearingEventStream, newModelHearingAggregate);
+
+        final JsonEnvelope addVerdictCommand = envelopeFrom(metadataWithRandomUUID("hearing.command.update-verdict"),
+                objectToJsonObjectConverter.convert(hearingUpdateVerdictCommand));
 
         this.hearingCommandHandler.updateVerdict(addVerdictCommand);
 
-        assertThat(verifyAppendAndGetArgumentFrom(this.offenceEventStream), streamContaining(
+        List<Object> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
+        Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
+        assertThat((JsonEnvelope) events.get(0),
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(addVerdictCommand)
                                 .withName("hearing.offence-verdict-updated"),
                         payloadIsJson(allOf(
+                                withJsonPath("$.caseId", is(hearingUpdateVerdictCommand.getCaseId().toString())),
+                                withJsonPath("$.hearingId", is(hearingUpdateVerdictCommand.getHearingId().toString())),
+                                withJsonPath("$.offenceId", is(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
+                                withJsonPath("$.verdictId", is(verdict.getId().toString())),
+                                withJsonPath("$.verdictValueId", is(verdict.getValue().getId().toString())),
+                                withJsonPath("$.category", is(verdict.getValue().getCategory())),
+                                withJsonPath("$.code", is(verdict.getValue().getCode())),
+                                withJsonPath("$.description", is(verdict.getValue().getDescription())),
+                                withJsonPath("$.numberOfJurors", is(verdict.getNumberOfJurors())),
+                                withJsonPath("$.numberOfSplitJurors", is(verdict.getNumberOfSplitJurors())),
+                                withJsonPath("$.unanimous", is(verdict.getUnanimous())),
+                                withJsonPath("$.verdictDate", is(verdict.getVerdictDate().toString()))
+                        )))
+        );
+
+        assertThat((JsonEnvelope) events.get(1),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(addVerdictCommand)
+                                .withName("hearing.conviction-date-added"),
+                        payloadIsJson(allOf(
                                 withJsonPath("$.caseId", equalTo(hearingUpdateVerdictCommand.getCaseId().toString())),
-                                withJsonPath("$.originHearingId", equalTo(hearingUpdateVerdictCommand.getHearingId().toString())),
+                                withJsonPath("$.hearingId", equalTo(hearingUpdateVerdictCommand.getHearingId().toString())),
                                 withJsonPath("$.offenceId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
-                                withJsonPath("$.verdictId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getId().toString())),
-                                withJsonPath("$.verdictValueId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue().getId().toString())),
-                                withJsonPath("$.category", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue().getCategory())),
-                                withJsonPath("$.code", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue().getCode())),
-                                withJsonPath("$.description", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue().getDescription()))
+                                withJsonPath("$.defendantId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getId().toString())),
+
+                                withJsonPath("$.convictionDate", equalTo(initiateHearingCommand.getHearing().getStartDateTime().toLocalDate().toString()))
 
                         )))
-        ));
+        );
+    }
+
+    @Test
+    public void updateVerdict_toNotGuilty() throws EventStreamException {
+
+        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+
+        HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.builder()
+                .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
+                .withHearingId(initiateHearingCommand.getHearing().getId())
+                .addDefendant(Defendant.builder()
+                        .withId(initiateHearingCommand.getHearing().getDefendants().get(0).getId())
+                        .withPersonId(randomUUID())
+                        .addOffence(Offence.builder()
+                                .withId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
+                                .withVerdict(Verdict.builder()
+                                        .withId(randomUUID())
+                                        .withValue(
+                                                VerdictValue.builder()
+                                                        .withId(randomUUID())
+                                                        .withCategory("NOT_GUILTY")
+                                                        .withCode("A1")
+                                                        .withDescription(STRING.next())
+
+                                        )
+                                        .withNumberOfJurors(integer(9, 12).next())
+                                        .withNumberOfSplitJurors(integer(0, 3).next())
+                                        .withVerdictDate(PAST_LOCAL_DATE.next())
+                                        .withUnanimous(BOOLEAN.next())
+                                )
+                        )
+                )
+                .build();
+
+        NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
+        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
+        setupMockedEventStream(hearingUpdateVerdictCommand.getHearingId(), this.hearingEventStream, newModelHearingAggregate);
+
+        final JsonEnvelope addVerdictCommand = envelopeFrom(metadataWithRandomUUID("hearing.command.update-verdict"),
+                objectToJsonObjectConverter.convert(hearingUpdateVerdictCommand));
+
+        this.hearingCommandHandler.updateVerdict(addVerdictCommand);
+
+        List<Object> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
+        Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
+        assertThat((JsonEnvelope) events.get(0),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(addVerdictCommand)
+                                .withName("hearing.offence-verdict-updated"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.caseId", is(hearingUpdateVerdictCommand.getCaseId().toString())),
+                                withJsonPath("$.hearingId", is(hearingUpdateVerdictCommand.getHearingId().toString())),
+                                withJsonPath("$.offenceId", is(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
+                                withJsonPath("$.verdictId", is(verdict.getId().toString())),
+                                withJsonPath("$.verdictValueId", is(verdict.getValue().getId().toString())),
+                                withJsonPath("$.category", is(verdict.getValue().getCategory())),
+                                withJsonPath("$.code", is(verdict.getValue().getCode())),
+                                withJsonPath("$.description", is(verdict.getValue().getDescription())),
+                                withJsonPath("$.numberOfJurors", is(verdict.getNumberOfJurors())),
+                                withJsonPath("$.numberOfSplitJurors", is(verdict.getNumberOfSplitJurors())),
+                                withJsonPath("$.unanimous", is(verdict.getUnanimous())),
+                                withJsonPath("$.verdictDate", is(verdict.getVerdictDate().toString()))
+                        )))
+        );
+
+        assertThat((JsonEnvelope) events.get(1),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(addVerdictCommand)
+                                .withName("hearing.conviction-date-removed"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.caseId", equalTo(hearingUpdateVerdictCommand.getCaseId().toString())),
+                                withJsonPath("$.hearingId", equalTo(hearingUpdateVerdictCommand.getHearingId().toString())),
+                                withJsonPath("$.offenceId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
+                                withJsonPath("$.defendantId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getId().toString()))
+                        )))
+        );
     }
 
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {

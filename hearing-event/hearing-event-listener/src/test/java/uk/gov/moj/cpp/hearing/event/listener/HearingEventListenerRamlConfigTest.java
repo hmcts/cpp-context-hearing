@@ -35,7 +35,6 @@ public class HearingEventListenerRamlConfigTest {
 
             InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
             OffencePleaUpdated.class.getAnnotation(Event.class).value(),
-            OffenceVerdictUpdated.class.getAnnotation(Event.class).value(),
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
             HearingConfirmedRecorded.class.getAnnotation(Event.class).value(),
             HearingUpdatePleaIgnored.class.getAnnotation(Event.class).value(),
@@ -44,8 +43,6 @@ public class HearingEventListenerRamlConfigTest {
             PleaChanged.class.getAnnotation(Event.class).value(),
             HearingVerdictUpdated.class.getAnnotation(Event.class).value(),
             HearingUpdateVerdictIgnored.class.getAnnotation(Event.class).value(),
-            ConvictionDateRemoved.class.getAnnotation(Event.class).value(),
-            ConvictionDateAdded.class.getAnnotation(Event.class).value(),
             HearingEventDeletionIgnored.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedRecorded.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedPreviouslyRecorded.class.getAnnotation(Event.class).value(),

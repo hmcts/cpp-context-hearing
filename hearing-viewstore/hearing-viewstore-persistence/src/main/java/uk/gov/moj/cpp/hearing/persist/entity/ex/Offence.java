@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -41,19 +41,19 @@ public class Offence {
     private String legislation;
 
     @Column(name = "start_date")
-    private java.time.LocalDate startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private java.time.LocalDate endDate;
+    private LocalDate endDate;
 
     @Column(name = "conviction_date")
-    private java.time.LocalDate convictionDate;
+    private LocalDate convictionDate;
 
     @Column(name = "plea_id") @Deprecated //TODO: GPE-3267: sanitise
     private UUID pleaId;
 
     @Column(name = "plea_date")
-    private LocalDateTime pleaDate;
+    private LocalDate pleaDate;
 
     @Column(name = "plea_value")
     private String pleaValue;
@@ -71,7 +71,7 @@ public class Offence {
     private String verdictDescription;
 
     @Column(name = "verdict_date")
-    private java.time.LocalDateTime verdictDate;
+    private LocalDate verdictDate;
 
     @Column(name = "number_of_jurors")
     private Integer numberOfJurors;
@@ -154,15 +154,15 @@ public class Offence {
         return legislation;
     }
 
-    public java.time.LocalDate getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public java.time.LocalDate getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public java.time.LocalDate getConvictionDate() {
+    public LocalDate getConvictionDate() {
         return convictionDate;
     }
 
@@ -171,11 +171,11 @@ public class Offence {
         return pleaId;
     }
 
-    public LocalDateTime getPleaDate() {
+    public LocalDate getPleaDate() {
         return pleaDate;
     }
 
-    public void setPleaDate(final LocalDateTime pleaDate) {
+    public void setPleaDate(final LocalDate pleaDate) {
         this.pleaDate = pleaDate;
     }
 
@@ -187,7 +187,7 @@ public class Offence {
         this.pleaValue = pleaValue;
     }
 
-    public java.util.UUID getVerdictId() {
+    public UUID getVerdictId() {
         return verdictId;
     }
 
@@ -203,7 +203,7 @@ public class Offence {
         return verdictDescription;
     }
 
-    public java.time.LocalDateTime getVerdictDate() {
+    public LocalDate getVerdictDate() {
         return verdictDate;
     }
 
@@ -223,7 +223,46 @@ public class Offence {
         return defendantId;
     }
 
+    public void setVerdictId(UUID verdictId) {
+        this.verdictId = verdictId;
+    }
+
+    public void setVerdictCode(String verdictCode) {
+        this.verdictCode = verdictCode;
+    }
+
+    public void setVerdictCategory(String verdictCategory) {
+        this.verdictCategory = verdictCategory;
+    }
+
+    public void setVerdictDescription(String verdictDescription) {
+        this.verdictDescription = verdictDescription;
+    }
+
+    public void setVerdictDate(LocalDate verdictDate) {
+        this.verdictDate = verdictDate;
+    }
+
+    public void setNumberOfJurors(Integer numberOfJurors) {
+        this.numberOfJurors = numberOfJurors;
+    }
+
+    public void setNumberOfSplitJurors(Integer numberOfSplitJurors) {
+        this.numberOfSplitJurors = numberOfSplitJurors;
+    }
+
+    public void setUnanimous(Boolean unanimous) {
+        this.unanimous = unanimous;
+    }
+
+    public void setConvictionDate(LocalDate convictionDate) {
+        this.convictionDate = convictionDate;
+    }
+
     public static class Builder {
+
+        protected Builder() {
+        }
 
         private HearingSnapshotKey id;
 
@@ -235,27 +274,24 @@ public class Offence {
 
         private String wording;
 
-        protected Builder() {
-        }
+        private String title;
 
-        public String title;
+        private String legislation;
 
-        public String legislation;
+        private LocalDate startDate;
 
-        private java.time.LocalDate startDate;
+        private LocalDate endDate;
 
-        private java.time.LocalDate endDate;
-
-        private java.time.LocalDate convictionDate;
+        private LocalDate convictionDate;
 
         @Deprecated //TODO: GPE-3267: sanitise
         public UUID pleaId;
 
-        public LocalDateTime pleaDate;
+        private LocalDate pleaDate;
 
-        public String pleaValue;
+        private String pleaValue;
 
-        private java.util.UUID verdictId;
+        private UUID verdictId;
 
         private String verdictCode;
 
@@ -263,13 +299,13 @@ public class Offence {
 
         private String verdictDescription;
 
-        private java.time.LocalDateTime verdictDate;
+        private LocalDate verdictDate;
 
-        public Integer numberOfJurors;
+        private Integer numberOfJurors;
 
-        public Integer numberOfSplitJurors;
+        private Integer numberOfSplitJurors;
 
-        public Boolean unanimous;
+        private Boolean unanimous;
 
         private Defendant defendant;
 
@@ -313,17 +349,17 @@ public class Offence {
             return this;
         }
 
-        public Builder withStartDate(final java.time.LocalDate startDate) {
+        public Builder withStartDate(final LocalDate startDate) {
             this.startDate = startDate;
             return this;
         }
 
-        public Builder withEndDate(final java.time.LocalDate endDate) {
+        public Builder withEndDate(final LocalDate endDate) {
             this.endDate = endDate;
             return this;
         }
 
-        public Builder withConvictionDate(final java.time.LocalDate convictionDate) {
+        public Builder withConvictionDate(final LocalDate convictionDate) {
             this.convictionDate = convictionDate;
             return this;
         }
@@ -334,7 +370,7 @@ public class Offence {
             return this;
         }
 
-        public Builder withPleaDate(final java.time.LocalDateTime pleaDate) {
+        public Builder withPleaDate(final LocalDate pleaDate) {
             this.pleaDate = pleaDate;
             return this;
         }
@@ -344,7 +380,7 @@ public class Offence {
             return this;
         }
 
-        public Builder withVerdictId(final java.util.UUID verdictId) {
+        public Builder withVerdictId(final UUID verdictId) {
             this.verdictId = verdictId;
             return this;
         }
@@ -364,7 +400,7 @@ public class Offence {
             return this;
         }
 
-        public Builder withVerdictDate(final java.time.LocalDateTime verdictDate) {
+        public Builder withVerdictDate(final LocalDate verdictDate) {
             this.verdictDate = verdictDate;
             return this;
         }
@@ -399,7 +435,7 @@ public class Offence {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(Object o) {
         if (this == o) {
             return true;
         }

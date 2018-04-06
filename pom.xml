@@ -38,6 +38,7 @@
         <module>hearing-performance-test</module>
         <module>hearing-notepad-parsing-service</module>
         <module>hearing-service</module>
+        <module>test-utilities</module>
     </modules>
     <build>
         <pluginManagement>

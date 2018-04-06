@@ -25,7 +25,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.convertor.DefenceCounselToDefendantMapConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ProsecutionCounselListConverter;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.DefenceCounselService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;

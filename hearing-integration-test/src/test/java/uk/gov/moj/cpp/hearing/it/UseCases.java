@@ -28,10 +28,10 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.initiateHearingCommandTemplate;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 public class UseCases {
 
@@ -57,6 +57,8 @@ public class UseCases {
 
         return initiateHearing;
     }
+
+
 
     public static InitiateHearingCommand initiateHearingMultipleDefendants(RequestSpecification requestSpec, int requiredDefendantCount) {
         Consumer<InitiateHearingCommand.Builder> consumer = builder -> {

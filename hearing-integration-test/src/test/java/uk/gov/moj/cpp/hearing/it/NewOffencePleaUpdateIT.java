@@ -15,9 +15,9 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.initiateHearingCommandTemplateWithOnlyMandatoryFields;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,7 +41,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
     @Test
     public void updateOffencePleaTest() throws Exception {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplateWithOnlyMandatoryFields().build();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final Hearing hearing = initiateHearingCommand.getHearing();
 
@@ -85,7 +85,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
-        TimeUnit.SECONDS.sleep(15);
+        TimeUnit.SECONDS.sleep(20);
         
         poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json")).until(
                 status().is(OK),

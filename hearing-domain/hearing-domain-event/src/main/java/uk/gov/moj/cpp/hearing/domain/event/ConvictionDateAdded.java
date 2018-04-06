@@ -13,7 +13,6 @@ public class ConvictionDateAdded {
     private UUID hearingId;
     private UUID caseId;
     private UUID defendantId;
-    private UUID personId;
     private UUID offenceId;
     private LocalDate convictionDate;
 
@@ -21,7 +20,6 @@ public class ConvictionDateAdded {
     public ConvictionDateAdded(@JsonProperty(value = "caseId") final UUID caseId,
                                @JsonProperty(value = "hearingId") final UUID hearingId,
                                @JsonProperty(value = "defendantId") final UUID defendantId,
-                               @JsonProperty(value = "personId") final UUID personId,
                                @JsonProperty(value = "offenceId") final UUID offenceId,
                                @JsonProperty(value = "convictionDate") final LocalDate convictionDate) {
         this.caseId = caseId;
@@ -29,7 +27,6 @@ public class ConvictionDateAdded {
         this.offenceId = offenceId;
         this.convictionDate = convictionDate;
         this.hearingId = hearingId;
-        this.personId = personId;
     }
 
     public ConvictionDateAdded() {
@@ -50,10 +47,6 @@ public class ConvictionDateAdded {
 
     public LocalDate getConvictionDate() {
         return convictionDate;
-    }
-
-    public UUID getPersonId() {
-        return personId;
     }
 
     public UUID getHearingId() {

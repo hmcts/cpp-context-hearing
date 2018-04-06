@@ -12,11 +12,9 @@ import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
-
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
@@ -26,12 +24,12 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.initiateHearingCommandTemplate;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.initiateHearingCommandTemplateWithOnlyMandatoryFields;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplateWithOnlyMandatoryFields;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.updatePleaTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 public class InitiateHearingIT extends AbstractIT {
 
@@ -142,24 +140,10 @@ public class InitiateHearingIT extends AbstractIT {
     public void initiateHearing_shouldInitiateHearing_whenThereIsAPreviousPlea() throws Exception {
 
         UUID hearingId = randomUUID();
-        UUID offenceId = randomUUID();
 
-        HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
-                .withCaseId(randomUUID())
-                .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
-                        .withId(randomUUID())
-                        .withPersonId(randomUUID())
-                        .addOffence(uk.gov.moj.cpp.hearing.command.plea.Offence.builder()
-                                .withId(offenceId)
-                                .withPlea(Plea.builder()
-                                        .withId(randomUUID())
-                                        .withPleaDate(PAST_LOCAL_DATE.next())
-                                        .withValue(STRING.next())
-                                )
-                        )
+        HearingUpdatePleaCommand updatePleaCommand = updatePleaTemplate().build();
 
-                )
-                .build();
+        UUID offenceId = updatePleaCommand.getDefendants().get(0).getOffences().get(0).getId();
 
         makeCommand(requestSpec, "hearing.update-plea")
                 .withArgs(hearingId.toString())

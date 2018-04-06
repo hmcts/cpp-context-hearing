@@ -53,6 +53,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>test-utilities</artifactId>
+            <scope>test</scope>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
 
     <profiles>

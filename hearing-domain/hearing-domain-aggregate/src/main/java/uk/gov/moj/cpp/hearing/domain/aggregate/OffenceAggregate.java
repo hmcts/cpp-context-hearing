@@ -55,22 +55,6 @@ public class OffenceAggregate implements Aggregate {
                     .buildStream());
     }
 
-    public Stream<Object> updateVerdict(UUID hearingId, UUID caseId, UUID offenceId, Verdict verdict) {
-
-        return apply(Stream.of(
-                new OffenceVerdictUpdated(
-                        caseId, //TODO - offenceId is unique within case, so do we need this?
-                        hearingId,
-                        offenceId,
-                        verdict.getId(), //TODO - do we need verdictId
-                        verdict.getValue().getId(),
-                        verdict.getValue().getCategory(),
-                        verdict.getValue().getCode(),
-                        verdict.getValue().getDescription()
-                )
-        ));
-    }
-
     public OffencePleaUpdated getPlea() {
         return offencePleaUpdated;
     }

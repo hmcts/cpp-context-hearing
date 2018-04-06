@@ -3,10 +3,12 @@ package uk.gov.moj.cpp.hearing.query.view.convertor;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
+import java.time.LocalDate;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -29,7 +31,14 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Attendees;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Case;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Plea;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Value;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Verdict;
 
 public final class HearingDetailsResponseConverter implements Converter<Ahearing, HearingDetailsResponse> {
 
@@ -39,7 +48,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             return new HearingDetailsResponse();
         }
 
-        return new HearingDetailsResponse()
+        return HearingDetailsResponse.builder()
                 .withHearingId(source.getId().toString())
                 .withStartDate(toDateStringOrNull(source.getStartDateTime()))
                 .withStartTime(toTimeStringOrNull(source.getStartDateTime()))
@@ -50,29 +59,30 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 .withRoomId(toStringOrNull(source.getRoomId()))
                 .withCourtCentreId(toStringOrNull(source.getCourtCentreId()))
                 .withAttendees(new AttendeesConverter().convert(source.getAttendees()))
-                .withCases(new CasesConverter().convert(source));
+                .withCases(new CasesConverter().convert(source))
+                .build();
     }
 
     // Private methods
     //-----------------------------------------------------------------------
     private static String toStringOrNull(final Object source) {
-        return Optional.ofNullable(source).map(Object::toString).orElse(null);
+        return ofNullable(source).map(Object::toString).orElse(null);
     }
 
     private static String toTimeStringOrNull(final Temporal source) {
-        return Optional.ofNullable(source).map(ISO_LOCAL_TIME::format).orElse(null);
+        return ofNullable(source).map(ISO_LOCAL_TIME::format).orElse(null);
     }
 
     private static String toDateStringOrNull(final Temporal source) {
-        return Optional.ofNullable(source).map(ISO_LOCAL_DATE::format).orElse(null);
+        return ofNullable(source).map(ISO_LOCAL_DATE::format).orElse(null);
     }
 
     // JudgeConverter
     //-----------------------------------------------------------------------
-    private static final class JudgeConverter implements Converter<List<Attendee>, HearingDetailsResponse.Judge> {
+    private static final class JudgeConverter implements Converter<List<Attendee>, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge> {
 
         @Override
-        public HearingDetailsResponse.Judge convert(final List<Attendee> source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge convert(final List<Attendee> source) {
             if (isEmpty(source)) {
                 return null;
             }
@@ -82,24 +92,25 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 return null;
             }
 
-            return new HearingDetailsResponse.Judge()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge.builder()
                     .withId(judge.get().getId().getId().toString())
                     .withTitle(judge.get().getTitle())
                     .withFirstName(judge.get().getFirstName())
-                    .withLastName(judge.get().getLastName());
+                    .withLastName(judge.get().getLastName())
+                    .build();
         }
     }
 
     // AttendeesConverter
     //-----------------------------------------------------------------------
-    private static final class AttendeesConverter implements Converter<List<Attendee>, HearingDetailsResponse.Attendees> {
+    private static final class AttendeesConverter implements Converter<List<Attendee>, Attendees> {
 
         @Override
-        public HearingDetailsResponse.Attendees convert(final List<Attendee> source) {
+        public Attendees convert(final List<Attendee> source) {
             if (isEmpty(source)) {
                 return null;
             }
-            return new HearingDetailsResponse.Attendees()
+            return Attendees.builder()
                     .withProsecutionCounsels(source.stream()
                             .filter(p -> p instanceof ProsecutionAdvocate)
                             .map(p -> new ProsecutionCounselConverter().convert((ProsecutionAdvocate) p))
@@ -107,52 +118,55 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withDefenceCounsels(source.stream()
                             .filter(d -> d instanceof DefenceAdvocate)
                             .map(d -> new DefenseCounselConverter().convert((DefenceAdvocate) d))
-                            .collect(toList()));
+                            .collect(toList()))
+                    .build();
         }
     }
 
     // ProsecutionCounselConverter
     //-----------------------------------------------------------------------
-    private static final class ProsecutionCounselConverter implements Converter<ProsecutionAdvocate, HearingDetailsResponse.ProsecutionCounsel> {
+    private static final class ProsecutionCounselConverter implements Converter<ProsecutionAdvocate, ProsecutionCounsel> {
 
         @Override
-        public HearingDetailsResponse.ProsecutionCounsel convert(final ProsecutionAdvocate source) {
+        public ProsecutionCounsel convert(final ProsecutionAdvocate source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return new HearingDetailsResponse.ProsecutionCounsel()
+            return ProsecutionCounsel.builder()
                     .withAttendeeId(source.getId().getId().toString())
                     .withStatus(source.getStatus())
                     .withTitle(source.getTitle())
                     .withFirstName(source.getFirstName())
-                    .withLastName(source.getLastName());
+                    .withLastName(source.getLastName())
+                    .build();
         }
     }
 
     // DefenseCounselConverter
     //-----------------------------------------------------------------------
-    private static final class DefenseCounselConverter implements Converter<DefenceAdvocate, HearingDetailsResponse.DefenceCounsel> {
+    private static final class DefenseCounselConverter implements Converter<DefenceAdvocate, DefenceCounsel> {
 
         @Override
-        public HearingDetailsResponse.DefenceCounsel convert(final DefenceAdvocate source) {
+        public DefenceCounsel convert(final DefenceAdvocate source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return new HearingDetailsResponse.DefenceCounsel()
+            return DefenceCounsel.builder()
                     .withAttendeeId(source.getId().getId().toString())
                     .withStatus(source.getStatus())
                     .withTitle(source.getTitle())
                     .withFirstName(source.getFirstName())
-                    .withLastName(source.getLastName());
+                    .withLastName(source.getLastName())
+                    .build();
         }
     }
 
     // CasesConverter
     //-----------------------------------------------------------------------
-    private static final class CasesConverter implements Converter<Ahearing, List<HearingDetailsResponse.Case>> {
+    private static final class CasesConverter implements Converter<Ahearing, List<Case>> {
 
         @Override
-        public List<HearingDetailsResponse.Case> convert(final Ahearing source) {
+        public List<Case> convert(final Ahearing source) {
             if (null == source || null == source.getId() || isEmpty(source.getDefendants())) {
                 return emptyList();
             }
@@ -193,31 +207,32 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
     // CasesConverter
     //-----------------------------------------------------------------------
-    private static final class CaseConverter implements Converter<Entry<LegalCase, Map<Defendant, List<Offence>>>, HearingDetailsResponse.Case> {
+    private static final class CaseConverter implements Converter<Entry<LegalCase, Map<Defendant, List<Offence>>>, Case> {
 
         @Override
-        public HearingDetailsResponse.Case convert(final Entry<LegalCase, Map<Defendant, List<Offence>>> source) {
+        public Case convert(final Entry<LegalCase, Map<Defendant, List<Offence>>> source) {
             if (null == source || null == source.getKey()) {
                 return null;
             }
 
             final LegalCase legalCase = source.getKey();
 
-            return new HearingDetailsResponse.Case()
+            return Case.builder()
                     .withCaseId(legalCase.getId().toString())
                     .withCaseUrn(legalCase.getCaseurn())
                     .withDefendants(source.getValue().entrySet().stream()
                             .map(e -> new DefendantConverter().convert(e))
-                            .collect(toList()));
+                            .collect(toList()))
+                    .build();
         }
     }
 
     // DefendantConverter
     //-----------------------------------------------------------------------
-    private static final class DefendantConverter implements Converter<Entry<Defendant, List<Offence>>, HearingDetailsResponse.Defendant> {
+    private static final class DefendantConverter implements Converter<Entry<Defendant, List<Offence>>, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant> {
 
         @Override
-        public HearingDetailsResponse.Defendant convert(final Entry<Defendant, List<Offence>> source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant convert(final Entry<Defendant, List<Offence>> source) {
             if (null == source || null == source.getKey()) {
                 return null;
             }
@@ -228,7 +243,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 return null;
             }
 
-            return new HearingDetailsResponse.Defendant()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant.builder()
                     .withDefendantId(defendant.getId().getId().toString())
                     .withPersonId(toStringOrNull(defendant.getPersonId()))
                     .withFirstName(defendant.getFirstName())
@@ -241,16 +256,17 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withDateOfBirth(toDateStringOrNull(defendant.getDateOfBirth()))
                     .withOffences(source.getValue().stream()
                             .map(o -> new OffenceConverter().convert(o))
-                            .collect(toList()));
+                            .collect(toList()))
+                    .build();
         }
     }
 
     // AddressConverter
     //-----------------------------------------------------------------------
-    private static final class AddressConverter implements Converter<Address, HearingDetailsResponse.Address> {
+    private static final class AddressConverter implements Converter<Address, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address> {
 
         @Override
-        public HearingDetailsResponse.Address convert(final Address source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address convert(final Address source) {
             if (null == source) {
                 return null;
             }
@@ -261,93 +277,99 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             final String address4 = source.getAddress4();
             final String postCode = source.getPostCode();
 
-            return new HearingDetailsResponse.Address()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address.builder()
                     .withAddress1(address1)
                     .withAddress2(address2)
                     .withAddress3(address3)
                     .withAddress4(address4)
                     .withPostCode(postCode)
-                    .withformattedAddress(Stream.of(address1, address2, address3, address4, postCode)
+                    .withFormattedAddress(Stream.of(address1, address2, address3, address4, postCode)
                             .filter(Objects::nonNull)
-                            .collect(Collectors.joining(" ")));
+                            .collect(Collectors.joining(" ")))
+                    .build();
         }
     }
 
     // OffenceConverter
     //-----------------------------------------------------------------------
-    private static final class OffenceConverter implements Converter<Offence, HearingDetailsResponse.Offence> {
+    private static final class OffenceConverter implements Converter<Offence, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence> {
 
         @Override
-        public HearingDetailsResponse.Offence convert(final Offence source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return new HearingDetailsResponse.Offence()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence.builder()
                     .withId(source.getId().getId().toString())
                     .withWording(source.getWording())
                     .withCount(source.getCount())
                     .withTitle(source.getTitle())
                     .withLegislation(source.getLegislation())
                     .withPlea(new PleaConveter().convert(source))
-                    .withVerdict(new VerdictConveter().convert(source));
+                    .withVerdict(new VerdictConveter().convert(source))
+                    .withConvictionDate(ofNullable(source.getConvictionDate()).map(LocalDate::toString).orElse(null))
+                    .build();
         }
     }
 
     // PleaConveter
     //-----------------------------------------------------------------------
-    private static final class PleaConveter implements Converter<Offence, HearingDetailsResponse.Plea> {
+    private static final class PleaConveter implements Converter<Offence, Plea> {
 
         @Override
-        public HearingDetailsResponse.Plea convert(final Offence source) {
+        public Plea convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return new HearingDetailsResponse.Plea()
+
+            return Plea.builder()
                     .withPleaId(toStringOrNull(source.getPleaId()))
                     .withPleaDate(toDateStringOrNull(source.getPleaDate()))
-                    .withValue(source.getPleaValue());
+                    .withValue(source.getPleaValue())
+                    .build();
         }
     }
 
     // VerdictConveter
     //-----------------------------------------------------------------------
-    private static final class VerdictConveter implements Converter<Offence, HearingDetailsResponse.Verdict> {
+    private static final class VerdictConveter implements Converter<Offence, Verdict> {
 
         @Override
-        public HearingDetailsResponse.Verdict convert(final Offence source) {
+        public Verdict convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
             if (null == source.getVerdictId()) {
                 return null;
             }
-            return new HearingDetailsResponse.Verdict()
+            return Verdict.builder()
                     .withVerdictId(source.getVerdictId().toString())
                     .withVerdictDate(toDateStringOrNull(source.getVerdictDate()))
                     .withNumberOfJurors(source.getNumberOfJurors())
                     .withNumberOfSplitJurors(source.getNumberOfSplitJurors())
                     .withUnanimous(source.getUnanimous())
-                    .withValue(new ValueConveter().convert(source));
+                    .withValue(new ValueConveter().convert(source))
+                    .build();
         }
     }
 
     // ValueConveter
     //-----------------------------------------------------------------------
-    private static final class ValueConveter implements Converter<Offence, HearingDetailsResponse.Value> {
+    private static final class ValueConveter implements Converter<Offence, Value> {
 
         @Override
-        public HearingDetailsResponse.Value convert(final Offence source) {
+        public Value convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
             if (null == source.getVerdictId()) {
                 return null;
             }
-            return new HearingDetailsResponse.Value()
-                    .withId(source.getVerdictId().toString()) /* TODO which id must be set here? */
+            return Value.builder()
                     .withCategory(source.getVerdictCategory())
                     .withCode(source.getVerdictCode())
-                    .withDescription(source.getVerdictDescription());
+                    .withDescription(source.getVerdictDescription())
+                    .build();
         }
     }
 }

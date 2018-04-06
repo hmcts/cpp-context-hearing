@@ -5,7 +5,7 @@
     "caseId": {
       "$ref": "#/definitions/uuid"
     },
-    "originHearingId": {
+    "hearingId": {
       "$ref": "#/definitions/uuid"
     },
     "offenceId": {
@@ -25,17 +25,30 @@
     },
     "description": {
       "type": "string"
+    },
+    "numberOfJurors": {
+      "type": "integer"
+    },
+    "numberOfSplitJurors": {
+      "type": "integer"
+    },
+    "unanimous": {
+      "type": "boolean"
+    },
+    "verdictDate": {
+      "type":"string"
     }
   },
   "required": [
     "caseId",
-    "originHearingId",
+    "hearingId",
     "offenceId",
     "verdictId",
     "verdictValueId",
     "category",
     "code",
-    "description"
+    "description",
+    "verdictDate"
   ],
   "definitions": {
     "uuid": {
