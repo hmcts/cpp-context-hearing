@@ -43,7 +43,7 @@ public class TestUtilities {
 
         public JsonPath waitFor() {
 
-            JsonPath message = retrieveMessage(messageConsumer);
+            JsonPath message = retrieveMessage(messageConsumer, 30000);
 
             while (message != null && !matches(message.prettify())) {
                 message = retrieveMessage(messageConsumer);

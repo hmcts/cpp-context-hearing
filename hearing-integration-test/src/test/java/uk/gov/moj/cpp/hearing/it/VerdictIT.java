@@ -9,6 +9,7 @@ import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 
 import java.text.MessageFormat;
+import java.util.concurrent.TimeUnit;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
@@ -82,7 +83,9 @@ public class VerdictIT extends AbstractIT {
         Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
 
         poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
+                        print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].id",
@@ -154,6 +157,7 @@ public class VerdictIT extends AbstractIT {
         Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
 
         poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
