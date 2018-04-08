@@ -38,7 +38,7 @@
   },
   "required": [
     "caseId",
-    "originHearingId",
+    "hearingId",
     "offenceId",
     "verdictId",
     "verdictValueId",
