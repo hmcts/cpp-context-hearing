@@ -85,9 +85,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
-        TimeUnit.SECONDS.sleep(20);
-        
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json")).until(
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json")).timeout(10, TimeUnit.SECONDS).until(
                 status().is(OK),
                 payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
                         withJsonPath("$.cases[0].caseId", is(caseId.toString())),
