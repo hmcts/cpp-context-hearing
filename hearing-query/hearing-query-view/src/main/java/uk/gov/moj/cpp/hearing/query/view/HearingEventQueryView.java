@@ -17,6 +17,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselToDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +30,7 @@ import javax.json.JsonObjectBuilder;
 public class HearingEventQueryView {
 
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
+    private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO = "hearing.get-hearing-event-definitions.v2";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
 
@@ -64,6 +66,20 @@ public class HearingEventQueryView {
 
     @Inject
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
+
+
+    @Handles("hearing.get-hearing-event-definitions.v2")
+    public JsonEnvelope getHearingEventDefinitionsVersionTwo(final JsonEnvelope query) {
+        final List<HearingEventDefinition> hearingEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
+        final JsonArrayBuilder eventDefinitionsJsonArrayBuilder = createArrayBuilder();
+
+        hearingEventDefinitions.forEach(eventDefinition -> eventDefinitionsJsonArrayBuilder.add(prepareEventDefinitionJsonObjectVersionTwo(eventDefinition)));
+
+        return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO)
+                .apply(createObjectBuilder()
+                        .add(FIELD_HEARING_EVENT_DEFINITIONS, eventDefinitionsJsonArrayBuilder)
+                        .build());
+    }
 
     @Handles("hearing.get-hearing-event-definitions")
     public JsonEnvelope getHearingEventDefinitions(final JsonEnvelope query) {
@@ -166,4 +182,35 @@ public class HearingEventQueryView {
         return eventDefinitionBuilder;
     }
 
+    private JsonObjectBuilder prepareEventDefinitionJsonObjectVersionTwo( final HearingEventDefinition eventDefinition) {
+        final JsonObjectBuilder eventDefinitionBuilder = createObjectBuilder();
+
+        if (eventDefinition.getCaseAttribute() != null) {
+            JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
+            Arrays.asList(eventDefinition.getCaseAttribute().split(",")).forEach(caseAttribute-> jsonArrayBuilder.add(caseAttribute.trim()));
+            eventDefinitionBuilder.add(FIELD_CASE_ATTRIBUTES, jsonArrayBuilder.build());
+        }
+
+        if (eventDefinition.getGroupLabel() != null) {
+            eventDefinitionBuilder.add(FIELD_GROUP_LABEL, eventDefinition.getGroupLabel());
+        }
+
+        if (eventDefinition.getActionLabelExtension() != null) {
+            eventDefinitionBuilder.add(FIELD_ACTION_LABEL_EXT, eventDefinition.getActionLabelExtension());
+        }
+
+        if (eventDefinition.getSequenceNumber() != null) {
+            eventDefinitionBuilder.add(FIELD_SEQUENCE, createObjectBuilder()
+                    .add(FIELD_GENERIC_ID, eventDefinition.getSequenceNumber())
+                    .add(FIELD_SEQUENCE_TYPE, eventDefinition.getSequenceType())
+            );
+        }
+
+        eventDefinitionBuilder
+                .add(FIELD_GENERIC_ID, eventDefinition.getId().toString())
+                .add(FIELD_ACTION_LABEL, eventDefinition.getActionLabel())
+                .add(FIELD_RECORDED_LABEL, eventDefinition.getRecordedLabel())
+                .add(FIELD_ALTERABLE, eventDefinition.isAlterable());
+        return eventDefinitionBuilder;
+    }
 }

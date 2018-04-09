@@ -54,6 +54,11 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.get-hearing-event-definitions.v2")
+    public JsonEnvelope getHearingEventDefinitionsVersionTwo(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
     @Handles("hearing.get-hearing-event-definition")
     public JsonEnvelope getHearingEventDefinition(final JsonEnvelope query) {
         return this.requester.request(query);

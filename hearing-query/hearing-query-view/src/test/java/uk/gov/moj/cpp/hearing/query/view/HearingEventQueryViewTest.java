@@ -54,6 +54,7 @@ public class HearingEventQueryViewTest {
 
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
+    private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO = "hearing.get-hearing-event-definitions.v2";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
 
     private static final String FIELD_HEARING_ID = "hearingId";
@@ -337,6 +338,130 @@ public class HearingEventQueryViewTest {
         ));
     }
 
+    @Test
+    public void shouldGetAllHearingEventDefinitionsVersionTwoWhichDoNotHaveCaseAttributes() {
+        when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithoutCaseAttributes());
+
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
+                .build());
+
+        final JsonEnvelope actualHearingEventDefinitions = hearingEventQueryView.getHearingEventDefinitionsVersionTwo(query);
+
+        assertThat(actualHearingEventDefinitions, is(jsonEnvelope(
+                withMetadataEnvelopedFrom(query)
+                        .withName(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(2)),
+
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(HEARING_EVENT_DEFINITION_ID.toString())),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL)),
+                        withJsonPath(format("$.%s[0].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_GENERIC_ID), is(SEQUENCE)),
+                        withJsonPath(format("$.%s[0].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_SEQUENCE_TYPE), is(GROUP_TYPE)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE)),
+
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(HEARING_EVENT_DEFINITION_ID_2.toString())),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2)),
+                        withJsonPath(format("$.%s[1].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_GENERIC_ID), is(SEQUENCE_2)),
+                        withJsonPath(format("$.%s[1].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_SEQUENCE_TYPE), is(GROUP_TYPE)),
+                        withoutJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                        withoutJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
+                        withoutJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_2))
+                ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldGetAllHearingEventDefinitionsVersionTwoWithCaseAttributes() {
+        when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithCaseAttributes());
+
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
+                .build());
+
+        final JsonEnvelope actualHearingEventDefinitions = hearingEventQueryView.getHearingEventDefinitionsVersionTwo(query);
+
+        assertThat(actualHearingEventDefinitions, is(jsonEnvelope(
+                withMetadataEnvelopedFrom(query)
+                        .withName(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(2)),
+
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(HEARING_EVENT_DEFINITION_ID.toString())),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL)),
+                        withJsonPath(format("$.%s[0].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_GENERIC_ID), is(SEQUENCE)),
+                        withJsonPath(format("$.%s[0].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_SEQUENCE_TYPE), is(GROUP_TYPE)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE)),
+
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(HEARING_EVENT_DEFINITION_ID_2.toString())),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2)),
+                        withJsonPath(format("$.%s[1].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_GENERIC_ID), is(SEQUENCE_2)),
+                        withJsonPath(format("$.%s[1].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_SEQUENCE_TYPE), is(GROUP_TYPE)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES), hasSize(2)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), is(GROUP_LABEL)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION), is(ACTION_LABEL_EXTENSION)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_2))
+                ))).thatMatchesSchema()
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingEventDefinitionsVersionTwoWithOutOfSequenceEvents() {
+        when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithOutOfSequenceEvent());
+
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
+                .build());
+
+        final JsonEnvelope actualHearingEventDefinitions = hearingEventQueryView.getHearingEventDefinitionsVersionTwo(query);
+
+        assertThat(actualHearingEventDefinitions, is(jsonEnvelope(
+                withMetadataEnvelopedFrom(query)
+                        .withName(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO),
+                payloadIsJson(allOf(
+                        withJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(3)),
+
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(HEARING_EVENT_DEFINITION_ID.toString())),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL)),
+                        withJsonPath(format("$.%s[0].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_GENERIC_ID), is(SEQUENCE)),
+                        withJsonPath(format("$.%s[0].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_SEQUENCE_TYPE), is(GROUP_TYPE)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
+                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE)),
+
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(HEARING_EVENT_DEFINITION_ID_2.toString())),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2)),
+                        withJsonPath(format("$.%s[1].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_GENERIC_ID), is(SEQUENCE_2)),
+                        withJsonPath(format("$.%s[1].%s.%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE, FIELD_SEQUENCE_TYPE), is(GROUP_TYPE)),
+                        withoutJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                        withoutJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
+                        withoutJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION)),
+                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_2)),
+
+                        withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(HEARING_EVENT_DEFINITION_ID_3.toString())),
+                        withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_3)),
+                        withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_3)),
+                        withoutJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE)),
+                        withoutJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                        withoutJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
+                        withoutJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION)),
+                        withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_3))
+                ))).thatMatchesSchema()
+        ));
+    }
+
+
     private HearingEventDefinition prepareHearingEventDefinition() {
         return new HearingEventDefinition(HEARING_EVENT_DEFINITION_ID, RECORDED_LABEL, ACTION_LABEL, SEQUENCE, GROUP_TYPE, null, null, null, ALTERABLE);
     }
@@ -362,6 +487,7 @@ public class HearingEventQueryViewTest {
                 new HearingEventDefinition(HEARING_EVENT_DEFINITION_ID_2, RECORDED_LABEL_2, ACTION_LABEL_2, SEQUENCE_2, GROUP_TYPE, CASE_ATTRIBUTES.stream().collect(joining(",")), GROUP_LABEL, ACTION_LABEL_EXTENSION, ALTERABLE_2)
         );
     }
+
 
     private List<HearingEventDefinition> hearingEventDefinitionsWithOutOfSequenceEvent() {
         return newArrayList(

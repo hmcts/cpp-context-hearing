@@ -28,5 +28,5 @@ public interface HearingEventDefinitionRepository extends EntityRepository<Heari
     List<HearingEventDefinition> findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
 
     @Query(value = "from HearingEventDefinition hed where hed.deleted is false")
-    List<HearingEventDefinition> findAllActive();
+    List<HearingEventDefinition>    findAllActive();
 }

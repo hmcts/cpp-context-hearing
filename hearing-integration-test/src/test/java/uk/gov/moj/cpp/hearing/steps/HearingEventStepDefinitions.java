@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.steps;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static org.hamcrest.Matchers.greaterThan;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static com.jayway.restassured.RestAssured.given;
@@ -49,8 +50,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
     private static final String MEDIA_TYPE_CREATE_EVENT_LOG = "application/vnd.hearing.log-hearing-event+json";
     private static final String MEDIA_TYPE_CREATE_EVENT_DEFINITIONS = "application/vnd.hearing.create-hearing-event-definitions+json";
-    private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions+json";
-    private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITION = "application/vnd.hearing.hearing-event-definition+json";
+    private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions.v2+json";
 
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
@@ -154,7 +154,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
         assertThat(response.getStatusCode(), equalTo(SC_ACCEPTED));
 
-        final String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl(randomUUID());
+        final String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl();
         poll(requestParams(queryEventDefinitionsUrl, MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
                 .until(
                         status().is(OK),
@@ -166,11 +166,8 @@ public class HearingEventStepDefinitions extends AbstractIT {
         return hearingEventDefinitions;
     }
 
-    public static void whenHearingEventDefinitionsAreUpdated(final HearingEventDefinitionData hearingEventDefinitions) {
-        andHearingEventDefinitionsAreAvailable(hearingEventDefinitions);
-    }
 
-    public static void thenHearingEventDefinitionsAreRecorded(final UUID hearingId, final HearingEventDefinitionData hearingEventDefinitions) {
+    public static void thenHearingEventDefinitionsAreRecorded( final HearingEventDefinitionData hearingEventDefinitions) {
         final List<HearingEventDefinition> eventDefinitions = newArrayList(hearingEventDefinitions.getEventDefinitions());
 
         sortBasedOnSequenceTypeSequenceAndActionLabel(eventDefinitions);
@@ -187,7 +184,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
                     conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].alterable", index), equalTo(eventDefinition.isAlterable())));
 
                     if (eventDefinition.getCaseAttribute() != null) {
-                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].caseAttributes", index), hasSize(0)));
+                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].caseAttributes", index), hasSize(greaterThan(0))));
                     } else {
                         conditionsOnJson.add(withoutJsonPath(format("$.eventDefinitions[%s].caseAttributes", index)));
                     }
@@ -213,52 +210,14 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
                 });
 
-        poll(requestParams(getQueryEventDefinitionsUrl(hearingId), MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
+        poll(requestParams(getQueryEventDefinitionsUrl(), MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(conditionsOnJson))
                 );
     }
 
-    public static void thenHearingEventDefinitionIsStillAvailable(final HearingEventDefinition hearingEventDefinition) {
-        final List<Matcher<? super ReadContext>> conditionsOnJson = new ArrayList<>();
-        conditionsOnJson.add(withJsonPath("$.id", equalTo(hearingEventDefinition.getId().toString())));
-        conditionsOnJson.add(withJsonPath("$.actionLabel", equalTo(hearingEventDefinition.getActionLabel())));
-        conditionsOnJson.add(withJsonPath("$.recordedLabel", equalTo(hearingEventDefinition.getRecordedLabel())));
-        conditionsOnJson.add(withJsonPath("$.alterable", equalTo(hearingEventDefinition.isAlterable())));
 
-        if (hearingEventDefinition.getCaseAttribute() != null) {
-            conditionsOnJson.add(withJsonPath("$.caseAttributes", hasSize(0)));
-        } else {
-            conditionsOnJson.add(withoutJsonPath("$.caseAttributes"));
-        }
-
-        if (hearingEventDefinition.getSequence() != null) {
-            conditionsOnJson.add(withJsonPath("$.sequence.id", equalTo(hearingEventDefinition.getSequence())));
-            conditionsOnJson.add(withJsonPath("$.sequence.type", equalTo(hearingEventDefinition.getSequenceType())));
-        } else {
-            conditionsOnJson.add(withoutJsonPath("$.sequence"));
-        }
-
-        if (hearingEventDefinition.getGroupLabel() != null) {
-            conditionsOnJson.add(withJsonPath("$.groupLabel", equalTo(hearingEventDefinition.getGroupLabel())));
-        } else {
-            conditionsOnJson.add(withoutJsonPath("$.groupLabel"));
-        }
-
-        if (hearingEventDefinition.getActionLabelExtension() != null) {
-            conditionsOnJson.add(withJsonPath("$.actionLabelExtension", equalTo(hearingEventDefinition.getActionLabelExtension())));
-        } else {
-            conditionsOnJson.add(withoutJsonPath("$.actionLabelExtension"));
-        }
-
-        poll(requestParams(getQueryEventDefinitionUrl(randomUUID(), hearingEventDefinition.getId()), MEDIA_TYPE_QUERY_EVENT_DEFINITION).withHeader(USER_ID, getLoggedInUser()))
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(conditionsOnJson))
-                );
-
-    }
 
     private static void sortBasedOnSequenceTypeSequenceAndActionLabel(final List<HearingEventDefinition> eventDefinitions) {
         eventDefinitions.sort((ed1, ed2) -> ComparisonChain.start()
@@ -268,19 +227,13 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 .result());
     }
 
-    private static String getQueryEventLogUrl(final UUID hearingId) {
-        final String queryEventLogEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"), hearingId);
-        return format("%s/%s", getBaseUri(), queryEventLogEndPoint);
-    }
 
-    private static String getQueryEventDefinitionsUrl(final UUID hearingId) {
-        final String queryEventDefinitionsEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-definitions"), hearingId);
+
+    private static String getQueryEventDefinitionsUrl() {
+        final String queryEventDefinitionsEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-definitions.v2");
         return format("%s/%s", getBaseUri(), queryEventDefinitionsEndPoint);
     }
 
-    private static String getQueryEventDefinitionUrl(final UUID hearingId, final UUID hearingEventDefinitionId) {
-        final String queryEventDefinitionsEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-definition"), hearingId, hearingEventDefinitionId);
-        return format("%s/%s", getBaseUri(), queryEventDefinitionsEndPoint);
-    }
+
 
 }
