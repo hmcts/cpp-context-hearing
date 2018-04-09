@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class StringToResultPromptSynonymConverterTest {
     @Test
-    public void convert() throws Exception {
+    public void convert() {
         assertThat(new StringToResultPromptSynonymConverter().convert("ddd") == null, is(true));
     }
 }

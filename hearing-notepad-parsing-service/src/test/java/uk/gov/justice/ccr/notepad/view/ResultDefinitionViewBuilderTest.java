@@ -215,7 +215,7 @@ public class ResultDefinitionViewBuilderTest {
                 , containsInAnyOrder(Arrays.asList(true, UNRESOLVED, BOOLEAN).toArray()));
         ResultChoice resultChoice = p1.getResultChoices().stream().filter(v -> v.getLevel().equals("O")).findFirst().get();
         assertThat(Arrays.asList(p1.getValue(), p1.getState(), p1.getResultChoices().size(), resultChoice.getCode().length(), resultChoice.getLabel().length() > 0, resultChoice.getType() != null)
-                , containsInAnyOrder(Arrays.asList("alc", UNRESOLVED, 5, 36, true, true).toArray()));
+                , containsInAnyOrder(Arrays.asList("alc", UNRESOLVED, 7, 36, true, true).toArray()));
         assertThat(Arrays.asList(p2.getValue(), p2.getState(), p2.getResultChoices().size())
                 , containsInAnyOrder(Arrays.asList("req", UNRESOLVED, 11).toArray()));
         assertThat(Arrays.asList(p4.getValue(), p4.getState(), p4.getType())
@@ -244,7 +244,7 @@ public class ResultDefinitionViewBuilderTest {
                 , is(1)
         );
         assertThat(Arrays.asList(p1.getValue(), p1.getState(), p1.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("Curfew", UNRESOLVED, 7).toArray()));
+                , containsInAnyOrder(Arrays.asList("Curfew", UNRESOLVED, 5).toArray()));
 
     }
 
@@ -269,14 +269,13 @@ public class ResultDefinitionViewBuilderTest {
                 , is(4)
         );
         assertThat(Arrays.asList(p1.getValue(), p1.getState(), p1.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("resTr", UNRESOLVED, 2).toArray()));
+                , containsInAnyOrder(Arrays.asList("resTr", UNRESOLVED, 4).toArray()));
         assertThat(Arrays.asList(p2.getValue(), p2.getState(), p2.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("Ord", UNRESOLVED, 15).toArray()));
+                , containsInAnyOrder(Arrays.asList("Ord", UNRESOLVED, 38).toArray()));
         assertThat(Arrays.asList(p3.getValue(), p3.getState(), p3.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("prd", UNRESOLVED, 10).toArray()));
+                , containsInAnyOrder(Arrays.asList("prd", UNRESOLVED, 19).toArray()));
         assertThat(Arrays.asList(p4.getValue(), p4.getState(), p4.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("Fur", UNRESOLVED, 2).toArray()));
-
+                , containsInAnyOrder(Arrays.asList("Fur", UNRESOLVED, 8).toArray()));
     }
 
     @Test

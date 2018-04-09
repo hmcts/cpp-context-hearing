@@ -2,6 +2,7 @@ package uk.gov.justice.ccr.notepad.result.cache;
 
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.stream.Collectors.toList;
 
@@ -15,7 +16,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,7 +28,6 @@ import javax.inject.Named;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +35,7 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class ResultCache {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(ResultCache.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultCache.class);
 
     private static final String RESULT_DEFINITION_KEY = "resultDefinitionKey";
     private static final String RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY = "resultDefinitionsGroupByKeywordKey";
@@ -56,7 +54,7 @@ public class ResultCache {
             .maximumSize(10)
             .build(new CacheLoader<String, Object>() {
                 @Override
-                public Object load(String key) throws Exception {
+                public Object load(String key) {
                     return null;
                 }
             });
@@ -80,9 +78,7 @@ public class ResultCache {
 
         addValueToCache(RESULT_DEFINITION_KEY, resultLoader.loadResultDefinition());
 
-        Map<String, List<Long>> resultDefinitionsIndexByKeyWord = getResultDefinitionsIndexByKeywords();
-
-        addValueToCache(RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY, resultDefinitionsIndexByKeyWord);
+        addValueToCache(RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY, getResultDefinitionsIndexByKeywords());
 
         addValueToCache(RESULT_DEFINITION_SYNONYM_KEY, resultLoader.loadResultDefinitionSynonym());
 
@@ -90,10 +86,7 @@ public class ResultCache {
 
         addValueToCache(RESULT_PROMPT_SYNONYM_KEY, resultLoader.loadResultPromptSynonym());
 
-        Map<String, List<Long>> resultPromptsIndexByKeyWord = getPromptsIndexByKeyword();
-
-        addValueToCache(RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY, resultPromptsIndexByKeyWord);
-
+        addValueToCache(RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY, getPromptsIndexByKeyword());
     }
 
     private void addValueToCache(final String key, final Object value) {
@@ -102,14 +95,14 @@ public class ResultCache {
     }
 
     private Map<String, List<Long>> getPromptsIndexByKeyword() throws ExecutionException {
-        Map<String, List<Long>> resultPromptsIndexByKeyWord = Maps.newHashMap();
+        Map<String, List<Long>> resultPromptsIndexByKeyWord = newHashMap();
         AtomicLong indexPromptIncrementer = new AtomicLong();
         getCachedResultPrompt()
                 .forEach((ResultPrompt resultPrompt) -> {
                     long index = indexPromptIncrementer.getAndIncrement();
                     resultPrompt.getKeywords().stream().filter(v -> !v.isEmpty()).forEach(word -> {
-                        resultPromptsIndexByKeyWord.putIfAbsent(word, newArrayList());
-                        resultPromptsIndexByKeyWord.computeIfPresent(word, (s, l) -> {
+                        resultPromptsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
+                        resultPromptsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (s, l) -> {
                             l.add(index);
                             return l;
                         });
@@ -120,14 +113,14 @@ public class ResultCache {
     }
 
     private Map<String, List<Long>> getResultDefinitionsIndexByKeywords() throws ExecutionException {
-        Map<String, List<Long>> resultDefinitionsIndexByKeyWord = Maps.newHashMap();
+        Map<String, List<Long>> resultDefinitionsIndexByKeyWord = newHashMap();
         AtomicLong indexIncrementer = new AtomicLong();
-        getCachedResultDefinition()
+        getCachedResultDefinitions()
                 .forEach((ResultDefinition resultDefinition) -> {
                     long index = indexIncrementer.getAndIncrement();
                     resultDefinition.getKeywords().forEach(word -> {
-                        resultDefinitionsIndexByKeyWord.putIfAbsent(word, newArrayList());
-                        resultDefinitionsIndexByKeyWord.computeIfPresent(word, (s, resultDefinitions) -> {
+                        resultDefinitionsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
+                        resultDefinitionsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (s, resultDefinitions) -> {
                             resultDefinitions.add(index);
                             return resultDefinitions;
                         });
@@ -137,8 +130,8 @@ public class ResultCache {
         return resultDefinitionsIndexByKeyWord;
     }
 
-    public List<ResultDefinition> getResultDefinition() throws ExecutionException {
-        return getCachedResultDefinition();
+    public List<ResultDefinition> getResultDefinitions() throws ExecutionException {
+        return getCachedResultDefinitions();
     }
 
     public Map<String, List<Long>> getResultDefinitionsIndexGroupByKeyword() throws ExecutionException {
@@ -151,7 +144,7 @@ public class ResultCache {
 
     public List<ResultDefinitionSynonym> getResultDefinitionSynonym() throws ExecutionException {
         Set<String> allKeyWords = newHashSet();
-        getResultDefinition().stream().map(ResultDefinition::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
+        getResultDefinitions().stream().map(ResultDefinition::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
         List<ResultDefinitionSynonym> resultDefinitionKeyWordsSynonyms =
                 allKeyWords.stream().map(s -> {
                     ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
@@ -169,8 +162,10 @@ public class ResultCache {
     }
 
     public List<ResultPrompt> getResultPromptByResultDefinitionId(final String resultDefinitionId) throws ExecutionException {
-        String resultDefinitionLabel = getResultDefinitionById(resultDefinitionId).get().getLabel();
-        return getResultPromptByResultDefinitionLabel(resultDefinitionLabel);
+        return getCachedResultPrompt()
+                .stream()
+                .filter(resultPrompt -> resultPrompt.getResultDefinitionId().toString().equals(resultDefinitionId))
+                .collect(toList());
     }
 
     public List<ResultPromptSynonym> getResultPromptSynonym() throws ExecutionException {
@@ -188,19 +183,7 @@ public class ResultCache {
         return resultPromptSynonyms;
     }
 
-    private Optional<ResultDefinition> getResultDefinitionById(final String resultDefinitionId) throws ExecutionException {
-        return getResultDefinition().stream()
-                .filter(resultDefinition -> resultDefinition.getId().equals(resultDefinitionId)).findFirst();
-
-    }
-
-    private List<ResultPrompt> getResultPromptByResultDefinitionLabel(final String resultDefinitionLabel) throws ExecutionException {
-        return getCachedResultPrompt().stream()
-                .filter(resultPrompt -> resultPrompt.getResultDefinitionLabel().equalsIgnoreCase(resultDefinitionLabel)).collect(toList());
-
-    }
-
-    private List<ResultDefinition> getCachedResultDefinition() throws ExecutionException {
+    private List<ResultDefinition> getCachedResultDefinitions() throws ExecutionException {
 
         return (List<ResultDefinition>) cache.get(RESULT_DEFINITION_KEY);
     }

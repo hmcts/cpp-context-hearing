@@ -111,7 +111,7 @@ public class Processor {
             promptChoice.setDurationElement(resultPrompt.getDurationElement());
             promptChoice.setLabel(resultPrompt.getLabel());
             promptChoice.setType(resultPrompt.getType());
-            promptChoice.setRequired("Y".equalsIgnoreCase(resultPrompt.getMandatory()));
+            promptChoice.setRequired(resultPrompt.isMandatory());
             promptChoice.setFixedList(resultPrompt.getFixedList());
             return promptChoice;
         }).collect(toList()));
@@ -146,7 +146,7 @@ public class Processor {
     private void getAmbiguousResultDefinition(final Knowledge knowledge, final List<String> values) throws ExecutionException {
 
         Map<String, Set<String>> matchedSynonymWords = resultDefinitionMatcher.findDefinitionExactMatchSynonyms.run(values);
-        List<ResultDefinition> resultDefinitions = resultCache.getResultDefinition();
+        List<ResultDefinition> resultDefinitions = resultCache.getResultDefinitions();
         for (Entry<String, Set<String>> entry : matchedSynonymWords.entrySet()) {
             Set<ResultChoice> resultChoices = newHashSet();
             for (String word : entry.getValue()) {

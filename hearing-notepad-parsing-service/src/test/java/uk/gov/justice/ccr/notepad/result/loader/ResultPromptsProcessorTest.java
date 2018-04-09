@@ -19,20 +19,20 @@ public class ResultPromptsProcessorTest {
     private ResultPromptsProcessor resultPromptsProcessor = new ResultPromptsProcessor(new StringToResultPromptConverter(new HashMap<> ()));
 
     @Test
-    public void shouldGroupResultPromptsByResultDefinition() throws Exception {
+    public void shouldGroupResultPromptsByResultDefinition() {
 
         //given
         List<String> lines = new ArrayList<>();
-        lines.add("Restraining order for period\tProtected person\tY\tTXT\t\tabc,xyz\tConviction / acquittal");
-        lines.add("Restraining order for period\tProtected person\tY\tTXT\t\t\t");
-        lines.add("Community order England / Wales\tEnd Date\tY\tDATE\t\t\t");
+        lines.add("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\tabc9bb61-cb5b-4cf7-be24-8866bcd2fc69\tProtected person\tY\tTXT\t\t\t\t1\t250\t\t\t\tN\t10\t\t\t\t\n");
+        lines.add("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\t3054909b-15b6-499f-b44f-67b2b1215c76\tProtected person's address\tY\tTXT\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n");
+        lines.add("6\t418b3aa7-65ab-4a4a-bab9-2f96b698118c\tCommunity order England / Wales\td6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9\tEnd Date\tY\tDATE\t\t\t\t\t\t\t\t\tN\t\t\t\t\t");
 
         //when
         Map<String, List<ResultPrompt>> actual = resultPromptsProcessor.groupByResultDefinition(lines);
 
         //then
-        assertThat(actual.get("Restraining order for period").size(), is(2));
-        assertThat(actual.get("Community order England / Wales").size(), is(1));
+        assertThat(actual.get("b81ac80b-81a9-48b6-87b0-cc34610eec97").size(), is(2));
+        assertThat(actual.get("418b3aa7-65ab-4a4a-bab9-2f96b698118c").size(), is(1));
     }
 
     @Test

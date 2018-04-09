@@ -8,7 +8,6 @@ import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -19,12 +18,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
 
 
 public class CompareDefinitionKeywordsUsingIndexesTest {
+    
     ResultCache resultCache = new ResultCache();
     FileResultLoader fileResultLoader = new FileResultLoader();
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();

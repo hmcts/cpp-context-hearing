@@ -24,6 +24,7 @@ import org.junit.Test;
 
 
 public class ResultDefinitionMatcherTest {
+    
     ResultCache resultCache = new ResultCache();
     FileResultLoader fileResultLoader = new FileResultLoader();
     ResultDefinitionMatcher testObj = new ResultDefinitionMatcher();
@@ -175,7 +176,7 @@ public class ResultDefinitionMatcherTest {
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
-                , is(UNKNOWN)
+                , is(EQUALS)
         );
     }
 
@@ -188,7 +189,7 @@ public class ResultDefinitionMatcherTest {
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
-                , is(UNKNOWN)
+                , is(EQUALS)
         );
     }
     @Test
@@ -232,6 +233,7 @@ public class ResultDefinitionMatcherTest {
                 , is(SHORT_CODE)
         );
     }
+   
     @Ignore
     //Ignoring test case as it test synonym contains processing and we uncommented due to some reason check with BA before uncommenting
     public void match6() throws Exception {
@@ -255,8 +257,7 @@ public class ResultDefinitionMatcherTest {
     public void match7() throws Exception {
         List<Part> parts = new PartsResolver().getParts("f f f f f f f f f f f f f f f f f f f f f");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
-
-
+        
         ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
 
         assertThat(
@@ -265,7 +266,7 @@ public class ResultDefinitionMatcherTest {
         );
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
-                , is(SHORT_CODE)
+                , is(EQUALS)
         );
     }
 
@@ -289,11 +290,9 @@ public class ResultDefinitionMatcherTest {
 
         Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values);
 
-        assertThat(
-                resultDefinition.get().getLabel()
-                , is("Community order England / Wales")
-        );
+        assertThat(resultDefinition.isPresent(), is(false));
     }
+    
     @Test
     public void matchEqual5() throws Exception {
         List<Part> parts = new PartsResolver().getParts("upw");
@@ -303,9 +302,10 @@ public class ResultDefinitionMatcherTest {
 
         assertThat(
                 resultDefinition.get().getLabel()
-                , is("Community requirement: Unpaid work")
+                , is("Restraining order for period")
         );
     }
+    
     @Test
     public void matchEqual2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prdr further imp sus");
@@ -438,6 +438,4 @@ public class ResultDefinitionMatcherTest {
         );
 
     }
-
-
 }

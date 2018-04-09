@@ -3,6 +3,7 @@ package uk.gov.justice.ccr.notepad.process;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DATE;
@@ -125,30 +126,18 @@ public class ProcessorTest {
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
         Knowledge knowledge = processor.processParts(values);
-        assertThat(
-                knowledge.getResultDefinitionParts().size()
-                , is(2)
-        );
-        assertThat(
-                knowledge.getResultPromptParts().size()
-                , is(11)
-        );
+        assertThat(knowledge.getResultDefinitionParts().entrySet(), hasSize(2));
+        assertThat(knowledge.getResultPromptParts().entrySet(), hasSize(11));
     }
 
     @Test
     public void processResultDefinition4() throws Exception {
-        List<Part> parts = new PartsResolver().getParts("Spec cust conc 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
-        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        final List<Part> parts = new PartsResolver().getParts("Spec cust conc 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
+        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
         Knowledge knowledge = processor.processParts(values);
-        assertThat(
-                knowledge.getResultDefinitionParts().size()
-                , is(3)
-        );
-        assertThat(
-                knowledge.getResultPromptParts().size()
-                , is(10)
-        );
+        assertThat(knowledge.getResultDefinitionParts().entrySet(), hasSize(4));
+        assertThat(knowledge.getResultPromptParts().entrySet(), hasSize(9));
     }
 
     @Test
@@ -190,8 +179,6 @@ public class ProcessorTest {
                 knowledge.getResultPromptParts().get("30/11/1980").getType()
                 , is(DATE)
         );
-
-
     }
 
     @Test
@@ -267,8 +254,8 @@ public class ProcessorTest {
                 , is(11)
         );
         assertThat(
-                knowledge.getResultDefinitionParts().get("alc").getResultChoices().size()
-                , is(5)
+                knowledge.getResultDefinitionParts().get("alc").getResultChoices()
+                , hasSize(7)
         );
         assertThat(
                 knowledge.getResultPromptParts().get("yr").getType()
@@ -294,11 +281,7 @@ public class ProcessorTest {
 
         Knowledge knowledge = processor.processResultPrompt(processor.processParts(values).getResultDefinitionParts().get("imp").getCode());
 
-
-        assertThat(
-                knowledge.getPromptChoices().size()
-                , is(13)
-        );
+        assertThat(knowledge.getPromptChoices(), hasSize(13));
     }
 
     @Test

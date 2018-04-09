@@ -22,7 +22,7 @@ class FindDefinitionsByShortCodes implements ResultFilter<Set<ResultDefinition>,
     @Override
     public Set<ResultDefinition> run(final List<String> values) throws ExecutionException {
 
-        Map<String, ResultDefinition> filteredResult = resultCache.getResultDefinition().stream()
+        Map<String, ResultDefinition> filteredResult = resultCache.getResultDefinitions().stream()
                 .filter(v -> !v.getShortCode().isEmpty())
                 .filter(v -> values.contains(v.getShortCode()))
                 .collect(toMap(ResultDefinition::getShortCode, v -> v, (p1, p2) -> p1));

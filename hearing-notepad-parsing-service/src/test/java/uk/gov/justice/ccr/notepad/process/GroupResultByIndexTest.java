@@ -39,14 +39,14 @@ public class GroupResultByIndexTest {
 
         assertThat(
                 outPut.size()
-                , is(25)
+                , is(29)
         );
 
     }
 
 
     @Test
-    public void runWithMutipleWords() throws Exception {
+    public void runWithMultipleWords() throws Exception {
         Set<String> words = new HashSet<>(Arrays.asList("restraining", "order","period","imprisonment", "suspended"));
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words);
 
@@ -55,7 +55,7 @@ public class GroupResultByIndexTest {
 
         assertThat(
                 outPut.size()
-                , is(49)
+                , is(88)
         );
 
     }
