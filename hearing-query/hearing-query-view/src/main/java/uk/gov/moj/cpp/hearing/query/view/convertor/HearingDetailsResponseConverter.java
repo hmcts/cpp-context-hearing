@@ -48,7 +48,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             return new HearingDetailsResponse();
         }
 
-        return new HearingDetailsResponse()
+        return HearingDetailsResponse.builder()
                 .withHearingId(source.getId().toString())
                 .withStartDate(toDateStringOrNull(source.getStartDateTime()))
                 .withStartTime(toTimeStringOrNull(source.getStartDateTime()))
@@ -59,7 +59,8 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 .withRoomId(toStringOrNull(source.getRoomId()))
                 .withCourtCentreId(toStringOrNull(source.getCourtCentreId()))
                 .withAttendees(new AttendeesConverter().convert(source.getAttendees()))
-                .withCases(new CasesConverter().convert(source));
+                .withCases(new CasesConverter().convert(source))
+                .build();
     }
 
     // Private methods
@@ -91,11 +92,12 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 return null;
             }
 
-            return new uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge.builder()
                     .withId(judge.get().getId().getId().toString())
                     .withTitle(judge.get().getTitle())
                     .withFirstName(judge.get().getFirstName())
-                    .withLastName(judge.get().getLastName());
+                    .withLastName(judge.get().getLastName())
+                    .build();
         }
     }
 
@@ -108,7 +110,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (isEmpty(source)) {
                 return null;
             }
-            return new Attendees()
+            return Attendees.builder()
                     .withProsecutionCounsels(source.stream()
                             .filter(p -> p instanceof ProsecutionAdvocate)
                             .map(p -> new ProsecutionCounselConverter().convert((ProsecutionAdvocate) p))
@@ -116,7 +118,8 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withDefenceCounsels(source.stream()
                             .filter(d -> d instanceof DefenceAdvocate)
                             .map(d -> new DefenseCounselConverter().convert((DefenceAdvocate) d))
-                            .collect(toList()));
+                            .collect(toList()))
+                    .build();
         }
     }
 
@@ -129,12 +132,13 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return new ProsecutionCounsel()
+            return ProsecutionCounsel.builder()
                     .withAttendeeId(source.getId().getId().toString())
                     .withStatus(source.getStatus())
                     .withTitle(source.getTitle())
                     .withFirstName(source.getFirstName())
-                    .withLastName(source.getLastName());
+                    .withLastName(source.getLastName())
+                    .build();
         }
     }
 
@@ -147,12 +151,13 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return new DefenceCounsel()
+            return DefenceCounsel.builder()
                     .withAttendeeId(source.getId().getId().toString())
                     .withStatus(source.getStatus())
                     .withTitle(source.getTitle())
                     .withFirstName(source.getFirstName())
-                    .withLastName(source.getLastName());
+                    .withLastName(source.getLastName())
+                    .build();
         }
     }
 
@@ -212,12 +217,13 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
             final LegalCase legalCase = source.getKey();
 
-            return new Case()
+            return Case.builder()
                     .withCaseId(legalCase.getId().toString())
                     .withCaseUrn(legalCase.getCaseurn())
                     .withDefendants(source.getValue().entrySet().stream()
                             .map(e -> new DefendantConverter().convert(e))
-                            .collect(toList()));
+                            .collect(toList()))
+                    .build();
         }
     }
 
@@ -237,7 +243,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 return null;
             }
 
-            return new uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant.builder()
                     .withDefendantId(defendant.getId().getId().toString())
                     .withPersonId(toStringOrNull(defendant.getPersonId()))
                     .withFirstName(defendant.getFirstName())
@@ -250,7 +256,8 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withDateOfBirth(toDateStringOrNull(defendant.getDateOfBirth()))
                     .withOffences(source.getValue().stream()
                             .map(o -> new OffenceConverter().convert(o))
-                            .collect(toList()));
+                            .collect(toList()))
+                    .build();
         }
     }
 
@@ -270,15 +277,16 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             final String address4 = source.getAddress4();
             final String postCode = source.getPostCode();
 
-            return new uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address.builder()
                     .withAddress1(address1)
                     .withAddress2(address2)
                     .withAddress3(address3)
                     .withAddress4(address4)
                     .withPostCode(postCode)
-                    .withformattedAddress(Stream.of(address1, address2, address3, address4, postCode)
+                    .withFormattedAddress(Stream.of(address1, address2, address3, address4, postCode)
                             .filter(Objects::nonNull)
-                            .collect(Collectors.joining(" ")));
+                            .collect(Collectors.joining(" ")))
+                    .build();
         }
     }
 
@@ -291,7 +299,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return new uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence.builder()
                     .withId(source.getId().getId().toString())
                     .withWording(source.getWording())
                     .withCount(source.getCount())
@@ -299,7 +307,8 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withLegislation(source.getLegislation())
                     .withPlea(new PleaConveter().convert(source))
                     .withVerdict(new VerdictConveter().convert(source))
-                    .withConvictionDate(ofNullable(source.getConvictionDate()).map(LocalDate::toString).orElse(null));
+                    .withConvictionDate(ofNullable(source.getConvictionDate()).map(LocalDate::toString).orElse(null))
+                    .build();
         }
     }
 
@@ -312,12 +321,12 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            if (null == source.getPleaId()) {
-                return null;
-            }
-            return new Plea()
-                    .withPleaId(source.getPleaId().toString())
-                    .withPleaDate(toDateStringOrNull(source.getPleaDate()));
+
+            return Plea.builder()
+                    .withPleaId(toStringOrNull(source.getPleaId()))
+                    .withPleaDate(toDateStringOrNull(source.getPleaDate()))
+                    .withValue(source.getPleaValue())
+                    .build();
         }
     }
 
@@ -333,13 +342,14 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source.getVerdictId()) {
                 return null;
             }
-            return new Verdict()
+            return Verdict.builder()
                     .withVerdictId(source.getVerdictId().toString())
                     .withVerdictDate(toDateStringOrNull(source.getVerdictDate()))
                     .withNumberOfJurors(source.getNumberOfJurors())
                     .withNumberOfSplitJurors(source.getNumberOfSplitJurors())
                     .withUnanimous(source.getUnanimous())
-                    .withValue(new ValueConveter().convert(source));
+                    .withValue(new ValueConveter().convert(source))
+                    .build();
         }
     }
 
@@ -355,11 +365,11 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source.getVerdictId()) {
                 return null;
             }
-            return new Value()
-
+            return Value.builder()
                     .withCategory(source.getVerdictCategory())
                     .withCode(source.getVerdictCode())
-                    .withDescription(source.getVerdictDescription());
+                    .withDescription(source.getVerdictDescription())
+                    .build();
         }
     }
 }

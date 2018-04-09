@@ -3,6 +3,10 @@ package uk.gov.moj.cpp.hearing.command.api;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -11,11 +15,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-@SuppressWarnings("WeakerAccess")
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
 
@@ -54,10 +53,10 @@ public class HearingCommandApi {
         this.sender.send(envelope);
     }
 
-    //TODO - CLEANUP - why have the new event name. - why not just keep hearing.command.update-plea?
+    //TODO - CLEANUP - why have the new event name. - why not just keep hearing.offence-plea-update?
     @Handles("hearing.update-plea")
     public void updatePlea(final JsonEnvelope command) {
-        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-plea").apply(command.payloadAsJsonObject()));
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.hearing-offence-plea-update").apply(command.payloadAsJsonObject()));
     }
 
     @Handles("hearing.update-verdict")
@@ -75,4 +74,5 @@ public class HearingCommandApi {
 
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.share-results").apply(payloadWithSharedTime.build()));
     }
+    
 }

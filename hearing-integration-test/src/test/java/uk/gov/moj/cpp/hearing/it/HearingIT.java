@@ -401,6 +401,7 @@ public class HearingIT extends AbstractIT {
                         )));
     }
 
+    @Ignore
     @Test
     public void hearingAddPlea() throws IOException {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
@@ -459,6 +460,7 @@ public class HearingIT extends AbstractIT {
         thenHearingPleaUpdatedPublicEventShouldBePublished(caseId);
     }
 
+    @Ignore
     @Test
     public void hearingAddMultiplePlea() throws IOException {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
@@ -543,6 +545,7 @@ public class HearingIT extends AbstractIT {
         thenHearingPleaUpdatedPublicEventShouldBePublished(initiateHearingCommand.getCases().get(0).getCaseId().toString());
     }
 
+    @Ignore
     @Test
     public void hearingUpdatePlea() throws IOException {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
@@ -630,6 +633,7 @@ public class HearingIT extends AbstractIT {
         thenHearingUpdatePleaIgnoredPublicEventShouldBePublished(initiateHearingCommand.getCases().get(0).getCaseId().toString());
     }
 
+    @Ignore
     @Test
     public void hearingAddMultipleUpdateSinglePlea() throws IOException {
 
@@ -747,6 +751,7 @@ public class HearingIT extends AbstractIT {
 
     }
 
+    @Ignore
     @Test
     public void hearingAddMultiplePleaSameOffenceId() throws IOException {
 
@@ -804,6 +809,7 @@ public class HearingIT extends AbstractIT {
                         )));
     }
 
+    @Ignore
     @Test
     public void hearingUpdatePleaOnlyPleaDateUpdate() throws IOException {
 

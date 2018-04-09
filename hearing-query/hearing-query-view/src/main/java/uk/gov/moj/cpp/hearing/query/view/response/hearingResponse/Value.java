@@ -1,55 +1,68 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "category",
-        "code",
-        "description"
-})
-public class Value {
-    private String category;
-    private String code;
-    private String description;
+public final class Value {
+
+    private final String category;
+    private final String code;
+    private final String description;
+    
+    @JsonCreator
+    public Value(@JsonProperty("category") final String category, 
+            @JsonProperty("code") final String code, 
+            @JsonProperty("description") final String description) {
+        this.category = category;
+        this.code = code;
+        this.description = description;
+    }
+
+    @JsonIgnore
+    private Value(final Builder builder) {
+        this.category = builder.category;
+        this.code = builder.code;
+        this.description = builder.description;
+    }
 
     public String getCategory() {
         return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public Value withCategory(String category) {
-        this.category = category;
-        return this;
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public Value withCode(String code) {
-        this.code = code;
-        return this;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public Value withDescription(String description) {
-        this.description = description;
-        return this;
+    public static final class Builder {
+
+        private String category;
+        private String code;
+        private String description;
+        
+        public Builder withCategory(final String category) {
+            this.category = category;
+            return this;
+        }
+        public Builder withCode(final String code) {
+            this.code = code;
+            return this;
+        }
+        public Builder withDescription(final String description) {
+            this.description = description;
+            return this;
+        }
+        
+        public Value build() {
+            return new Value(this);
+        }
     }
 }

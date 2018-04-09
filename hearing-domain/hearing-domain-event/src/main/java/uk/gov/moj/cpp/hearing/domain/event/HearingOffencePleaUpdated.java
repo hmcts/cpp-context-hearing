@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.justice.domain.annotation.Event;
 
-@Event("hearing.offence-plea-updated")
-public final class OffencePleaUpdated {
+@Event("hearing.hearing-offence-plea-updated")
+public final class HearingOffencePleaUpdated {
 
     private final UUID hearingId;
     private final UUID offenceId;
@@ -19,7 +19,7 @@ public final class OffencePleaUpdated {
     private final String value;
 
     @JsonCreator
-    public OffencePleaUpdated(@JsonProperty("hearingId") final UUID originHearingId, 
+    public HearingOffencePleaUpdated(@JsonProperty("hearingId") final UUID originHearingId, 
             @JsonProperty("offenceId") final UUID offenceId, 
             @JsonProperty("pleaDate") final LocalDate pleaDate, 
             @JsonProperty("value") final String value) {
@@ -30,8 +30,8 @@ public final class OffencePleaUpdated {
     }
 
     @JsonIgnore // avoid serialisation by this constructor
-    private OffencePleaUpdated(final Builder builder) {
-        this.hearingId = builder.hearingId;
+    private HearingOffencePleaUpdated(final Builder builder) {
+        this.hearingId = builder.originHearingId;
         this.offenceId = builder.offenceId;
         this.pleaDate = builder.pleaDate;
         this.value = builder.value;
@@ -59,13 +59,13 @@ public final class OffencePleaUpdated {
 
     public static final class Builder {
 
-        private UUID hearingId;
+        private UUID originHearingId;
         private UUID offenceId;
         private LocalDate pleaDate;
         private String value;
         
         public Builder withHearingId(final UUID hearingId) {
-            this.hearingId = hearingId;
+            this.originHearingId = hearingId;
             return this;
         }
         
@@ -84,8 +84,8 @@ public final class OffencePleaUpdated {
             return this;
         }
         
-        public OffencePleaUpdated build() {
-            return new OffencePleaUpdated(this);
+        public HearingOffencePleaUpdated build() {
+            return new HearingOffencePleaUpdated(this);
         }
         
         public Stream<Object> buildStream() {

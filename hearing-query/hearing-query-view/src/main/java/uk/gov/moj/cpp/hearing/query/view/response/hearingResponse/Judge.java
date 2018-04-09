@@ -1,70 +1,84 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "id",
-        "title",
-        "firstName",
-        "lastName"
-})
 public class Judge {
+
     private String id;
     private String title;
     private String firstName;
     private String lastName;
+    
+    @JsonCreator
+    public Judge(@JsonProperty("id") final String id, 
+            @JsonProperty("title") final String title, 
+            @JsonProperty("firstName") final String firstName, 
+            @JsonProperty("lastName") final String lastName) {
+        this.id = id;
+        this.title = title;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    @JsonIgnore
+    private Judge(final Builder builder) {
+        this.id = builder.id;
+        this.title = builder.title;
+        this.firstName = builder.firstName;
+        this.lastName = builder.lastName;
+    }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Judge withId(String id) {
-        this.id = id;
-        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Judge withTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
     public String getFirstName() {
         return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public Judge withFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public static Builder builder() {
+        return new Builder();
     }
 
-    public Judge withLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
+    public static final class Builder {
+
+        private String id;
+        private String title;
+        private String firstName;
+        private String lastName;
+        
+        public Builder withId(final String id) {
+            this.id = id;
+            return this;
+        }
+        
+        public Builder withTitle(final String title) {
+            this.title = title;
+            return this;
+        }
+        
+        public Builder withFirstName(final String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+        
+        public Builder withLastName(final String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public Judge build() {
+            return new Judge(this);
+        }
     }
 }

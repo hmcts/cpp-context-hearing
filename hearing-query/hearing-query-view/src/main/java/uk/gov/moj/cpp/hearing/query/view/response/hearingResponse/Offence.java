@@ -1,127 +1,141 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "id",
-        "wording",
-        "count",
-        "title",
-        "legislation",
-        "plea",
-        "verdict"
-})
-public class Offence {
-    private String id;
-    private String wording;
-    private Integer count;
-    private String title;
-    private String legislation;
-    private Plea plea;
-    private Verdict verdict;
-    private String convictionDate;
+public final class Offence {
 
+    private final String id;
+    private final String wording;
+    private final Integer count;
+    private final String title;
+    private final String legislation;
+    private final Plea plea;
+    private final Verdict verdict;
+    private final String convictionDate;
+    
+    @JsonCreator
+    public Offence(@JsonProperty("id") final String id, 
+            @JsonProperty("wording") final String wording, 
+            @JsonProperty("count") final Integer count, 
+            @JsonProperty("title") final String title, 
+            @JsonProperty("legislation") final String legislation, 
+            @JsonProperty("plea") final Plea plea,
+            @JsonProperty("verdict") final Verdict verdict, 
+            @JsonProperty("convictionDate") final String convictionDate) {
+        this.id = id;
+        this.wording = wording;
+        this.count = count;
+        this.title = title;
+        this.legislation = legislation;
+        this.plea = plea;
+        this.verdict = verdict;
+        this.convictionDate = convictionDate;
+    }
+
+   @JsonIgnore
+    private Offence(final Builder builder) {
+        this.id = builder.id;
+        this.wording = builder.wording;
+        this.count = builder.count;
+        this.title = builder.title;
+        this.legislation = builder.legislation;
+        this.plea = builder.plea;
+        this.verdict = builder.verdict;
+        this.convictionDate = builder.convictionDate;
+    }
+    
+   
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Offence withId(String id) {
-        this.id = id;
-        return this;
     }
 
     public String getWording() {
         return wording;
     }
 
-    public void setWording(String wording) {
-        this.wording = wording;
-    }
-
-    public Offence withWording(String wording) {
-        this.wording = wording;
-        return this;
-    }
-
     public Integer getCount() {
         return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
-    }
-
-    public Offence withCount(Integer count) {
-        this.count = count;
-        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Offence withTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
     public String getLegislation() {
         return legislation;
-    }
-
-    public void setLegislation(String legislation) {
-        this.legislation = legislation;
-    }
-
-    public Offence withLegislation(String legislation) {
-        this.legislation = legislation;
-        return this;
     }
 
     public Plea getPlea() {
         return plea;
     }
 
-    public void setPlea(Plea plea) {
-        this.plea = plea;
-    }
-
-    public Offence withPlea(Plea plea) {
-        this.plea = plea;
-        return this;
-    }
-
     public Verdict getVerdict() {
         return verdict;
-    }
-
-    public void setVerdict(Verdict verdict) {
-        this.verdict = verdict;
-    }
-
-    public Offence withVerdict(Verdict verdict) {
-        this.verdict = verdict;
-        return this;
     }
 
     public String getConvictionDate() {
         return convictionDate;
     }
 
-    public Offence withConvictionDate(String convictionDate) {
-        this.convictionDate = convictionDate;
-        return this;
+    public static Builder builder() {
+        return new Builder();
     }
 
+    public static final class Builder {
 
+        private String id;
+        private String wording;
+        private Integer count;
+        private String title;
+        private String legislation;
+        private Plea plea;
+        private Verdict verdict;
+        private String convictionDate;
+        
+        public Builder withId(final String id) {
+            this.id = id;
+            return this;
+        }
+        
+        public Builder withWording(final String wording) {
+            this.wording = wording;
+            return this;
+        }
+        
+        public Builder withCount(final Integer count) {
+            this.count = count;
+            return this;
+        }
+        
+        public Builder withTitle(final String title) {
+            this.title = title;
+            return this;
+        }
+        
+        public Builder withLegislation(final String legislation) {
+            this.legislation = legislation;
+            return this;
+        }
+        
+        public Builder withPlea(final Plea plea) {
+            this.plea = plea;
+            return this;
+        }
+        
+        public Builder withVerdict(final Verdict verdict) {
+            this.verdict = verdict;
+            return this;
+        }
+        
+        public Builder withConvictionDate(final String convictionDate) {
+            this.convictionDate = convictionDate;
+            return this;
+        }
+        
+        public Offence build() {
+            return new Offence(this);
+        }
+    }
 }

@@ -245,7 +245,7 @@ public class HearingServiceTest {
                     assertEquals(address.getAddress3(), responseObject.getAddress().getAddress3());
                     assertEquals(address.getAddress4(), responseObject.getAddress().getAddress4());
                     assertEquals(address.getPostCode(), responseObject.getAddress().getPostCode());
-                    assertEquals(format(address.getAddress1(),address.getAddress2(), address.getAddress3(), address.getAddress4(), address.getPostCode()), responseObject.getAddress().getformattedAddress());
+                    assertEquals(format(address.getAddress1(),address.getAddress2(), address.getAddress3(), address.getAddress4(), address.getPostCode()), responseObject.getAddress().getFormattedAddress());
                 }
                 
             });

@@ -56,7 +56,7 @@ public class HearingAggregate implements Aggregate {
                 when(CaseAssociated.class)
                         .apply(caseAssociated -> this.hearingId = caseAssociated.getHearingId()),
                 when(HearingPleaAdded.class)
-                        .apply(hearingPleaAdded -> this.hearingId = hearingPleaAdded.getHearingId()),
+                        .apply(hearingPleaAdded -> this.hearingId = hearingPleaAdded.getHearingId()), //TODO: GPE-3267: sanitise
                 when(HearingPleaChanged.class)
                         .apply(hearingPleaChanged -> this.hearingId = hearingPleaChanged.getHearingId()),
                 when(VerdictAdded.class)

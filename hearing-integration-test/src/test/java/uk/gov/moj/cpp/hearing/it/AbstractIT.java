@@ -3,12 +3,14 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -23,6 +25,8 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.json.JSONObject;
+
+import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 
@@ -132,6 +136,10 @@ public class AbstractIT {
     protected static Matcher<Integer> equalInt(final Object bean, final String name) {
         return equalTo(getInteger(bean, name));
     }
+    
+    protected static Matcher<String> equalDate(final LocalDate localDate) {
+        return is(ISO_LOCAL_DATE.format(localDate));
+    }
 
     protected static String getString(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {
         try {
@@ -165,8 +173,11 @@ public class AbstractIT {
     }
 
     protected String getStringFromResource(final String path) throws IOException {
-        return Resources.toString(getResource(path),
-                defaultCharset());
+        return Resources.toString(getResource(path), defaultCharset());
+    }
+
+    protected String getURL(final String property, final Object... args) {
+        return getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty(property), args);
     }
 
     public static Matcher<ResponseData> print() {
@@ -185,5 +196,9 @@ public class AbstractIT {
             }
         };
 
+    }
+
+    protected static RequestParams requestParameters(final String url, final String contentType) {
+        return requestParams(url, contentType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build();
     }
 }

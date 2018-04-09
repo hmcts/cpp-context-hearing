@@ -5,35 +5,30 @@ import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
-
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 
-
 import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
 
 public class NewModelHearingAggregate implements Aggregate {
 
@@ -65,6 +60,16 @@ public class NewModelHearingAggregate implements Aggregate {
 
     private void onInitiateHearingOffencePlead(InitiateHearingOffencePlead initiateHearingOffencePlead) {
 
+    }
+    
+    public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final LocalDate pleaDate,
+            final String pleaValue) {
+        return HearingOffencePleaUpdated.builder()
+                    .withHearingId(originHearingId)
+                    .withOffenceId(offenceId)
+                    .withPleaDate(pleaDate)
+                    .withValue(pleaValue)
+                    .buildStream();
     }
 
     private void onHearingEventLogged(HearingEventLogged hearingEventLogged) {
@@ -228,5 +233,4 @@ public class NewModelHearingAggregate implements Aggregate {
             return hearingEventLogged;
         }
     }
-
 }

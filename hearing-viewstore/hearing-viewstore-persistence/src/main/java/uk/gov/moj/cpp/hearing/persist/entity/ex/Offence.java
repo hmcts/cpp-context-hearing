@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,7 +49,7 @@ public class Offence {
     @Column(name = "conviction_date")
     private LocalDate convictionDate;
 
-    @Column(name = "plea_id")
+    @Column(name = "plea_id") @Deprecated //TODO: GPE-3267: sanitise
     private UUID pleaId;
 
     @Column(name = "plea_date")
@@ -60,7 +59,7 @@ public class Offence {
     private String pleaValue;
 
     @Column(name = "verdict_id")
-    private UUID verdictId;
+    private java.util.UUID verdictId;
 
     @Column(name = "verdict_code")
     private String verdictCode;
@@ -167,6 +166,7 @@ public class Offence {
         return convictionDate;
     }
 
+    @Deprecated //TODO: GPE-3267: sanitise
     public UUID getPleaId() {
         return pleaId;
     }
@@ -175,8 +175,16 @@ public class Offence {
         return pleaDate;
     }
 
+    public void setPleaDate(final LocalDate pleaDate) {
+        this.pleaDate = pleaDate;
+    }
+
     public String getPleaValue() {
         return pleaValue;
+    }
+
+    public void setPleaValue(final String pleaValue) {
+        this.pleaValue = pleaValue;
     }
 
     public UUID getVerdictId() {
@@ -276,7 +284,8 @@ public class Offence {
 
         private LocalDate convictionDate;
 
-        private UUID pleaId;
+        @Deprecated //TODO: GPE-3267: sanitise
+        public UUID pleaId;
 
         private LocalDate pleaDate;
 
@@ -300,112 +309,113 @@ public class Offence {
 
         private Defendant defendant;
 
-        public Builder withId(HearingSnapshotKey id) {
+        public Builder withId(final HearingSnapshotKey id) {
             this.id = id;
             return this;
         }
 
-        public Builder withCase(LegalCase legalCase) {
+        public Builder withCase(final LegalCase legalCase) {
             this.legalCase = legalCase;
             return this;
         }
 
-        public Builder withDefendant(Defendant defendant) {
+        public Builder withDefendant(final Defendant defendant) {
             this.defendant = defendant;
             return this;
         }
 
-        public Builder withCode(String code) {
+        public Builder withCode(final String code) {
             this.code = code;
             return this;
         }
 
-        public Builder withCount(Integer count) {
+        public Builder withCount(final Integer count) {
             this.count = count;
             return this;
         }
 
-        public Builder withWording(String wording) {
+        public Builder withWording(final String wording) {
             this.wording = wording;
             return this;
         }
 
-        public Builder withTitle(String title) {
+        public Builder withTitle(final String title) {
             this.title = title;
             return this;
         }
 
-        public Builder withLegislation(String legislation) {
+        public Builder withLegislation(final String legislation) {
             this.legislation = legislation;
             return this;
         }
 
-        public Builder withStartDate(LocalDate startDate) {
+        public Builder withStartDate(final LocalDate startDate) {
             this.startDate = startDate;
             return this;
         }
 
-        public Builder withEndDate(LocalDate endDate) {
+        public Builder withEndDate(final LocalDate endDate) {
             this.endDate = endDate;
             return this;
         }
 
-        public Builder withConvictionDate(LocalDate convictionDate) {
+        public Builder withConvictionDate(final LocalDate convictionDate) {
             this.convictionDate = convictionDate;
             return this;
         }
 
-        public Builder withPleaId(UUID pleaId) {
+        @Deprecated //TODO: GPE-3267: sanitise
+        public Builder withPleaId(final java.util.UUID pleaId) {
             this.pleaId = pleaId;
             return this;
         }
 
-        public Builder withPleaDate(LocalDate pleaDate) {
+        public Builder withPleaDate(final LocalDate pleaDate) {
             this.pleaDate = pleaDate;
             return this;
         }
 
-        public Builder withPleaValue(String pleaValue) {
+        public Builder withPleaValue(final String pleaValue) {
             this.pleaValue = pleaValue;
             return this;
         }
 
-        public Builder withVerdictId(UUID verdictId) {
+        public Builder withVerdictId(final UUID verdictId) {
             this.verdictId = verdictId;
             return this;
         }
 
-        public Builder withVerdictCode(String verdictCode) {
+        public Builder withVerdictCode(final String verdictCode) {
             this.verdictCode = verdictCode;
             return this;
         }
 
-        public Builder withVerdictCategory(String verdictCategory) {
+        public Builder withVerdictCategory(final String verdictCategory) {
             this.verdictCategory = verdictCategory;
             return this;
         }
 
-        public Builder withVerdictDescription(String verdictDescription) {
+        public Builder withVerdictDescription(final String verdictDescription) {
             this.verdictDescription = verdictDescription;
             return this;
         }
 
-        public Builder withVerdictDate(LocalDate verdictDate) {
+        public Builder withVerdictDate(final LocalDate verdictDate) {
             this.verdictDate = verdictDate;
             return this;
         }
 
-        public Builder withNumberOfJurors(Integer numberOfJurors) {
+        public Builder withNumberOfJurors(final Integer numberOfJurors) {
             this.numberOfJurors = numberOfJurors;
             return this;
         }
 
-        public Builder withNumberOfSplitJurors(Integer numberOfSplitJurors) {
+        public Builder withNumberOfSplitJurors(final Integer numberOfSplitJurors) {
             this.numberOfSplitJurors = numberOfSplitJurors;
             return this;
         }
 
-        public Builder withUnanimous(Boolean unanimous) {
+        public Builder withUnanimous(final Boolean unanimous) {
             this.unanimous = unanimous;
             return this;
         }
