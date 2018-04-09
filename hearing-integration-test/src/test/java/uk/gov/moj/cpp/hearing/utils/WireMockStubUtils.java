@@ -40,27 +40,27 @@ public class WireMockStubUtils {
     }
 
     public static void setupAsAuthorisedUser(final UUID userId) {
-        stubPingFor("usersgroups-query-api");
+        stubPingFor("usersgroups-service");
 
-        stubFor(get(urlPathEqualTo(format("/usersgroups-query-api/query/api/rest/usersgroups/users/{0}/groups", userId)))
+        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(getPayload("stub-data/usersgroups.get-groups-by-user.json"))));
 
-        waitForStubToBeReady(format("/usersgroups-query-api/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
-        stubPingFor("progression-query-api");
+        stubPingFor("progression-service");
 
-        stubFor(get(urlPathEqualTo(format("/progression-query-api/query/api/rest/progression/cases/{0}", caseId)))
+        stubFor(get(urlPathEqualTo(format("/progression-service/query/api/rest/progression/cases/{0}", caseId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withHeader(ID, randomUUID().toString())
                         .withHeader(CONTENT_TYPE, CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS)
                         .withBody(getProgressionCaseJson(caseId, caseUrn).toString())));
 
-        waitForStubToBeReady(format("/progression-query-api/query/api/rest/progression/cases/{0}", caseId), CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS);
+        waitForStubToBeReady(format("/progression-service/query/api/rest/progression/cases/{0}", caseId), CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS);
     }
 
 
