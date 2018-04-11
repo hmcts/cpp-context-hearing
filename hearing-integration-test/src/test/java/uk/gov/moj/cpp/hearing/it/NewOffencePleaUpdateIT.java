@@ -77,6 +77,10 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                         hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate"),
                         hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.value"))));
 
+
+        TestUtilities.EventListener publicEventPleaUpdatedListener = listenFor("public.hearing.plea-updated")
+                .withFilter(isJson(withJsonPath("$.offenceId", is(offence.getId().toString()))));
+
         final String updatePleaCommandURL = getURL("hearing.update-plea", hearingId);
         final String updatePleaPayload = getJsonBody(caseId, defendant.getId(), offence.getId(), pleaValue, pleaDate);
 
@@ -84,8 +88,10 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                 .body(updatePleaPayload).header(CPP_UID_HEADER).when().post(updatePleaCommandURL).then().extract().response();
 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
-
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json")).timeout(10, TimeUnit.SECONDS).until(
+        
+        publicEventPleaUpdatedListener.waitFor();
+        
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json")).until(
                 status().is(OK),
                 payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
                         withJsonPath("$.cases[0].caseId", is(caseId.toString())),

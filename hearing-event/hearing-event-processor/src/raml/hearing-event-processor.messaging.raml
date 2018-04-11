@@ -29,6 +29,7 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.hearing-event-logged+json:
             schema: !include json/schema/hearing.hearing-event-logged.json
             example: !include json/hearing.hearing-event-logged.json
+
         application/vnd.hearing.hearing-event-ignored+json:
             schema: !include json/schema/hearing.hearing-event-ignored.json
             example: !include json/hearing.hearing-event-ignored.json
@@ -40,6 +41,15 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.newmags-court-hearing-recorded+json:
             schema: !include json/schema/hearing.newmags-court-hearing-recorded.json
             example: !include json/hearing.newmags-court-hearing-recorded.json
+
+        application/vnd.hearing.hearing-offence-plea-updated+json:
+            schema: !include json/schema/hearing.hearing-offence-plea-updated.json
+            example: !include json/hearing.hearing-offence-plea-updated.json
+
+        application/vnd.hearing.offence-verdict-updated+json:
+                    schema: !include json/schema/hearing.offence-verdict-updated.json
+                    example: !include json/hearing.offence-verdict-updated.json
+
 
 # old model
 
@@ -81,9 +91,7 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.hearing-update-verdict-ignored+json:
             schema: !include json/schema/hearing.hearing-update-verdict-ignored.json
             example: !include json/hearing.hearing-update-verdict-ignored.json
-        application/vnd.hearing.hearing-offence-plea-updated+json:
-            schema: !include json/schema/hearing.hearing-offence-plea-updated.json
-            example: !include json/hearing.hearing-offence-plea-updated.json
+
 
 /public.event:
   post:

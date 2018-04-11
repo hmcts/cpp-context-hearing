@@ -61,15 +61,16 @@ public class NewModelHearingAggregate implements Aggregate {
     private void onInitiateHearingOffencePlead(InitiateHearingOffencePlead initiateHearingOffencePlead) {
 
     }
-    
+
     public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final LocalDate pleaDate,
-            final String pleaValue) {
-        return HearingOffencePleaUpdated.builder()
-                    .withHearingId(originHearingId)
-                    .withOffenceId(offenceId)
-                    .withPleaDate(pleaDate)
-                    .withValue(pleaValue)
-                    .buildStream();
+                                     final String pleaValue) {
+        return apply(Stream.of(HearingOffencePleaUpdated.builder()
+                .withHearingId(originHearingId)
+                .withOffenceId(offenceId)
+                .withPleaDate(pleaDate)
+                .withValue(pleaValue)
+                .build()
+        ));
     }
 
     private void onHearingEventLogged(HearingEventLogged hearingEventLogged) {
@@ -200,7 +201,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 verdict.getVerdictDate()
         ));
 
-        if (verdict.getValue().getCategory().equalsIgnoreCase("GUILTY")){
+        if (verdict.getValue().getCategory().equalsIgnoreCase("GUILTY")) {
             events.add(new ConvictionDateAdded(caseId, hearingId, defendantId, offenceId, hearing.getStartDateTime().toLocalDate()));
         } else {
             events.add(new ConvictionDateRemoved(caseId, hearingId, defendantId, offenceId));

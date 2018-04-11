@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
@@ -11,6 +12,7 @@ import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
@@ -26,6 +28,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOO
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
@@ -67,12 +70,16 @@ public class VerdictIT extends AbstractIT {
                 )
                 .build();
 
+        TestUtilities.EventListener publicEventVerdictUpdatedListener = listenFor("public.hearing.verdict-updated")
+                .withFilter(isJson(withJsonPath("$.hearingId", Matchers.is(initiateHearingCommand.getHearing().getId().toString()))));
 
         makeCommand(requestSpec, "hearing.initiate-hearing")
                 .ofType("application/vnd.hearing.update-verdict+json")
                 .withArgs(initiateHearingCommand.getHearing().getId())
                 .withPayload(hearingUpdateVerdictCommand)
                 .executeSuccessfully();
+
+        publicEventVerdictUpdatedListener.waitFor();
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearingCommand.getHearing().getId());
