@@ -91,8 +91,8 @@ public class LogEventHearingEventProcessorTest {
 
         HearingEventLogged event = new HearingEventLogged(randomUUID(), lastHearingEventId, randomUUID(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), true,
-                randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), caseUrn, randomUUID()
-        );
+                randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), caseUrn, randomUUID(),
+                null);
 
         this.logEventHearingEventProcessor.publishHearingEventLoggedPublicEvent(
                 createEnvelope("hearing.hearing-event-logged", this.objectToJsonObjectConverter.convert(event))
@@ -128,8 +128,8 @@ public class LogEventHearingEventProcessorTest {
 
         HearingEventLogged event = new HearingEventLogged(randomUUID(), lastHearingEventId, randomUUID(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), true,
-                randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), caseUrn, randomUUID()
-        );
+                randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), caseUrn, randomUUID(),
+                null);
 
         this.logEventHearingEventProcessor.publishHearingEventLoggedPublicEvent(
                 createEnvelope("hearing.hearing-event-logged", this.objectToJsonObjectConverter.convert(event))

@@ -1,9 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static java.util.UUID.fromString;
-import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -12,20 +8,24 @@ import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_LISTENER)
 public class HearingLogEventListener {
 
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_WITNESS_ID = "witnessId";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_DEFINITION_ID = "id";
@@ -88,8 +88,9 @@ public class HearingLogEventListener {
         final ZonedDateTime eventTime = fromJsonString(payload.getJsonString(FIELD_EVENT_TIME));
         final ZonedDateTime lastModifiedTime = fromJsonString(payload.getJsonString(FIELD_LAST_MODIFIED_TIME));
         final boolean alterable = payload.getBoolean(FIELD_ALTERABLE);
+        final UUID witnessId = payload.containsKey(FIELD_WITNESS_ID) == true ? fromString(payload.getString(FIELD_WITNESS_ID) ): null;
 
-        hearingEventRepository.save(new HearingEvent(hearingEventId, hearingEventDefinitionId, hearingId, recordedLabel, eventTime, lastModifiedTime, alterable));
+        hearingEventRepository.save(new HearingEvent(hearingEventId, hearingEventDefinitionId, hearingId, recordedLabel, eventTime, lastModifiedTime, alterable,witnessId));
     }
 
     @Handles("hearing.hearing-event-deleted")

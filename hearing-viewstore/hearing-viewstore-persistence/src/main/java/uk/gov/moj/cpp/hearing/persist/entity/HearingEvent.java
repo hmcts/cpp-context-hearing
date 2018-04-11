@@ -36,13 +36,16 @@ public class HearingEvent {
     @Column(name = "deleted")
     private boolean deleted;
 
+    @Column(name = "witnessid")
+    private UUID witnessId;
+
     public HearingEvent() {
         // for JPA
     }
 
     public HearingEvent(final UUID id, final UUID hearingEventDefinitionId, final UUID hearingId, final String recordedLabel,
                         final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime,
-                        final boolean alterable) {
+                        final boolean alterable, UUID witnessId) {
         this.id = id;
         this.hearingEventDefinitionId = hearingEventDefinitionId;
         this.hearingId = hearingId;
@@ -51,11 +54,12 @@ public class HearingEvent {
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
         this.deleted = false;
+        this.witnessId=witnessId;
     }
 
     private HearingEvent(final UUID id, final UUID hearingEventDefinitionId, final UUID hearingId, final String recordedLabel,
                          final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime,
-                         final boolean alterable, final boolean deleted) {
+                         final boolean alterable, final boolean deleted, UUID witnessId) {
         this.id = id;
         this.hearingEventDefinitionId = hearingEventDefinitionId;
         this.hearingId = hearingId;
@@ -64,6 +68,7 @@ public class HearingEvent {
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
         this.deleted = deleted;
+        this.witnessId=witnessId;
     }
 
     public UUID getId() {
@@ -94,8 +99,12 @@ public class HearingEvent {
         return deleted;
     }
 
+    public UUID getWitnessId() {
+        return witnessId;
+    }
+
     public Builder builder() {
-        return new Builder(getId(), getHearingEventDefinitionId(), getHearingId(), getRecordedLabel(), getEventTime(), getLastModifiedTime(), isAlterable(), isDeleted());
+        return new Builder(getId(), getHearingEventDefinitionId(), getHearingId(), getRecordedLabel(), getEventTime(), getLastModifiedTime(), isAlterable(), isDeleted(), getWitnessId());
     }
 
     public UUID getHearingEventDefinitionId() {
@@ -111,10 +120,11 @@ public class HearingEvent {
         private ZonedDateTime lastModifiedTime;
         private boolean alterable;
         private boolean deleted;
+        private UUID witnessId;
 
         Builder(final UUID id, final UUID hearingEventDefinitionId, final UUID hearingId, final String recordedLabel,
                 final ZonedDateTime eventTime, final ZonedDateTime lastModifiedTime,
-                final boolean alterable, final boolean deleted) {
+                final boolean alterable, final boolean deleted, UUID witnessId) {
             this.id = id;
             this.hearingEventDefinitionId = hearingEventDefinitionId;
             this.hearingId = hearingId;
@@ -123,6 +133,7 @@ public class HearingEvent {
             this.lastModifiedTime = lastModifiedTime;
             this.alterable = alterable;
             this.deleted = deleted;
+            this.witnessId= witnessId;
         }
 
         public Builder withId(final UUID hearingEventId) {
@@ -140,13 +151,17 @@ public class HearingEvent {
             return this;
         }
 
+        public Builder withWitnessId(final UUID witnessId) {
+            this.witnessId = witnessId;
+            return this;
+        }
         public Builder delete() {
             this.deleted = true;
             return this;
         }
 
         public HearingEvent build() {
-            return new HearingEvent(this.id, this.hearingEventDefinitionId, this.hearingId, this.recordedLabel, this.eventTime, this.lastModifiedTime, this.alterable, this.deleted);
+            return new HearingEvent(this.id, this.hearingEventDefinitionId, this.hearingId, this.recordedLabel, this.eventTime, this.lastModifiedTime, this.alterable, this.deleted,this.witnessId);
         }
     }
 

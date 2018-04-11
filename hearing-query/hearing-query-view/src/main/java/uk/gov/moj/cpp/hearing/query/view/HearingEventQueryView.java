@@ -1,10 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static java.util.UUID.fromString;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
-
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -17,13 +12,17 @@ import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselToDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
 
+import javax.inject.Inject;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import static java.util.UUID.fromString;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 
 @SuppressWarnings({"CdiInjectionPointsInspection", "WeakerAccess"})
 @ServiceComponent(QUERY_VIEW)
@@ -54,6 +53,7 @@ public class HearingEventQueryView {
     private static final String FIELD_SEQUENCE = "sequence";
     private static final String FIELD_SEQUENCE_TYPE = "type";
     private static final String FIELD_ALTERABLE = "alterable";
+    private static final String FIELD_WITNESS_ID = "witnessId";
 
     @Inject
     private Enveloper enveloper;
@@ -115,15 +115,23 @@ public class HearingEventQueryView {
         final JsonArrayBuilder eventLogJsonArrayBuilder = createArrayBuilder();
 
         hearingEvents.
-                forEach(hearingEvent -> eventLogJsonArrayBuilder.add(
-                        createObjectBuilder()
-                                .add(FIELD_HEARING_EVENT_ID, hearingEvent.getId().toString())
-                                .add(FIELD_HEARING_EVENT_DEFINITION_ID, hearingEvent.getHearingEventDefinitionId().toString())
-                                .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
-                                .add(FIELD_EVENT_TIME, ZonedDateTimes.toString(hearingEvent.getEventTime()))
-                                .add(FIELD_LAST_MODIFIED_TIME, ZonedDateTimes.toString(hearingEvent.getLastModifiedTime()))
-                                .add(FIELD_ALTERABLE, hearingEvent.isAlterable())
-                ));
+                forEach(hearingEvent ->
+                        {
+                            JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
+                                    .add(FIELD_HEARING_EVENT_ID, hearingEvent.getId().toString())
+                                    .add(FIELD_HEARING_EVENT_DEFINITION_ID, hearingEvent.getHearingEventDefinitionId().toString())
+                                    .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
+                                    .add(FIELD_EVENT_TIME, ZonedDateTimes.toString(hearingEvent.getEventTime()))
+                                    .add(FIELD_LAST_MODIFIED_TIME, ZonedDateTimes.toString(hearingEvent.getLastModifiedTime()))
+                                    .add(FIELD_ALTERABLE, hearingEvent.isAlterable());
+
+                            if( hearingEvent.getWitnessId() != null){
+                                jsonObjectBuilder.add(FIELD_WITNESS_ID, hearingEvent.getWitnessId().toString());
+                            }
+                            eventLogJsonArrayBuilder.add(jsonObjectBuilder);
+                        }
+
+                );
 
         return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_LOG)
                 .apply(createObjectBuilder()

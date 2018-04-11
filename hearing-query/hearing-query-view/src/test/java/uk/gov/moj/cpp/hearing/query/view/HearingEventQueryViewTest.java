@@ -59,6 +59,7 @@ public class HearingEventQueryViewTest {
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
+    private static final String FIELD_WITNESS_ID = "witnessId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_EVENT_TIME = "eventTime";
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
@@ -79,6 +80,7 @@ public class HearingEventQueryViewTest {
     private static final UUID HEARING_ID = randomUUID();
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
+    private static final UUID WITNESS_ID = randomUUID();
     private static final UUID HEARING_EVENT_DEFINITION_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next();
@@ -136,7 +138,6 @@ public class HearingEventQueryViewTest {
                 createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString()).build());
 
         final JsonEnvelope actualHearingEventLog = hearingEventQueryView.getHearingEventLog(query);
-
         assertThat(actualHearingEventLog, is(jsonEnvelope(
                 withMetadataEnvelopedFrom(query)
                         .withName(RESPONSE_NAME_HEARING_EVENT_LOG),
@@ -150,6 +151,7 @@ public class HearingEventQueryViewTest {
                         withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_EVENT_TIME), equalTo(ZonedDateTimes.toString(EVENT_TIME))),
                         withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_LAST_MODIFIED_TIME), equalTo(ZonedDateTimes.toString(LAST_MODIFIED_TIME))),
                         withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_ALTERABLE), equalTo(ALTERABLE)),
+                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_WITNESS_ID), equalTo(WITNESS_ID.toString())),
 
                         withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_2.toString())),
                         withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_DEFINITION_ID), equalTo(HEARING_EVENT_DEFINITION_ID_2.toString())),
@@ -468,8 +470,8 @@ public class HearingEventQueryViewTest {
 
     private List<HearingEvent> hearingEvents() {
         final List<HearingEvent> hearingEvents = new ArrayList<>();
-        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE));
-        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID_2, HEARING_EVENT_DEFINITION_ID_2, HEARING_ID, RECORDED_LABEL_2, EVENT_TIME_2, LAST_MODIFIED_TIME_2, ALTERABLE_2));
+        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, WITNESS_ID));
+        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID_2, HEARING_EVENT_DEFINITION_ID_2, HEARING_ID, RECORDED_LABEL_2, EVENT_TIME_2, LAST_MODIFIED_TIME_2, ALTERABLE_2, null));
 
         return hearingEvents;
     }
