@@ -52,7 +52,7 @@ public class LegalCaseRepositoryTest {
         assertNotNull(legalCases);
         assertEquals(1, legalCases.size());
         assertEquals(legalCase1.getId(), legalCases.get(0).getId());
-        assertEquals(legalCase1.getCaseurn(), legalCases.get(0).getCaseurn());
+        assertEquals(legalCase1.getCaseUrn(), legalCases.get(0).getCaseUrn());
     }
     
     @Test
@@ -61,7 +61,7 @@ public class LegalCaseRepositoryTest {
         assertNotNull(legalCases);
         assertEquals(1, legalCases.size());
         assertEquals(legalCase1.getId(), legalCases.get(0).getId());
-        assertEquals(legalCase1.getCaseurn(), legalCases.get(0).getCaseurn());
+        assertEquals(legalCase1.getCaseUrn(), legalCases.get(0).getCaseUrn());
     }
     
     @Test

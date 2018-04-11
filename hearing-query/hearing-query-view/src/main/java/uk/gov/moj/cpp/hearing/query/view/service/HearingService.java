@@ -60,7 +60,6 @@ public class HearingService {
         return hearingView;
     }
 
-    //TODO - GPE-3032 - investigate proper validation.
     @Transactional
     public HearingListResponse getHearingByStartDateV2(final LocalDate startDate) {
         if (null == startDate) {

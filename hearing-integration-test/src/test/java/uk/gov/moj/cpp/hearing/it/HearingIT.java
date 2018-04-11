@@ -99,27 +99,6 @@ public class HearingIT extends AbstractIT {
     private static final String FIELD_PLEA_DATE = "pleaDate";
     private static final String FIELD_PERSON_ID = "personId";
 
-
-    @Test
-    public void getHearing_CapabilityDisabled() {
-        stubSetStatusForCapability("hearing.get.hearing", false);
-
-        final String hearingId = randomUUID().toString();
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(
-                        status().is(FORBIDDEN));
-
-        stubSetStatusForCapability("hearing.get.hearing", true);
-    }
-
-
     @Test
     public void hearingSaveDraftResultTest() throws IOException {
         final String targetId = randomUUID().toString();

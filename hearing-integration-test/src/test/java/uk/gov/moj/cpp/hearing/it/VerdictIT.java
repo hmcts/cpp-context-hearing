@@ -109,7 +109,7 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfJurors", is(verdict.getNumberOfJurors())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.unanimous", is(verdict.getUnanimous())),
 
-                                withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", is(initiateHearingCommand.getHearing().getStartDateTime().toLocalDate().toString()))
+                                withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", is(verdict.getVerdictDate().toString()))
                         )));
     }
 

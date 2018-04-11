@@ -172,7 +172,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || isEmpty(source.getDefendants())) {
                 return emptyList();
             }
-            
+
             // 1. building a set of legal cases to avoid duplications
             final Set<LegalCase> legalCases = source.getDefendants().stream()
                     .flatMap(defendant -> defendant.getOffences().stream())
@@ -183,20 +183,20 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (isEmpty(legalCases)) {
                 return emptyList();
             }
-            
+
             // 2. building a data structure map to build the expected response
             final Map<LegalCase, Cases> cases = new LinkedHashMap<>();
 
             // 3. filtering the given data and filling the structure map
             legalCases.forEach(legalCase -> {
-                cases.putIfAbsent(legalCase,  new Cases());
+                cases.putIfAbsent(legalCase, new Cases());
 
                 source.getDefendants().forEach(d -> {
                     cases.get(legalCase).getDefendants().putIfAbsent(d, new ArrayList<>());
                     d.getOffences().stream().filter(offence -> isOffenceCase(offence, legalCase)).forEach(cases.get(legalCase).getDefendants().get(d)::add);
                 });
 
-                source.getWitnesses().stream().filter(witness -> isWitnessCase(witness , legalCase)).forEach(cases.get(legalCase).getWitnesses()::add);
+                source.getWitnesses().stream().filter(witness -> isWitnessCase(witness, legalCase)).forEach(cases.get(legalCase).getWitnesses()::add);
             });
 
             // 4. converting the data structure map to the respective Java Script Object
@@ -236,6 +236,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             this.witnesses = witnesses;
         }
     }
+
     // CasesConverter
     //-----------------------------------------------------------------------
     private static final class CaseConverter implements Converter<Entry<LegalCase, Cases>, Case> {
@@ -250,12 +251,17 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
             return Case.builder()
                     .withCaseId(legalCase.getId().toString())
-                    .withCaseUrn(legalCase.getCaseurn())
-                    .withDefendants(source.getValue().getDefendants().entrySet().stream()
-                            .map(e -> new DefendantConverter().convert(e))
-                            .collect(toList()))
-                    .withWitnesses(source.getValue().getWitnesses().stream()
-                            .map(w -> new WitnessConverter().convert(w)).collect(toList())).build();
+                    .withCaseUrn(legalCase.getCaseUrn())
+                    .withDefendants(
+                            source.getValue().getDefendants().entrySet().stream()
+                                    .map(e -> new DefendantConverter().convert(e))
+                                    .collect(toList())
+                    )
+                    .withWitnesses(
+                            source.getValue().getWitnesses().stream()
+                                    .map(w -> new WitnessConverter().convert(w)).collect(toList())
+                    )
+                    .build();
         }
 
 
@@ -263,7 +269,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
     // WitnessConverter
     //-----------------------------------------------------------------------
-    private static final class WitnessConverter implements  Converter<Witness, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness> {
+    private static final class WitnessConverter implements Converter<Witness, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness> {
 
         @Override
         public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness convert(Witness source) {

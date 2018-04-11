@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import com.google.common.io.Resources;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 
@@ -30,7 +31,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 
 public class DefenceCounselIT extends AbstractIT {
 
-
+    @Ignore("GPE-3032 - need to project councillors into view for get hearings call.  Then we can modify this IT.")
     @Test
     public void hearingAddDefenceCounselTest() throws IOException {
 

@@ -165,7 +165,7 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                                 withJsonPath("$.offenceId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
                                 withJsonPath("$.defendantId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getId().toString())),
 
-                                withJsonPath("$.convictionDate", equalTo(initiateHearingCommand.getHearing().getStartDateTime().toLocalDate().toString()))
+                                withJsonPath("$.convictionDate", equalTo(verdict.getVerdictDate().toString()))
 
                         )))
         );

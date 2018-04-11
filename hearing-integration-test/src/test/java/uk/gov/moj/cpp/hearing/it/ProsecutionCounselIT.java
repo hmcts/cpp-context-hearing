@@ -4,6 +4,7 @@ import com.google.common.io.Resources;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 
@@ -48,6 +49,7 @@ public class ProsecutionCounselIT extends AbstractIT {
         return addProsecutionCounselPayload;
     }
 
+    @Ignore("GPE-3032 - need to project councillors into view for get hearings call.  Then we can modify this IT.")
     @Test
     public void hearingAddProsecutionCounselTest() throws IOException {
         InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearingMultipleDefendants(requestSpec, 1);

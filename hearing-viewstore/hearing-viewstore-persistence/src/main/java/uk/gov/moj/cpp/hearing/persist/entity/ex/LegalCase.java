@@ -31,7 +31,7 @@ public class LegalCase {
         return id;
     }
 
-    public String getCaseurn() {
+    public String getCaseUrn() {
         return caseurn;
     }
 

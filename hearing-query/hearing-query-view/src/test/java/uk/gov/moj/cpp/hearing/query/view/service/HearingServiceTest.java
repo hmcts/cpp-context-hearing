@@ -4,6 +4,8 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.join;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -20,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -112,9 +115,9 @@ public class HearingServiceTest {
         //-----------------------------------------------------------------------
         assertEquals(hearingList.get(0).getId().toString(), response.getHearings().get(0).getHearingId());
         assertEquals(hearingList.get(0).getHearingType(), response.getHearings().get(0).getHearingType());
-        assertEquals(hearingList.get(0).getDefendants().get(0).getOffences().stream()
-                .map(o -> o.getLegalCase().getCaseurn()).collect(Collectors.toList()),
-                response.getHearings().get(0).getCaseUrn());
+        assertThat(response.getHearings().get(0).getCases().get(0).getId(), is(hearingList.get(0).getDefendants().get(0).getOffences().get(0).getLegalCase().getId()));
+        assertThat(response.getHearings().get(0).getCases().get(0).getUrn(), is(hearingList.get(0).getDefendants().get(0).getOffences().get(0).getLegalCase().getCaseUrn()));
+
         assertEquals(
                 hearingList.get(0).getDefendants().stream().map(d -> d.getFirstName() + " " + d.getLastName())
                         .collect(Collectors.toList()),
@@ -149,7 +152,7 @@ public class HearingServiceTest {
 
         final List<ProsecutionCounsel> prosecutionCounsels = response.getAttendees().getProsecutionCounsels();
         final List<DefenceCounsel> defenceCounsels = response.getAttendees().getDefenceCounsels();
-        
+
         final AtomicInteger judgeCounter = new AtomicInteger();
         final AtomicInteger procecutionCounter = new AtomicInteger();
         final AtomicInteger defenceCounter = new AtomicInteger();
@@ -170,7 +173,7 @@ public class HearingServiceTest {
             } else {
 
                 if (attendee instanceof ProsecutionAdvocate) {
-                    
+
                     final ProsecutionAdvocate entityBean = (ProsecutionAdvocate) attendee;
 
                     prosecutionCounsels.forEach(prosecutionCounsel -> {
@@ -184,9 +187,9 @@ public class HearingServiceTest {
                     });
 
                 } else if (attendee instanceof DefenceAdvocate) {
-                    
+
                     final DefenceAdvocate entityBean = (DefenceAdvocate) attendee;
-        
+
                     defenceCounsels.forEach(responseObject -> {
                         if (entityBean.getId().getId().toString().equals(responseObject.getAttendeeId())) {
                             assertEquals(entityBean.getTitle(), responseObject.getTitle());
@@ -199,7 +202,7 @@ public class HearingServiceTest {
                 }
             }
         });
-        
+
         assertEquals(1, judgeCounter.get());
         assertEquals(prosecutionCounsels.size(), procecutionCounter.get());
         assertEquals(defenceCounsels.size(), defenceCounter.get());
@@ -208,26 +211,26 @@ public class HearingServiceTest {
         //-----------------------------------------------------------------------
         final Set<LegalCase> legalCases = hearing.getDefendants().stream().flatMap(d -> d.getOffences().stream().map(o -> o.getLegalCase())).collect(Collectors.toSet());
         assertEquals(legalCases.size(), response.getCases().size());
-        
+
         legalCases.stream().forEach(entityBean -> {
-            
+
             response.getCases().forEach(responseObject -> {
-                
+
                 if (entityBean.getId().toString().equals(responseObject.getCaseId())) {
-                    assertEquals(entityBean.getCaseurn(), responseObject.getCaseUrn());
+                    assertEquals(entityBean.getCaseUrn(), responseObject.getCaseUrn());
                 }
             });
-            
+
         });
-        
+
         // 7. performing assertions for defendant objects attributes
         final Set<Defendant> defendants = response.getCases().stream().flatMap(c -> c.getDefendants().stream()).collect(Collectors.toSet());
         assertEquals(defendants.size(), hearing.getDefendants().size());
-        
+
         defendants.forEach(responseObject -> {
-            
+
             hearing.getDefendants().forEach(entityBean -> {
-                
+
                 if (entityBean.getId().getId().toString().equals(responseObject.getId())) {
                     assertEquals(entityBean.getPersonId().toString(), responseObject.getId());
                     assertEquals(entityBean.getFirstName(), responseObject.getFirstName());
@@ -237,7 +240,7 @@ public class HearingServiceTest {
                     assertEquals(entityBean.getFax(), responseObject.getFax());
                     assertEquals(entityBean.getEmail(), responseObject.getEmail());
                     assertEquals(entityBean.getDateOfBirth().format(ISO_LOCAL_DATE), responseObject.getDateOfBirth());
-                    
+
                     final Address address = entityBean.getAddress();
                     assertNotNull(address);
                     assertEquals(address.getAddress1(), responseObject.getAddress().getAddress1());
@@ -245,14 +248,14 @@ public class HearingServiceTest {
                     assertEquals(address.getAddress3(), responseObject.getAddress().getAddress3());
                     assertEquals(address.getAddress4(), responseObject.getAddress().getAddress4());
                     assertEquals(address.getPostCode(), responseObject.getAddress().getPostCode());
-                    assertEquals(format(address.getAddress1(),address.getAddress2(), address.getAddress3(), address.getAddress4(), address.getPostCode()), responseObject.getAddress().getFormattedAddress());
+                    assertEquals(format(address.getAddress1(), address.getAddress2(), address.getAddress3(), address.getAddress4(), address.getPostCode()), responseObject.getAddress().getFormattedAddress());
                 }
-                
+
             });
-            
+
         });
     }
-    
+
     /**
      * @param vals
      * @return

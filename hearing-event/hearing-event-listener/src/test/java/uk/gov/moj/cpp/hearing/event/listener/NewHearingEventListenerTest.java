@@ -366,7 +366,7 @@ public class NewHearingEventListenerTest {
         assertThat(actualOffence.getId().getHearingId(), is(hearing.getId()));
         assertThat(actualOffence.getDefendantId(), is(defendant.getId()));
         assertThat(actualOffence.getLegalCase().getId(), is(legalCase.getCaseId()));
-        assertThat(actualOffence.getLegalCase().getCaseurn(), is(legalCase.getUrn()));
+        assertThat(actualOffence.getLegalCase().getCaseUrn(), is(legalCase.getUrn()));
         assertThat(actualOffence.getLegislation(), is(offence.getLegislation()));
         assertThat(actualOffence.getTitle(), is(offence.getTitle()));
         assertThat(actualOffence.getWording(), is(offence.getWording()));
@@ -391,7 +391,7 @@ public class NewHearingEventListenerTest {
         final LegalCase actualLegalCase = caseArgumentCaptor.getValue();
 
         assertThat(actualLegalCase.getId(), is(legalCase.getCaseId()));
-        assertThat(actualLegalCase.getCaseurn(), is(legalCase.getUrn()));
+        assertThat(actualLegalCase.getCaseUrn(), is(legalCase.getUrn()));
     }
 
 

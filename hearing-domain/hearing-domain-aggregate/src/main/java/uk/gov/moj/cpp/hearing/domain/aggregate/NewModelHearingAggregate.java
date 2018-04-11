@@ -202,7 +202,7 @@ public class NewModelHearingAggregate implements Aggregate {
         ));
 
         if (verdict.getValue().getCategory().equalsIgnoreCase("GUILTY")) {
-            events.add(new ConvictionDateAdded(caseId, hearingId, defendantId, offenceId, hearing.getStartDateTime().toLocalDate()));
+            events.add(new ConvictionDateAdded(caseId, hearingId, defendantId, offenceId, verdict.getVerdictDate()));
         } else {
             events.add(new ConvictionDateRemoved(caseId, hearingId, defendantId, offenceId));
         }

@@ -11,25 +11,25 @@ public final class HearingListResponseHearing {
 
     private final String hearingId;
     private final String hearingType;
-    private final List<String> caseUrn;
+    private final List<LegalCase> cases;
     private final List<HearingListResponseDefendant> hearingListResponseDefendants;
     
     @JsonCreator
     public HearingListResponseHearing(@JsonProperty("hearingId") String hearingId, 
             @JsonProperty("hearingType") String hearingType, 
-            @JsonProperty("caseUrn") List<String> caseUrn,
+            @JsonProperty("cases") List<LegalCase> cases,
             @JsonProperty("defendants") List<HearingListResponseDefendant> hearingListResponseDefendants) {
         super();
         this.hearingId = hearingId;
         this.hearingType = hearingType;
-        this.caseUrn = caseUrn;
+        this.cases = cases;
         this.hearingListResponseDefendants = hearingListResponseDefendants;
     }
 
     private HearingListResponseHearing(final Builder builder) {
         this.hearingId = builder.hearingId;
         this.hearingType = builder.hearingType;
-        this.caseUrn = builder.caseUrn;
+        this.cases = builder.cases;
         this.hearingListResponseDefendants = builder.hearingListResponseDefendants;
     }
 
@@ -41,8 +41,8 @@ public final class HearingListResponseHearing {
         return hearingType;
     }
 
-    public List<String> getCaseUrn() {
-        return caseUrn;
+    public List<LegalCase> getCases() {
+        return cases;
     }
 
     public List<HearingListResponseDefendant> getDefendants() {
@@ -57,7 +57,7 @@ public final class HearingListResponseHearing {
  
         private String hearingId;
         private String hearingType;
-        private List<String> caseUrn;
+        private List<LegalCase> cases;
         private List<HearingListResponseDefendant> hearingListResponseDefendants;
 
         public Builder withHearingId(final String hearingId) {
@@ -70,8 +70,8 @@ public final class HearingListResponseHearing {
             return this;
         }
 
-        public Builder withCaseUrn(final List<String> caseUrn) {
-            this.caseUrn = caseUrn;
+        public Builder withCases(final List<LegalCase> cases) {
+            this.cases = cases;
             return this;
         }
 
