@@ -13,7 +13,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
@@ -41,7 +40,6 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
@@ -50,7 +48,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -59,11 +56,11 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTe
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
-public class NewModelHearingEventProcessorTest {
+public class InitiateHearingEventProcessorTest {
 
 
     @InjectMocks
-    private NewModelHearingEventProcessor newModelHearingEventProcessor;
+    private InitiateHearingEventProcessor initiateHearingEventProcessor;
 
     @Mock
     private Sender sender;
@@ -103,7 +100,7 @@ public class NewModelHearingEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.initiated"), objectToJsonObjectConverter.convert(initiateHearingCommand));
 
-        this.newModelHearingEventProcessor.hearingInitiated(event);
+        this.initiateHearingEventProcessor.hearingInitiated(event);
 
         verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
 
@@ -151,7 +148,7 @@ public class NewModelHearingEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.initiate-hearing-offence-enriched"), payload);
 
-        this.newModelHearingEventProcessor.hearingInitiateOffencePlea(event);
+        this.initiateHearingEventProcessor.hearingInitiateOffencePlea(event);
 
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 

@@ -17,6 +17,7 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
             example: !include json/hearing.command.initiate-hearing-offence-plea.json
 
+
         application/vnd.hearing.command.log-hearing-event+json:
             example: !include json/hearing.command.log-hearing-event.json
             schema: !include json/schema/hearing.command.log-hearing-event.json
@@ -66,9 +67,7 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.command.share-results.json
             schema:  !include json/schema/hearing.command.share-results.json
 
-        application/vnd.hearing.record-confirmed-hearing+json:
-            example: !include json/hearing.record-confirmed-hearing.json
-            schema:  !include json/schema/hearing.record-confirmed-hearing.json
+
 
         application/vnd.hearing.hearing-offence-plea-update+json:
             example: !include json/hearing.hearing-offence-plea-update.json
@@ -81,14 +80,6 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.update-verdict+json:
             example: !include json/hearing.command.update-verdict.json
             schema:  !include json/schema/hearing.command.update-verdict.json
-
-        application/vnd.hearing.plea-add+json:
-            example: !include json/hearing.plea-add.json
-            schema:  !include json/schema/hearing.plea-add.json
-
-        application/vnd.hearing.plea-change+json:
-            example: !include json/hearing.plea-change.json
-            schema:  !include json/schema/hearing.plea-change.json
 
         application/vnd.hearing.record-sending-sheet-complete+json:
             example: !include json/hearing.record-sending-sheet-complete.json

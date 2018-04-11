@@ -12,15 +12,13 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.plea.HearingPlea;
-import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingDetails;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.HearingsPleaAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
@@ -39,9 +37,6 @@ import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonSt
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 import static uk.gov.justice.services.eventsourcing.source.core.Events.streamOf;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
-
-import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 
 @SuppressWarnings({"WeakerAccess", "CdiInjectionPointsInspection"})
 @ServiceComponent(COMMAND_HANDLER)
@@ -231,42 +226,7 @@ public class HearingCommandHandler {
         eventStream.append(events.map(this.enveloper.withMetadataFrom(command)));
     }
 
-    @Deprecated //TODO: GPE-3032: sanitise
-    public void updatePlea(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.trace("Processing hearing.command.update-plea command");
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
-        final HearingUpdatePleaCommand hearingUpdatePleaCommand =
-                this.jsonObjectToObjectConverter.convert(payload, HearingUpdatePleaCommand.class);
-        applyHearingPleaAggregate(caseId, aggregate -> aggregate.updatePlea(hearingUpdatePleaCommand), command);
-    }
 
-    @Handles("hearing.plea-add") @Deprecated //TODO: GPE-3032: sanitise
-    public void pleaAdd(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final HearingPlea hearingPlea =
-                this.jsonObjectToObjectConverter.convert(payload, HearingPlea.class);
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.addPlea(hearingPlea), command);
-    }
-
-    @Handles("hearing.plea-change") @Deprecated //TODO: GPE-3032: sanitise
-    public void pleaChange(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final HearingPlea hearingPlea =
-                this.jsonObjectToObjectConverter.convert(payload, HearingPlea.class);
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.changePlea(hearingPlea), command);
-    }
-
-    public void updateVerdict(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.trace("Processing hearing.command.update-verdict command");
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand =
-                this.jsonObjectToObjectConverter.convert(payload, HearingUpdateVerdictCommand.class);
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.updateVerdict(hearingUpdateVerdictCommand), command);
-    }
 
     private HearingAggregate applyToHearingAggregate(final UUID streamId, final Function<HearingAggregate, Stream<Object>> function,
                                                      final JsonEnvelope envelope) throws EventStreamException {
@@ -277,13 +237,6 @@ public class HearingCommandHandler {
         return aggregate;
     }
 
-    private void applyHearingPleaAggregate(final UUID streamId, final Function<HearingsPleaAggregate, Stream<Object>> function,
-                                           final JsonEnvelope envelope) throws EventStreamException {
-        final EventStream eventStream = this.eventSource.getStreamById(streamId);
-        final HearingsPleaAggregate hearingsPleaAggregate = this.aggregateService.get(eventStream, HearingsPleaAggregate.class);
-        final Stream<Object> events = function.apply(hearingsPleaAggregate);
-        eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
-    }
 
     private ResultLine extractResultLine(final JsonObject resultLine) {
         return new ResultLine(fromString(resultLine.getString(FIELD_GENERIC_ID)),

@@ -387,7 +387,7 @@ public class NewHearingEventListenerTest {
         assertThat(actualOffence.getVerdictDescription(), nullValue());
 
         ArgumentCaptor<LegalCase> caseArgumentCaptor = ArgumentCaptor.forClass(LegalCase.class);
-        verify(this.legalCaseRepository).save(caseArgumentCaptor.capture());
+        verify(this.legalCaseRepository).saveAndFlush(caseArgumentCaptor.capture());
         final LegalCase actualLegalCase = caseArgumentCaptor.getValue();
 
         assertThat(actualLegalCase.getId(), is(legalCase.getCaseId()));

@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 public class HearingTransformer {
 
-    public static final String DEFAULT_HEARING_TYPE="Magistrate Court Hearing";
+    public static final String DEFAULT_HEARING_TYPE = "Magistrate Court Hearing";
 
-    private Map<LocalDate, Map<Defendant, List<Offence>>  > extractPleaDate2DefendantOffence(Hearing originatingHearing) {
-        final Map<LocalDate, Map<Defendant, List<Offence>>  > pleaDate2DefendantOffence = new HashMap<>();
+    private Map<LocalDate, Map<Defendant, List<Offence>>> extractPleaDate2DefendantOffence(Hearing originatingHearing) {
+        final Map<LocalDate, Map<Defendant, List<Offence>>> pleaDate2DefendantOffence = new HashMap<>();
         originatingHearing.getDefendants().forEach(
                 defendants ->
                         defendants.getOffences().forEach(
@@ -44,7 +44,7 @@ public class HearingTransformer {
         final List<Defendant> defendants = new ArrayList<>();
         //clone each defendant,
         entryT.getValue().entrySet().forEach(
-                entry->{
+                entry -> {
                     final Defendant defendant = entry.getKey();
                     final List<Offence> filteredOffences = entry.getValue();
                     final Defendant defendantClone = (new Defendant.Builder()).withAddress(defendant.getAddress()).withBailStatus(defendant.getBailStatus()).
@@ -55,19 +55,19 @@ public class HearingTransformer {
                 }
         );
         //default the hearing type
-        final String hearingType = originatingHearing.getType()==null || originatingHearing.getType().trim().length()==0 ? HearingTransformer.DEFAULT_HEARING_TYPE : originatingHearing.getType();
+        final String hearingType = originatingHearing.getType() == null || originatingHearing.getType().trim().length() == 0 ? HearingTransformer.DEFAULT_HEARING_TYPE : originatingHearing.getType();
         final Hearing originatingHearingClone = new Hearing(originatingHearing.getCaseId(), originatingHearing.getCaseUrn(),
-                originatingHearing.getCourtCentreId(), originatingHearing.getCourtCentreName(), defendants, originatingHearing.getSendingCommittalDate(),                                     hearingType);
+                originatingHearing.getCourtCentreId(), originatingHearing.getCourtCentreName(), defendants, originatingHearing.getSendingCommittalDate(), hearingType);
         return new MagsCourtHearingRecorded(originatingHearingClone, entryT.getKey(), UUID.randomUUID());
     }
 
     public List<MagsCourtHearingRecorded> transform(final Hearing originatingHearing) {
 
-        final Map<LocalDate, Map<Defendant, List<Offence>>  > pleaDate2DefendantOffence = extractPleaDate2DefendantOffence(originatingHearing);
+        final Map<LocalDate, Map<Defendant, List<Offence>>> pleaDate2DefendantOffence = extractPleaDate2DefendantOffence(originatingHearing);
 
         final List<MagsCourtHearingRecorded> result;
 
-        result = pleaDate2DefendantOffence.entrySet().stream().map( entry-> map(entry, originatingHearing) ).collect(Collectors.toList());
+        result = pleaDate2DefendantOffence.entrySet().stream().map(entry -> map(entry, originatingHearing)).collect(Collectors.toList());
 
         result.sort((e1, e2) -> e1.getConvictionDate().compareTo(e2.getConvictionDate()));
         return result;

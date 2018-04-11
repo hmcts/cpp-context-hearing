@@ -98,18 +98,7 @@ public class HearingEventProcessor {
                 .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
     }
 
-    @Handles("hearing.sending-sheet-recorded")
-    public void processSendingSheetRecordedRecordMags(final JsonEnvelope event) {
-        LOGGER.trace("Received hearing.sending-sheet-recorded event, processing");
-        final JsonObject payload = event.payloadAsJsonObject();
-        final SendingSheetCompletedRecorded sendingSheetCompletedRecorded = this.jsonObjectToObjectConverter.convert(payload, SendingSheetCompletedRecorded.class);
 
-        final RecordMagsCourtHearingCommand command = new RecordMagsCourtHearingCommand(sendingSheetCompletedRecorded.getHearing());
-
-        final JsonValue newPayload = this.objectToJsonValueConverter.convert(command);
-        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_RECORD_MAGS_COURT_HEARING)
-                .apply(newPayload));
-    }
 
     @Handles("hearing.case.plea-added")
     public void processCasePleaAdded(final JsonEnvelope event) {

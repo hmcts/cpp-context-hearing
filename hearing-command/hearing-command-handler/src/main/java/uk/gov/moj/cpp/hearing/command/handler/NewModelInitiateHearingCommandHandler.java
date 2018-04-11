@@ -16,12 +16,10 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
 import javax.inject.Inject;
-import javax.json.JsonObject;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 @ServiceComponent(COMMAND_HANDLER)

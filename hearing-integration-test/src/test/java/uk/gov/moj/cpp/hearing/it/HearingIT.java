@@ -6,7 +6,6 @@ import com.jayway.jsonpath.matchers.IsJson;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
 import org.json.JSONArray;
@@ -17,10 +16,7 @@ import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.moj.cpp.hearing.command.initiate.Address;
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
 
@@ -65,6 +61,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserLogsMultipleEvents;
@@ -101,7 +98,7 @@ public class HearingIT extends AbstractIT {
     private static final String FIELD_VALUE = "value";
     private static final String FIELD_PLEA_DATE = "pleaDate";
     private static final String FIELD_PERSON_ID = "personId";
-    private static final int EXPECTED_DEFAULT_HEARING_LENGTH = 15;
+
 
     @Test
     public void getHearing_CapabilityDisabled() {
@@ -226,180 +223,6 @@ public class HearingIT extends AbstractIT {
         thenHearingResultAmendedPublicEventShouldBePublished(hearingId, amendedResultForOffence);
     }
 
-    private void checkSendingSheetCompleteFlow(final String caseId, final List<String> pleaIds) {
-
-        final List<String> pleaIdsToCheck = new ArrayList<>(pleaIds);
-
-        StreamSupport.stream(waitForPleasForCase(caseId, pleaIds.size()).spliterator(), false)
-                .map(JSONObject.class::cast)
-                .forEach(pleaJson -> {
-                    pleaIdsToCheck.remove(pleaJson.getString("pleaId"));
-
-                    final JSONObject hearingJson = getExistingHearing(pleaJson.getString("hearingId"));
-
-                    assertThat(hearingJson.getInt("duration"), is(EXPECTED_DEFAULT_HEARING_LENGTH));
-                    assertThat(hearingJson.getString("hearingType"), is("Magistrate Court Hearing"));
-                    assertThat(hearingJson.getString("courtCentreName"), is("courtCentreName"));
-                    assertThat(hearingJson.getJSONArray("caseIds"), contains(caseId));
-                });
-
-        assertThat("Not all expected pleas were present", pleaIdsToCheck, is(empty()));
-    }
-
-    @Test
-    public void progressionSendingSheetCompleteNoneGuilty() throws IOException {
-        final MessageProducer messageProducer = publicEvents.createProducer();
-        final String eventName = "public.progression.events.sending-sheet-completed";
-        final String userId = UUID.randomUUID().toString();
-
-        final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), eventName)
-                .withUserId(userId)
-                .build();
-        final String resource = eventName + ".noguilty" + ".json";
-        //could use builders instead
-        final UUID caseID = UUID.randomUUID();
-
-        final String eventPayloadString = getStringFromResource(resource).replaceAll("CASE_ID", caseID.toString());
-        final JsonObject eventPayload = new StringToJsonObjectConverter().convert(eventPayloadString);
-        sendMessage(messageProducer, eventName, eventPayload, metadata);
-        ConditionTimeoutException timeout = null;
-        try {
-            waitForPleasForCase(caseID.toString(), 1);
-        } catch (final ConditionTimeoutException ex) {
-            timeout = ex;
-        }
-        assertThat("expected a timeout", timeout, is(not(nullValue())));
-    }
-
-    @Ignore("GPE-3032 - depends on sending sheet complete refactor")
-    @Test
-    public void progressionSendingSheetComplete1GuiltyPlea() throws IOException {
-        final MessageProducer messageProducer = publicEvents.createProducer();
-        final String eventName = "public.progression.events.sending-sheet-completed";
-        final String userId = UUID.randomUUID().toString();
-
-        final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), eventName)
-                .withUserId(userId)
-                .build();
-        final String resource = eventName + ".json";
-
-        final UUID caseID = UUID.randomUUID();
-        final UUID pleaID = UUID.randomUUID();
-        final UUID courtCentreID = UUID.randomUUID();
-
-        String eventPayloadString = getStringFromResource(resource).
-                replaceAll("CASE_ID", caseID.toString()).replaceAll("PLEA_ID", pleaID.toString());
-        eventPayloadString = eventPayloadString.replaceAll("COURT_CENTRE_ID", courtCentreID.toString());
-        final JsonObject eventPayload = new StringToJsonObjectConverter().convert(eventPayloadString);
-        sendMessage(messageProducer, eventName, eventPayload, metadata);
-        checkSendingSheetCompleteFlow(caseID.toString(), Arrays.asList(pleaID.toString()));
-    }
-
-    @Ignore("GPE-3032 - depends on sending sheet complete refactor")
-    @Test
-    public void progressionSendingSheetCompletePartialGuiltyThreeConvictionDates() throws IOException {
-        final MessageProducer messageProducer = publicEvents.createProducer();
-        final String eventName = "public.progression.events.sending-sheet-completed";
-        final String userId = UUID.randomUUID().toString();
-
-        final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), eventName)
-                .withUserId(userId)
-                .build();
-        final String resource = eventName + ".partialguilty" + ".json";
-        //could use builders instead
-
-        final UUID caseID = UUID.randomUUID();
-        final UUID courtCentreID = UUID.randomUUID();
-
-        final List<UUID> offenceIDs = new ArrayList<>();
-        final List<UUID> pleaIDs = new ArrayList<>();
-
-        String payloadString = getStringFromResource(resource);
-        payloadString = payloadString.replaceAll("CASE_ID", caseID.toString());
-        payloadString = payloadString.replaceAll("COURT_CENTRE_ID", courtCentreID.toString());
-
-        for (int done = 0; done <= 4; done++) {
-            final UUID offenceID = UUID.randomUUID();
-            final UUID pleaID = UUID.randomUUID();
-            offenceIDs.add(offenceID);
-            pleaIDs.add(pleaID);
-            payloadString = payloadString.replaceAll("OFFENCE_ID_" + done, offenceID.toString());
-            payloadString = payloadString.replaceAll("PLEA_ID_" + done, pleaID.toString());
-        }
-
-        final JsonObject eventPayload = new StringToJsonObjectConverter().convert(payloadString);
-        sendMessage(messageProducer, eventName, eventPayload, metadata);
-
-        checkSendingSheetCompleteFlow(caseID.toString(), pleaIDs.stream().map(pleaID -> pleaID.toString()).collect(Collectors.toList()));
-    }
-
-
-    private JSONArray waitForPleasForCase(final String caseId, final int pleaCount) {
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.pleas.by.case.id"), caseId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.case.pleas+json";
-        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(withJsonPath("$.pleas[" + (pleaCount - 1) + "]")))
-                ).getPayload();
-        final JSONObject jsonObject = new JSONObject(payload);
-        final JSONArray jsonPleas = jsonObject.getJSONArray("pleas");
-        Assert.assertEquals("expected plea count", pleaCount, jsonPleas.length());
-        return jsonPleas;
-    }
-
-
-    @Test
-    public void hearingAddHearingsTest() throws Exception {
-        final MessageProducer messageProducer = publicEvents.createProducer();
-        final String caseId = UUID.randomUUID().toString();
-        final String hearingId = UUID.randomUUID().toString();
-        final String userId = UUID.randomUUID().toString();
-        final String commandName = "public.hearing-confirmed";
-        final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), commandName)
-                .withUserId(userId)
-                .build();
-        final JsonObject eventPayload = getHearingConfirmedPayload("public.hearing-confirmed.json",
-                caseId, hearingId);
-        final MessageConsumer messageConsumer = publicEvents.createConsumer(commandName);
-        sendMessage(messageProducer, commandName, eventPayload, metadata);
-        final JsonPath message = retrieveMessage(messageConsumer);
-
-        assertThat(message.prettify(), new IsJson<>(
-                AllOf.allOf(
-                        withJsonPath("$._metadata.name", IsEqual.equalTo(commandName)),
-                        withJsonPath("$.hearing.id", IsEqual.equalTo(hearingId)),
-                        withJsonPath("$.caseId", IsEqual.equalTo(caseId))
-                )));
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingId)),
-                                withJsonPath("$.caseIds[0]", is(caseId)),
-                                withJsonPath("$.courtCentreName", is("Liverpool Crown Court")),
-                                withJsonPath("$.courtCentreId", is("e8821a38-546d-4b56-9992-ebdd772a561f")),
-                                withJsonPath("$.roomName", is("3")),
-                                withJsonPath("$.roomId", is("6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d")),
-                                withJsonPath("$.startDate", is("2016-06-01")),
-                                withJsonPath("$.hearingType", is("TRIAL")),
-                                withJsonPath("$.duration", is(7200)),
-                                withJsonPath("$.judge.id", is("1daefec3-2f76-8109-82d9-2e60544a6c01")),
-                                withJsonPath("$.judge.firstName", is("Neil")),
-                                withJsonPath("$.judge.lastName", is("Flewitt")),
-                                withJsonPath("$.judge.title", is("HHJ"))
-                        )));
-    }
 
     @Ignore
     @Test

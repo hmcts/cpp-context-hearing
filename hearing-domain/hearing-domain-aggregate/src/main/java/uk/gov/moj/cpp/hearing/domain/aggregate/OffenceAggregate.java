@@ -10,36 +10,34 @@ import java.util.stream.Stream;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 
 public class OffenceAggregate implements Aggregate {
 
     private static final long serialVersionUID = 1L;
     
-    private OffencePleaUpdated offencePleaUpdated;
+    private OffencePleaUpdated plea;
 
     @Override
     public Object apply(Object event) {
         return match(event).with(
-                when(OffencePleaUpdated.class).apply((offencePleaUpdated) -> this.offencePleaUpdated = offencePleaUpdated),
+                when(OffencePleaUpdated.class).apply((offencePleaUpdated) -> this.plea = offencePleaUpdated),
                 otherwiseDoNothing()
         );
     }
 
     public Stream<Object> initiateHearingOffence(InitiateHearingOffenceCommand initiateHearingOffenceCommand) {
 
-        if (this.offencePleaUpdated != null) {
+        if (this.plea != null) {
             return apply(Stream.of(new InitiateHearingOffenceEnriched(
                     initiateHearingOffenceCommand.getOffenceId(),
                     initiateHearingOffenceCommand.getCaseId(),
                     initiateHearingOffenceCommand.getDefendantId(),
                     initiateHearingOffenceCommand.getHearingId(),
-                    offencePleaUpdated.getHearingId(),
-                    offencePleaUpdated.getPleaDate(),
-                    offencePleaUpdated.getValue()
+                    plea.getHearingId(),
+                    plea.getPleaDate(),
+                    plea.getValue()
             )));
         }
         return apply(Stream.empty());
@@ -56,6 +54,6 @@ public class OffenceAggregate implements Aggregate {
     }
 
     public OffencePleaUpdated getPlea() {
-        return offencePleaUpdated;
+        return plea;
     }
 }

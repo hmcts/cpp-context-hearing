@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Address;
 
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.NewMagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -32,20 +33,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RunWith(MockitoJUnitRunner.class)
-public class HearingsPleaAggregateTest {
+public class CaseAggregateTest {
 
-
-    @Mock
-    private HearingTransformer hearingTransformer;
 
     @InjectMocks
-    private HearingsPleaAggregate hearingsPleaAggregate;
+    private CaseAggregate caseAggregate;
 
     @Test
     public void testRecordSendingSheetComplete() throws Exception {
         final SendingSheetCompleted sendingSheetCompleted = createSendingSheet();
 
-        Stream<Object> events = hearingsPleaAggregate.recordSendingSheetComplete(sendingSheetCompleted );
+        Stream<Object> events = caseAggregate.recordSendingSheetComplete(sendingSheetCompleted );
         List<Object> lEvents = events.collect(Collectors.toList());
         Assert.assertEquals(1, lEvents.size());
         Object event;
@@ -57,7 +55,7 @@ public class HearingsPleaAggregateTest {
         Assert.assertEquals(typedEvent.getHearing(), sendingSheetCompleted.getHearing() );
 
         //check that the second call does not result in another recording !
-        events = hearingsPleaAggregate.recordSendingSheetComplete(sendingSheetCompleted );
+        events = caseAggregate.recordSendingSheetComplete(sendingSheetCompleted );
         lEvents = events.collect(Collectors.toList());
         Assert.assertEquals(1, lEvents.size());
         event = lEvents.get(0);
@@ -109,74 +107,6 @@ public class HearingsPleaAggregateTest {
         final SendingSheetCompleted  sendingSheetCompleted =   (new SendingSheetCompleted.Builder()).withHearing(hearing).
                 withCrownCourtHearing(crownCourtHearing).build();
         return sendingSheetCompleted;
-    }
-
-    @Test
-    public void testRecordMagsCourtHearing() {
-        Whitebox.setInternalState(hearingsPleaAggregate, "hearingTransformer",  hearingTransformer);
-        final Hearing originatingHearing = (new Hearing.Builder()).build();
-        final List<MagsCourtHearingRecorded> magsCourtHearingRecordeds = new ArrayList<>();
-
-        LocalDate convictionDate;
-        List<Defendant> defendants;
-        List<Offence> offences;
-        Defendant defendant;
-        Offence offence;
-
-        final List<UUID> pleaIds = new ArrayList<>();
-        final List<LocalDate> convictionDates = new ArrayList<>();
-        final List<UUID> caseIds = new ArrayList<>();
-
-        for (int done=0; done<2; done++) {
-            MagsCourtHearingRecorded magsCourtHearingRecorded;
-            convictionDate = LocalDate.now().minusDays(2+done);
-            convictionDates.add(convictionDate);
-            UUID pleaId = UUID.randomUUID();
-            pleaIds.add(pleaId);
-            Plea plea = (new Plea.Builder()).withPleaDate(convictionDate).withPleaValue(PleaValue.GUILTY).withId(pleaId).build();
-            offence = (new Offence.Builder()).withPlea(plea).build();
-            offences = Arrays.asList(offence);
-            defendant = (new Defendant.Builder()).withOffences(offences).build();
-            defendants = Arrays.asList(defendant);
-            UUID caseId = UUID.randomUUID();
-            caseIds.add(caseId);
-            Hearing hearing = (new Hearing.Builder()).withDefendants(defendants).withCaseId(caseId).build();
-            magsCourtHearingRecorded = new MagsCourtHearingRecorded(hearing, convictionDate, null);
-            magsCourtHearingRecordeds.add(magsCourtHearingRecorded);
-        }
-
-        Mockito.when(hearingTransformer.transform(originatingHearing)).thenReturn(magsCourtHearingRecordeds);
-
-        final Stream<Object> events =  hearingsPleaAggregate.recordMagsCourtHearing(originatingHearing);
-        final List<Object> lEvents = events.collect(Collectors.toList());
-        Assert.assertEquals(2*magsCourtHearingRecordeds.size(), lEvents.size() );
-
-        //assume that the plea added events appear insequence after the magscourthearingrecorded events
-
-        for (int done=0; done<magsCourtHearingRecordeds.size(); done++) {
-            Assert.assertEquals(lEvents.get(done*2).getClass(), MagsCourtHearingRecorded.class);
-            Assert.assertEquals(lEvents.get(done*2+1).getClass(), PleaAdded.class);
-            MagsCourtHearingRecorded magsCourtHearingRecorded = (MagsCourtHearingRecorded) lEvents.get(done*2);
-            Assert.assertEquals(magsCourtHearingRecorded.getOriginatingHearing().getCaseId(), caseIds.get(done));
-            Assert.assertEquals(magsCourtHearingRecorded.getConvictionDate(), convictionDates.get(done));
-            PleaAdded pleaAdded = (PleaAdded) lEvents.get(done*2+1);
-            Assert.assertEquals(pleaAdded.getPlea().getId(), pleaIds.get(done));
-        }
-    }
-
-    @Test
-    public void testRecordMagsCourtHearingNoneGuilty() {
-        Whitebox.setInternalState(hearingsPleaAggregate, "hearingTransformer",  hearingTransformer);
-        final Hearing originatingHearing = (new Hearing.Builder()).build();
-        final List<MagsCourtHearingRecorded> magsCourtHearingRecordeds = new ArrayList<>();
-
-        Mockito.when(hearingTransformer.transform(originatingHearing)).thenReturn(magsCourtHearingRecordeds);
-
-        final Stream<Object> events =  hearingsPleaAggregate.recordMagsCourtHearing(originatingHearing);
-        final List<Object> lEvents = events.collect(Collectors.toList());
-
-        Assert.assertEquals(0, lEvents.size() );
-
     }
 
 

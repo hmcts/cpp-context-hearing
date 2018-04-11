@@ -5,12 +5,19 @@ baseUri: message://event/processor/message/hearing
 /hearing.event:
   post:
     body:
+
+# new model
         application/vnd.hearing.initiate-hearing-offence+json:
             schema: !include json/schema/hearing.command.initiate-hearing-offence.json
             example: !include json/hearing.command.initiate-hearing-offence.json
+
         application/vnd.hearing.initiate-hearing-offence-plea+json:
             schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
             example: !include json/hearing.command.initiate-hearing-offence-plea.json
+
+        application/vnd.hearing.initiate-mags-court+json:
+            schema: !include json/schema/hearing.command.initiate-mags-court.json
+            example: !include json/hearing.command.initiate-mags-court.json
 
         application/vnd.hearing.initiated+json:
             schema: !include json/schema/hearing.initiated.json
@@ -26,8 +33,15 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.hearing-event-ignored.json
             example: !include json/hearing.hearing-event-ignored.json
 
+        application/vnd.hearing.sending-sheet-recorded+json:
+            schema: !include json/schema/hearing.sending-sheet-recorded.json
+            example: !include json/hearing.sending-sheet-recorded.json
 
+        application/vnd.hearing.newmags-court-hearing-recorded+json:
+            schema: !include json/schema/hearing.newmags-court-hearing-recorded.json
+            example: !include json/hearing.newmags-court-hearing-recorded.json
 
+# old model
 
         application/vnd.hearing.results-shared+json:
             schema: !include json/schema/hearing.results-shared.json
@@ -44,15 +58,14 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.case.plea-changed+json:
             schema: !include json/schema/hearing.case.plea-changed.json
             example: !include json/hearing.case.plea-changed.json
-        application/vnd.hearing.sending-sheet-recorded+json:
-            schema: !include json/schema/hearing.sending-sheet-recorded.json
-            example: !include json/hearing.sending-sheet-recorded.json
+
         application/vnd.hearing.sending-sheet-previously-recorded+json:
             schema: !include json/schema/hearing.sending-sheet-previously-recorded.json
             example: !include json/hearing.sending-sheet-previously-recorded.json
         application/vnd.hearing.mags-court-hearing-recorded+json:
             schema: !include json/schema/hearing.mags-court-hearing-recorded.json
             example: !include json/hearing.mags-court-hearing-recorded.json
+
         application/vnd.hearing.hearing-plea-updated+json:
             schema: !include json/schema/hearing.hearing-plea-updated.json
             example: !include json/hearing.hearing-plea-updated.json
@@ -75,9 +88,14 @@ baseUri: message://event/processor/message/hearing
 /public.event:
   post:
     body:
+# new model
+        application/vnd.public.progression.events.sending-sheet-completed+json:
+                schema: !include json/schema/public.progression.events.sending-sheet-completed.json
+                example: !include json/public.progression.events.sending-sheet-completed.json
+
+# old model
+
         application/vnd.public.hearing-confirmed+json:
             schema: !include json/schema/public.hearing-confirmed.json
             example: !include json/public.hearing-confirmed.json
-        application/vnd.public.progression.events.sending-sheet-completed+json:
-            schema: !include json/schema/public.progression.events.sending-sheet-completed.json
-            example: !include json/public.progression.events.sending-sheet-completed.json
+

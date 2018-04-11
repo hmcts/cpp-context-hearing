@@ -12,29 +12,35 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithOnlyNonSequencedEvents;
+import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithOnlySequencedEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithPauseAndResumeEvents;
 
 public class HearingEventDefinitionsIT extends AbstractIT {
 
+
     private final UUID userId = randomUUID();
 
+    //TODO - GPE-3032 - none of these tests are validating the enrichment of hearing data in event definitions.  Follow hearingId.
 
     @Test
     public void shouldRecordAndReturnOnlyNonSequencedHearingEventDefinitions() {
 
         givenAUserHasLoggedInAsACourtClerk(this.userId);
+
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithOnlyNonSequencedEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
+
         thenHearingEventDefinitionsAreRecorded(eventDefinitions);
     }
-
 
     @Test
     public void shouldRecordAndReturnPauseAndResumeEventsInHearingEventDefinitions() {
 
         givenAUserHasLoggedInAsACourtClerk(this.userId);
+
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithPauseAndResumeEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
+
         thenHearingEventDefinitionsAreRecorded(eventDefinitions);
     }
 
@@ -44,6 +50,7 @@ public class HearingEventDefinitionsIT extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(this.userId);
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
+
         thenHearingEventDefinitionsAreRecorded(eventDefinitions);
     }
 
@@ -53,6 +60,7 @@ public class HearingEventDefinitionsIT extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(this.userId);
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents();
         andHearingEventDefinitionsAreAvailable(eventDefinitions);
+
         thenHearingEventDefinitionsAreRecorded(eventDefinitions);
     }
 }

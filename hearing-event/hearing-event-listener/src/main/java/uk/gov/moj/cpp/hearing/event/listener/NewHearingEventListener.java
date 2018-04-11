@@ -118,13 +118,12 @@ public class NewHearingEventListener {
                     LegalCase legalCase = legalCaseRepository.findById(caseIn.getCaseId());
                     if (null == legalCase) {
                         legalCase = LegalCase.builder().withId(caseIn.getCaseId()).withCaseurn(caseIn.getUrn()).build();
-                        id2Case.put(legalCase.getId(), legalCase);
-                        legalCaseRepository.save(legalCase);
+                        legalCaseRepository.saveAndFlush(legalCase);
                     }
+                    id2Case.put(legalCase.getId(), legalCase);
                 }
         );
-
-        this.ahearingRepository.save(Ahearing.builder()
+        Ahearing aHearing = Ahearing.builder()
                 .withId(hearing.getId())
                 .withHearingType(hearing.getType())
                 .withCourtCentreId(hearing.getCourtCentreId())
@@ -137,7 +136,10 @@ public class NewHearingEventListener {
                             Defendant defendant = translateDefendant(hearing.getId(), defendantIn).build();
                             defendant.setOffences(new ArrayList<>());
                             defendantIn.getOffences().forEach(
-                                    offenceIn -> defendant.getOffences().add(translateOffence(hearing.getId(), offenceIn, id2Case).withDefendant(defendant).build())
+                                    offenceIn -> {
+                                        Offence offence = translateOffence(hearing.getId(), offenceIn, id2Case).withDefendant(defendant).build();
+                                        defendant.getOffences().add(offence);
+                                    }
                             );
                             return defendant;
                         })
@@ -147,7 +149,8 @@ public class NewHearingEventListener {
                         .withFirstName(hearing.getJudge().getFirstName())
                         .withLastName(hearing.getJudge().getLastName())
                         .withTitle(hearing.getJudge().getTitle()))
-                .build());
+                .build();
+        this.ahearingRepository.save(aHearing);
     }
 
     @Transactional
@@ -256,10 +259,8 @@ public class NewHearingEventListener {
                     if (!defendant.isPresent()) {
                         String message = String.format("hearing %s defence counsel %s added for unkown defendant %s ", hearing.getId(), newDefenceCounselAdded.getAttendeeId(), did);
                         LOGGER.error(message);
-                        //TODO should throw an exception ?
                         throw new RuntimeException(message);
                     } else {
-                        //TODO should check whether its already been added ?
                         defenceAdvocate.getDefendants().add(defendant.get());
                     }
                 }

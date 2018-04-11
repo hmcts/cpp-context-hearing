@@ -22,7 +22,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.HearingsPleaAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
@@ -279,7 +279,7 @@ public class HearingCommandHandlerTest {
         when(this.eventSource.getStreamById(new UUID(CASE_ID.getLeastSignificantBits(), CASE_ID.getMostSignificantBits()))).thenReturn(this.caseEventStream);
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
-        when(this.aggregateService.get(this.hearingPleaEventStream, HearingsPleaAggregate.class)).thenReturn(new HearingsPleaAggregate());
+        when(this.aggregateService.get(this.hearingPleaEventStream, CaseAggregate.class)).thenReturn(new CaseAggregate());
     }
 
     @Test
@@ -635,143 +635,6 @@ public class HearingCommandHandlerTest {
                         ))
                 ).thatMatchesSchema()
         ));
-    }
-
-    @Test
-    public void shouldRaisePleaAdded() throws Exception {
-
-        final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
-                "hearing.update-plea.json", PLEA_GUILTY);
-        final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_UPDATE_PLEA),
-                publicHearingAddedPayload);
-        // When
-        this.hearingCommandHandler.updatePlea(addPleaCommand);
-        // Then
-        assertThat(verifyAppendAndGetArgumentFrom(this.hearingPleaEventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addPleaCommand)
-                                .withName(PLEA_ADDED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_GUILTY))
-                        ))),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addPleaCommand)
-                                .withName(HEARING_HEARING_PLEA_UPDATED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
-                        )))
-        ));
-    }
-
-    @Ignore
-    @Test
-    public void shouldRaiseVerdictUpdated() throws Exception {
-        // Given
-
-        final JsonObject updateVerdictPayload = getHearingUpdateVerdictPayload(
-                "hearing.update-verdict.json");
-        final JsonEnvelope updateVerdictCommand = envelopeFrom(metadataWithRandomUUID(HEARING_UPDATE_VERDICT),
-                updateVerdictPayload);
-        // When
-        this.hearingCommandHandler.updateVerdict(updateVerdictCommand);
-        // Then
-        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(updateVerdictCommand)
-                                .withName(HEARING_CONVICTION_DATE_ADDED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
-                        ))),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(updateVerdictCommand)
-                                .withName(HEARING_VERDICT_ADDED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s.%s", "verdict", "value", "category"), equalTo(VERDICT_CATEGORY)),
-                                withJsonPath(format("$.%s.%s", "verdict", "verdictDate"), equalTo(VERDICT_DATE))
-                        ))),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(updateVerdictCommand)
-                                .withName(HEARING_HEARING_VERDICT_UPDATED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
-                        )))
-        ));
-    }
-
-    @Ignore("GPE-3032")
-    @Test
-    public void shouldRaiseHearingPleaAdded() throws Exception {
-        // Given
-
-        final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
-                "hearing.plea.json", PLEA_GUILTY);
-        final JsonEnvelope addPleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_PLEA_ADD),
-                publicHearingAddedPayload);
-        // When
-        this.hearingCommandHandler.pleaAdd(addPleaCommand);
-        // Then
-        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addPleaCommand)
-                                .withName(HEARING_CONVICTION_DATE_ADDED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_CONVICTION_DATE), equalTo(PLEA_DATE))
-                        ))),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addPleaCommand)
-                                .withName(HEARING_PLEA_ADDED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_GUILTY))
-                        )))
-        ));
-
-    }
-
-    @Ignore("GPE-3032")
-    @Test
-    public void shouldRaiseHearingPleaChanged() throws Exception {
-        // Given
-
-        final JsonObject publicHearingAddedPayload = getSendCaseForListingPayload(
-                "hearing.plea.json", PLEA_NOT_GUILTY);
-        final JsonEnvelope changePleaCommand = envelopeFrom(metadataWithRandomUUID(HEARING_PLEA_CHANGE),
-                publicHearingAddedPayload);
-        // When
-        this.hearingCommandHandler.pleaChange(changePleaCommand);
-        // Then
-        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(changePleaCommand)
-                                .withName(HEARING_CONVICTION_DATE_REMOVED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString()))
-                        ))),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(changePleaCommand)
-                                .withName(HEARING_PLEA_CHANGED),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                                withJsonPath(format("$.%s.%s", "plea", "value"), equalTo(PLEA_NOT_GUILTY))
-                        )))
-        ));
-
     }
 
 

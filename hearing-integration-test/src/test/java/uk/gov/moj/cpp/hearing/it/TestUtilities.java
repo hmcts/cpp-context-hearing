@@ -41,6 +41,18 @@ public class TestUtilities {
             return matchers.stream().allMatch(m -> m.matches(json));
         }
 
+        public void expectNoneWithin(long timeout) {
+
+            JsonPath message = retrieveMessage(messageConsumer, timeout);
+
+            while (message != null && !matches(message.prettify())) {
+                message = retrieveMessage(messageConsumer);
+            }
+            if (message != null) {
+                fail("expected no messages");
+            }
+        }
+
         public JsonPath waitFor() {
 
             JsonPath message = retrieveMessage(messageConsumer, 30000);

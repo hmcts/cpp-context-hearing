@@ -4,10 +4,17 @@
   "properties": {
     "hearingId": {
       "$ref": "#/definitions/uuid"
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uuid"
+      }
     }
   },
   "required": [
-    "hearingId"
+    "hearingId",
+    "cases"
   ],
   "definitions": {
     "uuid": {
