@@ -11,14 +11,17 @@ public final class Case {
     private final String caseId;
     private final String caseUrn;
     private final List <Defendant> defendants;
+    private final List<Witness> witnesses;
     
     @JsonCreator
     public Case(@JsonProperty("caseId") final String caseId, 
             @JsonProperty("caseUrn") final String caseUrn, 
-            @JsonProperty("defendants") final List<Defendant> defendants) {
+            @JsonProperty("defendants") final List<Defendant> defendants,
+            @JsonProperty("witnesses") final List<Witness> witnesses) {
         this.caseId = caseId;
         this.caseUrn = caseUrn;
         this.defendants = defendants;
+        this.witnesses = witnesses;
     }
 
     @JsonIgnore
@@ -26,6 +29,7 @@ public final class Case {
         this.caseId = builder.caseId;
         this.caseUrn = builder.caseUrn;
         this.defendants = builder.defendants;
+        this.witnesses = builder.witnesses;
     }
     
     public String getCaseId() {
@@ -40,6 +44,10 @@ public final class Case {
         return defendants;
     }
 
+    public List<Witness> getWitnesses(){
+        return witnesses;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -49,7 +57,8 @@ public final class Case {
         private String caseId;
         private String caseUrn;
         private List<Defendant> defendants;
-        
+        private List<Witness> witnesses;
+
         public Builder withCaseId(final String caseId) {
             this.caseId = caseId;
             return this;
@@ -62,6 +71,11 @@ public final class Case {
         
         public Builder withDefendants(final List<Defendant> defendants) {
             this.defendants = defendants;
+            return this;
+        }
+
+        public Builder withWitnesses(List<Witness> witnesses){
+            this.witnesses = witnesses;
             return this;
         }
         

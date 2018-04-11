@@ -24,6 +24,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 
@@ -103,6 +104,28 @@ public class NewHearingEventListener {
         return builder;
     }
 
+    private Witness.Builder translateWitness(UUID hearingId, uk.gov.moj.cpp.hearing.command.initiate.Witness witnessIn, LegalCase id2Case) {
+        Witness.Builder builder = Witness.builder()
+                .withLegalCase(id2Case)
+                .withType(witnessIn.getType())
+                .withClassification(witnessIn.getClassification())
+                .withPersonId(witnessIn.getPersonId())
+                .withTitle(witnessIn.getTitle())
+                .withFirstName(witnessIn.getFirstName())
+                .withLastName(witnessIn.getLastName())
+                .withGender(witnessIn.getGender())
+                .withDateOfBirth(witnessIn.getDateOfBirth())
+                .withNationality(witnessIn.getNationality())
+                .withHomeTelephone(witnessIn.getHomeTelephone())
+                .withWorkTelephone(witnessIn.getWorkTelephone())
+                .withEmail(witnessIn.getEmail())
+                .withFax(witnessIn.getFax())
+                .withMobileTelephone(witnessIn.getMobile())
+                .withId(new HearingSnapshotKey(witnessIn.getId(), hearingId));
+
+        return builder;
+    }
+
 
     @Transactional
     @Handles("hearing.initiated")
@@ -144,6 +167,10 @@ public class NewHearingEventListener {
                             return defendant;
                         })
                         .collect(Collectors.toList()))
+                .withWitnesses(hearing.getWitnesses().stream()
+                        .map(witnessIn -> {
+                             return translateWitness(hearing.getId(), witnessIn, id2Case.get(witnessIn.getCaseId())).build();
+                        }).collect((Collectors.toList())))
                 .withJudge((uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.Builder) uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.builder()
                         .withId(new HearingSnapshotKey(hearing.getJudge().getId(), hearing.getId()))
                         .withFirstName(hearing.getJudge().getFirstName())

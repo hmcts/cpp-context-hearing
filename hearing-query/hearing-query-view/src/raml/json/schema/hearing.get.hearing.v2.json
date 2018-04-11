@@ -272,9 +272,64 @@
         "personId"
       ]
     },
+    "witness": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "type": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "homeTelephone": {
+          "type": "string"
+        },
+        "workTelephone": {
+          "type": "string"
+        },
+        "mobile": {
+          "type": "string"
+        },
+        "fax": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "classification",
+        "personId"
+      ]
+    },
     "case":{
       "type":"object",
-      "additionalProperties":false,
       "properties":{
         "caseId":{
           "$ref":"#/definitions/uuid"
@@ -286,6 +341,12 @@
           "type":"array",
           "items":{
             "$ref":"#/definitions/defendant"
+          }
+        },
+        "witnesses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/witness"
           }
         }
       },
@@ -364,8 +425,8 @@
       "pattern":"^((([\\+-]?\\d{4}(?!\\d{2}\\b))\\-(0[13578]|1[02])\\-(0[1-9]|[12]\\d|3[01]))|(([\\+-]?\\d{4}(?!\\d{2}\\b))\\-(0[13456789]|1[012])\\-(0[1-9]|[12]\\d|30))|(([\\+-]?\\d{4}(?!\\d{2}\\b))\\-02\\-(0[1-9]|1\\d|2[0-8]))|(((1[6-9]|[2-9]\\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))\\-02\\-29))$"
     },
     "timePattern": {
-       "type":"string",
-       "pattern":"(2[0-3]|[01][0-9]):[0-5][0-9](:[0-5][0-9])?"
+      "type":"string",
+      "pattern":"(2[0-3]|[01][0-9]):[0-5][0-9](:[0-5][0-9])?"
     }
   }
 }

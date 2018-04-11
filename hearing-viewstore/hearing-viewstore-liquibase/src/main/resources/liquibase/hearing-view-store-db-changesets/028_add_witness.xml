@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="28" author="I2T" logicalFilePath="028_add_witness.xml"  >
+
+        <createTable tableName="a_witness">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="case_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="TEXT"/>
+            <column name="classification" type="TEXT"/>
+            <column name="person_id" type="UUID"/>
+            <column name="title" type="TEXT"/>
+            <column name="first_name" type="TEXT"/>
+            <column name="last_name" type="TEXT"/>
+            <column name="date_of_birth" type="DATE"/>
+            <column name="nationality" type="TEXT"/>
+            <column name="gender" type="TEXT"/>
+            <column name="work_telephone" type="TEXT"/>
+            <column name="home_telephone" type="TEXT"/>
+            <column name="mobile_telephone" type="TEXT"/>
+            <column name="fax" type="TEXT"/>
+            <column name="email" type="TEXT"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_witness" tableName="a_witness"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_witness"
+                                 constraintName="fk_witness_hearing" referencedColumnNames="id"
+                                 referencedTableName="a_hearing"/>
+
+        <addForeignKeyConstraint baseColumnNames="case_id" baseTableName="a_witness"
+                                 constraintName="fk_witness_case" referencedColumnNames="id"
+                                 referencedTableName="a_case"/>
+
+    </changeSet>
+
+</databaseChangeLog>

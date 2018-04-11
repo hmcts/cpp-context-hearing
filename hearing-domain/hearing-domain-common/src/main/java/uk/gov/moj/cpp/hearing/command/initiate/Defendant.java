@@ -261,6 +261,7 @@ public class Defendant {
 
         defendant.getOffences().forEach(offence -> builder.addOffence(Offence.from(offence)));
 
+
         return builder;
     }
 }

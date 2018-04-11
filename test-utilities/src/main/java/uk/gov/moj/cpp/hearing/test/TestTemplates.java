@@ -10,6 +10,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.command.initiate.Witness;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
 
@@ -69,6 +70,7 @@ public class TestTemplates {
                                                 .withStartDate(PAST_LOCAL_DATE.next())
                                 )
                         )
+
                 );
     }
 
@@ -140,6 +142,25 @@ public class TestTemplates {
                                                 .withLegislation(STRING.next())
                                                 .withTitle(STRING.next())
                                 )
+                        )
+                        .addWintess(Witness.builder()
+                                        .withId(randomUUID())
+                                        .withCaseId(caseId)
+                                        .withType("Prosecution")
+                                        .withClassification("Expert")
+                                        .withPersonId(randomUUID())
+                                .withTitle(STRING.next())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .withGender(STRING.next())
+                                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                                .withEmail(STRING.next())
+                                .withFax(STRING.next())
+                                .withHomeTelephone(STRING.next())
+                                .withWorkTelephone(STRING.next())
+                                .withMobile(STRING.next())
+                                .withNationality(STRING.next())
+
                         )
                 );
     }

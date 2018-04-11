@@ -15,6 +15,25 @@
           "firstName":"Sean",
           "lastName":"Parker"
         }
+      ],
+      "witnesses": [
+        {
+          "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
+          "type":"Prosecution",
+          "classification": "Professional",
+          "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+          "title": "Mr",
+          "firstName": "David",
+          "lastName": "LLOYD",
+          "dateOfBirth": "1980-07-15",
+          "nationality": "England",
+          "gender": "Male",
+          "homeTelephone": "02012345678",
+          "workTelephone": "02012345679",
+          "mobile": "07777777777",
+          "fax": "02011111111",
+          "email": "email@email.com"
+        }
       ]
     },
     {
@@ -35,6 +54,25 @@
         {
           "firstName":"James",
           "lastName":"Gosling"
+        }
+      ],
+      "witnesses": [
+        {
+          "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
+          "type":"Prosecution",
+          "classification": "Professional",
+          "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+          "title": "Mr",
+          "firstName": "David",
+          "lastName": "LLOYD",
+          "dateOfBirth": "1980-07-15",
+          "nationality": "England",
+          "gender": "Male",
+          "homeTelephone": "02012345678",
+          "workTelephone": "02012345679",
+          "mobile": "07777777777",
+          "fax": "02011111111",
+          "email": "email@email.com"
         }
       ]
     }

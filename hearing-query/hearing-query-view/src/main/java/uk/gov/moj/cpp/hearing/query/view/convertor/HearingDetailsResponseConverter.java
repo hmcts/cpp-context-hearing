@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
@@ -172,32 +174,40 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             }
             
             // 1. building a set of legal cases to avoid duplications
-            final Set<LegalCase> cases = source.getDefendants().stream()
+            final Set<LegalCase> legalCases = source.getDefendants().stream()
                     .flatMap(defendant -> defendant.getOffences().stream())
                     .map(Offence::getLegalCase)
                     .distinct()
                     .collect(toSet());
 
-            if (isEmpty(cases)) {
+            if (isEmpty(legalCases)) {
                 return emptyList();
             }
             
             // 2. building a data structure map to build the expected response
-            final Map<LegalCase, Map<Defendant, List<Offence>>> defendants = new LinkedHashMap<>();
+            final Map<LegalCase, Cases> cases = new LinkedHashMap<>();
 
             // 3. filtering the given data and filling the structure map
-            cases.forEach(c -> {
-                defendants.putIfAbsent(c, new LinkedHashMap<>());
+            legalCases.forEach(legalCase -> {
+                cases.putIfAbsent(legalCase,  new Cases());
+
                 source.getDefendants().forEach(d -> {
-                    defendants.get(c).putIfAbsent(d, new ArrayList<>());
-                    d.getOffences().stream().filter(o -> isOffenceCase(o, c)).forEach(defendants.get(c).get(d)::add);
+                    cases.get(legalCase).getDefendants().putIfAbsent(d, new ArrayList<>());
+                    d.getOffences().stream().filter(offence -> isOffenceCase(offence, legalCase)).forEach(cases.get(legalCase).getDefendants().get(d)::add);
                 });
+
+                source.getWitnesses().stream().filter(witness -> isWitnessCase(witness , legalCase)).forEach(cases.get(legalCase).getWitnesses()::add);
             });
 
             // 4. converting the data structure map to the respective Java Script Object
             // Notation entities
-            return defendants.entrySet().stream().map(e -> new CaseConverter().convert(e)).collect(toList());
+            return cases.entrySet().stream().map(e -> new CaseConverter().convert(e)).collect(toList());
         }
+
+        private boolean isWitnessCase(final Witness witness, final LegalCase legalCase) {
+            return null != legalCase.getId() && null != witness.getLegalCase() && legalCase.getId().equals(witness.getLegalCase().getId());
+        }
+
 
         private boolean isOffenceCase(final Offence offence, final LegalCase legalCase) {
             return null != legalCase.getId() && null != offence.getLegalCase() && legalCase.getId().equals(offence.getLegalCase().getId());
@@ -205,12 +215,33 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
     }
 
+    // Cases class
+    private static final class Cases {
+        Map<Defendant, List<Offence>> defendants = new HashMap<>();
+        List<Witness> witnesses = new ArrayList<>();
+
+        public Map<Defendant, List<Offence>> getDefendants() {
+            return defendants;
+        }
+
+        public void setDefendants(Map<Defendant, List<Offence>> defendants) {
+            this.defendants = defendants;
+        }
+
+        public List<Witness> getWitnesses() {
+            return witnesses;
+        }
+
+        public void setWitnesses(List<Witness> witnesses) {
+            this.witnesses = witnesses;
+        }
+    }
     // CasesConverter
     //-----------------------------------------------------------------------
-    private static final class CaseConverter implements Converter<Entry<LegalCase, Map<Defendant, List<Offence>>>, Case> {
+    private static final class CaseConverter implements Converter<Entry<LegalCase, Cases>, Case> {
 
         @Override
-        public Case convert(final Entry<LegalCase, Map<Defendant, List<Offence>>> source) {
+        public Case convert(final Entry<LegalCase, Cases> source) {
             if (null == source || null == source.getKey()) {
                 return null;
             }
@@ -220,10 +251,43 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             return Case.builder()
                     .withCaseId(legalCase.getId().toString())
                     .withCaseUrn(legalCase.getCaseurn())
-                    .withDefendants(source.getValue().entrySet().stream()
+                    .withDefendants(source.getValue().getDefendants().entrySet().stream()
                             .map(e -> new DefendantConverter().convert(e))
                             .collect(toList()))
-                    .build();
+                    .withWitnesses(source.getValue().getWitnesses().stream()
+                            .map(w -> new WitnessConverter().convert(w)).collect(toList())).build();
+        }
+
+
+    }
+
+    // WitnessConverter
+    //-----------------------------------------------------------------------
+    private static final class WitnessConverter implements  Converter<Witness, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness> {
+
+        @Override
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness convert(Witness source) {
+            if (null == source || null == source.getId()) {
+                return null;
+            }
+            return new uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness()
+                    .withId(toStringOrNull(source.getId()))
+                    .withCaseId(toStringOrNull(source.getLegalCase().getId()))
+                    .withtType(source.getType())
+                    .withClassification(source.getClassification())
+                    .withPersonId(toStringOrNull(source.getPersonId()))
+                    .withTitle(source.getTitle())
+                    .withFirstName(source.getFirstName())
+                    .withLastName(source.getLastName())
+                    .withDateOfBirth(toDateStringOrNull(source.getDateOfBirth()))
+                    .withNationality(source.getNationality())
+                    .withGender(source.getGender())
+                    .withHomeTelephone(source.getHomeTelephone())
+                    .withWorkTelephone(source.getWorkTelephone())
+                    .withMobile(source.getMobileTelephone())
+                    .withEmail(source.getEmail())
+                    .withFax(source.getFax());
+
         }
     }
 

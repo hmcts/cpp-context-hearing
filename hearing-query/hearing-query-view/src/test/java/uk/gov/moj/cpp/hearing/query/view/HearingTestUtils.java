@@ -20,6 +20,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
 
 public class HearingTestUtils {
 
@@ -52,6 +53,8 @@ public class HearingTestUtils {
         final Offence offence1 = buildOffence1(ahearing, defendant1, legalCase1);
         defendant1.setOffences(Arrays.asList(offence1));
         defendant2.setOffences(Arrays.asList(offence1));
+
+        ahearing.setWitnesses(Arrays.asList(buildWitness(ahearing, legalCase1)));
         
         // 5. add the created hearing to the hearing list
         return Arrays.asList(ahearing);
@@ -200,7 +203,28 @@ public class HearingTestUtils {
                 .withUnanimous(false)
                 .build();
     }
-    
+
+    public static Witness buildWitness(final Ahearing ahearing, final LegalCase legalCase) {
+        return Witness.builder()
+                .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), ahearing.getId()))
+                .withHearing(ahearing)
+                .withPersonId(UUID.fromString("5a6e2001-91ed-4af2-99af-f30ddc9ef5af"))
+                .withFirstName("Ken")
+                .withLastName("Thompson")
+                .withDateOfBirth(parse("1943-02-04T00:00:00Z").toLocalDate())
+                .withNationality("United States")
+                .withGender("M")
+                .withType("Prosecution")
+                .withClassification("classification")
+                .withWorkTelephone("02070101011")
+                .withHomeTelephone("02070101010")
+                .withMobileTelephone("07422263910")
+                .withFax("021111111")
+                .withEmail("ken.thompson@acme.me")
+                .withLegalCase(legalCase)
+                .build();
+    }
+
     public static Optional<Hearing> getHearing() {
         final Hearing hearingA = new Hearing(randomUUID(), startDate, null, 1,
                 null, null, null);

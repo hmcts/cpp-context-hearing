@@ -182,9 +182,25 @@ public class NewModelInitiateHearingCommandHandlerTest {
                                 withJsonPath("$.hearing.defendants.[0].offences.[0].startDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getStartDate().toString())),
                                 withJsonPath("$.hearing.defendants.[0].offences.[0].orderIndex", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getOrderIndex())),
                                 withJsonPath("$.hearing.defendants.[0].offences.[0].count", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCount())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].convictionDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getConvictionDate().toString()))
+                                withJsonPath("$.hearing.defendants.[0].offences.[0].convictionDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getConvictionDate().toString())),
 
-                        ))).thatMatchesSchema()
+                                withJsonPath("$.hearing.witnesses.[0].type", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getType())),
+                                withJsonPath("$.hearing.witnesses.[0].classification", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getClassification())),
+                                withJsonPath("$.hearing.witnesses.[0].caseId", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getCaseId().toString())),
+                                withJsonPath("$.hearing.witnesses.[0].personId", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getPersonId().toString())),
+                                withJsonPath("$.hearing.witnesses.[0].title", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getTitle())),
+                                withJsonPath("$.hearing.witnesses.[0].firstName", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getFirstName())),
+                                withJsonPath("$.hearing.witnesses.[0].lastName", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getLastName())),
+                                withJsonPath("$.hearing.witnesses.[0].nationality", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getNationality())),
+                                withJsonPath("$.hearing.witnesses.[0].gender", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getGender())),
+                                withJsonPath("$.hearing.witnesses.[0].dateOfBirth", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getDateOfBirth().toString())),
+                                withJsonPath("$.hearing.witnesses.[0].homeTelephone", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getHomeTelephone())),
+                                withJsonPath("$.hearing.witnesses.[0].workTelephone", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getWorkTelephone())),
+                                withJsonPath("$.hearing.witnesses.[0].fax", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getFax())),
+                                withJsonPath("$.hearing.witnesses.[0].mobile", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getMobile()))
+
+
+                                ))).thatMatchesSchema()
         ));
     }
 

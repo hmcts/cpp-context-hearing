@@ -1,6 +1,6 @@
 {
   "cases": [{
-    "caseId": "000000-0000-0000-000000000000",
+    "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
     "urn": "87GD9945217"
   }],
   "hearing": {
@@ -42,7 +42,7 @@
         },
         "defendantCases": [
           {
-            "caseId": "000000-0000-0000-000000000000",
+            "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
             "bailStatus": "bailed",
             "custodyTimeLimitDate": "2018-01-30"
           }
@@ -50,7 +50,7 @@
         "offences": [
           {
             "id": "7e2f843e-d639-40b3-8611-8015f3a18958",
-            "caseId": "000000-0000-0000-000000000000",
+            "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
             "offenceCode": "H8198",
             "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
             "section": "Section 51",
@@ -63,6 +63,26 @@
             "legislation": "legislation"
           }
         ]
+      }
+    ],
+    "witnesses":[
+      {
+        "id":"7e2f843e-d639-40b3-8611-8015f3a18810",
+        "caseId":"7e2f843e-d639-40b3-8611-8015f3a18950",
+        "type":"Prosecution",
+        "classification":"Professional",
+        "personId":"ab746921-d839-4867-bcf9-b41db8ebc852",
+        "title":"Mr",
+        "firstName":"David",
+        "lastName":"LLOYD",
+        "dateOfBirth":"1980-07-15",
+        "nationality":"England",
+        "gender":"Male",
+        "homeTelephone":"02012345678",
+        "workTelephone":"02012345679",
+        "mobile":"07777777777",
+        "fax":"02011111111",
+        "email":"email@email.com"
       }
     ]
   }

@@ -3,9 +3,10 @@ package uk.gov.moj.cpp.hearing.command.initiate;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.unmodifiableList;
@@ -24,6 +25,7 @@ public class Hearing {
     private final Boolean notBefore;
     private final Integer estimateMinutes;
     private final List<Defendant> defendants;
+    private final List<Witness> witnesses;
 
     @JsonCreator
     public Hearing(@JsonProperty("id") final UUID id,
@@ -36,7 +38,8 @@ public class Hearing {
                    @JsonProperty("startDateTime") final ZonedDateTime startDateTime,
                    @JsonProperty("notBefore") final Boolean notBefore,
                    @JsonProperty("estimateMinutes") final Integer estimateMinutes,
-                   @JsonProperty("defendants") final List<Defendant> defendants) {
+                   @JsonProperty("defendants") final List<Defendant> defendants,
+                   @JsonProperty("witnesses") final List<Witness> witnesses) {
         this.id = id;
         this.type = type;
         this.courtCentreId = courtCentreId;
@@ -48,6 +51,7 @@ public class Hearing {
         this.notBefore = notBefore;
         this.estimateMinutes = estimateMinutes;
         this.defendants = defendants;
+        this.witnesses = witnesses;
     }
 
     public UUID getId() {
@@ -94,6 +98,10 @@ public class Hearing {
         return defendants;
     }
 
+    public  List<Witness> getWitnesses(){
+        return witnesses;
+    }
+
 
     public static class Builder {
 
@@ -108,6 +116,7 @@ public class Hearing {
         private boolean notBefore;
         private Integer estimateMinutes;
         private List<Defendant.Builder> defendants = new ArrayList<>();
+        private List<Witness.Builder> witnesses = new ArrayList<>();
 
         public Builder() {
 
@@ -155,6 +164,10 @@ public class Hearing {
 
         public List<Defendant.Builder> getDefendants() {
             return defendants;
+        }
+
+        public List<Witness.Builder> getWitnesses(){
+            return witnesses;
         }
 
         public Builder withId(UUID id) {
@@ -212,11 +225,17 @@ public class Hearing {
             return this;
         }
 
+        public Builder addWintess(Witness.Builder witness){
+            this.witnesses.add(witness);
+            return this;
+        }
+
         public Hearing build() {
             return new Hearing(id, type, courtCentreId, courtCentreName, courtRoomId, courtRoomName,
                     ofNullable(judge).map(Judge.Builder::build).orElse(null),
                     startDateTime, notBefore, estimateMinutes,
-                    unmodifiableList(defendants.stream().map(Defendant.Builder::build).collect(Collectors.toList())));
+                    unmodifiableList(defendants.stream().map(Defendant.Builder::build).collect(Collectors.toList())),
+                    unmodifiableList(witnesses.stream().map(Witness.Builder::build).collect(Collectors.toList())));
         }
     }
 
@@ -238,6 +257,8 @@ public class Hearing {
                 .withEstimateMinutes(hearing.getEstimateMinutes());
 
         hearing.getDefendants().forEach(defendant -> builder.addDefendant(Defendant.from(defendant)));
+
+        hearing.getWitnesses().forEach( witness -> builder.addWintess(Witness.from(witness)));
 
         return builder;
     }
