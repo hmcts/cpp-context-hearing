@@ -167,10 +167,10 @@ public class NewHearingEventListener {
                             return defendant;
                         })
                         .collect(Collectors.toList()))
-                .withWitnesses(hearing.getWitnesses().stream()
+                .withWitnesses((hearing.getWitnesses() == null ? new ArrayList<Witness>() : hearing.getWitnesses().stream()
                         .map(witnessIn -> {
                              return translateWitness(hearing.getId(), witnessIn, id2Case.get(witnessIn.getCaseId())).build();
-                        }).collect((Collectors.toList())))
+                        }).collect((Collectors.toList()))))
                 .withJudge((uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.Builder) uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.builder()
                         .withId(new HearingSnapshotKey(hearing.getJudge().getId(), hearing.getId()))
                         .withFirstName(hearing.getJudge().getFirstName())
