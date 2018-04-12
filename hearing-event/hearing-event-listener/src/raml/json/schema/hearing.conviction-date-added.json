@@ -5,12 +5,6 @@
     "hearingId": {
       "$ref": "#/definitions/uuid"
     },
-    "caseId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "defendantId": {
-      "$ref": "#/definitions/uuid"
-    },
     "offenceId": {
       "$ref": "#/definitions/uuid"
     },

@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -160,12 +161,8 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                         withMetadataEnvelopedFrom(addVerdictCommand)
                                 .withName("hearing.conviction-date-added"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.caseId", equalTo(hearingUpdateVerdictCommand.getCaseId().toString())),
-                                withJsonPath("$.hearingId", equalTo(hearingUpdateVerdictCommand.getHearingId().toString())),
                                 withJsonPath("$.offenceId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
-                                withJsonPath("$.defendantId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getId().toString())),
-
-                                withJsonPath("$.convictionDate", equalTo(verdict.getVerdictDate().toString()))
+                                withJsonPath("$.convictionDate", equalTo(initiateHearingCommand.getHearing().getStartDateTime().toLocalDate().toString()))
 
                         )))
         );
@@ -241,10 +238,8 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                         withMetadataEnvelopedFrom(addVerdictCommand)
                                 .withName("hearing.conviction-date-removed"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.caseId", equalTo(hearingUpdateVerdictCommand.getCaseId().toString())),
-                                withJsonPath("$.hearingId", equalTo(hearingUpdateVerdictCommand.getHearingId().toString())),
                                 withJsonPath("$.offenceId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getId().toString())),
-                                withJsonPath("$.defendantId", equalTo(hearingUpdateVerdictCommand.getDefendants().get(0).getId().toString()))
+                                withoutJsonPath("$.convictionDate")
                         )))
         );
     }

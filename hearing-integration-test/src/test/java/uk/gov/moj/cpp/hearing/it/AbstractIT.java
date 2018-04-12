@@ -172,11 +172,11 @@ public class AbstractIT {
         }
     }
 
-    protected String getStringFromResource(final String path) throws IOException {
+    protected static String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path), defaultCharset());
     }
 
-    protected String getURL(final String property, final Object... args) {
+    protected static String getURL(final String property, final Object... args) {
         return getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty(property), args);
     }
 

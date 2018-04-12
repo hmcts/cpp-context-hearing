@@ -1,7 +1,34 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+
+import java.io.StringReader;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +39,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -34,34 +65,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.io.StringReader;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NewHearingEventListenerTest {
@@ -71,6 +75,9 @@ public class NewHearingEventListenerTest {
 
     @Mock
     private LegalCaseRepository legalCaseRepository;
+    
+    @Mock
+    private OffenceRepository offenceRepository;
 
     @InjectMocks
     private NewHearingEventListener newHearingEventListener;
@@ -439,32 +446,32 @@ public class NewHearingEventListenerTest {
     @Test
     public void convictionDateUpdated_shouldUpdateTheConvictionDate() throws Exception {
 
-        UUID hearingId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = offenceId;
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
+        final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(hearingId, offenceId, PAST_LOCAL_DATE.next());
 
-        ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(randomUUID(), hearingId, randomUUID(),
-                randomUUID(), PAST_LOCAL_DATE.next());
-
-        Ahearing ahearing = Ahearing.builder().withId(hearingId)
+        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withOffences(asList(
                                         Offence.builder()
-                                                .withId(new HearingSnapshotKey(convictionDateAdded.getOffenceId(), hearingId))
+                                                .withId(snapshotKey)
                                                 .build()
                                 ))
                                 .build()))
                 .build();
 
-        when(this.ahearingRepository.findById(hearingId)).thenReturn(ahearing);
+        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+
+        when(this.offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
         newHearingEventListener.convictionDateUpdated(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
                 objectToJsonObjectConverter.convert(convictionDateAdded)));
 
-        verify(this.ahearingRepository).save(ahearing);
+        verify(this.offenceRepository).save(offence);
 
-        Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
         assertThat(offence.getId().getId(), is(convictionDateAdded.getOffenceId()));
-        assertThat(offence.getId().getHearingId(), is(convictionDateAdded.getHearingId()));
         assertThat(offence.getConvictionDate(), is(convictionDateAdded.getConvictionDate()));
     }
 
@@ -472,31 +479,34 @@ public class NewHearingEventListenerTest {
     @Test
     public void convictionDateRemoved_shouldSetConvictionDateToNull() throws Exception {
 
-        ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(randomUUID(), randomUUID(), randomUUID(),
-                randomUUID());
-
-        Ahearing ahearing = Ahearing.builder().withId(convictionDateRemoved.getHearingId())
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
+        final ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(hearingId, offenceId);
+        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withOffences(asList(
                                         Offence.builder()
-                                                .withId(new HearingSnapshotKey(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId()))
+                                                .withId(snapshotKey)
                                                 .withConvictionDate(LocalDate.now())
                                                 .build()
                                 ))
                                 .build()))
-                .build();
 
-        when(this.ahearingRepository.findById(convictionDateRemoved.getHearingId())).thenReturn(ahearing);
+                .build();
+        
+        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        
+        when(offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
         newHearingEventListener.convictionDateRemoved(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
                 objectToJsonObjectConverter.convert(convictionDateRemoved)));
 
-        verify(this.ahearingRepository).save(ahearing);
+        verify(this.offenceRepository).save(offence);
 
-        Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
-        assertThat(offence.getId().getId(), is(convictionDateRemoved.getOffenceId()));
-        assertThat(offence.getId().getHearingId(), is(convictionDateRemoved.getHearingId()));
+        assertThat(offence.getId().getId(), is(offenceId));
+        assertThat(offence.getId().getHearingId(), is(hearingId));
         assertThat(offence.getConvictionDate(), is(nullValue()));
     }
 

@@ -205,11 +205,11 @@ public class HearingAggregate implements Aggregate {
     private void updateConvictionDate(final Builder<Object> streamBuilder, final UUID hearingUpdateVerdictCommandCaseId, final UUID hearingId, final Defendant defendant, final Offence offence) {
         if (offence.getVerdict().getValue().getCategory().equalsIgnoreCase(PLEA_GUILTY)) {
             // set conviction date to hearing date when verdict = Found guilty
-            final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(hearingUpdateVerdictCommandCaseId, hearingId, defendant.getId(), offence.getId(), hearingDate);
+            final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(hearingId, offence.getId(), hearingDate);
             streamBuilder.add(convictionDateAdded);
         } else {
             //set conviction date to null when verdict = Found Not Guilty
-            final ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(hearingUpdateVerdictCommandCaseId, hearingId, defendant.getId(), offence.getId());
+            final ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(hearingId, offence.getId());
             streamBuilder.add(convictionDateRemoved);
         }
     }
@@ -217,9 +217,9 @@ public class HearingAggregate implements Aggregate {
     private void updateConvitionDateForPlea(final Builder<Object> streamBuilder, final HearingPlea hearingPlea) {
         if (hearingPlea.getPlea().getValue().equalsIgnoreCase(PLEA_GUILTY)) {
             // For GUILTY plea, hearingDate = pleaDate = convictionDate
-            streamBuilder.add(new ConvictionDateAdded(hearingPlea.getCaseId(), hearingPlea.getHearingId(), hearingPlea.getDefendantId(), hearingPlea.getOffenceId(), hearingPlea.getPlea().getPleaDate()));
+            streamBuilder.add(new ConvictionDateAdded(hearingPlea.getHearingId(), hearingPlea.getOffenceId(), hearingPlea.getPlea().getPleaDate()));
         } else {
-            streamBuilder.add(new ConvictionDateRemoved(hearingPlea.getCaseId(), hearingPlea.getHearingId(), hearingPlea.getDefendantId(), hearingPlea.getOffenceId()));
+            streamBuilder.add(new ConvictionDateRemoved(hearingPlea.getHearingId(), hearingPlea.getOffenceId()));
         }
     }
 

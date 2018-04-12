@@ -32,6 +32,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 public class NewModelHearingAggregate implements Aggregate {
 
+    private static final String GUILTY = "GUILTY";
     private static final String REASON_ALREADY_LOGGED = "Already logged";
     private static final String REASON_ALREADY_DELETED = "Already deleted";
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
@@ -61,16 +62,27 @@ public class NewModelHearingAggregate implements Aggregate {
     private void onInitiateHearingOffencePlead(InitiateHearingOffencePlead initiateHearingOffencePlead) {
 
     }
-
-    public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final LocalDate pleaDate,
-                                     final String pleaValue) {
-        return apply(Stream.of(HearingOffencePleaUpdated.builder()
-                .withHearingId(originHearingId)
-                .withOffenceId(offenceId)
-                .withPleaDate(pleaDate)
-                .withValue(pleaValue)
-                .build()
-        ));
+    
+    public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
+            final String pleaValue) {
+        final List<Object> events = new ArrayList<>();
+        events.add(HearingOffencePleaUpdated.builder()
+                    .withHearingId(hearingId)
+                    .withOffenceId(offenceId)
+                    .withPleaDate(pleaDate)
+                    .withValue(pleaValue)
+                    .build());
+        events.add(isGuilty(pleaValue) ? 
+                ConvictionDateAdded.builder()
+                    .withHearingId(hearingId)
+                    .withOffenceId(offenceId)
+                    .withConvictionDate(pleaDate)
+                    .build() : 
+               ConvictionDateRemoved.builder()
+                    .withHearingId(hearingId)
+                    .withOffenceId(offenceId)
+                    .build());
+        return apply(events.stream());
     }
 
     private void onHearingEventLogged(HearingEventLogged hearingEventLogged) {
@@ -79,6 +91,10 @@ public class NewModelHearingAggregate implements Aggregate {
 
     private void onHearingEventDeleted(HearingEventDeleted hearingEventDeleted) {
         this.events.get(hearingEventDeleted.getHearingEventId()).setDeleted(true);
+    }
+    
+    private boolean isGuilty(final String value) {
+        return GUILTY.equalsIgnoreCase(value);
     }
 
     public Stream<Object> initiate(InitiateHearingCommand initiateHearingCommand) {
@@ -201,13 +217,11 @@ public class NewModelHearingAggregate implements Aggregate {
                 verdict.getVerdictDate()
         ));
 
-        if (verdict.getValue().getCategory().equalsIgnoreCase("GUILTY")) {
-            events.add(new ConvictionDateAdded(caseId, hearingId, defendantId, offenceId, verdict.getVerdictDate()));
+        if (isGuilty(verdict.getValue().getCategory())){
+            events.add(new ConvictionDateAdded(hearingId, offenceId, hearing.getStartDateTime().toLocalDate()));
         } else {
-            events.add(new ConvictionDateRemoved(caseId, hearingId, defendantId, offenceId));
+            events.add(new ConvictionDateRemoved(hearingId, offenceId));
         }
-
-        //TODO - GPE-3157 - update plea must do this conviction date stuff as well.
 
         return apply(events.stream());
     }

@@ -27,6 +27,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
+import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -52,6 +53,9 @@ public class NewHearingEventListener {
 
     @Inject
     private LegalCaseRepository legalCaseRepository;
+    
+    @Inject
+    private OffenceRepository offenceRepository;
 
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -208,38 +212,27 @@ public class NewHearingEventListener {
     @Transactional
     @Handles("hearing.conviction-date-added")
     public void convictionDateUpdated(final JsonEnvelope event) {
-
         final ConvictionDateAdded convictionDateAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateAdded.class);
-
-        Ahearing ahearing = ahearingRepository.findById(convictionDateAdded.getHearingId());
-
-        Offence offence = ahearing.getDefendants().stream()
-                .flatMap(d -> d.getOffences().stream())
-                .filter(o -> o.getId().getId().equals(convictionDateAdded.getOffenceId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + convictionDateAdded.getOffenceId().toString()));
-
-        offence.setConvictionDate(convictionDateAdded.getConvictionDate());
-
-        ahearingRepository.save(ahearing);
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(convictionDateAdded.getOffenceId(), convictionDateAdded.getHearingId());
+        final Offence offence = offenceRepository.findBySnapshotKey(snapshotKey);
+        Optional.ofNullable(offence).map(o -> {
+            o.setConvictionDate(convictionDateAdded.getConvictionDate());
+            offenceRepository.save(o);
+            return o;
+        }).orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + snapshotKey));
     }
 
     @Transactional
     @Handles("hearing.conviction-date-removed")
     public void convictionDateRemoved(final JsonEnvelope event) {
         final ConvictionDateRemoved convictionDateRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);
-
-        Ahearing ahearing = ahearingRepository.findById(convictionDateRemoved.getHearingId());
-
-        Offence offence = ahearing.getDefendants().stream()
-                .flatMap(d -> d.getOffences().stream())
-                .filter(o -> o.getId().getId().equals(convictionDateRemoved.getOffenceId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + convictionDateRemoved.getOffenceId().toString()));
-
-        offence.setConvictionDate(null);
-
-        ahearingRepository.save(ahearing);
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId());
+        final Offence offence = offenceRepository.findBySnapshotKey(snapshotKey);
+        Optional.ofNullable(offence).map(o -> {
+            o.setConvictionDate(null);
+            offenceRepository.save(o);
+            return o;
+        }).orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + snapshotKey));
     }
 
     @Transactional

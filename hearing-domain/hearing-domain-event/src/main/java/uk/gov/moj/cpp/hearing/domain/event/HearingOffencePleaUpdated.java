@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;

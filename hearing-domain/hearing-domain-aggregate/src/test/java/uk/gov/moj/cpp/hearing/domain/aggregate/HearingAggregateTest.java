@@ -118,18 +118,11 @@ public class HearingAggregateTest {
 
 
     private void assertConvictionDateAddedEventValues(final ConvictionDateAdded event) {
-        assertEquals(caseId, event.getCaseId());
-        assertEquals(hearingId, event.getHearingId());
-        assertEquals(defendantId, event.getDefendantId());
         assertEquals(offenceId, event.getOffenceId());
-
         assertEquals(pleaDate, event.getConvictionDate());
     }
 
     private void assertConvictionDateRemovedEventValues(final ConvictionDateRemoved event) {
-        assertEquals(caseId, event.getCaseId());
-        assertEquals(hearingId, event.getHearingId());
-        assertEquals(defendantId, event.getDefendantId());
         assertEquals(offenceId, event.getOffenceId());
 
     }

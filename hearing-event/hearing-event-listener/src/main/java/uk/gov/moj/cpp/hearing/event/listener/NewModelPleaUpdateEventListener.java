@@ -36,11 +36,12 @@ public class NewModelPleaUpdateEventListener {
     public void offencePleaUpdated(final JsonEnvelope envelop) {
         final HearingOffencePleaUpdated plea = convertToObject(envelop);
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(plea.getOffenceId(), plea.getHearingId());
-        final Offence offence = offenceRepository.findById(snapshotKey);
+        final Offence offence = offenceRepository.findBySnapshotKey(snapshotKey);
         Optional.ofNullable(offence).map(o -> {
             o.setPleaDate(plea.getPleaDate());
             o.setPleaValue(plea.getValue());
-            return offenceRepository.save(o);
+            offenceRepository.save(o);
+            return o;
         }).orElseThrow(() -> new HandlerExecutionException("Entity offence not found by: " + snapshotKey, null));
     }
 
