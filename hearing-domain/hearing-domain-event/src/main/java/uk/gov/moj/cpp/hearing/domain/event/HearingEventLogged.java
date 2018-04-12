@@ -26,6 +26,7 @@ public class HearingEventLogged {
 
     private String caseUrn;
     private UUID caseId;
+    private UUID witnessId;
 
     public HearingEventLogged(
             UUID hearingEventId,
@@ -42,7 +43,7 @@ public class HearingEventLogged {
             String courtRoomName,
             String hearingType,
             String caseUrn,
-            UUID caseId) {
+            UUID caseId, UUID witnessId) {
 
         this.hearingEventId = hearingEventId;
         this.lastHearingEventId = lastHearingEventId;
@@ -59,6 +60,7 @@ public class HearingEventLogged {
         this.hearingType = hearingType;
         this.caseUrn = caseUrn;
         this.caseId = caseId;
+        this.witnessId=witnessId;
     }
 
     public HearingEventLogged() {
@@ -123,5 +125,9 @@ public class HearingEventLogged {
 
     public UUID getCaseId() {
         return caseId;
+    }
+
+    public UUID getWitnessId() {
+        return this.witnessId;
     }
 }

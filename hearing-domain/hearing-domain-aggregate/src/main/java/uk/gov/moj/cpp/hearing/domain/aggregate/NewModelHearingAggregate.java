@@ -130,8 +130,8 @@ public class NewModelHearingAggregate implements Aggregate {
                 this.hearing.getCourtRoomName(),
                 this.hearing.getType(),
                 this.cases.get(0).getUrn(), //TODO - doesn't support multiple cases yet.
-                this.cases.get(0).getCaseId()
-        )));
+                this.cases.get(0).getCaseId(),
+                logEventCommand.getWitnessId())));
     }
 
     public Stream<Object> correctHearingEvent(CorrectLogEventCommand logEventCommand) {
@@ -177,8 +177,8 @@ public class NewModelHearingAggregate implements Aggregate {
                         this.hearing.getCourtRoomName(),
                         this.hearing.getType(),
                         this.cases.get(0).getUrn(), //TODO - doesn't support multiple cases yet.
-                        this.cases.get(0).getCaseId()
-                )
+                        this.cases.get(0).getCaseId(),
+                        null)
         ));
     }
 

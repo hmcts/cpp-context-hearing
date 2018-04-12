@@ -109,7 +109,7 @@ public class UseCases {
                                            Consumer<LogEventCommand.Builder> consumer,
                                            InitiateHearingCommand initiateHearingCommand,
                                            UUID hearingEventDefinitionId,
-                                           boolean alterable) {
+                                           boolean alterable, UUID witnessId) {
         LogEventCommand logEvent = with(
                 LogEventCommand.builder()
                         .withHearingEventId(randomUUID())
@@ -118,6 +118,7 @@ public class UseCases {
                         .withEventTime(PAST_ZONED_DATE_TIME.next())
                         .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
                         .withRecordedLabel(STRING.next())
+                        .withWitnessId(witnessId)
 
                 , consumer).build();
 

@@ -5,6 +5,7 @@
       "hearingEventId": "7daefec3-2f76-8109-82d9-2e60544a6c02",
       "hearingEventDefinitionId": "cababf6e-62f4-411b-98ef-2d45f7ede08f",
       "recordedLabel": "Hearing Started",
+      "witnessId": "1daefec3-2f76-8109-82d9-2e60544a6c02",
       "eventTime": "2016-12-08T14:13:00Z",
       "lastModifiedTime": "2016-12-08T14:15:12Z",
       "alterable": false

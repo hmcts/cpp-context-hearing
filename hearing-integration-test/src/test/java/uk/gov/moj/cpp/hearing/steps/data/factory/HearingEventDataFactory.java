@@ -39,7 +39,7 @@ public class HearingEventDataFactory {
 
         return new HearingEvent(hearingEventId, randomHearingEventDefinition.getId(), hearingId,
                 randomHearingEventDefinition.getRecordedLabel(),null, lastModifiedTime,
-                randomHearingEventDefinition.isAlterable());
+                randomHearingEventDefinition.isAlterable(), null);
     }
 
     public static HearingEvent hearingStartedEvent(final UUID hearingId) {
@@ -160,7 +160,7 @@ public class HearingEventDataFactory {
         final ZonedDateTime lastModifiedTime = new UtcClock().now();
 
         return new HearingEvent(hearingEventId, hearingEventDefinition.getId(), hearingId, recordedLabel,
-                eventTime, lastModifiedTime, hearingEventDefinition.isAlterable());
+                eventTime, lastModifiedTime, hearingEventDefinition.isAlterable(), null);
     }
 
 }

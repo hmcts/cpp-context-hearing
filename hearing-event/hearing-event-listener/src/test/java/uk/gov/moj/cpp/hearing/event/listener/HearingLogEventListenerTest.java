@@ -52,6 +52,7 @@ public class HearingLogEventListenerTest {
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_WITNESS_ID = "witnessId";
     private static final String FIELD_EVENT_TIME = "eventTime";
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
 
@@ -67,6 +68,7 @@ public class HearingLogEventListenerTest {
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
+    private static final UUID WITNESS_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next();
     private static final ZonedDateTime LAST_MODIFIED_TIME = PAST_ZONED_DATE_TIME.next();
@@ -122,10 +124,26 @@ public class HearingLogEventListenerTest {
     }
 
     @Test
+    public void shouldPersistAHearingEventLogWithWitness() {
+        final JsonEnvelope event = prepareHearingEventLoggedEventWithWitness();
+
+        hearingLogEventListener.hearingEventLogged(event);
+
+        verify(hearingEventRepository).save(eventLogArgumentCaptor.capture());
+        assertThat(eventLogArgumentCaptor.getValue().getId(), is(HEARING_EVENT_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID));
+        assertThat(eventLogArgumentCaptor.getValue().isAlterable(), is(ALTERABLE));
+        assertThat(eventLogArgumentCaptor.getValue().getHearingId(), is(HEARING_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getWitnessId(), is(WITNESS_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getRecordedLabel(), is(RECORDED_LABEL));
+        assertThat(eventLogArgumentCaptor.getValue().getEventTime().toString(), is(ZonedDateTimes.toString(EVENT_TIME)));
+    }
+
+    @Test
     public void shouldDeleteAnExistingHearingEvent() {
         final JsonEnvelope event = prepareHearingEventDeletedEvent();
         when(hearingEventRepository.findOptionalById(HEARING_EVENT_ID)).thenReturn(
-                of(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE))
+                of(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, null))
         );
 
         hearingLogEventListener.hearingEventDeleted(event);
@@ -247,6 +265,19 @@ public class HearingLogEventListenerTest {
                 .withPayloadOf(HEARING_EVENT_ID, FIELD_HEARING_EVENT_ID)
                 .withPayloadOf(HEARING_EVENT_DEFINITION_ID, FIELD_HEARING_EVENT_DEFINITION_ID)
                 .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(RECORDED_LABEL, FIELD_RECORDED_LABEL)
+                .withPayloadOf(ALTERABLE, FIELD_ALTERABLE)
+                .withPayloadOf(ZonedDateTimes.toString(EVENT_TIME), FIELD_EVENT_TIME)
+                .withPayloadOf(ZonedDateTimes.toString(LAST_MODIFIED_TIME), FIELD_LAST_MODIFIED_TIME)
+                .build();
+    }
+
+    private JsonEnvelope prepareHearingEventLoggedEventWithWitness() {
+        return envelope()
+                .withPayloadOf(HEARING_EVENT_ID, FIELD_HEARING_EVENT_ID)
+                .withPayloadOf(HEARING_EVENT_DEFINITION_ID, FIELD_HEARING_EVENT_DEFINITION_ID)
+                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
+                .withPayloadOf(WITNESS_ID, FIELD_WITNESS_ID)
                 .withPayloadOf(RECORDED_LABEL, FIELD_RECORDED_LABEL)
                 .withPayloadOf(ALTERABLE, FIELD_ALTERABLE)
                 .withPayloadOf(ZonedDateTimes.toString(EVENT_TIME), FIELD_EVENT_TIME)
