@@ -192,15 +192,15 @@ public class HearingEventListenerTest {
     private static final UUID RESULT_LINE_ID_3 = randomUUID();
     private static final UUID RESULT_LINE_ID_4 = randomUUID();
 
-    private static final String DRAFT_RESULT = "{\"targetId\":\"" + TARGET_ID + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\""+ randomUUID() + "\",\"resultLineId\":\"" + RESULT_LINE_ID + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
-    private static final String UPDATED_DRAFT_RESULT = "{\"targetId\":\"" + TARGET_ID + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\""+ RESULT_LINE_ID + "\",\"resultLineId\":\"" + RESULT_LINE_ID + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
+    private static final String DRAFT_RESULT = "{\"targetId\":\"" + TARGET_ID + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\"" + randomUUID() + "\",\"resultLineId\":\"" + RESULT_LINE_ID + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
+    private static final String UPDATED_DRAFT_RESULT = "{\"targetId\":\"" + TARGET_ID + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\"" + RESULT_LINE_ID + "\",\"resultLineId\":\"" + RESULT_LINE_ID + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final String DRAFT_RESULT_2 = "{\"targetId\":\"" + TARGET_ID_2 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID_2 + "\",\"offenceId\":\"" + OFFENCE_ID_2 + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"resultLineId\":\"" + RESULT_LINE_ID_2 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":false,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final String UPDATED_DRAFT_RESULT_2 = "{\"targetId\":\"" + TARGET_ID_2 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID_2 + "\",\"offenceId\":\"" + OFFENCE_ID_2 + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"resultLineId\":\"" + RESULT_LINE_ID_2 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":false,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final String DRAFT_RESULT_3 = "{\"targetId\":\"" + TARGET_ID_3 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID_2 + "\",\"offenceId\":\"" + OFFENCE_ID_3 + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\"" + randomUUID() + "\",\"resultLineId\":\"" + RESULT_LINE_ID_3 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final String UPDATED_DRAFT_RESULT_3 = "{\"targetId\":\"" + TARGET_ID_3 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID_2 + "\",\"offenceId\":\"" + OFFENCE_ID_3 + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\"" + RESULT_LINE_ID_3 + "\",\"resultLineId\":\"" + RESULT_LINE_ID_3 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
 
-    private static final String DRAFT_RESULT_4 = "{\"targetId\":\"" + TARGET_ID_4 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\""+ randomUUID() + "\",\"resultLineId\":\"" + RESULT_LINE_ID_4 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
-    private static final String UPDATED_DRAFT_RESULT_4 = "{\"targetId\":\"" + TARGET_ID_4 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\""+ RESULT_LINE_ID_4 + "\",\"resultLineId\":\"" + RESULT_LINE_ID_4 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
+    private static final String DRAFT_RESULT_4 = "{\"targetId\":\"" + TARGET_ID_4 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\"" + randomUUID() + "\",\"resultLineId\":\"" + RESULT_LINE_ID_4 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
+    private static final String UPDATED_DRAFT_RESULT_4 = "{\"targetId\":\"" + TARGET_ID_4 + "\",\"caseId\":\"" + CASE_ID + "\",\"defendantId\":\"" + DEFENDANT_ID + "\",\"offenceId\":\"" + OFFENCE_ID + "\",\"offenceNum\":1,\"showDefendantName\":true,\"addMoreResults\":false,\"results\":[{\"lastSharedResultId\":\"" + RESULT_LINE_ID_4 + "\",\"resultLineId\":\"" + RESULT_LINE_ID_4 + "\",\"originalText\":\"vs£500\",\"resultCode\":\"12dc713a-04dc-4613-8af0-9d962c08af0d\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Surcharge\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"value\":\"£500\",\"type\":\"CURR\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"8bfc5e44-ca2f-45e3-8b5f-fcbe397f913f\",\"label\":\"Amount of surcharge\",\"type\":\"CURR\",\"required\":true}]}]}";
     private static final UUID PLEA_ID = randomUUID();
     private static final UUID VERDICT_ID = randomUUID();
     private static final UUID VERDICT_VALUE_ID = randomUUID();
@@ -294,212 +294,12 @@ public class HearingEventListenerTest {
                 new ObjectMapperProducer().objectMapper());
     }
 
-    @Test
-    public void shouldInitiateHearingIfDoesNotExist() {
-        final JsonEnvelope event = getInitiateHearingJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(empty());
-
-        this.hearingEventListener.hearingInitiated(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(START_DATE));
-        assertThat(actualHearing.getStartTime(), is(START_TIME));
-        assertThat(actualHearing.getDuration(), is(DURATION));
-        assertThat(actualHearing.getHearingType(), is(HEARING_TYPE));
-        assertThat(actualHearing.getCourtCentreName(), is(nullValue()));
-        assertThat(actualHearing.getRoomName(), is(nullValue()));
-    }
-
-    @Test
-    public void shouldUpdateExistingHearingWhenInitiated() {
-        final JsonEnvelope event = getInitiateHearingJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
-
-        this.hearingEventListener.hearingInitiated(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(START_DATE));
-        assertThat(actualHearing.getStartTime(), is(START_TIME));
-        assertThat(actualHearing.getDuration(), is(DURATION));
-        assertThat(actualHearing.getHearingType(), is(HEARING_TYPE));
-        assertThat(actualHearing.getCourtCentreName(), is(nullValue()));
-        assertThat(actualHearing.getRoomName(), is(nullValue()));
-    }
 
     @Test
     public void shouldUpdateCaseWhenAdded() {
 
     }
 
-
-    @Test
-    public void shouldAssignCourtCentreNameToAnExistingHearing() {
-        final JsonEnvelope event = getAssignCourtJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
-
-        this.hearingEventListener.courtAssigned(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(START_DATE_2));
-        assertThat(actualHearing.getStartTime(), is(START_TIME_2));
-        assertThat(actualHearing.getDuration(), is(DURATION_2));
-        assertThat(actualHearing.getHearingType(), is(HEARING_TYPE_2));
-        assertThat(actualHearing.getCourtCentreName(), is(COURT_CENTRE_NAME));
-        assertThat(actualHearing.getRoomName(), is(nullValue()));
-    }
-
-    @Test
-    public void shouldAssignJudgeToHearing() {
-        final JsonEnvelope event = getAssignJudgeJsonEnvelope();
-
-        this.hearingEventListener.judgeAssigned(event);
-
-        verify(this.hearingJudgeRepository).save(this.hearingJudgeArgumentCaptor.capture());
-        final HearingJudge hearingJudge = this.hearingJudgeArgumentCaptor.getValue();
-        assertThat(hearingJudge.getHearingId(), is(HEARING_ID));
-        assertThat(hearingJudge.getId(), is(JUDGE_ID));
-        assertThat(hearingJudge.getFirstName(), is(JUDGE_FIRST_NAME));
-        assertThat(hearingJudge.getLastName(), is(JUDGE_LAST_NAME));
-        assertThat(hearingJudge.getTitle(), is(JUDGE_TITLE));
-    }
-
-    @Test
-    public void shouldAssignCourtCentreNameEventIfHearingDoesNotExist() {
-        final JsonEnvelope event = getAssignCourtJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(empty());
-
-        this.hearingEventListener.courtAssigned(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(nullValue()));
-        assertThat(actualHearing.getStartTime(), is(nullValue()));
-        assertThat(actualHearing.getDuration(), is(nullValue()));
-        assertThat(actualHearing.getHearingType(), is(nullValue()));
-        assertThat(actualHearing.getCourtCentreName(), is(COURT_CENTRE_NAME));
-        assertThat(actualHearing.getCourtCentreId(), is(COURT_CENTRE_ID));
-        assertThat(actualHearing.getRoomName(), is(nullValue()));
-    }
-
-    @Test
-    public void shouldBookRoomToAnExistingHearing() {
-        final JsonEnvelope event = getBookRoomJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
-
-        this.hearingEventListener.roomBooked(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(START_DATE_2));
-        assertThat(actualHearing.getStartTime(), is(START_TIME_2));
-        assertThat(actualHearing.getDuration(), is(DURATION_2));
-        assertThat(actualHearing.getHearingType(), is(HEARING_TYPE_2));
-        assertThat(actualHearing.getCourtCentreName(), is(nullValue()));
-        assertThat(actualHearing.getRoomName(), is(ROOM_NAME));
-    }
-
-    @Test
-    public void shouldBookRoomEventIfHearingDoesNotExist() {
-        final JsonEnvelope event = getBookRoomJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(empty());
-
-        this.hearingEventListener.roomBooked(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(nullValue()));
-        assertThat(actualHearing.getStartTime(), is(nullValue()));
-        assertThat(actualHearing.getDuration(), is(nullValue()));
-        assertThat(actualHearing.getHearingType(), is(nullValue()));
-        assertThat(actualHearing.getCourtCentreName(), is(nullValue()));
-        assertThat(actualHearing.getRoomName(), is(ROOM_NAME));
-        assertThat(actualHearing.getRoomId(), is(ROOM_ID));
-    }
-
-    @Test
-    public void shouldAdjournDateForAnExistingHearing() {
-        final JsonEnvelope event = getAdjournDateJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
-
-        this.hearingEventListener.hearingAdjournDateUpdated(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(START_DATE_3));
-        assertThat(actualHearing.getStartTime(), is(START_TIME_2));
-        assertThat(actualHearing.getDuration(), is(DURATION_2));
-        assertThat(actualHearing.getHearingType(), is(HEARING_TYPE_2));
-        assertThat(actualHearing.getCourtCentreName(), is(nullValue()));
-        assertThat(actualHearing.getRoomName(), is(nullValue()));
-    }
-
-    @Test
-    public void shouldAdjournDateEvenIfHearingDoesNotExist() {
-        final JsonEnvelope event = getAdjournDateJsonEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(empty());
-
-        this.hearingEventListener.hearingAdjournDateUpdated(event);
-
-        verify(this.hearingRepository).save(this.hearingArgumentCaptor.capture());
-        final uk.gov.moj.cpp.hearing.persist.entity.Hearing actualHearing = this.hearingArgumentCaptor.getValue();
-        assertThat(actualHearing.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearing.getStartDate(), is(START_DATE_3));
-        assertThat(actualHearing.getStartTime(), is(nullValue()));
-        assertThat(actualHearing.getDuration(), is(nullValue()));
-        assertThat(actualHearing.getHearingType(), is(nullValue()));
-        assertThat(actualHearing.getCourtCentreName(), is(nullValue()));
-        assertThat(actualHearing.getRoomName(), is(nullValue()));
-    }
-
-    @Test
-    public void shouldAssociateACaseIfNoCasesAreMappedToTheHearing() {
-        final JsonEnvelope event = getAssociateCaseJsonEnvelope();
-        when(this.hearingCaseRepository.findByHearingId(HEARING_ID)).thenReturn(emptyList());
-
-        this.hearingEventListener.caseAssociated(event);
-
-        verify(this.hearingCaseRepository).save(this.hearingCaseArgumentCaptor.capture());
-        final HearingCase actualHearingCase = this.hearingCaseArgumentCaptor.getValue();
-        assertThat(actualHearingCase.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearingCase.getCaseId(), is(CASE_ID));
-        assertThat(actualHearingCase.getId(), is(notNullValue()));
-    }
-
-    @Test
-    public void shouldAssociateACaseIfNotMappedToTheHearing() {
-        final JsonEnvelope event = getAssociateCaseJsonEnvelope();
-        when(this.hearingCaseRepository.findByHearingId(HEARING_ID)).thenReturn(getHearingCases());
-
-        this.hearingEventListener.caseAssociated(event);
-
-        verify(this.hearingCaseRepository).save(this.hearingCaseArgumentCaptor.capture());
-        final HearingCase actualHearingCase = this.hearingCaseArgumentCaptor.getValue();
-        assertThat(actualHearingCase.getHearingId(), is(HEARING_ID));
-        assertThat(actualHearingCase.getCaseId(), is(CASE_ID));
-        assertThat(actualHearingCase.getId(), is(notNullValue()));
-    }
-
-    @Test
-    public void shouldNotAssociateACaseIfAlreadyMappedToTheHearing() {
-        final JsonEnvelope event = getAssociateCaseJsonEnvelope();
-        final List<HearingCase> hearingCases = getHearingCases();
-        hearingCases.add(new HearingCase(randomUUID(), HEARING_ID, CASE_ID));
-        when(this.hearingCaseRepository.findByHearingId(HEARING_ID)).thenReturn(hearingCases);
-
-        this.hearingEventListener.caseAssociated(event);
-
-        verify(this.hearingCaseRepository, never()).save(any(HearingCase.class));
-    }
 
     @Test
     public void shouldHandleProsecutionCounselAddedEvent() {
@@ -634,72 +434,6 @@ public class HearingEventListenerTest {
         assertThat(expectedHearingOutcome.getDefendantId(), is(DEFENDANT_ID));
         assertThat(expectedHearingOutcome.getOffenceId(), is(OFFENCE_ID));
         assertThat(expectedHearingOutcome.getDraftResult(), is(UPDATED_DRAFT_RESULT_4));
-    }
-
-    @Test
-    public void shouldPersistPleaHearingForPleaAdded() {
-        final JsonEnvelope event = getHearingPleaEnvelope();
-        this.hearingEventListener.pleaAdded(event);
-        verify(this.pleaHearingRepository).save(this.pleaHearingArgumentCaptor.capture());
-        final PleaHearing pleaHearing = this.pleaHearingArgumentCaptor.getValue();
-        assertThat(pleaHearing.getHearingId(), is(HEARING_ID));
-        assertThat(pleaHearing.getCaseId(), is(CASE_ID));
-        assertThat(pleaHearing.getDefendantId(), is(DEFENDANT_ID));
-        assertThat(pleaHearing.getOffenceId(), is(OFFENCE_ID));
-        assertThat(pleaHearing.getPersonId(), is(PERSON_ID));
-        assertThat(pleaHearing.getPleaId(), is(PLEA_ID));
-        assertThat(pleaHearing.getPleaDate(), is(START_DATE));
-        assertThat(pleaHearing.getValue(), is(PLEA_VALUE));
-    }
-
-    @Test
-    public void shouldPersistPleaHearingForPleaChanged() {
-        final JsonEnvelope event = getHearingPleaEnvelope();
-        this.hearingEventListener.pleaChanged(event);
-        verify(this.pleaHearingRepository).save(this.pleaHearingArgumentCaptor.capture());
-        final PleaHearing pleaHearing = this.pleaHearingArgumentCaptor.getValue();
-        assertThat(pleaHearing.getHearingId(), is(HEARING_ID));
-        assertThat(pleaHearing.getCaseId(), is(CASE_ID));
-        assertThat(pleaHearing.getDefendantId(), is(DEFENDANT_ID));
-        assertThat(pleaHearing.getOffenceId(), is(OFFENCE_ID));
-        assertThat(pleaHearing.getPersonId(), is(PERSON_ID));
-        assertThat(pleaHearing.getPleaId(), is(PLEA_ID));
-        assertThat(pleaHearing.getPleaDate(), is(START_DATE));
-        assertThat(pleaHearing.getValue(), is(PLEA_VALUE));
-    }
-
-    @Test
-    public void shouldPersistVerdictHearingForVerdictAdded() {
-        final JsonEnvelope event = getHearingVerdictEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
-        this.hearingEventListener.verdictAdded(event);
-        verify(this.verdictHearingRepository).save(this.verdictHearingArgumentCaptor.capture());
-        final VerdictHearing verdictHearing = this.verdictHearingArgumentCaptor.getValue();
-        assertThat(verdictHearing.getHearingId(), is(HEARING_ID));
-        assertThat(verdictHearing.getCaseId(), is(CASE_ID));
-        assertThat(verdictHearing.getDefendantId(), is(DEFENDANT_ID));
-        assertThat(verdictHearing.getOffenceId(), is(OFFENCE_ID));
-        assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
-        assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
-        assertThat(verdictHearing.getValue().getCategory(), is(VERDICT_VALUE_CATEGORY));
-        assertThat(verdictHearing.getVerdictDate(), is(START_DATE));
-    }
-
-    @Test
-    public void shouldPersistVerdictHearingForVerdictChanged() {
-        final JsonEnvelope event = getHearingVerdictEnvelope();
-        when(this.hearingRepository.getByHearingId(HEARING_ID)).thenReturn(of(getHearingWithOnlyRequiredFields(HEARING_ID)));
-        this.hearingEventListener.verdictChanged(event);
-        verify(this.verdictHearingRepository).save(this.verdictHearingArgumentCaptor.capture());
-        final VerdictHearing verdictHearing = this.verdictHearingArgumentCaptor.getValue();
-        assertThat(verdictHearing.getHearingId(), is(HEARING_ID));
-        assertThat(verdictHearing.getCaseId(), is(CASE_ID));
-        assertThat(verdictHearing.getDefendantId(), is(DEFENDANT_ID));
-        assertThat(verdictHearing.getOffenceId(), is(OFFENCE_ID));
-        assertThat(verdictHearing.getPersonId(), is(PERSON_ID));
-        assertThat(verdictHearing.getVerdictId(), is(VERDICT_ID));
-        assertThat(verdictHearing.getVerdictDate(), is(START_DATE));
-        assertThat(verdictHearing.getValue().getCategory(), is(VERDICT_VALUE_CATEGORY));
     }
 
     private List<HearingOutcome> getHearingOutcomesForSharedResults() {

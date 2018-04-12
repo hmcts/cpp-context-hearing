@@ -46,8 +46,6 @@
     "verdictId",
     "verdictValueId",
     "category",
-    "code",
-    "description",
     "verdictDate"
   ],
   "definitions": {

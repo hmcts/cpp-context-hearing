@@ -1,15 +1,20 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import org.apache.commons.io.FileUtils;
+import org.junit.Before;
+import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.moj.cpp.hearing.domain.event.*;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.NewMagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,32 +23,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";
     private static final String COMMAND_NAME = "hearing";
     private static final String CONTENT_TYPE_PREFIX = "application/vnd.";
 
-    private Map<String, String> hearingListenerMethodsToHandlerNames;
-    private Map<String, String> hearingLogListenerMethodsToHandlerNames;
+    private Map<String, String> handlerNames = new HashMap<>();
 
     private final List<String> handlerNamesToIgnore = asList(
 
             InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
             OffencePleaUpdated.class.getAnnotation(Event.class).value(),
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
-            HearingConfirmedRecorded.class.getAnnotation(Event.class).value(),
-            HearingUpdatePleaIgnored.class.getAnnotation(Event.class).value(),
-            HearingPleaUpdated.class.getAnnotation(Event.class).value(),
-            PleaAdded.class.getAnnotation(Event.class).value(),
-            PleaChanged.class.getAnnotation(Event.class).value(),
+
             HearingVerdictUpdated.class.getAnnotation(Event.class).value(),
-            HearingUpdateVerdictIgnored.class.getAnnotation(Event.class).value(),
-            HearingEventDeletionIgnored.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedRecorded.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedPreviouslyRecorded.class.getAnnotation(Event.class).value(),
             MagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
@@ -54,9 +52,11 @@ public class HearingEventListenerRamlConfigTest {
 
     @Before
     public void setup() throws IOException {
-        this.hearingListenerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingEventListener.class);
-        this.hearingListenerMethodsToHandlerNames.putAll(getMethodsToHandlerNamesMapFor(NewHearingEventListener.class, NewModelPleaUpdateEventListener.class));
-        this.hearingLogListenerMethodsToHandlerNames = getMethodsToHandlerNamesMapFor(HearingLogEventListener.class);
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(NewHearingEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(NewModelPleaUpdateEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(VerdictUpdateEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingLogEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 
@@ -69,9 +69,8 @@ public class HearingEventListenerRamlConfigTest {
 
     @Test
     public void testActionNameAndHandleNameAreSame() throws Exception {
-        final List<String> allHandlerNames = concat(this.hearingListenerMethodsToHandlerNames.values().stream(), this.hearingLogListenerMethodsToHandlerNames.values().stream()).collect(toList());
 
-        assertThat(allHandlerNames, containsInAnyOrder(this.ramlActionNames.toArray()));
+        assertThat(handlerNames.values(), containsInAnyOrder(this.ramlActionNames.toArray()));
     }
 
     @Test

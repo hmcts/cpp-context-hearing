@@ -46,7 +46,6 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeletionIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 
@@ -120,7 +119,7 @@ public class HearingEventCommandHandlerTest {
     @Spy
     private Enveloper enveloper = createEnveloperWithEvents(
             HearingEventLogged.class, HearingEventDefinitionsCreated.class,
-            HearingEventDeletionIgnored.class, HearingEventDeleted.class, HearingEventIgnored.class,
+            HearingEventDeleted.class, HearingEventIgnored.class,
             HearingEventDefinitionsDeleted.class);
 
     @Spy

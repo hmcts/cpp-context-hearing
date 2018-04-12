@@ -403,47 +403,6 @@ public class NewHearingEventListenerTest {
 
 
     @Test
-    public void verdictUpdate_shouldUpdateTheVerdict() throws Exception {
-
-        UUID hearingId = randomUUID();
-
-        OffenceVerdictUpdated offenceVerdictUpdated = new OffenceVerdictUpdated(randomUUID(), hearingId, randomUUID(),
-                randomUUID(), randomUUID(), STRING.next(), STRING.next(), STRING.next(), INTEGER.next(), INTEGER.next(),
-                BOOLEAN.next(), PAST_LOCAL_DATE.next());
-
-        Ahearing ahearing = Ahearing.builder().withId(hearingId)
-                .withDefendants(asList
-                        (Defendant.builder()
-                                .withOffences(asList(
-                                        Offence.builder()
-                                                .withId(new HearingSnapshotKey(offenceVerdictUpdated.getOffenceId(), hearingId))
-                                                .build()
-                                ))
-                                .build()))
-                .build();
-
-        when(this.ahearingRepository.findById(hearingId)).thenReturn(ahearing);
-
-        newHearingEventListener.verdictUpdate(envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
-                objectToJsonObjectConverter.convert(offenceVerdictUpdated)));
-
-        verify(this.ahearingRepository).save(ahearing);
-
-        Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
-
-        assertThat(offence.getId().getId(), is(offenceVerdictUpdated.getOffenceId()));
-        assertThat(offence.getId().getHearingId(), is(offenceVerdictUpdated.getHearingId()));
-        assertThat(offence.getVerdictId(), is(offenceVerdictUpdated.getVerdictId()));
-        assertThat(offence.getVerdictCategory(), is(offenceVerdictUpdated.getCategory()));
-        assertThat(offence.getVerdictCode(), is(offenceVerdictUpdated.getCode()));
-        assertThat(offence.getVerdictDescription(), is(offenceVerdictUpdated.getDescription()));
-        assertThat(offence.getNumberOfJurors(), is(offenceVerdictUpdated.getNumberOfJurors()));
-        assertThat(offence.getNumberOfSplitJurors(), is(offenceVerdictUpdated.getNumberOfSplitJurors()));
-        assertThat(offence.getUnanimous(), is(offenceVerdictUpdated.getUnanimous()));
-        assertThat(offence.getVerdictDate(), is(offenceVerdictUpdated.getVerdictDate()));
-    }
-
-    @Test
     public void convictionDateUpdated_shouldUpdateTheConvictionDate() throws Exception {
 
         final UUID offenceId = randomUUID();

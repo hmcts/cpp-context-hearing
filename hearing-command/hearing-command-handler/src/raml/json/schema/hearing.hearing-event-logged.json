@@ -48,6 +48,9 @@
     },
     "hearingType": {
       "type": "string"
+    },
+    "witnessId": {
+      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,

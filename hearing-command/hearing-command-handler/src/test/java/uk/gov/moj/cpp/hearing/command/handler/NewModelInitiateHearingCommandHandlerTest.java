@@ -20,30 +20,18 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.CaseAssociated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.CourtAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAdjournDateUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaChanged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.JudgeAssigned;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
-import uk.gov.moj.cpp.hearing.domain.event.PleaChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
-import uk.gov.moj.cpp.hearing.domain.event.RoomBooked;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictAdded;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -96,13 +84,14 @@ public class NewModelInitiateHearingCommandHandlerTest {
             Initiated.class,
             InitiateHearingOffenceEnriched.class,
             InitiateHearingOffencePlead.class,
+            DraftResultSaved.class,
 
+            ConvictionDateRemoved.class,
             //TODO - GPE-3032 CLEANUP - remove old events.
-            DraftResultSaved.class, HearingInitiated.class, CaseAssociated.class, CourtAssigned.class,
-            RoomBooked.class, ProsecutionCounselAdded.class, DefenceCounselAdded.class,
-            HearingAdjournDateUpdated.class, ResultsShared.class, ResultAmended.class, PleaAdded.class, PleaChanged.class,
-            HearingPleaAdded.class, HearingPleaChanged.class, HearingPleaUpdated.class, JudgeAssigned.class,
-            VerdictAdded.class, ConvictionDateAdded.class, HearingVerdictUpdated.class, ConvictionDateRemoved.class);
+
+            ProsecutionCounselAdded.class, DefenceCounselAdded.class,
+            ResultsShared.class, ResultAmended.class,
+            ConvictionDateAdded.class, HearingVerdictUpdated.class );
 
     @Mock
     private HearingCommandHandler oldHandler;

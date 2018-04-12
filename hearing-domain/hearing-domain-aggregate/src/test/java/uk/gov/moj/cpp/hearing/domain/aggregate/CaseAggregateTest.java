@@ -18,9 +18,6 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValu
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Address;
 
-import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.NewMagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.PleaAdded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 

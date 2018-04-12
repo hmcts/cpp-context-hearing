@@ -184,30 +184,6 @@ public class NewHearingEventListener {
         this.ahearingRepository.save(aHearing);
     }
 
-    @Transactional
-    @Handles("hearing.offence-verdict-updated")
-    public void verdictUpdate(final JsonEnvelope event) {
-        final OffenceVerdictUpdated verdictUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), OffenceVerdictUpdated.class);
-
-        Ahearing ahearing = ahearingRepository.findById(verdictUpdated.getHearingId());
-
-        Offence offence = ahearing.getDefendants().stream()
-                .flatMap(d -> d.getOffences().stream())
-                .filter(o -> o.getId().getId().equals(verdictUpdated.getOffenceId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + verdictUpdated.getOffenceId().toString()));
-
-        offence.setVerdictId(verdictUpdated.getVerdictId());
-        offence.setVerdictCode(verdictUpdated.getCode());
-        offence.setVerdictCategory(verdictUpdated.getCategory());
-        offence.setVerdictDescription(verdictUpdated.getDescription());
-        offence.setVerdictDate(verdictUpdated.getVerdictDate());
-        offence.setNumberOfJurors(verdictUpdated.getNumberOfJurors());
-        offence.setNumberOfSplitJurors(verdictUpdated.getNumberOfSplitJurors());
-        offence.setUnanimous(verdictUpdated.getUnanimous());
-
-        ahearingRepository.save(ahearing);
-    }
 
     @Transactional
     @Handles("hearing.conviction-date-added")

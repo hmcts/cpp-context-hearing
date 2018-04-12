@@ -14,8 +14,6 @@
   },
   "required": [
     "hearingId",
-    "caseId",
-    "defendantId",
     "offenceId",
     "convictionDate"
   ],

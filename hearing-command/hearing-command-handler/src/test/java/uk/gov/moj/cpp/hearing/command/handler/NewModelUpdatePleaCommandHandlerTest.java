@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
@@ -33,7 +34,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -50,9 +50,41 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+
 import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
+import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
+
+import java.util.UUID;
+import java.util.function.Consumer;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
+import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NewModelUpdatePleaCommandHandlerTest {
@@ -60,15 +92,31 @@ public class NewModelUpdatePleaCommandHandlerTest {
     // InjectMocks 
     @InjectMocks private NewModelUpdatePleaCommandHandler hearingCommandHandler;
     // Mocks
-    @Mock private EventStream hearingAggregateEventStream;
-    @Mock private EventStream offenceAggregateEventStream;
-    @Mock private EventSource eventSource;
-    @Mock private AggregateService aggregateService;
+    @Mock
+    private EventStream hearingAggregateEventStream;
+
+    @Mock
+    private EventStream offenceAggregateEventStream;
+
+    @Mock
+    private EventSource eventSource;
+
+    @Mock
+    private AggregateService aggregateService;
+
     // Spys
-    @Spy private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-    @Spy private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-    @Spy private final Enveloper enveloper = createEnveloperWithEvents(Initiated.class, HearingOffencePleaUpdated.class,
-            OffencePleaUpdated.class, ConvictionDateAdded.class, ConvictionDateRemoved.class);
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Spy
+    private final Enveloper enveloper = createEnveloperWithEvents(Initiated.class,
+            HearingOffencePleaUpdated.class,
+            OffencePleaUpdated.class,
+            ConvictionDateAdded.class,
+            ConvictionDateRemoved.class);
 
     private static InitiateHearingCommand initiateHearingCommand;
     private static UUID caseId;
@@ -92,8 +140,8 @@ public class NewModelUpdatePleaCommandHandlerTest {
         medatadaId = UUID.randomUUID();
         pleaDate = PAST_LOCAL_DATE.next();
     }
-    
-    
+
+
     @Before
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());

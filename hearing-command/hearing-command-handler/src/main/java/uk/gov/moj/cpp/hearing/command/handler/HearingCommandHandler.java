@@ -96,67 +96,6 @@ public class HearingCommandHandler {
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-
-
-    @Handles("hearing.initiate-hearing")
-    public void initiateHearing(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final ZonedDateTime startDateTime = fromJsonString(payload.getJsonString(FIELD_START_DATE_TIME));
-        final int duration = payload.getInt(FIELD_DURATION);
-        final String hearingType = payload.getString(FIELD_HEARING_TYPE);
-        final UUID courtCentreId = getUUID(payload, FIELD_COURT_CENTRE_ID).orElse(null);
-        final String courtCentreName = payload.getString(FIELD_COURT_CENTRE_NAME, null);
-        final UUID roomId = getUUID(payload, FIELD_COURT_ROOM_ID).orElse(null);
-        final String roomName = payload.getString(FIELD_ROOM_NAME, null);
-        final UUID caseId = getUUID(payload, FIELD_CASE_ID).orElse(null);
-        final String judgeId = payload.getString(FIELD_JUDGE_ID, null);
-        final String judgeFirstName = payload.getString(FIELD_JUDGE_FIRST_NAME, null);
-        final String judgeLastName = payload.getString(FIELD_JUDGE_LAST_NAME, null);
-        final String judgeTitle = payload.getString(FIELD_JUDGE_TITLE, null);
-        final HearingDetails hearingDetails = new HearingDetails.Builder().withHearingId(hearingId).withStartDateTime(startDateTime).withDuration(duration).withHearingType(hearingType)
-                .withCourtCentreId(courtCentreId).withCourtCentreName(courtCentreName).withRoomId(roomId).withRoomName(roomName).withCaseId(caseId)
-                .withJudgeId(judgeId).withJudgeFirstName(judgeFirstName).withJudgeLastName(judgeLastName).withJudgeTitle(judgeTitle).build();
-
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.initiateHearing(hearingDetails), command);
-    }
-
-    @Handles("hearing.allocate-court")
-    public void allocateCourt(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final String courtCentreName = payload.getString(FIELD_COURT_CENTRE_NAME);
-
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.allocateCourt(hearingId, courtCentreName), command);
-    }
-
-    @Handles("hearing.book-room")
-    public void bookRoom(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final String roomName = payload.getString(FIELD_ROOM_NAME);
-
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.bookRoom(hearingId, roomName), command);
-    }
-
-    @Handles("hearing.adjourn-date")
-    public void adjournHearingDate(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final LocalDate startDate = LocalDate.parse(payload.getString(FIELD_START_DATE));
-
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.adjournHearingDate(hearingId, startDate), command);
-    }
-
-    @Handles("hearing.add-case")
-    public void addCase(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
-
-        applyToHearingAggregate(hearingId, aggregate -> aggregate.addCaseToHearing(hearingId, caseId), command);
-    }
-
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope command) throws EventStreamException {
         final JsonObject payload = command.payloadAsJsonObject();
