@@ -1,38 +1,17 @@
 package uk.gov.moj.cpp.hearing.query.view.convertor;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
-import static java.util.Collections.emptyList;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
-
-import java.time.LocalDate;
-import java.time.temporal.Temporal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import uk.gov.justice.services.common.converter.Converter;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Attendees;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Case;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
@@ -41,6 +20,29 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Plea;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Value;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Verdict;
+
+import java.time.LocalDate;
+import java.time.temporal.Temporal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 public final class HearingDetailsResponseConverter implements Converter<Ahearing, HearingDetailsResponse> {
 
@@ -254,7 +256,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withCaseUrn(legalCase.getCaseUrn())
                     .withDefendants(
                             source.getValue().getDefendants().entrySet().stream()
-                                    .map(e -> new DefendantConverter().convert(e))
+                                    .map(e -> new DefendantConverter().convertDefendant(source.getKey().getId(), e))
                                     .collect(toList())
                     )
                     .withWitnesses(
@@ -276,12 +278,11 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId()) {
                 return null;
             }
-            return new uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness.builder()
                     .withId(toStringOrNull(source.getId()))
                     .withCaseId(toStringOrNull(source.getLegalCase().getId()))
                     .withtType(source.getType())
                     .withClassification(source.getClassification())
-                    .withPersonId(toStringOrNull(source.getPersonId()))
                     .withTitle(source.getTitle())
                     .withFirstName(source.getFirstName())
                     .withLastName(source.getLastName())
@@ -292,26 +293,27 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withWorkTelephone(source.getWorkTelephone())
                     .withMobile(source.getMobileTelephone())
                     .withEmail(source.getEmail())
-                    .withFax(source.getFax());
+                    .withFax(source.getFax())
+                    .build();
 
         }
     }
 
     // DefendantConverter
     //-----------------------------------------------------------------------
-    private static final class DefendantConverter implements Converter<Entry<Defendant, List<Offence>>, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant> {
+    private static final class DefendantConverter {
 
-        @Override
-        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant convert(final Entry<Defendant, List<Offence>> source) {
-            if (null == source || null == source.getKey()) {
-                return null;
-            }
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant convertDefendant(UUID caseId, final Entry<Defendant, List<Offence>> source) {
 
             final Defendant defendant = source.getKey();
 
-            if (null == defendant.getId() || null == defendant.getId().getId()) {
-                return null;
-            }
+            String bailStatus = defendant.getDefendantCases()
+                    .stream()
+                    .filter(dc -> dc.getLegalCase().getId().equals(caseId))
+                    .filter(dc -> dc.getBailStatus() != null)
+                    .map(DefendantCase::getBailStatus)
+                    .findFirst()
+                    .orElse(null);
 
             return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant.builder()
                     .withDefendantId(defendant.getId().getId().toString())
@@ -327,6 +329,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withOffences(source.getValue().stream()
                             .map(o -> new OffenceConverter().convert(o))
                             .collect(toList()))
+                    .withBailStatus(bailStatus)
                     .build();
         }
     }

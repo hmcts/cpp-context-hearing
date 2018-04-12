@@ -2,29 +2,13 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class Case {
     
     private final String caseId;
     private final String caseUrn;
     private final List <Defendant> defendants;
     private final List<Witness> witnesses;
-    
-    @JsonCreator
-    public Case(@JsonProperty("caseId") final String caseId, 
-            @JsonProperty("caseUrn") final String caseUrn, 
-            @JsonProperty("defendants") final List<Defendant> defendants,
-            @JsonProperty("witnesses") final List<Witness> witnesses) {
-        this.caseId = caseId;
-        this.caseUrn = caseUrn;
-        this.defendants = defendants;
-        this.witnesses = witnesses;
-    }
 
-    @JsonIgnore
     private Case(final Builder builder) {
         this.caseId = builder.caseId;
         this.caseUrn = builder.caseUrn;

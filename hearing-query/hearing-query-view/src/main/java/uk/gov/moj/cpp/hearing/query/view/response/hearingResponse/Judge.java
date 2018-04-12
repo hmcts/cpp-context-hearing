@@ -1,28 +1,12 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Judge {
 
     private String id;
     private String title;
     private String firstName;
     private String lastName;
-    
-    @JsonCreator
-    public Judge(@JsonProperty("id") final String id, 
-            @JsonProperty("title") final String title, 
-            @JsonProperty("firstName") final String firstName, 
-            @JsonProperty("lastName") final String lastName) {
-        this.id = id;
-        this.title = title;
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
 
-    @JsonIgnore
     private Judge(final Builder builder) {
         this.id = builder.id;
         this.title = builder.title;

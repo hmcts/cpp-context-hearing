@@ -1,9 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class Offence {
 
     private final String id;
@@ -14,27 +10,7 @@ public final class Offence {
     private final Plea plea;
     private final Verdict verdict;
     private final String convictionDate;
-    
-    @JsonCreator
-    public Offence(@JsonProperty("id") final String id, 
-            @JsonProperty("wording") final String wording, 
-            @JsonProperty("count") final Integer count, 
-            @JsonProperty("title") final String title, 
-            @JsonProperty("legislation") final String legislation, 
-            @JsonProperty("plea") final Plea plea,
-            @JsonProperty("verdict") final Verdict verdict, 
-            @JsonProperty("convictionDate") final String convictionDate) {
-        this.id = id;
-        this.wording = wording;
-        this.count = count;
-        this.title = title;
-        this.legislation = legislation;
-        this.plea = plea;
-        this.verdict = verdict;
-        this.convictionDate = convictionDate;
-    }
 
-   @JsonIgnore
     private Offence(final Builder builder) {
         this.id = builder.id;
         this.wording = builder.wording;

@@ -1,9 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class Verdict {
 
     private final String verdictId;
@@ -13,25 +9,7 @@ public final class Verdict {
     private final Integer numberOfSplitJurors;
     private final Integer numberOfJurors;
     private final Boolean unanimous;
-    
-    @JsonCreator
-    public Verdict(@JsonProperty("verdictId") final String verdictId, 
-            @JsonProperty("hearingId") final String hearingId, 
-            @JsonProperty("value") final Value value, 
-            @JsonProperty("verdictDate") final String verdictDate, 
-            @JsonProperty("numberOfSplitJurors") final Integer numberOfSplitJurors,
-            @JsonProperty("numberOfJurors") final Integer numberOfJurors, 
-            @JsonProperty("unanimous") final Boolean unanimous) {
-        this.verdictId = verdictId;
-        this.hearingId = hearingId;
-        this.value = value;
-        this.verdictDate = verdictDate;
-        this.numberOfSplitJurors = numberOfSplitJurors;
-        this.numberOfJurors = numberOfJurors;
-        this.unanimous = unanimous;
-    }
 
-    @JsonIgnore
     private Verdict(Builder builder) {
         this.verdictId = builder.verdictId;
         this.hearingId = builder.hearingId;

@@ -1,9 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class Address {
     
     private final String formattedAddress;
@@ -13,22 +9,6 @@ public final class Address {
     private final String address4;
     private final String postCode;
 
-    @JsonCreator
-    public Address(@JsonProperty("formattedAddress") final String formattedAddress, 
-            @JsonProperty("address1") final String address1, 
-            @JsonProperty("address2") final String address2, 
-            @JsonProperty("address3") final String address3, 
-            @JsonProperty("address4") final String address4,
-            @JsonProperty("postCode") final String postCode) {
-        this.formattedAddress = formattedAddress;
-        this.address1 = address1;
-        this.address2 = address2;
-        this.address3 = address3;
-        this.address4 = address4;
-        this.postCode = postCode;
-    }
-
-    @JsonIgnore
     private Address(final Builder builder) {
         this.formattedAddress = builder.formattedAddress;
         this.address1 = builder.address1;

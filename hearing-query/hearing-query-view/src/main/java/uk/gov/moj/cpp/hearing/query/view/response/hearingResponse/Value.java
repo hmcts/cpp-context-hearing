@@ -1,25 +1,11 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class Value {
 
     private final String category;
     private final String code;
     private final String description;
-    
-    @JsonCreator
-    public Value(@JsonProperty("category") final String category, 
-            @JsonProperty("code") final String code, 
-            @JsonProperty("description") final String description) {
-        this.category = category;
-        this.code = code;
-        this.description = description;
-    }
 
-    @JsonIgnore
     private Value(final Builder builder) {
         this.category = builder.category;
         this.code = builder.code;

@@ -1,25 +1,11 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class Plea {
 
     private final String pleaId;
     private final String pleaDate;
     private final String value;
-    
-    @JsonCreator
-    public Plea(@JsonProperty("pleaId") final String pleaId, 
-            @JsonProperty("pleaDate") final String pleaDate, 
-            @JsonProperty("value") final String value) {
-        this.pleaId = pleaId;
-        this.pleaDate = pleaDate;
-        this.value = value;
-    }
 
-    @JsonIgnore
     private Plea(final Builder builder) {
         this.pleaId = builder.pleaId;
         this.pleaDate = builder.pleaDate;

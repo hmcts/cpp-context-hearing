@@ -2,10 +2,6 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class Defendant {
 
     private final String defendantId;
@@ -20,35 +16,8 @@ public final class Defendant {
     private final Address address;
     private final String dateOfBirth;
     private final List<Offence> offences;
+    private final String bailStatus;
 
-    @JsonCreator
-    public Defendant(@JsonProperty("defendantId") final String defendantId, 
-            @JsonProperty("personId") final String personId, 
-            @JsonProperty("id") final String id, 
-            @JsonProperty("firstName") final String firstName, 
-            @JsonProperty("lastName") final String lastName,
-            @JsonProperty("homeTelephone") final String homeTelephone, 
-            @JsonProperty("mobile") final String mobile, 
-            @JsonProperty("fax") final String fax, 
-            @JsonProperty("email") final String email, 
-            @JsonProperty("address") final Address address, 
-            @JsonProperty("dateOfBirth") final String dateOfBirth,
-            @JsonProperty("offences") final List<Offence> offences) {
-        this.defendantId = defendantId;
-        this.personId = personId;
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.homeTelephone = homeTelephone;
-        this.mobile = mobile;
-        this.fax = fax;
-        this.email = email;
-        this.address = address;
-        this.dateOfBirth = dateOfBirth;
-        this.offences = offences;
-    }
-    
-    @JsonIgnore
     private Defendant(final Builder builder) {
         this.defendantId = builder.defendantId;
         this.personId = builder.personId;
@@ -62,8 +31,9 @@ public final class Defendant {
         this.address = builder.address;
         this.dateOfBirth = builder.dateOfBirth;
         this.offences = builder.offences;
+        this.bailStatus = builder.bailStatus;
     }
-    
+
     public String getDefendantId() {
         return defendantId;
     }
@@ -112,12 +82,16 @@ public final class Defendant {
         return offences;
     }
 
+    public String getBailStatus() {
+        return bailStatus;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
     public static final class Builder {
-        
+
         private String defendantId;
         private String personId;
         private String id;
@@ -130,62 +104,63 @@ public final class Defendant {
         private Address address;
         private String dateOfBirth;
         private List<Offence> offences;
-        
+        private String bailStatus;
+
         public Builder withDefendantId(final String defendantId) {
             this.defendantId = defendantId;
             return this;
         }
-        
+
         public Builder withPersonId(final String personId) {
             this.personId = personId;
             return this;
         }
-        
+
         public Builder withId(final String id) {
             this.id = id;
             return this;
         }
-        
+
         public Builder withFirstName(final String firstName) {
             this.firstName = firstName;
             return this;
         }
-        
+
         public Builder withLastName(final String lastName) {
             this.lastName = lastName;
             return this;
         }
-        
+
         public Builder withHomeTelephone(final String homeTelephone) {
             this.homeTelephone = homeTelephone;
             return this;
         }
-        
+
         public Builder withMobile(final String mobile) {
             this.mobile = mobile;
             return this;
         }
-        
+
         public Builder withFax(final String fax) {
             this.fax = fax;
             return this;
         }
-        
+
         public Builder withEmail(final String email) {
             this.email = email;
             return this;
         }
-        
+
         public Builder withAddress(final Address address) {
             this.address = address;
             return this;
         }
-        
+
         public Builder withDateOfBirth(final String dateOfBirth) {
             this.dateOfBirth = dateOfBirth;
             return this;
         }
-        
+
         public Builder withOffences(final List<Offence> offences) {
             this.offences = offences;
             return this;
@@ -193,6 +168,11 @@ public final class Defendant {
 
         public Defendant build() {
             return new Defendant(this);
+        }
+
+        public Builder withBailStatus(String bailStatus) {
+            this.bailStatus = bailStatus;
+            return this;
         }
     }
 }

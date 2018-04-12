@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.persist.entity.ex;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
@@ -16,18 +17,18 @@ public class DefendantCase {
     @EmbeddedId
     private DefendantCaseKey id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
     private Ahearing hearing;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumns({
-            @JoinColumn(name = "defendant_id", insertable = false, updatable = false),
-            @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
+            @JoinColumn(name = "defendant_id", referencedColumnName = "id", insertable = false, updatable = false),
+            @JoinColumn(name = "hearing_id", referencedColumnName = "hearing_id", insertable = false, updatable = false)
     })
     private Defendant defendant;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "case_id", insertable = false, updatable = false)
     private LegalCase legalCase;
 
@@ -47,6 +48,10 @@ public class DefendantCase {
     }
 
     public DefendantCase() {
+    }
+
+    public DefendantCaseKey getId() {
+        return id;
     }
 
     public Ahearing getHearing() {

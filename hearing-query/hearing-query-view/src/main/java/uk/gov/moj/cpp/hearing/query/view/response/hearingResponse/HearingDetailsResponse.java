@@ -2,10 +2,6 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public final class HearingDetailsResponse {
 
     private final String hearingId;
@@ -32,35 +28,8 @@ public final class HearingDetailsResponse {
         this.courtCentreId = null;
         this.attendees = null;
         this.cases = null;
-
-    }
-    
-    @JsonCreator
-    public HearingDetailsResponse(@JsonProperty("hearingId") final String hearingId, 
-            @JsonProperty("startDate") final String startDate, 
-            @JsonProperty("startTime") final String startTime, 
-            @JsonProperty("roomName") final String roomName,
-            @JsonProperty("hearingType") final String hearingType, 
-            @JsonProperty("courtCentreName") final String courtCentreName, 
-            @JsonProperty("judge") final Judge judge, 
-            @JsonProperty("roomId") final String roomId, 
-            @JsonProperty("courtCentreId") final String courtCentreId,
-            @JsonProperty("attendees") final Attendees attendees, 
-            @JsonProperty("cases") final List<Case> cases) {
-        this.hearingId = hearingId;
-        this.startDate = startDate;
-        this.startTime = startTime;
-        this.roomName = roomName;
-        this.hearingType = hearingType;
-        this.courtCentreName = courtCentreName;
-        this.judge = judge;
-        this.roomId = roomId;
-        this.courtCentreId = courtCentreId;
-        this.attendees = attendees;
-        this.cases = cases;
     }
 
-    @JsonIgnore
     private HearingDetailsResponse(final Builder builder) {
         this.hearingId = builder.hearingId;
         this.startDate = builder.startDate;
