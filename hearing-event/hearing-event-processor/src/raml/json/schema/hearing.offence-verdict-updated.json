@@ -42,9 +42,7 @@
     "offenceId",
     "verdictId",
     "verdictValueId",
-    "category",
-    "code",
-    "description"
+    "category"
   ],
   "definitions": {
     "uuid": {
