@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -14,7 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="a_attendee")
+@Table(name = "a_attendee")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
         discriminatorType = DiscriminatorType.STRING,
@@ -26,7 +27,7 @@ public class Attendee {
     private HearingSnapshotKey id;
 
     @ManyToOne
-    @JoinColumn(name = "hearing_id", insertable=false, updatable=false)
+    @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
     private Ahearing hearing;
 
     @Column(name = "person_id")
@@ -76,6 +77,31 @@ public class Attendee {
         return title;
     }
 
+    public Attendee setHearing(Ahearing hearing) {
+        this.hearing = hearing;
+        return this;
+    }
+
+    public Attendee setPersonId(UUID personId) {
+        this.personId = personId;
+        return this;
+    }
+
+    public Attendee setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public Attendee setLastName(String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
+
+    public Attendee setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
     public static abstract class Builder {
 
         private HearingSnapshotKey id;
@@ -84,7 +110,8 @@ public class Attendee {
         private String lastName;
         private String title;
 
-        protected Builder() {}
+        protected Builder() {
+        }
 
         public Attendee.Builder withId(HearingSnapshotKey id) {
             this.id = id;
@@ -127,6 +154,6 @@ public class Attendee {
         if (null == o || getClass() != o.getClass()) {
             return false;
         }
-        return Objects.equals(this.id, ((Attendee)o).id);
+        return Objects.equals(this.id, ((Attendee) o).id);
     }
 }

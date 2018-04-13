@@ -2,10 +2,6 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
 
@@ -40,17 +36,7 @@ public class HearingAggregate implements Aggregate {
         );
     }
 
-    public Stream<Object> addProsecutionCounsel(final NewProsecutionCounselAdded prosecutionCounselAdded) {
-        return apply(Stream.of(
-                new ProsecutionCounselAdded(prosecutionCounselAdded.getHearingId(), prosecutionCounselAdded.getAttendeeId(), prosecutionCounselAdded.getPersonId(), prosecutionCounselAdded.getStatus()),
-                prosecutionCounselAdded));
-    }
 
-    public Stream<Object> addDefenceCounsel(NewDefenceCounselAdded newDefenceCounselAdded) {
-        return apply(Stream.of(new DefenceCounselAdded(newDefenceCounselAdded.getHearingId(), newDefenceCounselAdded.getAttendeeId(),
-                        newDefenceCounselAdded.getPersonId(), newDefenceCounselAdded.getDefendantIds(), newDefenceCounselAdded.getStatus()),
-                newDefenceCounselAdded));
-    }
 
     public Stream<Object> shareResults(final UUID hearingId, final ZonedDateTime sharedTime, final List<ResultLine> resultLines) {
         final LinkedList<Object> events = new LinkedList<>();

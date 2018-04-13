@@ -57,6 +57,8 @@ public class HearingEventListenerRamlConfigTest {
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(NewModelPleaUpdateEventListener.class));
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(VerdictUpdateEventListener.class));
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingLogEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(DefenceCounselAddedEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(ProsecutionCounselAddedEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 
@@ -69,7 +71,6 @@ public class HearingEventListenerRamlConfigTest {
 
     @Test
     public void testActionNameAndHandleNameAreSame() throws Exception {
-
         assertThat(handlerNames.values(), containsInAnyOrder(this.ramlActionNames.toArray()));
     }
 

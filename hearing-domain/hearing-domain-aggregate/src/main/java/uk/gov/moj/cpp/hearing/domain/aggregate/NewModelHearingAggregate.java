@@ -1,29 +1,35 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
+import uk.gov.moj.cpp.hearing.command.defenceCounsel.DefendantId;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 
-import java.util.ArrayList;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
@@ -43,56 +49,98 @@ public class NewModelHearingAggregate implements Aggregate {
 
     private Map<UUID, HearingEvent> events = new HashMap<>();
 
+    private List<NewProsecutionCounselAdded> prosecutionCounsels = new ArrayList<>();
+    private List<NewDefenceCounselAdded> newDefenceCounsels = new ArrayList<>();
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(
-                when(Initiated.class).apply(this::onInitiated),
-                when(InitiateHearingOffencePlead.class).apply(this::onInitiateHearingOffencePlead),
-                when(HearingEventLogged.class).apply(this::onHearingEventLogged),
-                when(HearingEventDeleted.class).apply(this::onHearingEventDeleted),
+                when(Initiated.class).apply(initiated -> {
+                    this.cases = initiated.getCases();
+                    this.hearing = initiated.getHearing();
+                }),
+
+                when(InitiateHearingOffencePlead.class).apply(initiateHearingOffencePlead -> {
+
+                }),
+
+                when(NewProsecutionCounselAdded.class).apply(newProsecutionCounselAdded -> {
+                    prosecutionCounsels.add(newProsecutionCounselAdded);
+                }),
+
+                when(NewDefenceCounselAdded.class).apply(newDefenceCounselAdded -> {
+                    newDefenceCounsels.add(newDefenceCounselAdded);
+                }),
+
+                when(HearingEventLogged.class).apply(hearingEventLogged -> {
+                    this.events.put(hearingEventLogged.getHearingEventId(), new HearingEvent(hearingEventLogged));
+                }),
+
+                when(HearingEventDeleted.class).apply(hearingEventDeleted -> {
+                    this.events.get(hearingEventDeleted.getHearingEventId()).setDeleted(true);
+                }),
+
                 otherwiseDoNothing()
         );
     }
 
-    private void onInitiated(Initiated initiated) {
-        this.cases = initiated.getCases();
-        this.hearing = initiated.getHearing();
+
+    public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
+        return apply(Stream.of(
+                NewProsecutionCounselAdded.builder()
+                        .withHearingId(prosecutionCounselCommand.getHearingId())
+                        .withAttendeeId(prosecutionCounselCommand.getAttendeeId())
+                        .withPersonId(prosecutionCounselCommand.getPersonId())
+                        .withFirstName(prosecutionCounselCommand.getFirstName())
+                        .withLastName(prosecutionCounselCommand.getLastName())
+                        .withStatus(prosecutionCounselCommand.getStatus())
+                        .withTitle(prosecutionCounselCommand.getTitle())
+                        .build()
+        ));
     }
 
-    private void onInitiateHearingOffencePlead(InitiateHearingOffencePlead initiateHearingOffencePlead) {
-
+    public Stream<Object> addDefenceCounsel(final AddDefenceCounselCommand defenceCounselCommand) {
+        return apply(Stream.of(
+                NewDefenceCounselAdded.builder()
+                        .withHearingId(defenceCounselCommand.getHearingId())
+                        .withDefendantIds(
+                                defenceCounselCommand.getDefendantIds().stream()
+                                        .map(DefendantId::getDefendantId)
+                                        .collect(Collectors.toList())
+                        )
+                        .withAttendeeId(defenceCounselCommand.getAttendeeId())
+                        .withPersonId(defenceCounselCommand.getPersonId())
+                        .withFirstName(defenceCounselCommand.getFirstName())
+                        .withLastName(defenceCounselCommand.getLastName())
+                        .withStatus(defenceCounselCommand.getStatus())
+                        .withTitle(defenceCounselCommand.getTitle())
+                        .build()
+        ));
     }
-    
+
     public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
-            final String pleaValue) {
+                                     final String pleaValue) {
         final List<Object> events = new ArrayList<>();
         events.add(HearingOffencePleaUpdated.builder()
-                    .withHearingId(hearingId)
-                    .withOffenceId(offenceId)
-                    .withPleaDate(pleaDate)
-                    .withValue(pleaValue)
-                    .build());
-        events.add(isGuilty(pleaValue) ? 
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId)
+                .withPleaDate(pleaDate)
+                .withValue(pleaValue)
+                .build());
+        events.add(isGuilty(pleaValue) ?
                 ConvictionDateAdded.builder()
-                    .withHearingId(hearingId)
-                    .withOffenceId(offenceId)
-                    .withConvictionDate(pleaDate)
-                    .build() : 
-               ConvictionDateRemoved.builder()
-                    .withHearingId(hearingId)
-                    .withOffenceId(offenceId)
-                    .build());
+                        .withHearingId(hearingId)
+                        .withOffenceId(offenceId)
+                        .withConvictionDate(pleaDate)
+                        .build() :
+                ConvictionDateRemoved.builder()
+                        .withHearingId(hearingId)
+                        .withOffenceId(offenceId)
+                        .build());
         return apply(events.stream());
     }
 
-    private void onHearingEventLogged(HearingEventLogged hearingEventLogged) {
-        this.events.put(hearingEventLogged.getHearingEventId(), new HearingEvent(hearingEventLogged));
-    }
 
-    private void onHearingEventDeleted(HearingEventDeleted hearingEventDeleted) {
-        this.events.get(hearingEventDeleted.getHearingEventId()).setDeleted(true);
-    }
-    
     private boolean isGuilty(final String value) {
         return GUILTY.equalsIgnoreCase(value);
     }
@@ -217,7 +265,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 verdict.getVerdictDate()
         ));
 
-        if (isGuilty(verdict.getValue().getCategory())){
+        if (isGuilty(verdict.getValue().getCategory())) {
             events.add(new ConvictionDateAdded(hearingId, offenceId, verdict.getVerdictDate()));
         } else {
             events.add(new ConvictionDateRemoved(hearingId, offenceId));

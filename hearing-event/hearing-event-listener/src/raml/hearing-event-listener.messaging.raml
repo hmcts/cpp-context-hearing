@@ -36,22 +36,18 @@ baseUri: message://event/listener/message/hearing
             example: !include json/hearing.conviction-date-removed.json
 
 
-# old
-        application/vnd.hearing.prosecution-counsel-added+json:
-            schema: !include json/schema/hearing.prosecution-counsel-added.json
-            example: !include json/hearing.prosecution-counsel-added.json
-
+# Add Prosecution Counsel
         application/vnd.hearing.newprosecution-counsel-added+json:
             schema: !include json/schema/hearing.newprosecution-counsel-added.json
             example: !include json/hearing.newprosecution-counsel-added.json
 
-        application/vnd.hearing.defence-counsel-added+json:
-            schema: !include json/schema/hearing.defence-counsel-added.json
-            example: !include json/hearing.defence-counsel-added.json
-
+# Add Defense Counsel
         application/vnd.hearing.newdefence-counsel-added+json:
             schema: !include json/schema/hearing.newdefence-counsel-added.json
             example: !include json/hearing.newdefence-counsel-added.json
+
+
+# old
 
         application/vnd.hearing.hearing-event-definitions-created+json:
             schema:  !include json/schema/hearing.hearing-event-definitions-created.json

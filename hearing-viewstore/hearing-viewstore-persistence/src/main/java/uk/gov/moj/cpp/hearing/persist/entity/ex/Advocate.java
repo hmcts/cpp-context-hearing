@@ -26,15 +26,18 @@ public class Advocate extends Attendee {
     public String getStatus() {
         return status;
     }
-    public void setStatus(String status) {
-        this.status=status;
+
+    public Advocate setStatus(String status) {
+        this.status = status;
+        return this;
     }
 
     public static class Builder extends Attendee.Builder {
 
         private String status;
 
-        protected Builder() {}
+        protected Builder() {
+        }
 
         public Advocate.Builder withStatus(String status) {
             this.status = status;
@@ -43,8 +46,8 @@ public class Advocate extends Attendee {
 
         @SuppressWarnings("unchecked")
         public Advocate build() {
-             return new Advocate(this);
-         }
+            return new Advocate(this);
+        }
 
     }
 }

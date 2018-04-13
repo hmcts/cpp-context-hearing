@@ -1,35 +1,14 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.emptyList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNull.notNullValue;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
-import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -51,35 +30,36 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.persist.entity.PleaHearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 
-import java.io.StringReader;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InOrder;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.moj.cpp.hearing.persist.entity.VerdictHearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
-import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
@@ -239,10 +219,6 @@ public class HearingEventListenerTest {
     @Mock
     private HearingCaseRepository hearingCaseRepository;
 
-    //TODO eventually these become part of NewHearingEventListener
-    @Mock
-    private AhearingRepository ahearingRepository;
-
     @Mock
     private LegalCaseRepository legalCaseRepository;
 
@@ -261,8 +237,7 @@ public class HearingEventListenerTest {
     @Captor
     private ArgumentCaptor<HearingCase> hearingCaseArgumentCaptor;
 
-    @Captor
-    private ArgumentCaptor<ProsecutionCounsel> prosecutionCounselArgumentCaptor;
+
 
     @Captor
     private ArgumentCaptor<DefenceCounsel> defenceCounselArgumentCaptor;
@@ -292,89 +267,6 @@ public class HearingEventListenerTest {
     public void setUp() {
         setField(this.jsonObjectToObjectConverter, "mapper",
                 new ObjectMapperProducer().objectMapper());
-    }
-
-
-    @Test
-    public void shouldUpdateCaseWhenAdded() {
-
-    }
-
-
-    @Test
-    public void shouldHandleProsecutionCounselAddedEvent() {
-        final JsonEnvelope event = getAddProsecutionCounselJsonEnvelope();
-
-        when(ahearingRepository.findBy(HEARING_ID)).thenReturn(Ahearing.builder().build());
-
-        this.hearingEventListener.prosecutionCounselAdded(event);
-
-        verify(this.prosecutionCounselRepository).save(this.prosecutionCounselArgumentCaptor.capture());
-        final ProsecutionCounsel actualProsecutionCounsel = this.prosecutionCounselArgumentCaptor.getValue();
-        assertThat(actualProsecutionCounsel.getHearingId(), is(HEARING_ID));
-        assertThat(actualProsecutionCounsel.getAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualProsecutionCounsel.getPersonId(), is(PERSON_ID));
-        assertThat(actualProsecutionCounsel.getStatus(), is(STATUS));
-    }
-
-    @Test
-    public void shouldAddDefendantsToDefenceCounselInAHearing() {
-        final JsonEnvelope event = getAddDefenceCounselJsonEnvelope();
-        when(this.defenceCounselDefendantRepository.findByDefenceCounselAttendeeId(ATTENDEE_ID)).thenReturn(emptyList());
-
-        this.hearingEventListener.defenceCounselAdded(event);
-
-        verify(this.defenceCounselDefendantRepository, never()).remove(any(DefenceCounselDefendant.class));
-        verify(this.defenceCounselRepository).save(this.defenceCounselArgumentCaptor.capture());
-        final DefenceCounsel actualDefenceCounsel = this.defenceCounselArgumentCaptor.getValue();
-        assertThat(actualDefenceCounsel.getAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualDefenceCounsel.getHearingId(), is(HEARING_ID));
-        assertThat(actualDefenceCounsel.getPersonId(), is(PERSON_ID));
-        assertThat(actualDefenceCounsel.getStatus(), is(STATUS));
-
-        verify(this.defenceCounselDefendantRepository, times(2)).save(this.defenceCounselDefendantArgumentCaptor.capture());
-        final List<DefenceCounselDefendant> actualValues = this.defenceCounselDefendantArgumentCaptor.getAllValues();
-        assertThat(actualValues, hasSize(2));
-        assertThat(actualValues.get(0).getDefenceCounselAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualValues.get(0).getDefendantId(), is(DEFENDANT_ID));
-
-        assertThat(actualValues.get(1).getDefenceCounselAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualValues.get(1).getDefendantId(), is(DEFENDANT_ID_2));
-    }
-
-    @Test
-    public void shouldRemoveDefendantsNotPartOfAttendeeListBeforeAddingNewDefendantsToDefenceCounselInAHearing() {
-        final JsonEnvelope event = getAddDefenceCounselJsonEnvelope();
-        when(this.defenceCounselDefendantRepository.findByDefenceCounselAttendeeId(ATTENDEE_ID)).thenReturn(getExistingAndNonExistingDefendants());
-
-        this.hearingEventListener.defenceCounselAdded(event);
-
-        verify(this.defenceCounselRepository).save(this.defenceCounselArgumentCaptor.capture());
-        final DefenceCounsel actualDefenceCounsel = this.defenceCounselArgumentCaptor.getValue();
-        assertThat(actualDefenceCounsel.getAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualDefenceCounsel.getHearingId(), is(HEARING_ID));
-        assertThat(actualDefenceCounsel.getPersonId(), is(PERSON_ID));
-        assertThat(actualDefenceCounsel.getStatus(), is(STATUS));
-
-
-        final InOrder inOrder = inOrder(this.defenceCounselDefendantRepository);
-        inOrder.verify(this.defenceCounselDefendantRepository, times(2)).remove(this.defenceCounselDefendantRemoveArgumentCaptor.capture());
-        final List<DefenceCounselDefendant> actualRemovedValues = this.defenceCounselDefendantRemoveArgumentCaptor.getAllValues();
-        assertThat(actualRemovedValues, hasSize(2));
-        assertThat(actualRemovedValues.get(0).getDefenceCounselAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualRemovedValues.get(0).getDefendantId(), is(DEFENDANT_ID_3));
-
-        assertThat(actualRemovedValues.get(1).getDefenceCounselAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualRemovedValues.get(1).getDefendantId(), is(DEFENDANT_ID_4));
-
-        inOrder.verify(this.defenceCounselDefendantRepository, times(2)).save(this.defenceCounselDefendantArgumentCaptor.capture());
-        final List<DefenceCounselDefendant> actualValues = this.defenceCounselDefendantArgumentCaptor.getAllValues();
-        assertThat(actualValues, hasSize(2));
-        assertThat(actualValues.get(0).getDefenceCounselAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualValues.get(0).getDefendantId(), is(DEFENDANT_ID));
-
-        assertThat(actualValues.get(1).getDefenceCounselAttendeeId(), is(ATTENDEE_ID));
-        assertThat(actualValues.get(1).getDefendantId(), is(DEFENDANT_ID_2));
     }
 
     @Test

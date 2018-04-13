@@ -20,18 +20,10 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
-import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -80,18 +72,10 @@ public class NewModelInitiateHearingCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            //new events.
             Initiated.class,
             InitiateHearingOffenceEnriched.class,
-            InitiateHearingOffencePlead.class,
-            DraftResultSaved.class,
-
-            ConvictionDateRemoved.class,
-            //TODO - GPE-3032 CLEANUP - remove old events.
-
-            ProsecutionCounselAdded.class, DefenceCounselAdded.class,
-            ResultsShared.class, ResultAmended.class,
-            ConvictionDateAdded.class, HearingVerdictUpdated.class );
+            InitiateHearingOffencePlead.class
+            );
 
     @Mock
     private HearingCommandHandler oldHandler;
@@ -189,7 +173,7 @@ public class NewModelInitiateHearingCommandHandlerTest {
                                 withJsonPath("$.hearing.witnesses.[0].mobile", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getMobile()))
 
 
-                                ))).thatMatchesSchema()
+                        ))).thatMatchesSchema()
         ));
     }
 

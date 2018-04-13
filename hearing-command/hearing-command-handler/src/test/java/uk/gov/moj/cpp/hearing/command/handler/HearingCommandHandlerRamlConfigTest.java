@@ -34,6 +34,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 NewModelInitiateHearingCommandHandler.class,
                 NewModelUpdatePleaCommandHandler.class,
                 NewModelUpdateVerdictCommandHandler.class,
+                AddDefenceCounselCommandHandler.class,
+                AddProsecutionCounselCommandHandler.class,
                 MagistratesCourtInitiateHearingCommandHandler.class,
                 HearingEventCommandHandler.class
         );

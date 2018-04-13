@@ -13,11 +13,12 @@ import javax.persistence.ManyToMany;
 public class DefenceAdvocate extends Advocate {
 
     @ManyToMany(mappedBy = "defenceAdvocates")
-    private List<Defendant> defendants=new ArrayList<>();
+    private List<Defendant> defendants = new ArrayList<>();
 
     public DefenceAdvocate() {
 
     }
+
     public DefenceAdvocate(final DefenceAdvocate.Builder builder) {
         super(builder);
     }
@@ -69,7 +70,9 @@ public class DefenceAdvocate extends Advocate {
         }
 
 
-        protected Builder() {}
+        protected Builder() {
+        }
+
         @Override
         public DefenceAdvocate build() {
             return new DefenceAdvocate(this);

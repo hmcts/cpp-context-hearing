@@ -1,12 +1,12 @@
-package uk.gov.moj.cpp.hearing.domain.event;
+package uk.gov.moj.cpp.hearing.command.prosecutionCounsel;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import uk.gov.justice.domain.annotation.Event;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.UUID;
-//TODO replace hearing.prosecution-counsel-added
-@Event("hearing.newprosecution-counsel-added")
-public class NewProsecutionCounselAdded {
+
+public class AddProsecutionCounselCommand {
+
     private UUID personId;
     private UUID attendeeId;
     private UUID hearingId;
@@ -15,23 +15,33 @@ public class NewProsecutionCounselAdded {
     private String lastName;
     private String title;
 
-
-    public NewProsecutionCounselAdded() {
+    @JsonCreator
+    public AddProsecutionCounselCommand(
+            @JsonProperty("personId") UUID personId,
+            @JsonProperty("attendeeId") UUID attendeeId,
+            @JsonProperty("hearingId") UUID hearingId,
+            @JsonProperty("status") String status,
+            @JsonProperty("firstName") String firstName,
+            @JsonProperty("lastName") String lastName,
+            @JsonProperty("title") String title) {
+        this.personId = personId;
+        this.attendeeId = attendeeId;
+        this.hearingId = hearingId;
+        this.status = status;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.title = title;
     }
 
-
-    private static NewProsecutionCounselAdded create(final Builder builder) {
-        NewProsecutionCounselAdded thus = new NewProsecutionCounselAdded();
-        thus.attendeeId=builder.attendeeId;
-        thus.firstName=builder.firstName;
-        thus.lastName=builder.lastName;
-        thus.hearingId=builder.hearingId;
-        thus.personId=builder.personId;
-        thus.status=builder.status;
-        thus.title=builder.title;
-        return thus;
+    public AddProsecutionCounselCommand(Builder builder) {
+        this.personId = builder.personId;
+        this.attendeeId = builder.attendeeId;
+        this.hearingId = builder.hearingId;
+        this.status = builder.status;
+        this.firstName = builder.firstName;
+        this.lastName = builder.lastName;
+        this.title = builder.title;
     }
-
 
     public UUID getHearingId() {
         return hearingId;
@@ -71,36 +81,42 @@ public class NewProsecutionCounselAdded {
         private String title;
 
         public Builder withPersonId(UUID personId) {
-            this.personId=personId;
-            return this;
-        }
-        public Builder withAttendeeId(UUID attendeeId) {
-            this.attendeeId=attendeeId;
-            return this;
-        }
-        public Builder withHearingId(UUID hearingId) {
-            this.hearingId=hearingId;
-            return this;
-        }
-        public Builder withStatus(String status) {
-            this.status=status;
-            return this;
-        }
-        public Builder withFirstName(String firstName) {
-            this.firstName=firstName;
-            return this;
-        }
-        public Builder withLastName(String lastName) {
-            this.lastName=lastName;
-            return this;
-        }
-        public Builder withTitle(String title) {
-            this.title=title;
+            this.personId = personId;
             return this;
         }
 
-        public NewProsecutionCounselAdded build() {
-            return NewProsecutionCounselAdded.create(this);
+        public Builder withAttendeeId(UUID attendeeId) {
+            this.attendeeId = attendeeId;
+            return this;
+        }
+
+        public Builder withHearingId(UUID hearingId) {
+            this.hearingId = hearingId;
+            return this;
+        }
+
+        public Builder withStatus(String status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder withFirstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder withLastName(String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public Builder withTitle(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public AddProsecutionCounselCommand build() {
+            return new AddProsecutionCounselCommand(this);
         }
     }
 

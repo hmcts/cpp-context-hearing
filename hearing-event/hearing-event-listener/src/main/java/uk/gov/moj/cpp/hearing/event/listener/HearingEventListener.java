@@ -6,7 +6,6 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselDefendantRepository;
 import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
@@ -16,10 +15,7 @@ import uk.gov.moj.cpp.hearing.persist.HearingRepository;
 import uk.gov.moj.cpp.hearing.persist.PleaHearingRepository;
 import uk.gov.moj.cpp.hearing.persist.ProsecutionCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.VerdictHearingRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
-import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
-import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
@@ -27,7 +23,6 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
-import javax.transaction.Transactional;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
@@ -92,44 +87,6 @@ public class HearingEventListener {
 
     @Inject
     private HearingJudgeRepository hearingJudgeRepository;
-
-    @Transactional
-    @Handles("hearing.prosecution-counsel-added")
-    public void prosecutionCounselAdded(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
-        final UUID attendeeId = fromString(payload.getString(FIELD_ATTENDEE_ID));
-        final String status = payload.getString(FIELD_STATUS);
-
-        this.prosecutionCounselRepository.save(new ProsecutionCounsel(attendeeId, hearingId, personId, status));
-    }
-
-
-    @Transactional
-    @Handles("hearing.defence-counsel-added")
-    public void defenceCounselAdded(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
-        final UUID attendeeId = fromString(payload.getString(FIELD_ATTENDEE_ID));
-        final String status = payload.getString(FIELD_STATUS);
-
-        final List<UUID> defendantIds = JsonObjects.getUUIDs(payload, FIELD_DEFENDANT_IDS);
-
-        this.defenceCounselRepository.save(new DefenceCounsel(attendeeId, hearingId, personId, status));
-
-        final List<DefenceCounselDefendant> existingDefendants =
-                this.defenceCounselDefendantRepository.findByDefenceCounselAttendeeId(attendeeId);
-
-        existingDefendants.stream()
-                .filter(defendant -> !defendantIds.contains(defendant.getDefendantId()))
-                .forEach(this.defenceCounselDefendantRepository::remove);
-
-        defendantIds.forEach(defendantId ->
-                this.defenceCounselDefendantRepository.save(new DefenceCounselDefendant(attendeeId, defendantId)));
-       // (new NewHearingEventListener()).defenceCounselAdded(event);
-    }
 
     @Handles("hearing.draft-result-saved")
     public void draftResultSaved(final JsonEnvelope event) {
