@@ -34,6 +34,9 @@
     },
     "unanimous": {
       "type": "boolean"
+    },
+    "verdictDate": {
+      "type":"string"
     }
   },
   "required": [
@@ -43,8 +46,7 @@
     "verdictId",
     "verdictValueId",
     "category",
-    "code",
-    "description"
+    "verdictDate"
   ],
   "definitions": {
     "uuid": {
