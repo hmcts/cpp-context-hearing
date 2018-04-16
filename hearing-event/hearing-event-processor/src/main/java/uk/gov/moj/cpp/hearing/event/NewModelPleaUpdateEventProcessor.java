@@ -25,6 +25,7 @@ public class NewModelPleaUpdateEventProcessor {
 
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdate(final JsonEnvelope envelop) {
+
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "hearing.offence-plea-updated").apply(envelop.payloadAsJsonObject()));
 
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.plea-updated")

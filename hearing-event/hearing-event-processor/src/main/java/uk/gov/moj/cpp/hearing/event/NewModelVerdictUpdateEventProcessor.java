@@ -24,8 +24,7 @@ public class NewModelVerdictUpdateEventProcessor {
     }
 
     @Handles("hearing.offence-verdict-updated")
-    public void offencePleaUpdate(final JsonEnvelope envelop) {
-
+    public void verdictUpdate(final JsonEnvelope envelop) {
 
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.verdict-updated")
                 .apply(createObjectBuilder()

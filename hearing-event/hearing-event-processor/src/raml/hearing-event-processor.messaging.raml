@@ -93,6 +93,10 @@ baseUri: message://event/processor/message/hearing
             example: !include json/hearing.hearing-update-verdict-ignored.json
 
 
+        application/vnd.hearing.record-sending-sheet-complete+json:
+            example: !include json/hearing.record-sending-sheet-complete.json
+            schema:  !include json/schema/hearing.record-sending-sheet-complete.json
+
 /public.event:
   post:
     body:

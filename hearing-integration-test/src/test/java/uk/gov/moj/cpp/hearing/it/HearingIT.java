@@ -163,7 +163,10 @@ public class HearingIT extends AbstractIT {
 
     @Test
     public void shouldShareAllAvailableResultLinesEvenAfterManyEventsLogged() {
-        final UUID hearingId = randomUUID();
+
+        InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, UseCases.asDefault());
+
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final ResultLineData resultForCase = resultLine(CASE);
         final ResultLineData resultForOffence = resultLine(OFFENCE);

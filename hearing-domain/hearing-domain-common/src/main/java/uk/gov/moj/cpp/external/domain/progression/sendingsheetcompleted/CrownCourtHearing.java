@@ -60,4 +60,8 @@ public class CrownCourtHearing {
       return new CrownCourtHearing(ccHearingDate, courtCentreId, courtCentreName);
     }
   }
+
+  public static Builder builder(){
+    return new Builder();
+  }
 }

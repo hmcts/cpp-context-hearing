@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.time.LocalDate;
@@ -21,23 +24,36 @@ public class OffenceVerdictUpdated {
     private Boolean unanimous;
     private LocalDate verdictDate;
 
-    public OffenceVerdictUpdated() {
-
+    @JsonIgnore
+    public OffenceVerdictUpdated(Builder builder) {
+        this.caseId = builder.caseId;
+        this.hearingId = builder.hearingId;
+        this.offenceId = builder.offenceId;
+        this.verdictId = builder.verdictId;
+        this.verdictValueId = builder.verdictValueId;
+        this.category = builder.category;
+        this.code = builder.code;
+        this.description = builder.description;
+        this.numberOfJurors = builder.numberOfJurors;
+        this.numberOfSplitJurors = builder.numberOfSplitJurors;
+        this.unanimous = builder.unanimous;
+        this.verdictDate = builder.verdictDate;
     }
 
-    public OffenceVerdictUpdated(UUID caseId,
-                                 UUID hearingId,
-                                 UUID offenceId,
-                                 UUID verdictId,
-                                 UUID verdictValueId,
-                                 String category,
-                                 String code,
-                                 String description,
-                                 Integer numberOfJurors,
-                                 Integer numberOfSplitJurors,
-                                 Boolean unanimous,
-                                 LocalDate verdictDate
-                                 ) {
+    @JsonCreator
+    public OffenceVerdictUpdated(@JsonProperty("caseId") UUID caseId,
+                                 @JsonProperty("hearingId") UUID hearingId,
+                                 @JsonProperty("offenceId") UUID offenceId,
+                                 @JsonProperty("verdictId") UUID verdictId,
+                                 @JsonProperty("verdictValueId") UUID verdictValueId,
+                                 @JsonProperty("category") String category,
+                                 @JsonProperty("code") String code,
+                                 @JsonProperty("description") String description,
+                                 @JsonProperty("numberOfJurors") Integer numberOfJurors,
+                                 @JsonProperty("numberOfSplitJurors") Integer numberOfSplitJurors,
+                                 @JsonProperty("unanimous") Boolean unanimous,
+                                 @JsonProperty("verdictDate") LocalDate verdictDate
+    ) {
         this.caseId = caseId;
         this.hearingId = hearingId;
         this.offenceId = offenceId;
@@ -98,5 +114,89 @@ public class OffenceVerdictUpdated {
 
     public LocalDate getVerdictDate() {
         return verdictDate;
+    }
+
+
+    public static class Builder {
+        private UUID caseId;
+        private UUID hearingId;
+        private UUID offenceId;
+        private UUID verdictId;
+        private UUID verdictValueId;
+        private String category;
+        private String code;
+        private String description;
+        private Integer numberOfJurors;
+        private Integer numberOfSplitJurors;
+        private Boolean unanimous;
+        private LocalDate verdictDate;
+
+        public Builder withCaseId(UUID caseId) {
+            this.caseId = caseId;
+            return this;
+        }
+
+        public Builder withHearingId(UUID hearingId) {
+            this.hearingId = hearingId;
+            return this;
+        }
+
+        public Builder withOffenceId(UUID offenceId) {
+            this.offenceId = offenceId;
+            return this;
+        }
+
+        public Builder withVerdictId(UUID verdictId) {
+            this.verdictId = verdictId;
+            return this;
+        }
+
+        public Builder withVerdictValueId(UUID verdictValueId) {
+            this.verdictValueId = verdictValueId;
+            return this;
+        }
+
+        public Builder withCategory(String category) {
+            this.category = category;
+            return this;
+        }
+
+        public Builder withCode(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withNumberOfJurors(Integer numberOfJurors) {
+            this.numberOfJurors = numberOfJurors;
+            return this;
+        }
+
+        public Builder withNumberOfSplitJurors(Integer numberOfSplitJurors) {
+            this.numberOfSplitJurors = numberOfSplitJurors;
+            return this;
+        }
+
+        public Builder withUnanimous(Boolean unanimous) {
+            this.unanimous = unanimous;
+            return this;
+        }
+
+        public Builder withVerdictDate(LocalDate verdictDate) {
+            this.verdictDate = verdictDate;
+            return this;
+        }
+
+        public OffenceVerdictUpdated build(){
+            return new OffenceVerdictUpdated(this);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 }

@@ -1,31 +1,17 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import static java.util.UUID.fromString;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.external.domain.listing.Hearing;
-import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
-import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
-import uk.gov.moj.cpp.hearing.event.command.InitiateHearingCommand;
-
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.*;
 
 import javax.inject.Inject;
-import javax.json.*;
+import javax.json.JsonObject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)

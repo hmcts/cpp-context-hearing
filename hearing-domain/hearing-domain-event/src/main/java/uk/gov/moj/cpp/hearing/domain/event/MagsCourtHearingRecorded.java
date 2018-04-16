@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 
 import java.time.LocalDate;
@@ -38,4 +39,35 @@ public class MagsCourtHearingRecorded {
     }
 
 
+    public static class Builder {
+
+        private Hearing hearing;
+
+        private LocalDate convictionDate;
+
+        private UUID hearingId;
+
+        public Builder withHearing(final Hearing hearing) {
+            this.hearing = hearing;
+            return this;
+        }
+
+        public Builder withConvictionDate(LocalDate convictionDate) {
+            this.convictionDate = convictionDate;
+            return this;
+        }
+
+        public Builder withHearingId(UUID hearingId) {
+            this.hearingId = hearingId;
+            return this;
+        }
+
+        public MagsCourtHearingRecorded build() {
+            return new MagsCourtHearingRecorded(hearing, convictionDate, hearingId);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
+    }
 }

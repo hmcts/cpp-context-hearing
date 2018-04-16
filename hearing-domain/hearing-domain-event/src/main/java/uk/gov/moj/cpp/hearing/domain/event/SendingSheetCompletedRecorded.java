@@ -53,4 +53,8 @@ public class SendingSheetCompletedRecorded {
             return new SendingSheetCompletedRecorded(crownCourtHearing, hearing);
         }
     }
+
+    public static Builder builder(){
+        return new Builder();
+    }
 }
