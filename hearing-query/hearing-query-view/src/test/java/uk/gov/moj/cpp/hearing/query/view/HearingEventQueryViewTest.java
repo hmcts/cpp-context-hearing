@@ -1,5 +1,30 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselToDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonassert.impl.matcher.IsEmptyCollection.empty;
@@ -25,28 +50,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselToDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
-
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(MockitoJUnitRunner.class)
@@ -123,7 +126,7 @@ public class HearingEventQueryViewTest {
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
 
     @Mock
-    private DefenceCounselRepository defenceCounselRepository;
+    private AhearingRepository ahearingRepository;
 
     @InjectMocks
     private HearingEventQueryView hearingEventQueryView;
@@ -224,8 +227,27 @@ public class HearingEventQueryViewTest {
 
     @Test
     public void shouldGetAllHearingEventDefinitionsWithCaseAttributes() {
+
         when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithCaseAttributes());
-        when(defenceCounselRepository.findDefenceCounselAndDefendantByHearingId(HEARING_ID)).thenReturn(defenceCounselToDefendants());
+
+        Ahearing ahearing = Ahearing.builder()
+                .withId(HEARING_ID)
+                .addAttendee(DefenceAdvocate.builder()
+                        .withId(new HearingSnapshotKey(randomUUID(), HEARING_ID))
+                        .withPersonId(PERSON_ID)
+                        .addDefendant(Defendant.builder()
+                                .withId(new HearingSnapshotKey(DEFENDANT_ID, HEARING_ID))
+                                .build())
+                        .build())
+                .addAttendee(DefenceAdvocate.builder()
+                        .withId(new HearingSnapshotKey(randomUUID(), HEARING_ID))
+                        .withPersonId(PERSON_ID_2)
+                        .addDefendant(Defendant.builder()
+                                .withId(new HearingSnapshotKey(DEFENDANT_ID_2, HEARING_ID))
+                                .build())
+                        .build())
+                .build();
+        when(ahearingRepository.findById(HEARING_ID)).thenReturn(ahearing);
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())

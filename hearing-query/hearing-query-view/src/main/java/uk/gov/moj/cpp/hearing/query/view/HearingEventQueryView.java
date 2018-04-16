@@ -5,12 +5,13 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.DefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselToDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
@@ -62,7 +63,7 @@ public class HearingEventQueryView {
     private HearingEventRepository hearingEventRepository;
 
     @Inject
-    private DefenceCounselRepository defenceCounselRepository;
+    private AhearingRepository hearingRepository;
 
     @Inject
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
@@ -125,7 +126,7 @@ public class HearingEventQueryView {
                                     .add(FIELD_LAST_MODIFIED_TIME, ZonedDateTimes.toString(hearingEvent.getLastModifiedTime()))
                                     .add(FIELD_ALTERABLE, hearingEvent.isAlterable());
 
-                            if( hearingEvent.getWitnessId() != null){
+                            if (hearingEvent.getWitnessId() != null) {
                                 jsonObjectBuilder.add(FIELD_WITNESS_ID, hearingEvent.getWitnessId().toString());
                             }
                             eventLogJsonArrayBuilder.add(jsonObjectBuilder);
@@ -142,14 +143,21 @@ public class HearingEventQueryView {
     }
 
     private JsonArrayBuilder defendantAndDefenceCounselAttributesFor(final UUID hearingId) {
-        final List<DefenceCounselToDefendant> defenceCounselDefendants = defenceCounselRepository.findDefenceCounselAndDefendantByHearingId(hearingId);
+
+        Ahearing aHearing = hearingRepository.findById(hearingId);
+
         final JsonArrayBuilder caseAttributesJsonArrayBuilder = createArrayBuilder();
 
-        defenceCounselDefendants.forEach(defenceCounselDefendant -> caseAttributesJsonArrayBuilder.add(
-                createObjectBuilder()
-                        .add(FIELD_COUNSEL_NAME, defenceCounselDefendant.getPersonId().toString())
-                        .add(FIELD_DEFENDANT_NAME, defenceCounselDefendant.getDefendantId().toString())
-        ));
+        aHearing.getAttendees().stream()
+                .filter(a -> a instanceof DefenceAdvocate)
+                .map(DefenceAdvocate.class::cast)
+                .forEach(defenceAdvocate -> {
+                    caseAttributesJsonArrayBuilder.add(
+                            createObjectBuilder()
+                                    .add(FIELD_COUNSEL_NAME, defenceAdvocate.getPersonId().toString())
+                                    .add(FIELD_DEFENDANT_NAME, defenceAdvocate.getDefendants().get(0).getId().getId().toString())
+                    );
+                });
 
         return caseAttributesJsonArrayBuilder;
     }
@@ -190,12 +198,12 @@ public class HearingEventQueryView {
         return eventDefinitionBuilder;
     }
 
-    private JsonObjectBuilder prepareEventDefinitionJsonObjectVersionTwo( final HearingEventDefinition eventDefinition) {
+    private JsonObjectBuilder prepareEventDefinitionJsonObjectVersionTwo(final HearingEventDefinition eventDefinition) {
         final JsonObjectBuilder eventDefinitionBuilder = createObjectBuilder();
 
         if (eventDefinition.getCaseAttribute() != null) {
             JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
-            Arrays.asList(eventDefinition.getCaseAttribute().split(",")).forEach(caseAttribute-> jsonArrayBuilder.add(caseAttribute.trim()));
+            Arrays.asList(eventDefinition.getCaseAttribute().split(",")).forEach(caseAttribute -> jsonArrayBuilder.add(caseAttribute.trim()));
             eventDefinitionBuilder.add(FIELD_CASE_ATTRIBUTES, jsonArrayBuilder.build());
         }
 

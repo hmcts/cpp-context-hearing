@@ -21,6 +21,7 @@ public class DefenceAdvocate extends Advocate {
 
     public DefenceAdvocate(final DefenceAdvocate.Builder builder) {
         super(builder);
+        this.defendants = builder.defendants;
     }
 
     public List<Defendant> getDefendants() {
@@ -32,6 +33,11 @@ public class DefenceAdvocate extends Advocate {
     }
 
     public static class Builder extends Advocate.Builder {
+
+        private List<Defendant> defendants = new ArrayList<>();
+
+        protected Builder() {
+        }
 
         @Override
         public DefenceAdvocate.Builder withStatus(String status) {
@@ -70,7 +76,9 @@ public class DefenceAdvocate extends Advocate {
         }
 
 
-        protected Builder() {
+        public DefenceAdvocate.Builder addDefendant(Defendant defendant) {
+            this.defendants.add(defendant);
+            return this;
         }
 
         @Override

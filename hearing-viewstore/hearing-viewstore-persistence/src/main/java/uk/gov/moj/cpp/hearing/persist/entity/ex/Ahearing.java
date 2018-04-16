@@ -63,8 +63,8 @@ public class Ahearing {
         this.roomName = builder.roomName;
         this.setDefendants(builder.defendants);
         this.setWitnesses(builder.witnesses);
+        this.attendees = builder.attendees;
         if (builder.judgeBuilder != null) {
-            this.attendees = new ArrayList<>();
             this.attendees.add(builder.judgeBuilder.build());
         }
     }
@@ -132,6 +132,7 @@ public class Ahearing {
         private String roomName;
         private Judge.Builder judgeBuilder;
         private List<Witness> witnesses = new ArrayList<>();
+        private List<Attendee> attendees = new ArrayList<>();
 
         protected Builder() {}
         public Builder withId(UUID id) {
@@ -181,6 +182,11 @@ public class Ahearing {
 
         public Builder withRoomName(String roomName) {
             this.roomName = roomName;
+            return this;
+        }
+
+        public Builder addAttendee(Attendee attendee){
+            this.attendees.add(attendee);
             return this;
         }
 
