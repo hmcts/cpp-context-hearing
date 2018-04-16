@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -34,15 +35,24 @@ public class NewModelPleaUpdateEventListener {
     @Transactional
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdated(final JsonEnvelope envelop) {
-        final HearingOffencePleaUpdated plea = convertToObject(envelop);
-        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(plea.getOffenceId(), plea.getHearingId());
-        final Offence offence = offenceRepository.findBySnapshotKey(snapshotKey);
-        Optional.ofNullable(offence).map(o -> {
-            o.setPleaDate(plea.getPleaDate());
-            o.setPleaValue(plea.getValue());
-            offenceRepository.save(o);
-            return o;
-        }).orElseThrow(() -> new HandlerExecutionException("Entity offence not found by: " + snapshotKey, null));
+        final HearingOffencePleaUpdated event = convertToObject(envelop);
+        Optional.ofNullable(
+                offenceRepository.findBySnapshotKey(new HearingSnapshotKey(event.getOffenceId(), event.getHearingId())))
+                .map(offence -> {
+                    offence.setPleaDate(event.getPleaDate());
+                    offence.setPleaValue(event.getValue());
+                    offenceRepository.saveAndFlush(offence);
+                    return offence;
+                }).orElseThrow(() -> new HandlerExecutionException("Offence not found by offenceId: " + event.getOffenceId() + " and hearingId: " + event.getHearingId(), null));
+        final List<Offence> offences = offenceRepository.findByOriginHearingId(event.getHearingId());
+        if (null == offences || offences.isEmpty()) {
+            throw new HandlerExecutionException("Offences not found by originHearingId " + event.getHearingId(), null);
+        }
+        offences.forEach(offence -> {
+            offence.setPleaDate(event.getPleaDate());
+            offence.setPleaValue(event.getValue());
+            offenceRepository.saveAndFlush(offence);
+        });
     }
 
     private HearingOffencePleaUpdated convertToObject(final JsonEnvelope envelop) {

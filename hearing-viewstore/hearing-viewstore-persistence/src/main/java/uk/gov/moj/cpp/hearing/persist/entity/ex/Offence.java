@@ -18,6 +18,9 @@ public class Offence {
 
     @EmbeddedId
     private HearingSnapshotKey id;
+    
+    @Column(name = "origin_hearing_id")
+    private UUID originHearingId;
 
     @ManyToOne
     @JoinColumns({
@@ -49,17 +52,11 @@ public class Offence {
     @Column(name = "conviction_date")
     private LocalDate convictionDate;
 
-    @Column(name = "plea_id") @Deprecated //TODO: GPE-3267: sanitise
-    private UUID pleaId;
-
     @Column(name = "plea_date")
     private LocalDate pleaDate;
 
     @Column(name = "plea_value")
     private String pleaValue;
-
-    @Column(name = "verdict_id")
-    private java.util.UUID verdictId;
 
     @Column(name = "verdict_code")
     private String verdictCode;
@@ -94,8 +91,9 @@ public class Offence {
 
     }
 
-    public Offence(Builder builder) {
+    private Offence(final Builder builder) {
         this.id = builder.id;
+        this.originHearingId = builder.originHearingId;
         this.defendant = builder.defendant;
         if (defendant != null) {
             this.defendantId = builder.defendant.getId().getId();
@@ -108,10 +106,8 @@ public class Offence {
         this.startDate = builder.startDate;
         this.endDate = builder.endDate;
         this.convictionDate = builder.convictionDate;
-        this.pleaId = builder.pleaId;
         this.pleaDate = builder.pleaDate;
         this.pleaValue = builder.pleaValue;
-        this.verdictId = builder.verdictId;
         this.verdictCode = builder.verdictCode;
         this.verdictCategory = builder.verdictCategory;
         this.verdictDescription = builder.verdictDescription;
@@ -124,6 +120,14 @@ public class Offence {
 
     public HearingSnapshotKey getId() {
         return id;
+    }
+    
+    public UUID getOriginHearingId() {
+        return originHearingId;
+    }
+    
+    public void setOriginHearingId(final UUID originHearingId) {
+        this.originHearingId = originHearingId;
     }
 
     public LegalCase getLegalCase() {
@@ -166,11 +170,6 @@ public class Offence {
         return convictionDate;
     }
 
-    @Deprecated //TODO: GPE-3267: sanitise
-    public UUID getPleaId() {
-        return pleaId;
-    }
-
     public LocalDate getPleaDate() {
         return pleaDate;
     }
@@ -185,10 +184,6 @@ public class Offence {
 
     public void setPleaValue(final String pleaValue) {
         this.pleaValue = pleaValue;
-    }
-
-    public UUID getVerdictId() {
-        return verdictId;
     }
 
     public String getVerdictCode() {
@@ -223,10 +218,6 @@ public class Offence {
         return defendantId;
     }
 
-    public void setVerdictId(UUID verdictId) {
-        this.verdictId = verdictId;
-    }
-
     public void setVerdictCode(String verdictCode) {
         this.verdictCode = verdictCode;
     }
@@ -259,58 +250,41 @@ public class Offence {
         this.convictionDate = convictionDate;
     }
 
-    public static class Builder {
-
-        protected Builder() {
-        }
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    public static final class Builder {
 
         private HearingSnapshotKey id;
-
+        private UUID originHearingId;
         private LegalCase legalCase;
-
         private String code;
-
         private Integer count;
-
         private String wording;
-
         private String title;
-
         private String legislation;
-
         private LocalDate startDate;
-
         private LocalDate endDate;
-
         private LocalDate convictionDate;
-
-        @Deprecated //TODO: GPE-3267: sanitise
-        public UUID pleaId;
-
         private LocalDate pleaDate;
-
         private String pleaValue;
-
-        private UUID verdictId;
-
         private String verdictCode;
-
         private String verdictCategory;
-
         private String verdictDescription;
-
         private LocalDate verdictDate;
-
         private Integer numberOfJurors;
-
         private Integer numberOfSplitJurors;
-
         private Boolean unanimous;
-
         private Defendant defendant;
 
         public Builder withId(final HearingSnapshotKey id) {
             this.id = id;
+            return this;
+        }
+        
+        public Builder withOriginHearingId(final UUID originHearingId) {
+            this.originHearingId = originHearingId;
             return this;
         }
 
@@ -364,12 +338,6 @@ public class Offence {
             return this;
         }
 
-        @Deprecated //TODO: GPE-3267: sanitise
-        public Builder withPleaId(final java.util.UUID pleaId) {
-            this.pleaId = pleaId;
-            return this;
-        }
-
         public Builder withPleaDate(final LocalDate pleaDate) {
             this.pleaDate = pleaDate;
             return this;
@@ -377,11 +345,6 @@ public class Offence {
 
         public Builder withPleaValue(final String pleaValue) {
             this.pleaValue = pleaValue;
-            return this;
-        }
-
-        public Builder withVerdictId(final UUID verdictId) {
-            this.verdictId = verdictId;
             return this;
         }
 
@@ -423,10 +386,6 @@ public class Offence {
         public Offence build() {
             return new Offence(this);
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     @Override

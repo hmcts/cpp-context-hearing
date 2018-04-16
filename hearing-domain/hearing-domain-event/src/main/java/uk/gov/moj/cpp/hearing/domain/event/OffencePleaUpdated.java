@@ -87,9 +87,5 @@ public final class OffencePleaUpdated {
         public OffencePleaUpdated build() {
             return new OffencePleaUpdated(this);
         }
-        
-        public Stream<Object> buildStream() {
-            return Stream.of(build());
-        }
     }
 }

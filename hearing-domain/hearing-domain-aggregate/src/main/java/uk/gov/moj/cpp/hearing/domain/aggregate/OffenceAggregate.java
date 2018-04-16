@@ -28,7 +28,6 @@ public class OffenceAggregate implements Aggregate {
     }
 
     public Stream<Object> initiateHearingOffence(InitiateHearingOffenceCommand initiateHearingOffenceCommand) {
-
         if (this.plea != null) {
             return apply(Stream.of(new InitiateHearingOffenceEnriched(
                     initiateHearingOffenceCommand.getOffenceId(),
@@ -45,12 +44,12 @@ public class OffenceAggregate implements Aggregate {
 
     public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final LocalDate pleaDate,
             final String pleaValue) {
-        return apply(OffencePleaUpdated.builder()
+        return apply(Stream.of(OffencePleaUpdated.builder()
                     .withHearingId(originHearingId)
                     .withOffenceId(offenceId)
                     .withPleaDate(pleaDate)
                     .withValue(pleaValue)
-                    .buildStream());
+                    .build()));
     }
 
     public OffencePleaUpdated getPlea() {

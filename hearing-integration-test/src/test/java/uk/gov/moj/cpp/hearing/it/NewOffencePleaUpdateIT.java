@@ -14,7 +14,6 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
@@ -35,28 +34,28 @@ import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 @SuppressWarnings("unchecked")
 public class NewOffencePleaUpdateIT extends AbstractIT {
     
-    private enum PleaValueType {GUILTY, NOT_GUILTY};
+    enum PleaValueType {GUILTY, NOT_GUILTY};
     
     @Test
     public void updatePleaToNotGuilty() throws Throwable {
-        updatePlea(PleaValueType.NOT_GUILTY);
+        updatePlea(PleaValueType.NOT_GUILTY, LocalDate.now());
     }
     
     @Test
     public void updatePleaToGuilty() throws Throwable {
-         updatePlea(PleaValueType.GUILTY);
+         updatePlea(PleaValueType.GUILTY, LocalDate.now());
     }
 
-    private static void updatePlea(final PleaValueType pleaValue) throws Throwable {
+    static InitiateHearingCommand updatePlea(final PleaValueType pleaValue, final LocalDate pleaDate) throws Throwable {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID caseId = initiateHearingCommand.getCases().get(0).getCaseId();
         final UUID defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId();
         final UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
-        final LocalDate pleaDate = PAST_LOCAL_DATE.next(); 
         
-        EventListener eventListener = listenFor("public.hearing.initiated")
+        final EventListener eventListener = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
 
         makeCommand(requestSpec, "hearing.initiate")
@@ -99,6 +98,8 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                             withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
                             withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is(pleaValue.name())
         ))));
+        
+        return initiateHearingCommand;
     }
 
     private static String getJsonBody(final UUID caseId, final UUID defendentId, final UUID offenceId, final String value,

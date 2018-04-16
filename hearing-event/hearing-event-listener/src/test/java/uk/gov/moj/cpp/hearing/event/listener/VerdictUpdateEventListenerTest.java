@@ -87,7 +87,6 @@ public class VerdictUpdateEventListenerTest {
 
         assertThat(offence.getId().getId(), is(offenceVerdictUpdated.getOffenceId()));
         assertThat(offence.getId().getHearingId(), is(offenceVerdictUpdated.getHearingId()));
-        assertThat(offence.getVerdictId(), is(offenceVerdictUpdated.getVerdictId()));
         assertThat(offence.getVerdictCategory(), is(offenceVerdictUpdated.getCategory()));
         assertThat(offence.getVerdictCode(), is(offenceVerdictUpdated.getCode()));
         assertThat(offence.getVerdictDescription(), is(offenceVerdictUpdated.getDescription()));

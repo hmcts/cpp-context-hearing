@@ -53,6 +53,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
@@ -219,7 +220,6 @@ public class NewHearingEventListenerTest {
         assertThat(actualLegalCase.getCaseUrn(), is(legalCase.getUrn()));
     }
 
-
     @Test
     public void convictionDateUpdated_shouldUpdateTheConvictionDate() throws Exception {
 
@@ -246,7 +246,7 @@ public class NewHearingEventListenerTest {
         newHearingEventListener.convictionDateUpdated(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
                 objectToJsonObjectConverter.convert(convictionDateAdded)));
 
-        verify(this.offenceRepository).save(offence);
+        verify(this.offenceRepository).saveAndFlush(offence);
 
         assertThat(offence.getId().getId(), is(convictionDateAdded.getOffenceId()));
         assertThat(offence.getConvictionDate(), is(convictionDateAdded.getConvictionDate()));
@@ -280,11 +280,70 @@ public class NewHearingEventListenerTest {
         newHearingEventListener.convictionDateRemoved(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
                 objectToJsonObjectConverter.convert(convictionDateRemoved)));
 
-        verify(this.offenceRepository).save(offence);
+        verify(this.offenceRepository).saveAndFlush(offence);
 
         assertThat(offence.getId().getId(), is(offenceId));
         assertThat(offence.getId().getHearingId(), is(hearingId));
         assertThat(offence.getConvictionDate(), is(nullValue()));
+    }
+    
+    
+    @Test
+    public void testHearingInitiatedPleaData() throws Exception {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID originHearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final LocalDate pleaDate = LocalDate.now();
+        final String pleaValue = "GUILTY";
+        final UUID caseId = randomUUID();
+        
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
+        
+        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
+                .withDefendants(asList
+                        (Defendant.builder()
+                                .withId(new HearingSnapshotKey(defendantId, hearingId))
+                                .withOffences(asList(
+                                        Offence.builder()
+                                                .withId(snapshotKey)
+                                                .withCase(LegalCase.builder()
+                                                        .withId(caseId)
+                                                        .withCaseurn("TEST")
+                                                        .build())
+                                                .withPleaDate(pleaDate)
+                                                .withPleaValue(pleaValue)
+                                                .build()
+                                ))
+                                .build()))
+
+                .build();
+        
+        final InitiateHearingOffencePlead event = InitiateHearingOffencePlead.builder()
+                .withOffenceId(offenceId)
+                .withCaseId(caseId)
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withOriginHearingId(originHearingId)
+                .withPleaDate(pleaDate)
+                .withValue(pleaValue)
+                .build();
+        
+        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        
+        when(offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
+
+        newHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.initiate-hearing-offence-plead"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).saveAndFlush(offence);
+
+        assertThat(offence.getId().getId(), is(offenceId));
+        assertThat(offence.getId().getHearingId(), is(hearingId));
+        assertThat(offence.getOriginHearingId(), is(originHearingId));
+        assertThat(offence.getPleaDate(), is(pleaDate));
+        assertThat(offence.getPleaValue(), is(pleaValue));
     }
 
 }

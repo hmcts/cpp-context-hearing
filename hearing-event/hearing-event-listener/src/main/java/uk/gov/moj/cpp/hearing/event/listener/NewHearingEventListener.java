@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -10,20 +8,15 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCaseKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
@@ -37,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -44,9 +38,6 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @ServiceComponent(EVENT_LISTENER)
 public class NewHearingEventListener {
-
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(NewHearingEventListener.class.getName());
 
     @Inject
     private AhearingRepository ahearingRepository;
@@ -75,7 +66,7 @@ public class NewHearingEventListener {
     }
 
     private Defendant.Builder translateDefendant(UUID hearingId, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendantIn) {
-        Defendant.Builder builder = Defendant.builder()
+        return Defendant.builder()
                 .withAddress(ofNullable(defendantIn.getAddress())
                         .map(a -> Address.builder()
                                 .withAddress1(a.getAddress1())
@@ -104,12 +95,10 @@ public class NewHearingEventListener {
                         )
                         .collect(Collectors.toList())
                 );
-
-        return builder;
     }
 
     private Witness.Builder translateWitness(UUID hearingId, uk.gov.moj.cpp.hearing.command.initiate.Witness witnessIn, LegalCase id2Case) {
-        Witness.Builder builder = Witness.builder()
+        return Witness.builder()
                 .withLegalCase(id2Case)
                 .withType(witnessIn.getType())
                 .withClassification(witnessIn.getClassification())
@@ -126,10 +115,7 @@ public class NewHearingEventListener {
                 .withFax(witnessIn.getFax())
                 .withMobileTelephone(witnessIn.getMobile())
                 .withId(new HearingSnapshotKey(witnessIn.getId(), hearingId));
-
-        return builder;
     }
-
 
     @Transactional
     @Handles("hearing.initiated")
@@ -184,39 +170,41 @@ public class NewHearingEventListener {
         this.ahearingRepository.save(aHearing);
     }
 
-
     @Transactional
     @Handles("hearing.conviction-date-added")
     public void convictionDateUpdated(final JsonEnvelope event) {
         final ConvictionDateAdded convictionDateAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateAdded.class);
-        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(convictionDateAdded.getOffenceId(), convictionDateAdded.getHearingId());
-        final Offence offence = offenceRepository.findBySnapshotKey(snapshotKey);
-        Optional.ofNullable(offence).map(o -> {
+        save(convictionDateAdded.getOffenceId(), convictionDateAdded.getHearingId(), (o) -> {
             o.setConvictionDate(convictionDateAdded.getConvictionDate());
-            offenceRepository.save(o);
-            return o;
-        }).orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + snapshotKey));
+        });
     }
 
     @Transactional
     @Handles("hearing.conviction-date-removed")
     public void convictionDateRemoved(final JsonEnvelope event) {
         final ConvictionDateRemoved convictionDateRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);
-        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId());
-        final Offence offence = offenceRepository.findBySnapshotKey(snapshotKey);
-        Optional.ofNullable(offence).map(o -> {
+        save(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId(), (o) -> {
             o.setConvictionDate(null);
-            offenceRepository.save(o);
-            return o;
-        }).orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + snapshotKey));
+        });
     }
 
     @Transactional
     @Handles("hearing.initiate-hearing-offence-plead")
-    public void hearingInitiatedPleaData(final JsonEnvelope event) {
-        LOGGER.error("HERE HERE HERE - we have received plea info");
+    public void hearingInitiatedPleaData(final JsonEnvelope envelop) {
+        final InitiateHearingOffencePlead event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InitiateHearingOffencePlead.class);
+        save(event.getOffenceId(), event.getHearingId(), (o) -> {
+            o.setOriginHearingId(event.getOriginHearingId());
+            o.setPleaDate(event.getPleaDate());
+            o.setPleaValue(event.getValue());
+        });
     }
-
-
-
+    
+    private void save(final UUID offenceId, final UUID hearingId, final Consumer<Offence> consumer) {
+        Optional.ofNullable(offenceRepository.findBySnapshotKey(new HearingSnapshotKey(offenceId, hearingId)))
+                .map(o -> {
+                    consumer.accept(o);
+                    offenceRepository.saveAndFlush(o);
+                    return o;
+                }).orElseThrow(() -> new RuntimeException("Offence id is not found on hearing id: " + hearingId));
+    }
 }

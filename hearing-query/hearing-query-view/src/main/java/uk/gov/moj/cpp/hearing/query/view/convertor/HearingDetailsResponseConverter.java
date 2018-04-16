@@ -396,7 +396,6 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             }
 
             return Plea.builder()
-                    .withPleaId(toStringOrNull(source.getPleaId()))
                     .withPleaDate(toDateStringOrNull(source.getPleaDate()))
                     .withValue(source.getPleaValue())
                     .build();
@@ -412,11 +411,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            if (null == source.getVerdictId()) {
-                return null;
-            }
             return Verdict.builder()
-                    .withVerdictId(source.getVerdictId().toString())
                     .withVerdictDate(toDateStringOrNull(source.getVerdictDate()))
                     .withNumberOfJurors(source.getNumberOfJurors())
                     .withNumberOfSplitJurors(source.getNumberOfSplitJurors())
@@ -433,9 +428,6 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
         @Override
         public Value convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
-                return null;
-            }
-            if (null == source.getVerdictId()) {
                 return null;
             }
             return Value.builder()

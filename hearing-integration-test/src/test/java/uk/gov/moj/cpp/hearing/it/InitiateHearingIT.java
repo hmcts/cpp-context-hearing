@@ -1,19 +1,8 @@
 package uk.gov.moj.cpp.hearing.it;
 
-
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.command.plea.Plea;
-
-import java.text.MessageFormat;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.is;
@@ -22,14 +11,22 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplateWithOnlyMandatoryFields;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.updatePleaTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
+
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 public class InitiateHearingIT extends AbstractIT {
 
@@ -152,34 +149,46 @@ public class InitiateHearingIT extends AbstractIT {
                         )));
     }
 
-
     @Test
-    public void initiateHearing_shouldInitiateHearing_whenThereIsAPreviousPlea() throws Exception {
-
-        UUID hearingId = randomUUID();
-
-        HearingUpdatePleaCommand updatePleaCommand = updatePleaTemplate().build();
-
-        UUID offenceId = updatePleaCommand.getDefendants().get(0).getOffences().get(0).getId();
-
-        makeCommand(requestSpec, "hearing.update-plea")
-                .withArgs(hearingId.toString())
-                .ofType("application/vnd.hearing.update-plea+json")
-                .withPayload(updatePleaCommand)
-                .executeSuccessfully();
-
-        //TODO - GPE-3032 - need to be able to test that this happened.
-        Thread.sleep(10000);
-
-        InitiateHearingCommand initiateHearing = with(initiateHearingCommandTemplate(), command -> {
-            command.getHearing().withId(hearingId);
-            command.getHearing().getDefendants().get(0).getOffences().get(0).withId(offenceId);
+    public void testIniatateHearingWithAPreviousPlea() throws Throwable {
+        assertIniatateHearingWithAPreviousPlea(NewOffencePleaUpdateIT.PleaValueType.GUILTY, LocalDate.now());
+    }
+    
+    private static void assertIniatateHearingWithAPreviousPlea(final NewOffencePleaUpdateIT.PleaValueType pleaValue, final LocalDate pleaDate) throws Throwable {
+        final InitiateHearingCommand firstInitiateHearingCommand = NewOffencePleaUpdateIT.updatePlea(pleaValue, pleaDate);
+        
+        final InitiateHearingCommand secondInitiateHearingCommand = with(initiateHearingCommandTemplate(), command -> {
+            command.getHearing().withId(UUID.randomUUID());
+            command.getHearing().getDefendants().get(0).getOffences().get(0).withId(firstInitiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId());
         }).build();
+        
+        final UUID hearingId = secondInitiateHearingCommand.getHearing().getId();
+        final UUID caseId = secondInitiateHearingCommand.getCases().get(0).getCaseId();
+        final UUID defendantId = secondInitiateHearingCommand.getHearing().getDefendants().get(0).getId();
+        final UUID offenceId = secondInitiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
 
+        final EventListener eventListener = listenFor("public.hearing.initiated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
+        
         makeCommand(requestSpec, "hearing.initiate")
                 .ofType("application/vnd.hearing.initiate+json")
-                .withPayload(initiateHearing)
+                .withPayload(secondInitiateHearingCommand)
                 .executeSuccessfully();
 
+        eventListener.waitFor();
+
+        final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingId);
+        
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+                .timeout(10, TimeUnit.SECONDS)
+                .until(
+                    status().is(OK),
+                    payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
+                            withJsonPath("$.cases[0].caseId", is(caseId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is(pleaValue.name())
+        ))));
     }
 }

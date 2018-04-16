@@ -31,6 +31,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.int
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 public class NewModelHearingAggregateTest {
+    
+    private static final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
 
     @Test
     public void initiate() {
@@ -44,8 +46,7 @@ public class NewModelHearingAggregateTest {
 
     @Test
     public void initiateHearingOffencePlea() {
-
-        InitiateHearingOffencePleaCommand initiateHearingOffencePleaCommand = new InitiateHearingOffencePleaCommand(
+       final  InitiateHearingOffencePleaCommand command = new InitiateHearingOffencePleaCommand(
                 randomUUID(),
                 randomUUID(),
                 randomUUID(),
@@ -54,16 +55,16 @@ public class NewModelHearingAggregateTest {
                 PAST_LOCAL_DATE.next(),
                 "GUILTY"
         );
-
-        InitiateHearingOffencePlead result = (InitiateHearingOffencePlead) new NewModelHearingAggregate()
-                .initiateHearingOffencePlea(initiateHearingOffencePleaCommand).collect(Collectors.toList()).get(0);
-
-        assertThat(result.getCaseId(), is(initiateHearingOffencePleaCommand.getCaseId()));
-        assertThat(result.getDefendantId(), is(initiateHearingOffencePleaCommand.getDefendantId()));
-        assertThat(result.getHearingId(), is(initiateHearingOffencePleaCommand.getHearingId()));
-        assertThat(result.getOffenceId(), is(initiateHearingOffencePleaCommand.getOffenceId()));
-        assertThat(result.getPleaDate(), is(initiateHearingOffencePleaCommand.getPleaDate()));
-        assertThat(result.getValue(), is(initiateHearingOffencePleaCommand.getValue()));
+        newModelHearingAggregate.initiateHearingOffencePlea(command)
+            .map(InitiateHearingOffencePlead.class::cast)
+            .forEach(event -> {
+                assertThat(event.getCaseId(), is(command.getCaseId()));
+                assertThat(event.getDefendantId(), is(command.getDefendantId()));
+                assertThat(event.getHearingId(), is(command.getHearingId()));
+                assertThat(event.getOffenceId(), is(command.getOffenceId()));
+                assertThat(event.getPleaDate(), is(command.getPleaDate()));
+                assertThat(event.getValue(), is(command.getValue()));
+        });
     }
 
     @Test

@@ -28,15 +28,14 @@ public class VerdictUpdateEventListener {
     public void verdictUpdate(final JsonEnvelope event) {
         final OffenceVerdictUpdated verdictUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), OffenceVerdictUpdated.class);
 
-        Ahearing ahearing = ahearingRepository.findById(verdictUpdated.getHearingId());
+        final Ahearing ahearing = ahearingRepository.findById(verdictUpdated.getHearingId());
 
-        Offence offence = ahearing.getDefendants().stream()
+        final Offence offence = ahearing.getDefendants().stream()
                 .flatMap(d -> d.getOffences().stream())
                 .filter(o -> o.getId().getId().equals(verdictUpdated.getOffenceId()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Invalid offence id.  Offence id is not found on hearing: " + verdictUpdated.getOffenceId().toString()));
 
-        offence.setVerdictId(verdictUpdated.getVerdictId());
         offence.setVerdictCode(verdictUpdated.getCode());
         offence.setVerdictCategory(verdictUpdated.getCategory());
         offence.setVerdictDescription(verdictUpdated.getDescription());

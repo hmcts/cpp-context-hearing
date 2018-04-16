@@ -38,6 +38,8 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 public class NewModelHearingAggregate implements Aggregate {
 
+    private static final long serialVersionUID = 1L;
+    
     private static final String GUILTY = "GUILTY";
     private static final String REASON_ALREADY_LOGGED = "Already logged";
     private static final String REASON_ALREADY_DELETED = "Already deleted";
@@ -59,11 +61,9 @@ public class NewModelHearingAggregate implements Aggregate {
                     this.cases = initiated.getCases();
                     this.hearing = initiated.getHearing();
                 }),
-
                 when(InitiateHearingOffencePlead.class).apply(initiateHearingOffencePlead -> {
 
                 }),
-
                 when(NewProsecutionCounselAdded.class).apply(newProsecutionCounselAdded -> {
                     prosecutionCounsels.add(newProsecutionCounselAdded);
                 }),
@@ -119,27 +119,26 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
-                                     final String pleaValue) {
+            final String pleaValue) {
         final List<Object> events = new ArrayList<>();
         events.add(HearingOffencePleaUpdated.builder()
-                .withHearingId(hearingId)
-                .withOffenceId(offenceId)
-                .withPleaDate(pleaDate)
-                .withValue(pleaValue)
-                .build());
-        events.add(isGuilty(pleaValue) ?
+                    .withHearingId(hearingId)
+                    .withOffenceId(offenceId)
+                    .withPleaDate(pleaDate)
+                    .withValue(pleaValue)
+                    .build());
+        events.add(isGuilty(pleaValue) ? 
                 ConvictionDateAdded.builder()
-                        .withHearingId(hearingId)
-                        .withOffenceId(offenceId)
-                        .withConvictionDate(pleaDate)
-                        .build() :
-                ConvictionDateRemoved.builder()
-                        .withHearingId(hearingId)
-                        .withOffenceId(offenceId)
-                        .build());
+                    .withHearingId(hearingId)
+                    .withOffenceId(offenceId)
+                    .withConvictionDate(pleaDate)
+                    .build() : 
+               ConvictionDateRemoved.builder()
+                    .withHearingId(hearingId)
+                    .withOffenceId(offenceId)
+                    .build());
         return apply(events.stream());
     }
-
 
     private boolean isGuilty(final String value) {
         return GUILTY.equalsIgnoreCase(value);
@@ -149,16 +148,17 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.of(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
     }
 
-    public Stream<Object> initiateHearingOffencePlea(InitiateHearingOffencePleaCommand initiateHearingOffencePleaCommand) {
-        return apply(Stream.of(new InitiateHearingOffencePlead(
-                initiateHearingOffencePleaCommand.getOffenceId(),
-                initiateHearingOffencePleaCommand.getCaseId(),
-                initiateHearingOffencePleaCommand.getDefendantId(),
-                initiateHearingOffencePleaCommand.getHearingId(),
-                initiateHearingOffencePleaCommand.getOriginHearingId(),
-                initiateHearingOffencePleaCommand.getPleaDate(),
-                initiateHearingOffencePleaCommand.getValue()
-        )));
+    public Stream<Object> initiateHearingOffencePlea(final InitiateHearingOffencePleaCommand command) {
+        return apply(Stream.of(InitiateHearingOffencePlead.builder()
+                .withOffenceId(command.getOffenceId())
+                .withCaseId(command.getCaseId())
+                .withDefendantId(command.getDefendantId())
+                .withHearingId(command.getHearingId())
+                .withOriginHearingId(command.getOriginHearingId())
+                .withPleaDate(command.getPleaDate())
+                .withValue(command.getValue())
+                .build()
+        ));
     }
 
     public Stream<Object> logHearingEvent(LogEventCommand logEventCommand) {

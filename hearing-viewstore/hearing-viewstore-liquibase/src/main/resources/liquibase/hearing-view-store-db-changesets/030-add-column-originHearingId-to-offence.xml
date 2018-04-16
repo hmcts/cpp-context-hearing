@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="30" author="hearing" logicalFilePath="030-add-column-originHearingId-to-offence.xml">
+
+        <addColumn tableName="a_offence">
+            <column name="origin_hearing_id" type="UUID"/>
+        </addColumn>
+        
+       <addForeignKeyConstraint baseColumnNames="origin_hearing_id" baseTableName="a_offence"
+                         constraintName="fk_offence_origin_hearing" referencedColumnNames="id"
+                         referencedTableName="a_hearing"/>
+
+        <sql>
+            CREATE INDEX IF NOT EXISTS idx_offence_origin_hearing_id 
+                ON a_offence (origin_hearing_id NULLS FIRST);
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>

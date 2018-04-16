@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+@Deprecated
 @Entity
 @Table(name = "verdict_hearing")
 public class VerdictHearing implements Serializable {
