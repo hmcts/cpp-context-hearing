@@ -10,7 +10,11 @@ import java.util.stream.Collectors;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
 
-public class InitiateHearingCommand {
+import java.io.Serializable;
+
+public class InitiateHearingCommand implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private List<Case> cases;
     private final Hearing hearing;

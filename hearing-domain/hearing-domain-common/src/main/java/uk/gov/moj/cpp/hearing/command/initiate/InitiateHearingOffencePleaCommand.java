@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public final class InitiateHearingOffencePleaCommand {
+public final class InitiateHearingOffencePleaCommand implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID offenceId;
     private UUID caseId;

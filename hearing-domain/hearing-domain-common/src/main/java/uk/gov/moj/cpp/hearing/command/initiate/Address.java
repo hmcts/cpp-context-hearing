@@ -1,9 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Address {
+public class Address implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String address1;
     private final String address2;

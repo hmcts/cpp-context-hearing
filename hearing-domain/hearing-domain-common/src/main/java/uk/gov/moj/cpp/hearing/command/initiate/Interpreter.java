@@ -1,11 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.UUID;
+public class Interpreter implements Serializable {
 
-public class Interpreter {
+    private static final long serialVersionUID = 1L;
 
     private final boolean needed;
     private final String language;

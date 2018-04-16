@@ -55,7 +55,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
         final UUID defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId();
         final UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
         
-        final EventListener eventListener = listenFor("public.hearing.initiated")
+        EventListener eventListener = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
 
         makeCommand(requestSpec, "hearing.initiate")
@@ -79,6 +79,9 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                             hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.value")
         )));
 
+        eventListener = listenFor("public.hearing.plea-updated")
+                .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+        
         final String updatePleaCommandURL = getURL("hearing.update-plea", hearingId);
         final String updatePleaPayload = getJsonBody(caseId, defendantId, offenceId, pleaValue.name(), pleaDate);
 
@@ -86,20 +89,28 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                 .body(updatePleaPayload).header(CPP_UID_HEADER).when().post(updatePleaCommandURL).then().extract().response();
 
         assertThat(response.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        
+        eventListener.waitFor();
 
         poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
-                .timeout(10, TimeUnit.SECONDS)
                 .until(
                     status().is(OK),
                     payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
                             withJsonPath("$.cases[0].caseId", is(caseId.toString())),
                             withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
+                            (isGuilty(pleaValue) ?
+                                    withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", equalDate(pleaDate)) :
+                                    hasNoJsonPath("$.cases[0].defendants[0].offences[0].convictionDate")),
                             withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
                             withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is(pleaValue.name())
-        ))));
+                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is(pleaValue.name()))
+                    )));
         
         return initiateHearingCommand;
+    }
+
+    private static boolean isGuilty(final PleaValueType pleaValue) {
+        return "GUILTY".equalsIgnoreCase(pleaValue.name());
     }
 
     private static String getJsonBody(final UUID caseId, final UUID defendentId, final UUID offenceId, final String value,

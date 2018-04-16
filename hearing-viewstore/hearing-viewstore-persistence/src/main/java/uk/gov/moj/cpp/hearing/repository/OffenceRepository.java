@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.repository;
 
-import static org.apache.deltaspike.data.api.SingleResultType.ANY;
 import static org.apache.deltaspike.data.api.SingleResultType.OPTIONAL;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.deltaspike.data.api.AbstractEntityRepository;
@@ -20,6 +18,6 @@ public abstract class OffenceRepository extends AbstractEntityRepository<Offence
     @Query(value = "from Offence o where o.id = :snapshotKey", singleResult = OPTIONAL)
     public abstract Offence findBySnapshotKey(@QueryParam("snapshotKey") final HearingSnapshotKey snapshotKey);
     
-    @Query(value = "from Offence o where o.originHearingId = :originHearingId", singleResult = ANY)
-    public abstract List<Offence> findByOriginHearingId(@QueryParam("originHearingId") final UUID originHearingId);
+    @Query(value = "from Offence o where o.id.id = :offenceId and o.originHearingId = :originHearingId", singleResult = OPTIONAL)
+    public abstract Offence findByOffenceIdOriginHearingId(@QueryParam("offenceId") final UUID offenceId, @QueryParam("originHearingId") final UUID originHearingId);
 }

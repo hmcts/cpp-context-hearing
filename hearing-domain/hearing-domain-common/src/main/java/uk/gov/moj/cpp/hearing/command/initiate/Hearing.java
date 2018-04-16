@@ -12,7 +12,11 @@ import java.util.stream.Collectors;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
 
-public class Hearing {
+import java.io.Serializable;
+
+public class Hearing implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID id;
     private final String type;

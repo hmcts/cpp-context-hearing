@@ -3,9 +3,12 @@ package uk.gov.moj.cpp.hearing.command.initiate;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Case {
+public class Case implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID caseId;
     private final String urn;

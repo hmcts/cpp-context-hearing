@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
@@ -26,6 +27,7 @@ import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.it.NewOffencePleaUpdateIT.PleaValueType;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 public class InitiateHearingIT extends AbstractIT {
@@ -150,8 +152,13 @@ public class InitiateHearingIT extends AbstractIT {
     }
 
     @Test
-    public void testIniatateHearingWithAPreviousPlea() throws Throwable {
+    public void testIniatateHearingWithAPreviousPleaGuiltyAndWithConvitionDate() throws Throwable {
         assertIniatateHearingWithAPreviousPlea(NewOffencePleaUpdateIT.PleaValueType.GUILTY, LocalDate.now());
+    }
+    
+    @Test
+    public void testIniatateHearingWithAPreviousPleaNotGuiltyAndWithoutConvitionDate() throws Throwable {
+        assertIniatateHearingWithAPreviousPlea(NewOffencePleaUpdateIT.PleaValueType.NOT_GUILTY, LocalDate.now());
     }
     
     private static void assertIniatateHearingWithAPreviousPlea(final NewOffencePleaUpdateIT.PleaValueType pleaValue, final LocalDate pleaDate) throws Throwable {
@@ -186,9 +193,16 @@ public class InitiateHearingIT extends AbstractIT {
                     payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
                             withJsonPath("$.cases[0].caseId", is(caseId.toString())),
                             withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
+                            (isGuilty(pleaValue) ?
+                                    withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", equalDate(pleaDate)) :
+                                    hasNoJsonPath("$.cases[0].defendants[0].offences[0].convictionDate")),
                             withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
                             withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
                             withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is(pleaValue.name())
         ))));
+    }
+    
+    private static boolean isGuilty(final PleaValueType pleaValue) {
+        return "GUILTY".equalsIgnoreCase(pleaValue.name());
     }
 }

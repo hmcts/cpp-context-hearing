@@ -16,7 +16,7 @@ public class DefendantId {
     }
 
     @JsonIgnore
-    public DefendantId(Builder builder){
+    private DefendantId(Builder builder){
         this.defendantId = builder.defendantId;
     }
 

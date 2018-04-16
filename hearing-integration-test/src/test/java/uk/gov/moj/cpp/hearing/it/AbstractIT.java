@@ -138,7 +138,7 @@ public class AbstractIT {
     }
     
     protected static Matcher<String> equalDate(final LocalDate localDate) {
-        return is(ISO_LOCAL_DATE.format(localDate));
+        return equalTo(ISO_LOCAL_DATE.format(localDate));
     }
 
     protected static String getString(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {

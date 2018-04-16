@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -44,15 +43,12 @@ public class NewModelPleaUpdateEventListener {
                     offenceRepository.saveAndFlush(offence);
                     return offence;
                 }).orElseThrow(() -> new HandlerExecutionException("Offence not found by offenceId: " + event.getOffenceId() + " and hearingId: " + event.getHearingId(), null));
-        final List<Offence> offences = offenceRepository.findByOriginHearingId(event.getHearingId());
-        if (null == offences || offences.isEmpty()) {
-            throw new HandlerExecutionException("Offences not found by originHearingId " + event.getHearingId(), null);
-        }
-        offences.forEach(offence -> {
+        final Offence offence = offenceRepository.findByOffenceIdOriginHearingId(event.getOffenceId(), event.getHearingId());
+        if (null != offence) {
             offence.setPleaDate(event.getPleaDate());
             offence.setPleaValue(event.getValue());
             offenceRepository.saveAndFlush(offence);
-        });
+        }
     }
 
     private HearingOffencePleaUpdated convertToObject(final JsonEnvelope envelop) {

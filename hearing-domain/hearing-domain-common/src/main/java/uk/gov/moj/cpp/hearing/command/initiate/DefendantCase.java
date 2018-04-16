@@ -3,10 +3,13 @@ package uk.gov.moj.cpp.hearing.command.initiate;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-public class DefendantCase {
+public class DefendantCase implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID caseId;
     private final String bailStatus;

@@ -196,9 +196,14 @@ public class NewHearingEventListener {
             o.setOriginHearingId(event.getOriginHearingId());
             o.setPleaDate(event.getPleaDate());
             o.setPleaValue(event.getValue());
+            o.setConvictionDate(isGuilty(event.getValue()) ? event.getPleaDate() : null);
         });
     }
     
+    private boolean isGuilty(String value) {
+        return "GUILTY".equalsIgnoreCase(value);
+    }
+
     private void save(final UUID offenceId, final UUID hearingId, final Consumer<Offence> consumer) {
         Optional.ofNullable(offenceRepository.findBySnapshotKey(new HearingSnapshotKey(offenceId, hearingId)))
                 .map(o -> {
