@@ -59,14 +59,6 @@ public class HearingEventProcessor {
     @Inject
     private Sender sender;
 
-    @Inject
-    private Requester requester;
-
-    @Inject
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
-    @Inject
-    private ObjectToJsonValueConverter objectToJsonValueConverter;
 
     @Handles("hearing.results-shared")
     public void publishHearingResultsSharedPublicEvent(final JsonEnvelope event) {
@@ -83,119 +75,6 @@ public class HearingEventProcessor {
     @Handles("hearing.draft-result-saved")
     public void publicDraftResultSavedPublicEvent(final JsonEnvelope event) {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_DRAFT_RESULT_SAVED).apply(event.payloadAsJsonObject()));
-    }
-
-    @Handles("hearing.hearing.confirmed-recorded")
-    public void processHearingConfirmedRecorded(final JsonEnvelope event) {
-        LOGGER.trace("Received hearing.hearing.confirmed-recorded event, processing");
-        final JsonObject payload = event.payloadAsJsonObject();
-        final Hearing hearing = this.jsonObjectToObjectConverter.convert(payload.getJsonObject(FIELD_HEARING), Hearing.class);
-        final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
-
-        final InitiateHearingCommand initiateHearingCommand = getInitiateHearingCommand(caseId, hearing);
-
-        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
-                .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
-    }
-
-
-
-    @Handles("hearing.case.plea-added")
-    public void processCasePleaAdded(final JsonEnvelope event) {
-        LOGGER.trace("Received plea-added event, processing");
-        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_ADD)
-                .apply(event.payloadAsJsonObject()));
-
-    }
-
-    @Handles("hearing.case.plea-changed")
-    public void processCasePleaChanged(final JsonEnvelope event) {
-
-        LOGGER.trace("Received plea-changed event, processing");
-        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_PLEA_CHANGE)
-                .apply(event.payloadAsJsonObject()));
-    }
-
-    @Handles("hearing.hearing-plea-updated")
-    public void publishHearingPleaUpdatedPublicEvent(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.trace("'hearing.hearing-plea-updated' event received {}", payload);
-        final String caseId = payload.getString(FIELD_CASE_ID);
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_PLEA_UPDATED).apply(Json.createObjectBuilder().add(FIELD_CASE_ID, caseId).build()));
-    }
-    @Handles("hearing.hearing-update-plea-ignored")
-    public void publishHearingUpdatePleaIgnoredPublicEvent(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.trace("'hearing.hearing-update-plea-ignored' event received {}", payload);
-        final String caseId = payload.getString(FIELD_CASE_ID);
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_UPDATE_PLEA_IGNORED).apply(Json.createObjectBuilder().add(FIELD_CASE_ID, caseId).build()));
-    }
-
-    @Handles("hearing.hearing-verdict-updated")
-    public void publishHearingVerdictUpdatedPublicEvent(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.trace("'hearing.hearing-verdict-updated' event received {}", payload);
-        final String hearingId = payload.getString(FIELD_HEARING_ID);
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_VERDICT_UPDATED).apply(Json.createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build()));
-    }
-
-    @Handles("hearing.hearing-update-verdict-ignored")
-    public void publishHearingUpdateVerdictIgnoredPublicEvent(final JsonEnvelope event) {
-        final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.trace("'hearing.hearing-update-verdict-ignored' event received {}", payload);
-        final String hearingId = payload.getString(FIELD_HEARING_ID);
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_UPDATE_VERDICT_IGNORED).apply(Json.createObjectBuilder().add(FIELD_HEARING_ID, hearingId).build()));
-    }
-
-    @Handles("hearing.mags-court-hearing-recorded")
-    public void magsCourtProcessed(final JsonEnvelope event) {
-        LOGGER.trace("Received hearing.mags-court-hearing-recorded event, processing");
-        final JsonObject payload = event.payloadAsJsonObject();
-        final MagsCourtHearingRecorded preceding = this.jsonObjectToObjectConverter.convert(payload, MagsCourtHearingRecorded.class);
-        final UUID caseId = preceding.getOriginatingHearing().getCaseId();
-
-        final InitiateHearingCommand initiateHearingCommand =
-                getInitiateHearingCommand(caseId, preceding.getOriginatingHearing(), preceding.getHearingId(), preceding.getConvictionDate());
-
-        this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_INITIATE_HEARING)
-                .apply(this.objectToJsonValueConverter.convert(initiateHearingCommand)));
-
-    }
-
-    private InitiateHearingCommand getInitiateHearingCommand(final UUID caseId,
-                                                             final Hearing hearing) {
-        final InitiateHearingCommand command = new InitiateHearingCommand();
-        command.setHearingId(hearing.getId());
-        command.setCaseId(caseId);
-        command.setCourtCentreId(hearing.getCourtCentreId() == null ? null : fromString(hearing.getCourtCentreId()));
-        command.setRoomId(hearing.getCourtRoomId() == null ? null : fromString(hearing.getCourtRoomId()));
-        command.setCourtCentreName(hearing.getCourtCentreName());
-        command.setRoomName(hearing.getCourtRoomName());
-        command.setDuration(hearing.getEstimateMinutes());
-        command.setHearingType(hearing.getType());
-        command.setStartDateTime(hearing.getStartDateTime());
-        if (hearing.getJudge() != null) {
-            command.setJudgeId(hearing.getJudge().getId());
-            command.setJudgeFirstName(hearing.getJudge().getFirstName());
-            command.setJudgeLastName(hearing.getJudge().getLastName());
-            command.setJudgeTitle(hearing.getJudge().getTitle());
-        }
-        return command;
-    }
-
-    private InitiateHearingCommand getInitiateHearingCommand(final UUID caseId,
-                                                             final uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing originatingHearing,
-                                                             UUID newHearingId, LocalDate convictionDate) {
-        //this is actually a create hearing command - the hearing may be historical
-        final InitiateHearingCommand command = new InitiateHearingCommand();
-        command.setHearingId(newHearingId);
-        command.setCaseId(caseId);
-        command.setCourtCentreId(originatingHearing.getCourtCentreId() == null ? null : fromString(originatingHearing.getCourtCentreId()));
-        command.setCourtCentreName(originatingHearing.getCourtCentreName());
-        command.setDuration(DEFAULT_HEARING_DURATION_MINUTES);
-        command.setHearingType(originatingHearing.getType());
-        command.setStartDateTime(convictionDate.atStartOfDay(ZoneOffset.UTC));
-        return command;
     }
 
 }

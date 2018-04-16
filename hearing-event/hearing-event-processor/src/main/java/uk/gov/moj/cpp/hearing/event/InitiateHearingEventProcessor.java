@@ -37,9 +37,6 @@ public class InitiateHearingEventProcessor {
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-    @Inject
-    private ObjectToJsonValueConverter objectToJsonValueConverter;
-
     @Handles("hearing.initiated")
     public void hearingInitiated(final JsonEnvelope event) {
         JsonString hearingId = event.payloadAsJsonObject().getJsonObject("hearing").getJsonString("id");

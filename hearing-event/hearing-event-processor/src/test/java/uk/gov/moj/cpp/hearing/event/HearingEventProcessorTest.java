@@ -317,112 +317,6 @@ public class HearingEventProcessorTest {
         // @formatter:on
     }
 
-    @Test
-    public void processHearingAddedPublicEvent() {
-        this.hearingEventProcessor.processHearingConfirmedRecorded(getJsonHearingAddedEnvelope());
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("hearing.initiate-hearing"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                        withJsonPath(format("$.%s", "hearingId"), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_HEARING_TYPE), equalTo(HEARING_TYPE)),
-                        withJsonPath(format("$.%s", FIELD_DURATION), equalTo(DURATION)))
-                )));
-    }
-
-    @Test
-    public void processHearingCasePleaAdded() throws IOException {
-
-        this.hearingEventProcessor.processCasePleaAdded(getJsonHearingCasePleaAddedOrChangedEnvelope());
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("hearing.plea-add"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
-                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_GENERIC_ID), equalTo(PLEA_ID.toString())),
-                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_VALUE), equalTo(PLEA_VALUE)),
-                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_PLEA_DATE), equalTo(START_DATE))
-                        )
-                )));
-    }
-
-    @Test
-    public void processHearingCasePleaChanged() throws IOException {
-
-        this.hearingEventProcessor.processCasePleaChanged(getJsonHearingCasePleaAddedOrChangedEnvelope());
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("hearing.plea-change"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
-                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_GENERIC_ID), equalTo(PLEA_ID.toString())),
-                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_VALUE), equalTo(PLEA_VALUE)),
-                        withJsonPath(format("$.%s.%s", OBJECT_PLEA, FIELD_PLEA_DATE), equalTo(START_DATE))
-                        )
-                )));
-    }
-
-    @Test
-    public void publishHearingPleaUpdatedIgnoredPublicEvent() throws IOException {
-
-        this.hearingEventProcessor.publishHearingUpdatePleaIgnoredPublicEvent(getJsonPublicHearingPleaUpdate());
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.update-plea-ignored"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
-                        )
-                )));
-    }
-
-    @Test
-    public void publishHearingVerdictUpdatedIgnoredPublicEvent() throws IOException {
-
-        this.hearingEventProcessor.publishHearingUpdateVerdictIgnoredPublicEvent(getJsonPublicHearingVerdictUpdate());
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.update-verdict-ignored"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
-                        )
-                )));
-    }
-
-    @Test
-    public void publishHearingPleaUpdatedPublicEvent() throws IOException {
-
-        this.hearingEventProcessor.publishHearingPleaUpdatedPublicEvent(getJsonPublicHearingPleaUpdate());
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.plea-updated"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString()))
-                        )
-                )));
-    }
-
-    @Test
-    public void publishHearingVerdictUpdatedPublicEvent() throws IOException {
-
-        this.hearingEventProcessor.publishHearingVerdictUpdatedPublicEvent(getJsonPublicHearingVerdictUpdate());
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.verdict-updated"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
-                        )
-                )));
-    }
-
     private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class commandClass, int sendCount) {
         final JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
         final Metadata metadata = metadataWithDefaults().build();
@@ -435,25 +329,6 @@ public class HearingEventProcessorTest {
         final JsonObject resultingPayload = result.payloadAsJsonObject();
         return (C) jsonObjectToObjectConverter.convert(resultingPayload, commandClass);
     }
-
-    @Test
-    public void testMagsCourtProcessed() {
-        final UUID caseId = UUID.randomUUID();
-        final UUID courtCentreId = UUID.randomUUID();
-        final Hearing originatingHearing = (new Hearing.Builder()).withCaseId(caseId).withCourtCentreId(courtCentreId.toString()).build();
-        final LocalDate convictionDate = LocalDate.now();
-        final UUID followingHearingId = UUID.randomUUID();
-        final MagsCourtHearingRecorded magsCourtHearingRecorded = new MagsCourtHearingRecorded(originatingHearing, convictionDate, followingHearingId);
-
-        final InitiateHearingCommand command = transactEvent2Command(magsCourtHearingRecorded,
-                (event) -> this.hearingEventProcessor.magsCourtProcessed(event), InitiateHearingCommand.class, 1);
-
-        assertEquals(caseId, command.getCaseId());
-        assertEquals(UUID.fromString(originatingHearing.getCourtCentreId()), command.getCourtCentreId());
-        assertEquals(magsCourtHearingRecorded.getHearingId(), command.getHearingId());
-        assertEquals(magsCourtHearingRecorded.getOriginatingHearing().getType(), command.getHearingType());
-    }
-
 
     private JsonEnvelope createResultsSharedEvent() {
         final JsonArray resultLines = createArrayBuilder().add(

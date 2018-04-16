@@ -9,9 +9,6 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/*
-* must contain sufficient information to initiate a hearing
- */
 @Event("hearing.mags-court-hearing-recorded")
 public class MagsCourtHearingRecorded {
 

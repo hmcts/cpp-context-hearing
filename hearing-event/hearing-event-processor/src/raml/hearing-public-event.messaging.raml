@@ -7,10 +7,15 @@ baseUri: message://event/processor/message/hearing
       responses:
           200:
               body:
-# Initiate
+# Initiate Hearing
                   application/vnd.public.hearing.initiated+json:
                       schema: !include json/schema/public.hearing.initiated.json
                       example: !include json/public.hearing.initiated.json
+
+# Initiate Mags Court Hearing
+                  application/vnd.public.mags.hearing.initiated+json:
+                      schema: !include json/schema/public.mags.hearing.initiated.json
+                      example: !include json/public.mags.hearing.initiated.json
 
 # Events
                   application/vnd.public.hearing.event-logged+json:

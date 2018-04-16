@@ -1,14 +1,18 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
-
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HearingTransformer {
@@ -47,10 +51,20 @@ public class HearingTransformer {
                 entry -> {
                     final Defendant defendant = entry.getKey();
                     final List<Offence> filteredOffences = entry.getValue();
-                    final Defendant defendantClone = (new Defendant.Builder()).withAddress(defendant.getAddress()).withBailStatus(defendant.getBailStatus()).
-                            withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate()).withDateOfBirth(defendant.getDateOfBirth()).withDefenceOrganisation(defendant.getDefenceOrganisation())
-                            .withFirstName(defendant.getFirstName()).withGender(defendant.getGender()).withId(defendant.getId()).withInterpreter(defendant.getInterpreter()).withLastName(defendant.getLastName()).
-                                    withNationality(defendant.getNationality()).withOffences(filteredOffences).withPersonId(defendant.getPersonId()).build();
+                    final Defendant defendantClone = (new Defendant.Builder())
+                            .withAddress(defendant.getAddress())
+                            .withBailStatus(defendant.getBailStatus())
+                            .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
+                            .withDateOfBirth(defendant.getDateOfBirth())
+                            .withDefenceOrganisation(defendant.getDefenceOrganisation())
+                            .withFirstName(defendant.getFirstName())
+                            .withGender(defendant.getGender())
+                            .withId(defendant.getId())
+                            .withInterpreter(defendant.getInterpreter())
+                            .withLastName(defendant.getLastName())
+                            .withNationality(defendant.getNationality())
+                            .withOffences(filteredOffences)
+                            .withPersonId(defendant.getPersonId()).build();
                     defendants.add(defendantClone);
                 }
         );
@@ -69,8 +83,7 @@ public class HearingTransformer {
 
         result = pleaDate2DefendantOffence.entrySet().stream().map(entry -> map(entry, originatingHearing)).collect(Collectors.toList());
 
-        result.sort((e1, e2) -> e1.getConvictionDate().compareTo(e2.getConvictionDate()));
+        result.sort(Comparator.comparing(MagsCourtHearingRecorded::getConvictionDate));
         return result;
     }
-
 }
