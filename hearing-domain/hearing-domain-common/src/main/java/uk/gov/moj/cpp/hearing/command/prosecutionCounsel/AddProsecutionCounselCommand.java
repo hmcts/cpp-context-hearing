@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.prosecutionCounsel;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.UUID;
@@ -33,7 +34,8 @@ public class AddProsecutionCounselCommand {
         this.title = title;
     }
 
-    public AddProsecutionCounselCommand(Builder builder) {
+    @JsonIgnore
+    private AddProsecutionCounselCommand(Builder builder) {
         this.personId = builder.personId;
         this.attendeeId = builder.attendeeId;
         this.hearingId = builder.hearingId;

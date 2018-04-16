@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.defenceCounsel;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -40,7 +41,8 @@ public class AddDefenceCounselCommand {
         this.defendantIds = defendantIds;
     }
 
-    public AddDefenceCounselCommand(Builder builder) {
+    @JsonIgnore
+    private AddDefenceCounselCommand(Builder builder) {
         this.personId = builder.personId;
         this.attendeeId = builder.attendeeId;
         this.hearingId = builder.hearingId;
