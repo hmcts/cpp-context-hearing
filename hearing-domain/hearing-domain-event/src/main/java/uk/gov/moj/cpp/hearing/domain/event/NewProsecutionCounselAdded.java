@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.util.UUID;
+
 //TODO replace hearing.prosecution-counsel-added
 @Event("hearing.newprosecution-counsel-added")
 public class NewProsecutionCounselAdded {
