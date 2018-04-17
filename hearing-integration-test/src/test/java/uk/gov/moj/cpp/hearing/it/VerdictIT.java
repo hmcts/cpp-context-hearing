@@ -97,8 +97,6 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].id",
                                         equalStr(initiateHearingCommand, "hearing.defendants[0].offences[0].id")),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictId",
-                                        equalStr(hearingUpdateVerdictCommand, "defendants[0].offences[0].verdict.id")),
 
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category", is(verdict.getValue().getCategory())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code", is(verdict.getValue().getCode())),
@@ -170,8 +168,6 @@ public class VerdictIT extends AbstractIT {
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].id",
                                         equalStr(initiateHearingCommand, "hearing.defendants[0].offences[0].id")),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictId",
-                                        equalStr(hearingUpdateVerdictCommand, "defendants[0].offences[0].verdict.id")),
 
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category", is(verdict.getValue().getCategory())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code", is(verdict.getValue().getCode())),
