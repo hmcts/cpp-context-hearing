@@ -3,12 +3,9 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet id="33" author="hearing" logicalFilePath="033-create-unique-index-to-offence.xml">
+    <changeSet id="34" author="hearing" logicalFilePath="033-drop-fk-constraint-on-origin-hearing-id.xml">
 
-        <sql>
-            CREATE UNIQUE INDEX IF NOT EXISTS udx_offence_offenceid_origin_hearing_id 
-                ON a_offence (id, origin_hearing_id NULLS FIRST);
-        </sql>
+        <dropForeignKeyConstraint baseTableName="a_offence" constraintName="fk_offence_origin_hearing"/>
 
     </changeSet>
 
