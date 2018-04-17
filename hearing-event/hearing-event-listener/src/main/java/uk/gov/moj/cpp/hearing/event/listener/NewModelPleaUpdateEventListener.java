@@ -7,6 +7,8 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -19,6 +21,8 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 @ServiceComponent(EVENT_LISTENER)
 public class NewModelPleaUpdateEventListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NewModelPleaUpdateEventListener.class);
 
     private final OffenceRepository offenceRepository;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -34,12 +38,15 @@ public class NewModelPleaUpdateEventListener {
     @Transactional
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdated(final JsonEnvelope envelop) {
+
+        LOGGER.info("UPDATE PLEA EVENT LISTENER " + envelop.toDebugStringPrettyPrint() );
         final HearingOffencePleaUpdated event = convertToObject(envelop);
         Optional.ofNullable(
                 offenceRepository.findBySnapshotKey(new HearingSnapshotKey(event.getOffenceId(), event.getHearingId())))
                 .map(offence -> {
                     offence.setPleaDate(event.getPleaDate());
                     offence.setPleaValue(event.getValue());
+                    LOGGER.info("saving plea ");
                     offenceRepository.saveAndFlush(offence);
                     return offence;
                 }).orElseThrow(() -> new HandlerExecutionException("Offence not found by offenceId: " + event.getOffenceId() + " and hearingId: " + event.getHearingId(), null));

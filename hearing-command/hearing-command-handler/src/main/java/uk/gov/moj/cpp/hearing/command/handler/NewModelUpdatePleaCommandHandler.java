@@ -4,6 +4,8 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -21,7 +23,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class NewModelUpdatePleaCommandHandler extends AbstractCommandHandler {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(NewModelUpdatePleaCommandHandler.class);
     @Inject
     public NewModelUpdatePleaCommandHandler(final EventSource eventSource, final Enveloper enveloper,
             final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
@@ -30,6 +32,7 @@ public class NewModelUpdatePleaCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.hearing-offence-plea-update")
     public void updatePlea(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.info("UPDATE PLEA " + envelope.toDebugStringPrettyPrint() );
         final HearingUpdatePleaCommand command = convertToObject(envelope, HearingUpdatePleaCommand.class);
         for (final Defendant defendant : command.getDefendants()) {
             for (final Offence offence : defendant.getOffences()) {
