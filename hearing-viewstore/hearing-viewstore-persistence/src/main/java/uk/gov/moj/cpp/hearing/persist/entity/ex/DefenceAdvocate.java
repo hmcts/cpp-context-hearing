@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 
 @Entity
 @DiscriminatorValue("DefenceAdvocate")
 public class DefenceAdvocate extends Advocate {
 
-    @ManyToMany(mappedBy = "defenceAdvocates")
+    @ManyToMany(mappedBy = "defenceAdvocates", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Defendant> defendants = new ArrayList<>();
 
     public DefenceAdvocate() {

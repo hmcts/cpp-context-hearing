@@ -85,12 +85,14 @@ public class DefenceCounselIT extends AbstractIT {
                         print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.attendees.defenceCounsels.[0].attendeeId", is(firstDefenceCounsel.getAttendeeId().toString())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].defendantId", is(firstDefenceCounsel.getDefendantIds().get(0).getDefendantId().toString())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].status", is(firstDefenceCounsel.getStatus())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].firstName", is(firstDefenceCounsel.getFirstName())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].lastName", is(firstDefenceCounsel.getLastName())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].title", is(firstDefenceCounsel.getTitle())),
 
                                 withJsonPath("$.attendees.defenceCounsels.[1].attendeeId", is(secondDefenceCounsel.getAttendeeId().toString())),
+                                withJsonPath("$.attendees.defenceCounsels.[1].defendantId", is(secondDefenceCounsel.getDefendantIds().get(0).getDefendantId().toString())),
                                 withJsonPath("$.attendees.defenceCounsels.[1].status", is(secondDefenceCounsel.getStatus())),
                                 withJsonPath("$.attendees.defenceCounsels.[1].firstName", is(secondDefenceCounsel.getFirstName())),
                                 withJsonPath("$.attendees.defenceCounsels.[1].lastName", is(secondDefenceCounsel.getLastName())),

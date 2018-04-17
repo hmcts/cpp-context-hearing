@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
@@ -92,6 +93,9 @@ public class DefenceCounselAddedEventListenerTest {
         assertThat(defenceAdvocate.getLastName(), is(newDefenceCounselAdded.getLastName()));
         assertThat(defenceAdvocate.getTitle(), is(newDefenceCounselAdded.getTitle()));
         assertThat(defenceAdvocate.getStatus(), is(newDefenceCounselAdded.getStatus()));
+
+        assertThat(ahearing.getDefendants().get(0).getDefenceAdvocates(), hasItems(defenceAdvocate));
+        assertThat(ahearing.getDefendants().get(1).getDefenceAdvocates(), hasItems(defenceAdvocate));
     }
 
 }

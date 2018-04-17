@@ -155,12 +155,17 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
+
+            String defendantId = source.getDefendants().isEmpty() ? "" :
+                    source.getDefendants().get(0).getId().getId().toString();
+
             return DefenceCounsel.builder()
                     .withAttendeeId(source.getId().getId().toString())
                     .withStatus(source.getStatus())
                     .withTitle(source.getTitle())
                     .withFirstName(source.getFirstName())
                     .withLastName(source.getLastName())
+                    .withDefendantId(defendantId)
                     .build();
         }
     }

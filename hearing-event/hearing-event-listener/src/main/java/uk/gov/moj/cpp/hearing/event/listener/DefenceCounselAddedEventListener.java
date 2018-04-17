@@ -68,6 +68,7 @@ public class DefenceCounselAddedEventListener {
                                     )
                             );
                     defenceAdvocate.getDefendants().add(defendant);
+                    defendant.getDefenceAdvocates().add(defenceAdvocate);
                 }
         );
         ahearingRepository.save(hearing);

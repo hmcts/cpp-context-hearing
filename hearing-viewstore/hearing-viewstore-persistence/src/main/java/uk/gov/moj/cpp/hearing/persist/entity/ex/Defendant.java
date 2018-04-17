@@ -17,12 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-/**
- * TODO action this:
- * Tim Cooke [12:25 PM]
- * I think we need to add this to defendant - "defenceSolicitorFirm": "xyz solicitor",
- * rather it is required for resulting and therefore should be part of the shared-results event
- */
 @Entity
 @Table(name = "a_defendant")
 public class Defendant {
@@ -34,7 +28,7 @@ public class Defendant {
     @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
     private Ahearing hearing;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "a_attendee_defendant",
             joinColumns = {
                     @JoinColumn(name = "defendant_id", referencedColumnName = "id"),
@@ -257,7 +251,7 @@ public class Defendant {
 
         private List<Offence> offences;
 
-        private List<DefenceAdvocate> defenceAdvocates;
+        private List<DefenceAdvocate> defenceAdvocates = new ArrayList<>();
 
         protected Builder() {
         }
