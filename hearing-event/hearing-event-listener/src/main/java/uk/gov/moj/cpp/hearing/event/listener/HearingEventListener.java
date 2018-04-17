@@ -47,10 +47,6 @@ public class HearingEventListener {
     private static final String FIELD_TARGET_ID = "targetId";
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_DRAFT_RESULT = "draftResult";
-    private static final String FIELD_PERSON_ID = "personId";
-    private static final String FIELD_ATTENDEE_ID = "attendeeId";
-    private static final String FIELD_STATUS = "status";
-    private static final String FIELD_DEFENDANT_IDS = "defendantIds";
     private static final String FIELD_RESULT_LINES = "resultLines";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";

@@ -49,6 +49,11 @@
       "name": "hearing.update-verdict",
       "type": "action",
       "action": "hearing.update-verdict"
+    },
+    {
+      "name": "hearing.add-witness",
+      "type": "action",
+      "action": "hearing.add-witness"
     }
   ]
 }

@@ -2,12 +2,15 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -25,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -48,7 +52,9 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
@@ -65,6 +71,9 @@ public class NewHearingEventListenerTest {
     @Mock
     private OffenceRepository offenceRepository;
 
+    @Mock
+    private WitnessRepository witnessRepository;
+
     @InjectMocks
     private NewHearingEventListener newHearingEventListener;
 
@@ -73,6 +82,26 @@ public class NewHearingEventListenerTest {
 
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Captor
+    private ArgumentCaptor<Witness> witnessArgumentCaptor;
+
+    private static final String FIELD_GENERIC_ID = "id";
+    private static final String FIELD_CASE_ID = "caseId";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_PERSON_ID = "personId";
+    public static final String FIELD_CLASSIFICATION = "classification";
+    public static final String FIELD_TYPE = "type";
+    public static final String FIELD_FIRST_NAME = "firstName";
+    public static final String FIELD_LAST_NAME = "lastName";
+    public static final String WITNESS_TYPE = "defence";
+    public static final String WITNESS_CLASSIFICATION = "expert";
+    public static final String FIRSTNAME = "firstname";
+    public static final String LASTNAME = "lastname";
+    private static final UUID HEARING_ID = randomUUID();
+    private static final UUID CASE_ID = randomUUID();
+    private static final UUID PERSON_ID = randomUUID();
+    private static final UUID TARGET_ID = randomUUID();
 
     @Before
     public void setup() {
@@ -331,4 +360,56 @@ public class NewHearingEventListenerTest {
         assertThat(offence.getPleaValue(), is(pleaValue));
     }
 
+
+    @Test
+    public void shouldUpdateWitness() {
+        final JsonEnvelope event = getWitnessAddedEnvelope();
+        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(Ahearing.builder().withId(HEARING_ID).build());
+        when(this.legalCaseRepository.findById(CASE_ID)).thenReturn(LegalCase.builder().withId(CASE_ID).build());
+
+        this.newHearingEventListener.witnessAdded(event);
+
+        verify(this.witnessRepository).save(this.witnessArgumentCaptor.capture());
+        final Witness expectedWitnessOutcome = this.witnessArgumentCaptor.getValue();
+        assertThat(expectedWitnessOutcome.getId().getId(), is(TARGET_ID));
+        assertThat(expectedWitnessOutcome.getHearing().getId(), is(HEARING_ID));
+        assertThat(expectedWitnessOutcome.getLegalCase().getId(), is(CASE_ID));
+        assertThat(expectedWitnessOutcome.getPersonId(), is(PERSON_ID));
+        assertThat(expectedWitnessOutcome.getType(), is(WITNESS_TYPE));
+        assertThat(expectedWitnessOutcome.getClassification(), is(WITNESS_CLASSIFICATION));
+        assertThat(expectedWitnessOutcome.getFirstName(), is(FIRSTNAME));
+        assertThat(expectedWitnessOutcome.getLastName(), is(LASTNAME));
+    }
+
+    @Test
+    public void shouldNotUpdateWitness_WhenHearingNotFound() {
+        final JsonEnvelope event = getWitnessAddedEnvelope();
+        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(null);
+        this.newHearingEventListener.witnessAdded(event);
+        verifyZeroInteractions(this.witnessRepository);
+
+    }
+
+    @Test
+    public void shouldNotUpdateWitness_WhenCaseNotFound() {
+        final JsonEnvelope event = getWitnessAddedEnvelope();
+        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(Ahearing.builder().withId(HEARING_ID).build());
+        when(this.legalCaseRepository.findById(CASE_ID)).thenReturn(null);
+        this.newHearingEventListener.witnessAdded(event);
+        verifyZeroInteractions(this.witnessRepository);
+
+    }
+
+    public JsonEnvelope getWitnessAddedEnvelope() {
+        final JsonObject witnessAdded = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
+                .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                .add(FIELD_PERSON_ID, PERSON_ID.toString())
+                .add(FIELD_GENERIC_ID, TARGET_ID.toString())
+                .add(FIELD_TYPE, WITNESS_TYPE)
+                .add(FIELD_CLASSIFICATION, WITNESS_CLASSIFICATION)
+                .add(FIELD_FIRST_NAME, FIRSTNAME)
+                .add(FIELD_LAST_NAME, LASTNAME)
+                .build();
+        return envelopeFrom(metadataWithRandomUUIDAndName(), witnessAdded);
+    }
 }

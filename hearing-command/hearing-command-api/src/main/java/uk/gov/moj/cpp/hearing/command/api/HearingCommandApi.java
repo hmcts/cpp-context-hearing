@@ -64,6 +64,11 @@ public class HearingCommandApi {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-verdict").apply(command.payloadAsJsonObject()));
     }
 
+    @Handles("hearing.add-witness")
+    public void addWitness(final JsonEnvelope command) {
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.add-witness").apply(command.payloadAsJsonObject()));
+    }
+
     @Handles(COMMAND_SHARE_RESULTS)
     public void shareResults(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();

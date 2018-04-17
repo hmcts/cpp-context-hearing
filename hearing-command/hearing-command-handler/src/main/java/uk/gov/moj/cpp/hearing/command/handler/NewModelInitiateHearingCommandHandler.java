@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import javax.inject.Inject;
@@ -17,6 +18,9 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+
+import javax.json.JsonObject;
+import java.util.UUID;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class NewModelInitiateHearingCommandHandler extends AbstractCommandHandler {
@@ -43,5 +47,22 @@ public class NewModelInitiateHearingCommandHandler extends AbstractCommandHandle
     public void initiateHearingOffencePlea(final JsonEnvelope envelop) throws EventStreamException {
         final InitiateHearingOffencePleaCommand command = convertToObject(envelop, InitiateHearingOffencePleaCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelop, a -> a.initiateHearingOffencePlea(command));
+    }
+
+
+    @Handles("hearing.command.add-witness")
+    public void addWitness(final JsonEnvelope envelop) throws EventStreamException {
+        final JsonObject payload = envelop.payloadAsJsonObject();
+        final UUID witnessId = fromString(payload.getString("id"));
+        final UUID caseId = fromString(payload.getString("caseId"));
+        final UUID hearingId = fromString(payload.getString("hearingId"));
+        final String type = payload.getString("type");
+        final String classification = payload.getString("classification");
+        final UUID personId = fromString(payload.getString("personId"));
+        final String title = payload.getString("title");
+        final String firstName = payload.getString("firstName");
+        final String lastName = payload.getString("lastName");
+
+        aggregate(NewModelHearingAggregate.class, hearingId, envelop, a ->a.addWitness(hearingId, caseId, witnessId, type, classification, personId, title, firstName, lastName));
     }
 }

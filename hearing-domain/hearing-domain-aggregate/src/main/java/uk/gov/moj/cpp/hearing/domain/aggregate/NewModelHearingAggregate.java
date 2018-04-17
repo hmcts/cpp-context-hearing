@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -79,6 +80,11 @@ public class NewModelHearingAggregate implements Aggregate {
                 when(HearingEventDeleted.class).apply(hearingEventDeleted -> {
                     this.events.get(hearingEventDeleted.getHearingEventId()).setDeleted(true);
                 }),
+
+                when(WitnessAdded.class).apply(witnessAdded -> {
+
+                }),
+
 
                 otherwiseDoNothing()
         );
@@ -295,5 +301,10 @@ public class NewModelHearingAggregate implements Aggregate {
         public HearingEventLogged getHearingEventLogged() {
             return hearingEventLogged;
         }
+    }
+
+    public Stream<Object> addWitness(UUID hearingId, UUID caseId, UUID witnessId, String type, String classification, UUID personId, String title, String firstName, String lastName) {
+        return apply(Stream.of(new WitnessAdded(witnessId,hearingId, caseId, type, classification, personId, title, firstName,
+                lastName)));
     }
 }

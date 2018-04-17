@@ -9,6 +9,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
@@ -34,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @ServiceComponent(EVENT_LISTENER)
@@ -47,6 +49,19 @@ public class NewHearingEventListener {
     
     @Inject
     private OffenceRepository offenceRepository;
+
+    @Inject
+    private WitnessRepository witnessRepository;
+
+    private static final String FIELD_GENERIC_ID = "id";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_CASE_ID = "caseId";
+    public static final String FIELD_CLASSIFICATION = "classification";
+    public static final String FIELD_TYPE = "type";
+    public static final String FIELD_TITLE = "title";
+    public static final String FIELD_FIRST_NAME = "firstName";
+    public static final String FIELD_LAST_NAME = "lastName";
+    private static final String FIELD_PERSON_ID = "personId";
 
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -211,5 +226,31 @@ public class NewHearingEventListener {
                     offenceRepository.saveAndFlush(o);
                     return o;
                 }).orElseThrow(() -> new RuntimeException("Offence id is not found on hearing id: " + hearingId));
+    }
+
+    @Transactional
+    @Handles("hearing.events.witness-added")
+    public void witnessAdded(final JsonEnvelope event) {
+
+        final JsonObject payload = event.payloadAsJsonObject();
+        final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
+        final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
+        final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
+        final String type = payload.getString(FIELD_TYPE);
+        final String classification = payload.getString(FIELD_CLASSIFICATION);
+        final String title = payload.containsKey(FIELD_TITLE)?payload.getString(FIELD_TITLE):null;
+        final String firstName = payload.getString(FIELD_FIRST_NAME);
+        final String lastName = payload.getString(FIELD_LAST_NAME);
+
+        Ahearing hearing = ahearingRepository.findById(hearingId);
+        LegalCase legalCase = legalCaseRepository.findById(caseId);
+
+        if (hearing != null && legalCase != null) {
+            Witness witness = Witness.builder().withId(new HearingSnapshotKey(id, hearingId)).withHearing(hearing).withLegalCase(legalCase)
+                    .withPersonId(personId).withType(type).withTitle(title).withFirstName(firstName).withLastName(lastName).withClassification(classification).build();
+
+            this.witnessRepository.save(witness);
+        }
     }
 }

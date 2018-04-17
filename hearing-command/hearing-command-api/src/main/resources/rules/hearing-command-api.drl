@@ -95,3 +95,12 @@ rule "Command - API - Action - hearing.update-verdict"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.add-witness"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-witness");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
