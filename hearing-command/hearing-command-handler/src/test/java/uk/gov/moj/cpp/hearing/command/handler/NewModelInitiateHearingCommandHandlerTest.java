@@ -75,10 +75,7 @@ public class NewModelInitiateHearingCommandHandlerTest {
             Initiated.class,
             InitiateHearingOffenceEnriched.class,
             InitiateHearingOffencePlead.class
-            );
-
-    @Mock
-    private HearingCommandHandler oldHandler;
+    );
 
     @InjectMocks
     private NewModelInitiateHearingCommandHandler hearingCommandHandler;
