@@ -4,6 +4,7 @@ package uk.gov.justice.ccr.notepad.result;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
@@ -19,6 +20,7 @@ public class ResultDefinitionLoaderTest {
 
     ResultCache resultCache = new ResultCache();
     FileResultLoader fileResultLoader = new FileResultLoader();
+    
     @Before
     public void init() throws ExecutionException {
         resultCache.setResultLoader(fileResultLoader);
@@ -27,13 +29,13 @@ public class ResultDefinitionLoaderTest {
 
     @Test
     public void getResultDefinition() throws Exception {
-        assertThat(resultCache.getResultDefinition().size(), is(433));
+        assertThat(resultCache.getResultDefinitions(), hasSize(542));
     }
 
     @Test
-    public void resultDefinitionKeywordsShouldhaveSynonymsDefined() throws Exception {
+    public void resultDefinitionKeywordsShouldHaveSynonymsDefined() throws Exception {
         List<String> allWords = newArrayList();
-        resultCache.getResultDefinition()
+        resultCache.getResultDefinitions()
                 .stream()
                 .map(value -> value.getKeywords()).forEach(s -> allWords.addAll(s));
 

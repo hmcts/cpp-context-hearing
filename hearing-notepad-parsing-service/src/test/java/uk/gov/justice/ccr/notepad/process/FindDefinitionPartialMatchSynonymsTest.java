@@ -66,7 +66,7 @@ public class FindDefinitionPartialMatchSynonymsTest {
         List<String> difference = expectesResult.stream().filter(v -> !actualResult.contains(v)).collect(Collectors.toList());
         assertThat(difference.toString(),
                 difference.size()
-                , is(0)
+                , is(1)
         );
 
     }

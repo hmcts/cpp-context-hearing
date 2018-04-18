@@ -12,15 +12,17 @@ import org.junit.Test;
 
 
 public class ResourceFileReaderTest {
-    StringToResultDefinitionConverter converter = new StringToResultDefinitionConverter();
+    
+    private StringToResultDefinitionConverter converter = new StringToResultDefinitionConverter();
+    
     @Test
-    public void getLines() throws Exception {
-        assertThat(new ResourceFileReader().getLines("/file-store/b6a117cb-c284-4103-958d-34ffcf200b24", true)
+    public void getLines() {
+        assertThat(new ResourceFileReader().getLines("/file-store/result-definitions.tdf", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()).size() > 1, is(true));
     }
 
     @Test(expected = ResourceFileProcessingException.class)
-    public void getLinesWhenNoFileFoundAtResource() throws Exception {
+    public void getLinesWhenNoFileFoundAtResource() {
         assertThat(new ResourceFileReader().getLines("/dummy", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()).size() > 1, is(true));
     }

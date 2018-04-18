@@ -14,9 +14,8 @@ public final class StringToResultPromptFixedListConverter {
     public ResultPromptFixedList convert(final String line) {
         final String[] values = TAB_SPLITTER.split(line, -1);
         if (MAX_TOKEN == values.length) {
-
             ResultPromptFixedList resultPromptFixedList = new ResultPromptFixedList();
-            resultPromptFixedList.setId(values[ResultPromptFixedListKey.FIXED_LIST_ID.getOrder()].trim());
+            resultPromptFixedList.setId(values[ResultPromptFixedListKey.UUID.getOrder()].trim());
             resultPromptFixedList.setValue(values[ResultPromptFixedListKey.VALUE.getOrder()].trim());
 
             return resultPromptFixedList;

@@ -4,9 +4,7 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 public class ResultPromptFixedList {
 
     private String id;
-
     private String value;
-
 
     public String getId() {
         return id;

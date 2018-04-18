@@ -7,8 +7,9 @@ import org.junit.Test;
 
 
 public class StringToResultDefinitionConverterTest {
+    
     @Test
-    public void convert() throws Exception {
+    public void convert() {
         assertThat(new StringToResultDefinitionConverter().convert("ddd") == null, is(true));
     }
 

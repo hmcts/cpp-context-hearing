@@ -1,17 +1,36 @@
 package uk.gov.justice.ccr.notepad.result.cache.model;
 
+import static java.util.stream.Collectors.toCollection;
 
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class ResultDefinition {
     private String id;
     private String label;
     private String shortCode;
     private String level;
-    private Set<String> keywords = new TreeSet<>();
+    private Set<String> keywords;
+
+    public ResultDefinition() {
+
+    }
+
+    public ResultDefinition(final String id, final String label, final String shortCode,
+                            final String level, final Set<String> keywords) {
+        this.id = id;
+        this.label = label;
+        this.shortCode = shortCode;
+        this.level = level;
+        this.keywords = keywords;
+    }
+
+    public final String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public final String getLabel() {
         return label;
@@ -38,21 +57,13 @@ public class ResultDefinition {
     }
 
     public final Set<String> getKeywords() {
-        return keywords;
+        return Optional.ofNullable(keywords).orElse(new HashSet<>());
     }
 
     public final void setKeywords(List<String> keywords) {
         if (!keywords.isEmpty()) {
-            this.keywords = new TreeSet<>(keywords.stream().filter(v -> !v.isEmpty()).collect(Collectors.toSet()));
+            this.keywords = keywords.stream().filter(v -> !v.isEmpty()).distinct().collect(toCollection(TreeSet::new));
         }
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public final String getId() {
-        return id;
     }
 
     @Override

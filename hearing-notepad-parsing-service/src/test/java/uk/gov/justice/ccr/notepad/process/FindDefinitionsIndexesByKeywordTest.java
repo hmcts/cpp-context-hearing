@@ -1,5 +1,6 @@
 package uk.gov.justice.ccr.notepad.process;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -7,8 +8,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -17,8 +16,8 @@ import org.hamcrest.core.AnyOf;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class FindDefinitionsIndexesByKeywordTest {
+    
     ResultCache resultCache = new ResultCache();
     FileResultLoader fileResultLoader = new FileResultLoader();
     FindDefinitionsIndexesByKeyword testObj = new FindDefinitionsIndexesByKeyword();
@@ -32,18 +31,18 @@ public class FindDefinitionsIndexesByKeywordTest {
 
     @Test
     public void run() throws Exception {
-        Set<String> words = new HashSet<>(Arrays.asList("rehabilitation", "imprisonment", "suspended"));
+        Set<String> words = newHashSet("rehabilitation", "imprisonment", "suspended");
 
         List<Long> resultDefinitionsIndex = testObj.run(words);
 
         assertThat(
                 resultDefinitionsIndex.size()
-                , is(35)
+                , is(41)
         );
         resultDefinitionsIndex.forEach(resultDefinition -> {
             try {
                 assertThat(
-                        resultCache.getResultDefinition().get(resultDefinition.intValue()).getKeywords().toString(),
+                        resultCache.getResultDefinitions().get(resultDefinition.intValue()).getKeywords().toString(),
                         AnyOf.anyOf(containsString("rehabilitation"), containsString("imprisonment"), containsString("suspended"))
                 );
             } catch (ExecutionException e) {
