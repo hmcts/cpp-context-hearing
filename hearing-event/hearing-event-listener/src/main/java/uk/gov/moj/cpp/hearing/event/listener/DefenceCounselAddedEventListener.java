@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -19,6 +21,8 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 @ServiceComponent(EVENT_LISTENER)
 public class DefenceCounselAddedEventListener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NewModelPleaUpdateEventListener.class);
+
     @Inject
     private AhearingRepository ahearingRepository;
 
@@ -28,6 +32,7 @@ public class DefenceCounselAddedEventListener {
     @Transactional
     @Handles("hearing.newdefence-counsel-added")
     public void defenseCounselAdded(final JsonEnvelope event) {
+        LOGGER.info("update defence counselor: " + event.toString() );
 
         DefenceCounselUpsert defenceCounselUpsert = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DefenceCounselUpsert.class);
 

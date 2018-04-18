@@ -38,15 +38,14 @@ public class NewModelPleaUpdateEventListener {
     @Transactional
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdated(final JsonEnvelope envelop) {
+        LOGGER.info("update plea: " + envelop.toString() );
 
-        LOGGER.info("UPDATE PLEA EVENT LISTENER " + envelop.toDebugStringPrettyPrint() );
         final HearingOffencePleaUpdated event = convertToObject(envelop);
         Optional.ofNullable(
                 offenceRepository.findBySnapshotKey(new HearingSnapshotKey(event.getOffenceId(), event.getHearingId())))
                 .map(offence -> {
                     offence.setPleaDate(event.getPleaDate());
                     offence.setPleaValue(event.getValue());
-                    LOGGER.info("saving plea ");
                     offenceRepository.saveAndFlush(offence);
                     return offence;
                 }).orElseThrow(() -> new HandlerExecutionException("Offence not found by offenceId: " + event.getOffenceId() + " and hearingId: " + event.getHearingId(), null));
