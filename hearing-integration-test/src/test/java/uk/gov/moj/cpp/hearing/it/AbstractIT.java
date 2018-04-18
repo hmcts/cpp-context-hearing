@@ -10,7 +10,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -19,42 +18,38 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.json.JSONObject;
-
-import uk.gov.justice.services.test.utils.core.http.RequestParams;
-import uk.gov.justice.services.test.utils.core.http.ResponseData;
-import uk.gov.justice.services.test.utils.core.rest.RestClient;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import com.google.common.io.Resources;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.specification.RequestSpecification;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("WeakerAccess")
+import com.google.common.io.Resources;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.response.Header;
+import com.jayway.restassured.specification.RequestSpecification;
+
+import uk.gov.justice.services.test.utils.core.http.RequestParams;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.justice.services.test.utils.core.rest.RestClient;
+
 public class AbstractIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
@@ -125,7 +120,7 @@ public class AbstractIT {
         return equalTo(getString(bean, name));
     }
 
-    protected static Matcher<String> equalStr(final Object bean, final char separator, String... names) {
+    protected static Matcher<String> equalStr(final Object bean, final char separator, final String... names) {
         return equalTo(StringUtils.join(Stream.of(names).map(name -> getString(bean, name).trim()).collect(toList()), separator).trim());
     }
 
@@ -137,8 +132,12 @@ public class AbstractIT {
         return equalTo(getInteger(bean, name));
     }
     
-    protected static Matcher<String> equalDate(final LocalDate localDate) {
+    protected static Matcher<String> equalDate(final Temporal localDate) {
         return equalTo(ISO_LOCAL_DATE.format(localDate));
+    }
+
+    protected static Matcher<String> equalEnum(final Enum<?> e) {
+        return equalTo(e.name());
     }
 
     protected static String getString(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {
@@ -152,6 +151,10 @@ public class AbstractIT {
             LOGGER.error("Cannot get string property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
             return EMPTY;
         }
+    }
+
+    protected static UUID getUUID(final Object bean,final String name) {
+        return UUID.fromString(getString(bean, name));
     }
 
     protected static String getString(final Object bean, final String name) {

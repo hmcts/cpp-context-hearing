@@ -132,13 +132,13 @@ function buildDeployAndTest {
   while getopts ":aiu" OPTION; do
     case "${OPTION}" in
       u)
-        SKIP_UNIT_TESTS="-DskiptTests"
+        SKIP_UNIT_TESTS="-DskipTests"
 	printf '\e[1;92m%-6s\e[m' "${0##*/}: Skiping the maven unit tests" ;;
       i)
 	printf '\e[1;92m%-6s\e[m' "${0##*/}: Skiping the health check and integration tests" ;;
       a)
-        SKIP_UNIT_TESTS="-DskiptTests"
-        SKIP_INTEGRATION_TESTS="true"
+        SKIP_UNIT_TESTS="-DskipTests"
+        SKIP_INTEGRATION_TESTS="skipIntegrationTests"
 	printf '\e[1;92m%-6s\e[m' "${0##*/} Skiping all tests" ;;
       *) 
         usage ;;
@@ -158,7 +158,7 @@ function deployAndTest {
   createEventLog
   runLiquibase
   runEventBufferLiquibase
-  if [[ "false" == "${1}" ]]; then
+  if [[ "skipIntegrationTests" != "${1}" ]]; then
     healthCheck
     integrationTests
   fi

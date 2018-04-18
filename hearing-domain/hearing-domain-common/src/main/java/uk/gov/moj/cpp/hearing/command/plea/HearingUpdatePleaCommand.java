@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.plea;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +13,9 @@ import java.util.stream.Collectors;
 import static java.util.Collections.unmodifiableList;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class HearingUpdatePleaCommand implements Serializable {
+public final class HearingUpdatePleaCommand implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID hearingId;
     private final UUID caseId;
@@ -28,16 +29,12 @@ public class HearingUpdatePleaCommand implements Serializable {
 
     // I think the update plea should only contain offences.  Each offence is uniquely associated to a defendant, so the defendant info is redundant.
 
-
-
     @JsonCreator
     public HearingUpdatePleaCommand(@JsonProperty("hearingId") final UUID hearingId,
-                                    @JsonProperty("caseId") final UUID caseId,
-                                    @JsonProperty("defendants") final List<Defendant> defendants) {
+            @JsonProperty("caseId") final UUID caseId, @JsonProperty("defendants") final List<Defendant> defendants) {
         this.caseId = caseId;
         this.hearingId = hearingId;
         this.defendants = (null == defendants) ? new ArrayList<>() : new ArrayList<>(defendants);
-
     }
 
     public UUID getHearingId() {
@@ -52,7 +49,7 @@ public class HearingUpdatePleaCommand implements Serializable {
         return defendants;
     }
 
-    public static class Builder {
+    public static final class Builder {
 
         private UUID caseId;
         private UUID hearingId;
@@ -106,6 +103,5 @@ public class HearingUpdatePleaCommand implements Serializable {
 
         hearingUpdatePleaCommand.getDefendants().forEach(defendant -> builder.addDefendant(Defendant.from(defendant)));
         return builder;
-
     }
 }

@@ -1,19 +1,20 @@
 package uk.gov.moj.cpp.hearing.command.plea;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.*;
 
-public class Defendant implements Serializable {
+public final class Defendant implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final UUID id;
     private final UUID personId;
     private final List<Offence> offences;

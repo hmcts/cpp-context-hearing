@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.plea;
 
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -9,10 +8,13 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Plea implements Serializable {
-    final private UUID id;
-    final private String value;
-    final private LocalDate pleaDate;
+public final class Plea implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private final UUID id;
+    private final String value;
+    private final LocalDate pleaDate;
 
     @JsonCreator
     public Plea(@JsonProperty("id") final UUID id,
@@ -21,7 +23,6 @@ public class Plea implements Serializable {
         this.id = id;
         this.pleaDate = pleaDate;
         this.value = value;
-
     }
 
     public UUID getId() {
@@ -51,7 +52,7 @@ public class Plea implements Serializable {
         return Objects.hash(getId(), getValue(), getPleaDate());
     }
 
-    public static class Builder {
+    public static final class Builder {
 
         private UUID id;
         private String value;

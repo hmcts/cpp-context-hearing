@@ -1,8 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.plea;
 
-
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -10,7 +8,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import static java.util.Optional.ofNullable;
 
-public class Offence implements Serializable {
+public final class Offence implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final UUID id;
     private final Plea plea;
 
@@ -19,7 +20,6 @@ public class Offence implements Serializable {
                    @JsonProperty("plea") final Plea plea) {
         this.id = id;
         this.plea = plea;
-
     }
 
     public UUID getId() {
@@ -33,15 +33,9 @@ public class Offence implements Serializable {
     public static class Builder {
 
         private UUID id;
-
         private Plea.Builder plea;
 
         private Builder() {
-
-        }
-
-        public UUID getId() {
-            return id;
         }
 
         public Offence.Builder withId(UUID id) {

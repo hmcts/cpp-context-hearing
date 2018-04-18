@@ -21,7 +21,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTe
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpStatus;
 import org.junit.Test;
@@ -29,24 +28,16 @@ import org.junit.Test;
 import com.jayway.restassured.response.Response;
 
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 @SuppressWarnings("unchecked")
 public class NewOffencePleaUpdateIT extends AbstractIT {
-    
-    enum PleaValueType {GUILTY, NOT_GUILTY};
-    
-    @Test
-    public void updatePleaToNotGuilty() throws Throwable {
-        updatePlea(PleaValueType.NOT_GUILTY, LocalDate.now());
-    }
-    
-    @Test
-    public void updatePleaToGuilty() throws Throwable {
-         updatePlea(PleaValueType.GUILTY, LocalDate.now());
-    }
 
-    static InitiateHearingCommand updatePlea(final PleaValueType pleaValue, final LocalDate pleaDate) throws Throwable {
+    enum PleaValueType {GUILTY, NOT_GUILTY};
+
+    @Test
+    public void updatePlea_toGuilty_shouldHaveConvictionDate() throws Throwable {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
         
@@ -54,6 +45,78 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
         final UUID caseId = initiateHearingCommand.getCases().get(0).getCaseId();
         final UUID defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId();
         final UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
+        final LocalDate pleaDate = LocalDate.now();
+        
+        EventListener eventListener = listenFor("public.hearing.initiated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
+
+        makeCommand(requestSpec, "hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearingCommand)
+                .executeSuccessfully();
+
+        eventListener.waitFor();
+
+        final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingId);
+
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+                .until(
+                    status().is(OK),
+                    payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
+                            withJsonPath("$.cases[0].caseId", is(caseId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
+                            hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea"),
+                            hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate"),
+                            hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.value")
+        )));
+
+        eventListener = listenFor("public.hearing.plea-updated")
+                .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+
+        final HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
+                .withCaseId(caseId)
+                .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
+                        .withId(defendantId)
+                        .addOffence(uk.gov.moj.cpp.hearing.command.plea.Offence.builder()
+                                .withId(offenceId)
+                                .withPlea(uk.gov.moj.cpp.hearing.command.plea.Plea.builder()
+                                        .withId(UUID.randomUUID())
+                                        .withPleaDate(pleaDate)
+                                        .withValue(PleaValueType.GUILTY.name()))))
+                .build();
+        
+        makeCommand(requestSpec, "hearing.update-plea")
+            .withArgs(hearingId)
+            .ofType("application/vnd.hearing.update-plea+json")
+            .withPayload(updatePleaCommand)
+            .executeSuccessfully();
+
+        eventListener.waitFor();
+
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+                .until(
+                    status().is(OK),
+                    payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
+                            withJsonPath("$.cases[0].caseId", is(caseId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", equalDate(pleaDate)),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
+                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", equalEnum(PleaValueType.GUILTY))
+                    )));
+    }
+
+    @Test
+    public void updatePlea_toNotGuilty_shouldNotHaveConvictionDate() throws Throwable {
+
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final UUID caseId = initiateHearingCommand.getCases().get(0).getCaseId();
+        final UUID defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId();
+        final UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
+        final LocalDate pleaDate = LocalDate.now();
         
         EventListener eventListener = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
@@ -82,14 +145,24 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
         eventListener = listenFor("public.hearing.plea-updated")
                 .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
         
-        final String updatePleaCommandURL = getURL("hearing.update-plea", hearingId);
-        final String updatePleaPayload = getJsonBody(caseId, defendantId, offenceId, pleaValue.name(), pleaDate);
-
-        final Response response = given().spec(requestSpec).and().contentType("application/vnd.hearing.update-plea+json")
-                .body(updatePleaPayload).header(CPP_UID_HEADER).when().post(updatePleaCommandURL).then().extract().response();
-
-        assertThat(response.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        final HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
+                .withCaseId(caseId)
+                .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
+                        .withId(defendantId)
+                        .addOffence(uk.gov.moj.cpp.hearing.command.plea.Offence.builder()
+                                .withId(offenceId)
+                                .withPlea(uk.gov.moj.cpp.hearing.command.plea.Plea.builder()
+                                        .withId(UUID.randomUUID())
+                                        .withPleaDate(pleaDate)
+                                        .withValue(PleaValueType.NOT_GUILTY.name()))))
+                .build();
         
+        makeCommand(requestSpec, "hearing.update-plea")
+            .withArgs(hearingId)
+            .ofType("application/vnd.hearing.update-plea+json")
+            .withPayload(updatePleaCommand)
+            .executeSuccessfully();
+
         eventListener.waitFor();
 
         poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
@@ -98,29 +171,10 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                     payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
                             withJsonPath("$.cases[0].caseId", is(caseId.toString())),
                             withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
-                            (isGuilty(pleaValue) ?
-                                    withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", equalDate(pleaDate)) :
-                                    hasNoJsonPath("$.cases[0].defendants[0].offences[0].convictionDate")),
+                            hasNoJsonPath("$.cases[0].defendants[0].offences[0].convictionDate"),
                             withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
                             withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is(pleaValue.name()))
+                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", equalEnum(PleaValueType.NOT_GUILTY))
                     )));
-        
-        return initiateHearingCommand;
-    }
-
-    private static boolean isGuilty(final PleaValueType pleaValue) {
-        return "GUILTY".equalsIgnoreCase(pleaValue.name());
-    }
-
-    private static String getJsonBody(final UUID caseId, final UUID defendentId, final UUID offenceId, final String value,
-            final LocalDate localDate) throws IOException {
-        String json = getStringFromResource("hearing.update-plea.json");
-        json = json.replace("RANDOM_CASE_ID", caseId.toString());
-        json = json.replace("RANDOM_DEFENDANT_ID", defendentId.toString());
-        json = json.replace("RANDOM_OFFENCE_ID", offenceId.toString());
-        json = json.replace("RANDOM_PLEA_ID", randomUUID().toString());
-        json = json.replace("PLEA_VALUE", value);
-        return json = json.replace("PLEA_DATE", ISO_LOCAL_DATE.format(localDate));
     }
 }

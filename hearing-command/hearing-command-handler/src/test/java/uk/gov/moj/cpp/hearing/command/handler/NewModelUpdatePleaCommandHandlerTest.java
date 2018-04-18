@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,7 +15,6 @@ import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -116,28 +114,12 @@ public class NewModelUpdatePleaCommandHandlerTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
+    @SuppressWarnings("serial")
     @Test
-    public void testHearingAggregateUpdatePleaToNotGuilty() throws Throwable {
-        assertHearingAggregate(PleaValueType.NOT_GUILTY);
-    }
-    
-    @Test
-    public void testHearingAggregateUpdatePleaToGuilty() throws Throwable {
-         assertHearingAggregate(PleaValueType.GUILTY);
-    }
-    
-    @Test
-    public void testOffenceAggregateUpdatePleaToNotGuilty() throws Throwable {
-        assertOffenceAggregate(PleaValueType.NOT_GUILTY);
-    }
-    
-    @Test
-    public void testOffenceAggregateUpdatePleaToGuilty() throws Throwable {
-         assertOffenceAggregate(PleaValueType.GUILTY);
-    }
-
-    private void assertHearingAggregate(final PleaValueType pleaValue) throws Throwable {
-
+    public void testHearingAggregateUpdatePlea_toNotGuilty_shouldNotHaveConvictionDate() throws Throwable {
+        
+        final PleaValueType pleaValue = PleaValueType.NOT_GUILTY;
+        
         final HearingUpdatePleaCommand updatePleacommand = HearingUpdatePleaCommand.builder()
                 .withCaseId(caseId)
                 .withHearingId(hearingId)
@@ -155,8 +137,9 @@ public class NewModelUpdatePleaCommandHandlerTest {
                 )
                 .build();
         
-        final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate() {{
+            apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        }};
 
         when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingAggregateEventStream);
         when(this.aggregateService.get(this.hearingAggregateEventStream, NewModelHearingAggregate.class)).thenReturn(newModelHearingAggregate);
@@ -179,38 +162,85 @@ public class NewModelUpdatePleaCommandHandlerTest {
                         )))
         );
         
-        switch (pleaValue) {
-        case GUILTY:
-            assertThat(events.get(1),
-                    jsonEnvelope(
-                            withMetadataEnvelopedFrom(jsonEnvelop)
-                                    .withName("hearing.conviction-date-added"),
-                            payloadIsJson(allOf(
-                                    withJsonPath("$.offenceId", is(offenceId.toString())),
-                                    withJsonPath("$.convictionDate", is(pleaDate.toString()))
-
-                            )))
-            );
-            break;
-        case NOT_GUILTY:
-            assertThat(events.get(1),
-                    jsonEnvelope(
-                            withMetadataEnvelopedFrom(jsonEnvelop)
-                                    .withName("hearing.conviction-date-removed"),
-                            payloadIsJson(allOf(
-                                    withJsonPath("$.offenceId", is(offenceId.toString())),
-                                    withoutJsonPath("$.convictionDate")
-                            )))
-            );
-            break;
-        }
+        assertThat(events.get(1),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(jsonEnvelop)
+                                .withName("hearing.conviction-date-removed"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.offenceId", is(offenceId.toString())),
+                                withoutJsonPath("$.convictionDate")
+                        )))
+        );
     }
+    
+    @SuppressWarnings("serial")
+    @Test
+    public void testHearingAggregateUpdatePlea_toGuilty_shouldHaveConvictionDate() throws Throwable {
 
-    private void assertOffenceAggregate(final PleaValueType pleaValue) throws EventStreamException {
+        final PleaValueType pleaValue = PleaValueType.GUILTY;
+
+        final HearingUpdatePleaCommand updatePleacommand = HearingUpdatePleaCommand.builder()
+                .withCaseId(caseId)
+                .withHearingId(hearingId)
+                .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
+                        .withId(defendantId)
+                        .withPersonId(personId)
+                        .addOffence(uk.gov.moj.cpp.hearing.command.plea.Offence.builder()
+                                .withId(offenceId)
+                                .withPlea(uk.gov.moj.cpp.hearing.command.plea.Plea.builder()
+                                        .withId(randomUUID())
+                                        .withPleaDate(pleaDate)
+                                        .withValue(pleaValue.name())
+                                )
+                        )
+                )
+                .build();
+
+        final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate() {{
+            apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingAggregateEventStream);
+        when(this.aggregateService.get(this.hearingAggregateEventStream, NewModelHearingAggregate.class)).thenReturn(newModelHearingAggregate);
+
+        final JsonEnvelope jsonEnvelop = envelopeFrom(metadataOf(medatadaId, "hearing.update-plea"), objectToJsonObjectConverter.convert(updatePleacommand));
+
+        this.hearingCommandHandler.updatePlea(jsonEnvelop);
+        
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream).collect(Collectors.toList());
+        
+        assertThat(events.get(0), 
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(jsonEnvelop)
+                                .withName("hearing.hearing-offence-plea-updated"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.offenceId", is(offenceId.toString())),
+                                withJsonPath("$.pleaDate", is(pleaDate.toString())),
+                                withJsonPath("$.value", is(pleaValue.name()))
+                        )))
+        );
+        
+        assertThat(events.get(1),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(jsonEnvelop)
+                                .withName("hearing.conviction-date-added"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.offenceId", is(offenceId.toString())),
+                                withJsonPath("$.convictionDate", is(pleaDate.toString()))
+
+                        )))
+        );
+    }
+    
+    @Test
+    public void testOffenceAggregateUpdatePlea_toNotGuilty() throws Throwable {
+
+        final PleaValueType pleaValue = PleaValueType.NOT_GUILTY;
 
         when(this.eventSource.getStreamById(offenceId)).thenReturn(this.offenceAggregateEventStream);
         when(this.aggregateService.get(this.offenceAggregateEventStream, OffenceAggregate.class)).thenReturn(new OffenceAggregate());
-        
+
         final JsonEnvelope jsonEnvelop = JsonEnvelopeBuilder.envelopeFrom(
                 metadataOf(medatadaId, "hearing.offence-plea-updated")
                         .build(), 
@@ -222,7 +252,40 @@ public class NewModelUpdatePleaCommandHandlerTest {
                         .build());
 
         this.hearingCommandHandler.updateOffencePlea(jsonEnvelop);
-        
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(jsonEnvelop)
+                                .withName("hearing.offence-plea-updated"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.offenceId", is(offenceId.toString())),
+                                withJsonPath("$.pleaDate", is(pleaDate.toString())),
+                                withJsonPath("$.value", is(pleaValue.name()))
+                        )))
+        ));
+    }
+    
+    @Test
+    public void testOffenceAggregateUpdatePleaToGuilty() throws Throwable {
+
+        final PleaValueType pleaValue = PleaValueType.GUILTY;
+
+        when(this.eventSource.getStreamById(offenceId)).thenReturn(this.offenceAggregateEventStream);
+        when(this.aggregateService.get(this.offenceAggregateEventStream, OffenceAggregate.class)).thenReturn(new OffenceAggregate());
+
+        final JsonEnvelope jsonEnvelop = JsonEnvelopeBuilder.envelopeFrom(
+                metadataOf(medatadaId, "hearing.offence-plea-updated")
+                        .build(), 
+                createObjectBuilder()
+                        .add("hearingId", hearingId.toString())
+                        .add("offenceId", offenceId.toString())
+                        .add("pleaDate", pleaDate.toString())
+                        .add("value", pleaValue.name())
+                        .build());
+
+        this.hearingCommandHandler.updateOffencePlea(jsonEnvelop);
+
         assertThat(verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(jsonEnvelop)
