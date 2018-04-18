@@ -9,7 +9,7 @@ import java.util.UUID;
 import static java.util.Collections.unmodifiableList;
 
 @Event("hearing.newdefence-counsel-added")
-public class NewDefenceCounselAdded {
+public class DefenceCounselUpsert {
 
     private UUID personId;
     private UUID attendeeId;
@@ -21,12 +21,12 @@ public class NewDefenceCounselAdded {
     private String lastName;
 
     @JsonCreator
-    public NewDefenceCounselAdded() {
+    public DefenceCounselUpsert() {
         // default constructor for Jackson serialisation
     }
 
-    private static NewDefenceCounselAdded build(Builder builder) {
-        NewDefenceCounselAdded thus = new NewDefenceCounselAdded();
+    private static DefenceCounselUpsert build(Builder builder) {
+        DefenceCounselUpsert thus = new DefenceCounselUpsert();
         thus.attendeeId = builder.attendeeId;
         thus.hearingId = builder.hearingId;
         thus.status = builder.status;
@@ -120,8 +120,8 @@ public class NewDefenceCounselAdded {
             return this;
         }
 
-        public NewDefenceCounselAdded build() {
-            return NewDefenceCounselAdded.build(this);
+        public DefenceCounselUpsert build() {
+            return DefenceCounselUpsert.build(this);
         }
     }
 

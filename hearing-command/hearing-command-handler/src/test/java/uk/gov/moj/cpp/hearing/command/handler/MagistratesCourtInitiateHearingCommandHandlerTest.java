@@ -1,15 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import javax.json.JsonObject;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.domain.aggregate.Aggregate;
@@ -28,19 +23,13 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendan
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.hearing.domain.aggregate.MagistratesCourtHearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;

@@ -97,4 +97,64 @@ public class ProsecutionCounselIT extends AbstractIT {
                                 withJsonPath("$.attendees.prosecutionCounsels.[1].title", is(secondProsecutionCounsel.getTitle()))
                         )));
     }
+
+    @Test
+    public void addProsecutionCounsel_shouldEdit() throws Exception {
+
+        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+
+        AddProsecutionCounselCommand firstProsecutionCounsel = AddProsecutionCounselCommand.builder()
+                .withAttendeeId(randomUUID())
+                .withPersonId(randomUUID())
+                .withHearingId(initiateHearingCommand.getHearing().getId())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withTitle(STRING.next())
+                .withStatus(STRING.next())
+                .build();
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.add-prosecution-counsel+json")
+                .withArgs(initiateHearingCommand.getHearing().getId())
+                .withPayload(firstProsecutionCounsel)
+                .executeSuccessfully();
+
+        final String queryEndpoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearingCommand.getHearing().getId());
+
+        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].attendeeId", is(firstProsecutionCounsel.getAttendeeId().toString())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].status", is(firstProsecutionCounsel.getStatus())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].firstName", is(firstProsecutionCounsel.getFirstName())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].lastName", is(firstProsecutionCounsel.getLastName())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].title", is(firstProsecutionCounsel.getTitle()))
+                        )));
+
+        firstProsecutionCounsel.setFirstName(STRING.next())
+                .setLastName(STRING.next())
+                .setTitle(STRING.next())
+                .setStatus(STRING.next());
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.add-prosecution-counsel+json")
+                .withArgs(initiateHearingCommand.getHearing().getId())
+                .withPayload(firstProsecutionCounsel)
+                .executeSuccessfully();
+
+        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].attendeeId", is(firstProsecutionCounsel.getAttendeeId().toString())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].status", is(firstProsecutionCounsel.getStatus())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].firstName", is(firstProsecutionCounsel.getFirstName())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].lastName", is(firstProsecutionCounsel.getLastName())),
+                                withJsonPath("$.attendees.prosecutionCounsels.[0].title", is(firstProsecutionCounsel.getTitle()))
+                        )));
+    }
 }

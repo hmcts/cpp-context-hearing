@@ -73,6 +73,26 @@ public class AddProsecutionCounselCommand {
         return title;
     }
 
+    public AddProsecutionCounselCommand setStatus(String status) {
+        this.status = status;
+        return this;
+    }
+
+    public AddProsecutionCounselCommand setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public AddProsecutionCounselCommand setLastName(String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
+
+    public AddProsecutionCounselCommand setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
     public static class Builder {
         private UUID personId;
         private UUID attendeeId;

@@ -85,6 +85,26 @@ public class AddDefenceCounselCommand {
         return defendantIds;
     }
 
+    public AddDefenceCounselCommand withStatus(String status) {
+        this.status = status;
+        return this;
+    }
+
+    public AddDefenceCounselCommand withFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
+
+    public AddDefenceCounselCommand withLastName(String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
+
+    public AddDefenceCounselCommand withTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
     public static class Builder {
         private UUID personId;
         private UUID attendeeId;
@@ -130,7 +150,7 @@ public class AddDefenceCounselCommand {
             return this;
         }
 
-        public Builder addDefendantId(DefendantId.Builder defendantId){
+        public Builder addDefendantId(DefendantId.Builder defendantId) {
             this.defendantIds.add(defendantId);
             return this;
         }

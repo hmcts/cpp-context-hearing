@@ -4,7 +4,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
@@ -19,7 +19,6 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 @ServiceComponent(EVENT_LISTENER)
 public class DefenceCounselAddedEventListener {
 
-
     @Inject
     private AhearingRepository ahearingRepository;
 
@@ -30,17 +29,17 @@ public class DefenceCounselAddedEventListener {
     @Handles("hearing.newdefence-counsel-added")
     public void defenseCounselAdded(final JsonEnvelope event) {
 
-        NewDefenceCounselAdded newDefenceCounselAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NewDefenceCounselAdded.class);
+        DefenceCounselUpsert defenceCounselUpsert = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DefenceCounselUpsert.class);
 
-        Ahearing hearing = ahearingRepository.findBy(newDefenceCounselAdded.getHearingId());
+        Ahearing hearing = ahearingRepository.findBy(defenceCounselUpsert.getHearingId());
 
         DefenceAdvocate defenceAdvocate = hearing.getAttendees().stream()
-                .filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(newDefenceCounselAdded.getAttendeeId()))
+                .filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(defenceCounselUpsert.getAttendeeId()))
                 .map(DefenceAdvocate.class::cast)
                 .findFirst()
                 .orElseGet(() -> {
                     DefenceAdvocate defenceCounselor = DefenceAdvocate.builder()
-                            .withId(new HearingSnapshotKey(newDefenceCounselAdded.getAttendeeId(), hearing.getId()))
+                            .withId(new HearingSnapshotKey(defenceCounselUpsert.getAttendeeId(), hearing.getId()))
 
                             .build();
                     hearing.getAttendees().add(defenceCounselor);
@@ -48,13 +47,13 @@ public class DefenceCounselAddedEventListener {
                 });
 
         defenceAdvocate
-                .setStatus(newDefenceCounselAdded.getStatus())
-                .setPersonId(newDefenceCounselAdded.getPersonId())
-                .setTitle(newDefenceCounselAdded.getTitle())
-                .setFirstName(newDefenceCounselAdded.getFirstName())
-                .setLastName(newDefenceCounselAdded.getLastName());
+                .setStatus(defenceCounselUpsert.getStatus())
+                .setPersonId(defenceCounselUpsert.getPersonId())
+                .setTitle(defenceCounselUpsert.getTitle())
+                .setFirstName(defenceCounselUpsert.getFirstName())
+                .setLastName(defenceCounselUpsert.getLastName());
 
-        newDefenceCounselAdded.getDefendantIds().forEach(
+        defenceCounselUpsert.getDefendantIds().forEach(
                 defendantId -> {
                     Defendant defendant = hearing.getDefendants().stream()
                             .filter(d -> d.getId().getId().equals(defendantId))
@@ -62,13 +61,21 @@ public class DefenceCounselAddedEventListener {
                             .orElseThrow(() -> new RuntimeException(
                                             String.format("hearing %s defence counsel %s added for unkown defendant %s ",
                                                     hearing.getId(),
-                                                    newDefenceCounselAdded.getAttendeeId(),
+                                                    defenceCounselUpsert.getAttendeeId(),
                                                     defendantId
                                             )
                                     )
                             );
-                    defenceAdvocate.getDefendants().add(defendant);
-                    defendant.getDefenceAdvocates().add(defenceAdvocate);
+
+                    if (defenceAdvocate.getDefendants().stream()
+                            .noneMatch(d -> d.getId().getId().equals(defendantId))) {
+                        defenceAdvocate.getDefendants().add(defendant);
+                    }
+
+                    if (defendant.getDefenceAdvocates().stream()
+                            .noneMatch(d -> d.getId().getId().equals(defenceAdvocate.getId().getId()))) {
+                        defendant.getDefenceAdvocates().add(defenceAdvocate);
+                    }
                 }
         );
         ahearingRepository.save(hearing);

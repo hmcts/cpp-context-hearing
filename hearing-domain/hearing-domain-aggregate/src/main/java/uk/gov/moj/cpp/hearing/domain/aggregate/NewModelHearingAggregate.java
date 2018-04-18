@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.NewDefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
@@ -53,7 +53,7 @@ public class NewModelHearingAggregate implements Aggregate {
     private Map<UUID, HearingEvent> events = new HashMap<>();
 
     private List<NewProsecutionCounselAdded> prosecutionCounsels = new ArrayList<>();
-    private List<NewDefenceCounselAdded> newDefenceCounsels = new ArrayList<>();
+    private Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
 
     @Override
     public Object apply(final Object event) {
@@ -69,8 +69,8 @@ public class NewModelHearingAggregate implements Aggregate {
                     prosecutionCounsels.add(newProsecutionCounselAdded);
                 }),
 
-                when(NewDefenceCounselAdded.class).apply(newDefenceCounselAdded -> {
-                    newDefenceCounsels.add(newDefenceCounselAdded);
+                when(DefenceCounselUpsert.class).apply(defenceCounselUpsert ->  {
+                    defenceCounsels.put(defenceCounselUpsert.getAttendeeId(), defenceCounselUpsert);
                 }),
 
                 when(HearingEventLogged.class).apply(hearingEventLogged -> {
@@ -107,7 +107,7 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> addDefenceCounsel(final AddDefenceCounselCommand defenceCounselCommand) {
         return apply(Stream.of(
-                NewDefenceCounselAdded.builder()
+                DefenceCounselUpsert.builder()
                         .withHearingId(defenceCounselCommand.getHearingId())
                         .withDefendantIds(
                                 defenceCounselCommand.getDefendantIds().stream()
