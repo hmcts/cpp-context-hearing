@@ -32,11 +32,15 @@ public class DefenceCounselAddedEventListener {
     @Transactional
     @Handles("hearing.newdefence-counsel-added")
     public void defenseCounselAdded(final JsonEnvelope event) {
-        LOGGER.info("update defence counselor: " + event.toString() );
+        LOGGER.info("update defence counselor: " + event.toDebugStringPrettyPrint() );
 
         DefenceCounselUpsert defenceCounselUpsert = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DefenceCounselUpsert.class);
 
         Ahearing hearing = ahearingRepository.findBy(defenceCounselUpsert.getHearingId());
+
+        if (hearing == null){
+            throw new RuntimeException("hearing id is not found.");
+        }
 
         DefenceAdvocate defenceAdvocate = hearing.getAttendees().stream()
                 .filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(defenceCounselUpsert.getAttendeeId()))
@@ -60,25 +64,28 @@ public class DefenceCounselAddedEventListener {
 
         defenceCounselUpsert.getDefendantIds().forEach(
                 defendantId -> {
+                    LOGGER.info("adding defence counsel to defendant:  " + defendantId);
                     Defendant defendant = hearing.getDefendants().stream()
                             .filter(d -> d.getId().getId().equals(defendantId))
                             .findFirst()
                             .orElseThrow(() -> new RuntimeException(
-                                            String.format("hearing %s defence counsel %s added for unkown defendant %s ",
+                                            String.format("hearing %s defence counsel %s added for unknown defendant %s ",
                                                     hearing.getId(),
                                                     defenceCounselUpsert.getAttendeeId(),
                                                     defendantId
                                             )
                                     )
                             );
-
+                    LOGGER.info("found defendant:  " + defendantId);
                     if (defenceAdvocate.getDefendants().stream()
                             .noneMatch(d -> d.getId().getId().equals(defendantId))) {
+                        LOGGER.info("added defendant to advocate");
                         defenceAdvocate.getDefendants().add(defendant);
                     }
 
                     if (defendant.getDefenceAdvocates().stream()
                             .noneMatch(d -> d.getId().getId().equals(defenceAdvocate.getId().getId()))) {
+                        LOGGER.info("added advocate to defendant");
                         defendant.getDefenceAdvocates().add(defenceAdvocate);
                     }
                 }
