@@ -21,7 +21,7 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 @ServiceComponent(EVENT_LISTENER)
 public class DefenceCounselAddedEventListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NewModelPleaUpdateEventListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefenceCounselAddedEventListener.class);
 
     @Inject
     private AhearingRepository ahearingRepository;
