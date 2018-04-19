@@ -105,6 +105,16 @@ public class AddDefenceCounselCommand {
         return this;
     }
 
+    public AddDefenceCounselCommand clearAllDefendantIds() {
+        this.defendantIds.clear();
+        return this;
+    }
+
+    public AddDefenceCounselCommand addDefendantId(DefendantId defendantId) {
+        this.defendantIds.add(defendantId);
+        return this;
+    }
+
     public static class Builder {
         private UUID personId;
         private UUID attendeeId;

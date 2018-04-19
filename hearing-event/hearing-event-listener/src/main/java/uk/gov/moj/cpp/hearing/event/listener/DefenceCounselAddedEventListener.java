@@ -16,6 +16,9 @@ import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @ServiceComponent(EVENT_LISTENER)
@@ -32,7 +35,6 @@ public class DefenceCounselAddedEventListener {
     @Transactional
     @Handles("hearing.newdefence-counsel-added")
     public void defenseCounselAdded(final JsonEnvelope event) {
-        LOGGER.info("update defence counselor: " + event.toDebugStringPrettyPrint() );
 
         DefenceCounselUpsert defenceCounselUpsert = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DefenceCounselUpsert.class);
 
@@ -62,9 +64,18 @@ public class DefenceCounselAddedEventListener {
                 .setFirstName(defenceCounselUpsert.getFirstName())
                 .setLastName(defenceCounselUpsert.getLastName());
 
+        List<Defendant> defendantsToRemove = new ArrayList<>();
+        for (Defendant defendant: defenceAdvocate.getDefendants()){
+
+            if (!defenceCounselUpsert.getDefendantIds().contains(defendant.getId().getId())){
+                defendantsToRemove.add(defendant);
+                defendant.getDefenceAdvocates().removeIf(da -> da.getId().getId().equals(defenceAdvocate.getId().getId()));
+            }
+        }
+        defenceAdvocate.getDefendants().removeAll(defendantsToRemove);
+
         defenceCounselUpsert.getDefendantIds().forEach(
                 defendantId -> {
-                    LOGGER.info("adding defence counsel to defendant:  " + defendantId);
                     Defendant defendant = hearing.getDefendants().stream()
                             .filter(d -> d.getId().getId().equals(defendantId))
                             .findFirst()
@@ -76,16 +87,13 @@ public class DefenceCounselAddedEventListener {
                                             )
                                     )
                             );
-                    LOGGER.info("found defendant:  " + defendantId);
                     if (defenceAdvocate.getDefendants().stream()
                             .noneMatch(d -> d.getId().getId().equals(defendantId))) {
-                        LOGGER.info("added defendant to advocate");
                         defenceAdvocate.getDefendants().add(defendant);
                     }
 
                     if (defendant.getDefenceAdvocates().stream()
                             .noneMatch(d -> d.getId().getId().equals(defenceAdvocate.getId().getId()))) {
-                        LOGGER.info("added advocate to defendant");
                         defendant.getDefenceAdvocates().add(defenceAdvocate);
                     }
                 }
