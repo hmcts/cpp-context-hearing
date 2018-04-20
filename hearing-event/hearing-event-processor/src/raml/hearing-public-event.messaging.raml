@@ -54,3 +54,12 @@ baseUri: message://event/processor/message/hearing
                   application/vnd.public.hearing.update-verdict-ignored+json:
                       schema: !include json/schema/public.hearing.update-verdict-ignored.json
                       example: !include json/public.hearing.update-verdict-ignored.json
+                      
+# Conviction Date                      
+                  application/vnd.public.hearing.offence-conviction-date-changed+json:
+                      schema: !include json/schema/public.hearing.offence-conviction-date-changed.json
+                      example: !include json/public.hearing.offence-conviction-date-changed.json
+                  application/vnd.public.hearing.offence-conviction-date-removed+json:
+                      schema: !include json/schema/public.hearing.offence-conviction-date-removed.json
+                      example: !include json/public.hearing.offence-conviction-date-removed.json 
+                      

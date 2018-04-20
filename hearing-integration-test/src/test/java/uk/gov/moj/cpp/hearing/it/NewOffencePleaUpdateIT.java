@@ -3,13 +3,8 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.restassured.RestAssured.given;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -18,14 +13,10 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import org.apache.http.HttpStatus;
 import org.junit.Test;
-
-import com.jayway.restassured.response.Response;
 
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
@@ -47,7 +38,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
         final UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
         final LocalDate pleaDate = LocalDate.now();
         
-        EventListener eventListener = listenFor("public.hearing.initiated")
+        final EventListener publicEventHearingInitiatedListener = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
 
         makeCommand(requestSpec, "hearing.initiate")
@@ -55,7 +46,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                 .withPayload(initiateHearingCommand)
                 .executeSuccessfully();
 
-        eventListener.waitFor();
+        publicEventHearingInitiatedListener.waitFor();
 
         final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingId);
 
@@ -71,8 +62,11 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                             hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.value")
         )));
 
-        eventListener = listenFor("public.hearing.plea-updated")
+        final EventListener publicEventPleaUpdatedListener = listenFor("public.hearing.plea-updated")
                 .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+        
+        final EventListener publicEventOffenceConvictionDateChangedListener = listenFor("public.hearing.offence-conviction-date-changed")
+        		.withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
 
         final HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
                 .withCaseId(caseId)
@@ -92,7 +86,8 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
             .withPayload(updatePleaCommand)
             .executeSuccessfully();
 
-        eventListener.waitFor();
+        publicEventPleaUpdatedListener.waitFor();
+        publicEventOffenceConvictionDateChangedListener.waitFor();
 
         poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
                 .until(
@@ -118,7 +113,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
         final UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
         final LocalDate pleaDate = LocalDate.now();
         
-        EventListener eventListener = listenFor("public.hearing.initiated")
+        final EventListener publicEventHearingInitiatedListener = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
 
         makeCommand(requestSpec, "hearing.initiate")
@@ -126,7 +121,7 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                 .withPayload(initiateHearingCommand)
                 .executeSuccessfully();
 
-        eventListener.waitFor();
+        publicEventHearingInitiatedListener.waitFor();
 
         final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingId);
 
@@ -142,8 +137,11 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                             hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.value")
         )));
 
-        eventListener = listenFor("public.hearing.plea-updated")
+        final EventListener publicEventPleaUpdatedListener = listenFor("public.hearing.plea-updated")
                 .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+        
+        final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor("public.hearing.offence-conviction-date-removed")
+        		.withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
         
         final HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
                 .withCaseId(caseId)
@@ -163,7 +161,8 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
             .withPayload(updatePleaCommand)
             .executeSuccessfully();
 
-        eventListener.waitFor();
+        publicEventPleaUpdatedListener.waitFor();
+        publicEventOffenceConvictionDateRemovedListener.waitFor();
 
         poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
                 .until(

@@ -50,6 +50,14 @@ baseUri: message://event/processor/message/hearing
                     schema: !include json/schema/hearing.offence-verdict-updated.json
                     example: !include json/hearing.offence-verdict-updated.json
 
+# Conviction Date
+        application/vnd.hearing.conviction-date-added+json:
+            schema: !include json/schema/hearing.conviction-date-added.json
+            example: !include json/hearing.conviction-date-added.json
+
+        application/vnd.hearing.conviction-date-removed+json:
+            schema: !include json/schema/hearing.conviction-date-removed.json
+            example: !include json/hearing.conviction-date-removed.json
 
 # old model
 
