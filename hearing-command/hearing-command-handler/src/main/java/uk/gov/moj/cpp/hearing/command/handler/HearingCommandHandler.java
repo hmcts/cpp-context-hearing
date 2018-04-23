@@ -11,7 +11,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.ResultPrompt;
-import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DraftResultSaved;
 
 import javax.inject.Inject;
@@ -86,7 +86,7 @@ public class HearingCommandHandler {
                 .collect(toList());
 
         final EventStream eventStream = this.eventSource.getStreamById(hearingId);
-        final HearingAggregate aggregate = this.aggregateService.get(eventStream, HearingAggregate.class);
+        final NewModelHearingAggregate aggregate = this.aggregateService.get(eventStream, NewModelHearingAggregate.class);
         final Stream<Object> events = aggregate.shareResults(hearingId, sharedTime, resultLines);
 
         eventStream.append(events.map(this.enveloper.withMetadataFrom(command)));

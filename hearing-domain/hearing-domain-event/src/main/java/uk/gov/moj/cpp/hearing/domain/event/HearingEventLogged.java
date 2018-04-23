@@ -2,11 +2,14 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Event("hearing.hearing-event-logged")
-public class HearingEventLogged {
+public class HearingEventLogged implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID hearingEventId;
     private UUID lastHearingEventId;

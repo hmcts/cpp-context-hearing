@@ -18,12 +18,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
 
-    private static final String COMMAND_SHARE_RESULTS = "hearing.share-results";
-
-    private static final String FIELD_HEARING_ID = "hearingId";
-    private static final String FIELD_SHARED_TIME = "sharedTime";
-    private static final String FIELD_RESULT_LINES = "resultLines";
-
     @Inject
     private Sender sender;
 
@@ -69,14 +63,13 @@ public class HearingCommandApi {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.add-witness").apply(command.payloadAsJsonObject()));
     }
 
-    @Handles(COMMAND_SHARE_RESULTS)
+    @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();
         final JsonObjectBuilder payloadWithSharedTime = createObjectBuilder()
-                .add(FIELD_HEARING_ID, payload.getString(FIELD_HEARING_ID))
-                .add(FIELD_SHARED_TIME, ZonedDateTimes.toString(this.clock.now()))
-                .add(FIELD_RESULT_LINES, payload.getJsonArray(FIELD_RESULT_LINES));
-
+                .add("hearingId", payload.getString("hearingId"))
+                .add("sharedTime", ZonedDateTimes.toString(this.clock.now()))
+                .add("resultLines", payload.getJsonArray("resultLines"));
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.share-results").apply(payloadWithSharedTime.build()));
     }
     

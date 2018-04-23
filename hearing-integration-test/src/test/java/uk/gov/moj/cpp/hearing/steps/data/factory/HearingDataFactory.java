@@ -15,6 +15,7 @@ import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
 import uk.gov.moj.cpp.hearing.steps.data.ResultLevel;
 import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +34,8 @@ public class HearingDataFactory {
     public static ResultLineData resultLine(final ResultLevel level) {
         return new ResultLineData(randomUUID(), null, randomUUID(), randomUUID(),
                 randomUUID(), level, STRING.next(),
-                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList()),
+//                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList()),
+                Arrays.asList(new ResultPrompt(STRING.next(), STRING.next()), new ResultPrompt(STRING.next(), STRING.next()), new ResultPrompt(STRING.next(), STRING.next())),
                 STRING.next(), STRING.next(), randomUUID(), STRING.next(), STRING.next());
     }
 
@@ -41,7 +43,8 @@ public class HearingDataFactory {
         return new ResultLineData(randomUUID(), pastSharedResult.getId(), pastSharedResult.getCaseId(),
                 pastSharedResult.getPersonId(), pastSharedResult.getOffenceId(),
                 randomEnum(ResultLevel.class).next(), STRING.next(),
-                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList()),
+//                range(0, integer(5).next()).mapToObj(index -> resultPrompt()).collect(toList()),
+                Arrays.asList(new ResultPrompt(STRING.next(), STRING.next()), new ResultPrompt(STRING.next(), STRING.next()), new ResultPrompt(STRING.next(), STRING.next())),
                 STRING.next(), STRING.next(), randomUUID(), STRING.next(), STRING.next());
     }
 

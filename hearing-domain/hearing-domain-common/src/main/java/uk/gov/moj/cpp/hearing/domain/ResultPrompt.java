@@ -1,8 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class ResultPrompt {
+public class ResultPrompt implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final String label;
     private final String value;
 

@@ -2,35 +2,53 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Event("hearing.newprosecution-counsel-added")
-public class NewProsecutionCounselAdded {
-    private UUID personId;
-    private UUID attendeeId;
-    private UUID hearingId;
-    private String status;
-    private String firstName;
-    private String lastName;
-    private String title;
+public class NewProsecutionCounselAdded implements Serializable {
 
+    private static final long serialVersionUID = 1L;
 
-    public NewProsecutionCounselAdded() {
+    private final UUID personId;
+    private final UUID attendeeId;
+    private final UUID hearingId;
+    private final String status;
+    private final String firstName;
+    private final String lastName;
+    private final String title;
+
+    @JsonCreator
+    public NewProsecutionCounselAdded(@JsonProperty("personId") final UUID personId, 
+            @JsonProperty("attendeeId") final UUID attendeeId, 
+            @JsonProperty("hearingId") final UUID hearingId, 
+            @JsonProperty("status") final String status, 
+            @JsonProperty("firstName") final String firstName,
+            @JsonProperty("lastName") final String lastName, 
+            @JsonProperty("title") final String title) {
+        this.personId = personId;
+        this.attendeeId = attendeeId;
+        this.hearingId = hearingId;
+        this.status = status;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.title = title;
     }
 
-
-    private static NewProsecutionCounselAdded create(final Builder builder) {
-        NewProsecutionCounselAdded thus = new NewProsecutionCounselAdded();
-        thus.attendeeId=builder.attendeeId;
-        thus.firstName=builder.firstName;
-        thus.lastName=builder.lastName;
-        thus.hearingId=builder.hearingId;
-        thus.personId=builder.personId;
-        thus.status=builder.status;
-        thus.title=builder.title;
-        return thus;
+    @JsonIgnore
+    private NewProsecutionCounselAdded(final Builder builder) {
+        this.attendeeId = builder.attendeeId;
+        this.firstName = builder.firstName;
+        this.lastName = builder.lastName;
+        this.hearingId = builder.hearingId;
+        this.personId = builder.personId;
+        this.status = builder.status;
+        this.title = builder.title;
     }
-
 
     public UUID getHearingId() {
         return hearingId;
@@ -99,7 +117,7 @@ public class NewProsecutionCounselAdded {
         }
 
         public NewProsecutionCounselAdded build() {
-            return NewProsecutionCounselAdded.create(this);
+            return new NewProsecutionCounselAdded(this);
         }
     }
 

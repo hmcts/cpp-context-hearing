@@ -45,6 +45,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -56,20 +57,17 @@ import com.jayway.jsonpath.ReadContext;
 import com.jayway.jsonpath.matchers.IsJson;
 import com.jayway.restassured.path.json.JsonPath;
 import org.hamcrest.Matcher;
+import org.junit.Assert;
 
 @SuppressWarnings("unchecked")
 public class HearingStepDefinitions extends AbstractIT {
 
     private static final String PUBLIC_EVENT_HEARING_CONFIRMED = "public.hearing-confirmed";
-    private static final String PUBLIC_EVENT_HEARING_RESULTED = "public.hearing.resulted";
-    private static final String PUBLIC_EVENT_HEARING_RESULT_AMENDED = "public.hearing.result-amended";
     private static final String PUBLIC_EVENT_HEARING_PLEA_UPDATED = "public.hearing.plea-updated";
     private static final String PUBLIC_EVENT_HEARING_UPDATE_PLEA_IGNORED = "public.hearing.update-plea-ignored";
     private static final String PUBLIC_EVENT_HEARING_VERDICT_UPDATED = "public.hearing.verdict-updated";
     private static final String PUBLIC_EVENT_HEARING_UPDATE_VERDICT_IGNORED = "public.hearing.update-verdict-ignored";
 
-    private static final MessageConsumer CONSUMER_FOR_PUBLIC_EVENT_HEARING_RESULTED = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_RESULTED);
-    private static final MessageConsumer CONSUMER_FOR_PUBLIC_EVENT_HEARING_RESULT_AMENDED = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_RESULT_AMENDED);
     private static final MessageConsumer CONSUMER_FOR_PUBLIC_EVENT_HEARING_PLEA_UPDATED = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_PLEA_UPDATED);
     private static final MessageConsumer CONSUMER_FOR_PUBLIC_EVENT_HEARING_UPDATE_PLEA_IGNORED = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_UPDATE_PLEA_IGNORED);
     private static final MessageConsumer CONSUMER_FOR_PUBLIC_EVENT_HEARING_VERDICT_UPDATED = publicEvents.createConsumer(PUBLIC_EVENT_HEARING_VERDICT_UPDATED);
@@ -184,11 +182,11 @@ public class HearingStepDefinitions extends AbstractIT {
         whenTheUserSharesResultsForAHearing(hearingId, resultLines);
     }
 
-    public static void thenHearingResultedPublicEventShouldBePublished(final UUID hearingId, final List<ResultLineData> resultLines) {
-        final JsonPath message = retrieveMessage(CONSUMER_FOR_PUBLIC_EVENT_HEARING_RESULTED);
+    public static void thenHearingResultedPublicEventShouldBePublished(final UUID hearingId, final List<ResultLineData> resultLines, final MessageConsumer messageConsumer) {
+        final JsonPath message = retrieveMessage(messageConsumer, 30000);
 
         assertThat(message.prettify(), new IsJson(allOf(
-                withJsonPath("$._metadata.name", equalTo(PUBLIC_EVENT_HEARING_RESULTED)),
+                withJsonPath("$._metadata.name", equalTo("public.hearing.resulted")),
 
                 withJsonPath("$.hearingId", equalTo(hearingId.toString())),
                 withJsonPath("$.sharedTime", is(notNullValue())),
@@ -268,24 +266,29 @@ public class HearingStepDefinitions extends AbstractIT {
         )));
     }
 
-    public static void thenHearingResultAmendedPublicEventShouldBePublished(final UUID hearingId, final ResultLineData amendedResult) {
-        final JsonPath message = retrieveMessage(CONSUMER_FOR_PUBLIC_EVENT_HEARING_RESULT_AMENDED);
+    public static void thenHearingResultAmendedPublicEventShouldBePublished(final UUID hearingId, final ResultLineData amendedResult, final MessageConsumer messageConsumer) {
+        final JsonPath message = retrieveMessage(messageConsumer, 30000);
 
-        final Matcher<ReadContext> amendedEventExceptResultPrompts = allOf(
-                withJsonPath("$._metadata.name", equalTo(PUBLIC_EVENT_HEARING_RESULT_AMENDED)),
+        try {
+            final Matcher<ReadContext> amendedEventExceptResultPrompts = allOf(
+                    withJsonPath("$._metadata.name", equalTo("public.hearing.result-amended")),
 
-                withJsonPath("$.hearingId", equalTo(hearingId.toString())),
-                withJsonPath("$.id", equalTo(amendedResult.getId().toString())),
-                withJsonPath("$.lastSharedResultId", equalTo(amendedResult.getLastSharedResultId().toString())),
-                withJsonPath("$.sharedTime", is(notNullValue())),
-                withJsonPath("$.personId", equalTo(amendedResult.getPersonId().toString())),
-                withJsonPath("$.caseId", equalTo(amendedResult.getCaseId().toString())),
-                withJsonPath("$.offenceId", equalTo(amendedResult.getOffenceId().toString())),
-                withJsonPath("$.level", equalTo(amendedResult.getLevel().name())),
-                withJsonPath("$.resultLabel", equalTo(amendedResult.getResultLabel()))
-        );
+                    withJsonPath("$.hearingId", equalTo(hearingId.toString())),
+                    withJsonPath("$.id", equalTo(amendedResult.getId().toString())),
+                    withJsonPath("$.lastSharedResultId", equalTo(amendedResult.getLastSharedResultId().toString())),
+                    withJsonPath("$.sharedTime", is(notNullValue())),
+                    withJsonPath("$.personId", equalTo(amendedResult.getPersonId().toString())),
+                    withJsonPath("$.caseId", equalTo(amendedResult.getCaseId().toString())),
+                    withJsonPath("$.offenceId", equalTo(amendedResult.getOffenceId().toString())),
+                    withJsonPath("$.level", equalTo(amendedResult.getLevel().name())),
+                    withJsonPath("$.resultLabel", equalTo(amendedResult.getResultLabel()))
+            );
 
-        assertThat(message.prettify(), new IsJson(both(amendedEventExceptResultPrompts).and(withResultPrompts(amendedResult.getPrompts()))));
+            assertThat(message.prettify(), new IsJson(both(amendedEventExceptResultPrompts).and(withResultPrompts(amendedResult.getPrompts()))));
+            
+        } catch (Exception e) {
+            Assert.assertNull(e.getMessage(), e);
+        }
     }
 
     private static Matcher<? super ReadContext> withResultPrompts(final List<ResultPrompt> resultPrompts) {

@@ -1,10 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-public class ResultLine {
+public class ResultLine implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     private final UUID id;
     private final UUID lastSharedResultId;
     private final UUID caseId;

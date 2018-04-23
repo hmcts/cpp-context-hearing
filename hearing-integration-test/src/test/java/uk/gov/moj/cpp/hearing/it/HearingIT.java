@@ -1,54 +1,38 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import com.google.common.io.Resources;
-import com.jayway.awaitility.core.ConditionTimeoutException;
 import com.jayway.jsonpath.matchers.IsJson;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.IsEqual;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.steps.data.ResultLineData;
+import uk.gov.moj.cpp.hearing.utils.QueueUtil;
 
 import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
 import javax.json.JsonObject;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.io.Resources.getResource;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isOneOf;
@@ -61,7 +45,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.whenUserLogsMultipleEvents;
@@ -82,10 +65,8 @@ import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingDataFactory.share
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithPauseAndResumeEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.manyRandomEvents;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
-import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubSetStatusForCapability;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 public class HearingIT extends AbstractIT {
 
@@ -153,12 +134,13 @@ public class HearingIT extends AbstractIT {
         final ResultLineData resultForDefendant = resultLine(DEFENDANT);
 
         final List<ResultLineData> resultLines = newArrayList(resultForCase, resultForDefendant, resultForOffence);
+        final MessageConsumer messageConsumer = QueueUtil.publicEvents.createConsumer("public.hearing.resulted");
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
         whenTheUserSharesResultsForAHearing(hearingId, resultLines);
 
-        thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines);
+        thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines, messageConsumer);
     }
 
     @Test
@@ -173,14 +155,15 @@ public class HearingIT extends AbstractIT {
         final ResultLineData resultForDefendant = resultLine(DEFENDANT);
 
         final List<ResultLineData> resultLines = newArrayList(resultForCase, resultForDefendant, resultForOffence);
-
+        final MessageConsumer messageConsumer = QueueUtil.publicEvents.createConsumer("public.hearing.resulted");
+        
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
         andHearingEventDefinitionsAreAvailable(hearingEventDefinitionsWithPauseAndResumeEvents());
 
         whenUserLogsMultipleEvents(manyRandomEvents(hearingId, 30));
         whenTheUserSharesResultsForAHearing(hearingId, resultLines);
 
-        thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines);
+        thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines, messageConsumer);
     }
 
 
@@ -193,7 +176,8 @@ public class HearingIT extends AbstractIT {
         final ResultLineData resultForDefendant = resultLine(DEFENDANT);
 
         final List<ResultLineData> resultLines = newArrayList(resultForCase, resultForDefendant, resultForOffence);
-
+        final MessageConsumer messageConsumer = publicEvents.createConsumer("public.hearing.result-amended");
+        
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
         andHearingResultsHaveBeenShared(hearingId, resultLines);
 
@@ -202,7 +186,7 @@ public class HearingIT extends AbstractIT {
         final ResultLineData sharedResultForDefendant = sharedResultLine(resultForDefendant);
         whenTheUserSharesAmendedResultsForTheHearing(hearingId, newArrayList(sharedResultForCase, sharedResultForDefendant, amendedResultForOffence));
 
-        thenHearingResultAmendedPublicEventShouldBePublished(hearingId, amendedResultForOffence);
+        thenHearingResultAmendedPublicEventShouldBePublished(hearingId, amendedResultForOffence, messageConsumer);
     }
 
 

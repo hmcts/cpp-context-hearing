@@ -1,41 +1,63 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import uk.gov.justice.domain.annotation.Event;
-
-import java.util.List;
-import java.util.UUID;
-
 import static java.util.Collections.unmodifiableList;
 
-@Event("hearing.newdefence-counsel-added")
-public class DefenceCounselUpsert {
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-    private UUID personId;
-    private UUID attendeeId;
-    private List<UUID> defendantIds;
-    private UUID hearingId;
-    private String status;
-    private String title;
-    private String firstName;
-    private String lastName;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import uk.gov.justice.domain.annotation.Event;
+
+@Event("hearing.newdefence-counsel-added")
+public class DefenceCounselUpsert implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private final UUID personId;
+    private final UUID attendeeId;
+    private final List<UUID> defendantIds;
+    private final UUID hearingId;
+    private final String status;
+    private final String title;
+    private final String firstName;
+    private final String lastName;
 
     @JsonCreator
-    public DefenceCounselUpsert() {
-        // default constructor for Jackson serialisation
+    public DefenceCounselUpsert(@JsonProperty("personId") final UUID personId, 
+            @JsonProperty("attendeeId") final UUID attendeeId, 
+            @JsonProperty("defendantIds") final List<UUID> defendantIds, 
+            @JsonProperty("hearingId") final UUID hearingId, 
+            @JsonProperty("status") final String status,
+            @JsonProperty("title") final String title, 
+            @JsonProperty("firstName") final String firstName, 
+            @JsonProperty("lastName") final String lastName) {
+        this.personId = personId;
+        this.attendeeId = attendeeId;
+        this.defendantIds = Collections.unmodifiableList(Optional.ofNullable(defendantIds).orElseGet(ArrayList::new));
+        this.hearingId = hearingId;
+        this.status = status;
+        this.title = title;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
-    private static DefenceCounselUpsert build(Builder builder) {
-        DefenceCounselUpsert thus = new DefenceCounselUpsert();
-        thus.attendeeId = builder.attendeeId;
-        thus.hearingId = builder.hearingId;
-        thus.status = builder.status;
-        thus.defendantIds = builder.defendantIds;
-        thus.firstName = builder.firstName;
-        thus.lastName = builder.lastName;
-        thus.title = builder.title;
-        thus.personId = builder.personId;
-        return thus;
+    @JsonIgnore
+    private DefenceCounselUpsert(Builder builder) {
+        this.attendeeId = builder.attendeeId;
+        this.hearingId = builder.hearingId;
+        this.status = builder.status;
+        this.defendantIds = Collections.unmodifiableList(Optional.ofNullable(builder.defendantIds).orElseGet(ArrayList::new));
+        this.firstName = builder.firstName;
+        this.lastName = builder.lastName;
+        this.title = builder.title;
+        this.personId = builder.personId;
     }
 
     public UUID getHearingId() {
@@ -121,7 +143,7 @@ public class DefenceCounselUpsert {
         }
 
         public DefenceCounselUpsert build() {
-            return DefenceCounselUpsert.build(this);
+            return new DefenceCounselUpsert(this);
         }
     }
 

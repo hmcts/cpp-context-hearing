@@ -16,7 +16,7 @@
       }
     }
   },
-  "additionalProperties": false,
+  "additionalProperties": true,
   "required": [
     "hearingId",
     "sharedTime",
@@ -86,13 +86,7 @@
         "caseId",
         "offenceId",
         "level",
-        "resultLabel",
-        "court",
-        "courtRoom",
-        "clerkOfTheCourtId",
-        "clerkOfTheCourtFirstName",
-        "clerkOfTheCourtLastName",
-        "prompts"
+        "resultLabel"
       ]
     },
     "uuid": {
