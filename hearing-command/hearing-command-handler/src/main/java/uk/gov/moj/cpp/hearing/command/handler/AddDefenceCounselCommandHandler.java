@@ -17,7 +17,7 @@ import javax.json.JsonObject;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 @ServiceComponent(COMMAND_HANDLER)
-public class AddDefenceCounselCommandHandler  extends AbstractCommandHandler {
+public class AddDefenceCounselCommandHandler extends AbstractCommandHandler {
 
     @Inject
     public AddDefenceCounselCommandHandler(EventSource eventSource, Enveloper enveloper, AggregateService aggregateService, JsonObjectToObjectConverter jsonObjectToObjectConverter) {
@@ -32,6 +32,5 @@ public class AddDefenceCounselCommandHandler  extends AbstractCommandHandler {
 
         aggregate(NewModelHearingAggregate.class, addDefenceCounselCommand.getHearingId(), envelope,
                 (hearingAggregate) ->  hearingAggregate.addDefenceCounsel(addDefenceCounselCommand));
-
     }
 }

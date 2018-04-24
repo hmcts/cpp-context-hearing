@@ -12,7 +12,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
@@ -55,7 +55,7 @@ public class ProsecutionCounselAddedEventListenerTest {
     @Test
     public void shouldStoreProsecutionCounselOnAddEvent() {
 
-        NewProsecutionCounselAdded newProsecutionCounselAdded = NewProsecutionCounselAdded.builder()
+        ProsecutionCounselUpsert prosecutionCounselUpsert = ProsecutionCounselUpsert.builder()
                 .withAttendeeId(randomUUID())
                 .withFirstName("david")
                 .withHearingId(randomUUID())
@@ -64,11 +64,11 @@ public class ProsecutionCounselAddedEventListenerTest {
                 .withTitle("Mr")
                 .build();
 
-        Ahearing ahearing = Ahearing.builder().withId(newProsecutionCounselAdded.getHearingId()).build();
-        when(this.ahearingRepository.findBy(newProsecutionCounselAdded.getHearingId())).thenReturn(ahearing);
+        Ahearing ahearing = Ahearing.builder().withId(prosecutionCounselUpsert.getHearingId()).build();
+        when(this.ahearingRepository.findBy(prosecutionCounselUpsert.getHearingId())).thenReturn(ahearing);
 
         this.prosecutionCounselAddedEventListener.prosecutionCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.newprosecution-counsel-added"),
-                objectToJsonObjectConverter.convert(newProsecutionCounselAdded)));
+                objectToJsonObjectConverter.convert(prosecutionCounselUpsert)));
 
         verify(this.ahearingRepository).save(ahearingArgumentCaptor.capture());
         Ahearing savedHearing = ahearingArgumentCaptor.getValue();
@@ -78,25 +78,25 @@ public class ProsecutionCounselAddedEventListenerTest {
 
         ProsecutionAdvocate prosecutionAdvocate = (ProsecutionAdvocate) ahearing.getAttendees().get(0);
 
-        assertThat(prosecutionAdvocate.getId().getId(), is(newProsecutionCounselAdded.getAttendeeId()));
-        assertThat(prosecutionAdvocate.getId().getHearingId(), is(newProsecutionCounselAdded.getHearingId()));
-        assertThat(prosecutionAdvocate.getFirstName(), is(newProsecutionCounselAdded.getFirstName()));
-        assertThat(prosecutionAdvocate.getLastName(), is(newProsecutionCounselAdded.getLastName()));
-        assertThat(prosecutionAdvocate.getTitle(), is(newProsecutionCounselAdded.getTitle()));
-        assertThat(prosecutionAdvocate.getStatus(), is(newProsecutionCounselAdded.getStatus()));
+        assertThat(prosecutionAdvocate.getId().getId(), is(prosecutionCounselUpsert.getAttendeeId()));
+        assertThat(prosecutionAdvocate.getId().getHearingId(), is(prosecutionCounselUpsert.getHearingId()));
+        assertThat(prosecutionAdvocate.getFirstName(), is(prosecutionCounselUpsert.getFirstName()));
+        assertThat(prosecutionAdvocate.getLastName(), is(prosecutionCounselUpsert.getLastName()));
+        assertThat(prosecutionAdvocate.getTitle(), is(prosecutionCounselUpsert.getTitle()));
+        assertThat(prosecutionAdvocate.getStatus(), is(prosecutionCounselUpsert.getStatus()));
         
         //  now check an update works
-        NewProsecutionCounselAdded updateProsecutionCounselAdded = NewProsecutionCounselAdded.builder()
-                .withAttendeeId(newProsecutionCounselAdded.getAttendeeId())
+        ProsecutionCounselUpsert updateProsecutionCounselAdded = ProsecutionCounselUpsert.builder()
+                .withAttendeeId(prosecutionCounselUpsert.getAttendeeId())
                 .withFirstName("Xdavid")
-                .withHearingId(newProsecutionCounselAdded.getHearingId())
+                .withHearingId(prosecutionCounselUpsert.getHearingId())
                 .withStatus("Trainee")
                 .withLastName("XBowie")
                 .withTitle("XMr")
                 .build();
 
         reset(this.ahearingRepository);
-        when(this.ahearingRepository.findBy(newProsecutionCounselAdded.getHearingId())).thenReturn(ahearing);
+        when(this.ahearingRepository.findBy(prosecutionCounselUpsert.getHearingId())).thenReturn(ahearing);
 
         this.prosecutionCounselAddedEventListener.prosecutionCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.newprosecution-counsel-added"),
                 objectToJsonObjectConverter.convert(updateProsecutionCounselAdded)));
@@ -110,7 +110,7 @@ public class ProsecutionCounselAddedEventListenerTest {
 
         prosecutionAdvocate = (ProsecutionAdvocate) ahearing.getAttendees().get(0);
 
-        assertThat(prosecutionAdvocate.getId().getId(), is(newProsecutionCounselAdded.getAttendeeId()));
+        assertThat(prosecutionAdvocate.getId().getId(), is(prosecutionCounselUpsert.getAttendeeId()));
         assertThat(prosecutionAdvocate.getId().getHearingId(), is(updateProsecutionCounselAdded.getHearingId()));
         assertThat(prosecutionAdvocate.getFirstName(), is(updateProsecutionCounselAdded.getFirstName()));
         assertThat(prosecutionAdvocate.getLastName(), is(updateProsecutionCounselAdded.getLastName()));

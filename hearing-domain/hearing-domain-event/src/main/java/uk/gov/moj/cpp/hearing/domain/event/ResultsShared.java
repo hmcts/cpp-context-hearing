@@ -28,23 +28,23 @@ public class ResultsShared implements Serializable {
     private final List<ResultLine> resultLines;
     private final Hearing hearing;
     private final List<Case> cases;
-    private final List<NewProsecutionCounselAdded> prosecutionCounsels;
+    private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels;
 
     @JsonCreator
-    public ResultsShared(@JsonProperty("hearingId") final UUID hearingId, 
-            @JsonProperty("sharedTime") final ZonedDateTime sharedTime, 
-            @JsonProperty("resultLines") final List<ResultLine> resultLines, 
-            @JsonProperty("hearing") final Hearing hearing, 
-            @JsonProperty("cases") final List<Case> cases, 
-            @JsonProperty("prosecutionCounsels") final List<NewProsecutionCounselAdded> prosecutionCounsels,
-            @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels) {
+    public ResultsShared(@JsonProperty("hearingId") final UUID hearingId,
+                         @JsonProperty("sharedTime") final ZonedDateTime sharedTime,
+                         @JsonProperty("resultLines") final List<ResultLine> resultLines,
+                         @JsonProperty("hearing") final Hearing hearing,
+                         @JsonProperty("cases") final List<Case> cases,
+                         @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
+                         @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.resultLines = Collections.unmodifiableList(Optional.ofNullable(resultLines).orElseGet(ArrayList::new));
         this.cases = Collections.unmodifiableList(Optional.ofNullable(cases).orElseGet(ArrayList::new));
         this.hearing = hearing;
-        this.prosecutionCounsels = Collections.unmodifiableList(Optional.ofNullable(prosecutionCounsels).orElseGet(ArrayList::new));
+        this.prosecutionCounsels = Collections.unmodifiableMap(Optional.ofNullable(prosecutionCounsels).orElseGet(HashMap::new));
         this.defenceCounsels = Collections.unmodifiableMap(Optional.ofNullable(defenceCounsels).orElseGet(HashMap::new));
     }
 
@@ -68,7 +68,7 @@ public class ResultsShared implements Serializable {
         return cases;
     }
 
-    public List<NewProsecutionCounselAdded> getProsecutionCounsels() {
+    public Map<UUID, ProsecutionCounselUpsert> getProsecutionCounsels() {
         return prosecutionCounsels;
     }
 

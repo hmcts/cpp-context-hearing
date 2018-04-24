@@ -12,11 +12,14 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 
 import javax.jms.MessageConsumer;
+import javax.xml.bind.SchemaOutputResolver;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
+import static java.util.Optional.ofNullable;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
@@ -82,7 +85,7 @@ public class TestUtilities {
         private RequestSpecification requestSpec;
         private String endpoint;
         private String type;
-        private Object payload;
+        private String payloadAsString;
         private Object[] arguments = new Object[0];
 
         public CommandBuilder(RequestSpecification requestSpec, String endpoint) {
@@ -100,33 +103,39 @@ public class TestUtilities {
             return this;
         }
 
+        public CommandBuilder withPayload(final String payload) {
+            this.payloadAsString = payload;
+            return this;
+        }
+
         public CommandBuilder withPayload(final Object payload) {
-            this.payload = payload;
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+                mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+                this.payloadAsString = mapper.writeValueAsString(payload);
+
+                System.out.println("Command Payload: ");
+                System.out.println(this.payloadAsString);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
             return this;
         }
 
         public void executeSuccessfully() {
 
             String url = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty(endpoint), arguments);
-            ObjectMapper mapper = new ObjectMapper();
-
-            mapper.registerModule(new JavaTimeModule());
-            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-            String output = "";
-            try {
-                output = mapper.writeValueAsString(payload);
-                System.out.println("Command Payload:");
-                System.out.println(output);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+            System.out.println("Command Url: ");
             System.out.println(url);
-            System.out.println(output);
+
             Response writeResponse = given().spec(requestSpec).and()
                     .contentType(type)
-                    .body(output).header(CPP_UID_HEADER).when()
+                    .body(ofNullable(this.payloadAsString).orElse(""))
+                    .header(CPP_UID_HEADER).when()
                     .post(url)
                     .then().extract().response();
             assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));

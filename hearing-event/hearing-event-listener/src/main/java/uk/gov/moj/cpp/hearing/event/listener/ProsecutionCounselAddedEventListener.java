@@ -4,7 +4,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
@@ -29,7 +29,7 @@ public class ProsecutionCounselAddedEventListener {
     @Handles("hearing.newprosecution-counsel-added")
     public void prosecutionCounselAdded(final JsonEnvelope event) {
 
-        NewProsecutionCounselAdded prosecutionCounselAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NewProsecutionCounselAdded.class);
+        ProsecutionCounselUpsert prosecutionCounselAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ProsecutionCounselUpsert.class);
 
         Ahearing hearing = ahearingRepository.findBy(prosecutionCounselAdded.getHearingId());
 

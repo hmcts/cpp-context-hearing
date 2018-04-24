@@ -19,7 +19,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 
 import java.util.UUID;
 
@@ -64,7 +64,7 @@ public class AddProsecutionCounselCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            NewProsecutionCounselAdded.class
+            ProsecutionCounselUpsert.class
     );
 
     @InjectMocks

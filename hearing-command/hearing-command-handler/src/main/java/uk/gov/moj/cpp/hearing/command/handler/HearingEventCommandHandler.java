@@ -28,7 +28,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(COMMAND_HANDLER)
-public class HearingEventCommandHandler {
+public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
@@ -42,16 +42,9 @@ public class HearingEventCommandHandler {
     private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
 
     @Inject
-    private EventSource eventSource;
-
-    @Inject
-    private Enveloper enveloper;
-
-    @Inject
-    private AggregateService aggregateService;
-
-    @Inject
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    public HearingEventCommandHandler(EventSource eventSource, Enveloper enveloper, AggregateService aggregateService, JsonObjectToObjectConverter jsonObjectToObjectConverter) {
+        super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
+    }
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
@@ -83,7 +76,7 @@ public class HearingEventCommandHandler {
         final LogEventCommand logEventCommand = this.jsonObjectToObjectConverter.convert(
                 command.payloadAsJsonObject(), LogEventCommand.class);
 
-        applyToHearingAggregate(logEventCommand.getHearingId(), a -> a.logHearingEvent(logEventCommand), command);
+        aggregate(NewModelHearingAggregate.class, logEventCommand.getHearingId(), command, a -> a.logHearingEvent(logEventCommand));
     }
 
     @Handles("hearing.command.correct-hearing-event")
@@ -92,15 +85,6 @@ public class HearingEventCommandHandler {
         final CorrectLogEventCommand logEventCommand = this.jsonObjectToObjectConverter.convert(
                 command.payloadAsJsonObject(), CorrectLogEventCommand.class);
 
-        applyToHearingAggregate(logEventCommand.getHearingId(), a -> a.correctHearingEvent(logEventCommand), command);
+        aggregate(NewModelHearingAggregate.class, logEventCommand.getHearingId(), command, a -> a.correctHearingEvent(logEventCommand));
     }
-
-    private void applyToHearingAggregate(final UUID streamId, final Function<NewModelHearingAggregate, Stream<Object>> function,
-                                         final JsonEnvelope envelope) throws EventStreamException {
-        final EventStream eventStream = this.eventSource.getStreamById(streamId);
-        final NewModelHearingAggregate aggregate = this.aggregateService.get(eventStream, NewModelHearingAggregate.class);
-        final Stream<Object> events = function.apply(aggregate);
-        eventStream.append(events.map(this.enveloper.withMetadataFrom(envelope)));
-    }
-
 }

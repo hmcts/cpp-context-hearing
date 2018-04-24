@@ -32,6 +32,5 @@ public class AddProsecutionCounselCommandHandler extends AbstractCommandHandler 
 
         aggregate(NewModelHearingAggregate.class, addProsecutionCounselCommand.getHearingId(), envelope,
                 (hearingAggregate) ->  hearingAggregate.addProsecutionCounsel(addProsecutionCounselCommand));
-
     }
 }

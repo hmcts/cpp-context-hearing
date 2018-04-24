@@ -40,7 +40,6 @@ public class HearingEventListenerRamlConfigTest {
             InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
             OffencePleaUpdated.class.getAnnotation(Event.class).value(),
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
-
             HearingVerdictUpdated.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedRecorded.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedPreviouslyRecorded.class.getAnnotation(Event.class).value(),

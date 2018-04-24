@@ -1,63 +1,53 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import static java.util.Collections.unmodifiableList;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import uk.gov.justice.domain.annotation.Event;
 
-@Event("hearing.newdefence-counsel-added")
-public class DefenceCounselUpsert implements Serializable {
+import java.io.Serializable;
+import java.util.UUID;
+
+@Event("hearing.newprosecution-counsel-added")
+public class ProsecutionCounselUpsert implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID personId;
-    private final UUID attendeeId;
-    private final List<UUID> defendantIds;
-    private final UUID hearingId;
-    private final String status;
-    private final String title;
-    private final String firstName;
-    private final String lastName;
+    private UUID personId;
+    private UUID attendeeId;
+    private UUID hearingId;
+    private String status;
+    private String firstName;
+    private String lastName;
+    private String title;
 
     @JsonCreator
-    protected DefenceCounselUpsert(@JsonProperty("personId") final UUID personId,
-            @JsonProperty("attendeeId") final UUID attendeeId, 
-            @JsonProperty("defendantIds") final List<UUID> defendantIds, 
-            @JsonProperty("hearingId") final UUID hearingId, 
-            @JsonProperty("status") final String status,
-            @JsonProperty("title") final String title, 
-            @JsonProperty("firstName") final String firstName, 
-            @JsonProperty("lastName") final String lastName) {
+    protected ProsecutionCounselUpsert(@JsonProperty("personId") final UUID personId,
+                                       @JsonProperty("attendeeId") final UUID attendeeId,
+                                       @JsonProperty("hearingId") final UUID hearingId,
+                                       @JsonProperty("status") final String status,
+                                       @JsonProperty("title") final String title,
+                                       @JsonProperty("firstName") final String firstName,
+                                       @JsonProperty("lastName") final String lastName){
         this.personId = personId;
         this.attendeeId = attendeeId;
-        this.defendantIds = Collections.unmodifiableList(Optional.ofNullable(defendantIds).orElseGet(ArrayList::new));
         this.hearingId = hearingId;
         this.status = status;
-        this.title = title;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.title = title;
     }
 
+
     @JsonIgnore
-    private DefenceCounselUpsert(Builder builder) {
+    private ProsecutionCounselUpsert(Builder builder) {
         this.attendeeId = builder.attendeeId;
-        this.hearingId = builder.hearingId;
-        this.status = builder.status;
-        this.defendantIds = Collections.unmodifiableList(Optional.ofNullable(builder.defendantIds).orElseGet(ArrayList::new));
         this.firstName = builder.firstName;
         this.lastName = builder.lastName;
-        this.title = builder.title;
+        this.hearingId = builder.hearingId;
         this.personId = builder.personId;
+        this.status = builder.status;
+        this.title = builder.title;
     }
 
     public UUID getHearingId() {
@@ -72,16 +62,8 @@ public class DefenceCounselUpsert implements Serializable {
         return personId;
     }
 
-    public List<UUID> getDefendantIds() {
-        return unmodifiableList(defendantIds);
-    }
-
     public String getStatus() {
         return status;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public String getFirstName() {
@@ -92,15 +74,18 @@ public class DefenceCounselUpsert implements Serializable {
         return lastName;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public static class Builder {
         private UUID personId;
         private UUID attendeeId;
-        private List<UUID> defendantIds;
         private UUID hearingId;
         private String status;
-        private String title;
         private String firstName;
         private String lastName;
+        private String title;
 
         public Builder withPersonId(UUID personId) {
             this.personId = personId;
@@ -109,11 +94,6 @@ public class DefenceCounselUpsert implements Serializable {
 
         public Builder withAttendeeId(UUID attendeeId) {
             this.attendeeId = attendeeId;
-            return this;
-        }
-
-        public Builder withDefendantIds(List<UUID> defendantIds) {
-            this.defendantIds = defendantIds;
             return this;
         }
 
@@ -142,8 +122,8 @@ public class DefenceCounselUpsert implements Serializable {
             return this;
         }
 
-        public DefenceCounselUpsert build() {
-            return new DefenceCounselUpsert(this);
+        public ProsecutionCounselUpsert build() {
+            return new ProsecutionCounselUpsert(this);
         }
     }
 
@@ -152,4 +132,3 @@ public class DefenceCounselUpsert implements Serializable {
     }
 
 }
-

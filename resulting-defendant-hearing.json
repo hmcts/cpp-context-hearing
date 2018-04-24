@@ -1,0 +1,58 @@
+{
+  "resultLines": [
+    {
+      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
+      "sharedTime": "2016-03-15T06:14:00Z",
+      "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+      "urn": "URN12345",
+      "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
+      "plea": {
+        "pleaDate": "2016-06-07",
+        "pleaValue": "Guilty"
+      },
+      "offenceTitle": "Wounding or inflicting grievous bodily harm with intent",
+      "level": "OFFENCE",
+      "resultLabel": "Imprisonment",
+      "startDate": "2016-06-21",
+      "endDate": "2017-08-01",
+      "court": "A court",
+      "courtRoom" : "Room 1",
+      "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+      "clerkOfTheCourtFirstName": "David",
+      "clerkOfTheCourtLastName": "Walliams",
+      "prompts": [
+        {
+          "label": "Imprisonment duration",
+          "value": "1 year 6 months"
+        },
+        {
+          "label": "Prison",
+          "value": "Wormwood Scrubs"
+        }
+      ]
+    }
+  ],
+  "person": {
+    "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
+    "firstName": "David",
+    "lastName": "LLOYD",
+    "dateOfBirth": "1980-07-15",
+    "address": {
+      "address1": "14 Tottenham Court Road",
+      "address2": "London",
+      "address3": "England",
+      "address4": "UK",
+      "postCode": "W1T 1JY"
+    }
+  },
+  "hearing": {
+    "id": "b42f1d49-52be-4da0-ac9e-d4ac85f2fce0",
+    "hearingType": "PTPH",
+    "courtCentreName": "Liverpool Crown Court",
+    "courtCode": "433",
+    "startDate": "2016-04-06",
+    "judgeName": "Nina Turner",
+    "prosecutorName": "Donald Smith",
+    "defenceName": "Maurice Rout"
+  }
+}

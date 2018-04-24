@@ -14,15 +14,15 @@ import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.NewProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
@@ -49,7 +49,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 public class NewModelHearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = 1L;
-    
+
     private static final String GUILTY = "GUILTY";
     private static final String REASON_ALREADY_LOGGED = "Already logged";
     private static final String REASON_ALREADY_DELETED = "Already deleted";
@@ -64,7 +64,7 @@ public class NewModelHearingAggregate implements Aggregate {
 
     private Map<UUID, HearingEvent> hearingHevents = new HashMap<>();
 
-    private List<NewProsecutionCounselAdded> prosecutionCounsels = new ArrayList<>();
+    private Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels = new HashMap<>();
     private Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
 
     @Override
@@ -74,32 +74,36 @@ public class NewModelHearingAggregate implements Aggregate {
                     this.cases = initiated.getCases();
                     this.hearing = initiated.getHearing();
                 }),
+
                 when(InitiateHearingOffencePlead.class).apply(initiateHearingOffencePlead -> {
 
                 }),
-                when(NewProsecutionCounselAdded.class).apply(newProsecutionCounselAdded -> {
-                    prosecutionCounsels.add(newProsecutionCounselAdded);
-                }),
 
-                when(DefenceCounselUpsert.class).apply(defenceCounselUpsert ->  {
-                    defenceCounsels.put(defenceCounselUpsert.getAttendeeId(), defenceCounselUpsert);
-                }),
+                when(ProsecutionCounselUpsert.class).apply(newProsecutionCounselAdded ->
+                    prosecutionCounsels.put(newProsecutionCounselAdded.getAttendeeId(), newProsecutionCounselAdded)
+                ),
 
-                when(HearingEventLogged.class).apply(hearingEventLogged -> {
-                    this.hearingHevents.put(hearingEventLogged.getHearingEventId(), new HearingEvent(hearingEventLogged));
-                }),
+                when(DefenceCounselUpsert.class).apply(defenceCounselUpsert ->
+                    defenceCounsels.put(defenceCounselUpsert.getAttendeeId(), defenceCounselUpsert)
+                ),
 
-                when(HearingEventDeleted.class).apply(hearingEventDeleted -> {
-                    this.hearingHevents.get(hearingEventDeleted.getHearingEventId()).setDeleted(true);
-                }),
+                when(HearingEventLogged.class).apply(hearingEventLogged ->
+                    this.hearingHevents.put(hearingEventLogged.getHearingEventId(), new HearingEvent(hearingEventLogged))
+                ),
+
+                when(HearingEventDeleted.class).apply(hearingEventDeleted ->
+                    this.hearingHevents.get(hearingEventDeleted.getHearingEventId()).setDeleted(true)
+                ),
 
                 when(WitnessAdded.class).apply(witnessAdded -> {
 
                 }),
+
                 when(ResultsShared.class).apply(resultsSharedResult -> {
                     this.resultsShared = true;
                     this.sharedResultIds.addAll(resultsSharedResult.getResultLines().stream().map(ResultLine::getId).collect(toSet()));
                 }),
+
 
                 otherwiseDoNothing()
         );
@@ -108,7 +112,7 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
         return apply(Stream.of(
-                NewProsecutionCounselAdded.builder()
+                ProsecutionCounselUpsert.builder()
                         .withHearingId(prosecutionCounselCommand.getHearingId())
                         .withAttendeeId(prosecutionCounselCommand.getAttendeeId())
                         .withPersonId(prosecutionCounselCommand.getPersonId())
@@ -140,24 +144,24 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
-            final String pleaValue) {
+                                     final String pleaValue) {
         final List<Object> events = new ArrayList<>();
         events.add(HearingOffencePleaUpdated.builder()
-                    .withHearingId(hearingId)
-                    .withOffenceId(offenceId)
-                    .withPleaDate(pleaDate)
-                    .withValue(pleaValue)
-                    .build());
-        events.add(isGuilty(pleaValue) ? 
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId)
+                .withPleaDate(pleaDate)
+                .withValue(pleaValue)
+                .build());
+        events.add(isGuilty(pleaValue) ?
                 ConvictionDateAdded.builder()
-                    .withHearingId(hearingId)
-                    .withOffenceId(offenceId)
-                    .withConvictionDate(pleaDate)
-                    .build() : 
-               ConvictionDateRemoved.builder()
-                    .withHearingId(hearingId)
-                    .withOffenceId(offenceId)
-                    .build());
+                        .withHearingId(hearingId)
+                        .withOffenceId(offenceId)
+                        .withConvictionDate(pleaDate)
+                        .build() :
+                ConvictionDateRemoved.builder()
+                        .withHearingId(hearingId)
+                        .withOffenceId(offenceId)
+                        .build());
         return apply(events.stream());
     }
 
@@ -291,7 +295,6 @@ public class NewModelHearingAggregate implements Aggregate {
         } else {
             events.add(new ConvictionDateRemoved(hearingId, offenceId));
         }
-
         return apply(events.stream());
     }
 
@@ -337,7 +340,7 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addWitness(UUID hearingId, UUID caseId, UUID witnessId, String type, String classification, UUID personId, String title, String firstName, String lastName) {
-        return apply(Stream.of(new WitnessAdded(witnessId,hearingId, caseId, type, classification, personId, title, firstName,
+        return apply(Stream.of(new WitnessAdded(witnessId, hearingId, caseId, type, classification, personId, title, firstName,
                 lastName)));
     }
 }
