@@ -12,11 +12,9 @@ import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
 
 import javax.jms.MessageConsumer;
-import javax.xml.bind.SchemaOutputResolver;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Optional.ofNullable;

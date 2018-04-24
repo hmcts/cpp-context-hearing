@@ -48,14 +48,14 @@ public class HearingEventListenerRamlConfigTest {
 
     @Before
     public void setup() throws IOException {
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingEventListener.class));
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(NewHearingEventListener.class));
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(NewModelPleaUpdateEventListener.class));
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(VerdictUpdateEventListener.class));
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingLogEventListener.class));
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(DefenceCounselAddedEventListener.class));
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(ProsecutionCounselAddedEventListener.class));
-        handlerNames.putAll(getMethodsToHandlerNamesMapFor(NowsRequestedEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingEventListener.class,
+                NewHearingEventListener.class,
+                NewModelPleaUpdateEventListener.class, 
+                VerdictUpdateEventListener.class, 
+                HearingLogEventListener.class,
+                DefenceCounselAddedEventListener.class, 
+                ProsecutionCounselAddedEventListener.class,
+                NowsRequestedEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 

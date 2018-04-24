@@ -55,9 +55,8 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTe
 @RunWith(MockitoJUnitRunner.class)
 public class NewModelUpdatePleaCommandHandlerTest {
 
-    // InjectMocks 
     @InjectMocks private NewModelUpdatePleaCommandHandler hearingCommandHandler;
-    // Mocks
+
     @Mock
     private EventStream hearingAggregateEventStream;
 
@@ -70,7 +69,6 @@ public class NewModelUpdatePleaCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
 
-    // Spys
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 

@@ -10,9 +10,9 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.Plea;
-import uk.gov.moj.cpp.hearing.domain.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
@@ -24,27 +24,21 @@ import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
-import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import java.io.Serializable;
-import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
@@ -60,9 +54,7 @@ public class NewModelHearingAggregate implements Aggregate {
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
     private static final String REASON_HEARING_NOT_FOUND = "Hearing not found";
 
-    private boolean resultsShared;
-    private final Set<UUID> sharedResultIds = new HashSet<>();
-
+    private transient Boolean resultsShared = Boolean.FALSE;
     private List<Case> cases;
     private Hearing hearing;
 
@@ -111,8 +103,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 }),
 
                 when(ResultsShared.class).apply(resultsSharedResult -> {
-                    this.resultsShared = true;
-                    this.sharedResultIds.addAll(resultsSharedResult.getResultLines().stream().map(ResultLine::getId).collect(toSet()));
+                    resultsShared = Boolean.TRUE;
                 }),
 
                 when(PleaUpsert.class).apply(pleaUpsert -> {
@@ -347,21 +338,22 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(events.stream());
     }
 
-    public Stream<Object> shareResults(final UUID hearingId, final ZonedDateTime sharedTime, final List<ResultLine> resultLines) {
-        final List<Object> events = new ArrayList<>();
-        if (this.resultsShared) {
-            events.addAll(resultLines.stream()
-                    .filter(resultLine -> !this.sharedResultIds.contains(resultLine.getId()))
-                    .map(resultLine -> new ResultAmended(resultLine.getId(), resultLine.getLastSharedResultId(),
-                            sharedTime, hearingId, resultLine.getCaseId(), resultLine.getPersonId(), resultLine.getOffenceId(),
-                            resultLine.getLevel(), resultLine.getResultLabel(), resultLine.getPrompts(), resultLine.getCourt(), resultLine.getCourtRoom(), resultLine.getClerkOfTheCourtId(), resultLine.getClerkOfTheCourtFirstName(), resultLine.getClerkOfTheCourtLastName())
-                    )
-                    .collect(toList()));
-        } else {
-            events.add(new ResultsShared(hearingId, sharedTime, resultLines, hearing, cases, prosecutionCounsels, defenceCounsels, pleas, verdicts));
-        }
+    public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
+        return apply(Stream.of(ResultsShared.builder()
+                        .withHearingId(command.getHearingId())
+                        .withSharedTime(sharedTime)
+                        .withResultLines(command.getResultLines())
+                        .withHearing(this.hearing)
+                        .withCases(this.cases)
+                        .withProsecutionCounsels(this.prosecutionCounsels)
+                        .withDefenceCounsels(this.defenceCounsels)
+                        .withPleas(this.pleas)
+                        .withVerdicts(this.verdicts)
+                        .build()));
+    }
 
-        return apply(events.stream());
+    public Boolean isResultsShared() {
+        return resultsShared;
     }
 
     public static final class HearingEvent implements Serializable {

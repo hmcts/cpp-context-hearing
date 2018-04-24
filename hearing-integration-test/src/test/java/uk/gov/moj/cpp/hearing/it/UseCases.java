@@ -39,6 +39,7 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+@SuppressWarnings("unchecked")
 public class UseCases {
 
     public static <T> Consumer<T> asDefault() {
@@ -99,8 +100,6 @@ public class UseCases {
 
     public static HearingUpdateVerdictCommand updateVerdict(final RequestSpecification requestSpec, InitiateHearingCommand initiateHearingCommand,
                                                       final Consumer<HearingUpdateVerdictCommand.Builder> consumer) {
-
-        UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
 
         HearingUpdateVerdictCommand.Builder hearingUpdateVerdictCommandBuilder = HearingUpdateVerdictCommand.builder()
                 .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())

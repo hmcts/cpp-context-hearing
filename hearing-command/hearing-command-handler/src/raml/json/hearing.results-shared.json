@@ -4,13 +4,13 @@
   "resultLines": [
     {
       "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
+      "resultDefinitionId":"186c0635-a72d-40f1-93bd-2d760289d99b",
       "personId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
       "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
       "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
       "level": "OFFENCE",
       "resultLabel": "Imprisonment",
-      "court": "aCourt",
-      "courtRoom": "courtRoom",
+      "complete": true,
       "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
       "clerkOfTheCourtFirstName": "David",
       "clerkOfTheCourtLastName": "Walliams",
@@ -27,16 +27,13 @@
     },
     {
       "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
+      "resultDefinitionId":"186c0635-a72d-40f1-93bd-2d760289d99b",
       "personId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
       "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
       "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
       "level": "CASE",
       "resultLabel": "Victim Surchange",
-      "court": "aCourt",
-      "courtRoom": "courtRoom",
-      "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-      "clerkOfTheCourtFirstName": "David",
-      "clerkOfTheCourtLastName": "Walliams",
+      "complete": true,
       "prompts": [
         {
           "label": "Amount",

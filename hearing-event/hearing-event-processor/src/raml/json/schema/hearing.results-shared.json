@@ -28,6 +28,9 @@
         "id": {
           "$ref": "#/definitions/uuid"
         },
+        "resultDefinitionId":{
+          "$ref":"#/definitions/uuid"
+        },
         "personId": {
           "$ref": "#/definitions/uuid"
         },
@@ -48,11 +51,8 @@
         "resultLabel": {
           "type": "string"
         },
-        "court": {
-          "type": "string"
-        },
-        "courtRoom": {
-          "type": "string"
+        "complete": {
+          "type":"boolean"
         },
         "clerkOfTheCourtId": {
           "$ref": "#/definitions/uuid"

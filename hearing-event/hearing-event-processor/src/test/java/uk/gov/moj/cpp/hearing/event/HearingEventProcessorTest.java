@@ -97,7 +97,6 @@ public class HearingEventProcessorTest {
 
     private static final String HEARING_INITIATED_EVENT = "hearing.initiated";
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
-    private static final String RESULT_AMENDED_EVENT = "hearing.result-amended";
     private static final String DRAFT_RESULT_SAVED_PRIVATE_EVENT = "hearing.draft-result-saved";
 
 
@@ -203,39 +202,6 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void publishHearingResultAmendedPublicEvent() {
-        final JsonEnvelope event = createResultAmendedEvent();
-
-        this.hearingEventProcessor.publishHearingResultAmendedPublicEvent(event);
-
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.result-amended"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_GENERIC_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_LAST_SHARED_RESULT_ID), equalTo(LAST_SHARED_RESULT_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_SHARED_TIME), equalTo(ZonedDateTimes.toString(SHARED_TIME))),
-                        withJsonPath(format("$.%s", FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
-                        withJsonPath(format("$.%s", FIELD_LEVEL), equalTo(LEVEL)),
-                        withJsonPath(format("$.%s", FIELD_COURT), equalTo(COURT)),
-                        withJsonPath(format("$.%s", FIELD_COURT_ROOM), equalTo(COURT_ROOM_NUMBER)),
-                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(CLERK_OF_THE_COURT_FIRST_NAME)),
-                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(CLERK_OF_THE_COURT_LAST_NAME)),
-                        withJsonPath(format("$.%s", FIELD_CLERK_OF_THE_COURT_ID), equalTo(CLERK_OF_THE_COURT_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_1)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_2))
-                        )
-                )).thatMatchesSchema());
-    }
-
-    @Test
     public void publicDraftResultSavedPublicEvent() {
         final String draftResult = "some random text";
         final JsonEnvelope event = createDraftResultSavedPrivateEvent(draftResult);
@@ -270,7 +236,7 @@ public class HearingEventProcessorTest {
         // @formatter:on
     }
 
-    private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class commandClass, int sendCount) {
+    private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class<?> commandClass, int sendCount) {
         final JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
         final Metadata metadata = metadataWithDefaults().build();
         final JsonEnvelope event = new DefaultJsonEnvelope(metadata, payload);
@@ -340,33 +306,6 @@ public class HearingEventProcessorTest {
                         .add(FIELD_LAST_MODIFIED_TIME, LAST_MODIFIED_TIME)
                         .add(FIELD_ALTERABLE, true)
                         .build());
-    }
-
-    private JsonEnvelope createResultAmendedEvent() {
-        final JsonObjectBuilder amendedResult = createObjectBuilder()
-                .add(FIELD_GENERIC_ID, GENERIC_ID.toString())
-                .add(FIELD_LAST_SHARED_RESULT_ID, LAST_SHARED_RESULT_ID.toString())
-                .add(FIELD_SHARED_TIME, ZonedDateTimes.toString(SHARED_TIME))
-                .add(FIELD_HEARING_ID, HEARING_ID.toString())
-                .add(FIELD_PERSON_ID, PERSON_ID.toString())
-                .add(FIELD_CASE_ID, CASE_ID.toString())
-                .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
-                .add(FIELD_LEVEL, LEVEL)
-                .add(FIELD_RESULT_LABEL, RESULT_LABEL)
-                .add(FIELD_COURT, COURT)
-                .add(FIELD_COURT_ROOM, COURT_ROOM_NUMBER)
-                .add(FIELD_CLERK_OF_THE_COURT_ID, CLERK_OF_THE_COURT_ID.toString())
-                .add(FIELD_CLERK_OF_THE_COURT_FIRST_NAME, CLERK_OF_THE_COURT_FIRST_NAME)
-                .add(FIELD_CLERK_OF_THE_COURT_LAST_NAME, CLERK_OF_THE_COURT_LAST_NAME)
-                .add(FIELD_PROMPTS, createArrayBuilder()
-                        .add(createObjectBuilder()
-                                .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
-                                .add(FIELD_VALUE, PROMPT_VALUE_1))
-                        .add(createObjectBuilder()
-                                .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
-                                .add(FIELD_VALUE, PROMPT_VALUE_2)));
-
-        return envelopeFrom(metadataWithRandomUUID(RESULT_AMENDED_EVENT), amendedResult.build());
     }
 
     private JsonEnvelope createDraftResultSavedPrivateEvent(String draftResult) {

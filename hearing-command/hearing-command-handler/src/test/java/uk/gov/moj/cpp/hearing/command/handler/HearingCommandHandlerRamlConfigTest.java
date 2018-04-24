@@ -34,7 +34,7 @@ public class HearingCommandHandlerRamlConfigTest {
                 .toArray();
 
         final List<String> allHandlerNames = getHandlerNames(
-                HearingCommandHandler.class,
+                NewModelShareResultsCommandHandler.class,
                 NewModelInitiateHearingCommandHandler.class,
                 NewModelUpdatePleaCommandHandler.class,
                 NewModelUpdateVerdictCommandHandler.class,

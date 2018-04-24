@@ -13,14 +13,20 @@ import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.Witness;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
+import uk.gov.moj.cpp.hearing.command.result.Level;
+import uk.gov.moj.cpp.hearing.command.result.ResultLine;
+import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 
 public class TestTemplates {
 
@@ -181,4 +187,44 @@ public class TestTemplates {
                 );
     }
 
+    public static ShareResultsCommand shareResultsCommandTemplate(final InitiateHearingCommand initiateHearingCommand) {
+        return ShareResultsCommand.builder()
+                .withResultLines(asList(ResultLine.builder()
+                            .withId(UUID.randomUUID())
+                            .withResultDefinitionId(UUID.randomUUID())
+                            .withPersonId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId())
+                            .withOffenceId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
+                            .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
+                            .withLevel(values(Level.values()).next())
+                            .withResultLabel(STRING.next())
+                            .withComplete(true)
+                            .withPrompts(asList(ResultPrompt.builder()
+                                        .withLabel(STRING.next())
+                                        .withValue(STRING.next())
+                                        .build(),
+                                    ResultPrompt.builder()
+                                        .withLabel(STRING.next())
+                                        .withValue(STRING.next())
+                                        .build()))
+                            .build(),
+                         ResultLine.builder()
+                            .withId(UUID.randomUUID())
+                            .withResultDefinitionId(UUID.randomUUID())
+                            .withPersonId(UUID.randomUUID())
+                            .withOffenceId(UUID.randomUUID())
+                            .withCaseId(UUID.randomUUID())
+                            .withLevel(values(Level.values()).next())
+                            .withResultLabel(STRING.next())
+                            .withComplete(false)
+                            .withPrompts(asList(ResultPrompt.builder()
+                                        .withLabel(STRING.next())
+                                        .withValue(STRING.next())
+                                        .build(),
+                                    ResultPrompt.builder()
+                                        .withLabel(STRING.next())
+                                        .withValue(STRING.next())
+                                        .build()))
+                            .build()))
+                .build();
+    }
 }

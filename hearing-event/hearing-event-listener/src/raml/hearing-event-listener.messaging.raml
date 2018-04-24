@@ -46,6 +46,14 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.newdefence-counsel-added.json
             example: !include json/hearing.newdefence-counsel-added.json
 
+# Share Results
+        application/vnd.hearing.draft-result-saved+json:
+            schema: !include json/schema/hearing.draft-result-saved.json
+            example: !include json/hearing.draft-result-saved.json
+
+        application/vnd.hearing.results-shared+json:
+            schema: !include json/schema/hearing.results-shared.json
+            example: !include json/hearing.results-shared.json
 
 # old
 
@@ -65,17 +73,6 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.hearing-event-deleted.json
             example: !include json/hearing.hearing-event-deleted.json
 
-        application/vnd.hearing.draft-result-saved+json:
-            schema: !include json/schema/hearing.draft-result-saved.json
-            example: !include json/hearing.draft-result-saved.json
-
-        application/vnd.hearing.results-shared+json:
-            schema: !include json/schema/hearing.results-shared.json
-            example: !include json/hearing.results-shared.json
-
-        application/vnd.hearing.result-amended+json:
-            schema: !include json/schema/hearing.result-amended.json
-            example: !include json/hearing.result-amended.json
 
         application/vnd.hearing.events.witness-added+json:
             schema: !include json/schema/hearing.events.witness-added.json

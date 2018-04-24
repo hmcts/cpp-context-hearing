@@ -1,14 +1,9 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
-import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -18,14 +13,15 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
 
-    @Inject
-    private Sender sender;
+    private final Sender sender;
+    private final Enveloper enveloper;
 
     @Inject
-    private Enveloper enveloper;
-
-    @Inject
-    private Clock clock;
+    public HearingCommandApi(final Sender sender, final Enveloper enveloper) {
+        assert null != sender && null != enveloper;
+        this.sender = sender;
+        this.enveloper = enveloper;
+    }
 
     @Handles("hearing.initiate")
     public void initiateHearing(final JsonEnvelope envelope) {
@@ -68,13 +64,7 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.share-results")
-    public void shareResults(final JsonEnvelope command) {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final JsonObjectBuilder payloadWithSharedTime = createObjectBuilder()
-                .add("hearingId", payload.getString("hearingId"))
-                .add("sharedTime", ZonedDateTimes.toString(this.clock.now()))
-                .add("resultLines", payload.getJsonArray("resultLines"));
-        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.share-results").apply(payloadWithSharedTime.build()));
+    public void shareResults(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.share-results").apply(envelope.payloadAsJsonObject()));
     }
-    
 }
