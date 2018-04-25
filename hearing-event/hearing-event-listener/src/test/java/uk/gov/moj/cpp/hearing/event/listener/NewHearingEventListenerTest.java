@@ -237,10 +237,11 @@ public class NewHearingEventListenerTest {
     @Test
     public void convictionDateUpdated_shouldUpdateTheConvictionDate() throws Exception {
 
+        final UUID caseId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID hearingId = offenceId;
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
-        final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(hearingId, offenceId, PAST_LOCAL_DATE.next());
+        final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(caseId, hearingId, offenceId, PAST_LOCAL_DATE.next());
 
         final Ahearing ahearing = Ahearing.builder().withId(hearingId)
                 .withDefendants(asList
@@ -270,10 +271,11 @@ public class NewHearingEventListenerTest {
     @Test
     public void convictionDateRemoved_shouldSetConvictionDateToNull() throws Exception {
 
+        final UUID caseId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID hearingId = randomUUID();
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
-        final ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(hearingId, offenceId);
+        final ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(caseId, hearingId, offenceId);
         final Ahearing ahearing = Ahearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()

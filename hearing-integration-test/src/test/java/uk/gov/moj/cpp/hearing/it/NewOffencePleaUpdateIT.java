@@ -61,13 +61,15 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                             hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate"),
                             hasNoJsonPath("$.cases[0].defendants[0].offences[0].plea.value")
         )));
-
+        
         final EventListener publicEventPleaUpdatedListener = listenFor("public.hearing.plea-updated")
                 .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
         
         final EventListener publicEventOffenceConvictionDateChangedListener = listenFor("public.hearing.offence-conviction-date-changed")
-        		.withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
-
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(offenceId.toString())), 
+                        withJsonPath("$.caseId", is(caseId.toString())))));
+        
         final HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
                 .withCaseId(caseId)
                 .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
@@ -141,7 +143,9 @@ public class NewOffencePleaUpdateIT extends AbstractIT {
                 .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
         
         final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor("public.hearing.offence-conviction-date-removed")
-        		.withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(offenceId.toString())), 
+                        withJsonPath("$.caseId", is(caseId.toString())))));
         
         final HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
                 .withCaseId(caseId)

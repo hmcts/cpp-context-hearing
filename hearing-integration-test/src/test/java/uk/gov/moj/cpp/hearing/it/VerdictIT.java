@@ -70,8 +70,11 @@ public class VerdictIT extends AbstractIT {
 
         final EventListener publicEventConvictionDateChangedListener = listenFor(
                 "public.hearing.offence-conviction-date-changed")
-                        .withFilter(isJson(withJsonPath("$.offenceId", is(initiateHearingCommand.getHearing()
-                                .getDefendants().get(0).getOffences().get(0).getId().toString()))));
+                        .withFilter(isJson(allOf(
+                                withJsonPath("$.offenceId", is(initiateHearingCommand.getHearing()
+                                .getDefendants().get(0).getOffences().get(0).getId().toString())),
+                                withJsonPath("$.caseId", is(initiateHearingCommand.getHearing()
+                                        .getDefendants().get(0).getOffences().get(0).getCaseId().toString())))));
 
         makeCommand(requestSpec, "hearing.initiate-hearing").ofType("application/vnd.hearing.update-verdict+json")
                 .withArgs(initiateHearingCommand.getHearing().getId()).withPayload(hearingUpdateVerdictCommand)
@@ -148,8 +151,9 @@ public class VerdictIT extends AbstractIT {
 
         final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor(
                 "public.hearing.offence-conviction-date-removed")
-                        .withFilter(isJson(withJsonPath("$.offenceId", is(initiateHearingCommand.getHearing()
-                                .getDefendants().get(0).getOffences().get(0).getId().toString()))));
+                        .withFilter(isJson(allOf(
+                                withJsonPath("$.offenceId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
+                                withJsonPath("$.caseId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCaseId().toString())))));
 
         makeCommand(requestSpec, "hearing.initiate-hearing").ofType("application/vnd.hearing.update-verdict+json")
                 .withArgs(initiateHearingCommand.getHearing().getId()).withPayload(hearingUpdateVerdictCommand)

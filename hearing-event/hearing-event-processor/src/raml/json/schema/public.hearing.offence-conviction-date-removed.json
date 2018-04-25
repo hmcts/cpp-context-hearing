@@ -2,12 +2,16 @@
   "$schema":"http://json-schema.org/draft-04/schema#",
   "type":"object",
   "properties":{
+    "caseId": {
+      "$ref": "#/definitions/uuid"
+    },  
     "offenceId":{
       "$ref":"#/definitions/uuid"
     }
   },
   "additionalProperties":false,
   "required":[
+    "caseId",  
     "offenceId"
   ],
   "definitions":{

@@ -145,6 +145,14 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
                                      final String pleaValue) {
+        
+        final UUID caseId = this.hearing.getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> offenceId.equals(o.getId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("case id is not present"))
+                .getCaseId();
+        
         final List<Object> events = new ArrayList<>();
         events.add(HearingOffencePleaUpdated.builder()
                 .withHearingId(hearingId)
@@ -154,11 +162,13 @@ public class NewModelHearingAggregate implements Aggregate {
                 .build());
         events.add(isGuilty(pleaValue) ?
                 ConvictionDateAdded.builder()
+                        .withCaseId(caseId)
                         .withHearingId(hearingId)
                         .withOffenceId(offenceId)
                         .withConvictionDate(pleaDate)
                         .build() :
                 ConvictionDateRemoved.builder()
+                        .withCaseId(caseId)
                         .withHearingId(hearingId)
                         .withOffenceId(offenceId)
                         .build());
@@ -291,9 +301,9 @@ public class NewModelHearingAggregate implements Aggregate {
         ));
 
         if (isGuilty(verdict.getValue().getCategory())) {
-            events.add(new ConvictionDateAdded(hearingId, offenceId, verdict.getVerdictDate()));
+            events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
         } else {
-            events.add(new ConvictionDateRemoved(hearingId, offenceId));
+            events.add(new ConvictionDateRemoved(caseId, hearingId, offenceId));
         }
         return apply(events.stream());
     }

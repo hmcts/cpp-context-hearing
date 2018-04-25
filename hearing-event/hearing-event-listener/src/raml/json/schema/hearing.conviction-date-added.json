@@ -2,6 +2,9 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "caseId": {
+      "$ref": "#/definitions/uuid"
+    },
     "hearingId": {
       "$ref": "#/definitions/uuid"
     },
@@ -13,6 +16,7 @@
     }
   },
   "required": [
+    "caseId",
     "hearingId",
     "offenceId",
     "convictionDate"
