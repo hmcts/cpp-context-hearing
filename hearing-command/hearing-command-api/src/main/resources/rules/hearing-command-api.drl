@@ -104,3 +104,12 @@ rule "Command - API - Action - hearing.add-witness"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.generate-nows"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.generate-nows");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

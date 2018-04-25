@@ -1,0 +1,12 @@
+{
+  "material": [
+    {
+      "id": "5d5807c9-004c-4b75-9cfd-29757fd4fd78",
+      "defendantId": "2d1d2d8a-860c-479b-aa68-c4ad37850839",
+      "status": "REQUESTED",
+      "userGroups": [ "courtAdmin","defence" ]
+    }
+  ]
+}
+
+

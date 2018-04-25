@@ -1,21 +1,28 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.util.stream.Collectors.toList;
+import static javax.json.Json.createObjectBuilder;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 import javax.transaction.Transactional;
 
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
+import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingEntityToHearing;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter;
@@ -23,6 +30,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 import uk.gov.moj.cpp.hearing.query.view.response.Judge;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Material;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsMaterialResponse;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
 public class HearingService {
@@ -35,6 +44,9 @@ public class HearingService {
 
     @Inject
     HearingJudgeRepository hearingJudgeRepository;
+
+    @Inject
+    NowsMaterialRepository nowsMaterialRepository;
 
     //TODO - GPE-3032 - move 3032 functionality to new classes so that cleanup is easier.
     // new repositories for hearing and case
@@ -75,5 +87,18 @@ public class HearingService {
             return new HearingDetailsResponse();
         }
         return new HearingDetailsResponseConverter().convert(ahearingRepository.findById(hearingId));
+    }
+
+    @Transactional
+    public NowsMaterialResponse getNows(final UUID hearingId) {
+
+        List<NowsMaterial> nowsMaterials= nowsMaterialRepository.findByHearingId(hearingId);
+
+        List<Material> materials=nowsMaterials.stream().map(nowsMaterial -> Material.builder().withDefendantId(nowsMaterial.getDefendantId().toString())
+                .withId(nowsMaterial.getId().toString())
+                .withStatus(nowsMaterial.getStatus().getDescription())
+                .withUserGroups(nowsMaterial.getUserGroups()).build() ).collect(toList());
+
+        return NowsMaterialResponse.builder().withMaterial(materials).build();
     }
 }

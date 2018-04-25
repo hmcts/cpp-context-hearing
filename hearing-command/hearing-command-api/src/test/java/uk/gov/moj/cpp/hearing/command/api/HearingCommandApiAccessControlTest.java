@@ -23,6 +23,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_CORRECT_HEARING_EVENT = "hearing.correct-hearing-event";
     private static final String ACTION_NAME_SHARE_RESULTS_EVENT = "hearing.share-results";
     private static final String ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT = "hearing.create-hearing-event-definitions";
+    private static final String ACTION_NAME_GENERATE_NOWS = "hearing.generate-nows";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -173,6 +174,26 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
+
+    @Test
+    public void shouldAllowAuthorisedUserToGenerateNows() {
+        final Action action = createActionFor(ACTION_NAME_GENERATE_NOWS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToGenerateNows() {
+        final Action action = createActionFor(ACTION_NAME_GENERATE_NOWS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
 
     @Override
     protected Map<Class, Object> getProviderMocks() {

@@ -1,0 +1,37 @@
+package uk.gov.moj.cpp.hearing.command.handler;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.core.aggregate.AggregateService;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
+
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import java.util.UUID;
+
+import static java.util.UUID.fromString;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+
+@ServiceComponent(COMMAND_HANDLER)
+public class GenerateNowsCommandHandler extends AbstractCommandHandler {
+
+    @Inject
+    public GenerateNowsCommandHandler(final EventSource eventSource, final Enveloper enveloper,
+                                      final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
+        super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
+    }
+
+
+    @Handles("hearing.command.generate-nows")
+    public void genarateNows(final JsonEnvelope envelop) throws EventStreamException {
+        final JsonObject payload = envelop.payloadAsJsonObject();
+        final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(payload, NowsRequested.class);
+        aggregate(NewModelHearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelop, a -> a.generateNows(nowsRequested));
+    }
+}

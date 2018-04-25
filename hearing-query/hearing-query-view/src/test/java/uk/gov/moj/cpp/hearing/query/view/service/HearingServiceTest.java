@@ -1,5 +1,47 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
+import uk.gov.moj.cpp.hearing.persist.HearingRepository;
+import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
+import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsMaterialResponse;
+import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+
+import java.io.IOException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 import static java.util.UUID.randomUUID;
@@ -11,44 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.getHearing;
-
-import java.io.IOException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
-import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
 /**
  * Unit tests for the HearingServiceTest class.
@@ -67,6 +71,9 @@ public class HearingServiceTest {
 
     @Mock
     private AhearingRepository ahearingRepository;
+
+    @Mock
+    private NowsMaterialRepository nowsMaterialRepository;
 
     @InjectMocks
     private HearingService caseHearingService;
@@ -254,6 +261,25 @@ public class HearingServiceTest {
             });
 
         });
+    }
+
+
+    @Test
+    public void shouldFindNowsByHearingId() throws Exception {
+        UUID hearingId = randomUUID();
+        UUID id = randomUUID();
+        UUID defendantId = randomUUID();
+        final List<NowsMaterial> hearingList = new ArrayList<>();
+        NowsMaterial nowsMaterial = NowsMaterial.builder().withHearingId(hearingId).withDefendantId(defendantId)
+                .withId(id).withStatus(NowsMaterialStatus.GENERATED).withUserGroups(Arrays.asList("LO", "CC")).build();
+        hearingList.add(nowsMaterial);
+        when(nowsMaterialRepository.findByHearingId(hearingId)).thenReturn(hearingList);
+
+        final NowsMaterialResponse response = caseHearingService.getNows(hearingId);
+
+        assertThat(response.getMaterial().get(0).getId(), is(id.toString()));
+        assertThat(response.getMaterial().get(0).getDefendantId(), is(defendantId.toString()));
+        assertThat(response.getMaterial().get(0).getStatus(), is(NowsMaterialStatus.GENERATED.getDescription()));
     }
 
     /**

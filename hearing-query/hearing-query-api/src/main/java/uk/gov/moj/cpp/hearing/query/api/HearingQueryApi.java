@@ -49,4 +49,9 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.get.nows")
+    public JsonEnvelope getNows(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
 }

@@ -26,8 +26,10 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ResultAmended;
 import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
+import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import java.io.Serializable;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -146,14 +148,14 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
                                      final String pleaValue) {
-        
+
         final UUID caseId = this.hearing.getDefendants().stream()
                 .flatMap(d -> d.getOffences().stream())
                 .filter(o -> offenceId.equals(o.getId()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("case id is not present"))
                 .getCaseId();
-        
+
         final List<Object> events = new ArrayList<>();
         events.add(HearingOffencePleaUpdated.builder()
                 .withHearingId(hearingId)
@@ -354,5 +356,9 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.of(new WitnessAdded(witnessId,hearingId, type, classification,  title, firstName,
                 lastName, defendantIdList.stream().map(DefendantId::getDefendantId)
                 .collect(Collectors.toList()))));
+    }
+
+    public Stream<Object> generateNows(final NowsRequested nowsRequested) {
+        return apply(Stream.of(nowsRequested));
     }
 }

@@ -112,6 +112,9 @@ protocols: [ HTTP, HTTPS ]
         (mapping):
             responseType: application/vnd.hearing.get.hearing.v2+json
             name: hearing.get.hearing.v2
+        (mapping):
+            responseType: application/vnd.hearing.get.nows+json
+            name: hearing.get.nows
         ...
       responses:
             200:
@@ -120,6 +123,9 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.hearing.v2+json:
                     example:  !include json/hearing.get.hearing.v2.json
                     schema:  !include  json/schema/hearing.get.hearing.v2.json
+                  application/vnd.hearing.get.nows+json:
+                    example:  !include json/hearing.get.nows.json
+                    schema:  !include  json/schema/hearing.get.nows.json
 
 /v2/hearings:
    get:

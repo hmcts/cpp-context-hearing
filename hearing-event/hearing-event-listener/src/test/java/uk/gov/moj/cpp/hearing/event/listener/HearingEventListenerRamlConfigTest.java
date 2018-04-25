@@ -32,9 +32,6 @@ public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";
     private static final String COMMAND_NAME = "hearing";
     private static final String CONTENT_TYPE_PREFIX = "application/vnd.";
-
-    private Map<String, String> handlerNames = new HashMap<>();
-
     private final List<String> handlerNamesToIgnore = asList(
 
             InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
@@ -45,8 +42,8 @@ public class HearingEventListenerRamlConfigTest {
             SendingSheetCompletedPreviouslyRecorded.class.getAnnotation(Event.class).value(),
             MagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
             NewMagsCourtHearingRecorded.class.getAnnotation(Event.class).value()
-            );
-
+    );
+    private Map<String, String> handlerNames = new HashMap<>();
     private List<String> ramlActionNames;
 
     @Before
@@ -58,13 +55,14 @@ public class HearingEventListenerRamlConfigTest {
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingLogEventListener.class));
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(DefenceCounselAddedEventListener.class));
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(ProsecutionCounselAddedEventListener.class));
+        handlerNames.putAll(getMethodsToHandlerNamesMapFor(NowsRequestedEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 
         this.ramlActionNames = allLines.stream()
                 .filter(action -> !action.isEmpty())
                 .filter(line -> line.contains(CONTENT_TYPE_PREFIX) && line.contains(COMMAND_NAME))
-                .map(line -> line.replaceAll("(application/vnd\\.)|(\\+json:)","").trim())
+                .map(line -> line.replaceAll("(application/vnd\\.)|(\\+json:)", "").trim())
                 .collect(toList());
     }
 
@@ -75,7 +73,7 @@ public class HearingEventListenerRamlConfigTest {
 
     @Test
     public void testEventsHandledProperly() throws Exception {
-        final List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event")
+        List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event")
                 .scan().getNamesOfClassesWithAnnotation(Event.class)
                 .stream().map(className -> {
                     try {
@@ -85,7 +83,7 @@ public class HearingEventListenerRamlConfigTest {
                     }
                 })
                 .collect(toList());
-
+        eventHandlerNames.add("hearing.events.nows-requested");
         eventHandlerNames.removeAll(this.handlerNamesToIgnore);
 
         assertThat(this.ramlActionNames, containsInAnyOrder(eventHandlerNames.toArray()));
