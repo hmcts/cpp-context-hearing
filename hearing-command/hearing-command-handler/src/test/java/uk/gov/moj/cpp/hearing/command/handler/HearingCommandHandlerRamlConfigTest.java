@@ -41,7 +41,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 AddDefenceCounselCommandHandler.class,
                 AddProsecutionCounselCommandHandler.class,
                 MagistratesCourtInitiateHearingCommandHandler.class,
-                HearingEventCommandHandler.class
+                HearingEventCommandHandler.class,
+                AddWitnessCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

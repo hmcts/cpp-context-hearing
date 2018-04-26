@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import uk.gov.justice.services.common.converter.Converter;
+import uk.gov.moj.cpp.hearing.command.DefenceWitness;
+import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
@@ -64,6 +66,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 .withCourtCentreId(toStringOrNull(source.getCourtCentreId()))
                 .withAttendees(new AttendeesConverter().convert(source.getAttendees()))
                 .withCases(new CasesConverter().convert(source))
+                .withDefenceWiteness(new DefenceWitnessesConverter().convert(source))
                 .build();
     }
 
@@ -167,6 +170,46 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withLastName(source.getLastName())
                     .withDefendantId(defendantId)
                     .build();
+        }
+    }
+
+    // DefenceWitnessesConverter
+    private static final class DefenceWitnessesConverter implements Converter<Ahearing, List<DefenceWitness>> {
+
+        @Override
+        public List<DefenceWitness> convert(Ahearing source) {
+            if (null == source || null == source.getId() || isEmpty(source.getDefendants())) {
+                return emptyList();
+            }
+
+            //  building a set of witness to avoid duplications
+            final Set<Witness> witnesses = source.getDefendants().stream()
+                    .flatMap(defendant -> defendant.getDefendantWitnesses().stream())
+                    .distinct()
+                    .collect(toSet());
+
+            return witnesses.stream().map( w -> new DefenceWitnessConverter().convert(w)).collect(toList());
+        }
+    }
+
+    private static final class DefenceWitnessConverter implements Converter<Witness, DefenceWitness> {
+
+        @Override
+        public DefenceWitness convert(final Witness source) {
+            if (null == source || null == source.getId()) {
+                return null;
+            }
+
+            return DefenceWitness.builder()
+                    .withId(toStringOrNull(source.getId().getId()))
+                    .withtType(source.getType())
+                    .withClassification(source.getClassification())
+                    .withTitle(source.getTitle())
+                    .withFirstName(source.getFirstName())
+                    .withLastName(source.getLastName())
+                    .withDefendants(source.getDefendants().stream().map( d -> (DefendantId.builder().withDefendantId(d.getId().getId())).build()).collect(toList()))
+                    .build();
+
         }
     }
 

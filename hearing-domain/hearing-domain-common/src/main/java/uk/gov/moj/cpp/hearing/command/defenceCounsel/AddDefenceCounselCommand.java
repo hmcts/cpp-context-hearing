@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.command.defenceCounsel;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.moj.cpp.hearing.command.DefendantId;
 
 import java.util.ArrayList;
 import java.util.List;

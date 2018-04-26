@@ -38,6 +38,12 @@
       "items":{
         "$ref":"#/definitions/case"
       }
+    },
+    "defenceWitnesses":{
+      "type":"array",
+      "items":{
+        "$ref":"#/definitions/defenceWitnesse"
+      }
     }
   },
   "required":[
@@ -328,6 +334,50 @@
         "personId"
       ]
     },
+
+    "defenceWitnesse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "type": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "defendants":{
+          "type":"array",
+          "properties":{
+            "defendantId": {
+              "$ref": "#/definitions/uuid"
+            }
+          },
+          "required":[
+            "defendantId"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "classification",
+        "firstName",
+        "lastName",
+        "defendants"
+      ]
+    },
+
     "case":{
       "type":"object",
       "properties":{

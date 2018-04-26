@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
+import uk.gov.moj.cpp.hearing.command.DefenceWitness;
+
 import java.util.List;
 
 public final class HearingDetailsResponse {
@@ -15,6 +17,7 @@ public final class HearingDetailsResponse {
     private final String courtCentreId;
     private final Attendees attendees;
     private final List<Case> cases;
+    private final List<DefenceWitness> defenceWitnesses;
 
     public HearingDetailsResponse() {
         this.hearingId = null;
@@ -28,6 +31,7 @@ public final class HearingDetailsResponse {
         this.courtCentreId = null;
         this.attendees = null;
         this.cases = null;
+        this.defenceWitnesses = null;
     }
 
     private HearingDetailsResponse(final Builder builder) {
@@ -42,6 +46,7 @@ public final class HearingDetailsResponse {
         this.courtCentreId = builder.courtCentreId;
         this.attendees = builder.attendees;
         this.cases = builder.cases;
+        this.defenceWitnesses = builder.defenceWitnesses;
     }
 
     public String getHearingId() {
@@ -88,6 +93,10 @@ public final class HearingDetailsResponse {
         return cases;
     }
 
+    public List<DefenceWitness> getDefenceWitnesses() {
+        return defenceWitnesses;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -104,6 +113,7 @@ public final class HearingDetailsResponse {
         private String courtCentreId;
         private Attendees attendees;
         private List<Case> cases;
+        private List<DefenceWitness> defenceWitnesses;
         
         public Builder withHearingId(final String hearingId) {
             this.hearingId = hearingId;
@@ -157,6 +167,11 @@ public final class HearingDetailsResponse {
         
         public Builder withCases(final List<Case> cases) {
             this.cases = cases;
+            return this;
+        }
+
+        public Builder withDefenceWiteness(final List<DefenceWitness> defenceWitnesses){
+            this.defenceWitnesses = defenceWitnesses;
             return this;
         }
         

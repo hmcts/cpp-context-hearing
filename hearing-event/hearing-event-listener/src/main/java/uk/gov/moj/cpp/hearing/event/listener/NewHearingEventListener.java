@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -9,7 +11,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
@@ -24,7 +25,9 @@ import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import javax.inject.Inject;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonString;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +44,8 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 @ServiceComponent(EVENT_LISTENER)
 public class NewHearingEventListener {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(NewHearingEventListener.class.getName());
     @Inject
     private AhearingRepository ahearingRepository;
 
@@ -50,18 +55,13 @@ public class NewHearingEventListener {
     @Inject
     private OffenceRepository offenceRepository;
 
-    @Inject
-    private WitnessRepository witnessRepository;
-
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_HEARING_ID = "hearingId";
-    private static final String FIELD_CASE_ID = "caseId";
     public static final String FIELD_CLASSIFICATION = "classification";
     public static final String FIELD_TYPE = "type";
     public static final String FIELD_TITLE = "title";
     public static final String FIELD_FIRST_NAME = "firstName";
     public static final String FIELD_LAST_NAME = "lastName";
-    private static final String FIELD_PERSON_ID = "personId";
 
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -232,25 +232,44 @@ public class NewHearingEventListener {
     @Handles("hearing.events.witness-added")
     public void witnessAdded(final JsonEnvelope event) {
 
+        addWitness(event);
+    }
+
+    private void addWitness(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
-        final UUID caseId = fromString(payload.getString(FIELD_CASE_ID));
+        LOGGER.debug("hearing.events.witness-added listener payload " + payload.toString());
         final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final UUID personId = fromString(payload.getString(FIELD_PERSON_ID));
         final String type = payload.getString(FIELD_TYPE);
         final String classification = payload.getString(FIELD_CLASSIFICATION);
         final String title = payload.containsKey(FIELD_TITLE)?payload.getString(FIELD_TITLE):null;
         final String firstName = payload.getString(FIELD_FIRST_NAME);
         final String lastName = payload.getString(FIELD_LAST_NAME);
+        final JsonArray defendantIds = payload.getJsonArray("defendantIds");
 
         Ahearing hearing = ahearingRepository.findById(hearingId);
-        LegalCase legalCase = legalCaseRepository.findById(caseId);
+        if (hearing != null) {
+            Witness witness = Witness.builder().withId(new HearingSnapshotKey(id, hearingId)).withHearing(hearing)
+                    .withType(type).withTitle(title).withFirstName(firstName).withLastName(lastName).withClassification(classification).build();
 
-        if (hearing != null && legalCase != null) {
-            Witness witness = Witness.builder().withId(new HearingSnapshotKey(id, hearingId)).withHearing(hearing).withLegalCase(legalCase)
-                    .withPersonId(personId).withType(type).withTitle(title).withFirstName(firstName).withLastName(lastName).withClassification(classification).build();
-
-            this.witnessRepository.save(witness);
+            defendantIds.forEach(
+                    defendantId -> {
+                        final Defendant defendant = hearing.getDefendants().stream()
+                                .filter(d ->d.getId().getId().toString().equals(((JsonString)defendantId).getString()))
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException(
+                                                String.format("hearing %s witness added for unkown defendant %s ",
+                                                        hearing.getId(),
+                                                        defendantId
+                                                )
+                                        )
+                                );
+                        witness.getDefendants().add(defendant);
+                        defendant.getDefendantWitnesses().add(witness);
+                    }
+            );
+            ahearingRepository.save(hearing);
         }
-    }
+   }
+
 }

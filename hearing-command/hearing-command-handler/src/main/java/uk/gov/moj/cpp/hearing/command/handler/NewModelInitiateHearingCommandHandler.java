@@ -48,21 +48,4 @@ public class NewModelInitiateHearingCommandHandler extends AbstractCommandHandle
         final InitiateHearingOffencePleaCommand command = convertToObject(envelop, InitiateHearingOffencePleaCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelop, a -> a.initiateHearingOffencePlea(command));
     }
-
-
-    @Handles("hearing.command.add-witness")
-    public void addWitness(final JsonEnvelope envelop) throws EventStreamException {
-        final JsonObject payload = envelop.payloadAsJsonObject();
-        final UUID witnessId = fromString(payload.getString("id"));
-        final UUID caseId = fromString(payload.getString("caseId"));
-        final UUID hearingId = fromString(payload.getString("hearingId"));
-        final String type = payload.getString("type");
-        final String classification = payload.getString("classification");
-        final UUID personId = fromString(payload.getString("personId"));
-        final String title = payload.getString("title");
-        final String firstName = payload.getString("firstName");
-        final String lastName = payload.getString("lastName");
-
-        aggregate(NewModelHearingAggregate.class, hearingId, envelop, a ->a.addWitness(hearingId, caseId, witnessId, type, classification, personId, title, firstName, lastName));
-    }
 }

@@ -41,6 +41,19 @@ public class Defendant {
     )
     private List<DefenceAdvocate> defenceAdvocates = new ArrayList<>();
 
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "defendant_witnesses",
+            joinColumns = {
+                    @JoinColumn(name = "defendant_id", referencedColumnName = "id"),
+                    @JoinColumn(name = "hearing_id", referencedColumnName = "hearing_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "witness_id", referencedColumnName = "id"),
+                    @JoinColumn(name = "witness_hearing_id", referencedColumnName = "hearing_id")
+            }
+    )
+    private List<Witness> defendantWitnesses = new ArrayList<>();
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
     private List<Offence> offences = new ArrayList<>();
 
@@ -117,6 +130,7 @@ public class Defendant {
         this.offences = builder.offences;
         this.defenceAdvocates = builder.defenceAdvocates;
         this.defendantCases = builder.defendantCases;
+        this.defendantWitnesses = builder.defendantWitnesses;
     }
 
     public List<Offence> getOffences() {
@@ -211,6 +225,13 @@ public class Defendant {
         return interpreterName;
     }
 
+    public List<Witness> getDefendantWitnesses() {
+        if(defendantWitnesses == null){
+            defendantWitnesses = new ArrayList<>();
+        }
+        return defendantWitnesses;
+    }
+
     public static class Builder {
 
         private HearingSnapshotKey id;
@@ -252,6 +273,8 @@ public class Defendant {
         private List<Offence> offences;
 
         private List<DefenceAdvocate> defenceAdvocates = new ArrayList<>();
+
+        private List<Witness> defendantWitnesses = new ArrayList<>();
 
         protected Builder() {
         }
@@ -353,6 +376,11 @@ public class Defendant {
 
         public Builder withOffences(final List<Offence> offences) {
             this.offences = offences;
+            return this;
+        }
+
+        public Builder withDefendantWitnesses(final List<Witness> defendantWitnesses) {
+            this.defendantWitnesses = defendantWitnesses;
             return this;
         }
 

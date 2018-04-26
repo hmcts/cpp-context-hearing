@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="35" author="hearing" logicalFilePath="035-create-table-defendant-witnesses.xml">
+
+       <createTable tableName="defendant_witnesses">
+            <column name="defendant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="witness_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="witness_hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+
+        </createTable>
+
+        <addPrimaryKey columnNames="hearing_id, defendant_id, witness_id" constraintName="pk_defendant_witnesses" tableName="defendant_witnesses"/>
+
+        <dropNotNullConstraint tableName="a_witness" columnName="case_id" />
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.command.defenceCounsel.DefendantId;
+import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;

@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.command.defenceCounsel.DefendantId;
+import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -46,6 +46,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
+@SuppressWarnings({"squid:S00107"})
 public class NewModelHearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = 1L;
@@ -349,8 +350,9 @@ public class NewModelHearingAggregate implements Aggregate {
         }
     }
 
-    public Stream<Object> addWitness(UUID hearingId, UUID caseId, UUID witnessId, String type, String classification, UUID personId, String title, String firstName, String lastName) {
-        return apply(Stream.of(new WitnessAdded(witnessId, hearingId, caseId, type, classification, personId, title, firstName,
-                lastName)));
+    public Stream<Object> addWitness(UUID hearingId, UUID witnessId, String type, String classification,  String title, String firstName, String lastName, List<DefendantId> defendantIdList) {
+        return apply(Stream.of(new WitnessAdded(witnessId,hearingId, type, classification,  title, firstName,
+                lastName, defendantIdList.stream().map(DefendantId::getDefendantId)
+                .collect(Collectors.toList()))));
     }
 }

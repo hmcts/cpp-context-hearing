@@ -8,9 +8,6 @@
     "hearingId": {
       "$ref": "#/definitions/uuid"
     },
-    "caseId": {
-      "$ref": "#/definitions/uuid"
-    },
     "type": {
       "type": "string",
       "enum": [
@@ -27,9 +24,6 @@
         "Character"
       ]
     },
-    "personId": {
-      "$ref": "#/definitions/uuid"
-    },
     "title": {
       "type": [
         "string",
@@ -41,16 +35,22 @@
     },
     "lastName": {
       "type": "string"
+    },
+    "defendantIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uuid"
+      }
     }
   },
   "required": [
     "id",
     "hearingId",
-    "caseId",
     "type",
     "classification",
     "firstName",
-    "lastName"
+    "lastName",
+    "defendantIds"
   ],
   "definitions": {
     "uuid": {

@@ -1,12 +1,17 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
-import javax.persistence.JoinColumn;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -68,6 +73,9 @@ public class Witness {
     @Column(name = "email")
     private String email;
 
+    @ManyToMany(mappedBy = "defendantWitnesses", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Defendant> defendants = new ArrayList<>();
+
     public Witness() {
 
     }
@@ -90,6 +98,7 @@ public class Witness {
         this.mobileTelephone = builder.mobileTelephone;
         this.fax = builder.fax;
         this.email = builder.email;
+        this.defendants = builder.defendants;
     }
 
     public HearingSnapshotKey getId() {
@@ -160,6 +169,13 @@ public class Witness {
         return title;
     }
 
+    public List<Defendant> getDefendants() {
+        if(defendants == null){
+            defendants = new ArrayList<>();
+        }
+        return defendants;
+    }
+
     public static class Builder {
 
         private HearingSnapshotKey id;
@@ -195,6 +211,8 @@ public class Witness {
         private String fax;
 
         private String email;
+
+        private List<Defendant> defendants;
 
         protected Builder() {
         }
@@ -281,6 +299,11 @@ public class Witness {
 
         public Builder withClassification(final String classification) {
             this.classification = classification;
+            return this;
+        }
+
+        public Builder withDefendants(final List<Defendant> defendants){
+            this.defendants = defendants;
             return this;
         }
 

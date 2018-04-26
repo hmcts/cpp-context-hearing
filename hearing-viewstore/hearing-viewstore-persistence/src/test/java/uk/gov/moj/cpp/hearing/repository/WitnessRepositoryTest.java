@@ -52,7 +52,7 @@ public class WitnessRepositoryTest {
         ahearingRepository.save(hearing);
         hearingSnapshotKey = new HearingSnapshotKey(id, hearingId);
         Witness witness = Witness.builder().withId(hearingSnapshotKey).withHearing(hearing).withLegalCase(legalCase).withFirstName(firstName)
-                .withLastName(lastName).withPersonId(personId).withType(DEFENCE).withClassification(EXPERT).build();
+                .withLastName(lastName).withType(DEFENCE).withClassification(EXPERT).build();
 
         this.witnessRepository.save(witness);
     }

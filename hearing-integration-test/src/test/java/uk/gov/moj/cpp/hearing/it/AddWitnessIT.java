@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -14,6 +15,7 @@ import java.util.UUID;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -42,8 +44,9 @@ public class AddWitnessIT extends AbstractIT {
 
         InitiateHearingCommand initiateHearing = initiateHearingCommandTemplateWithOnlyMandatoryFields().build();
 
-        final Hearing hearing = initiateHearing.getHearing();
 
+        final Hearing hearing = initiateHearing.getHearing();
+        final UUID defendantId = hearing.getDefendants().get(0).getId();
         TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
 
@@ -55,28 +58,30 @@ public class AddWitnessIT extends AbstractIT {
         publicEventTopic.waitFor();
 
         String witnessId = UUID.randomUUID().toString();
-        String personId = UUID.randomUUID().toString();
         JsonObject addWitness =  createObjectBuilder()
                 .add("id", witnessId)
                 .add("hearingId",hearing.getId().toString() )
-                .add("caseId",initiateHearing.getCases().get(0).getCaseId().toString())
                 .add("type", TYPE)
                 .add("classification", CLASSIFICATION)
-                .add("personId", personId)
                 .add("title", TITLE)
                 .add("firstName", FIRSTNAME)
                 .add("lastName", LASTNAME)
+                .add("defendantIds", createArrayBuilder().add(createObjectBuilder()
+                        .add("defendantId", defendantId.toString()).build()).build())
                 .build();
 
         final String commandAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearing.getId().toString());
 
+        final TestUtilities.EventListener publicEventWitnessAdded = listenFor("public.hearing.events.witness-added")
+                .withFilter(isJson(withJsonPath("$.witnessId", is(witnessId.toString()))));
 
         Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.add-witness+json")
                 .body(addWitness.toString()).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
                 .then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+        publicEventWitnessAdded.waitFor();
 
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
@@ -103,12 +108,15 @@ public class AddWitnessIT extends AbstractIT {
                                 withJsonPath("$.cases[0].defendants[0].defendantId", equalStr(hearing, "defendants[0].id")),
                                 withJsonPath("$.cases[0].defendants[0].firstName", equalStr(hearing, "defendants[0].firstName")),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].id", equalStr(hearing, "defendants[0].offences[0].id")),
-                                withJsonPath("$.cases[0].witnesses[0].caseId", is(initiateHearing.getCases().get(0).getCaseId().toString())),
-                                withJsonPath("$.cases[0].witnesses[0].type", is(TYPE)),
-                                withJsonPath("$.cases[0].witnesses[0].classification", is(CLASSIFICATION)),
-                                withJsonPath("$.cases[0].witnesses[0].title", is(TITLE)),
-                                withJsonPath("$.cases[0].witnesses[0].firstName", is(FIRSTNAME)),
-                                withJsonPath("$.cases[0].witnesses[0].lastName", is(LASTNAME))
+                                withJsonPath("$.defenceWitnesses[0].id", is(witnessId.toString())),
+                                withJsonPath("$.defenceWitnesses[0].type", is(TYPE)),
+                                withJsonPath("$.defenceWitnesses[0].classification", is(CLASSIFICATION)),
+                                withJsonPath("$.defenceWitnesses[0].title", is(TITLE)),
+                                withJsonPath("$.defenceWitnesses[0].firstName", is(FIRSTNAME)),
+                                withJsonPath("$.defenceWitnesses[0].lastName", is(LASTNAME)),
+                                withJsonPath("$.defenceWitnesses[0].defendants[0].defendantId", is(defendantId.toString()))
                         )));
+
+
     }
 }

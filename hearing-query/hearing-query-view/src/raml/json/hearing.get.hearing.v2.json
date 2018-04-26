@@ -160,5 +160,20 @@
             }
          ]
       }
+   ],
+   "defenceWitnesses": [
+      {
+         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb491",
+         "type": "Defence",
+         "classification": "Expert",
+         "title": "Mr",
+         "firstName": "Barack",
+         "lastName": "OBAMA",
+         "defendants": [
+            {
+               "defendantId": "3739b4e3-1f81-4d12-a99d-ad27ae672566"
+            }
+         ]
+      }
    ]
 }
