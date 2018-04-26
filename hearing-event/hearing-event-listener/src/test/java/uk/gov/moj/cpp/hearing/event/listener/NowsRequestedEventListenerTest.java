@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,25 +11,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -40,10 +30,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 
 @RunWith(MockitoJUnitRunner.class)
