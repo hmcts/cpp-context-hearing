@@ -228,7 +228,8 @@ public class HearingCommandHandlerTest {
     public void shouldRaiseResultAmendedEventsForNewAndUpdatedResultsOnlyOnSubsequentSharingOfResults() throws Exception {
         final JsonEnvelope command = prepareAmendedResultsToShareCommand();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        hearingAggregate.apply(new ResultsShared(HEARING_ID, SHARED_TIME, prepareResultLines(), null, null, null, null)); //FIXME: GPE-3390
+        hearingAggregate.apply(new ResultsShared(HEARING_ID, SHARED_TIME, prepareResultLines(), null, null,
+                null, null, null, null)); //FIXME: GPE-3390
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
         this.hearingCommandHandler.shareResult(command);
@@ -289,7 +290,8 @@ public class HearingCommandHandlerTest {
     public void shouldFilterEarlierSharedResultsBeforeRaisingAnyResultAmendedEvents() throws Exception {
         final JsonEnvelope command = prepareAmendedResultsToShareCommand();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        hearingAggregate.apply(new ResultsShared(HEARING_ID, SHARED_TIME, prepareResultLines(), null, null, null, null)); //FIXME: GPE-3390
+        hearingAggregate.apply(new ResultsShared(HEARING_ID, SHARED_TIME, prepareResultLines(), null, null,
+                null, null, null, null)); //FIXME: GPE-3390
         prepareAmendedResults().forEach(hearingAggregate::apply);
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);

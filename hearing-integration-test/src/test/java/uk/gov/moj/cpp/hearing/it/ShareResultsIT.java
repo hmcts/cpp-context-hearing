@@ -2,20 +2,33 @@ package uk.gov.moj.cpp.hearing.it;
 
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.plea.Plea;
+import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 
-public class TemporaryIT extends AbstractIT {
-
+public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void publishResults() throws Exception {
 
-        InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, UseCases.asDefault());
+        InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, asDefault());
+
+        UseCases.updatePlea(requestSpec, initiateHearingCommand,  hearingUpdatePleaCommand -> {
+            Plea.Builder plea = hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea();
+                    plea.withValue("NOT_GUILTY");
+        });
+
+        UseCases.updateVerdict(requestSpec, initiateHearingCommand, hearingUpdateVerdictCommand -> {
+            VerdictValue.Builder verdictValue = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue();
+            verdictValue.withCategory("GUILTY");
+        });
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
+        //TODO - use POJO.
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")
                 .withArgs(initiateHearingCommand.getHearing().getId())
@@ -67,5 +80,8 @@ public class TemporaryIT extends AbstractIT {
                         "  ]\n" +
                         "}")
                 .executeSuccessfully();
+
+
+        //TODO - complete assertions. Need POJO used above before its worth doing this.
     }
 }

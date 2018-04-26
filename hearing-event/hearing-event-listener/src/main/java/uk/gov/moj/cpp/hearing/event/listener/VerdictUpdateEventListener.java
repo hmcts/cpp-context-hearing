@@ -4,7 +4,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
@@ -26,7 +26,7 @@ public class VerdictUpdateEventListener {
     @Transactional
     @Handles("hearing.offence-verdict-updated")
     public void verdictUpdate(final JsonEnvelope event) {
-        final OffenceVerdictUpdated verdictUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), OffenceVerdictUpdated.class);
+        final VerdictUpsert verdictUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), VerdictUpsert.class);
 
         final Ahearing ahearing = ahearingRepository.findById(verdictUpdated.getHearingId());
 

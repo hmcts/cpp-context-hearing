@@ -13,7 +13,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.util.List;
 import java.util.UUID;
@@ -383,24 +383,23 @@ public class NewModelHearingAggregateTest {
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
         hearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
-        OffenceVerdictUpdated offenceVerdictUpdated = (OffenceVerdictUpdated) hearingAggregate.updateVerdict(
+        VerdictUpsert verdictUpsert = (VerdictUpsert) hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
                 initiateHearingCommand.getCases().get(0).getCaseId(),
-                initiateHearingCommand.getHearing().getDefendants().get(0).getId(),
                 initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
                 verdict
         ).collect(Collectors.toList()).get(0);
 
-        assertThat(offenceVerdictUpdated.getCaseId(), Matchers.is(initiateHearingCommand.getCases().get(0).getCaseId()));
-        assertThat(offenceVerdictUpdated.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
-        assertThat(offenceVerdictUpdated.getHearingId(), Matchers.is(initiateHearingCommand.getHearing().getId()));
+        assertThat(verdictUpsert.getCaseId(), Matchers.is(initiateHearingCommand.getCases().get(0).getCaseId()));
+        assertThat(verdictUpsert.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
+        assertThat(verdictUpsert.getHearingId(), Matchers.is(initiateHearingCommand.getHearing().getId()));
 
-        assertThat(offenceVerdictUpdated.getVerdictId(), Matchers.is(verdict.getId()));
+        assertThat(verdictUpsert.getVerdictId(), Matchers.is(verdict.getId()));
 
-        assertThat(offenceVerdictUpdated.getVerdictValueId(), Matchers.is(verdict.getValue().getId()));
-        assertThat(offenceVerdictUpdated.getCode(), Matchers.is(verdict.getValue().getCode()));
-        assertThat(offenceVerdictUpdated.getDescription(), Matchers.is(verdict.getValue().getDescription()));
-        assertThat(offenceVerdictUpdated.getCategory(), Matchers.is(verdict.getValue().getCategory()));
+        assertThat(verdictUpsert.getVerdictValueId(), Matchers.is(verdict.getValue().getId()));
+        assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
+        assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
+        assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
     }
 
 

@@ -125,6 +125,7 @@ public class HearingIT extends AbstractIT {
                         )));
     }
 
+    @Ignore("GPE-3392")
     @Test
     public void shouldShareAllAvailableResultLines() {
         final UUID hearingId = randomUUID();
@@ -143,6 +144,7 @@ public class HearingIT extends AbstractIT {
         thenHearingResultedPublicEventShouldBePublished(hearingId, resultLines, messageConsumer);
     }
 
+    @Ignore("GPE-3392")
     @Test
     public void shouldShareAllAvailableResultLinesEvenAfterManyEventsLogged() {
 

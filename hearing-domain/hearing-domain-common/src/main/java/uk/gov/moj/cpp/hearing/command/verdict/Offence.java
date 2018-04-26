@@ -52,6 +52,10 @@ public class Offence implements Serializable {
             return this;
         }
 
+        public Verdict.Builder getVerdict() {
+            return verdict;
+        }
+
         public Offence build() {
             return new Offence(id, ofNullable(verdict).map(Verdict.Builder::build).orElse(null)
             );

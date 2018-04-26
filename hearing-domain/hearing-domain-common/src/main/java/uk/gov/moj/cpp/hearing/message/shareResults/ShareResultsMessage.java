@@ -1,18 +1,15 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
-import java.util.List;
-
 public class ShareResultsMessage {
 
-    private List<Defendant> defendants;
+    private Hearing hearing;
 
-
-    public List<Defendant> getDefendants() {
-        return defendants;
+    public Hearing getHearing() {
+        return hearing;
     }
 
-    public ShareResultsMessage setDefendants(List<Defendant> defendants) {
-        this.defendants = defendants;
+    public ShareResultsMessage setHearing(Hearing hearing) {
+        this.hearing = hearing;
         return this;
     }
 

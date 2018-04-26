@@ -6,16 +6,17 @@ import com.jayway.restassured.specification.RequestSpecification;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.moj.cpp.hearing.command.initiate.Address;
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.it.NewOffencePleaUpdateIT.PleaValueType;
+import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
+import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.Offence;
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
+import uk.gov.moj.cpp.hearing.it.PleaIT.PleaValueType;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 import java.time.LocalDate;
@@ -28,10 +29,11 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
@@ -62,54 +64,84 @@ public class UseCases {
         return initiateHearing;
     }
 
+    public static HearingUpdatePleaCommand updatePlea(final RequestSpecification requestSpec, InitiateHearingCommand initiateHearingCommand,
+                                                      final Consumer<HearingUpdatePleaCommand.Builder> consumer) {
 
+        UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
 
-    public static InitiateHearingCommand initiateHearingMultipleDefendants(RequestSpecification requestSpec, int requiredDefendantCount) {
-        Consumer<InitiateHearingCommand.Builder> consumer = builder -> {
-            for (; builder.getHearing().getDefendants().size() < requiredDefendantCount; ) {
-                builder.getHearing().addDefendant(Defendant.builder()
-                        .withId(randomUUID())
-                        .withPersonId(randomUUID())
-                        .withFirstName(STRING.next())
-                        .withLastName(STRING.next())
-                        .withNationality(STRING.next())
-                        .withGender(STRING.next())
-                        .withAddress(
-                                Address.builder()
-                                        .withAddress1(STRING.next())
-                                        .withAddress2(STRING.next())
-                                        .withAddress3(STRING.next())
-                                        .withAddress4(STRING.next())
-                                        .withPostCode(STRING.next())
-                        )
-                        .withDateOfBirth(PAST_LOCAL_DATE.next())
-                        .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(
-                                Interpreter.builder()
-                                        .withNeeded(false)
-                                        .withLanguage(STRING.next())
-                        )
-                        .addOffence(
-                                Offence.builder()
-                                        .withId(randomUUID())
-                                        .withCaseId(builder.getCases().get(0).getCaseId())
-                                        .withOffenceCode(STRING.next())
-                                        .withWording(STRING.next())
-                                        .withSection(STRING.next())
-                                        .withStartDate(PAST_LOCAL_DATE.next())
-                                        .withEndDate(PAST_LOCAL_DATE.next())
-                                        .withOrderIndex(INTEGER.next())
-                                        .withCount(INTEGER.next())
-                                        .withConvictionDate(PAST_LOCAL_DATE.next())
-                        )
-                );
-            }
-        };
-        return initiateHearing(requestSpec, consumer);
+        final HearingUpdatePleaCommand.Builder updatePleaCommandBuilder = HearingUpdatePleaCommand.builder()
+                .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
+                .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
+                        .withId(initiateHearingCommand.getHearing().getDefendants().get(0).getId())
+                        .addOffence(uk.gov.moj.cpp.hearing.command.plea.Offence.builder()
+                                .withId(offenceId)
+                                .withPlea(uk.gov.moj.cpp.hearing.command.plea.Plea.builder()
+                                        .withId(UUID.randomUUID())
+                                        .withPleaDate(PAST_LOCAL_DATE.next())
+                                        .withValue("GUILTY"))));
+
+        consumer.accept(updatePleaCommandBuilder);
+        HearingUpdatePleaCommand hearingUpdatePleaCommand = updatePleaCommandBuilder.build();
+
+        EventListener eventListener = listenFor("public.hearing.plea-updated")
+                .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .withArgs(initiateHearingCommand.getHearing().getId())
+                .ofType("application/vnd.hearing.update-plea+json")
+                .withPayload(hearingUpdatePleaCommand)
+                .executeSuccessfully();
+
+        eventListener.waitFor();
+
+        return hearingUpdatePleaCommand;
     }
 
+    public static HearingUpdateVerdictCommand updateVerdict(final RequestSpecification requestSpec, InitiateHearingCommand initiateHearingCommand,
+                                                      final Consumer<HearingUpdateVerdictCommand.Builder> consumer) {
+
+        UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
+
+        HearingUpdateVerdictCommand.Builder hearingUpdateVerdictCommandBuilder = HearingUpdateVerdictCommand.builder()
+                .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
+                .addDefendant(
+                        Defendant.builder().withId(initiateHearingCommand.getHearing().getDefendants().get(0).getId())
+                                .withPersonId(randomUUID())
+                                .addOffence(Offence.builder()
+                                        .withId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences()
+                                                .get(0).getId())
+                                        .withVerdict(Verdict.builder().withId(randomUUID())
+                                                .withValue(VerdictValue.builder().withId(randomUUID())
+                                                        .withCategory("GUILTY").withCode("A1")
+                                                        .withDescription(STRING.next())
+
+                                                ).withNumberOfJurors(integer(9, 12).next())
+                                                .withNumberOfSplitJurors(integer(0, 3).next())
+                                                .withUnanimous(BOOLEAN.next())
+                                                .withVerdictDate(PAST_LOCAL_DATE.next()))));
+
+        consumer.accept(hearingUpdateVerdictCommandBuilder);
+        HearingUpdateVerdictCommand hearingUpdateVerdictCommand = hearingUpdateVerdictCommandBuilder.build();
+
+        final EventListener eventListener = listenFor("public.hearing.verdict-updated").withFilter(
+                isJson(withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))));
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.update-verdict+json")
+                .withArgs(initiateHearingCommand.getHearing().getId())
+                .withPayload(hearingUpdateVerdictCommand)
+                .executeSuccessfully();
+
+        eventListener.waitFor();
+
+        return hearingUpdateVerdictCommand;
+    }
+
+
+
+
     public static UUID initiateHearingWithOffenceAndPlea(final RequestSpecification requestSpec,
-            final PleaValueType pleaValueType, final LocalDate pleaDate) throws Throwable {
+                                                         final PleaValueType pleaValueType, final LocalDate pleaDate) throws Throwable {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
@@ -125,7 +157,7 @@ public class UseCases {
         eventListener.waitFor();
 
         final UUID offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
-        
+
         eventListener = listenFor("public.hearing.plea-updated")
                 .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
 
@@ -143,17 +175,18 @@ public class UseCases {
                                         .withPleaDate(pleaDate)
                                         .withValue(pleaValueType.name()))))
                 .build();
-        
+
         makeCommand(requestSpec, "hearing.update-plea")
-            .withArgs(hearingId)
-            .ofType("application/vnd.hearing.update-plea+json")
-            .withPayload(updatePleaCommand)
-            .executeSuccessfully();
+                .withArgs(hearingId)
+                .ofType("application/vnd.hearing.update-plea+json")
+                .withPayload(updatePleaCommand)
+                .executeSuccessfully();
 
         eventListener.waitFor();
 
         return offenceId;
     }
+
     public static LogEventCommand logEvent(RequestSpecification requestSpec,
                                            Consumer<LogEventCommand.Builder> consumer,
                                            InitiateHearingCommand initiateHearingCommand,
@@ -218,11 +251,11 @@ public class UseCases {
     }
 
     public static CorrectLogEventCommand correctLogEvent(RequestSpecification requestSpec,
-                                           UUID hearingEventId,
-                                           Consumer<CorrectLogEventCommand.Builder> consumer,
-                                           InitiateHearingCommand initiateHearingCommand,
-                                           UUID hearingEventDefinitionId,
-                                           boolean alterable) {
+                                                         UUID hearingEventId,
+                                                         Consumer<CorrectLogEventCommand.Builder> consumer,
+                                                         InitiateHearingCommand initiateHearingCommand,
+                                                         UUID hearingEventDefinitionId,
+                                                         boolean alterable) {
         CorrectLogEventCommand logEvent = with(
                 CorrectLogEventCommand.builder()
                         .withLastestHearingEventId(randomUUID()) // the new event id.

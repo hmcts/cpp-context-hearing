@@ -38,7 +38,6 @@ public class NewModelUpdateVerdictCommandHandler extends AbstractCommandHandler 
                                 hearingAggregate.updateVerdict(
                                         hearingUpdateVerdictCommand.getHearingId(),
                                         hearingUpdateVerdictCommand.getCaseId(),
-                                        defendant.getId(),
                                         offence.getId(),
                                         offence.getVerdict()
                                 )

@@ -16,7 +16,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.util.List;
 
@@ -76,7 +76,7 @@ public class NewModelPleaUpdateEventProcessorTest {
     public void offencePleaUpdate() {
 
 
-        HearingOffencePleaUpdated hearingOffencePleaUpdated = HearingOffencePleaUpdated.builder()
+        PleaUpsert pleaUpsert = PleaUpsert.builder()
                 .withHearingId(randomUUID())
                 .withOffenceId(randomUUID())
                 .withPleaDate(PAST_LOCAL_DATE.next())
@@ -85,7 +85,7 @@ public class NewModelPleaUpdateEventProcessorTest {
 
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
-                objectToJsonObjectConverter.convert(hearingOffencePleaUpdated));
+                objectToJsonObjectConverter.convert(pleaUpsert));
 
         this.newModelPleaUpdateEventProcessor.offencePleaUpdate(event);
 
@@ -97,10 +97,10 @@ public class NewModelPleaUpdateEventProcessorTest {
                 events.get(0), jsonEnvelope(
                         metadata().withName("hearing.offence-plea-updated"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingOffencePleaUpdated.getHearingId().toString())),
-                                withJsonPath("$.offenceId", is(hearingOffencePleaUpdated.getOffenceId().toString())),
-                                withJsonPath("$.pleaDate", is(hearingOffencePleaUpdated.getPleaDate().toString())),
-                                withJsonPath("$.value", is(hearingOffencePleaUpdated.getValue()))
+                                withJsonPath("$.hearingId", is(pleaUpsert.getHearingId().toString())),
+                                withJsonPath("$.offenceId", is(pleaUpsert.getOffenceId().toString())),
+                                withJsonPath("$.pleaDate", is(pleaUpsert.getPleaDate().toString())),
+                                withJsonPath("$.value", is(pleaUpsert.getValue()))
 
                                 )
                         )
@@ -111,7 +111,7 @@ public class NewModelPleaUpdateEventProcessorTest {
                 events.get(1), jsonEnvelope(
                         metadata().withName("public.hearing.plea-updated"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.offenceId", is(hearingOffencePleaUpdated.getOffenceId().toString()))
+                                withJsonPath("$.offenceId", is(pleaUpsert.getOffenceId().toString()))
 
                                 )
                         )

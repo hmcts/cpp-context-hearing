@@ -27,7 +27,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.util.List;
 import java.util.UUID;
@@ -77,7 +77,7 @@ public class NewModelUpdateVerdictCommandHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             Initiated.class,
-            OffenceVerdictUpdated.class,
+            VerdictUpsert.class,
             ConvictionDateAdded.class,
             ConvictionDateRemoved.class
     );

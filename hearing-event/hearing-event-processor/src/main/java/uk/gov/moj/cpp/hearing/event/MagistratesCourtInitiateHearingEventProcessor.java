@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendan
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
-import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
@@ -72,7 +72,7 @@ public class MagistratesCourtInitiateHearingEventProcessor {
                     continue;
                 }
 
-                HearingOffencePleaUpdated hearingOffencePleaUpdated = HearingOffencePleaUpdated.builder()
+                final PleaUpsert pleaUpsert = PleaUpsert.builder()
                         .withHearingId(magsCourtHearingRecorded.getHearingId())
                         .withOffenceId(offence.getId())
                         .withPleaDate(offence.getPlea().getPleaDate())
@@ -80,7 +80,7 @@ public class MagistratesCourtInitiateHearingEventProcessor {
                         .build();
 
                 this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.offence-plea-updated")
-                        .apply(this.objectToJsonValueConverter.convert(hearingOffencePleaUpdated)));
+                        .apply(this.objectToJsonValueConverter.convert(pleaUpsert)));
             }
         }
     }

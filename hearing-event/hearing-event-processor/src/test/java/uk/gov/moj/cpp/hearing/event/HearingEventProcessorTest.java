@@ -202,39 +202,6 @@ public class HearingEventProcessorTest {
         MockitoAnnotations.initMocks(this);
     }
 
-
-    @Test
-    public void publishHearingResultedPublicEvent() {
-        final JsonEnvelope event = createResultsSharedEvent();
-
-        this.hearingEventProcessor.publishHearingResultsSharedPublicEvent(event);
-
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.resulted"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_SHARED_TIME), equalTo(ZonedDateTimes.toString(SHARED_TIME))),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_GENERIC_ID), equalTo(GENERIC_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_PERSON_ID), equalTo(PERSON_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CASE_ID), equalTo(CASE_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_RESULT_LABEL), equalTo(RESULT_LABEL)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_LEVEL), equalTo(LEVEL)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT), equalTo(COURT)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_COURT_ROOM), equalTo(COURT_ROOM_NUMBER)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_FIRST_NAME), equalTo(CLERK_OF_THE_COURT_FIRST_NAME)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_LAST_NAME), equalTo(CLERK_OF_THE_COURT_LAST_NAME)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_RESULT_LINES, FIELD_CLERK_OF_THE_COURT_ID), equalTo(CLERK_OF_THE_COURT_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s[0].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_1)),
-                        withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_PROMPT_LABEL), equalTo(PROMPT_LABEL_2)),
-                        withJsonPath(format("$.%s[0].%s[1].%s", FIELD_RESULT_LINES, FIELD_PROMPTS, FIELD_VALUE), equalTo(PROMPT_VALUE_2))
-                        )
-                )).thatMatchesSchema());
-    }
-
     @Test
     public void publishHearingResultAmendedPublicEvent() {
         final JsonEnvelope event = createResultAmendedEvent();

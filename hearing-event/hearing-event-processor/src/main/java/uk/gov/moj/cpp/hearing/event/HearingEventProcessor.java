@@ -22,11 +22,6 @@ public class HearingEventProcessor {
         this.sender = sender;
     }
 
-    @Handles("hearing.results-shared")
-    public void publishHearingResultsSharedPublicEvent(final JsonEnvelope event) {
-        this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted").apply(event.payloadAsJsonObject()));
-    }
-
     @Handles("hearing.result-amended")
     public void publishHearingResultAmendedPublicEvent(final JsonEnvelope event) {
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.result-amended").apply(event.payloadAsJsonObject()));

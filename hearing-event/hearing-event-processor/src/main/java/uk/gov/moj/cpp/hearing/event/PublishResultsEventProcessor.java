@@ -1,0 +1,213 @@
+package uk.gov.moj.cpp.hearing.event;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.ResultsShared;
+import uk.gov.moj.cpp.hearing.message.shareResults.Address;
+import uk.gov.moj.cpp.hearing.message.shareResults.Attendee;
+import uk.gov.moj.cpp.hearing.message.shareResults.Case;
+import uk.gov.moj.cpp.hearing.message.shareResults.CourtCentre;
+import uk.gov.moj.cpp.hearing.message.shareResults.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.message.shareResults.Defendant;
+import uk.gov.moj.cpp.hearing.message.shareResults.Hearing;
+import uk.gov.moj.cpp.hearing.message.shareResults.Interpreter;
+import uk.gov.moj.cpp.hearing.message.shareResults.Offence;
+import uk.gov.moj.cpp.hearing.message.shareResults.Person;
+import uk.gov.moj.cpp.hearing.message.shareResults.Plea;
+import uk.gov.moj.cpp.hearing.message.shareResults.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.message.shareResults.ShareResultsMessage;
+import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+
+@SuppressWarnings({"squid:S1188"})
+@ServiceComponent(EVENT_PROCESSOR)
+public class PublishResultsEventProcessor {
+
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    private final Enveloper enveloper;
+
+    private final Sender sender;
+
+    @Inject
+    public PublishResultsEventProcessor(final Enveloper enveloper, final Sender sender, final JsonObjectToObjectConverter jsonObjectToObjectConverter,
+                                        final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
+        this.enveloper = enveloper;
+        this.sender = sender;
+        this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
+        this.objectToJsonObjectConverter = objectToJsonObjectConverter;
+    }
+
+
+    @Handles("hearing.results-shared")
+    public void resultsShared(final JsonEnvelope event) {
+
+        final ResultsShared input = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), ResultsShared.class);
+
+        ShareResultsMessage shareResultsMessage = ShareResultsMessage.shareResultsMessage()
+                .setHearing(Hearing.hearing()
+                        .setId(input.getHearingId())
+                        .setCourtCentre(mapCourtCentre(input))
+                        .setAttendees(mapAttendees(input))
+                        .setDefendants(mapDefendants(input))
+                );
+
+        this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
+                .apply(this.objectToJsonObjectConverter.convert(shareResultsMessage)));
+    }
+
+    private static CourtCentre mapCourtCentre(ResultsShared input) {
+        return CourtCentre.courtCentre()
+                .setCourtCentreId(input.getHearing().getCourtCentreId())
+                .setCourtCentreName(input.getHearing().getCourtCentreName())
+                .setCourtRoomId(input.getHearing().getCourtRoomId())
+                .setCourtRoomName(input.getHearing().getCourtRoomName());
+    }
+
+    private static List<Attendee> mapAttendees(ResultsShared input) {
+        List<Attendee> attendees = new ArrayList<>();
+        attendees.add(Attendee.attendee()
+                .setFirstName(input.getHearing().getJudge().getFirstName())
+                .setLastName(input.getHearing().getJudge().getLastName())
+                .setTitle(input.getHearing().getJudge().getTitle())
+                .setType("JUDGE"));
+
+        attendees.addAll(
+                input.getDefenceCounsels().values().stream()
+                        .map(defenceCounselUpsert -> DefenceAdvocate.defenceAdvocate()
+                                .setFirstName(defenceCounselUpsert.getFirstName())
+                                .setLastName(defenceCounselUpsert.getLastName())
+                                .setTitle(defenceCounselUpsert.getTitle())
+                                .setStatus(defenceCounselUpsert.getStatus())
+                                .setType("DEFENCEADVOCATE")
+                                .setDefendantIds(defenceCounselUpsert.getDefendantIds())
+                        )
+                        .collect(toList())
+        );
+
+        attendees.addAll(
+                input.getProsecutionCounsels().values().stream()
+                        .map(prosecutionCounselUpsert -> ProsecutionAdvocate.prosecutionAdvocate()
+                                //TODO - which cases do the prosecution counsellors handle?
+                                .setCaseIds(input.getCases().stream().map(c -> c.getCaseId()).collect(toList()))
+                                .setFirstName(prosecutionCounselUpsert.getFirstName())
+                                .setLastName(prosecutionCounselUpsert.getLastName())
+                                .setTitle(prosecutionCounselUpsert.getTitle())
+                                .setStatus(prosecutionCounselUpsert.getStatus())
+                                .setType("PROSECUTIONADVOCATE")
+                        )
+                        .collect(toList())
+        );
+        return attendees;
+    }
+
+    private static List<Defendant> mapDefendants(ResultsShared input) {
+        return input.getHearing().getDefendants().stream()
+                .map(defendant -> Defendant.defendant()
+                        .setId(defendant.getId())
+                        .setPerson(Person.person()
+                                .setId(defendant.getPersonId())
+                                .setFirstName(defendant.getFirstName())
+                                .setLastName(defendant.getLastName())
+                                .setAddress(Address.address()
+                                        .setAddress1(defendant.getAddress().getAddress1())
+                                        .setAddress2(defendant.getAddress().getAddress2())
+                                        .setAddress3(defendant.getAddress().getAddress3())
+                                        .setAddress4(defendant.getAddress().getAddress4())
+                                        .setPostCode(defendant.getAddress().getPostCode())
+                                )
+                                .setDateOfBirth(defendant.getDateOfBirth())
+                                .setGender(defendant.getGender())
+                                .setNationality(defendant.getNationality())
+                                .setHomeTelephone("")
+                                .setWorkTelephone("")
+                                .setMobile("")
+                                .setFax("")
+                                .setEmail("")
+                        )
+                        .setDefenceOrganisation(defendant.getDefenceOrganisation())
+                        .setInterpreter(Interpreter.interpreter()
+                                .setLanguage(defendant.getInterpreter().getLanguage())
+                                .setName("")//TODO 'needed' value from initiate?
+                        )
+                        .setCases(mapCases(input, defendant))
+                )
+                .collect(Collectors.toList());
+    }
+
+    private static List<Case> mapCases(ResultsShared input, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant) {
+        return defendant.getDefendantCases().stream()
+                .map(defendantCase -> Case.legalCase()
+                        .setId(defendantCase.getCaseId())
+                        .setUrn(input.getCases().stream()
+                                .filter(c -> c.getCaseId().equals(defendantCase.getCaseId()))
+                                .map(c -> c.getUrn())
+                                .findFirst()
+                                .orElse(null))
+                        .setBailStatus(defendantCase.getBailStatus())
+                        .setCustodyTimeLimitDate(defendantCase.getCustodyTimeLimitDate())
+                        .setOffences(mapOffences(input, defendant)))
+                .collect(Collectors.toList());
+    }
+
+    private static List<Offence> mapOffences(ResultsShared input, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant) {
+        return defendant.getOffences().stream()
+                .map(o -> Offence.offence()
+                        .setId(o.getId())
+                        .setCode(o.getOffenceCode())
+                        .setConvictionDate(o.getConvictionDate())
+                        .setStartDate(o.getStartDate())
+                        .setEndDate(o.getEndDate())
+                        .setWording(o.getWording())
+                        .setPlea(
+                                input.getPleas().values().stream()
+                                        .filter(p -> p.getOffenceId().equals(o.getId()))
+                                        .map(p -> Plea.plea()
+                                                //TODO - do we need plea id?
+                                                .setId(p.getOffenceId())
+                                                .setValue(p.getValue())
+                                                .setDate(p.getPleaDate())
+                                                .setEnteredHearingId(p.getOriginHearingId()))
+                                        .findFirst()
+                                        .orElse(null)
+                        )
+                        .setVerdict(
+                                input.getVerdicts().values().stream()
+                                        .filter(v -> v.getOffenceId().equals(o.getId()))
+                                        .map(v -> Verdict.verdict()
+                                                .setVerdictCategory(v.getCategory())
+                                                .setEnteredHearingId(v.getHearingId())
+                                                .setNumberOfJurors(v.getNumberOfJurors())
+                                                .setNumberOfSplitJurors(String.format("%s-%s",
+                                                        v.getNumberOfJurors() - v.getNumberOfSplitJurors(),
+                                                        v.getNumberOfSplitJurors()
+                                                ))
+                                                // guilty of lesser offence.
+                                                .setUnanimous(v.getUnanimous())
+                                                .setVerdictDate(v.getVerdictDate())
+                                                .setVerdictDescription(v.getDescription())
+                                        )
+                                        .findFirst()
+                                        .orElse(null)
+                        )
+                )
+                .collect(Collectors.toList());
+    }
+}
