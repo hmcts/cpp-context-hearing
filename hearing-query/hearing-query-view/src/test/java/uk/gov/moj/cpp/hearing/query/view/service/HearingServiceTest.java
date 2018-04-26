@@ -1,10 +1,17 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+import static java.util.UUID.randomUUID;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.getHearing;
+
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
@@ -42,17 +49,11 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.getHearing;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * Unit tests for the HearingServiceTest class.
@@ -112,11 +113,11 @@ public class HearingServiceTest {
 
         // 2. setting the repository mock return
         //-----------------------------------------------------------------------
-        when(ahearingRepository.findByStartDate(startDateStartOfDay)).thenReturn(hearingList);
+        when(ahearingRepository.findByDate(startDateStartOfDay)).thenReturn(hearingList);
 
         // 3. invoking the service with the given input mock value
         //-----------------------------------------------------------------------
-        final HearingListResponse response = caseHearingService.getHearingByStartDateV2(HearingTestUtils.START_DATE_1.toLocalDate());
+        final HearingListResponse response = caseHearingService.getHearingByDateV2(HearingTestUtils.START_DATE_1.toLocalDate());
 
         // 4. performing the assertions
         //-----------------------------------------------------------------------

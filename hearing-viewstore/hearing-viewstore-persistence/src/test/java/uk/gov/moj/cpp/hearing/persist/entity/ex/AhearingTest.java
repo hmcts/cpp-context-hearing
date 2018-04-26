@@ -7,6 +7,7 @@ import static uk.gov.moj.cpp.hearing.utils.TestUtils.hasInnerStaticClass;
 import static uk.gov.moj.cpp.hearing.utils.TestUtils.hasParameterizedConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -33,8 +34,8 @@ public class AhearingTest {
         assertTrue(hasParameterizedConstructor(Ahearing.class, Ahearing.Builder.class));
     }
 
-    public static Ahearing buildHering1(final UUID hearingId, final ZonedDateTime startDateTime) {
-        return new Ahearing.Builder()
+    public static Ahearing buildHearing1(final UUID hearingId, final ZonedDateTime startDateTime) {
+        Ahearing ahearing = new Ahearing.Builder()
                 .withId(hearingId)
                 .withHearingType("TRIAL")
                 .withStartDateTime(startDateTime)
@@ -42,6 +43,12 @@ public class AhearingTest {
                 .withCourtCentreName("Liverpool Crown Court")
                 .withRoomId(UUID.fromString("e7721a38-546d-4b56-9992-ebdd772a561b"))
                 .withRoomName("3-1")
+                .withHearingDays(Arrays.asList(AhearingDate.builder()
+                                .withDate(startDateTime)
+                                .withId(new HearingSnapshotKey(UUID.randomUUID(), hearingId))
+                                .build()))
                 .build();
+
+        return ahearing;
     }
 }

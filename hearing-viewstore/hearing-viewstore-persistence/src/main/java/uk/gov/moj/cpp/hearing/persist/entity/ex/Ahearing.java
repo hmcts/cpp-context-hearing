@@ -35,6 +35,9 @@ public class Ahearing {
     @Column(name = "start_date_time")
     private ZonedDateTime startDateTime;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private List<AhearingDate> hearingDays = new ArrayList<>();
+
     @Column(name = "court_centre_id")
     private UUID courtCentreId;
 
@@ -57,12 +60,14 @@ public class Ahearing {
         this.id = builder.id;
         this.hearingType = builder.hearingType;
         this.startDateTime = builder.startDateTime;
+        this.hearingDays = builder.hearingDays;
         this.courtCentreId = builder.courtCentreId;
         this.courtCentreName = builder.courtCentreName;
         this.roomId = builder.roomId;
         this.roomName = builder.roomName;
         this.setDefendants(builder.defendants);
         this.setWitnesses(builder.witnesses);
+        this.hearingDays = builder.hearingDays;
         this.attendees = builder.attendees;
         if (builder.judgeBuilder != null) {
             this.attendees.add(builder.judgeBuilder.build());
@@ -105,6 +110,10 @@ public class Ahearing {
         return startDateTime;
     }
 
+    public List<AhearingDate> getHearingDays() {
+        return hearingDays;
+    }
+
     public UUID getCourtCentreId() {
         return courtCentreId;
     }
@@ -126,6 +135,7 @@ public class Ahearing {
         private List<Defendant> defendants = new ArrayList<>();
         private String hearingType;
         private ZonedDateTime startDateTime;
+        private List<AhearingDate> hearingDays = new ArrayList<>();
         private UUID courtCentreId;
         private String courtCentreName;
         private UUID roomId;
@@ -162,6 +172,11 @@ public class Ahearing {
 
         public Builder withStartDateTime(ZonedDateTime startDateTime) {
             this.startDateTime = startDateTime;
+            return this;
+        }
+
+        public Builder withHearingDays(List<AhearingDate> hearingDays) {
+            this.hearingDays = hearingDays;
             return this;
         }
 

@@ -6,6 +6,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCaseTest.buildLegalCase1;
 
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
 
 @RunWith(CdiTestRunner.class)
 public class AhearingRepositoryTest {
@@ -56,11 +56,11 @@ public class AhearingRepositoryTest {
         return zdt.toLocalDate().atStartOfDay(zdt.getZone());
     }
 
-    @Ignore // GPE-3032
+    @Ignore("Need to resolve issue with Date JPA function running on Deltaspike's TestRunner/ H2 in memory DB")
     @Test
     public void shouldFindByStartDate() throws Exception {
         final ZonedDateTime localTime = atStartOfDay(AhearingRepositoryTestUtils.START_DATE_1);
-        assertEquals(1, ahearingRepository.findByStartDate(localTime).size());
+        assertEquals(1, ahearingRepository.findByDate(localTime).size());
 
     }
 
@@ -75,6 +75,7 @@ public class AhearingRepositoryTest {
         assertNotNull(ahearing);
         assertEquals(AhearingRepositoryTestUtils.HEARING_ID_1, ahearing.getId());
         assertEquals(AhearingRepositoryTestUtils.START_DATE_1, ahearing.getStartDateTime());
+        assertEquals(AhearingRepositoryTestUtils.START_DATE_1, (ahearing.getHearingDays().get(0)).getDate());
     }
 
     @Test

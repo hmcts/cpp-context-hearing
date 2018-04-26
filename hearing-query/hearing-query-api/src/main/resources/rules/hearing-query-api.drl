@@ -33,10 +33,10 @@ rule "Query - API - hearing.get.hearings-by-startdate"
     $outcome.setSuccess(true);
 end
 
-rule "Query - API - hearing.get.hearings-by-startdate.v2"
+rule "Query - API - hearing.get.hearings-by-date.v2"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.get.hearings-by-startdate.v2");
+    $action: Action(name == "hearing.get.hearings-by-date.v2");
     eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
   then
     $outcome.setSuccess(true);

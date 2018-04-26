@@ -1,11 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static java.time.format.DateTimeFormatter.ISO_TIME;
-import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.services.common.converter.LocalDates;
@@ -14,43 +8,27 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounsel;
-import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
-import uk.gov.moj.cpp.hearing.persist.entity.ProsecutionCounsel;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
-import uk.gov.moj.cpp.hearing.query.view.convertor.DefenceCounselToDefendantMapConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
-import uk.gov.moj.cpp.hearing.query.view.convertor.ProsecutionCounselListConverter;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsMaterialResponse;
-import uk.gov.moj.cpp.hearing.query.view.service.DefenceCounselService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
-import uk.gov.moj.cpp.hearing.query.view.service.ProsecutionCounselService;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 @ServiceComponent(Component.QUERY_VIEW)
+@SuppressWarnings({"squid:S3655"})
 public class HearingQueryView {
 
     private static final String FIELD_HEARING_ID = "hearingId";
-    private static final String FIELD_START_DATE = "startDate";
+    private static final String FIELD_DATE = "date";
 
     @Inject
     private HearingService hearingService;
@@ -64,10 +42,10 @@ public class HearingQueryView {
     @Inject
     private HearingOutcomesConverter hearingOutcomesConverter;
 
-    @Handles("hearing.get.hearings-by-startdate.v2")
-    public JsonEnvelope findHearingsByStartDateV2(final JsonEnvelope envelope) {
-        final LocalDate startDate = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_START_DATE));
-        final HearingListResponse hearingListResponse = hearingService.getHearingByStartDateV2(startDate);
+    @Handles("hearing.get.hearings-by-date.v2")
+    public JsonEnvelope findHearingsByDateV2(final JsonEnvelope envelope) {
+        final LocalDate date = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_DATE));
+        final HearingListResponse hearingListResponse = hearingService.getHearingByDateV2(date);
         return enveloper.withMetadataFrom(envelope, "hearing.get.hearings.v2")
                 .apply(hearingListResponse);
     }

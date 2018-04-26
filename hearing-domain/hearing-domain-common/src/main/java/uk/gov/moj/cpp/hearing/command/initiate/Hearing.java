@@ -1,18 +1,17 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.ofNullable;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Optional.ofNullable;
-
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Hearing implements Serializable {
 
@@ -26,6 +25,7 @@ public class Hearing implements Serializable {
     private final String courtRoomName;
     private final Judge judge;
     private final ZonedDateTime startDateTime;
+    private final List<ZonedDateTime> hearingDays;
     private final Boolean notBefore;
     private final Integer estimateMinutes;
     private final List<Defendant> defendants;
@@ -40,6 +40,7 @@ public class Hearing implements Serializable {
                    @JsonProperty("courtRoomName") final String courtRoomName,
                    @JsonProperty("judge") final Judge judge,
                    @JsonProperty("startDateTime") final ZonedDateTime startDateTime,
+                   @JsonProperty("hearingDays") final List<ZonedDateTime> hearingDays,
                    @JsonProperty("notBefore") final Boolean notBefore,
                    @JsonProperty("estimateMinutes") final Integer estimateMinutes,
                    @JsonProperty("defendants") final List<Defendant> defendants,
@@ -52,6 +53,7 @@ public class Hearing implements Serializable {
         this.courtRoomName = courtRoomName;
         this.judge = judge;
         this.startDateTime = startDateTime;
+        this.hearingDays = hearingDays;
         this.notBefore = notBefore;
         this.estimateMinutes = estimateMinutes;
         this.defendants = defendants;
@@ -90,6 +92,10 @@ public class Hearing implements Serializable {
         return startDateTime;
     }
 
+    public List<ZonedDateTime> getHearingDays() {
+        return hearingDays;
+    }
+
     public Boolean isNotBefore() {
         return notBefore;
     }
@@ -117,6 +123,7 @@ public class Hearing implements Serializable {
         private String courtRoomName;
         private Judge.Builder judge;
         private ZonedDateTime startDateTime;
+        private List<ZonedDateTime> hearingDays;
         private boolean notBefore;
         private Integer estimateMinutes;
         private List<Defendant.Builder> defendants = new ArrayList<>();
@@ -214,6 +221,11 @@ public class Hearing implements Serializable {
             return this;
         }
 
+        public Builder withHearingDays(List<ZonedDateTime> hearingDays) {
+            this.hearingDays = hearingDays;
+            return this;
+        }
+
         public Builder withNotBefore(boolean notBefore) {
             this.notBefore = notBefore;
             return this;
@@ -237,7 +249,7 @@ public class Hearing implements Serializable {
         public Hearing build() {
             return new Hearing(id, type, courtCentreId, courtCentreName, courtRoomId, courtRoomName,
                     ofNullable(judge).map(Judge.Builder::build).orElse(null),
-                    startDateTime, notBefore, estimateMinutes,
+                    startDateTime, hearingDays, notBefore, estimateMinutes,
                     unmodifiableList(defendants.stream().map(Defendant.Builder::build).collect(Collectors.toList())),
                     unmodifiableList(witnesses.stream().map(Witness.Builder::build).collect(Collectors.toList())));
         }
@@ -257,6 +269,7 @@ public class Hearing implements Serializable {
                 .withCourtRoomName(hearing.getCourtRoomName())
                 .withJudge(Judge.from(hearing.getJudge()))
                 .withStartDateTime(hearing.getStartDateTime())
+                .withHearingDays(hearing.getHearingDays())
                 .withNotBefore(hearing.isNotBefore())
                 .withEstimateMinutes(hearing.getEstimateMinutes());
 

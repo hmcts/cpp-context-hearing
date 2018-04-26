@@ -1,11 +1,13 @@
 package uk.gov.moj.cpp.hearing.test;
 
+
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
@@ -24,11 +26,10 @@ import uk.gov.moj.cpp.hearing.command.result.ResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 
+import java.time.ZonedDateTime;
+
 import java.util.Arrays;
 import java.util.UUID;
-
-import static java.util.Arrays.asList;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 
 public class TestTemplates {
 
@@ -39,6 +40,7 @@ public class TestTemplates {
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields() {
 
         final UUID caseId = randomUUID();
+        final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next();
 
         return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
@@ -59,7 +61,8 @@ public class TestTemplates {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
+                        .withStartDateTime(startDateTime)
+                        .withHearingDays(Arrays.asList(startDateTime))
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()
                                 .withId(randomUUID())
@@ -85,6 +88,7 @@ public class TestTemplates {
 
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplate() {
         final UUID caseId = randomUUID();
+        final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next();
         return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
                         .withCaseId(caseId)
@@ -104,7 +108,8 @@ public class TestTemplates {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
+                        .withStartDateTime(startDateTime)
+                        .withHearingDays(Arrays.asList(startDateTime))
                         .withNotBefore(false)
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()
@@ -176,6 +181,7 @@ public class TestTemplates {
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields(
             final UUID caseId, final UUID hearingId, final UUID... defendantIds) {
 
+        final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next();
         final Builder initiateHearingBuilder = InitiateHearingCommand.builder()
                 .addCase(Case.builder().withCaseId(caseId).withUrn(STRING.next()))
                 .withHearing(Hearing.builder().withId(hearingId).withType(STRING.next())
@@ -187,7 +193,8 @@ public class TestTemplates {
                                 .withTitle(STRING.next())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next()))
-                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
+                        .withStartDateTime(startDateTime)
+                        .withHearingDays(Arrays.asList(startDateTime))
                         .withEstimateMinutes(INTEGER.next())
                 );
         Arrays.stream(defendantIds).forEach(id ->

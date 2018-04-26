@@ -25,7 +25,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_HEARING_V2 = "hearing.get.hearing.v2";
     private static final String ACTION_NAME_GET_CASE_PLEAS = "hearing.get.case.pleas";
     private static final String ACTION_NAME_GET_HEARINGS_BY_START_DATE = "hearing.get.hearings-by-startdate";
-    private static final String ACTION_NAME_GET_HEARINGS_BY_START_DATE_V2 = "hearing.get.hearings-by-startdate.v2";
+    private static final String ACTION_NAME_GET_HEARINGS_BY_DATE_V2 = "hearing.get.hearings-by-date.v2";
     private static final String ACTION_NAME_GET_HEARINGS_BY_CASE_ID = "hearing.get.hearings-by-caseid";
     private static final String ACTION_NAME_GET_PROSECUTION_COUNSELS = "hearing.get.prosecution-counsels";
     private static final String ACTION_NAME_GET_DEFENCE_COUNSELS = "hearing.get.defence-counsels";
@@ -80,8 +80,8 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Test
-    public void shouldAllowUserInAuthorisedGroupToGetHearingsByStartDateV2() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_START_DATE_V2, "Listing Officers", "Court Clerks");
+    public void shouldAllowUserInAuthorisedGroupToGetHearingsByDateV2() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_DATE_V2, "Listing Officers", "Court Clerks");
     }
 
     @Test
@@ -90,8 +90,8 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Test
-    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByStartDateV2() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_START_DATE_V2, "Listing Officers", "Court Clerks");
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByDateV2() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_DATE_V2, "Listing Officers", "Court Clerks");
     }
 
     @Test

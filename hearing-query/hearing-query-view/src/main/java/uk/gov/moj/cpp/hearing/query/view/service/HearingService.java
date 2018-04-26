@@ -1,20 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createObjectBuilder;
-
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-import javax.transaction.Transactional;
 
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
@@ -26,13 +12,23 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingEntityToHearing;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 import uk.gov.moj.cpp.hearing.query.view.response.Judge;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Material;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsMaterialResponse;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 public class HearingService {
     
@@ -73,12 +69,12 @@ public class HearingService {
     }
 
     @Transactional
-    public HearingListResponse getHearingByStartDateV2(final LocalDate startDate) {
-        if (null == startDate) {
+    public HearingListResponse getHearingByDateV2(final LocalDate date) {
+        if (null == date) {
             return new HearingListResponse();
         }
-        ZonedDateTime zonedStartDatetime = startDate.atStartOfDay(ZoneOffset.systemDefault());
-        return new HearingListResponseConverter().convert(ahearingRepository.findByStartDate(zonedStartDatetime));
+        final ZonedDateTime zonedDateTime = date.atStartOfDay(ZoneOffset.systemDefault());
+        return new HearingListResponseConverter().convert(ahearingRepository.findByDate(zonedDateTime));
     }
     
     @Transactional

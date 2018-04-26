@@ -4,6 +4,30 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.AhearingDate;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCaseKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
+import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
+import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,29 +44,6 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCaseKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
-import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
-import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 @SuppressWarnings({"squid:S2201"})
 @ServiceComponent(EVENT_LISTENER)
@@ -169,6 +170,12 @@ public class NewHearingEventListener {
                 .withRoomId(hearing.getCourtRoomId())
                 .withRoomName(hearing.getCourtRoomName())
                 .withStartDateTime(hearing.getStartDateTime())
+                .withHearingDays(hearing.getHearingDays().stream()
+                        .map(zdt -> AhearingDate.builder()
+                                .withDate(zdt)
+                                .withId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()))
+                                .build())
+                        .collect(Collectors.toList()))
                 .withDefendants(hearing.getDefendants().stream()
                         .map(defendantIn -> {
                             final Defendant defendant = translateDefendant(hearing.getId(), defendantIn).build();

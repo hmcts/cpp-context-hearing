@@ -392,6 +392,14 @@
           "type": "string",
           "format": "date-time"
         },
+        "hearingDays": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
         "notBefore": {
           "type": "boolean"
         },
@@ -420,6 +428,7 @@
         "courtRoomName",
         "judge",
         "startDateTime",
+        "hearingDays",
         "estimateMinutes",
         "defendants"
       ]

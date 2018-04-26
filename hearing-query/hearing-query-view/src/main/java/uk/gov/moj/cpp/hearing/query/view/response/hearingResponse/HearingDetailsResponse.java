@@ -9,6 +9,7 @@ public final class HearingDetailsResponse {
     private final String hearingId;
     private final String startDate;
     private final String startTime;
+    private final List<String> hearingDays;
     private final String roomName;
     private final String hearingType;
     private final String courtCentreName;
@@ -25,6 +26,7 @@ public final class HearingDetailsResponse {
         this.startTime = null;
         this.roomName = null;
         this.hearingType = null;
+        this.hearingDays = null;
         this.courtCentreName = null;
         this.judge = null;
         this.roomId = null;
@@ -38,6 +40,7 @@ public final class HearingDetailsResponse {
         this.hearingId = builder.hearingId;
         this.startDate = builder.startDate;
         this.startTime = builder.startTime;
+        this.hearingDays = builder.hearingDays;
         this.roomName = builder.roomName;
         this.hearingType = builder.hearingType;
         this.courtCentreName = builder.courtCentreName;
@@ -59,6 +62,10 @@ public final class HearingDetailsResponse {
 
     public String getStartTime() {
         return startTime;
+    }
+
+    public List<String> getHearingDays() {
+        return hearingDays;
     }
 
     public String getRoomName() {
@@ -105,6 +112,7 @@ public final class HearingDetailsResponse {
         private String hearingId;
         private String startDate;
         private String startTime;
+        private List<String> hearingDays;
         private String roomName;
         private String hearingType;
         private String courtCentreName;
@@ -129,7 +137,12 @@ public final class HearingDetailsResponse {
             this.startTime = startTime;
             return this;
         }
-        
+
+        public Builder withHearingDays(final List<String> hearingDays) {
+            this.hearingDays = hearingDays;
+            return this;
+        }
+
         public Builder withRoomName(final String roomName) {
             this.roomName = roomName;
             return this;

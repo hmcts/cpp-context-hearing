@@ -4,24 +4,10 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-
-import java.time.LocalDate;
-import java.time.temporal.Temporal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import uk.gov.justice.services.common.converter.Converter;
 import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
@@ -46,6 +32,20 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCou
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Value;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Verdict;
 
+import java.time.LocalDate;
+import java.time.temporal.Temporal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 public final class HearingDetailsResponseConverter implements Converter<Ahearing, HearingDetailsResponse> {
 
     @Override
@@ -58,6 +58,9 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                 .withHearingId(source.getId().toString())
                 .withStartDate(toDateStringOrNull(source.getStartDateTime()))
                 .withStartTime(toTimeStringOrNull(source.getStartDateTime()))
+                .withHearingDays(source.getHearingDays().stream()
+                        .map(ahd -> ahd.getDate().toString())
+                        .collect(toList()))
                 .withRoomName(source.getRoomName())
                 .withHearingType(source.getHearingType())
                 .withCourtCentreName(source.getCourtCentreName())
@@ -406,7 +409,7 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
                     .withPostCode(postCode)
                     .withFormattedAddress(Stream.of(address1, address2, address3, address4, postCode)
                             .filter(Objects::nonNull)
-                            .collect(Collectors.joining(" ")))
+                            .collect(joining(" ")))
                     .build();
         }
     }
