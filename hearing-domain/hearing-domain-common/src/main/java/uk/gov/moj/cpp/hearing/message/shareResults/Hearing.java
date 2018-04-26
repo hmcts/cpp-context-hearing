@@ -1,19 +1,18 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class Hearing {
 
     private UUID id;
     private String hearingType;
-    private String courtCentreName;
-    private String courtCode;
-    private LocalDate startDate;
-    private String judgeName;
-    private String prosecutorName;
-    private String defenceName;
-
+    private ZonedDateTime startDateTime;
+    private List<ZonedDateTime> hearingDates;
+    private CourtCentre courtCentre;
+    private List<Attendee> attendees;
+    private List<Defendant> defendants;
 
     public UUID getId() {
         return id;
@@ -23,28 +22,24 @@ public class Hearing {
         return hearingType;
     }
 
-    public String getCourtCentreName() {
-        return courtCentreName;
+    public ZonedDateTime getStartDateTime() {
+        return startDateTime;
     }
 
-    public String getCourtCode() {
-        return courtCode;
+    public List<ZonedDateTime> getHearingDates() {
+        return hearingDates;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public CourtCentre getCourtCentre() {
+        return courtCentre;
     }
 
-    public String getJudgeName() {
-        return judgeName;
+    public List<Attendee> getAttendees() {
+        return attendees;
     }
 
-    public String getProsecutorName() {
-        return prosecutorName;
-    }
-
-    public String getDefenceName() {
-        return defenceName;
+    public List<Defendant> getDefendants() {
+        return defendants;
     }
 
     public Hearing setId(UUID id) {
@@ -57,37 +52,32 @@ public class Hearing {
         return this;
     }
 
-    public Hearing setCourtCentreName(String courtCentreName) {
-        this.courtCentreName = courtCentreName;
+    public Hearing setStartDateTime(ZonedDateTime startDateTime) {
+        this.startDateTime = startDateTime;
         return this;
     }
 
-    public Hearing setCourtCode(String courtCode) {
-        this.courtCode = courtCode;
+    public Hearing setHearingDates(List<ZonedDateTime> hearingDates) {
+        this.hearingDates = hearingDates;
         return this;
     }
 
-    public Hearing setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
+    public Hearing setCourtCentre(CourtCentre courtCentre) {
+        this.courtCentre = courtCentre;
         return this;
     }
 
-    public Hearing setJudgeName(String judgeName) {
-        this.judgeName = judgeName;
+    public Hearing setAttendees(List<Attendee> attendees) {
+        this.attendees = attendees;
         return this;
     }
 
-    public Hearing setProsecutorName(String prosecutorName) {
-        this.prosecutorName = prosecutorName;
+    public Hearing setDefendants(List<Defendant> defendants) {
+        this.defendants = defendants;
         return this;
     }
 
-    public Hearing setDefenceName(String defenceName) {
-        this.defenceName = defenceName;
-        return this;
-    }
-
-    public static Hearing hearing(){
+    public static Hearing hearing() {
         return new Hearing();
     }
 }

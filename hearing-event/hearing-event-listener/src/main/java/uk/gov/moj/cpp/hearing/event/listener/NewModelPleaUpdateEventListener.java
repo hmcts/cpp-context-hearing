@@ -14,7 +14,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.handler.exception.HandlerExecutionException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
@@ -40,7 +40,7 @@ public class NewModelPleaUpdateEventListener {
     public void offencePleaUpdated(final JsonEnvelope envelop) {
         LOGGER.info("update plea: " + envelop.toString() );
 
-        final HearingOffencePleaUpdated event = convertToObject(envelop);
+        final PleaUpsert event = convertToObject(envelop);
         Optional.ofNullable(
                 offenceRepository.findBySnapshotKey(new HearingSnapshotKey(event.getOffenceId(), event.getHearingId())))
                 .map(offence -> {
@@ -57,7 +57,7 @@ public class NewModelPleaUpdateEventListener {
         }
     }
 
-    private HearingOffencePleaUpdated convertToObject(final JsonEnvelope envelop) {
-        return this.jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), HearingOffencePleaUpdated.class);
+    private PleaUpsert convertToObject(final JsonEnvelope envelop) {
+        return this.jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), PleaUpsert.class);
     }
 }

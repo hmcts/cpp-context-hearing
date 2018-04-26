@@ -23,7 +23,7 @@ public class Offence implements Serializable {
     private final LocalDate endDate;
     private final Integer orderIndex;
     private final Integer count;
-    private final LocalDate convictionDate;
+    private LocalDate convictionDate;
     private Plea plea;
     private final String title;
     private final String legislation;
@@ -98,12 +98,18 @@ public class Offence implements Serializable {
         return convictionDate;
     }
 
+    public Offence setConvictionDate(LocalDate convictionDate) {
+        this.convictionDate = convictionDate;
+        return this;
+    }
+
     public Plea getPlea() {
         return plea;
     }
 
-    public void setPlea(Plea plea) {
+    public Offence setPlea(Plea plea) {
         this.plea = plea;
+        return this;
     }
 
     public String getTitle() {

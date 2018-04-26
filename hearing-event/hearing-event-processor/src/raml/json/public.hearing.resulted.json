@@ -1,138 +1,74 @@
 {
-  "hearingId": "7601f854-2e7b-4174-a83b-8ac564244b11",
-  "sharedTime": "2017-04-12T09:18:23Z",
-  "resultLines": [
-    {
-      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-      "personId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
-      "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-      "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
-      "level": "OFFENCE",
-      "resultLabel": "Imprisonment",
-      "prompts": [
-        {
-          "label": "Imprisonment duration",
-          "value": "1 year 6 months"
-        },
-        {
-          "label": "Prison",
-          "value": "Wormwood Scrubs"
-        }
-      ]
-    },
-    {
-      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-      "personId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
-      "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-      "offenceId": "25d8cbfa-8dd0-494f-82f5-e58df2e53a33",
-      "level": "CASE",
-      "resultLabel": "Victim Surchange",
-      "prompts": [
-        {
-          "label": "Amount",
-          "value": "£60"
-        }
-      ]
-    }
-  ],
   "hearing": {
-    "id": "f6541c25-825c-6a98-1764-caee654c763a",
-    "type": "TRIAL",
-    "courtCentreId": "e8821a38-546d-4b56-9992-ebdd772a561f",
-    "courtCentreName": "Liverpool Crown Court",
-    "courtRoomId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
-    "courtRoomName": "3",
-    "judge": {
-      "id": "1daefec3-2f76-8109-82d9-2e60544a6c01",
-      "title": "HHJ",
-      "firstName": "Neil",
-      "lastName": "Flewitt"
+    "id": "c6a3fb7e-7523-4391-98a0-ae622ad4ac33",
+    "courtCentre": {
+      "courtCentreId": "d2ca6c3b-6c47-400f-acfb-6eea9cb45705",
+      "courtCentreName": "whEYt5pGLz",
+      "courtRoomId": "b1355956-eaa5-47ba-bb85-48eef368fa5d",
+      "courtRoomName": "fjm8yfzGGJ"
     },
-    "startDateTime": "2016-06-01T10:00:00Z",
-    "notBefore": true,
-    "estimateMinutes": 7200,
-    "defendants": [
-      {
-        "id": "0baecac5-222b-402d-9047-84803679edac",
-        "personId": "0baecac5-222b-402d-9047-84803679edad",
-        "firstName": "David",
-        "lastName": "Lloyd",
-        "nationality": "British",
-        "gender": "Male",
+    "attendees": [{
+      "firstName": "3nYfi7ayhi",
+      "lastName": "FHHU9tSba0",
+      "type": "JUDGE",
+      "title": "xskZgkBeqq"
+    }],
+    "defendants": [{
+      "id": "36e43e49-f644-4884-9261-8485537fe9ab",
+      "person": {
+        "id": "fc14c731-d05b-406a-bed2-74021be2e938",
+        "firstName": "2FiARDLxhK",
+        "lastName": "meKUv0Guug",
+        "dateOfBirth": "2014-06-04",
         "address": {
-          "address1": "222 Furze Road",
-          "address2": "Exeter",
-          "address3": "England",
-          "address4": "UK",
-          "postCode": "W1T 1JY"
+          "address1": "TRSO6VFKPV",
+          "address2": "RwLw0YjcT4",
+          "address3": "WzsLzeJo6q",
+          "address4": "jcURK6HxG1",
+          "postCode": "QkqxJ3tZdr"
         },
-        "dateOfBirth": "1995-03-23",
-        "defenceOrganisation": "Solicitor XYZ",
-        "interpreter": {
-          "needed": false,
-          "language": "English"
-        },
-        "defendantCase": [
-          {
-            "caseId": "000000-0000-0000-000000000000",
-            "bailStatus": "bailed",
-            "custodyTimeLimitDate": "2018-01-30"
-          }
-        ],
-        "offences": [
-          {
-            "id": "7e2f843e-d639-40b3-8611-8015f3a18958",
-            "caseId": "000000-0000-0000-000000000000",
-            "offenceCode": "H8198",
-            "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
-            "section": "Section 51",
-            "startDate": "2010-08-01",
-            "endDate": "2011-08-01",
-            "orderIndex": 1,
-            "count": 1,
-            "convictionDate": "2017-08-01",
-            "title": "Wounding with intent",
-            "legislation": "legislation"
-          }
-        ]
-      }
-    ],
-    "witnesses":[
-      {
-        "id":"7e2f843e-d639-40b3-8611-8015f3a18810",
-        "caseId":"7e2f843e-d639-40b3-8611-8015f3a18950",
-        "type":"Prosecution",
-        "classification":"Professional",
-        "personId":"ab746921-d839-4867-bcf9-b41db8ebc852",
-        "title":"Mr",
-        "firstName":"David",
-        "lastName":"LLOYD",
-        "dateOfBirth":"1980-07-15",
-        "nationality":"England",
-        "gender":"Male",
-        "homeTelephone":"02012345678",
-        "workTelephone":"02012345679",
-        "mobile":"07777777777",
-        "fax":"02011111111",
-        "email":"email@email.com"
-      }
-    ]
-  },
-  "cases": [{
-    "caseId": "000000-0000-0000-000000000000",
-    "urn": "87GD9945217"
-  }],
-  "prosecutionCounsels": [{
-    "attendeeId": "d06f6539-2a7c-4bc8-bca3-A1e5a225471a",
-    "hearingId": "f06f6539-2a7c-4bc8-bca3-A1e5a225471a",
-    "personId": "a06f6539-2a7c-4bc8-bca3-A1e5a225471b",
-    "status" : "QC"
-  }],
-  "defenceCounsels": [{
-    "attendeeId": "d06f6539-2a7c-4bc8-bca3-A1e5a225471a",
-    "personId": "a06f6539-2a7c-4bc8-bca3-A1e5a225471b",
-    "hearingId": "c06f6539-2a7c-4bc8-bca3-A1e5a225471c",
-    "defendantIds": ["a06f6539-2a7c-4bc8-bca3-A1e5a225471c","a06f6539-2a7c-4bc8-bca3-A1e5a225471d"],
-    "status": "QC"
-  }]  
+        "nationality": "2ngztuHbZG",
+        "gender": "s3rd7yCqov",
+        "homeTelephone": "",
+        "workTelephone": "",
+        "mobile": "",
+        "fax": "",
+        "email": ""
+      },
+      "defenceOrganisation": "zWcg2T1IcX",
+      "interpreter": {
+        "name": "",
+        "language": "RsranAFgSO"
+      },
+      "cases": [{
+        "id": "6d4295ff-3878-46ad-a05b-9c7b17a897f3",
+        "urn": "3nF4LR0iRK",
+        "bailStatus": "B7n9HmHrpw",
+        "custodyTimeLimitDate": "2021-02-04T12:00:15.351Z",
+        "offences": [{
+          "id": "5ba1c5e8-8e6f-4b81-9d90-0a75a51e4a10",
+          "code": "E8RLeQXk5i",
+          "convictionDate": "2015-12-15",
+          "plea": {
+            "id": "5ba1c5e8-8e6f-4b81-9d90-0a75a51e4a10",
+            "date": "2015-12-02",
+            "value": "NOT_GUILTY",
+            "enteredHearingId": "c6a3fb7e-7523-4391-98a0-ae622ad4ac33"
+          },
+          "verdict": {
+            "verdictDescription": "nXdgfBIC7d",
+            "verdictCategory": "GUILTY",
+            "numberOfSplitJurors": "9-0",
+            "verdictDate": "2015-12-15",
+            "numberOfJurors": 9,
+            "unanimous": false,
+            "enteredHearingId": "c6a3fb7e-7523-4391-98a0-ae622ad4ac33"
+          },
+          "wording": "5BFduy8niU",
+          "startDate": "2016-12-13",
+          "endDate": "2017-04-11"
+        }]
+      }]
+    }]
+  }
 }

@@ -1,33 +1,52 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class Plea {
 
-    private LocalDate pleaDate;
-    private String pleaValue;
+    private UUID id;
+    private LocalDate date;
+    private String value;
+    private UUID enteredHearingId;
 
-    public LocalDate getPleaDate() {
-        return pleaDate;
+    public UUID getId() {
+        return id;
     }
 
-    public String getPleaValue() {
-        return pleaValue;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public Plea setPleaDate(LocalDate pleaDate) {
-        this.pleaDate = pleaDate;
+    public String getValue() {
+        return value;
+    }
+
+    public UUID getEnteredHearingId() {
+        return enteredHearingId;
+    }
+
+    public Plea setId(UUID id) {
+        this.id = id;
         return this;
     }
 
-    public Plea setPleaValue(String pleaValue) {
-        this.pleaValue = pleaValue;
+    public Plea setDate(LocalDate date) {
+        this.date = date;
         return this;
     }
 
-    public static Plea plea(){
+    public Plea setValue(String value) {
+        this.value = value;
+        return this;
+    }
+
+    public Plea setEnteredHearingId(UUID enteredHearingId) {
+        this.enteredHearingId = enteredHearingId;
+        return this;
+    }
+
+    public static Plea plea() {
         return new Plea();
     }
-
-
 }

@@ -23,7 +23,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 
@@ -79,7 +79,7 @@ public class NewModelUpdatePleaCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(Initiated.class,
-            HearingOffencePleaUpdated.class,
+            PleaUpsert.class,
             OffencePleaUpdated.class,
             ConvictionDateAdded.class,
             ConvictionDateRemoved.class);

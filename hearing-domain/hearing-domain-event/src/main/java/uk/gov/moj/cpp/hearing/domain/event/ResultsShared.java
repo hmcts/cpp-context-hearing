@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.ResultLine;
 
 @Event("hearing.results-shared")
@@ -30,6 +31,8 @@ public class ResultsShared implements Serializable {
     private final List<Case> cases;
     private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels;
+    private final Map<UUID, VerdictUpsert> verdicts;
+    private final Map<UUID, Plea> pleas;
 
     @JsonCreator
     public ResultsShared(@JsonProperty("hearingId") final UUID hearingId,
@@ -38,14 +41,19 @@ public class ResultsShared implements Serializable {
                          @JsonProperty("hearing") final Hearing hearing,
                          @JsonProperty("cases") final List<Case> cases,
                          @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
-                         @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels) {
+                         @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
+                         @JsonProperty("pleas") final Map<UUID, Plea> pleas,
+                         @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts
+                         ) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.resultLines = Collections.unmodifiableList(Optional.ofNullable(resultLines).orElseGet(ArrayList::new));
         this.cases = Collections.unmodifiableList(Optional.ofNullable(cases).orElseGet(ArrayList::new));
         this.hearing = hearing;
-        this.prosecutionCounsels = Collections.unmodifiableMap(Optional.ofNullable(prosecutionCounsels).orElseGet(HashMap::new));
-        this.defenceCounsels = Collections.unmodifiableMap(Optional.ofNullable(defenceCounsels).orElseGet(HashMap::new));
+        this.prosecutionCounsels = prosecutionCounsels;
+        this.defenceCounsels = defenceCounsels;
+        this.pleas = pleas;
+        this.verdicts = verdicts;
     }
 
     public UUID getHearingId() {
@@ -74,5 +82,13 @@ public class ResultsShared implements Serializable {
 
     public Map<UUID, DefenceCounselUpsert> getDefenceCounsels() {
         return defenceCounsels;
+    }
+
+    public Map<UUID, VerdictUpsert> getVerdicts() {
+        return verdicts;
+    }
+
+    public Map<UUID, Plea> getPleas() {
+        return pleas;
     }
 }

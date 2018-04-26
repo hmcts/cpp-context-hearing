@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Event("hearing.offence-verdict-updated")
-public class OffenceVerdictUpdated {
+public class VerdictUpsert implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID caseId;
     private UUID hearingId;
@@ -25,7 +28,7 @@ public class OffenceVerdictUpdated {
     private LocalDate verdictDate;
 
     @JsonIgnore
-    public OffenceVerdictUpdated(Builder builder) {
+    public VerdictUpsert(Builder builder) {
         this.caseId = builder.caseId;
         this.hearingId = builder.hearingId;
         this.offenceId = builder.offenceId;
@@ -41,18 +44,18 @@ public class OffenceVerdictUpdated {
     }
 
     @JsonCreator
-    public OffenceVerdictUpdated(@JsonProperty("caseId") UUID caseId,
-                                 @JsonProperty("hearingId") UUID hearingId,
-                                 @JsonProperty("offenceId") UUID offenceId,
-                                 @JsonProperty("verdictId") UUID verdictId,
-                                 @JsonProperty("verdictValueId") UUID verdictValueId,
-                                 @JsonProperty("category") String category,
-                                 @JsonProperty("code") String code,
-                                 @JsonProperty("description") String description,
-                                 @JsonProperty("numberOfJurors") Integer numberOfJurors,
-                                 @JsonProperty("numberOfSplitJurors") Integer numberOfSplitJurors,
-                                 @JsonProperty("unanimous") Boolean unanimous,
-                                 @JsonProperty("verdictDate") LocalDate verdictDate
+    protected VerdictUpsert(@JsonProperty("caseId") UUID caseId,
+                         @JsonProperty("hearingId") UUID hearingId,
+                         @JsonProperty("offenceId") UUID offenceId,
+                         @JsonProperty("verdictId") UUID verdictId,
+                         @JsonProperty("verdictValueId") UUID verdictValueId,
+                         @JsonProperty("category") String category,
+                         @JsonProperty("code") String code,
+                         @JsonProperty("description") String description,
+                         @JsonProperty("numberOfJurors") Integer numberOfJurors,
+                         @JsonProperty("numberOfSplitJurors") Integer numberOfSplitJurors,
+                         @JsonProperty("unanimous") Boolean unanimous,
+                         @JsonProperty("verdictDate") LocalDate verdictDate
     ) {
         this.caseId = caseId;
         this.hearingId = hearingId;
@@ -115,7 +118,6 @@ public class OffenceVerdictUpdated {
     public LocalDate getVerdictDate() {
         return verdictDate;
     }
-
 
     public static class Builder {
         private UUID caseId;
@@ -191,8 +193,57 @@ public class OffenceVerdictUpdated {
             return this;
         }
 
-        public OffenceVerdictUpdated build(){
-            return new OffenceVerdictUpdated(this);
+
+        public UUID getCaseId() {
+            return caseId;
+        }
+
+        public UUID getHearingId() {
+            return hearingId;
+        }
+
+        public UUID getOffenceId() {
+            return offenceId;
+        }
+
+        public UUID getVerdictId() {
+            return verdictId;
+        }
+
+        public UUID getVerdictValueId() {
+            return verdictValueId;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public Integer getNumberOfJurors() {
+            return numberOfJurors;
+        }
+
+        public Integer getNumberOfSplitJurors() {
+            return numberOfSplitJurors;
+        }
+
+        public Boolean getUnanimous() {
+            return unanimous;
+        }
+
+        public LocalDate getVerdictDate() {
+            return verdictDate;
+        }
+
+        public VerdictUpsert build(){
+            return new VerdictUpsert(this);
         }
     }
 

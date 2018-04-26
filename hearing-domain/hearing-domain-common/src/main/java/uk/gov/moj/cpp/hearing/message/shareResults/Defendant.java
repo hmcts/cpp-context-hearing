@@ -1,29 +1,41 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
 import java.util.List;
+import java.util.UUID;
 
 public class Defendant {
 
-    private List<ResultLine> resultsLines;
-
+    private UUID id;
     private Person person;
 
-    private Hearing hearing;
+    private String defenceOrganisation;
 
-    public List<ResultLine> getResultsLines() {
-        return resultsLines;
+    private Interpreter interpreter;
+
+    private List<Case> cases;
+
+    public UUID getId() {
+        return id;
     }
 
     public Person getPerson() {
         return person;
     }
 
-    public Hearing getHearing() {
-        return hearing;
+    public String getDefenceOrganisation() {
+        return defenceOrganisation;
     }
 
-    public Defendant setResultsLines(List<ResultLine> resultsLines) {
-        this.resultsLines = resultsLines;
+    public Interpreter getInterpreter() {
+        return interpreter;
+    }
+
+    public List<Case> getCases() {
+        return cases;
+    }
+
+    public Defendant setId(UUID id) {
+        this.id = id;
         return this;
     }
 
@@ -32,12 +44,22 @@ public class Defendant {
         return this;
     }
 
-    public Defendant setHearing(Hearing hearing) {
-        this.hearing = hearing;
+    public Defendant setDefenceOrganisation(String defenceOrganisation) {
+        this.defenceOrganisation = defenceOrganisation;
         return this;
     }
 
-    public static Defendant defendant(){
+    public Defendant setInterpreter(Interpreter interpreter) {
+        this.interpreter = interpreter;
+        return this;
+    }
+
+    public Defendant setCases(List<Case> cases) {
+        this.cases = cases;
+        return this;
+    }
+
+    public static Defendant defendant() {
         return new Defendant();
     }
 

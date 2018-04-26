@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.it.NewOffencePleaUpdateIT.PleaValueType;
+import uk.gov.moj.cpp.hearing.it.PleaIT.PleaValueType;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 public class InitiateHearingIT extends AbstractIT {

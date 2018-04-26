@@ -48,6 +48,10 @@ public final class Offence implements Serializable {
             return this;
         }
 
+        public Plea.Builder getPlea() {
+            return plea;
+        }
+
         public Offence build() {
             return new Offence(id, ofNullable(plea).map(Plea.Builder::build).orElse(null)
             );

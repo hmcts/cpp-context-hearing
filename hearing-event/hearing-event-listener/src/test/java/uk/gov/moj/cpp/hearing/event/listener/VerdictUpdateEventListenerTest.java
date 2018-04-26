@@ -10,7 +10,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
@@ -61,16 +61,28 @@ public class VerdictUpdateEventListenerTest {
 
         UUID hearingId = randomUUID();
 
-        OffenceVerdictUpdated offenceVerdictUpdated = new OffenceVerdictUpdated(randomUUID(), hearingId, randomUUID(),
-                randomUUID(), randomUUID(), STRING.next(), STRING.next(), STRING.next(), INTEGER.next(), INTEGER.next(),
-                BOOLEAN.next(), PAST_LOCAL_DATE.next());
+        VerdictUpsert verdictUpsert = VerdictUpsert.builder()
+                .withCaseId(randomUUID())
+                .withHearingId(hearingId)
+                .withOffenceId(randomUUID())
+                .withVerdictId(randomUUID())
+                .withVerdictValueId(randomUUID())
+                .withCategory(STRING.next())
+                .withCode(STRING.next())
+                .withDescription(STRING.next())
+                .withNumberOfJurors(INTEGER.next())
+                .withNumberOfSplitJurors(INTEGER.next())
+                .withUnanimous(BOOLEAN.next())
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .build();
 
-        Ahearing ahearing = Ahearing.builder().withId(hearingId)
+        Ahearing ahearing = Ahearing.builder()
+                .withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withOffences(asList(
                                         Offence.builder()
-                                                .withId(new HearingSnapshotKey(offenceVerdictUpdated.getOffenceId(), hearingId))
+                                                .withId(new HearingSnapshotKey(verdictUpsert.getOffenceId(), hearingId))
                                                 .build()
                                 ))
                                 .build()))
@@ -79,20 +91,20 @@ public class VerdictUpdateEventListenerTest {
         when(this.ahearingRepository.findById(hearingId)).thenReturn(ahearing);
 
         verdictUpdateEventListener.verdictUpdate(envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
-                objectToJsonObjectConverter.convert(offenceVerdictUpdated)));
+                objectToJsonObjectConverter.convert(verdictUpsert)));
 
         verify(this.ahearingRepository).save(ahearing);
 
         Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
 
-        assertThat(offence.getId().getId(), is(offenceVerdictUpdated.getOffenceId()));
-        assertThat(offence.getId().getHearingId(), is(offenceVerdictUpdated.getHearingId()));
-        assertThat(offence.getVerdictCategory(), is(offenceVerdictUpdated.getCategory()));
-        assertThat(offence.getVerdictCode(), is(offenceVerdictUpdated.getCode()));
-        assertThat(offence.getVerdictDescription(), is(offenceVerdictUpdated.getDescription()));
-        assertThat(offence.getNumberOfJurors(), is(offenceVerdictUpdated.getNumberOfJurors()));
-        assertThat(offence.getNumberOfSplitJurors(), is(offenceVerdictUpdated.getNumberOfSplitJurors()));
-        assertThat(offence.getUnanimous(), is(offenceVerdictUpdated.getUnanimous()));
-        assertThat(offence.getVerdictDate(), is(offenceVerdictUpdated.getVerdictDate()));
+        assertThat(offence.getId().getId(), is(verdictUpsert.getOffenceId()));
+        assertThat(offence.getId().getHearingId(), is(verdictUpsert.getHearingId()));
+        assertThat(offence.getVerdictCategory(), is(verdictUpsert.getCategory()));
+        assertThat(offence.getVerdictCode(), is(verdictUpsert.getCode()));
+        assertThat(offence.getVerdictDescription(), is(verdictUpsert.getDescription()));
+        assertThat(offence.getNumberOfJurors(), is(verdictUpsert.getNumberOfJurors()));
+        assertThat(offence.getNumberOfSplitJurors(), is(verdictUpsert.getNumberOfSplitJurors()));
+        assertThat(offence.getUnanimous(), is(verdictUpsert.getUnanimous()));
+        assertThat(offence.getVerdictDate(), is(verdictUpsert.getVerdictDate()));
     }
 }

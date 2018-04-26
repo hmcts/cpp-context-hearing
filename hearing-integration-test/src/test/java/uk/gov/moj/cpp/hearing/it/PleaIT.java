@@ -23,7 +23,7 @@ import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 @SuppressWarnings("unchecked")
-public class NewOffencePleaUpdateIT extends AbstractIT {
+public class PleaIT extends AbstractIT {
 
     enum PleaValueType {GUILTY, NOT_GUILTY};
 

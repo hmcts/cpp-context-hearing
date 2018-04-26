@@ -16,19 +16,13 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.HearingOffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -80,7 +74,7 @@ public class NewModelVerdictUpdateEventProcessorTest {
     @Test
     public void offencePleaUpdate() {
 
-        OffenceVerdictUpdated offenceVerdictUpdated = OffenceVerdictUpdated.builder()
+        VerdictUpsert verdictUpsert = VerdictUpsert.builder()
                 .withHearingId(randomUUID())
                 .withOffenceId(randomUUID())
                 .withCaseId(randomUUID())
@@ -96,7 +90,7 @@ public class NewModelVerdictUpdateEventProcessorTest {
                 .build();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
-                objectToJsonObjectConverter.convert(offenceVerdictUpdated));
+                objectToJsonObjectConverter.convert(verdictUpsert));
 
         this.newModelVerdictUpdateEventProcessor.verdictUpdate(event);
 
@@ -106,7 +100,7 @@ public class NewModelVerdictUpdateEventProcessorTest {
                 envelopeArgumentCaptor.getValue(), jsonEnvelope(
                         metadata().withName("public.hearing.verdict-updated"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", is(offenceVerdictUpdated.getHearingId().toString()))
+                                withJsonPath("$.hearingId", is(verdictUpsert.getHearingId().toString()))
 
                                 )
                         )
