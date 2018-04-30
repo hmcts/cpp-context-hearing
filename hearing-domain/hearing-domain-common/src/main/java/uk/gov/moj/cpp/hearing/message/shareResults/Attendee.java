@@ -1,6 +1,10 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
+import java.util.UUID;
+
 public class Attendee<T extends Attendee> {
+
+    private UUID personId;
 
     private String firstName;
 
@@ -10,6 +14,9 @@ public class Attendee<T extends Attendee> {
 
     private String title;
 
+    public UUID getPersonId() {
+        return personId;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -25,6 +32,11 @@ public class Attendee<T extends Attendee> {
 
     public String getTitle() {
         return title;
+    }
+
+    public T setPersonId(UUID personId) {
+        this.personId = personId;
+        return (T) this;
     }
 
     public T setFirstName(String firstName) {
@@ -47,7 +59,7 @@ public class Attendee<T extends Attendee> {
         return (T) this;
     }
 
-    public static <T extends Attendee> Attendee<T> attendee(){
+    public static <T extends Attendee> Attendee<T> attendee() {
         return new Attendee<>();
     }
 }

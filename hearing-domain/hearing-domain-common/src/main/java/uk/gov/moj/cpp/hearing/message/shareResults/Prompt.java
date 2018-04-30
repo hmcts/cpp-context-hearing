@@ -13,15 +13,17 @@ public class Prompt {
         return value;
     }
 
-    public void setLabel(String label) {
+    public Prompt setLabel(String label) {
         this.label = label;
+        return this;
     }
 
-    public void setValue(String value) {
+    public Prompt setValue(String value) {
         this.value = value;
+        return this;
     }
 
-    public static Prompt prompt(){
+    public static Prompt prompt() {
         return new Prompt();
     }
 }

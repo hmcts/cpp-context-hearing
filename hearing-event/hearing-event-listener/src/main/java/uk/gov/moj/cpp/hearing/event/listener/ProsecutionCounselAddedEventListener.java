@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
+@SuppressWarnings("squid:S00112")
 @ServiceComponent(EVENT_LISTENER)
 public class ProsecutionCounselAddedEventListener {
 
@@ -32,6 +33,10 @@ public class ProsecutionCounselAddedEventListener {
         ProsecutionCounselUpsert prosecutionCounselAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ProsecutionCounselUpsert.class);
 
         Ahearing hearing = ahearingRepository.findBy(prosecutionCounselAdded.getHearingId());
+
+        if (hearing == null){
+            throw new RuntimeException("Hearing not found for prosecution councel update.");
+        }
 
         ProsecutionAdvocate prosecutionAdvocate = hearing.getAttendees().stream()
                 .filter(a -> a instanceof ProsecutionAdvocate)

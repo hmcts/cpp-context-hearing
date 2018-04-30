@@ -38,9 +38,10 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.val
 
 public class TestTemplates {
 
-    private TestTemplates(){
+    private TestTemplates() {
 
     }
+
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields() {
 
         final UUID caseId = randomUUID();
@@ -157,11 +158,11 @@ public class TestTemplates {
                                 )
                         )
                         .addWintess(Witness.builder()
-                                        .withId(randomUUID())
-                                        .withCaseId(caseId)
-                                        .withType("Prosecution")
-                                        .withClassification("Expert")
-                                        .withPersonId(randomUUID())
+                                .withId(randomUUID())
+                                .withCaseId(caseId)
+                                .withType("Prosecution")
+                                .withClassification("Expert")
+                                .withPersonId(randomUUID())
                                 .withTitle(STRING.next())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next())
@@ -179,34 +180,35 @@ public class TestTemplates {
     }
 
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields(
-                    final UUID caseId, final UUID hearingId, final UUID... defendantIds) {
+            final UUID caseId, final UUID hearingId, final UUID... defendantIds) {
 
         final Builder initiateHearingBuilder = InitiateHearingCommand.builder()
-                        .addCase(Case.builder().withCaseId(caseId).withUrn(STRING.next()))
-                        .withHearing(Hearing.builder().withId(hearingId).withType(STRING.next())
-                                        .withCourtCentreId(randomUUID())
-                                        .withCourtCentreName(STRING.next())
-                                        .withCourtRoomId(randomUUID())
-                                        .withCourtRoomName(STRING.next())
-                                        .withJudge(Judge.builder().withId(randomUUID())
-                                                        .withTitle(STRING.next())
-                                                        .withFirstName(STRING.next())
-                                                        .withLastName(STRING.next()))
-                                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
-                                        .withEstimateMinutes(INTEGER.next())
-        );
+                .addCase(Case.builder().withCaseId(caseId).withUrn(STRING.next()))
+                .withHearing(Hearing.builder().withId(hearingId).withType(STRING.next())
+                        .withCourtCentreId(randomUUID())
+                        .withCourtCentreName(STRING.next())
+                        .withCourtRoomId(randomUUID())
+                        .withCourtRoomName(STRING.next())
+                        .withJudge(Judge.builder().withId(randomUUID())
+                                .withTitle(STRING.next())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next()))
+                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
+                        .withEstimateMinutes(INTEGER.next())
+                );
         Arrays.stream(defendantIds).forEach(id ->
 
-            initiateHearingBuilder.getHearing().addDefendant(Defendant.builder()
+                initiateHearingBuilder.getHearing().addDefendant(Defendant.builder()
                         .withId(id).withPersonId(randomUUID())
-                            .withFirstName(STRING.next()).withLastName(STRING.next())
-                            .addDefendantCase(DefendantCase.builder().withCaseId(caseId))
-                            .addOffence(Offence.builder().withId(randomUUID()).withCaseId(caseId)
-                                            .withOffenceCode(STRING.next())
-                                            .withWording(STRING.next())
-                                        .withStartDate(PAST_LOCAL_DATE.next()))));
+                        .withFirstName(STRING.next()).withLastName(STRING.next())
+                        .addDefendantCase(DefendantCase.builder().withCaseId(caseId))
+                        .addOffence(Offence.builder().withId(randomUUID()).withCaseId(caseId)
+                                .withOffenceCode(STRING.next())
+                                .withWording(STRING.next())
+                                .withStartDate(PAST_LOCAL_DATE.next()))));
         return initiateHearingBuilder;
     }
+
     public static HearingUpdatePleaCommand.Builder updatePleaTemplate() {
         return HearingUpdatePleaCommand.builder()
                 .withCaseId(randomUUID())
@@ -228,41 +230,44 @@ public class TestTemplates {
     public static ShareResultsCommand shareResultsCommandTemplate(final InitiateHearingCommand initiateHearingCommand) {
         return ShareResultsCommand.builder()
                 .withResultLines(asList(ResultLine.builder()
-                            .withId(UUID.randomUUID())
-                            .withResultDefinitionId(UUID.randomUUID())
-                            .withPersonId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId())
-                            .withOffenceId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
-                            .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
-                            .withLevel(values(Level.values()).next())
-                            .withResultLabel(STRING.next())
-                            .withComplete(true)
-                            .withPrompts(asList(ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build(),
-                                    ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build()))
-                            .build(),
-                         ResultLine.builder()
-                            .withId(UUID.randomUUID())
-                            .withResultDefinitionId(UUID.randomUUID())
-                            .withPersonId(UUID.randomUUID())
-                            .withOffenceId(UUID.randomUUID())
-                            .withCaseId(UUID.randomUUID())
-                            .withLevel(values(Level.values()).next())
-                            .withResultLabel(STRING.next())
-                            .withComplete(false)
-                            .withPrompts(asList(ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build(),
-                                    ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build()))
-                            .build()))
+                                .withId(UUID.randomUUID())
+                                .withResultDefinitionId(UUID.randomUUID())
+                                .withPersonId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId())
+                                .withOffenceId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
+                                .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
+                                .withLevel(values(Level.values()).next())
+                                .withResultLabel(STRING.next())
+                                .withComplete(true)
+                                .withPrompts(asList(ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build(),
+                                        ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build()))
+                                .build(),
+                        ResultLine.builder()
+                                .withId(UUID.randomUUID())
+                                .withResultDefinitionId(UUID.randomUUID())
+                                .withPersonId(UUID.randomUUID())
+                                .withOffenceId(UUID.randomUUID())
+                                .withCaseId(UUID.randomUUID())
+                                .withLevel(values(Level.values()).next())
+                                .withResultLabel(STRING.next())
+                                .withComplete(false)
+                                .withClerkOfTheCourtId(randomUUID())
+                                .withClerkOfTheCourtFirstName(STRING.next())
+                                .withClerkOfTheCourtLastName(STRING.next())
+                                .withPrompts(asList(ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build(),
+                                        ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build()))
+                                .build()))
                 .build();
     }
 }

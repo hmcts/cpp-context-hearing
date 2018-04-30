@@ -4,6 +4,9 @@
   "properties": {
     "hearing": {
       "$ref": "#/definitions/hearing"
+    },
+    "sharedTime": {
+      "type": "string"
     }
   },
   "additionalProperties": false,
@@ -30,6 +33,12 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/defendant"
+          }
+        },
+        "sharedResultLines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/sharedResultLine"
           }
         }
       },
@@ -346,6 +355,54 @@
         "numberOfJurors",
         "unanimous",
         "enteredHearingId"
+      ]
+    },
+    "sharedResultLine": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "caseId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "defendantId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "offenceId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "level": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "rank": {
+          "type": "number"
+        },
+        "prompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "level",
+        "label",
+        "prompts"
       ]
     },
     "uuid": {

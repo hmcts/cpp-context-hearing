@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -7,6 +9,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.result.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.message.shareResults.Address;
 import uk.gov.moj.cpp.hearing.message.shareResults.Attendee;
@@ -19,11 +22,14 @@ import uk.gov.moj.cpp.hearing.message.shareResults.Interpreter;
 import uk.gov.moj.cpp.hearing.message.shareResults.Offence;
 import uk.gov.moj.cpp.hearing.message.shareResults.Person;
 import uk.gov.moj.cpp.hearing.message.shareResults.Plea;
+import uk.gov.moj.cpp.hearing.message.shareResults.Prompt;
 import uk.gov.moj.cpp.hearing.message.shareResults.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.message.shareResults.ShareResultsMessage;
+import uk.gov.moj.cpp.hearing.message.shareResults.SharedResultLine;
 import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
 
 import javax.inject.Inject;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +40,9 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 @SuppressWarnings({"squid:S1188"})
 @ServiceComponent(EVENT_PROCESSOR)
 public class PublishResultsEventProcessor {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(PublishResultsEventProcessor.class.getName());
 
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -52,9 +61,9 @@ public class PublishResultsEventProcessor {
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
     }
 
-
     @Handles("hearing.results-shared")
     public void resultsShared(final JsonEnvelope event) {
+        LOGGER.debug("results-shared event received {}", event.payloadAsJsonObject());
 
         final ResultsShared input = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
@@ -65,7 +74,9 @@ public class PublishResultsEventProcessor {
                         .setCourtCentre(mapCourtCentre(input))
                         .setAttendees(mapAttendees(input))
                         .setDefendants(mapDefendants(input))
-                );
+                        .setSharedResultLines(mapSharedResultsLines(input))
+                )
+                .setSharedTime(ZonedDateTime.now());
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
                 .apply(this.objectToJsonObjectConverter.convert(shareResultsMessage)));
@@ -81,6 +92,17 @@ public class PublishResultsEventProcessor {
 
     private static List<Attendee> mapAttendees(ResultsShared input) {
         List<Attendee> attendees = new ArrayList<>();
+
+        if (input.getResultLines().isEmpty()){
+            ResultLine resultLine = input.getResultLines().get(0);
+            attendees.add(Attendee.attendee()
+                    .setPersonId(resultLine.getClerkOfTheCourtId())
+                    .setFirstName(resultLine.getClerkOfTheCourtFirstName())
+                    .setLastName(resultLine.getClerkOfTheCourtLastName())
+                    .setTitle("")
+                    .setType("COURTCLERK"));
+        }
+
         attendees.add(Attendee.attendee()
                 .setFirstName(input.getHearing().getJudge().getFirstName())
                 .setLastName(input.getHearing().getJudge().getLastName())
@@ -113,6 +135,9 @@ public class PublishResultsEventProcessor {
                         )
                         .collect(toList())
         );
+
+
+
         return attendees;
     }
 
@@ -206,6 +231,26 @@ public class PublishResultsEventProcessor {
                                         .orElse(null)
                         )
                 )
+                .collect(Collectors.toList());
+    }
+
+    private List<SharedResultLine> mapSharedResultsLines(ResultsShared input) {
+        return input.getResultLines().stream()
+                .filter(ResultLine::isComplete)
+                .map(rl -> SharedResultLine.sharedResultLine()
+                        .setId(rl.getId())
+                        .setLastSharedResultId(rl.getLastSharedResultId())
+                        .setCaseId(rl.getCaseId())
+                        .setDefendantId(rl.getPersonId())
+                        .setOffenceId(rl.getOffenceId())
+                        .setLabel(rl.getResultLabel())
+                        .setLevel(rl.getLevel().name())
+                        .setPrompts(rl.getPrompts().stream()
+                                .map(p -> Prompt.prompt()
+                                        .setLabel(p.getLabel())
+                                        .setValue(p.getValue()))
+                                .collect(Collectors.toList())
+                        ))
                 .collect(Collectors.toList());
     }
 }

@@ -13,6 +13,7 @@ public class Hearing {
     private CourtCentre courtCentre;
     private List<Attendee> attendees;
     private List<Defendant> defendants;
+    private List<SharedResultLine> sharedResultLines;
 
     public UUID getId() {
         return id;
@@ -40,6 +41,10 @@ public class Hearing {
 
     public List<Defendant> getDefendants() {
         return defendants;
+    }
+
+    public List<SharedResultLine> getSharedResultLines() {
+        return sharedResultLines;
     }
 
     public Hearing setId(UUID id) {
@@ -74,6 +79,11 @@ public class Hearing {
 
     public Hearing setDefendants(List<Defendant> defendants) {
         this.defendants = defendants;
+        return this;
+    }
+
+    public Hearing setSharedResultLines(List<SharedResultLine> sharedResultLines) {
+        this.sharedResultLines = sharedResultLines;
         return this;
     }
 

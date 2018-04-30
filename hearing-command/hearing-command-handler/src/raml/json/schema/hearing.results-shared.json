@@ -16,7 +16,6 @@
       }
     }
   },
-  "additionalProperties": false,
   "required": [
     "hearingId",
     "sharedTime",
@@ -74,12 +73,10 @@
               "value": {
                 "type": "string"
               }
-            },
-            "additionalProperties": false
+            }
           }
         }
       },
-      "additionalProperties": false,
       "required": [
         "id",
         "personId",
@@ -87,8 +84,6 @@
         "offenceId",
         "level",
         "resultLabel",
-        "court",
-        "courtRoom",
         "clerkOfTheCourtId",
         "clerkOfTheCourtFirstName",
         "clerkOfTheCourtLastName",

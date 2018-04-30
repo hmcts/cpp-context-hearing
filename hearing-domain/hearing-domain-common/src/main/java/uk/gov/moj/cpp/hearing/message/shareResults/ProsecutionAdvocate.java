@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.message.shareResults;
 import java.util.List;
 import java.util.UUID;
 
-public class ProsecutionAdvocate extends Attendee<DefenceAdvocate> {
+public class ProsecutionAdvocate extends Attendee<ProsecutionAdvocate> {
 
     private List<UUID> caseIds;
 

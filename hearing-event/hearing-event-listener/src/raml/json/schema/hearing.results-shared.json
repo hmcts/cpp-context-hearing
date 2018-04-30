@@ -16,7 +16,6 @@
       }
     }
   },
-  "additionalProperties": true,
   "required": [
     "hearingId",
     "sharedTime",
@@ -52,7 +51,7 @@
           "type": "string"
         },
         "complete": {
-          "type":"boolean"
+          "type": "boolean"
         },
         "clerkOfTheCourtId": {
           "$ref": "#/definitions/uuid"
@@ -74,19 +73,21 @@
               "value": {
                 "type": "string"
               }
-            },
-            "additionalProperties": false
+            }
           }
         }
       },
-      "additionalProperties": false,
       "required": [
         "id",
         "personId",
         "caseId",
         "offenceId",
         "level",
-        "resultLabel"
+        "resultLabel",
+        "clerkOfTheCourtId",
+        "clerkOfTheCourtFirstName",
+        "clerkOfTheCourtLastName",
+        "prompts"
       ]
     },
     "uuid": {
