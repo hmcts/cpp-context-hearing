@@ -1,6 +1,11 @@
-package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
+package uk.gov.moj.cpp.hearing.command.defendant;
 
-public class Interpreter {
+import java.io.Serializable;
+
+public class Interpreter implements Serializable {
+
+    private final static long serialVersionUID = 1L;
+
     private String language;
 
     private Boolean needed;
@@ -26,6 +31,7 @@ public class Interpreter {
     }
 
     public static class Builder {
+
         private String language;
 
         private Boolean needed;

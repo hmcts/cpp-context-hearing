@@ -1,0 +1,27 @@
+{
+  "caseId": "CASE_ID",
+  "caseUrn": "CASE_URN",
+  "defendants": {
+    "address": {
+      "address1": "222 Furze Road",
+      "address2": "Exeter",
+      "address3": "England",
+      "address4": "UK",
+      "postcode": "W1T 1JY"
+    },
+    "bailStatus": "bailed",
+    "custodyTimeLimitDate": "2018-01-30",
+    "dateOfBirth": "1995-03-23",
+    "defenceOrganisation": "Solicitor XYZ",
+    "firstName": "David",
+    "gender": "Male",
+    "id": "DEFENDANT_ID",
+    "interpreter": {
+      "language": "English",
+      "needed": false
+    },
+    "lastName": "Lloyd",
+    "nationality": "British",
+    "personId": "PERSON_ID"
+  }
+}

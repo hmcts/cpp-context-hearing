@@ -1,9 +1,5 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -16,6 +12,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "a_defendant")
@@ -133,6 +132,10 @@ public class Defendant {
         this.defendantWitnesses = builder.defendantWitnesses;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public List<Offence> getOffences() {
         return offences;
     }
@@ -157,24 +160,48 @@ public class Defendant {
         return firstName;
     }
 
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
     public String getLastName() {
         return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public java.time.LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
+    public void setDateOfBirth(java.time.LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
     public String getNationality() {
         return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
     }
 
     public String getGender() {
         return gender;
     }
 
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     public Address getAddress() {
         return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public String getWorkTelephone() {
@@ -209,8 +236,16 @@ public class Defendant {
         return defenceSolicitorFirm;
     }
 
+    public void setDefenceSolicitorFirm(String defenceSolicitorFirm) {
+        this.defenceSolicitorFirm = defenceSolicitorFirm;
+    }
+
     public String getInterpreterLanguage() {
         return interpreterLanguage;
+    }
+
+    public void setInterpreterLanguage(String interpreterLanguage) {
+        this.interpreterLanguage = interpreterLanguage;
     }
 
     /**
@@ -226,10 +261,26 @@ public class Defendant {
     }
 
     public List<Witness> getDefendantWitnesses() {
-        if(defendantWitnesses == null){
+        if (defendantWitnesses == null) {
             defendantWitnesses = new ArrayList<>();
         }
         return defendantWitnesses;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (null == o || getClass() != o.getClass()) {
+            return false;
+        }
+        return Objects.equals(this.id, ((Defendant) o).id);
     }
 
     public static class Builder {
@@ -387,25 +438,5 @@ public class Defendant {
         public Defendant build() {
             return new Defendant(this);
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.id);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        return Objects.equals(this.id, ((Defendant) o).id);
     }
 }

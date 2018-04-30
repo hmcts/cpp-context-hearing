@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 import uk.gov.justice.services.core.annotation.Handles;
 
 import java.io.File;
@@ -15,8 +13,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 
 public class HearingCommandHandlerRamlConfigTest {
 
@@ -43,7 +42,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 MagistratesCourtInitiateHearingCommandHandler.class,
                 HearingEventCommandHandler.class,
                 AddWitnessCommandHandler.class,
-                GenerateNowsCommandHandler.class
+                GenerateNowsCommandHandler.class,
+                ChangeCaseDefendantDetailsCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));
@@ -62,10 +62,10 @@ public class HearingCommandHandlerRamlConfigTest {
     public void testThatAllFilesInSchemasAreReferenced() throws IOException {
 
         List<String> filesThatArePresent =
-        Arrays.stream(Objects.requireNonNull(new File("src/raml/json/schema").listFiles()))
-                .map(File::getName)
-                .map(name -> "json/schema/" + name)
-                .collect(Collectors.toList());
+                Arrays.stream(Objects.requireNonNull(new File("src/raml/json/schema").listFiles()))
+                        .map(File::getName)
+                        .map(name -> "json/schema/" + name)
+                        .collect(Collectors.toList());
 
         Collections.sort(filesThatArePresent);
 

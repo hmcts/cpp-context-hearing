@@ -48,6 +48,7 @@ public class Address {
   }
 
   public static class Builder {
+
     private String address1;
 
     private String address2;
@@ -57,6 +58,8 @@ public class Address {
     private String address4;
 
     private String postcode;
+
+    private Builder() {}
 
     public Builder withAddress1(final String address1) {
       this.address1 = address1;

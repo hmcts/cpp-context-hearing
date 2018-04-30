@@ -87,12 +87,21 @@ public class InitiateHearingEventProcessorTest {
 
         this.initiateHearingEventProcessor.hearingInitiated(event);
 
-        verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender, times(4)).send(this.envelopeArgumentCaptor.capture());
 
         final List<JsonEnvelope> envelopes = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(
                 envelopes.get(0), jsonEnvelope(
+                        metadata().withName("hearing.command.register-defendant-with-hearing"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.defendantId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
+                        .thatMatchesSchema()
+        );
+
+        assertThat(
+                envelopes.get(1), jsonEnvelope(
                         metadata().withName("hearing.command.initiate-hearing-offence"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
@@ -101,18 +110,19 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
                         .thatMatchesSchema()
         );
-        assertThat(envelopes.get(1), jsonEnvelope(
-                metadata().withName(
-                        "hearing.command.initiate-hearing-defence-witness-enrich"),
-                payloadIsJson(allOf(withJsonPath("$.defendantId",
-                        is(initiateHearingCommand.getHearing().getDefendants()
-                                .get(0).getId().toString())),
-                        withJsonPath("$.hearingId", is(initiateHearingCommand
-                                .getHearing().getId().toString()))))));
+
+        //TODO: missing schema
+        assertThat(
+                envelopes.get(2), jsonEnvelope(
+                        metadata().withName("hearing.command.initiate-hearing-defence-witness-enrich"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.defendantId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
+        );
+
 
         assertThat(
-                envelopes.get(2),
-                jsonEnvelope(
+                envelopes.get(3), jsonEnvelope(
                         metadata().withName("public.hearing.initiated"),
                         payloadIsJson(withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))))
                         .thatMatchesSchema()

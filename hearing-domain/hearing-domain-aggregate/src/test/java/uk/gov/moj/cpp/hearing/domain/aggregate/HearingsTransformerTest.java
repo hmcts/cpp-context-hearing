@@ -49,7 +49,7 @@ public class HearingsTransformerTest {
 
         List<Defendant> arrDefendant = new ArrayList<>();
         for (int defendantIndex = 0; defendantIndex<defendantCount; defendantIndex++) {
-            List lOffence = new ArrayList<>();
+            List<Offence> lOffence = new ArrayList<>();
             int offenceCount = defendantIndex2OffenceCount.apply(defendantIndex);
             for (int offenceIndex=0; offenceIndex<offenceCount; offenceIndex++) {
                 Plea plea = defendantOffenceIndexToPlea.apply(defendantIndex, offenceIndex);
@@ -65,10 +65,10 @@ public class HearingsTransformerTest {
                 lOffence.add(offence);
             }
 
-            Address address = (new Address.Builder()).withAddress1("addr1").withAddress2("addr2").withAddress3("addr3").
+            Address address = Address.address().withAddress1("addr1").withAddress2("addr2").withAddress3("addr3").
                     withAddress4("addr4").withPostcode("AA1 1AA").build();
             UUID defendantId = UUID.randomUUID();
-            Interpreter interpreter = (new Interpreter.Builder()).withLanguage("English").withNeeded(true).build();
+            Interpreter interpreter = Interpreter.interpreter().withLanguage("English").withNeeded(true).build();
             Defendant defendant = (new Defendant.Builder()).withOffences(lOffence).withAddress(address).withBailStatus("bailStatus").
                     withCustodyTimeLimitDate(date("11/12/2017")).withDateOfBirth(date("12/11/1978")).withDefenceOrganisation("CPP").
                     withFirstName("Geoff").withLastName("ssdfsf").withGender("Male").withId(defendantId).

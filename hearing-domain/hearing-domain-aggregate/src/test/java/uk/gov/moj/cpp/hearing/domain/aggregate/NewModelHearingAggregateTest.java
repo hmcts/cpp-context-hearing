@@ -2,26 +2,36 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import uk.gov.moj.cpp.hearing.command.defendant.Address;
+import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
+import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -31,7 +41,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.int
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 public class NewModelHearingAggregateTest {
-    
+
     private static final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
 
     @Test
@@ -46,7 +56,7 @@ public class NewModelHearingAggregateTest {
 
     @Test
     public void initiateHearingOffencePlea() {
-       final  InitiateHearingOffencePleaCommand command = new InitiateHearingOffencePleaCommand(
+        final InitiateHearingOffencePleaCommand command = new InitiateHearingOffencePleaCommand(
                 randomUUID(),
                 randomUUID(),
                 randomUUID(),
@@ -56,15 +66,15 @@ public class NewModelHearingAggregateTest {
                 "GUILTY"
         );
         newModelHearingAggregate.initiateHearingOffencePlea(command)
-            .map(InitiateHearingOffencePlead.class::cast)
-            .forEach(event -> {
-                assertThat(event.getCaseId(), is(command.getCaseId()));
-                assertThat(event.getDefendantId(), is(command.getDefendantId()));
-                assertThat(event.getHearingId(), is(command.getHearingId()));
-                assertThat(event.getOffenceId(), is(command.getOffenceId()));
-                assertThat(event.getPleaDate(), is(command.getPleaDate()));
-                assertThat(event.getValue(), is(command.getValue()));
-        });
+                .map(InitiateHearingOffencePlead.class::cast)
+                .forEach(event -> {
+                    assertThat(event.getCaseId(), is(command.getCaseId()));
+                    assertThat(event.getDefendantId(), is(command.getDefendantId()));
+                    assertThat(event.getHearingId(), is(command.getHearingId()));
+                    assertThat(event.getOffenceId(), is(command.getOffenceId()));
+                    assertThat(event.getPleaDate(), is(command.getPleaDate()));
+                    assertThat(event.getValue(), is(command.getValue()));
+                });
     }
 
     @Test
@@ -375,7 +385,7 @@ public class NewModelHearingAggregateTest {
                         .withCode(STRING.next())
                         .withCategory(STRING.next())
                 )
-                .withNumberOfJurors(integer(9,12).next())
+                .withNumberOfJurors(integer(9, 12).next())
                 .withUnanimous(BOOLEAN.next())
                 .build();
 
@@ -402,5 +412,65 @@ public class NewModelHearingAggregateTest {
         assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
     }
 
+    @Test
+    public void updateDefendantDetails_shouldIgnore_when_resultshared() {
 
+        final int expected = 0;
+
+        CaseDefendantDetailsWithHearingCommand command = initiateDefendantCommandTemplate();
+
+        NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        hearingAggregate.apply(ResultsShared.builder().build());
+
+        Stream<Object> stream = hearingAggregate.updateDefendantDetails(command);
+
+        assertEquals(expected, stream.count());
+    }
+
+
+    @Test
+    public void updateDefendantDetails_shouldUpdate_when_resultnotshared() {
+
+        CaseDefendantDetailsWithHearingCommand command = initiateDefendantCommandTemplate();
+
+        NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        DefendantDetailsUpdated result = (DefendantDetailsUpdated) hearingAggregate.updateDefendantDetails(command).collect(Collectors.toList()).get(0);
+
+        assertThat(result.getCaseId(), Matchers.is(command.getCaseId()));
+    }
+
+    private CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate() {
+
+        final Address.Builder address = Address.address()
+                .withAddress1(STRING.next())
+                .withAddress2(STRING.next())
+                .withAddress3(STRING.next())
+                .withAddress4(STRING.next())
+                .withPostcode(STRING.next());
+
+        final Interpreter.Builder interpreter = Interpreter.interpreter()
+                .withLanguage(STRING.next())
+                .withNeeded(false);
+
+        return CaseDefendantDetailsWithHearingCommand.builder()
+                .withCaseId(randomUUID())
+                .withCaseUrn(STRING.next())
+                .withHearingIds(Collections.singletonList(randomUUID()))
+                .withDefendants(Defendant.builder()
+                        .withId(randomUUID())
+                        .withPersonId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .withNationality(STRING.next())
+                        .withGender(STRING.next())
+                        .withAddress(address)
+                        .withDateOfBirth(PAST_LOCAL_DATE.next())
+                        .withBailStatus(STRING.next())
+                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                        .withDefenceOrganisation(STRING.next())
+                        .withInterpreter(interpreter))
+                .build();
+    }
 }

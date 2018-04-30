@@ -1,8 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
+import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.Address;
+import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -16,14 +20,15 @@ import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
@@ -54,7 +59,6 @@ public class NewModelHearingAggregate implements Aggregate {
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
     private static final String REASON_HEARING_NOT_FOUND = "Hearing not found";
 
-    private transient Boolean resultsShared = Boolean.FALSE;
     private List<Case> cases;
     private Hearing hearing;
 
@@ -65,6 +69,8 @@ public class NewModelHearingAggregate implements Aggregate {
 
     private Map<UUID, Plea> pleas = new HashMap<>();
     private Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
+
+    private boolean published = false;
 
     @Override
     public Object apply(final Object event) {
@@ -102,8 +108,8 @@ public class NewModelHearingAggregate implements Aggregate {
 
                 }),
 
-                when(ResultsShared.class).apply(resultsSharedResult -> {
-                    resultsShared = Boolean.TRUE;
+                when(ResultsShared.class).apply(resultsShared -> {
+                    published = true;
                 }),
 
                 when(PleaUpsert.class).apply(pleaUpsert -> {
@@ -340,20 +346,71 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
         return apply(Stream.of(ResultsShared.builder()
-                        .withHearingId(command.getHearingId())
-                        .withSharedTime(sharedTime)
-                        .withResultLines(command.getResultLines())
-                        .withHearing(this.hearing)
-                        .withCases(this.cases)
-                        .withProsecutionCounsels(this.prosecutionCounsels)
-                        .withDefenceCounsels(this.defenceCounsels)
-                        .withPleas(this.pleas)
-                        .withVerdicts(this.verdicts)
-                        .build()));
+                .withHearingId(command.getHearingId())
+                .withSharedTime(sharedTime)
+                .withResultLines(command.getResultLines())
+                .withHearing(this.hearing)
+                .withCases(this.cases)
+                .withProsecutionCounsels(this.prosecutionCounsels)
+                .withDefenceCounsels(this.defenceCounsels)
+                .withPleas(this.pleas)
+                .withVerdicts(this.verdicts)
+                .build()));
     }
 
-    public Boolean isResultsShared() {
-        return resultsShared;
+    public Stream<Object> addWitness(UUID hearingId, UUID witnessId, String type, String classification, String title, String firstName, String lastName, List<DefendantId> defendantIdList) {
+        return apply(Stream.of(new WitnessAdded(witnessId, hearingId, type, classification, title, firstName,
+                lastName, defendantIdList.stream().map(DefendantId::getDefendantId)
+                .collect(Collectors.toList()))));
+    }
+
+    public Stream<Object> generateNows(final NowsRequested nowsRequested) {
+        return apply(Stream.of(nowsRequested));
+    }
+
+    public Stream<Object> updateDefendantDetails(CaseDefendantDetailsWithHearingCommand command) {
+
+        if (!isPublished()) {
+
+            final Defendant defendant = command.getDefendants();
+
+            final Address address = defendant.getAddress();
+
+            final Interpreter interpreter = defendant.getInterpreter();
+
+            return apply(
+                    Stream.of(
+                            DefendantDetailsUpdated.builder()
+                                    .withCaseId(command.getCaseId())
+                                    .withHearingId(command.getHearingIds().get(0))
+                                    .withDefendant(Defendant.builder()
+                                            .withId(defendant.getId())
+                                            .withPersonId(defendant.getPersonId())
+                                            .withFirstName(defendant.getFirstName())
+                                            .withLastName(defendant.getLastName())
+                                            .withNationality(defendant.getNationality())
+                                            .withGender(defendant.getGender())
+                                            .withAddress(Address.address()
+                                                    .withAddress1(address.getAddress1())
+                                                    .withAddress2(address.getAddress2())
+                                                    .withAddress3(address.getAddress3())
+                                                    .withAddress4(address.getAddress4())
+                                                    .withPostcode(address.getPostCode()))
+                                            .withDateOfBirth(defendant.getDateOfBirth())
+                                            .withBailStatus(defendant.getBailStatus())
+                                            .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
+                                            .withDefenceOrganisation(defendant.getDefenceOrganisation())
+                                            .withInterpreter(Interpreter.interpreter()
+                                                    .withLanguage(interpreter.getLanguage())
+                                                    .withNeeded(interpreter.getNeeded())))
+                                    .build()));
+        }
+
+        return Stream.empty();
+    }
+
+    public boolean isPublished() {
+        return published;
     }
 
     public static final class HearingEvent implements Serializable {
@@ -378,15 +435,5 @@ public class NewModelHearingAggregate implements Aggregate {
         public HearingEventLogged getHearingEventLogged() {
             return hearingEventLogged;
         }
-    }
-
-    public Stream<Object> addWitness(UUID hearingId, UUID witnessId, String type, String classification,  String title, String firstName, String lastName, List<DefendantId> defendantIdList) {
-        return apply(Stream.of(new WitnessAdded(witnessId,hearingId, type, classification,  title, firstName,
-                lastName, defendantIdList.stream().map(DefendantId::getDefendantId)
-                .collect(Collectors.toList()))));
-    }
-
-    public Stream<Object> generateNows(final NowsRequested nowsRequested) {
-        return apply(Stream.of(nowsRequested));
     }
 }

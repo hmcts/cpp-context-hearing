@@ -20,19 +20,20 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.hearing.domain.aggregate.MagistratesCourtHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.not;
@@ -50,13 +51,16 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-
-
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MagistratesCourtInitiateHearingCommandHandlerTest {
+    @Spy
+    private final Enveloper enveloper = createEnveloperWithEvents(
+            SendingSheetCompletedRecorded.class,
+            MagsCourtHearingRecorded.class
+    );
 
     @Mock
     private EventStream eventStream;
@@ -72,12 +76,6 @@ public class MagistratesCourtInitiateHearingCommandHandlerTest {
 
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(
-            SendingSheetCompletedRecorded.class,
-            MagsCourtHearingRecorded.class
-    );
 
     @InjectMocks
     private MagistratesCourtInitiateHearingCommandHandler magistratesCourtInitiateHearingCommandHandler;
@@ -114,6 +112,7 @@ public class MagistratesCourtInitiateHearingCommandHandlerTest {
 
         magistratesCourtInitiateHearingCommandHandler.recordSendingSheetComplete(command);
 
+        //noinspection unchecked
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
@@ -144,9 +143,9 @@ public class MagistratesCourtInitiateHearingCommandHandlerTest {
                 .withCourtCentreName(STRING.next())
                 .withSendingCommittalDate(PAST_LOCAL_DATE.next())
                 .withType(STRING.next())
-                .withDefendants(asList(Defendant.builder()
+                .withDefendants(Collections.singletonList(Defendant.builder()
                         .withId(randomUUID())
-                        .withOffences(asList(uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence.builder()
+                        .withOffences(Collections.singletonList(Offence.builder()
                                 .withId(randomUUID())
                                 .withPlea(Plea.plea()
                                         .withPleaDate(PAST_LOCAL_DATE.next())
@@ -165,6 +164,7 @@ public class MagistratesCourtInitiateHearingCommandHandlerTest {
 
         magistratesCourtInitiateHearingCommandHandler.recordMagsCourtHearing(command);
 
+        //noinspection unchecked
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)

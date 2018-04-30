@@ -20,8 +20,11 @@ baseUri:  message://command/handler/message/hearing
 
         application/vnd.hearing.command.initiate-hearing-defence-witness-enrich+json:
             schema: !include json/schema/hearing.command.initiate-hearing-defence-witness-enrich.json
-            example: !include json/hearing.command.initiate-hearing-defence-witness-enrich.json            
+            example: !include json/hearing.command.initiate-hearing-defence-witness-enrich.json
 
+        application/vnd.hearing.update-case-defendant-details+json:
+            schema: !include json/schema/hearing.update-case-defendant-details.json
+            example: !include json/hearing.update-case-defendant-details.json
 # Log Event
         application/vnd.hearing.command.log-hearing-event+json:
             example: !include json/hearing.command.log-hearing-event.json
@@ -88,3 +91,12 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.command.generate-nows.json
             schema:  !include json/schema/hearing.command.generate-nows.json
 
+
+# Case Defendant Details Update
+        application/vnd.hearing.command.register-defendant-with-hearing+json:
+            schema: !include json/schema/hearing.command.register-defendant-with-hearing.json
+            example: !include json/hearing.command.register-defendant-with-hearing.json
+
+        application/vnd.hearing.update-case-defendant-details-against-hearing-aggregate+json:
+            schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
+            example: !include json/hearing.update-case-defendant-details-against-hearing-aggregate.json

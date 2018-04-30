@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
@@ -14,6 +15,7 @@ import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.NewMagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
@@ -43,6 +45,8 @@ public class HearingEventListenerRamlConfigTest {
             SendingSheetCompletedRecorded.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedPreviouslyRecorded.class.getAnnotation(Event.class).value(),
             MagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
+            CaseDefendantDetailsWithHearings.class.getAnnotation(Event.class).value(),
+            RegisterHearingAgainstDefendant.class.getAnnotation(Event.class).value(),
             NewMagsCourtHearingRecorded.class.getAnnotation(Event.class).value()
     );
     private Map<String, String> handlerNames = new HashMap<>();
@@ -52,12 +56,13 @@ public class HearingEventListenerRamlConfigTest {
     public void setup() throws IOException {
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingEventListener.class,
                 NewHearingEventListener.class,
-                NewModelPleaUpdateEventListener.class, 
-                VerdictUpdateEventListener.class, 
+                NewModelPleaUpdateEventListener.class,
+                VerdictUpdateEventListener.class,
                 HearingLogEventListener.class,
-                DefenceCounselAddedEventListener.class, 
+                DefenceCounselAddedEventListener.class,
                 ProsecutionCounselAddedEventListener.class,
-                NowsRequestedEventListener.class));
+                NowsRequestedEventListener.class,
+                CaseDefendantChangeEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 
@@ -69,12 +74,12 @@ public class HearingEventListenerRamlConfigTest {
     }
 
     @Test
-    public void testActionNameAndHandleNameAreSame() throws Exception {
+    public void testActionNameAndHandleNameAreSame() {
         assertThat(handlerNames.values(), containsInAnyOrder(this.ramlActionNames.toArray()));
     }
 
     @Test
-    public void testEventsHandledProperly() throws Exception {
+    public void testEventsHandledProperly() {
         List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event")
                 .scan().getNamesOfClassesWithAnnotation(Event.class)
                 .stream().map(className -> {

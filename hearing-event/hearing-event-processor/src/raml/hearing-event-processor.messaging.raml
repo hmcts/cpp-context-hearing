@@ -23,6 +23,10 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
             example: !include json/hearing.command.initiate-hearing-offence-plea.json
 
+        application/vnd.hearing.update-case-defendant-details+json:
+            schema: !include json/schema/hearing.update-case-defendant-details.json
+            example: !include json/hearing.update-case-defendant-details.json
+
 # Sending Sheet Complete
         application/vnd.hearing.record-sending-sheet-complete+json:
             example: !include json/hearing.record-sending-sheet-complete.json
@@ -91,6 +95,19 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.offence-verdict-updated.json
             example: !include json/hearing.offence-verdict-updated.json
 
+# Case Defendant Details Change
+        application/vnd.hearing.update-case-defendant-details-enriched-with-hearing-ids+json:
+            example: !include json/hearing.update-case-defendant-details-enriched-with-hearing-ids.json
+            schema: !include json/schema/hearing.update-case-defendant-details-enriched-with-hearing-ids.json
+
+        application/vnd.hearing.command.register-defendant-with-hearing+json:
+            example: !include json/hearing.command.register-defendant-with-hearing.json
+            schema: !include json/schema/hearing.command.register-defendant-with-hearing.json
+
+        application/vnd.hearing.update-case-defendant-details-against-hearing-aggregate+json:
+            example: !include json/hearing.update-case-defendant-details-against-hearing-aggregate.json
+            schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
+
 /public.event:
   post:
     body:
@@ -98,3 +115,9 @@ baseUri: message://event/processor/message/hearing
         application/vnd.public.progression.events.sending-sheet-completed+json:
                 schema: !include json/schema/public.progression.events.sending-sheet-completed.json
                 example: !include json/public.progression.events.sending-sheet-completed.json
+
+# Case Defendant Details Change
+        application/vnd.public.progression.case-defendant-changed+json:
+                schema: !include json/schema/public.progression.case-defendant-changed.json
+                example: !include json/public.progression.case-defendant-changed.json
+
