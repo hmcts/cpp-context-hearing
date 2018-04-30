@@ -36,12 +36,8 @@
     "lastName": {
       "type": "string"
     },
-    "defendantIds": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/uuid"
-      }
-    }
+    "defendantId": {
+		"$ref": "#/definitions/uuid"    }
   },
   "required": [
     "id",
@@ -50,7 +46,7 @@
     "classification",
     "firstName",
     "lastName",
-    "defendantIds"
+    "defendantId"
   ],
   "definitions": {
     "uuid": {

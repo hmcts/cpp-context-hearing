@@ -1,5 +1,13 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+
+import javax.inject.Inject;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonString;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -10,17 +18,13 @@ import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonString;
-
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-
 @ServiceComponent(EVENT_PROCESSOR)
 public class InitiateHearingEventProcessor {
 
+    private static final String HEARING_ID = "hearingId";
+    private static final String OFFENCE_ID = "offenceId";
+    private static final String CASE_ID = "caseId";
+    private static final String DEFENDANT_ID = "defendantId";
     @Inject
     private Enveloper enveloper;
 
@@ -32,26 +36,32 @@ public class InitiateHearingEventProcessor {
 
     @Handles("hearing.initiated")
     public void hearingInitiated(final JsonEnvelope event) {
-        JsonString hearingId = event.payloadAsJsonObject().getJsonObject("hearing").getJsonString("id");
+        final JsonString hearingId = event.payloadAsJsonObject().getJsonObject("hearing").getJsonString("id");
 
-        InitiateHearingCommand initiateHearingCommand = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), InitiateHearingCommand.class);
+        final InitiateHearingCommand initiateHearingCommand = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), InitiateHearingCommand.class);
 
-        JsonArrayBuilder cases = createArrayBuilder();
+        final JsonArrayBuilder cases = createArrayBuilder();
 
-        for (Defendant defendant : initiateHearingCommand.getHearing().getDefendants()) {
-            for (Offence offence : defendant.getOffences()) {
+        for (final Defendant defendant : initiateHearingCommand.getHearing().getDefendants()) {
+            for (final Offence offence : defendant.getOffences()) {
                 cases.add(offence.getCaseId().toString());
                 this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.initiate-hearing-offence").apply(createObjectBuilder()
-                        .add("hearingId", hearingId)
-                        .add("offenceId", offence.getId().toString())
-                        .add("caseId", offence.getCaseId().toString())
-                        .add("defendantId", defendant.getId().toString())
+                        .add(HEARING_ID, hearingId)
+                        .add(OFFENCE_ID, offence.getId().toString())
+                        .add(CASE_ID, offence.getCaseId().toString())
+                        .add(DEFENDANT_ID, defendant.getId().toString())
                         .build()));
             }
+            this.sender.send(this.enveloper.withMetadataFrom(event,
+                            "hearing.command.initiate-hearing-defence-witness-enrich")
+                            .apply(createObjectBuilder().add(HEARING_ID, hearingId)
+                                            .add(DEFENDANT_ID, defendant.getId().toString())
+                                            .build()));
+
         }
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.initiated").apply(createObjectBuilder()
-                .add("hearingId", hearingId)
+                .add(HEARING_ID, hearingId)
                 .add("cases", cases.build())
                 .build()));
     }

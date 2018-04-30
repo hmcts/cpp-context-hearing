@@ -9,7 +9,9 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
+import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -30,8 +32,8 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
     }
 
     @Handles("hearing.command.add-witness")
-    public void addWitness(final JsonEnvelope envelop) throws EventStreamException {
-        final JsonObject payload = envelop.payloadAsJsonObject();
+    public void addWitness(final JsonEnvelope envelope) throws EventStreamException {
+        final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID witnessId = fromString(payload.getString("id"));
         final UUID hearingId = fromString(payload.getString("hearingId"));
         final String type = payload.getString("type");
@@ -43,7 +45,22 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
                 .map(this::extractDefendantId)
                 .collect(toList());
 
-        aggregate(NewModelHearingAggregate.class, hearingId, envelop, a ->a.addWitness(hearingId, witnessId, type, classification, title, firstName, lastName, defendantIdList));
+        aggregate(NewModelHearingAggregate.class, hearingId, envelope, a ->a.addWitness(hearingId, witnessId, type, classification, title, firstName, lastName, defendantIdList));
+    }
+
+    @Handles("hearing.defence-witness-added")
+    public void defenceWitnessAdded(final JsonEnvelope envelope) throws EventStreamException {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final UUID witnessId = fromString(payload.getString("witnessId"));
+        final UUID hearingId = fromString(payload.getString("hearingId"));
+        final String type = payload.getString("type");
+        final String classification = payload.getString("classification");
+        final String title = payload.getString("title");
+        final String firstName = payload.getString("firstName");
+        final String lastName = payload.getString("lastName");
+        final UUID  defendantId = fromString(payload.getString("defendantId"));
+        aggregate(DefendantAggregate.class, defendantId, envelope,
+                (defendantAggregate) -> defendantAggregate.addWitness(witnessId, hearingId, defendantId, type, classification, title, firstName, lastName));
     }
 
     private DefendantId extractDefendantId(JsonObject jsonObject) {

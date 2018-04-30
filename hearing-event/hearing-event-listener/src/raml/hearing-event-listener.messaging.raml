@@ -45,6 +45,10 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.newdefence-counsel-added+json:
             schema: !include json/schema/hearing.newdefence-counsel-added.json
             example: !include json/hearing.newdefence-counsel-added.json
+# Add hearing witnesses
+        application/vnd.hearing.initiate-hearing-defence-witness-enriched+json:
+            schema: !include json/schema/hearing.initiate-hearing-defence-witness-enriched.json
+            example: !include json/hearing.initiate-hearing-defence-witness-enriched.json
 
 # Share Results
         application/vnd.hearing.draft-result-saved+json:

@@ -1,20 +1,33 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.util.UUID.fromString;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.inject.Inject;
-import javax.json.JsonString;
-
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-
 @ServiceComponent(EVENT_PROCESSOR)
 public class WitnessAddedEventProcessor {
 
+
+    private static final String ID = "id";
+    private static final String FIELD_HEARING_ID = "hearingId";
+    public static final String FIELD_CLASSIFICATION = "classification";
+    public static final String FIELD_TYPE = "type";
+    public static final String FIELD_TITLE = "title";
+    public static final String FIELD_FIRST_NAME = "firstName";
+    public static final String FIELD_LAST_NAME = "lastName";
     @Inject
     private Enveloper enveloper;
 
@@ -24,10 +37,36 @@ public class WitnessAddedEventProcessor {
     @Handles("hearing.events.witness-added")
     public void publishWitnessAddedPublicEvent(final JsonEnvelope event) {
 
-        JsonString witnessId = event.payloadAsJsonObject().getJsonString("id");
+
+        final JsonObject payload = event.payloadAsJsonObject();
+        final UUID witnessId = fromString(payload.getString(ID));
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
+        final String type = payload.getString(FIELD_TYPE);
+        final String classification = payload.getString(FIELD_CLASSIFICATION);
+        final String title = payload.containsKey(FIELD_TITLE)?payload.getString(FIELD_TITLE):null;
+        final String firstName = payload.getString(FIELD_FIRST_NAME);
+        final String lastName = payload.getString(FIELD_LAST_NAME);
+        final JsonArray defendantIds = payload.getJsonArray("defendantIds");
+
+        defendantIds.forEach(
+                defendantId -> 
+                    this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.defence-witness-added").apply(createObjectBuilder()
+                            .add("defendantId", ((JsonString)defendantId).getString())
+                            .add("witnessId", witnessId.toString())
+                            .add(FIELD_HEARING_ID, hearingId.toString())
+                            .add(FIELD_TYPE, type)
+                            .add(FIELD_CLASSIFICATION, classification)
+                            .add(FIELD_TITLE,title)
+                            .add(FIELD_FIRST_NAME,firstName)
+                            .add(FIELD_LAST_NAME,lastName)
+                                                        .build()))
+                
+        );
+
+
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.events.witness-added")
                 .apply(createObjectBuilder()
-                        .add("witnessId", witnessId)
+                        .add("witnessId", witnessId.toString())
                         .build()));
     }
 

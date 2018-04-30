@@ -1,7 +1,26 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -11,6 +30,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
@@ -24,23 +44,7 @@ import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
-import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.fromString;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-
+@SuppressWarnings({"squid:S2201"})
 @ServiceComponent(EVENT_LISTENER)
 public class NewHearingEventListener {
 
@@ -54,6 +58,10 @@ public class NewHearingEventListener {
     
     @Inject
     private OffenceRepository offenceRepository;
+
+    @Inject
+    private WitnessRepository witnessRepository;
+
 
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_HEARING_ID = "hearingId";
@@ -80,7 +88,7 @@ public class NewHearingEventListener {
                 .withEndDate(offenceIn.getEndDate());
     }
 
-    private Defendant.Builder translateDefendant(UUID hearingId, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendantIn) {
+    private Defendant.Builder translateDefendant(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.initiate.Defendant defendantIn) {
         return Defendant.builder()
                 .withAddress(ofNullable(defendantIn.getAddress())
                         .map(a -> Address.builder()
@@ -112,7 +120,7 @@ public class NewHearingEventListener {
                 );
     }
 
-    private Witness.Builder translateWitness(UUID hearingId, uk.gov.moj.cpp.hearing.command.initiate.Witness witnessIn, LegalCase id2Case) {
+    private Witness.Builder translateWitness(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.initiate.Witness witnessIn, final LegalCase id2Case) {
         return Witness.builder()
                 .withLegalCase(id2Case)
                 .withType(witnessIn.getType())
@@ -151,7 +159,7 @@ public class NewHearingEventListener {
                     id2Case.put(legalCase.getId(), legalCase);
                 }
         );
-        Ahearing aHearing = Ahearing.builder()
+        final Ahearing aHearing = Ahearing.builder()
                 .withId(hearing.getId())
                 .withHearingType(hearing.getType())
                 .withCourtCentreId(hearing.getCourtCentreId())
@@ -161,11 +169,11 @@ public class NewHearingEventListener {
                 .withStartDateTime(hearing.getStartDateTime())
                 .withDefendants(hearing.getDefendants().stream()
                         .map(defendantIn -> {
-                            Defendant defendant = translateDefendant(hearing.getId(), defendantIn).build();
+                            final Defendant defendant = translateDefendant(hearing.getId(), defendantIn).build();
                             defendant.setOffences(new ArrayList<>());
                             defendantIn.getOffences().forEach(
                                     offenceIn -> {
-                                        Offence offence = translateOffence(hearing.getId(), offenceIn, id2Case).withDefendant(defendant).build();
+                                        final Offence offence = translateOffence(hearing.getId(), offenceIn, id2Case).withDefendant(defendant).build();
                                         defendant.getOffences().add(offence);
                                     }
                             );
@@ -214,18 +222,65 @@ public class NewHearingEventListener {
             o.setConvictionDate(isGuilty(event.getValue()) ? event.getPleaDate() : null);
         });
     }
-    
-    private boolean isGuilty(String value) {
+
+    @Transactional
+    @Handles("hearing.initiate-hearing-defence-witness-enriched")
+    public void initiateHearingWitnessEnriched(final JsonEnvelope event) {
+        final JsonObject payload = event.payloadAsJsonObject();
+        LOGGER.debug("hearing.initiate-hearing-defence-witness-enriched listener payload {} ",
+                        payload);
+        final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
+        final String type = payload.getString(FIELD_TYPE);
+        final String classification = payload.getString(FIELD_CLASSIFICATION);
+        final String title =
+                        payload.containsKey(FIELD_TITLE) ? payload.getString(FIELD_TITLE) : null;
+        final String firstName = payload.getString(FIELD_FIRST_NAME);
+        final String lastName = payload.getString(FIELD_LAST_NAME);
+        final UUID defendantId = fromString(payload.getString("defendantId"));
+
+        final Ahearing hearing = ahearingRepository.findById(hearingId);
+        if (hearing != null) {
+            final HearingSnapshotKey witnessKey = new HearingSnapshotKey(id, hearingId);
+            Witness witness = witnessRepository.findBy(witnessKey);
+
+            if (witness == null) {
+                LOGGER.info("Witness {} not found for hearing id  {}  , creating new witness", id,
+                                hearingId);
+                witness = Witness.builder().withId(witnessKey).withHearing(hearing).withType(type)
+                                .withTitle(title).withFirstName(firstName).withLastName(lastName)
+                                .withClassification(classification).build();
+            }
+
+            final Defendant defendant = hearing.getDefendants().stream()
+                            .filter(d -> d.getId().getId().equals((defendantId))).findFirst()
+                            .orElseThrow(() -> new RuntimeException(String.format(
+                                            "hearing %s witness added for unkown defendant %s ",
+                                            hearing.getId(), defendantId)));
+
+
+            witness.getDefendants().add(defendant);
+            defendant.getDefendantWitnesses().add(witness);
+
+            ahearingRepository.saveAndFlush(hearing);
+        }
+
+
+    }
+
+    private boolean isGuilty(final String value) {
         return "GUILTY".equalsIgnoreCase(value);
     }
 
-    private void save(final UUID offenceId, final UUID hearingId, final Consumer<Offence> consumer) {
-        Optional.ofNullable(offenceRepository.findBySnapshotKey(new HearingSnapshotKey(offenceId, hearingId)))
-                .map(o -> {
-                    consumer.accept(o);
-                    offenceRepository.saveAndFlush(o);
-                    return o;
-                }).orElseThrow(() -> new RuntimeException("Offence id is not found on hearing id: " + hearingId));
+    private void save(final UUID offenceId, final UUID hearingId,
+                    final Consumer<Offence> consumer) {
+        Optional.ofNullable(offenceRepository
+                        .findBySnapshotKey(new HearingSnapshotKey(offenceId, hearingId))).map(o -> {
+                            consumer.accept(o);
+                            offenceRepository.saveAndFlush(o);
+                            return o;
+                        }).orElseThrow(() -> new RuntimeException(
+                                        "Offence id is not found on hearing id: " + hearingId));
     }
 
     @Transactional
@@ -236,40 +291,39 @@ public class NewHearingEventListener {
     }
 
     private void addWitness(final JsonEnvelope event) {
+
         final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.debug("hearing.events.witness-added listener payload " + payload.toString());
+        LOGGER.debug("hearing.events.witness-added listener payload {} ", payload);
         final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String type = payload.getString(FIELD_TYPE);
         final String classification = payload.getString(FIELD_CLASSIFICATION);
-        final String title = payload.containsKey(FIELD_TITLE)?payload.getString(FIELD_TITLE):null;
+        final String title =
+                        payload.containsKey(FIELD_TITLE) ? payload.getString(FIELD_TITLE) : null;
         final String firstName = payload.getString(FIELD_FIRST_NAME);
         final String lastName = payload.getString(FIELD_LAST_NAME);
         final JsonArray defendantIds = payload.getJsonArray("defendantIds");
 
-        Ahearing hearing = ahearingRepository.findById(hearingId);
+        final Ahearing hearing = ahearingRepository.findById(hearingId);
         if (hearing != null) {
-            Witness witness = Witness.builder().withId(new HearingSnapshotKey(id, hearingId)).withHearing(hearing)
-                    .withType(type).withTitle(title).withFirstName(firstName).withLastName(lastName).withClassification(classification).build();
+            final Witness witness = Witness.builder().withId(new HearingSnapshotKey(id, hearingId))
+                            .withHearing(hearing).withType(type).withTitle(title)
+                            .withFirstName(firstName).withLastName(lastName)
+                            .withClassification(classification).build();
 
-            defendantIds.forEach(
-                    defendantId -> {
-                        final Defendant defendant = hearing.getDefendants().stream()
-                                .filter(d ->d.getId().getId().toString().equals(((JsonString)defendantId).getString()))
+            defendantIds.forEach(defendantId -> {
+                final Defendant defendant = hearing.getDefendants().stream()
+                                .filter(d -> d.getId().getId().toString()
+                                                .equals(((JsonString) defendantId).getString()))
                                 .findFirst()
-                                .orElseThrow(() -> new RuntimeException(
-                                                String.format("hearing %s witness added for unkown defendant %s ",
-                                                        hearing.getId(),
-                                                        defendantId
-                                                )
-                                        )
-                                );
-                        witness.getDefendants().add(defendant);
-                        defendant.getDefendantWitnesses().add(witness);
-                    }
-            );
+                                .orElseThrow(() -> new RuntimeException(String.format(
+                                                "hearing %s witness added for unkown defendant %s ",
+                                                hearing.getId(), defendantId)));
+                witness.getDefendants().add(defendant);
+                defendant.getDefendantWitnesses().add(witness);
+            });
             ahearingRepository.save(hearing);
         }
-   }
+    }
 
 }

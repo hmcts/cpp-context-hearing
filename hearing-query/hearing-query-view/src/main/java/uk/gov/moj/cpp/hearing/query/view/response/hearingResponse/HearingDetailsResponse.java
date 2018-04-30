@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
-import uk.gov.moj.cpp.hearing.command.DefenceWitness;
+import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
 
 import java.util.List;
 

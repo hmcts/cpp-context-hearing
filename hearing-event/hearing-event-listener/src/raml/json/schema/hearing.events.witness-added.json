@@ -12,7 +12,7 @@
       "type": "string",
       "enum": [
         "Prosecution",
-        "Defense"
+        "Defence"
       ]
     },
     "classification": {

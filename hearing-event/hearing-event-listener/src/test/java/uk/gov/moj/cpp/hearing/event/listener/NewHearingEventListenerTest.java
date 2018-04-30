@@ -1,44 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
-import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
-import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.io.StringReader;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
@@ -57,11 +18,58 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
+import java.io.StringReader;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.Case;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
+import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
+import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+
 @RunWith(MockitoJUnitRunner.class)
 public class NewHearingEventListenerTest {
 
     @Mock
     private AhearingRepository ahearingRepository;
+
+    @Mock
+    private WitnessRepository witnessRepository;
+
 
     @Mock
     private LegalCaseRepository legalCaseRepository;
@@ -89,6 +97,7 @@ public class NewHearingEventListenerTest {
     public static final String FIELD_FIRST_NAME = "firstName";
     public static final String FIELD_LAST_NAME = "lastName";
     public static final String FIELD_DEFENDANT_IDS = "defendantIds";
+    public static final String FIELD_DEFENDANT_ID = "defendantId";
     public static final String WITNESS_TYPE = "defence";
     public static final String WITNESS_CLASSIFICATION = "expert";
     public static final String FIRSTNAME = "firstname";
@@ -105,31 +114,31 @@ public class NewHearingEventListenerTest {
     }
 
 
-    private JsonEnvelope getInitiateAhearingJsonEnvelope(List<Case> cases, uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing) {
+    private JsonEnvelope getInitiateAhearingJsonEnvelope(final List<Case> cases, final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing) {
         //TODO review unexpected use of InitiateHearingCommand that contains cases
-        InitiateHearingCommand document = new InitiateHearingCommand(cases, hearing);
-        ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+        final InitiateHearingCommand document = new InitiateHearingCommand(cases, hearing);
+        final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
         //objectMapper.configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true);
 
         String strJsonDocument;
         try {
             strJsonDocument = objectMapper.writer().writeValueAsString(document);
-        } catch (JsonProcessingException jpe) {
+        } catch (final JsonProcessingException jpe) {
             throw new RuntimeException("failed ot serialise " + document, jpe);
         }
-        JsonObject jsonObject = Json.createReader(new StringReader(strJsonDocument)).readObject();
+        final JsonObject jsonObject = Json.createReader(new StringReader(strJsonDocument)).readObject();
         return new DefaultJsonEnvelope(null, jsonObject);
     }
 
     @Test
     public void shouldInsertAhearingWhenInitiated() {
 
-        InitiateHearingCommand command = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand command = initiateHearingCommandTemplate().build();
 
-        Case legalCase = command.getCases().get(0);
-        Hearing hearing = command.getHearing();
-        uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant = command.getHearing().getDefendants().get(0);
-        uk.gov.moj.cpp.hearing.command.initiate.Offence offence = defendant.getOffences().get(0);
+        final Case legalCase = command.getCases().get(0);
+        final Hearing hearing = command.getHearing();
+        final uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant = command.getHearing().getDefendants().get(0);
+        final uk.gov.moj.cpp.hearing.command.initiate.Offence offence = defendant.getOffences().get(0);
 
         when(this.ahearingRepository.findBy(command.getHearing().getId())).thenReturn(null);
 
@@ -143,7 +152,7 @@ public class NewHearingEventListenerTest {
 
         this.newHearingEventListener.newHearingInitiated(getInitiateAhearingJsonEnvelope(command.getCases(), command.getHearing()));
 
-        ArgumentCaptor<Ahearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Ahearing.class);
+        final ArgumentCaptor<Ahearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Ahearing.class);
         verify(this.ahearingRepository).save(hearingexArgumentCaptor.capture());
         final Ahearing actualHearing = hearingexArgumentCaptor.getValue();
 
@@ -155,7 +164,7 @@ public class NewHearingEventListenerTest {
         assertThat(actualHearing.getStartDateTime().toLocalDateTime(), is(hearing.getStartDateTime().toLocalDateTime()));
         assertThat(actualHearing.getHearingType(), is(hearing.getType()));
 
-        uk.gov.moj.cpp.hearing.persist.entity.ex.Judge actualJudge = actualHearing.getAttendees().stream()
+        final uk.gov.moj.cpp.hearing.persist.entity.ex.Judge actualJudge = actualHearing.getAttendees().stream()
                 .filter(a -> a instanceof uk.gov.moj.cpp.hearing.persist.entity.ex.Judge)
                 .map(uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.class::cast)
                 .findFirst()
@@ -221,7 +230,7 @@ public class NewHearingEventListenerTest {
         assertThat(actualOffence.getVerdictDate(), nullValue());
         assertThat(actualOffence.getVerdictDescription(), nullValue());
 
-        ArgumentCaptor<LegalCase> caseArgumentCaptor = ArgumentCaptor.forClass(LegalCase.class);
+        final ArgumentCaptor<LegalCase> caseArgumentCaptor = ArgumentCaptor.forClass(LegalCase.class);
         verify(this.legalCaseRepository).saveAndFlush(caseArgumentCaptor.capture());
         final LegalCase actualLegalCase = caseArgumentCaptor.getValue();
 
@@ -373,7 +382,7 @@ public class NewHearingEventListenerTest {
         when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(ahearing);
 
         this.newHearingEventListener.witnessAdded(event);
-        ArgumentCaptor<Ahearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Ahearing.class);
+        final ArgumentCaptor<Ahearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Ahearing.class);
         verify(this.ahearingRepository).save(hearingexArgumentCaptor.capture());
         final Ahearing actualHearing = hearingexArgumentCaptor.getValue();
         final Witness expectedWitnessOutcome = actualHearing.getDefendants().get(0).getDefendantWitnesses().get(0);
@@ -394,6 +403,41 @@ public class NewHearingEventListenerTest {
 
     }
 
+    @Test
+    public void shouldEnricheWitnessWhenHearingFound() {
+        final JsonEnvelope event = getWitnessEnrichEnvelope();
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(DEFENDANT_ID, HEARING_ID);
+        final Ahearing ahearing = Ahearing.builder().withId(HEARING_ID)
+                        .withDefendants(asList(Defendant.builder().withId(snapshotKey).build()))
+
+                        .build();
+        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(ahearing);
+        when(this.witnessRepository.findBy(new HearingSnapshotKey(TARGET_ID, HEARING_ID)))
+                        .thenReturn(null);
+        this.newHearingEventListener.initiateHearingWitnessEnriched(event);
+        final ArgumentCaptor<Ahearing> hearingexArgumentCaptor =
+                        ArgumentCaptor.forClass(Ahearing.class);
+        verify(this.ahearingRepository).saveAndFlush(hearingexArgumentCaptor.capture());
+        final Ahearing actualHearing = hearingexArgumentCaptor.getValue();
+        final Witness expectedWitnessOutcome =
+                        actualHearing.getDefendants().get(0).getDefendantWitnesses().get(0);
+        assertThat(expectedWitnessOutcome.getId().getId(), is(TARGET_ID));
+        assertThat(expectedWitnessOutcome.getHearing().getId(), is(HEARING_ID));
+        assertThat(expectedWitnessOutcome.getType(), is(WITNESS_TYPE));
+        assertThat(expectedWitnessOutcome.getClassification(), is(WITNESS_CLASSIFICATION));
+        assertThat(expectedWitnessOutcome.getFirstName(), is(FIRSTNAME));
+        assertThat(expectedWitnessOutcome.getLastName(), is(LASTNAME));
+    }
+
+    @Test
+    public void shouldNotEnrichWitness_WhenHearingNotFound() {
+        final JsonEnvelope event = getWitnessEnrichEnvelope();
+        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(null);
+        this.newHearingEventListener.initiateHearingWitnessEnriched(event);
+        verify(ahearingRepository, never()).save(any(Ahearing.class));
+
+    }
     public JsonEnvelope getWitnessAddedEnvelope() {
         final JsonObject witnessAdded = createObjectBuilder()
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
@@ -405,6 +449,16 @@ public class NewHearingEventListenerTest {
                 .add(FIELD_LAST_NAME, LASTNAME)
                 .add(FIELD_DEFENDANT_IDS, createArrayBuilder().add(DEFENDANT_ID.toString()).build())
                 .build();
+        return envelopeFrom(metadataWithRandomUUIDAndName(), witnessAdded);
+    }
+
+    public JsonEnvelope getWitnessEnrichEnvelope() {
+        final JsonObject witnessAdded = createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .add(FIELD_GENERIC_ID, TARGET_ID.toString()).add(FIELD_TYPE, WITNESS_TYPE)
+                        .add(FIELD_CLASSIFICATION, WITNESS_CLASSIFICATION)
+                        .add(FIELD_FIRST_NAME, FIRSTNAME).add(FIELD_LAST_NAME, LASTNAME)
+                        .add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString()).build();
         return envelopeFrom(metadataWithRandomUUIDAndName(), witnessAdded);
     }
 }

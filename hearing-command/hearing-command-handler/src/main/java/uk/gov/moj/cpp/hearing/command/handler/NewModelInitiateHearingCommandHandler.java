@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -16,11 +18,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-
-import javax.json.JsonObject;
-import java.util.UUID;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class NewModelInitiateHearingCommandHandler extends AbstractCommandHandler {
@@ -47,5 +47,15 @@ public class NewModelInitiateHearingCommandHandler extends AbstractCommandHandle
     public void initiateHearingOffencePlea(final JsonEnvelope envelop) throws EventStreamException {
         final InitiateHearingOffencePleaCommand command = convertToObject(envelop, InitiateHearingOffencePleaCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelop, a -> a.initiateHearingOffencePlea(command));
+    }
+
+    @Handles("hearing.command.initiate-hearing-defence-witness-enrich")
+    public void initiateHearingDefenceWitness(final JsonEnvelope event)
+                    throws EventStreamException {
+        final JsonObject payload = event.payloadAsJsonObject();
+        aggregate(DefendantAggregate.class, UUID.fromString(payload.getString("defendantId")),
+                        event,
+                        a -> a.initiateHearingDefenceWitness(payload));
+
     }
 }

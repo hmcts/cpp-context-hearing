@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
@@ -36,6 +37,7 @@ public class HearingEventListenerRamlConfigTest {
 
             InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
             OffencePleaUpdated.class.getAnnotation(Event.class).value(),
+            DefenceWitnessAdded.class.getAnnotation(Event.class).value(),
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
             HearingVerdictUpdated.class.getAnnotation(Event.class).value(),
             SendingSheetCompletedRecorded.class.getAnnotation(Event.class).value(),

@@ -1,26 +1,25 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.moj.cpp.hearing.command.DefendantId;
-
-import java.util.List;
-import java.util.UUID;
 
 @SuppressWarnings({"squid:S00107"})
-@Event("hearing.events.witness-added")
-public class WitnessAdded {
+@Event("hearing.initiate-hearing-defence-witness-enriched")
+public class InitiateHearingDefenceWitnessEnriched {
 
-    private UUID hearingId;
-    private UUID id;
+    private String hearingId;
+    private String id;
     private String type;
     private String classification;
     private String title;
     private String firstName;
     private String lastName;
-    private List<UUID> defendantIds;
+    private String defendantId;
 
 
-    public WitnessAdded(UUID id, UUID hearingId, String type, String classification, String title, String firstName, String lastName,  List<UUID> defendantIds) {
+    public InitiateHearingDefenceWitnessEnriched(final String id, final String hearingId,
+                    final String type,
+                    final String classification, final String title, final String firstName,
+                    final String lastName, final String defendantId) {
         this.hearingId = hearingId;
         this.id = id;
         this.type = type;
@@ -28,14 +27,14 @@ public class WitnessAdded {
         this.title = title;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.defendantIds = defendantIds;
+        this.defendantId = defendantId;
     }
 
-    public WitnessAdded() {
+    public InitiateHearingDefenceWitnessEnriched() {
         // default constructor for Jackson serialisation
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
@@ -59,11 +58,11 @@ public class WitnessAdded {
         return lastName;
     }
 
-    public UUID getHearingId() {
+    public String getHearingId() {
         return hearingId;
     }
 
-    public List<UUID> getDefendantIds() {
-        return defendantIds;
+    public String getDefendantId() {
+        return defendantId;
     }
 }

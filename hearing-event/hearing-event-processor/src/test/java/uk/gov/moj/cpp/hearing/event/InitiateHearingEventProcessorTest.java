@@ -1,29 +1,5 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-
-import javax.json.JsonObject;
-import java.util.List;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -39,6 +15,33 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+
+import java.util.List;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
@@ -82,15 +85,15 @@ public class InitiateHearingEventProcessorTest {
     @Test
     public void publishHearingInitiatedEvent() {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.initiated"), objectToJsonObjectConverter.convert(initiateHearingCommand));
 
         this.initiateHearingEventProcessor.hearingInitiated(event);
 
-        verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
-        List<JsonEnvelope> envelopes = this.envelopeArgumentCaptor.getAllValues();
+        final List<JsonEnvelope> envelopes = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(
                 envelopes.get(0), jsonEnvelope(
@@ -102,9 +105,18 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
                         .thatMatchesSchema()
         );
+        assertThat(envelopes.get(1), jsonEnvelope(
+                        metadata().withName(
+                                        "hearing.command.initiate-hearing-defence-witness-enrich"),
+                        payloadIsJson(allOf(withJsonPath("$.defendantId",
+                                        is(initiateHearingCommand.getHearing().getDefendants()
+                                                        .get(0).getId().toString())),
+                                        withJsonPath("$.hearingId", is(initiateHearingCommand
+                                                        .getHearing().getId().toString()))))));
 
         assertThat(
-                envelopes.get(1), jsonEnvelope(
+                        envelopes.get(2),
+                        jsonEnvelope(
                         metadata().withName("public.hearing.initiated"),
                         payloadIsJson(withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))))
                         .thatMatchesSchema()
@@ -114,15 +126,15 @@ public class InitiateHearingEventProcessorTest {
     @Test
     public void hearingInitiateOffencePlea() {
 
-        UUID offenceId = randomUUID();
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID hearingId = randomUUID();
-        UUID originHearingId = randomUUID();
-        String pleaDate = "2017-01-01";
-        String value = "GUILTY";
+        final UUID offenceId = randomUUID();
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID originHearingId = randomUUID();
+        final String pleaDate = "2017-01-01";
+        final String value = "GUILTY";
 
-        JsonObject payload = createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("offenceId", offenceId.toString())
                 .add("caseId", caseId.toString())
                 .add("defendantId", defendantId.toString())

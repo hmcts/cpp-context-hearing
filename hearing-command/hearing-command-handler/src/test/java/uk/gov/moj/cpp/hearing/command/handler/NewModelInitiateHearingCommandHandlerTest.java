@@ -1,34 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.aggregate.AggregateService;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.eventsourcing.source.core.EventSource;
-import uk.gov.justice.services.eventsourcing.source.core.EventStream;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
-import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -49,6 +20,40 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.UUID;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.aggregate.AggregateService;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingDefenceWitnessEnriched;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+
 @RunWith(MockitoJUnitRunner.class)
 public class NewModelInitiateHearingCommandHandlerTest {
 
@@ -57,6 +62,9 @@ public class NewModelInitiateHearingCommandHandlerTest {
 
     @Mock
     private EventStream offenceEventStream;
+
+    @Mock
+    private EventStream defendantEventStream;
 
     @Mock
     private EventSource eventSource;
@@ -74,7 +82,7 @@ public class NewModelInitiateHearingCommandHandlerTest {
     private final Enveloper enveloper = createEnveloperWithEvents(
             Initiated.class,
             InitiateHearingOffenceEnriched.class,
-            InitiateHearingOffencePlead.class
+                    InitiateHearingOffencePlead.class, InitiateHearingDefenceWitnessEnriched.class
     );
 
     @InjectMocks
@@ -89,7 +97,7 @@ public class NewModelInitiateHearingCommandHandlerTest {
     @Test
     public void initiateHearing() throws Throwable {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final UUID caseId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCaseId();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
@@ -194,7 +202,7 @@ public class NewModelInitiateHearingCommandHandlerTest {
                 .add("caseId", caseId.toString())
                 .build());
 
-        OffenceAggregate offenceAggregate = new OffenceAggregate();
+        final OffenceAggregate offenceAggregate = new OffenceAggregate();
         offenceAggregate.apply(new OffencePleaUpdated(originHearingId, offenceId, pleaDate, value));
         setupMockedEventStream(offenceId, this.offenceEventStream, offenceAggregate);
 
@@ -220,7 +228,7 @@ public class NewModelInitiateHearingCommandHandlerTest {
     @Test
     public void initiateHearingOffencePlea() throws Throwable {
 
-        InitiateHearingOffencePleaCommand input =
+        final InitiateHearingOffencePleaCommand input =
                 new InitiateHearingOffencePleaCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), PAST_LOCAL_DATE.next(), "GUILTY");
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(input));
@@ -246,10 +254,45 @@ public class NewModelInitiateHearingCommandHandlerTest {
         ));
     }
 
+    @Test
+    public void testEnrichDefenceWitness() throws EventStreamException {
+        final UUID defendantId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID witnessId = randomUUID();
+        final JsonEnvelope command = envelopeFrom(
+                        metadataWithRandomUUID(
+                                        "hearing.command.initiate-hearing-defence-witness-enrich"),
+                        createObjectBuilder().add("defendantId", defendantId.toString())
+                                        .add("hearingId", hearingId.toString()).build());
+        final DefendantAggregate defendantAggregate = new DefendantAggregate();
+        setupMockedEventStream(defendantId, this.defendantEventStream, defendantAggregate);
+        defendantAggregate.apply(new DefenceWitnessAdded(witnessId, defendantId, hearingId,
+                        "Defence", "Expert", "Mr", "John", "Smith"));
+        this.hearingCommandHandler.initiateHearingDefenceWitness(command);
+        assertThat(verifyAppendAndGetArgumentFrom(this.defendantEventStream),
+                        streamContaining(jsonEnvelope(withMetadataEnvelopedFrom(command)
+                                        .withName("hearing.initiate-hearing-defence-witness-enriched"),
+                                        payloadIsJson(allOf(
+                                                        withJsonPath("$.id",
+                                                                        is(witnessId.toString())),
+                                                        withJsonPath("$.defendantId",
+                                                                        is(defendantId.toString())),
+                                                        withJsonPath("$.hearingId",
+                                                                        is(hearingId.toString())),
+                                                        withJsonPath("$.title", is("Mr")),
+                                                        withJsonPath("$.firstName", is("John")),
+                                                        withJsonPath("$.lastName", is("Smith")),
+                                                        withJsonPath("$.type", is("Defence")),
+                                                        withJsonPath("$.classification", is(
+                                                                        "Expert")))))
+                                                                        .thatMatchesSchema()
 
-    private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
+                        ));
+    }
+
+    private <T extends Aggregate> void setupMockedEventStream(final UUID id, final EventStream eventStream, final T aggregate) {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
-        Class<T> clz = (Class<T>) aggregate.getClass();
+        final Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
     }
 }

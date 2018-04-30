@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import uk.gov.justice.services.common.converter.Converter;
-import uk.gov.moj.cpp.hearing.command.DefenceWitness;
+import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;

@@ -18,6 +18,10 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
             example: !include json/hearing.command.initiate-hearing-offence-plea.json
 
+        application/vnd.hearing.command.initiate-hearing-defence-witness-enrich+json:
+            schema: !include json/schema/hearing.command.initiate-hearing-defence-witness-enrich.json
+            example: !include json/hearing.command.initiate-hearing-defence-witness-enrich.json            
+
 # Log Event
         application/vnd.hearing.command.log-hearing-event+json:
             example: !include json/hearing.command.log-hearing-event.json
@@ -77,7 +81,9 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.add-witness+json:
             example: !include json/hearing.command.add-witness.json
             schema:  !include json/schema/hearing.command.add-witness.json
-
+        application/vnd.hearing.defence-witness-added+json:
+            schema: !include json/schema/hearing.defence-witness-added.json
+            example: !include json/hearing.defence-witness-added.json
         application/vnd.hearing.command.generate-nows+json:
             example: !include json/hearing.command.generate-nows.json
             schema:  !include json/schema/hearing.command.generate-nows.json

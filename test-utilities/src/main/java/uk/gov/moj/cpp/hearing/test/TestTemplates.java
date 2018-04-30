@@ -1,12 +1,19 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
+import static java.util.UUID.randomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.Builder;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
@@ -18,6 +25,7 @@ import uk.gov.moj.cpp.hearing.command.result.ResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
@@ -30,10 +38,12 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.val
 
 public class TestTemplates {
 
+    private TestTemplates(){
 
+    }
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields() {
 
-        UUID caseId = randomUUID();
+        final UUID caseId = randomUUID();
 
         return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
@@ -74,13 +84,12 @@ public class TestTemplates {
                                                 .withStartDate(PAST_LOCAL_DATE.next())
                                 )
                         )
-
                 );
     }
 
 
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplate() {
-        UUID caseId = randomUUID();
+        final UUID caseId = randomUUID();
         return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
                         .withCaseId(caseId)
@@ -169,6 +178,35 @@ public class TestTemplates {
                 );
     }
 
+    public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields(
+                    final UUID caseId, final UUID hearingId, final UUID... defendantIds) {
+
+        final Builder initiateHearingBuilder = InitiateHearingCommand.builder()
+                        .addCase(Case.builder().withCaseId(caseId).withUrn(STRING.next()))
+                        .withHearing(Hearing.builder().withId(hearingId).withType(STRING.next())
+                                        .withCourtCentreId(randomUUID())
+                                        .withCourtCentreName(STRING.next())
+                                        .withCourtRoomId(randomUUID())
+                                        .withCourtRoomName(STRING.next())
+                                        .withJudge(Judge.builder().withId(randomUUID())
+                                                        .withTitle(STRING.next())
+                                                        .withFirstName(STRING.next())
+                                                        .withLastName(STRING.next()))
+                                        .withStartDateTime(FUTURE_ZONED_DATE_TIME.next())
+                                        .withEstimateMinutes(INTEGER.next())
+        );
+        Arrays.stream(defendantIds).forEach(id ->
+
+            initiateHearingBuilder.getHearing().addDefendant(Defendant.builder()
+                        .withId(id).withPersonId(randomUUID())
+                            .withFirstName(STRING.next()).withLastName(STRING.next())
+                            .addDefendantCase(DefendantCase.builder().withCaseId(caseId))
+                            .addOffence(Offence.builder().withId(randomUUID()).withCaseId(caseId)
+                                            .withOffenceCode(STRING.next())
+                                            .withWording(STRING.next())
+                                        .withStartDate(PAST_LOCAL_DATE.next()))));
+        return initiateHearingBuilder;
+    }
     public static HearingUpdatePleaCommand.Builder updatePleaTemplate() {
         return HearingUpdatePleaCommand.builder()
                 .withCaseId(randomUUID())

@@ -1,4 +1,6 @@
-package uk.gov.moj.cpp.hearing.command;
+package uk.gov.moj.cpp.hearing.command.witness;
+
+import uk.gov.moj.cpp.hearing.command.DefendantId;
 
 import java.util.List;
 
