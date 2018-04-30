@@ -144,6 +144,8 @@ public class NewHearingEventListener {
     @Handles("hearing.initiated")
     public void newHearingInitiated(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
+        LOGGER.debug("hearing.initiated event received {}", payload);
+
         final InitiateHearingCommand initiated = jsonObjectToObjectConverter.convert(payload, InitiateHearingCommand.class);
         final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing = initiated.getHearing();
 
