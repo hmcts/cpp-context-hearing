@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
@@ -51,10 +52,12 @@ public class ShareResultsIT extends AbstractIT {
                         withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is("NOT_GUILTY"))
         )));
 
+        final ShareResultsCommand shareResultsCommand = shareResultsCommandTemplate(initiateHearingCommand);
+
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")
                 .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(shareResultsCommandTemplate(initiateHearingCommand))
+                .withPayload(shareResultsCommand)
                 .executeSuccessfully();
 
         publicEventResulted.waitFor();
