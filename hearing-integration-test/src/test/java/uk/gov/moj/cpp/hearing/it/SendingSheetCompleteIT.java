@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -11,8 +12,13 @@ import java.util.stream.IntStream;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
@@ -70,7 +76,6 @@ public class SendingSheetCompleteIT extends AbstractIT {
 
         publicEventTopic.waitFor();
 
-
         InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, initiateHearing -> {
             initiateHearing.getCases().get(0).withCaseId(caseId);
 
@@ -88,21 +93,20 @@ public class SendingSheetCompleteIT extends AbstractIT {
             });
 
         });
-/*
-        //TODO - GPE-3032 - need to check plea information when pleas are finished saving plea against hearing.
-        final String queryAPIEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearingCommand.getHearing().getId());
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        poll(requestParams(url, "application/vnd.hearing.get.hearing.v2+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.cases[0].caseId", is(caseId.toString()))
-                                //TODO - plea assertions here.
-                        )));
-*/
-    }
 
+        final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", initiateHearingCommand.getHearing().getId().toString());
+
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(withJsonPath("$.hearingId", Matchers.is(initiateHearingCommand.getHearing().getId().toString())),
+                                withJsonPath("$.cases[0].caseId", Matchers.is(caseId.toString())),
+                                withJsonPath("$.cases[0].defendants[0].defendantId", Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].id", Matchers.is(offenceId.toString())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", is("2017-11-12")),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is("GUILTY"))
+                        )));
+    }
 
     @Test
     public void processSendingSheetComplete_shouldProduceHearings_given3GuiltyPleas() throws IOException {

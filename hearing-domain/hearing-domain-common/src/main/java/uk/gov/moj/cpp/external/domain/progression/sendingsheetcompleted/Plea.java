@@ -8,12 +8,12 @@ public class Plea {
 
   private LocalDate pleaDate;
 
-  private PleaValue value;
+  private String value;
 
   public Plea() {
   }
 
-  public Plea(final UUID id, final LocalDate pleaDate, final PleaValue value) {
+  public Plea(final UUID id, final LocalDate pleaDate, final String value) {
     this.id = id;
     this.pleaDate = pleaDate;
     this.value = value;
@@ -27,7 +27,7 @@ public class Plea {
     return pleaDate;
   }
 
-  public PleaValue getValue() {
+  public String getValue() {
     return value;
   }
 
@@ -40,7 +40,7 @@ public class Plea {
 
     private LocalDate pleaDate;
 
-    private PleaValue pleaValue;
+    private String pleaValue;
 
     public Builder withId(final UUID id) {
       this.id = id;
@@ -52,7 +52,7 @@ public class Plea {
       return this;
     }
 
-    public Builder withPleaValue(final PleaValue pleaValue) {
+    public Builder withPleaValue(final String pleaValue) {
       this.pleaValue = pleaValue;
       return this;
     }

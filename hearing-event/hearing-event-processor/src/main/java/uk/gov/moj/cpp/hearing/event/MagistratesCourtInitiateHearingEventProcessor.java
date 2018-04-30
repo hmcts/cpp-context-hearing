@@ -10,7 +10,6 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
@@ -68,7 +67,7 @@ public class MagistratesCourtInitiateHearingEventProcessor {
         for (Defendant defendant : magsCourtHearingRecorded.getOriginatingHearing().getDefendants()) {
             for (Offence offence : defendant.getOffences()) {
 
-                if (offence.getPlea() == null || offence.getPlea().getValue() == PleaValue.NOT_GUILTY) {
+                if (offence.getPlea() == null || "NOT_GUILTY".equals(offence.getPlea().getValue())) {
                     continue;
                 }
 
@@ -76,7 +75,7 @@ public class MagistratesCourtInitiateHearingEventProcessor {
                         .withHearingId(magsCourtHearingRecorded.getHearingId())
                         .withOffenceId(offence.getId())
                         .withPleaDate(offence.getPlea().getPleaDate())
-                        .withValue(offence.getPlea().getValue().toString())
+                        .withValue(offence.getPlea().getValue())
                         .build();
 
                 this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.offence-plea-updated")

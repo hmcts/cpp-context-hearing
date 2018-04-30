@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import com.google.common.base.Predicates;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -315,21 +316,8 @@ public class HearingEventListenerTest {
         assertThat(expectedHearingOutcomes.get(2).getDraftResult(), is(UPDATED_DRAFT_RESULT_3));
     }
 
-    @Test @Deprecated @Ignore //TODO: GPE-3390 Cleanup
-    public void shouldUpdateDraftResultWithLastSharedResultIdsWhenResultIsAmended() {
-//        final JsonEnvelope event = getResultAmendedJsonEnvelope();
-//        when(this.hearingOutcomeRepository.findByHearingId(HEARING_ID)).thenReturn(getHearingOutcomesForAmendedResult());
-//
-//        this.hearingEventListener.updateDraftResultWithLastSharedResultIdFromAmendedResult(event);
-//
-//        verify(this.hearingOutcomeRepository).save(this.hearingOutcomeArgumentCaptor.capture());
-//        final HearingOutcome expectedHearingOutcome = this.hearingOutcomeArgumentCaptor.getValue();
-//        assertThat(expectedHearingOutcome.getId(), is(TARGET_ID_4));
-//        assertThat(expectedHearingOutcome.getHearingId(), is(HEARING_ID));
-//        assertThat(expectedHearingOutcome.getDefendantId(), is(DEFENDANT_ID));
-//        assertThat(expectedHearingOutcome.getOffenceId(), is(OFFENCE_ID));
-//        assertThat(expectedHearingOutcome.getDraftResult(), is(UPDATED_DRAFT_RESULT_4));
-    }
+
+    //TODO: GPE-3390  shouldUpdateDraftResultWithLastSharedResultIdsWhenResultIsAmended
 
     private List<HearingOutcome> getHearingOutcomesForSharedResults() {
         return newArrayList(
