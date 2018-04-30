@@ -13,6 +13,8 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.shareResultsCommandTempl
 import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.plea.Plea;
+import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 
 
@@ -24,15 +26,15 @@ public class ShareResultsIT extends AbstractIT {
 
         final InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, asDefault());
 
-//        UseCases.updatePlea(requestSpec, initiateHearingCommand, hearingUpdatePleaCommand -> {
-//            Plea.Builder plea = hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea();
-//            plea.withValue("NOT_GUILTY");
-//        });
-//
-//        UseCases.updateVerdict(requestSpec, initiateHearingCommand, hearingUpdateVerdictCommand -> {
-//            VerdictValue.Builder verdictValue = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue();
-//            verdictValue.withCategory("GUILTY");
-//        });
+        UseCases.updatePlea(requestSpec, initiateHearingCommand, hearingUpdatePleaCommand -> {
+            Plea.Builder plea = hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea();
+            plea.withValue("NOT_GUILTY");
+        });
+
+        UseCases.updateVerdict(requestSpec, initiateHearingCommand, hearingUpdateVerdictCommand -> {
+            VerdictValue.Builder verdictValue = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue();
+            verdictValue.withCategory("GUILTY");
+        });
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
@@ -44,9 +46,9 @@ public class ShareResultsIT extends AbstractIT {
                         withJsonPath("$.hearing.defendants[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                         withJsonPath("$.hearing.defendants[0].cases[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getCaseId().toString())),
                         withJsonPath("$.hearing.defendants[0].cases[0].bailStatus", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getBailStatus())),
-                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString()))
-//                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].verdict.verdictCategory", is("GUILTY")),
-//                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is("NOT_GUILTY"))
+                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
+                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].verdict.verdictCategory", is("GUILTY")),
+                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is("NOT_GUILTY"))
         )));
 
         makeCommand(requestSpec, "hearing.share-results")
