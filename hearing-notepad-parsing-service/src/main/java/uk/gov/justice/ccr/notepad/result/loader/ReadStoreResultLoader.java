@@ -123,7 +123,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                     resultPrompt.setKeywords(getKeywordsForPrompts(promptJson));
 
                     final String fixedListId = promptJson.getString("fixedListId", null);
-                    if (fixedListId != null && ResultType.FIXL == resultPrompt.getType()) {
+                    if (fixedListId != null && (ResultType.FIXL == resultPrompt.getType() || ResultType.FIXLM == resultPrompt.getType() )) {
                         resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId.trim()));
                     }
                     resultPrompts.add(resultPrompt);
