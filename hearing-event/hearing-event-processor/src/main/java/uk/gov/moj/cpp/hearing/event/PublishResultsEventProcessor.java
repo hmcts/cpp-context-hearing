@@ -71,10 +71,12 @@ public class PublishResultsEventProcessor {
         ShareResultsMessage shareResultsMessage = ShareResultsMessage.shareResultsMessage()
                 .setHearing(Hearing.hearing()
                         .setId(input.getHearingId())
+                        .setHearingType(input.getHearing().getType())
                         .setCourtCentre(mapCourtCentre(input))
                         .setAttendees(mapAttendees(input))
                         .setDefendants(mapDefendants(input))
                         .setSharedResultLines(mapSharedResultsLines(input))
+                        .setStartDateTime(input.getHearing().getStartDateTime())
                 )
                 .setSharedTime(ZonedDateTime.now());
 
@@ -93,7 +95,7 @@ public class PublishResultsEventProcessor {
     private static List<Attendee> mapAttendees(ResultsShared input) {
         List<Attendee> attendees = new ArrayList<>();
 
-        if (input.getResultLines().isEmpty()){
+        if (!input.getResultLines().isEmpty()) {
             ResultLine resultLine = input.getResultLines().get(0);
             attendees.add(Attendee.attendee()
                     .setPersonId(resultLine.getClerkOfTheCourtId())
@@ -135,7 +137,6 @@ public class PublishResultsEventProcessor {
                         )
                         .collect(toList())
         );
-
 
 
         return attendees;
