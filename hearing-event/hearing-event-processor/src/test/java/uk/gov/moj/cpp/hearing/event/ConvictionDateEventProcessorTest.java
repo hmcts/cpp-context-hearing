@@ -37,76 +37,77 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 
 public class ConvictionDateEventProcessorTest {
 
-	@InjectMocks
-	private ConvictionDateEventProcessor convictionDateEventProcessor;
+    @InjectMocks
+    private ConvictionDateEventProcessor convictionDateEventProcessor;
 
-	@Mock
-	private Sender sender;
+    @Mock
+    private Sender sender;
 
-	@Mock
-	private Requester requester;
+    @Mock
+    private Requester requester;
 
-	@Mock
-	private JsonEnvelope responseEnvelope;
+    @Mock
+    private JsonEnvelope responseEnvelope;
 
-	@Spy
-	private final Enveloper enveloper = createEnveloper();
+    @Spy
+    private final Enveloper enveloper = createEnveloper();
 
-	@Captor
-	private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
 
-	@Spy
-	private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+    @Spy
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
-	@Spy
-	@InjectMocks
-	private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
+    @Spy
+    @InjectMocks
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
 
-	@Spy
-	@InjectMocks
-	private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
+    @Spy
+    @InjectMocks
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
-	@Before
-	public void initMocks() {
-		MockitoAnnotations.initMocks(this);
-	}
+    @Before
+    public void initMocks() {
+        MockitoAnnotations.initMocks(this);
+    }
 
-	@Test
-	public void publishOffenceConvictionDateChangedPublicEvent() {
+    @Test
+    public void publishOffenceConvictionDateChangedPublicEvent() {
 
-		ConvictionDateAdded convictionDateAdded = ConvictionDateAdded.builder().withHearingId(randomUUID())
-				.withOffenceId(randomUUID()).withConvictionDate(PAST_LOCAL_DATE.next()).build();
+        ConvictionDateAdded convictionDateAdded = ConvictionDateAdded.builder().withHearingId(randomUUID())
+                .withCaseId(randomUUID()).withOffenceId(randomUUID()).withConvictionDate(PAST_LOCAL_DATE.next())
+                .build();
 
-		final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
-				objectToJsonObjectConverter.convert(convictionDateAdded));
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
+                objectToJsonObjectConverter.convert(convictionDateAdded));
 
-		this.convictionDateEventProcessor.publishOffenceConvictionDateChangedPublicEvent(event);
+        this.convictionDateEventProcessor.publishOffenceConvictionDateChangedPublicEvent(event);
 
-		verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-		assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
-				metadata().withName("public.hearing.offence-conviction-date-changed"),
-				payloadIsJson(allOf(withJsonPath("$.offenceId", is(convictionDateAdded.getOffenceId().toString())),
-						withJsonPath("$.convictionDate", is(convictionDateAdded.getConvictionDate().toString()))))));
-	}
+        assertThat(envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-changed"), payloadIsJson(allOf(
+                        withJsonPath("$.offenceId", is(convictionDateAdded.getOffenceId().toString())),
+                        withJsonPath("$.convictionDate", is(convictionDateAdded.getConvictionDate().toString()))))));
+    }
 
-	@SuppressWarnings("unchecked")
-	@Test
-	public void publishOffenceConvictionDateRemovedPublicEvent() {
+    @SuppressWarnings("unchecked")
+    @Test
+    public void publishOffenceConvictionDateRemovedPublicEvent() {
 
-		ConvictionDateRemoved convictionDateRemoved = ConvictionDateRemoved.builder().withHearingId(randomUUID())
-				.withOffenceId(randomUUID()).build();
+        ConvictionDateRemoved convictionDateRemoved = ConvictionDateRemoved.builder().withHearingId(randomUUID())
+                .withCaseId(randomUUID()).withOffenceId(randomUUID()).build();
 
-		final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
-				objectToJsonObjectConverter.convert(convictionDateRemoved));
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
+                objectToJsonObjectConverter.convert(convictionDateRemoved));
 
-		this.convictionDateEventProcessor.publishOffenceConvictionDateRemovedPublicEvent(event);
+        this.convictionDateEventProcessor.publishOffenceConvictionDateRemovedPublicEvent(event);
 
-		verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-		assertThat(envelopeArgumentCaptor.getValue(),
-				jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-removed"),
-						payloadIsJson(allOf(withJsonPath("$.offenceId", is(convictionDateRemoved.getOffenceId().toString()))))));
-	}
+        assertThat(envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-removed"), payloadIsJson(
+                        allOf(withJsonPath("$.offenceId", is(convictionDateRemoved.getOffenceId().toString()))))));
+    }
 
 }
