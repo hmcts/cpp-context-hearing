@@ -14,16 +14,44 @@ import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
-
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
 
     @Test
-    public void publishResults() throws Exception {
+    public void shouldRaiseDraftResultSaved() throws Exception {
+
+        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplateWithHearingId(UseCases.initiateHearing(requestSpec, asDefault()));
+
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
+        final EventListener publicEventResulted = listenFor("public.hearing.draft-result-saved")
+                .withFilter(isJson(allOf(
+                        withJsonPath("$._metadata.name", is("public.hearing.draft-result-saved")),
+                        withJsonPath("$._metadata.context.user", is(USER_ID_VALUE.toString())),
+                        withJsonPath("$.hearingId", is(saveDraftResultCommand.getHearingId().toString())),
+                        withJsonPath("$.defendantId", is(saveDraftResultCommand.getDefendantId().toString())),
+                        withJsonPath("$.targetId", is(saveDraftResultCommand.getTargetId().toString())),
+                        withJsonPath("$.offenceId", is(saveDraftResultCommand.getOffenceId().toString())),
+                        withJsonPath("$.draftResult", is(saveDraftResultCommand.getDraftResult()))
+        )));
+
+        makeCommand(requestSpec, "hearing.save-draft-result")
+                .ofType("application/vnd.hearing.save-draft-result+json")
+                .withArgs(saveDraftResultCommand.getHearingId())
+                .withPayload(saveDraftResultCommand)
+                .executeSuccessfully();
+
+        publicEventResulted.waitFor();
+    }
+
+    @Test
+    public void shouldRaiseResultsSharedEvent() throws Exception {
 
         final InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, asDefault());
 
