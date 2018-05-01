@@ -1,12 +1,15 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Plea implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -39,6 +42,7 @@ public class Plea implements Serializable {
         return value;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getPleaDate() {
         return pleaDate;
     }

@@ -3,8 +3,10 @@ package uk.gov.moj.cpp.hearing.command.initiate;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Interpreter implements Serializable {
 
     private static final long serialVersionUID = 1L;

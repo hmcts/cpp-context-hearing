@@ -11,9 +11,11 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings({"squid:S2384", "squid:S1067"})
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class ResultLine implements Serializable {
 
     private static final long serialVersionUID = 1L;

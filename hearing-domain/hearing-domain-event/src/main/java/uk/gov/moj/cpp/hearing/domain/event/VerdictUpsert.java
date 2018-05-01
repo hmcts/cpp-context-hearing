@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
@@ -10,6 +12,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Event("hearing.offence-verdict-updated")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VerdictUpsert implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -115,6 +118,7 @@ public class VerdictUpsert implements Serializable {
         return unanimous;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getVerdictDate() {
         return verdictDate;
     }

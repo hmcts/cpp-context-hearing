@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
@@ -10,6 +12,7 @@ import static java.util.Optional.ofNullable;
 
 import java.io.Serializable;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Offence implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -78,10 +81,12 @@ public class Offence implements Serializable {
         return section;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getStartDate() {
         return startDate;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getEndDate() {
         return endDate;
     }
@@ -94,6 +99,7 @@ public class Offence implements Serializable {
         return count;
     }
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getConvictionDate() {
         return convictionDate;
     }

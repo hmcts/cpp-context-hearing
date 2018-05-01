@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.justice.domain.annotation.Event;
@@ -27,6 +28,7 @@ import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 @SuppressWarnings({"squid:S2384", "squid:S1067"})
 @Event("hearing.results-shared")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class ResultsShared implements Serializable {
 
     private static final long serialVersionUID = 1L;

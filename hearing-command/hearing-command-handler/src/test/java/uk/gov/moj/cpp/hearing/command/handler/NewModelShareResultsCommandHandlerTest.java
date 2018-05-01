@@ -44,11 +44,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.result.Level;
-import uk.gov.moj.cpp.hearing.command.result.ResultLine;
-import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
@@ -93,46 +89,16 @@ public class NewModelShareResultsCommandHandlerTest {
     private static InitiateHearingCommand initiateHearingCommand;
     private static ProsecutionCounselUpsert prosecutionCounselUpsert;
     private static DefenceCounselUpsert defenceCounselUpsert;
-    private static UUID hearingId;
-    private static UUID defendantId;
-    private static UUID targetId;
-    private static UUID offenceId;
-    private static UUID medatadaId;
-    private static UUID resultDefinitionId;
-    private static UUID resultLineId1;
-    private static UUID personId;
-    private static UUID caseId;
-    private static String draftResult;
-    private static String resultLabel;
-    private static String promptLabel1;
-    private static String promptValue1;
-    private static String promptLabel2;
-    private static String promptValue2;
-    private static Level level;
+    private static UUID metadataId;
     private static ZonedDateTime sharedTime;
 
     @BeforeClass
     public static void init() {
         initiateHearingCommand = TestTemplates.initiateHearingCommandTemplate().build();
-        hearingId = initiateHearingCommand.getHearing().getId();
-        defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId();
-        targetId = UUID.randomUUID();
-        offenceId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
-        medatadaId = UUID.randomUUID();
-        resultDefinitionId = UUID.randomUUID();
-        resultLineId1 = UUID.randomUUID();
-        personId = initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId();
-        caseId = initiateHearingCommand.getCases().get(0).getCaseId();
-        draftResult = RandomGenerator.STRING.next();
-        resultLabel = RandomGenerator.STRING.next();
-        promptLabel1 = RandomGenerator.STRING.next();
-        promptValue1 = RandomGenerator.STRING.next();
-        promptLabel2 = RandomGenerator.STRING.next();
-        promptValue2 = RandomGenerator.STRING.next();
-        level = RandomGenerator.values(Level.CASE, Level.DEFENDANT, Level.OFFENCE).next();
+        metadataId = UUID.randomUUID();
         sharedTime = new UtcClock().now();
         prosecutionCounselUpsert = ProsecutionCounselUpsert.builder()
-            .withHearingId(hearingId)
+            .withHearingId(initiateHearingCommand.getHearing().getId())
             .withPersonId(randomUUID())
             .withAttendeeId(randomUUID())
             .withTitle(STRING.next())
@@ -141,14 +107,14 @@ public class NewModelShareResultsCommandHandlerTest {
             .withStatus(STRING.next())
             .build();
         defenceCounselUpsert = DefenceCounselUpsert.builder()
-            .withHearingId(hearingId)
+            .withHearingId(initiateHearingCommand.getHearing().getId())
             .withPersonId(randomUUID())
             .withAttendeeId(randomUUID())
             .withTitle(STRING.next())
             .withFirstName(STRING.next())
             .withLastName(STRING.next())
             .withStatus(STRING.next())
-            .withDefendantIds(asList(defendantId))
+            .withDefendantIds(asList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
             .build();
     }
 
@@ -156,7 +122,7 @@ public class NewModelShareResultsCommandHandlerTest {
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
+        when(this.eventSource.getStreamById(initiateHearingCommand.getHearing().getId())).thenReturn(this.hearingEventStream);
         when(this.clock.now()).thenReturn(sharedTime);
     }
 
@@ -171,15 +137,9 @@ public class NewModelShareResultsCommandHandlerTest {
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
 
-        final SaveDraftResultCommand saveDraftResultCommand = SaveDraftResultCommand.builder()
-                .withHearingId(hearingId)
-                .withDefendantId(defendantId)
-                .withOffenceId(offenceId)
-                .withTargetId(targetId)
-                .withDraftResult(draftResult)
-                .build();
+        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplateWithHearingId(initiateHearingCommand);
 
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(medatadaId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(saveDraftResultCommand));
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(saveDraftResultCommand));
 
         this.shareResultsCommandHandler.saveDraftResult(envelope);
 
@@ -188,18 +148,18 @@ public class NewModelShareResultsCommandHandlerTest {
                         withMetadataEnvelopedFrom(envelope)
                                 .withName("hearing.draft-result-saved"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingId.toString())),
-                                withJsonPath("$.defendantId", is(defendantId.toString())),
-                                withJsonPath("$.targetId", is(targetId.toString())),
-                                withJsonPath("$.offenceId", is(offenceId.toString())),
-                                withJsonPath("$.draftResult", is(draftResult))
+                                withJsonPath("$.hearingId", is(saveDraftResultCommand.getHearingId().toString())),
+                                withJsonPath("$.defendantId", is(saveDraftResultCommand.getDefendantId().toString())),
+                                withJsonPath("$.targetId", is(saveDraftResultCommand.getTargetId().toString())),
+                                withJsonPath("$.offenceId", is(saveDraftResultCommand.getOffenceId().toString())),
+                                withJsonPath("$.draftResult", is(saveDraftResultCommand.getDraftResult()))
                         ))
                 )
         ));
     }
 
     @Test
-    public void shouldRaiseResultsSharedEventIfSharingForTheFirstTime() throws Exception {
+    public void shouldRaiseResultsSharedEvent() throws Exception {
 
         final NewModelHearingAggregate aggregate = new NewModelHearingAggregate() {{
             apply(Stream.of(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
@@ -209,47 +169,9 @@ public class NewModelShareResultsCommandHandlerTest {
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
 
-        final ShareResultsCommand shareResultsCommand = ShareResultsCommand.builder()
-                .withHearingId(hearingId)
-                .withResultLines(asList(ResultLine.builder()
-                            .withId(resultLineId1)
-                            .withResultDefinitionId(resultDefinitionId)
-                            .withPersonId(personId)
-                            .withOffenceId(offenceId)
-                            .withCaseId(caseId)
-                            .withLevel(level)
-                            .withResultLabel(resultLabel)
-                            .withComplete(true)
-                            .withPrompts(asList(ResultPrompt.builder()
-                                        .withLabel(promptLabel1)
-                                        .withValue(promptValue1)
-                                        .build(),
-                                    ResultPrompt.builder()
-                                        .withLabel(promptLabel2)
-                                        .withValue(promptValue2)
-                                        .build()))
-                            .build(),
-                         ResultLine.builder()
-                            .withId(UUID.randomUUID())
-                            .withResultDefinitionId(resultDefinitionId)
-                            .withPersonId(UUID.randomUUID())
-                            .withOffenceId(UUID.randomUUID())
-                            .withCaseId(UUID.randomUUID())
-                            .withLevel(level)
-                            .withResultLabel(resultLabel)
-                            .withComplete(false)
-                            .withPrompts(asList(ResultPrompt.builder()
-                                        .withLabel(promptLabel1)
-                                        .withValue(promptValue1)
-                                        .build(),
-                                    ResultPrompt.builder()
-                                        .withLabel(promptLabel2)
-                                        .withValue(promptValue2)
-                                        .build()))
-                            .build()))
-                .build();
+        final ShareResultsCommand shareResultsCommand = TestTemplates.shareResultsCommandTemplateWithHearingId(initiateHearingCommand);
 
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(medatadaId, "hearing.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
 
         this.shareResultsCommandHandler.shareResult(envelope);
 
@@ -258,23 +180,23 @@ public class NewModelShareResultsCommandHandlerTest {
                         withMetadataEnvelopedFrom(envelope)
                                 .withName("hearing.results-shared"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.hearingId", is(shareResultsCommand.getHearingId().toString())),
                                 withJsonPath("$.sharedTime", is(ZonedDateTimes.toString(sharedTime))),
-                                withJsonPath("$.resultLines[0].id", is(resultLineId1.toString())),
+                                withJsonPath("$.resultLines[0].id", is(shareResultsCommand.getResultLines().get(0).getId().toString())),
                                 withoutJsonPath("$.resultLines[0].lastSharedResultId"),
-                                withJsonPath("$.resultLines[0].personId", is(personId.toString())),
-                                withJsonPath("$.resultLines[0].offenceId", is(offenceId.toString())),
-                                withJsonPath("$.resultLines[0].caseId", is(caseId.toString())),
-                                withJsonPath("$.resultLines[0].level", is(level.name())),
-                                withJsonPath("$.resultLines[0].resultLabel", is(resultLabel)),
-                                withJsonPath("$.resultLines[0].prompts[0].label", is(promptLabel1)),
-                                withJsonPath("$.resultLines[0].prompts[0].value", is(promptValue1)),
-                                withJsonPath("$.resultLines[0].prompts[1].label", is(promptLabel2)),
-                                withJsonPath("$.resultLines[0].prompts[1].value", is(promptValue2)),
+                                withJsonPath("$.resultLines[0].personId", is(shareResultsCommand.getResultLines().get(0).getPersonId().toString())),
+                                withJsonPath("$.resultLines[0].offenceId", is(shareResultsCommand.getResultLines().get(0).getOffenceId().toString())),
+                                withJsonPath("$.resultLines[0].caseId", is(shareResultsCommand.getResultLines().get(0).getCaseId().toString())),
+                                withJsonPath("$.resultLines[0].level", is(shareResultsCommand.getResultLines().get(0).getLevel().name())),
+                                withJsonPath("$.resultLines[0].resultLabel", is(shareResultsCommand.getResultLines().get(0).getResultLabel())),
+                                withJsonPath("$.resultLines[0].prompts[0].label", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(0).getLabel())),
+                                withJsonPath("$.resultLines[0].prompts[0].value", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(0).getValue())),
+                                withJsonPath("$.resultLines[0].prompts[1].label", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(1).getLabel())),
+                                withJsonPath("$.resultLines[0].prompts[1].value", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(1).getValue())),
                                 
-                                withJsonPath("$.cases.[0].caseId", is(caseId.toString())),
+                                withJsonPath("$.cases.[0].caseId", is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.cases.[0].urn", is(initiateHearingCommand.getCases().get(0).getUrn())),
-                                withJsonPath("$.hearing.id", is(hearingId.toString())),
+                                withJsonPath("$.hearing.id", is(initiateHearingCommand.getHearing().getId().toString())),
                                 withJsonPath("$.hearing.type", is(initiateHearingCommand.getHearing().getType())),
 
                                 withJsonPath("$.hearing.courtCentreId", is(initiateHearingCommand.getHearing().getCourtCentreId().toString())),

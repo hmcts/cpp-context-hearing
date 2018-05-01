@@ -24,6 +24,7 @@ import uk.gov.moj.cpp.hearing.command.plea.Plea;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 
 import java.time.ZonedDateTime;
@@ -228,8 +229,35 @@ public class TestTemplates {
                 );
     }
 
-    public static ShareResultsCommand shareResultsCommandTemplate(final InitiateHearingCommand initiateHearingCommand) {
+    public static SaveDraftResultCommand saveDraftResultCommandTemplateWithoutHearingId(final InitiateHearingCommand initiateHearingCommand) {
+        return saveDraftResultCommandTemplate(initiateHearingCommand, false);
+    }
+
+    public static SaveDraftResultCommand saveDraftResultCommandTemplateWithHearingId(final InitiateHearingCommand initiateHearingCommand) {
+        return saveDraftResultCommandTemplate(initiateHearingCommand, true);
+    }
+
+    private static SaveDraftResultCommand saveDraftResultCommandTemplate(final InitiateHearingCommand initiateHearingCommand, final boolean withHearingId) {
+        return SaveDraftResultCommand.builder()
+                .withHearingId(true == withHearingId ? initiateHearingCommand.getHearing().getId() : null)
+                .withDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getId())
+                .withOffenceId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
+                .withTargetId(UUID.randomUUID())
+                .withDraftResult(STRING.next())
+                .build();
+    }
+
+    public static ShareResultsCommand shareResultsCommandTemplateWithoutHearingId(final InitiateHearingCommand initiateHearingCommand) {
+        return shareResultsCommandTemplate(initiateHearingCommand, false);
+    }
+
+    public static ShareResultsCommand shareResultsCommandTemplateWithHearingId(final InitiateHearingCommand initiateHearingCommand) {
+        return shareResultsCommandTemplate(initiateHearingCommand, true);
+    }
+
+    private static ShareResultsCommand shareResultsCommandTemplate(final InitiateHearingCommand initiateHearingCommand, final boolean withHearingId) {
         return ShareResultsCommand.builder()
+                .withHearingId(true == withHearingId ? initiateHearingCommand.getHearing().getId() : null)
                 .withResultLines(asList(ResultLine.builder()
                             .withId(UUID.randomUUID())
                             .withResultDefinitionId(UUID.randomUUID())

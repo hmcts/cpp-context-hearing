@@ -8,7 +8,7 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.shareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.shareResultsCommandTemplateWithoutHearingId;
 
 import org.junit.Test;
 
@@ -52,7 +52,7 @@ public class ShareResultsIT extends AbstractIT {
                         withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is("NOT_GUILTY"))
         )));
 
-        final ShareResultsCommand shareResultsCommand = shareResultsCommandTemplate(initiateHearingCommand);
+        final ShareResultsCommand shareResultsCommand = shareResultsCommandTemplateWithoutHearingId(initiateHearingCommand);
 
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")
