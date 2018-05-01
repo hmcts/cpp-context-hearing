@@ -11,6 +11,8 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -20,7 +22,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 @ServiceComponent(EVENT_PROCESSOR)
 public class WitnessAddedEventProcessor {
 
-
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(WitnessAddedEventProcessor.class.getName());
     private static final String ID = "id";
     private static final String FIELD_HEARING_ID = "hearingId";
     public static final String FIELD_CLASSIFICATION = "classification";
@@ -43,7 +46,7 @@ public class WitnessAddedEventProcessor {
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String type = payload.getString(FIELD_TYPE);
         final String classification = payload.getString(FIELD_CLASSIFICATION);
-        final String title = payload.containsKey(FIELD_TITLE)?payload.getString(FIELD_TITLE):null;
+        final String title = payload.containsKey(FIELD_TITLE)?payload.getString(FIELD_TITLE):"";
         final String firstName = payload.getString(FIELD_FIRST_NAME);
         final String lastName = payload.getString(FIELD_LAST_NAME);
         final JsonArray defendantIds = payload.getJsonArray("defendantIds");
@@ -68,6 +71,7 @@ public class WitnessAddedEventProcessor {
                 .apply(createObjectBuilder()
                         .add("witnessId", witnessId.toString())
                         .build()));
+        LOGGER.info("public.hearing.events.witness-added raised");
     }
 
 }
