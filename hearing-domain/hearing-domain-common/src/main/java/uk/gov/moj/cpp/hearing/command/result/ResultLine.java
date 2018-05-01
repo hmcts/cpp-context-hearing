@@ -20,34 +20,34 @@ public final class ResultLine implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
-    private final UUID resultDefinitionId;
-    private final UUID lastSharedResultId;
-    private final UUID caseId;
-    private final UUID personId;
-    private final UUID offenceId;
-    private final Level level;
-    private final String resultLabel;
-    private final Boolean complete;
-    private final UUID clerkOfTheCourtId;
-    private final String clerkOfTheCourtFirstName;
-    private final String clerkOfTheCourtLastName;
-    private final List<ResultPrompt> prompts;
+    private UUID id;
+    private UUID resultDefinitionId;
+    private UUID lastSharedResultId;
+    private UUID caseId;
+    private UUID personId;
+    private UUID offenceId;
+    private Level level;
+    private String resultLabel;
+    private Boolean complete;
+    private UUID clerkOfTheCourtId;
+    private String clerkOfTheCourtFirstName;
+    private String clerkOfTheCourtLastName;
+    private List<ResultPrompt> prompts;
 
     @JsonCreator
     protected ResultLine(@JsonProperty("id") final UUID id,
-            @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
-            @JsonProperty("lastSharedResultId") final UUID lastSharedResultId, 
-            @JsonProperty("caseId") final UUID caseId, 
-            @JsonProperty("personId") final UUID personId,
-            @JsonProperty("offenceId") final UUID offenceId, 
-            @JsonProperty("level") final Level level, 
-            @JsonProperty("resultLabel") final String resultLabel,
-            @JsonProperty("complete") final Boolean complete,
-            @JsonProperty("clerkOfTheCourtId") final UUID clerkOfTheCourtId,
-            @JsonProperty("clerkOfTheCourtFirstName") final String clerkOfTheCourtFirstName,
-            @JsonProperty("clerkOfTheCourtLastName") final String clerkOfTheCourtLastName,
-            @JsonProperty("prompts") final List<ResultPrompt> prompts) {
+                         @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
+                         @JsonProperty("lastSharedResultId") final UUID lastSharedResultId,
+                         @JsonProperty("caseId") final UUID caseId,
+                         @JsonProperty("personId") final UUID personId,
+                         @JsonProperty("offenceId") final UUID offenceId,
+                         @JsonProperty("level") final Level level,
+                         @JsonProperty("resultLabel") final String resultLabel,
+                         @JsonProperty("complete") final Boolean complete,
+                         @JsonProperty("clerkOfTheCourtId") final UUID clerkOfTheCourtId,
+                         @JsonProperty("clerkOfTheCourtFirstName") final String clerkOfTheCourtFirstName,
+                         @JsonProperty("clerkOfTheCourtLastName") final String clerkOfTheCourtLastName,
+                         @JsonProperty("prompts") final List<ResultPrompt> prompts) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.lastSharedResultId = lastSharedResultId;
@@ -136,6 +136,58 @@ public final class ResultLine implements Serializable {
         return prompts;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public void setResultDefinitionId(UUID resultDefinitionId) {
+        this.resultDefinitionId = resultDefinitionId;
+    }
+
+    public void setLastSharedResultId(UUID lastSharedResultId) {
+        this.lastSharedResultId = lastSharedResultId;
+    }
+
+    public void setCaseId(UUID caseId) {
+        this.caseId = caseId;
+    }
+
+    public void setPersonId(UUID personId) {
+        this.personId = personId;
+    }
+
+    public void setOffenceId(UUID offenceId) {
+        this.offenceId = offenceId;
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
+    public void setResultLabel(String resultLabel) {
+        this.resultLabel = resultLabel;
+    }
+
+    public void setComplete(Boolean complete) {
+        this.complete = complete;
+    }
+
+    public void setClerkOfTheCourtId(UUID clerkOfTheCourtId) {
+        this.clerkOfTheCourtId = clerkOfTheCourtId;
+    }
+
+    public void setClerkOfTheCourtFirstName(String clerkOfTheCourtFirstName) {
+        this.clerkOfTheCourtFirstName = clerkOfTheCourtFirstName;
+    }
+
+    public void setClerkOfTheCourtLastName(String clerkOfTheCourtLastName) {
+        this.clerkOfTheCourtLastName = clerkOfTheCourtLastName;
+    }
+
+    public void setPrompts(List<ResultPrompt> prompts) {
+        this.prompts = prompts;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -167,7 +219,7 @@ public final class ResultLine implements Serializable {
     }
 
     public static final class Builder {
-        
+
         private UUID id;
         private UUID resultDefinitionId;
         private UUID lastSharedResultId;
@@ -191,38 +243,38 @@ public final class ResultLine implements Serializable {
             this.resultDefinitionId = resultDefinitionId;
             return this;
         }
- 
+
         public Builder withLastSharedResultId(final UUID lastSharedResultId) {
             this.lastSharedResultId = lastSharedResultId;
             return this;
         }
-        
+
         public Builder withCaseId(final UUID caseId) {
             this.caseId = caseId;
             return this;
         }
-        
+
         public Builder withPersonId(final UUID personId) {
             this.personId = personId;
             return this;
         }
-        
+
         public Builder withOffenceId(final UUID offenceId) {
             this.offenceId = offenceId;
             return this;
         }
-        
+
         public Builder withLevel(final Level level) {
             this.level = level;
             return this;
         }
-        
+
         public Builder withResultLabel(final String resultLabel) {
             this.resultLabel = resultLabel;
             return this;
         }
 
-        
+
         public Builder withComplete(final Boolean complete) {
             this.complete = complete;
             return this;

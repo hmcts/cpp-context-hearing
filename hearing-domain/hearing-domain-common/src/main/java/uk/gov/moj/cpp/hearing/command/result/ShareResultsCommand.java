@@ -17,8 +17,8 @@ public final class ShareResultsCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID hearingId;
-    private final List<ResultLine> resultLines;
+    private UUID hearingId;
+    private List<ResultLine> resultLines;
 
     @JsonCreator
     protected ShareResultsCommand(@JsonProperty("hearingId") final UUID hearingId,
@@ -33,6 +33,14 @@ public final class ShareResultsCommand implements Serializable {
 
     public UUID getHearingId() {
         return hearingId;
+    }
+
+    public void setHearingId(UUID hearingId) {
+        this.hearingId = hearingId;
+    }
+
+    public void setResultLines(List<ResultLine> resultLines) {
+        this.resultLines = resultLines;
     }
 
     @Override

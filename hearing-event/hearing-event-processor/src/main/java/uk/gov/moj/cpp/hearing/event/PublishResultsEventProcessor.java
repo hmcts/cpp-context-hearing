@@ -242,7 +242,7 @@ public class PublishResultsEventProcessor {
                         .setId(rl.getId())
                         .setLastSharedResultId(rl.getLastSharedResultId())
                         .setCaseId(rl.getCaseId())
-                        .setDefendantId(rl.getPersonId())
+                        .setPersonId(rl.getPersonId())
                         .setOffenceId(rl.getOffenceId())
                         .setLabel(rl.getResultLabel())
                         .setLevel(rl.getLevel().name())

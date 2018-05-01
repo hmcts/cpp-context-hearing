@@ -82,7 +82,7 @@
       {
         "id": "7879fde7-6dfc-4466-95df-36e584bbc3b0",
         "caseId": "b96a29e5-1c09-4384-8b99-77cebca3d8af",
-        "defendantId": "f287aa07-8d2b-43a9-8836-122388e93e9f",
+        "personId": "f287aa07-8d2b-43a9-8836-122388e93e9f",
         "offenceId": "9f3646a1-e9ab-484f-abda-c1bc04ce6ff1",
         "level": "DEFENDANT_CASE",
         "label": "Imprisonment",
