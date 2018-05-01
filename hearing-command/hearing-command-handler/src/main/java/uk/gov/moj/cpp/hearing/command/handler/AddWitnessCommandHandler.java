@@ -38,7 +38,7 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
         final UUID hearingId = fromString(payload.getString("hearingId"));
         final String type = payload.getString("type");
         final String classification = payload.getString("classification");
-        final String title = payload.getString("title");
+        final String title = payload.getString("title", null);
         final String firstName = payload.getString("firstName");
         final String lastName = payload.getString("lastName");
         List<DefendantId> defendantIdList = payload.getJsonArray("defendantIds").getValuesAs(JsonObject.class).stream()
@@ -55,7 +55,7 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
         final UUID hearingId = fromString(payload.getString("hearingId"));
         final String type = payload.getString("type");
         final String classification = payload.getString("classification");
-        final String title = payload.getString("title");
+        final String title = payload.getString("title", null);
         final String firstName = payload.getString("firstName");
         final String lastName = payload.getString("lastName");
         final UUID  defendantId = fromString(payload.getString("defendantId"));
