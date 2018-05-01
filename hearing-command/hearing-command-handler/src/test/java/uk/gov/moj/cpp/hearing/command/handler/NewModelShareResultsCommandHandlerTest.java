@@ -18,6 +18,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -55,11 +57,11 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
-@SuppressWarnings({"serial","unchecked"})
+@SuppressWarnings({"serial", "unchecked"})
 @RunWith(MockitoJUnitRunner.class)
 public class NewModelShareResultsCommandHandlerTest {
 
-    @InjectMocks 
+    @InjectMocks
     private NewModelShareResultsCommandHandler shareResultsCommandHandler;
 
     @Mock
@@ -98,24 +100,24 @@ public class NewModelShareResultsCommandHandlerTest {
         metadataId = UUID.randomUUID();
         sharedTime = new UtcClock().now();
         prosecutionCounselUpsert = ProsecutionCounselUpsert.builder()
-            .withHearingId(initiateHearingCommand.getHearing().getId())
-            .withPersonId(randomUUID())
-            .withAttendeeId(randomUUID())
-            .withTitle(STRING.next())
-            .withFirstName(STRING.next())
-            .withLastName(STRING.next())
-            .withStatus(STRING.next())
-            .build();
+                .withHearingId(initiateHearingCommand.getHearing().getId())
+                .withPersonId(randomUUID())
+                .withAttendeeId(randomUUID())
+                .withTitle(STRING.next())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withStatus(STRING.next())
+                .build();
         defenceCounselUpsert = DefenceCounselUpsert.builder()
-            .withHearingId(initiateHearingCommand.getHearing().getId())
-            .withPersonId(randomUUID())
-            .withAttendeeId(randomUUID())
-            .withTitle(STRING.next())
-            .withFirstName(STRING.next())
-            .withLastName(STRING.next())
-            .withStatus(STRING.next())
-            .withDefendantIds(asList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
-            .build();
+                .withHearingId(initiateHearingCommand.getHearing().getId())
+                .withPersonId(randomUUID())
+                .withAttendeeId(randomUUID())
+                .withTitle(STRING.next())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withStatus(STRING.next())
+                .withDefendantIds(asList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
+                .build();
     }
 
     @Before
@@ -133,7 +135,7 @@ public class NewModelShareResultsCommandHandlerTest {
             apply(Stream.of(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
             apply(Stream.of(prosecutionCounselUpsert));
             apply(Stream.of(defenceCounselUpsert));
-         }};
+        }};
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
 
@@ -164,12 +166,14 @@ public class NewModelShareResultsCommandHandlerTest {
         final NewModelHearingAggregate aggregate = new NewModelHearingAggregate() {{
             apply(Stream.of(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
             apply(Stream.of(prosecutionCounselUpsert));
-            apply(Stream.of(defenceCounselUpsert)); 
+            apply(Stream.of(defenceCounselUpsert));
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
 
-        final ShareResultsCommand shareResultsCommand = TestTemplates.shareResultsCommandTemplateWithHearingId(initiateHearingCommand);
+        final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand), template -> {
+            template.setHearingId(initiateHearingCommand.getHearing().getId());
+        });
 
         final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
 
@@ -193,7 +197,7 @@ public class NewModelShareResultsCommandHandlerTest {
                                 withJsonPath("$.resultLines[0].prompts[0].value", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(0).getValue())),
                                 withJsonPath("$.resultLines[0].prompts[1].label", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(1).getLabel())),
                                 withJsonPath("$.resultLines[0].prompts[1].value", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(1).getValue())),
-                                
+
                                 withJsonPath("$.cases.[0].caseId", is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.cases.[0].urn", is(initiateHearingCommand.getCases().get(0).getUrn())),
                                 withJsonPath("$.hearing.id", is(initiateHearingCommand.getHearing().getId().toString())),
@@ -254,13 +258,13 @@ public class NewModelShareResultsCommandHandlerTest {
                                 withJsonPath("$.hearing.witnesses.[0].fax", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getFax())),
                                 withJsonPath("$.hearing.witnesses.[0].mobile", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getMobile())),
 
-                                withJsonPath("$.prosecutionCounsels."+ prosecutionCounselUpsert.getAttendeeId() +".hearingId", is(prosecutionCounselUpsert.getHearingId().toString())),
-                                withJsonPath("$.prosecutionCounsels."+ prosecutionCounselUpsert.getAttendeeId() +".personId", is(prosecutionCounselUpsert.getPersonId().toString())),
-                                withJsonPath("$.prosecutionCounsels."+ prosecutionCounselUpsert.getAttendeeId() +".attendeeId", is(prosecutionCounselUpsert.getAttendeeId().toString())),
-                                withJsonPath("$.prosecutionCounsels."+ prosecutionCounselUpsert.getAttendeeId() +".title", is(prosecutionCounselUpsert.getTitle())),
-                                withJsonPath("$.prosecutionCounsels."+ prosecutionCounselUpsert.getAttendeeId() +".firstName", is(prosecutionCounselUpsert.getFirstName())),
-                                withJsonPath("$.prosecutionCounsels."+ prosecutionCounselUpsert.getAttendeeId() +".lastName", is(prosecutionCounselUpsert.getLastName())),
-                                withJsonPath("$.prosecutionCounsels."+ prosecutionCounselUpsert.getAttendeeId() +".status", is(prosecutionCounselUpsert.getStatus())),
+                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".hearingId", is(prosecutionCounselUpsert.getHearingId().toString())),
+                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".personId", is(prosecutionCounselUpsert.getPersonId().toString())),
+                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".attendeeId", is(prosecutionCounselUpsert.getAttendeeId().toString())),
+                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".title", is(prosecutionCounselUpsert.getTitle())),
+                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".firstName", is(prosecutionCounselUpsert.getFirstName())),
+                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".lastName", is(prosecutionCounselUpsert.getLastName())),
+                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".status", is(prosecutionCounselUpsert.getStatus())),
 
                                 withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".hearingId", is(defenceCounselUpsert.getHearingId().toString())),
                                 withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".personId", is(defenceCounselUpsert.getPersonId().toString())),

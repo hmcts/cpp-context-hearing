@@ -247,59 +247,51 @@ public class TestTemplates {
                 .build();
     }
 
-    public static ShareResultsCommand shareResultsCommandTemplateWithoutHearingId(final InitiateHearingCommand initiateHearingCommand) {
-        return shareResultsCommandTemplate(initiateHearingCommand, false);
-    }
-
-    public static ShareResultsCommand shareResultsCommandTemplateWithHearingId(final InitiateHearingCommand initiateHearingCommand) {
-        return shareResultsCommandTemplate(initiateHearingCommand, true);
-    }
-
-    private static ShareResultsCommand shareResultsCommandTemplate(final InitiateHearingCommand initiateHearingCommand, final boolean withHearingId) {
+    public static ShareResultsCommand basicShareResultsCommandTemplate(final InitiateHearingCommand initiateHearingCommand) {
         return ShareResultsCommand.builder()
-                .withHearingId(true == withHearingId ? initiateHearingCommand.getHearing().getId() : null)
+                .withHearingId(null)
                 .withResultLines(asList(ResultLine.builder()
-                            .withId(UUID.randomUUID())
-                            .withResultDefinitionId(UUID.randomUUID())
-                            .withPersonId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId())
-                            .withOffenceId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
-                            .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
-                            .withLevel(values(Level.values()).next())
-                            .withResultLabel(STRING.next())
-                            .withComplete(true)
-                            .withClerkOfTheCourtId(UUID.randomUUID())
-                            .withClerkOfTheCourtFirstName(STRING.next())
-                            .withClerkOfTheCourtLastName(STRING.next())
-                            .withPrompts(asList(ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build(),
-                                    ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build()))
-                            .build(),
-                         ResultLine.builder()
-                            .withId(UUID.randomUUID())
-                            .withResultDefinitionId(UUID.randomUUID())
-                            .withPersonId(UUID.randomUUID())
-                            .withOffenceId(UUID.randomUUID())
-                            .withCaseId(UUID.randomUUID())
-                            .withLevel(values(Level.values()).next())
-                            .withResultLabel(STRING.next())
-                            .withComplete(false)
-                            .withClerkOfTheCourtId(UUID.randomUUID())
-                            .withClerkOfTheCourtFirstName(STRING.next())
-                            .withClerkOfTheCourtLastName(STRING.next())
-                            .withPrompts(asList(ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build(),
-                                    ResultPrompt.builder()
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build()))
-                            .build()))
+                                .withId(UUID.randomUUID())
+                                .withResultDefinitionId(UUID.randomUUID())
+                                .withPersonId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId())
+                                .withOffenceId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
+                                .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
+                                .withLevel(values(Level.values()).next())
+                                .withResultLabel(STRING.next())
+                                .withComplete(true)
+                                .withClerkOfTheCourtId(UUID.randomUUID())
+                                .withClerkOfTheCourtFirstName(STRING.next())
+                                .withClerkOfTheCourtLastName(STRING.next())
+                                .withPrompts(asList(ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build(),
+                                        ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build()))
+                                .build(),
+                        ResultLine.builder()
+                                .withId(UUID.randomUUID())
+                                .withResultDefinitionId(UUID.randomUUID())
+                                .withPersonId(UUID.randomUUID())
+                                .withOffenceId(UUID.randomUUID())
+                                .withCaseId(UUID.randomUUID())
+                                .withLevel(values(Level.values()).next())
+                                .withResultLabel(STRING.next())
+                                .withComplete(false)
+                                .withClerkOfTheCourtId(UUID.randomUUID())
+                                .withClerkOfTheCourtFirstName(STRING.next())
+                                .withClerkOfTheCourtLastName(STRING.next())
+                                .withPrompts(asList(ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build(),
+                                        ResultPrompt.builder()
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .build()))
+                                .build()))
                 .build();
     }
 }

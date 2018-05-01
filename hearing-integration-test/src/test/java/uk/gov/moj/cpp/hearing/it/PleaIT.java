@@ -69,7 +69,7 @@ public class PleaIT extends AbstractIT {
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(offenceId.toString())), 
                         withJsonPath("$.caseId", is(caseId.toString())))));
-        
+
         final HearingUpdatePleaCommand updatePleaCommand = HearingUpdatePleaCommand.builder()
                 .withCaseId(caseId)
                 .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()

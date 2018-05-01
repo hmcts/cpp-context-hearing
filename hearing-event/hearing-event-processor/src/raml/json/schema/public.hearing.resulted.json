@@ -366,7 +366,7 @@
         "caseId": {
           "$ref": "#/definitions/uuid"
         },
-        "defendantId": {
+        "personId": {
           "$ref": "#/definitions/uuid"
         },
         "offenceId": {

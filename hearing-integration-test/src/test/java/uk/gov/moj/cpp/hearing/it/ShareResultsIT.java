@@ -8,7 +8,8 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.shareResultsCommandTemplateWithoutHearingId;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import org.junit.Test;
 
@@ -39,7 +40,7 @@ public class ShareResultsIT extends AbstractIT {
                         withJsonPath("$.targetId", is(saveDraftResultCommand.getTargetId().toString())),
                         withJsonPath("$.offenceId", is(saveDraftResultCommand.getOffenceId().toString())),
                         withJsonPath("$.draftResult", is(saveDraftResultCommand.getDraftResult()))
-        )));
+                )));
 
         makeCommand(requestSpec, "hearing.save-draft-result")
                 .ofType("application/vnd.hearing.save-draft-result+json")
@@ -78,9 +79,11 @@ public class ShareResultsIT extends AbstractIT {
                         withJsonPath("$.hearing.defendants[0].cases[0].offences[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
                         withJsonPath("$.hearing.defendants[0].cases[0].offences[0].verdict.verdictCategory", is("GUILTY")),
                         withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is("NOT_GUILTY"))
-        )));
+                )));
 
-        final ShareResultsCommand shareResultsCommand = shareResultsCommandTemplateWithoutHearingId(initiateHearingCommand);
+        final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand), template -> {
+            template.getResultLines().forEach(rl -> rl.setPersonId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId()));
+        });
 
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")
