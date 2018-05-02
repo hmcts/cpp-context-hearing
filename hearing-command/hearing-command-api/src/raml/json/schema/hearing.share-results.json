@@ -76,12 +76,8 @@
       "additionalProperties":false,
       "required":[
         "id",
-        "personId",
-        "caseId",
-        "offenceId",
-        "level",
-        "resultLabel",
-        "prompts"
+        "resultDefinitionId",
+        "complete"
       ]
     },
     "uuid":{

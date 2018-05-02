@@ -100,15 +100,8 @@
       },
       "required":[
         "id",
-        "personId",
-        "caseId",
-        "offenceId",
-        "level",
-        "resultLabel",
-        "clerkOfTheCourtId",
-        "clerkOfTheCourtFirstName",
-        "clerkOfTheCourtLastName",
-        "prompts"
+        "complete",
+        "resultDefinitionId"
       ]
     },
     "hearing":{

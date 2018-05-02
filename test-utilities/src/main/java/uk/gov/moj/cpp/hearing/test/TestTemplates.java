@@ -8,6 +8,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
+
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
@@ -279,7 +280,7 @@ public class TestTemplates {
                                 .withCaseId(UUID.randomUUID())
                                 .withLevel(values(Level.values()).next())
                                 .withResultLabel(STRING.next())
-                                .withComplete(false)
+                                .withComplete(true)
                                 .withClerkOfTheCourtId(UUID.randomUUID())
                                 .withClerkOfTheCourtFirstName(STRING.next())
                                 .withClerkOfTheCourtLastName(STRING.next())
@@ -291,7 +292,13 @@ public class TestTemplates {
                                                 .withLabel(STRING.next())
                                                 .withValue(STRING.next())
                                                 .build()))
-                                .build()))
+                                .build(),
+                        ResultLine.builder()
+                                .withId(UUID.randomUUID())
+                                .withResultDefinitionId(UUID.randomUUID())
+                                .withComplete(false)
+                                .build()
+                ))
                 .build();
     }
 }
