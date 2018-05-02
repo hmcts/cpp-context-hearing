@@ -92,8 +92,16 @@
           "mandatory": true,
           "type": "FIXL",
           "sequence": 8,
-          "duration": "Days",
+
           "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
+        },
+        {
+          "id": "5aeb14be-6fe6-44c2-a827-5b8fb4a716b8",
+          "label": "Contractor",
+          "mandatory": true,
+          "type": "FIXL",
+          "sequence": 8,
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b"
         },
         {
           "id": "ea26f773-0a91-4526-b4ad-84d07b5bf940",
@@ -201,6 +209,7 @@
           "duration": "Days",
           "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
         },
+
         {
           "id": "ea26f773-0a91-4526-b4ad-84d07b5bf942",
           "label": "Reason",
