@@ -147,8 +147,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 otherwiseDoNothing()
         );
     }
-
-
+    
     public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
         return apply(Stream.of(
                 ProsecutionCounselUpsert.builder()
@@ -233,20 +232,16 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> logHearingEvent(LogEventCommand logEventCommand) {
 
-        if (this.hearing == null || hearingHevents.containsKey(logEventCommand.getHearingEventId())) {
+        if (hearing == null) {
+            return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand)));
+        }
 
-            String reason = hearing == null ? REASON_HEARING_NOT_FOUND :
-                    hearingHevents.get(logEventCommand.getHearingEventId()).isDeleted() ? REASON_ALREADY_DELETED : REASON_ALREADY_LOGGED;
+        if (hearingHevents.containsKey(logEventCommand.getHearingEventId())) {
+            if (hearingHevents.get(logEventCommand.getHearingEventId()).isDeleted()) {
+                return apply(Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_DELETED, logEventCommand)));
+            }
 
-            return apply(Stream.of(new HearingEventIgnored(
-                    logEventCommand.getHearingEventId(),
-                    logEventCommand.getHearingId(),
-                    logEventCommand.getHearingEventDefinitionId(),
-                    logEventCommand.getRecordedLabel(),
-                    logEventCommand.getEventTime(),
-                    reason,
-                    logEventCommand.getAlterable()
-            )));
+            return apply(Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_LOGGED, logEventCommand)));
         }
 
         return apply(Stream.of(new HearingEventLogged(
@@ -269,29 +264,18 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
     public Stream<Object> correctHearingEvent(CorrectLogEventCommand logEventCommand) {
+
+        if (hearing == null) {
+            return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand)));
+        }
+
         if (!hearingHevents.containsKey(logEventCommand.getHearingEventId())) {
 
-            return apply(Stream.of(new HearingEventIgnored(
-                    logEventCommand.getHearingEventId(),
-                    logEventCommand.getHearingId(),
-                    logEventCommand.getHearingEventDefinitionId(),
-                    logEventCommand.getRecordedLabel(),
-                    logEventCommand.getEventTime(),
-                    REASON_EVENT_NOT_FOUND,
-                    logEventCommand.getAlterable()
-            )));
+            return apply(Stream.of(generateHearingIgnoredMessage(REASON_EVENT_NOT_FOUND, logEventCommand)));
         }
 
         if (hearingHevents.get(logEventCommand.getHearingEventId()).isDeleted()) {
-            return apply(Stream.of(new HearingEventIgnored(
-                    logEventCommand.getHearingEventId(),
-                    logEventCommand.getHearingId(),
-                    logEventCommand.getHearingEventDefinitionId(),
-                    logEventCommand.getRecordedLabel(),
-                    logEventCommand.getEventTime(),
-                    REASON_ALREADY_DELETED,
-                    logEventCommand.getAlterable()
-            )));
+            return apply(Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_DELETED, logEventCommand)));
         }
 
         return apply(Stream.of(
@@ -310,7 +294,7 @@ public class NewModelHearingAggregate implements Aggregate {
                         this.hearing.getCourtRoomId(),
                         this.hearing.getCourtRoomName(),
                         this.hearing.getType(),
-                        this.cases.get(0).getUrn(), //TODO - doesn't support multiple cases yet.
+                        this.cases.get(0).getUrn(),
                         this.cases.get(0).getCaseId(),
                         null)
         ));
@@ -356,16 +340,6 @@ public class NewModelHearingAggregate implements Aggregate {
                 .withPleas(this.pleas)
                 .withVerdicts(this.verdicts)
                 .build()));
-    }
-
-    public Stream<Object> addWitness(UUID hearingId, UUID witnessId, String type, String classification, String title, String firstName, String lastName, List<DefendantId> defendantIdList) {
-        return apply(Stream.of(new WitnessAdded(witnessId, hearingId, type, classification, title, firstName,
-                lastName, defendantIdList.stream().map(DefendantId::getDefendantId)
-                .collect(Collectors.toList()))));
-    }
-
-    public Stream<Object> generateNows(final NowsRequested nowsRequested) {
-        return apply(Stream.of(nowsRequested));
     }
 
     public Stream<Object> updateDefendantDetails(CaseDefendantDetailsWithHearingCommand command) {
@@ -435,5 +409,50 @@ public class NewModelHearingAggregate implements Aggregate {
         public HearingEventLogged getHearingEventLogged() {
             return hearingEventLogged;
         }
+    }
+
+
+    public Stream<Object> addWitness(UUID hearingId, UUID witnessId, String type, String classification, String title, String firstName, String lastName, List<DefendantId> defendantIdList) {
+        return apply(Stream.of(new WitnessAdded(
+                witnessId,
+                hearingId,
+                type,
+                classification,
+                title,
+                firstName,
+                lastName,
+                defendantIdList.stream()
+                        .map(DefendantId::getDefendantId)
+                        .collect(Collectors.toList())
+        )));
+    }
+
+    public Stream<Object> generateNows(final NowsRequested nowsRequested) {
+        return apply(Stream.of(nowsRequested));
+    }
+
+
+    private HearingEventIgnored generateHearingIgnoredMessage(String reason, CorrectLogEventCommand logEventCommand) {
+        return new HearingEventIgnored(
+                logEventCommand.getHearingEventId(),
+                logEventCommand.getHearingId(),
+                logEventCommand.getHearingEventDefinitionId(),
+                logEventCommand.getRecordedLabel(),
+                logEventCommand.getEventTime(),
+                reason,
+                logEventCommand.getAlterable()
+        );
+    }
+
+    private HearingEventIgnored generateHearingIgnoredMessage(String reason, LogEventCommand logEventCommand) {
+        return new HearingEventIgnored(
+                logEventCommand.getHearingEventId(),
+                logEventCommand.getHearingId(),
+                logEventCommand.getHearingEventDefinitionId(),
+                logEventCommand.getRecordedLabel(),
+                logEventCommand.getEventTime(),
+                reason,
+                logEventCommand.getAlterable()
+        );
     }
 }

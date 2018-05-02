@@ -21,7 +21,6 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendan
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
@@ -159,7 +158,7 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
                                                         .withId(randomUUID())
                                                         .withCategory(STRING.next())
                                                         .withPlea(Plea.plea()
-                                                                .withPleaValue(PleaValue.GUILTY)
+                                                                .withPleaValue("GUILTY")
                                                                 .withPleaDate(PAST_LOCAL_DATE.next())
                                                                 .build())
                                                         .build(),
@@ -167,7 +166,7 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
                                                         .withId(randomUUID())
                                                         .withCategory(STRING.next())
                                                         .withPlea(Plea.plea()
-                                                                .withPleaValue(PleaValue.NOT_GUILTY)
+                                                                .withPleaValue("NOT_GUILTY")
                                                                 .withPleaDate(PAST_LOCAL_DATE.next())
                                                                 .build())
                                                         .build()
@@ -203,7 +202,7 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
                         withJsonPath("$.hearingId", is(magsCourtHearingRecorded.getHearingId().toString())),
                         withJsonPath("$.offenceId", is(offence.getId().toString())),
                         withJsonPath("$.pleaDate", is(offence.getPlea().getPleaDate().toString())),
-                        withJsonPath("$.value", is(offence.getPlea().getValue().toString()))
+                        withJsonPath("$.value", is(offence.getPlea().getValue()))
                 ))
                 )
         );

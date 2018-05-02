@@ -23,7 +23,6 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendan
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.command.RecordMagsCourtHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.MagistratesCourtHearingAggregate;
@@ -149,7 +148,7 @@ public class MagistratesCourtInitiateHearingCommandHandlerTest {
                                 .withId(randomUUID())
                                 .withPlea(Plea.plea()
                                         .withPleaDate(PAST_LOCAL_DATE.next())
-                                        .withPleaValue(PleaValue.GUILTY)
+                                        .withPleaValue("GUILTY")
                                         .build())
                                 .build()))
                         .build()))

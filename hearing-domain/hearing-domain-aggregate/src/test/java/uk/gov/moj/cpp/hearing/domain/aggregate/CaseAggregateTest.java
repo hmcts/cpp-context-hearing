@@ -13,7 +13,6 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Interpreter;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
@@ -63,8 +62,8 @@ public class CaseAggregateTest {
 
         final List<Defendant> arrDefendants = new ArrayList<>();
         final List lOffences = new ArrayList<>();
-        final Plea plea = (new Plea.Builder()).withId(UUID.randomUUID()).withPleaValue(PleaValue.GUILTY).withPleaDate(LocalDate.now()).build();
-        final LocalDate convictionDate = plea != null && plea.getValue().equals(PleaValue.GUILTY) ? plea.getPleaDate() : null;
+        final Plea plea = (new Plea.Builder()).withId(UUID.randomUUID()).withPleaValue("GUILTY").withPleaDate(LocalDate.now()).build();
+        final LocalDate convictionDate = plea != null && plea.getValue().equals("GUILTY") ? plea.getPleaDate() : null;
         UUID offenceId = UUID.randomUUID();
         final Offence offence = (new Offence.Builder()).withId(offenceId).withCategory("category").withConvictionDate(convictionDate).
                 withDescription("testOffence").withEndDate(LocalDate.now()).withPlea(plea)

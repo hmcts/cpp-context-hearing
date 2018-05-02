@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.PleaValue;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 
 import java.time.LocalDate;
@@ -25,7 +24,7 @@ public class HearingTransformer {
                 defendants ->
                         defendants.getOffences().forEach(
                                 offence -> {
-                                    if (offence.getPlea() != null && offence.getPlea().getValue().equals(PleaValue.GUILTY)) {
+                                    if (offence.getPlea() != null && "GUILTY".equals(offence.getPlea().getValue())) {
                                         final LocalDate pleaDate = offence.getPlea().getPleaDate();
                                         if (!pleaDate2DefendantOffence.containsKey(pleaDate)) {
                                             pleaDate2DefendantOffence.put(pleaDate, new HashMap<>());
