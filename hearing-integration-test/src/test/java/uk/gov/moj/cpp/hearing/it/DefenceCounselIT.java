@@ -23,7 +23,7 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -142,7 +142,7 @@ public class DefenceCounselIT extends AbstractIT {
                                     DefendantCase.builder()
                                             .withCaseId(i.getCases().get(0).getCaseId())
                                             .withBailStatus(STRING.next())
-                                            .withCustodyTimeLimitDate(FUTURE_ZONED_DATE_TIME.next())
+                                            .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next())
                             )
                             .addOffence(
                                     Offence.builder()

@@ -188,13 +188,7 @@ public class NewHearingEventListenerTest {
         assertThat(actualDefendant.getInterpreterLanguage(), is(defendant.getInterpreter().getLanguage()));
         assertThat(actualDefendant.getDefenceSolicitorFirm(), is(defendant.getDefenceOrganisation()));
         assertThat(actualDefendant.getDefendantCases().get(0).getBailStatus(), is(defendant.getDefendantCases().get(0).getBailStatus()));
-        assertThat(actualDefendant.getDefendantCases().get(0).getCustodyTimeLimitDate().toLocalDateTime(), is(defendant.getDefendantCases().get(0).getCustodyTimeLimitDate().toLocalDateTime()));
-
-        //assertThat(actualDefendant.getEmail(), is(""));
-        //assertThat(actualDefendant.getFax(), is(""));
-        //assertThat(actualDefendant.getHomeTelephone(), is(""));
-        //assertThat(actualDefendant.getMobileTelephone(), is(""));
-        //assertThat(actualDefendant.getWorkTelephone(), is(""));
+        assertThat(actualDefendant.getDefendantCases().get(0).getCustodyTimeLimitDate().toLocalDateTime().toLocalDate(), is(defendant.getDefendantCases().get(0).getCustodyTimeLimitDate()));
 
         final uk.gov.moj.cpp.hearing.persist.entity.ex.Address actualAddress = actualDefendant.getAddress();
 

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,12 +15,12 @@ public class DefendantCase implements Serializable {
 
     private final UUID caseId;
     private final String bailStatus;
-    private final ZonedDateTime custodyTimeLimitDate;
+    private final LocalDate custodyTimeLimitDate;
 
     @JsonCreator
     public DefendantCase(@JsonProperty("caseId") final UUID caseId,
                          @JsonProperty("bailStatus") final String bailStatus,
-                         @JsonProperty("custodyTimeLimitDate") final ZonedDateTime custodyTimeLimitDate
+                         @JsonProperty("custodyTimeLimitDate") final LocalDate custodyTimeLimitDate
     ) {
 
         this.caseId = caseId;
@@ -36,7 +36,7 @@ public class DefendantCase implements Serializable {
         return bailStatus;
     }
 
-    public ZonedDateTime getCustodyTimeLimitDate() {
+    public LocalDate getCustodyTimeLimitDate() {
         return custodyTimeLimitDate;
     }
 
@@ -44,7 +44,7 @@ public class DefendantCase implements Serializable {
 
         private UUID caseId;
         private String bailStatus;
-        private ZonedDateTime custodyTimeLimitDate;
+        private LocalDate custodyTimeLimitDate;
 
         private Builder() {
 
@@ -58,7 +58,7 @@ public class DefendantCase implements Serializable {
             return bailStatus;
         }
 
-        public ZonedDateTime getCustodyTimeLimitDate() {
+        public LocalDate getCustodyTimeLimitDate() {
             return custodyTimeLimitDate;
         }
 
@@ -72,7 +72,7 @@ public class DefendantCase implements Serializable {
             return this;
         }
 
-        public Builder withCustodyTimeLimitDate(ZonedDateTime custodyTimeLimitDate) {
+        public Builder withCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
             this.custodyTimeLimitDate = custodyTimeLimitDate;
             return this;
         }

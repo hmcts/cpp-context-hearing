@@ -6,8 +6,7 @@
       "$ref":"#/definitions/uuid"
     },
     "sharedTime":{
-      "type":"string",
-      "format":"date-time"
+      "type":"string"
     },
     "resultLines":{
       "type":"array",
@@ -316,8 +315,7 @@
           "type":"string"
         },
         "custodyTimeLimitDate":{
-          "type":"string",
-          "format":"date-time"
+          "type":"string"
         }
       },
       "required":[

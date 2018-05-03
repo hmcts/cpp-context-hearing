@@ -36,6 +36,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -173,7 +174,7 @@ public class PublishResultsEventProcessorTest {
                                 withJsonPath("$.hearing.defendants[0].cases[0].urn", is(resultsShared.getCases().get(0).getUrn())),
 
                                 withJsonPath("$.hearing.defendants[0].cases[0].custodyTimeLimitDate", is(
-                                        ZonedDateTimes.toString(defendant.getDefendantCases().get(0).getCustodyTimeLimitDate())
+                                        defendant.getDefendantCases().get(0).getCustodyTimeLimitDate().toString()
                                 )),
 
                                 withJsonPath("$.hearing.defendants[0].cases[0].offences[0].id", is(offence.getId().toString())),
@@ -260,7 +261,7 @@ public class PublishResultsEventProcessorTest {
                                 )
                                 .addDefendantCase(DefendantCase.builder()
                                         .withBailStatus(STRING.next())
-                                        .withCustodyTimeLimitDate(ZonedDateTime.now(ZoneId.of("UTC")))
+                                        .withCustodyTimeLimitDate(LocalDate.now())
                                         .withCaseId(caseId)
                                 )
                                 .addOffence(Offence.builder()

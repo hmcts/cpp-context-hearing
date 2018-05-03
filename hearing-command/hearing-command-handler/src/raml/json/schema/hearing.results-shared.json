@@ -316,8 +316,7 @@
           "type":"string"
         },
         "custodyTimeLimitDate":{
-          "type":"string",
-          "format":"date-time"
+          "type":"string"
         }
       },
       "required":[

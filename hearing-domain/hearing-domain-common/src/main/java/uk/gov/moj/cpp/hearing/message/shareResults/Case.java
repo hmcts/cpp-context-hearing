@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,7 +8,7 @@ public class Case {
     private UUID id;
     private String urn;
     private String bailStatus;
-    private ZonedDateTime custodyTimeLimitDate;
+    private LocalDate custodyTimeLimitDate;
     private List<Offence> offences;
 
     public UUID getId() {
@@ -23,7 +23,7 @@ public class Case {
         return bailStatus;
     }
 
-    public ZonedDateTime getCustodyTimeLimitDate() {
+    public LocalDate getCustodyTimeLimitDate() {
         return custodyTimeLimitDate;
     }
 
@@ -46,7 +46,7 @@ public class Case {
         return this;
     }
 
-    public Case setCustodyTimeLimitDate(ZonedDateTime custodyTimeLimitDate) {
+    public Case setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
         this.custodyTimeLimitDate = custodyTimeLimitDate;
         return this;
     }
