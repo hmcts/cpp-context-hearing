@@ -73,6 +73,11 @@ public class GenerateNowsIT extends AbstractIT {
 
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
+
+        TestUtilities.EventListener publicEventTopicNows = listenFor("public.hearing.events.nows-requested")
+                .withFilter(isJson(withJsonPath("$.hearing.id", is(hearing.getId().toString()))));
+        publicEventTopicNows.waitFor();
+
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.nows"), initiateHearing.getHearing().getId());
         final String url = getBaseUri() + "/" + queryAPIEndPoint;

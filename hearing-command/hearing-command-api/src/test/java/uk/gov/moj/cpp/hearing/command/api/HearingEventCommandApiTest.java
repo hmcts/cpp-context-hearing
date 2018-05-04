@@ -17,7 +17,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -57,8 +57,8 @@ public class HearingEventCommandApiTest {
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final UUID HEARING_EVENT_DEFINITION_ID = randomUUID();
-    private static final String EVENT_TIME = ZonedDateTimes.toString(PAST_UTC_DATE_TIME.next());
-    private static final String LAST_MODIFIED_TIME = ZonedDateTimes.toString(PAST_UTC_DATE_TIME.next());
+    private static final String EVENT_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
+    private static final String LAST_MODIFIED_TIME = ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next());
     private static final String RECORDED_LABEL = STRING.next();
 
     @InjectMocks

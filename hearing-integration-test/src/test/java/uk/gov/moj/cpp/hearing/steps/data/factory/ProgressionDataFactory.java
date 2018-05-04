@@ -6,7 +6,7 @@ import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.justice.services.common.converter.LocalDates;
@@ -43,7 +43,7 @@ public class ProgressionDataFactory {
                                 .add("firstName", dataFactory.getFirstName())
                                 .add("lastName", dataFactory.getLastName())
                         )
-                        .add("startDateTime", ZonedDateTimes.toString(PAST_UTC_DATE_TIME.next()))
+                        .add("startDateTime", ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next()))
                         .add("notBefore", true)
                         .add("estimateMinutes", 7200)
                         .add("defendants", createArrayBuilder()

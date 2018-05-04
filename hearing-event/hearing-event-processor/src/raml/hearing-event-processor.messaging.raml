@@ -108,6 +108,10 @@ baseUri: message://event/processor/message/hearing
             example: !include json/hearing.update-case-defendant-details-against-hearing-aggregate.json
             schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
 
+        application/vnd.hearing.events.nows-requested+json:
+            schema: !include json/schema/hearing.events.nows-requested.json
+            example: !include json/hearing.events.nows-requested.json
+
 /public.event:
   post:
     body:

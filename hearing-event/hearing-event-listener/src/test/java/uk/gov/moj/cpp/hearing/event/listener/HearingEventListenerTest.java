@@ -38,7 +38,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,7 +84,7 @@ public class HearingEventListenerTest {
     private static final UUID TARGET_ID_3 = randomUUID();
     private static final UUID TARGET_ID_4 = randomUUID();
 
-    private static final ZonedDateTime START_DATE_TIME = PAST_UTC_DATE_TIME.next();
+    private static final ZonedDateTime START_DATE_TIME = PAST_ZONED_DATE_TIME.next();
     private static final LocalDate START_DATE = START_DATE_TIME.toLocalDate();
 
     private static final int NUMBER_OF_JURORS = 10;
@@ -101,7 +101,7 @@ public class HearingEventListenerTest {
     private static final String PROMPT_VALUE_1 = "1 year 6 months";
     private static final String PROMPT_LABEL_2 = "Prison";
     private static final String PROMPT_VALUE_2 = "Wormwood Scrubs";
-    private static final ZonedDateTime SHARED_TIME = PAST_UTC_DATE_TIME.next();
+    private static final ZonedDateTime SHARED_TIME = PAST_ZONED_DATE_TIME.next();
 
     private static final UUID RESULT_LINE_ID = randomUUID();
     private static final UUID RESULT_LINE_ID_2 = randomUUID();
