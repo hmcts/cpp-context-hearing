@@ -5,15 +5,17 @@ import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.persist.NowsRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsResult;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,49 +25,86 @@ import static org.hamcrest.core.Is.is;
 @SuppressWarnings("CdiInjectionPointsInspection")
 @RunWith(CdiTestRunner.class)
 public class NowsRepositoryTest {
+
     UUID id;
     UUID hearingId;
     UUID defendantId;
+    UUID nowsTypeId;
+    UUID nowMaterialId;
+    UUID sharedResultId;
+
+    private static final String language = "wales";
+    private NowsMaterial nowsMaterial;
 
     @Inject
-    private NowsMaterialRepository nowsMaterialRepository;
+    private NowsRepository nowsRepository;
 
     @Before
     public void setup() {
         id = randomUUID();
         hearingId = randomUUID();
         defendantId = randomUUID();
+        nowsTypeId = randomUUID();
+        nowMaterialId = randomUUID();
+        sharedResultId = randomUUID();
 
-        NowsMaterial nowsMaterial = new NowsMaterial();
-        nowsMaterial.setId(id);
-        nowsMaterial.setDefendantId(defendantId);
-        nowsMaterial.setHearingId(hearingId);
+        Nows nows = new Nows();
+        nows.setId(id);
+        nows.setDefendantId(defendantId);
+        nows.setHearingId(hearingId);
+        nows.setNowsTypeId(nowsTypeId);
+
+        nowsMaterial = new NowsMaterial();
+        nowsMaterial.setId(nowMaterialId);
+        nowsMaterial.setNows(nows);
         nowsMaterial.setStatus(NowsMaterialStatus.REQUESTED);
         nowsMaterial.setUserGroups(Arrays.asList("LO", "GA"));
+        nowsMaterial.setLanguage(language);
+        nows.getMaterial().add(nowsMaterial);
 
-        this.nowsMaterialRepository.save(nowsMaterial);
+        NowsResult nowsResult = new NowsResult();
+        nowsResult.setSequence(1);
+        nowsResult.setSharedResultId(sharedResultId);
+        nowsResult.setNows(nows);
+        nows.getNowResult().add(nowsResult);
+
+        this.nowsRepository.save(nows);
     }
 
 
     @Test
     public void findAllTest() {
-        final NowsMaterial nowsMaterials = this.nowsMaterialRepository.findAll().stream().filter(nowsMaterial -> nowsMaterial.getId().equals(id)).findFirst().get();
-        assertThat(nowsMaterials.getDefendantId(), is(this.defendantId));
-        assertThat(nowsMaterials.getHearingId(), is(this.hearingId));
-        assertThat(nowsMaterials.getStatus(), is(NowsMaterialStatus.REQUESTED));
-        assertThat(nowsMaterials.getUserGroups(), containsInAnyOrder("LO", "GA"));
+        final Nows nows = this.nowsRepository.findAll().stream().filter(n -> n.getId().equals(id)).findFirst().get();
+        assertThat(nows.getDefendantId(), is(this.defendantId));
+        assertThat(nows.getHearingId(), is(this.hearingId));
+        assertThat(nows.getNowsTypeId(), is(this.nowsTypeId));
+
+        assertThat(nows.getMaterial().get(0).getId(), is(this.nowsMaterial.getId()));
+        assertThat(nows.getMaterial().get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
+        assertThat(nows.getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
+        assertThat(nows.getMaterial().get(0).getLanguage(), is(language));
+
+        assertThat(nows.getNowResult().get(0).getSharedResultId(), is(sharedResultId));
+        assertThat(nows.getNowResult().get(0).getSequence(), is(1));
+
 
     }
 
     @Test
     public void findByHearingIdTest() {
-        final List<NowsMaterial> nowsMaterials = this.nowsMaterialRepository.findByHearingId(hearingId);
-        assertThat(nowsMaterials.get(0).getId(), is(this.id));
-        assertThat(nowsMaterials.get(0).getDefendantId(), is(this.defendantId));
-        assertThat(nowsMaterials.get(0).getHearingId(), is(this.hearingId));
-        assertThat(nowsMaterials.get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
-        assertThat(nowsMaterials.get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
+        final List<Nows> nows = this.nowsRepository.findByHearingId(hearingId);
+        assertThat(nows.get(0).getId(), is(this.id));
+        assertThat(nows.get(0).getDefendantId(), is(this.defendantId));
+        assertThat(nows.get(0).getHearingId(), is(this.hearingId));
+        assertThat(nows.get(0).getNowsTypeId(), is(this.nowsTypeId));
 
+        assertThat(nows.get(0).getMaterial().get(0).getId(), is(this.nowsMaterial.getId()));
+        assertThat(nows.get(0).getMaterial().get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
+        assertThat(nows.get(0).getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
+        assertThat(nows.get(0).getMaterial().get(0).getLanguage(), is(language));
+
+        assertThat(nows.get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
+        assertThat(nows.get(0).getNowResult().get(0).getSequence(), is(1));
     }
 
 }

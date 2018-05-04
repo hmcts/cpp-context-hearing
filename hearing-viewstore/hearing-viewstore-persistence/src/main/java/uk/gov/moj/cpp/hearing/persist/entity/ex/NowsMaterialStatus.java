@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.persist.entity.ex;
 
 public enum NowsMaterialStatus {
 
-    REQUESTED("REQUESTED"),
-    GENERATED("GENERATED");
+    REQUESTED("Requested"),
+    GENERATED("Generated");
 
     private String description;
 

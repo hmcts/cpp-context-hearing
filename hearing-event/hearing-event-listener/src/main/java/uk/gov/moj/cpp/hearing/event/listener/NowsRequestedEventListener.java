@@ -5,9 +5,11 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
-import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.persist.NowsRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsResult;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -26,7 +28,7 @@ public class NowsRequestedEventListener {
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Inject
-    private NowsMaterialRepository nowsMaterialRepository;
+    private NowsRepository nowsRepository;
 
 
     @Transactional
@@ -37,16 +39,27 @@ public class NowsRequestedEventListener {
 
         UUID hearingId = fromString(nowsRequested.getHearing().getId());
 
-        List<NowsMaterial> nowsMaterials = nowsMaterialRepository.findByHearingId(hearingId);
-        if (nowsMaterials != null) {
-            nowsMaterials.forEach(nowsMaterial -> nowsMaterialRepository.remove(nowsMaterial));
+        List<Nows> nowsList = nowsRepository.findByHearingId(hearingId);
+        if (nowsList != null) {
+            nowsList.forEach(nows -> nowsRepository.remove(nows));
         }
         nowsRequested.getHearing().getNows().forEach(now -> {
-            UUID defendantId = fromString(now.getDefendantId());
+            Nows nows = Nows.builder().withNowsTypeId(fromString(now.getNowsTypeId())).withDefendantId(fromString(now.getDefendantId()))
+                    .withHearingId(hearingId).withId(fromString(now.getId())).build();
+
             now.getMaterial().forEach(material -> {
                 List<String> stringList = material.getUserGroups().stream().map(materialUserGroup -> materialUserGroup.getGroup()).collect(Collectors.toList());
-                nowsMaterialRepository.save(NowsMaterial.builder().withUserGroups(stringList).withStatus(NowsMaterialStatus.REQUESTED).withId(fromString(material.getId())).withDefendantId(defendantId).withHearingId(hearingId).build());
+                NowsMaterial nowsMaterial = NowsMaterial.builder().withUserGroups(stringList).withStatus(NowsMaterialStatus.REQUESTED)
+                        .withId(fromString(material.getId())).withLanguage(material.getLanguage()).withNows(nows).build();
+                nows.getMaterial().add(nowsMaterial);
             });
+
+            now.getNowResult().forEach(result -> {
+                NowsResult nowResult = NowsResult.builder().withSharedResultId(fromString(result.getSharedResultId())).withSequence(result.getSequence()).withNows(nows).build();
+                nows.getNowResult().add(nowResult);
+            });
+
+            nowsRepository.save(nows);
         });
 
 

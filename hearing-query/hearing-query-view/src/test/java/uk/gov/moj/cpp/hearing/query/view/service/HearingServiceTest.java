@@ -15,7 +15,7 @@ import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.getHearing;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
-import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingCase;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
@@ -24,8 +24,10 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
@@ -34,7 +36,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
-import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsMaterialResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
 import java.io.IOException;
@@ -74,7 +76,7 @@ public class HearingServiceTest {
     private AhearingRepository ahearingRepository;
 
     @Mock
-    private NowsMaterialRepository nowsMaterialRepository;
+    private NowsRepository nowsRepository;
 
     @InjectMocks
     private HearingService caseHearingService;
@@ -267,20 +269,49 @@ public class HearingServiceTest {
 
     @Test
     public void shouldFindNowsByHearingId() throws Exception {
-        UUID hearingId = randomUUID();
-        UUID id = randomUUID();
-        UUID defendantId = randomUUID();
-        final List<NowsMaterial> hearingList = new ArrayList<>();
-        NowsMaterial nowsMaterial = NowsMaterial.builder().withHearingId(hearingId).withDefendantId(defendantId)
-                .withId(id).withStatus(NowsMaterialStatus.GENERATED).withUserGroups(Arrays.asList("LO", "CC")).build();
-        hearingList.add(nowsMaterial);
-        when(nowsMaterialRepository.findByHearingId(hearingId)).thenReturn(hearingList);
+        final UUID hearingId = randomUUID();
+        final UUID id = randomUUID();
+        final UUID defendantId = randomUUID();
 
-        final NowsMaterialResponse response = caseHearingService.getNows(hearingId);
+        final UUID nowsTypeId = randomUUID();
+        final UUID nowMaterialId = randomUUID();
+        final UUID sharedResultId = randomUUID();
+        final String language = "wales";
 
-        assertThat(response.getMaterial().get(0).getId(), is(id.toString()));
-        assertThat(response.getMaterial().get(0).getDefendantId(), is(defendantId.toString()));
-        assertThat(response.getMaterial().get(0).getStatus(), is(NowsMaterialStatus.GENERATED.getDescription()));
+        final Nows nows = new Nows();
+        nows.setId(id);
+        nows.setDefendantId(defendantId);
+        nows.setHearingId(hearingId);
+        nows.setNowsTypeId(nowsTypeId);
+
+        final NowsMaterial nowsMaterial = new NowsMaterial();
+        nowsMaterial.setId(nowMaterialId);
+        nowsMaterial.setNows(nows);
+        nowsMaterial.setStatus(NowsMaterialStatus.GENERATED);
+        nowsMaterial.setUserGroups(Arrays.asList("LO", "GA"));
+        nowsMaterial.setLanguage(language);
+        nows.getMaterial().add(nowsMaterial);
+
+        final NowsResult nowsResult = new NowsResult();
+        nowsResult.setSequence(1);
+        nowsResult.setSharedResultId(sharedResultId);
+        nowsResult.setNows(nows);
+        nows.getNowResult().add(nowsResult);
+
+        final List<Nows> nowsList = new ArrayList<>();
+        nowsList.add(nows);
+        when(nowsRepository.findByHearingId(hearingId)).thenReturn(nowsList);
+
+        final NowsResponse response = caseHearingService.getNows(hearingId);
+        assertThat(response.getNows().get(0).getId(), is(id.toString()));
+        assertThat(response.getNows().get(0).getDefendantId(), is(defendantId.toString()));
+        assertThat(response.getNows().get(0).getNowsTypeId(), is(nowsTypeId.toString()));
+        assertThat(response.getNows().get(0).getMaterial().get(0).getId(), is(nowsMaterial.getId().toString()));
+        assertThat(response.getNows().get(0).getMaterial().get(0).getStatus(), is(NowsMaterialStatus.GENERATED.getDescription()));
+        assertThat(response.getNows().get(0).getMaterial().get(0).getLanguage(), is(language));
+        assertThat(response.getNows().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId.toString()));
+        assertThat(response.getNows().get(0).getNowResult().get(0).getSequence(), is(1));
+
     }
 
     /**

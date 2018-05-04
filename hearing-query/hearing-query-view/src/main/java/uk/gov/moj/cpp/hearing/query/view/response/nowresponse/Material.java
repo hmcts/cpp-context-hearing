@@ -1,24 +1,18 @@
 
 package uk.gov.moj.cpp.hearing.query.view.response.nowresponse;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class Material {
 
     @JsonProperty("id")
     private String id;
-    @JsonProperty("defendantId")
-    private String defendantId;
+    @JsonProperty("language")
+    private String language;
     @JsonProperty("status")
     private String status;
     @JsonProperty("userGroups")
@@ -32,12 +26,12 @@ public class Material {
         this.id = id;
     }
 
-    public String getDefendantId() {
-        return defendantId;
+    public String getLanguage() {
+        return language;
     }
 
-    public void setDefendantId(String defendantId) {
-        this.defendantId = defendantId;
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public String getStatus() {
@@ -62,7 +56,7 @@ public class Material {
 
     public static final class Builder {
         private String id;
-        private String defendantId;
+        private String language;
         private String status;
         private List<String> userGroups = new ArrayList<>();
 
@@ -74,8 +68,8 @@ public class Material {
             return this;
         }
 
-        public Builder withDefendantId(String defendantId) {
-            this.defendantId = defendantId;
+        public Builder withLanguage(String language) {
+            this.language = language;
             return this;
         }
 
@@ -92,7 +86,7 @@ public class Material {
         public Material build() {
             Material material = new Material();
             material.setId(id);
-            material.setDefendantId(defendantId);
+            material.setLanguage(language);
             material.setStatus(status);
             material.setUserGroups(userGroups);
             return material;

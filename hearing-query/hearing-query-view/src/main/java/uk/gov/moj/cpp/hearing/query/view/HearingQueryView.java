@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsMaterialResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
@@ -71,8 +71,8 @@ public class HearingQueryView {
     @Handles("hearing.get.nows")
     public JsonEnvelope findNows(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final NowsMaterialResponse nowsMaterialResponse = hearingService.getNows(hearingId.get());
+        final NowsResponse nowsResponse = hearingService.getNows(hearingId.get());
         return enveloper.withMetadataFrom(envelope, "hearing.get.nows")
-                .apply(nowsMaterialResponse);
+                .apply(nowsResponse);
     }
 }

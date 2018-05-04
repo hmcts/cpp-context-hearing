@@ -48,14 +48,21 @@ public class GenerateNowsIT extends AbstractIT {
                 .withPayload(initiateHearing)
                 .executeSuccessfully();
 
+        publicEventTopic.waitFor();
 
         String defendantId = randomUUID().toString();
         String materialId = randomUUID().toString();
+        String nowsId = randomUUID().toString();
+        String nowsTypeId = randomUUID().toString();
+        String sharedResultId = randomUUID().toString();
 
         String nowsJson = Resources.toString(Resources.getResource("hearing.generate-nows.json"), Charset.defaultCharset())
                 .replace("HEARING_ID", hearing.getId().toString())
                 .replace("DEFENDANT_ID", defendantId)
-                .replace("MATERIAL_ID", materialId);
+                .replace("NOW_ID", nowsId)
+                .replace("MATERIAL_ID", materialId)
+                .replace("NOWTYPE_ID", nowsTypeId)
+                .replace("RESULT_ID", sharedResultId);
 
         final String commandUrl = getBaseUri() + "/" + ENDPOINT_PROPERTIES.getProperty("hearing.generate-nows");
         Response writeResponse = given()
@@ -76,9 +83,14 @@ public class GenerateNowsIT extends AbstractIT {
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                withJsonPath("$.material[0].id", is(materialId)),
-                                withJsonPath("$.material[0].defendantId", is(defendantId)),
-                                withJsonPath("$.material[0].status", is("REQUESTED"))
+                                withJsonPath("$.nows[0].id", is(nowsId)),
+                                withJsonPath("$.nows[0].defendantId", is(defendantId)),
+                                withJsonPath("$.nows[0].nowsTypeId", is(nowsTypeId)),
+                                withJsonPath("$.nows[0].material[0].id", is(materialId)),
+                                withJsonPath("$.nows[0].material[0].language", is("welsh")),
+                                withJsonPath("$.nows[0].material[0].status", is("Requested")),
+                                withJsonPath("$.nows[0].nowResult[0].sharedResultId", is(sharedResultId)),
+                                withJsonPath("$.nows[0].nowResult[0].sequence", is(1))
                         )));
     }
 }

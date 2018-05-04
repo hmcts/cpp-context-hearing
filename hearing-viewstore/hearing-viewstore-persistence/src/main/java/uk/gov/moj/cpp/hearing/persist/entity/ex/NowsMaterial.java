@@ -9,7 +9,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.ArrayList;
@@ -24,12 +23,6 @@ public class NowsMaterial {
     @Column(name = "id", nullable = false)
     private UUID id;
 
-    @Column(name = "defendant_id", nullable = false)
-    private UUID defendantId;
-
-    @Column(name = "hearing_id", nullable = false)
-    private UUID hearingId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private NowsMaterialStatus status;
@@ -41,6 +34,13 @@ public class NowsMaterial {
     )
     @Column(name = "user_groups", nullable = false)
     private List<String> userGroups = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "nows_id", nullable = false)
+    Nows nows;
+
+    @Column(name = "language")
+    private String language;
 
     public NowsMaterialStatus getStatus() {
         return status;
@@ -58,20 +58,12 @@ public class NowsMaterial {
         this.id = id;
     }
 
-    public UUID getDefendantId() {
-        return defendantId;
+    public String getLanguage() {
+        return language;
     }
 
-    public void setDefendantId(UUID defendantId) {
-        this.defendantId = defendantId;
-    }
-
-    public UUID getHearingId() {
-        return hearingId;
-    }
-
-    public void setHearingId(UUID hearingId) {
-        this.hearingId = hearingId;
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public List<String> getUserGroups() {
@@ -86,32 +78,31 @@ public class NowsMaterial {
         return new Builder();
     }
 
+    public Nows getNows() {
+        return nows;
+    }
+
+    public void setNows(Nows nows) {
+        this.nows = nows;
+    }
+
     public static final class Builder {
         private UUID id;
-        private UUID defendantId;
         private NowsMaterialStatus status;
-        private UUID hearingId;
         private List<String> userGroups = new ArrayList<>();
+        private String language;
+        private Nows nows;
 
         private Builder() {
         }
-
-
 
         public Builder withId(UUID id) {
             this.id = id;
             return this;
         }
 
-
-
-        public Builder withDefendantId(UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-
-        public Builder withHearingId(UUID hearingId) {
-            this.hearingId = hearingId;
+        public Builder withLanguage(String language) {
+            this.language = language;
             return this;
         }
 
@@ -125,13 +116,18 @@ public class NowsMaterial {
             return this;
         }
 
+        public Builder withNows(Nows nows) {
+            this.nows = nows;
+            return this;
+        }
+
         public NowsMaterial build() {
             NowsMaterial nowsMaterial = new NowsMaterial();
             nowsMaterial.setId(id);
             nowsMaterial.setStatus(status);
-            nowsMaterial.setDefendantId(defendantId);
-            nowsMaterial.setHearingId(hearingId);
+            nowsMaterial.setLanguage(language);
             nowsMaterial.setUserGroups(userGroups);
+            nowsMaterial.setNows(nows);
             return nowsMaterial;
         }
     }

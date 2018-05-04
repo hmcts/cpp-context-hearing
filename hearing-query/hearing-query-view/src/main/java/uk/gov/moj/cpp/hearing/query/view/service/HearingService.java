@@ -5,10 +5,13 @@ import static java.util.stream.Collectors.toList;
 import uk.gov.moj.cpp.hearing.persist.HearingCaseRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingJudgeRepository;
 import uk.gov.moj.cpp.hearing.persist.HearingRepository;
-import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.HearingJudge;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsResult;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowResult;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Nows;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingEntityToHearing;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter;
@@ -17,7 +20,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.HearingView;
 import uk.gov.moj.cpp.hearing.query.view.response.Judge;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Material;
-import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsMaterialResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
 import java.time.LocalDate;
@@ -31,7 +34,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 public class HearingService {
-    
+
     @Inject
     private HearingRepository hearingRepository;
 
@@ -42,7 +45,7 @@ public class HearingService {
     HearingJudgeRepository hearingJudgeRepository;
 
     @Inject
-    NowsMaterialRepository nowsMaterialRepository;
+    NowsRepository nowsRepository;
 
     //TODO - GPE-3032 - move 3032 functionality to new classes so that cleanup is easier.
     // new repositories for hearing and case
@@ -76,7 +79,7 @@ public class HearingService {
         final ZonedDateTime zonedDateTime = date.atStartOfDay(ZoneOffset.systemDefault());
         return new HearingListResponseConverter().convert(ahearingRepository.findByDate(zonedDateTime));
     }
-    
+
     @Transactional
     public HearingDetailsResponse getHearingByIdV2(final UUID hearingId) {
         if (null == hearingId) {
@@ -86,15 +89,32 @@ public class HearingService {
     }
 
     @Transactional
-    public NowsMaterialResponse getNows(final UUID hearingId) {
+    public NowsResponse getNows(final UUID hearingId) {
 
-        List<NowsMaterial> nowsMaterials= nowsMaterialRepository.findByHearingId(hearingId);
+        List<uk.gov.moj.cpp.hearing.persist.entity.ex.Nows> nows = nowsRepository.findByHearingId(hearingId);
 
-        List<Material> materials=nowsMaterials.stream().map(nowsMaterial -> Material.builder().withDefendantId(nowsMaterial.getDefendantId().toString())
+        List<Nows> nowsList = nows.stream().map(now -> Nows.builder()
+                .withDefendantId(now.getDefendantId().toString())
+                .withId(now.getId().toString())
+                .withNowsTypeId(now.getNowsTypeId().toString())
+                .withMaterial(populateMaterial(now.getMaterial()))
+                .withNowResult(populateNowResult(now.getNowResult()))
+                .build()).collect(toList());
+        return NowsResponse.builder().withNows(nowsList).build();
+    }
+
+    private List<NowResult> populateNowResult(List<NowsResult> nowResult) {
+        return nowResult.stream().map(result -> NowResult.builder()
+        .withSequence(result.getSequence())
+                .withSharedResultId(result.getSharedResultId().toString())
+                .build()).collect(toList());
+    }
+
+    private List<Material> populateMaterial(List<NowsMaterial> nowsMaterials) {
+        return nowsMaterials.stream().map(nowsMaterial -> Material.builder()
                 .withId(nowsMaterial.getId().toString())
                 .withStatus(nowsMaterial.getStatus().getDescription())
+                .withLanguage(nowsMaterial.getLanguage())
                 .withUserGroups(nowsMaterial.getUserGroups()).build() ).collect(toList());
-
-        return NowsMaterialResponse.builder().withMaterial(materials).build();
     }
 }

@@ -168,12 +168,12 @@
     ],
     "nows": [
       {
-        "id": "45f4fb1e-ff6f-41c4-9f66-e88e01995c0d",
-        "nowsTypeId": "9d5cc1dd-f7e1-4093-b6a0-83a2e2206853",
+        "id": "NOW_ID",
+        "nowsTypeId": "NOWTYPE_ID",
         "defendantId": "DEFENDANT_ID",
         "nowResult": [
           {
-            "sharedResultId": "7879fde7-6dfc-4466-95df-36e584bbc3b0",
+            "sharedResultId": "RESULT_ID",
             "sequence": 1
           }
         ],

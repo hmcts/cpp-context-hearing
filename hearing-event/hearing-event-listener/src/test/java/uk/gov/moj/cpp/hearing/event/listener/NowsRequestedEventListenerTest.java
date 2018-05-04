@@ -12,9 +12,11 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
-import uk.gov.moj.cpp.hearing.persist.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.persist.NowsRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
+import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsResult;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 public class NowsRequestedEventListenerTest {
 
     @Mock
-    private NowsMaterialRepository nowsMaterialRepository;
+    private NowsRepository nowsRepository;
 
     @InjectMocks
     private NowsRequestedEventListener nowsRequestedEventListener;
@@ -60,31 +62,49 @@ public class NowsRequestedEventListenerTest {
         UUID hearingId = randomUUID();
         UUID defendantId = randomUUID();
         UUID materialId = randomUUID();
+        UUID nowsId = randomUUID();
+        UUID nowsTypeId = randomUUID();
+        UUID sharedResultId = randomUUID();
+        final String language = "english";
 
         final InputStream is = NowsRequestedEventListenerTest.class.getResourceAsStream("/hearing.events.nows-generated.json");
-        NowsRequested nowsRequested =  new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
+        NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
         nowsRequested.getHearing().setId(hearingId.toString());
         nowsRequested.getHearing().getNows().get(0).setDefendantId(defendantId.toString());
+        nowsRequested.getHearing().getNows().get(0).setId(nowsId.toString());
+        nowsRequested.getHearing().getNows().get(0).setNowsTypeId(nowsTypeId.toString());
+        nowsRequested.getHearing().getNows().get(0).getNowResult().get(0).setSharedResultId(sharedResultId.toString());
+        nowsRequested.getHearing().getNows().get(0).getNowResult().get(0).setSequence(1);
         nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).setId(materialId.toString());
-
-        final List<NowsMaterial> hearingList = new ArrayList<>();
-        NowsMaterial nowsMaterial = NowsMaterial.builder().withHearingId(hearingId).withDefendantId(defendantId)
-                .withId(materialId).withStatus(NowsMaterialStatus.GENERATED).withUserGroups(Arrays.asList("LO", "CC")).build();
-        hearingList.add(nowsMaterial);
-        when(nowsMaterialRepository.findByHearingId(hearingId)).thenReturn(hearingList);
+        nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).setLanguage(language);
 
 
-        when(this.nowsMaterialRepository.findByHearingId((hearingId))).thenReturn(hearingList);
+        final List<Nows> nowsList = new ArrayList<>();
+        Nows nows = Nows.builder().withHearingId(hearingId).withDefendantId(defendantId).withId(nowsId).withNowsTypeId(nowsTypeId).build();
 
-        nowsRequestedEventListener.nowsRequested(envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
+        NowsMaterial nowsMaterial = NowsMaterial.builder().withUserGroups(Arrays.asList("LO", "CC"))
+                .withId(materialId).withLanguage(language).withNows(nows).build();
+        NowsResult nowResult = NowsResult.builder().withSharedResultId(sharedResultId).withSequence(1).withNows(nows).build();
+        nows.getMaterial().add(nowsMaterial);
+        nows.getNowResult().add(nowResult);
+        nowsList.add(nows);
+
+        when(nowsRepository.findByHearingId(hearingId)).thenReturn(nowsList);
+
+        nowsRequestedEventListener.nowsRequested(envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested"),
                 objectToJsonObjectConverter.convert(nowsRequested)));
 
-        ArgumentCaptor<NowsMaterial> nowsMaterialArgumentCaptor= ArgumentCaptor.forClass(NowsMaterial.class);
-        verify(this.nowsMaterialRepository).save(nowsMaterialArgumentCaptor.capture());
-        assertThat(nowsMaterialArgumentCaptor.getValue().getId(), is(materialId));
+        ArgumentCaptor<Nows> nowsMaterialArgumentCaptor = ArgumentCaptor.forClass(Nows.class);
+        verify(this.nowsRepository).save(nowsMaterialArgumentCaptor.capture());
+        assertThat(nowsMaterialArgumentCaptor.getValue().getId(), is(nowsId));
         assertThat(nowsMaterialArgumentCaptor.getValue().getHearingId(), is(hearingId));
         assertThat(nowsMaterialArgumentCaptor.getValue().getDefendantId(), is(defendantId));
-
+        assertThat(nowsMaterialArgumentCaptor.getValue().getNowsTypeId(), is(nowsTypeId));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getId(), is(nowsMaterial.getId()));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getLanguage(), is(language));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getNowResult().get(0).getSharedResultId(), is(sharedResultId));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getNowResult().get(0).getSequence(), is(1));
 
     }
 }
