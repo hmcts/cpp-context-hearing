@@ -109,7 +109,8 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                                         .withValue(
                                                 VerdictValue.builder()
                                                         .withId(randomUUID())
-                                                        .withCategory("GUILTY")
+                                                        .withCategory("Guilty")
+                                                        .withCategoryType("GUILTY")
                                                         .withCode("A1")
                                                         .withDescription(STRING.next())
 
@@ -186,7 +187,8 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                                         .withValue(
                                                 VerdictValue.builder()
                                                         .withId(randomUUID())
-                                                        .withCategory("NOT_GUILTY")
+                                                        .withCategory("Not Guilty")
+                                                        .withCategoryType("NOT_GUILTY")
                                                         .withCode("A1")
                                                         .withDescription(STRING.next())
 

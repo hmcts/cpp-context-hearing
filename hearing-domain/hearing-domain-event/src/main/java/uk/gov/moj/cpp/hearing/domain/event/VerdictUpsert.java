@@ -23,6 +23,7 @@ public class VerdictUpsert implements Serializable {
     private UUID verdictId;
     private UUID verdictValueId;
     private String category;
+    private String categoryType;
     private String code;
     private String description;
     private Integer numberOfJurors;
@@ -38,6 +39,7 @@ public class VerdictUpsert implements Serializable {
         this.verdictId = builder.verdictId;
         this.verdictValueId = builder.verdictValueId;
         this.category = builder.category;
+        this.categoryType = builder.categoryType;
         this.code = builder.code;
         this.description = builder.description;
         this.numberOfJurors = builder.numberOfJurors;
@@ -53,6 +55,7 @@ public class VerdictUpsert implements Serializable {
                          @JsonProperty("verdictId") UUID verdictId,
                          @JsonProperty("verdictValueId") UUID verdictValueId,
                          @JsonProperty("category") String category,
+                         @JsonProperty("categoryType") String categoryType,
                          @JsonProperty("code") String code,
                          @JsonProperty("description") String description,
                          @JsonProperty("numberOfJurors") Integer numberOfJurors,
@@ -66,6 +69,7 @@ public class VerdictUpsert implements Serializable {
         this.verdictId = verdictId;
         this.verdictValueId = verdictValueId;
         this.category = category;
+        this.categoryType = categoryType;
         this.code = code;
         this.description = description;
         this.numberOfJurors = numberOfJurors;
@@ -96,6 +100,10 @@ public class VerdictUpsert implements Serializable {
 
     public String getCategory() {
         return category;
+    }
+
+    public String getCategoryType() {
+        return categoryType;
     }
 
     public String getCode() {
@@ -130,6 +138,7 @@ public class VerdictUpsert implements Serializable {
         private UUID verdictId;
         private UUID verdictValueId;
         private String category;
+        private String categoryType;
         private String code;
         private String description;
         private Integer numberOfJurors;
@@ -167,6 +176,11 @@ public class VerdictUpsert implements Serializable {
             return this;
         }
 
+        public Builder withCategoryType(String categoryType) {
+            this.categoryType = categoryType;
+            return this;
+        }
+        
         public Builder withCode(String code) {
             this.code = code;
             return this;
@@ -220,6 +234,10 @@ public class VerdictUpsert implements Serializable {
 
         public String getCategory() {
             return category;
+        }
+
+        public String getCategoryType() {
+            return categoryType;
         }
 
         public String getCode() {

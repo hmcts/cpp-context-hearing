@@ -8,19 +8,23 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@SuppressWarnings("squid:S1067")
 public class VerdictValue implements Serializable {
     final private UUID id;
     final private String category;
+    final private String categoryType;
     final private String code;
     final private String description;
 
     @JsonCreator
     public VerdictValue(@JsonProperty("id") final UUID id,
                         @JsonProperty("category") final String category,
+                        @JsonProperty("categoryType") final String categoryType,
                         @JsonProperty("code") final String code,
                         @JsonProperty("description") final String description) {
         this.id = id;
         this.category = category;
+        this.categoryType = categoryType;
         this.code = code;
         this.description = description;
     }
@@ -31,6 +35,10 @@ public class VerdictValue implements Serializable {
 
     public String getCategory() {
         return category;
+    }
+
+    public String getCategoryType() {
+        return categoryType;
     }
 
     public String getCode() {
@@ -52,6 +60,7 @@ public class VerdictValue implements Serializable {
         VerdictValue verdict = (VerdictValue) o;
         return Objects.equals(getId(), verdict.getId()) &&
                 Objects.equals(getCategory(), verdict.getCategory()) &&
+                Objects.equals(getCategoryType(), verdict.getCategoryType()) &&
                 Objects.equals(getCode(), verdict.getCode()) &&
                 Objects.equals(getDescription(), verdict.getDescription());
 
@@ -59,13 +68,14 @@ public class VerdictValue implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCategory(), getCode(), getDescription());
+        return Objects.hash(getId(), getCategory(), getCategoryType(), getCode(), getDescription());
     }
 
     public static Builder from(VerdictValue value) {
         return new Builder()
                 .withId(value.getId())
                 .withCategory(value.getCategory())
+                .withCategoryType(value.getCategoryType())
                 .withCode(value.getCode())
                 .withDescription(value.getDescription());
     }
@@ -73,6 +83,7 @@ public class VerdictValue implements Serializable {
     public static class Builder {
         private UUID id;
         private String category;
+        private String categoryType;
         private String code;
         private String description;
 
@@ -82,6 +93,10 @@ public class VerdictValue implements Serializable {
 
         public String getCategory() {
             return category;
+        }
+
+        public String getCategoryType() {
+            return categoryType;
         }
 
         public String getCode() {
@@ -101,6 +116,11 @@ public class VerdictValue implements Serializable {
             this.category = category;
             return this;
         }
+        
+        public Builder withCategoryType(String categoryType) {
+            this.categoryType = categoryType;
+            return this;
+        }
 
         public Builder withCode(String code) {
             this.code = code;
@@ -113,7 +133,7 @@ public class VerdictValue implements Serializable {
         }
 
         public VerdictValue build() {
-            return new VerdictValue(id, category, code, description);
+            return new VerdictValue(id, category, categoryType, code, description);
         }
     }
 

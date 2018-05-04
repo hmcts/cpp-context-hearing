@@ -54,6 +54,7 @@ public class NewModelHearingAggregate implements Aggregate {
     private static final long serialVersionUID = 1L;
 
     private static final String GUILTY = "GUILTY";
+    private static final String NOT_GUILTY = "NOT_GUILTY";
     private static final String REASON_ALREADY_LOGGED = "Already logged";
     private static final String REASON_ALREADY_DELETED = "Already deleted";
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
@@ -311,6 +312,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 .withVerdictId(verdict.getId())
                 .withVerdictValueId(verdict.getValue().getId())
                 .withCategory(verdict.getValue().getCategory())
+                .withCategoryType(verdict.getValue().getCategoryType())
                 .withCode(verdict.getValue().getCode())
                 .withDescription(verdict.getValue().getDescription())
                 .withNumberOfJurors(verdict.getNumberOfJurors())
@@ -320,9 +322,9 @@ public class NewModelHearingAggregate implements Aggregate {
                 .build()
         );
 
-        if (GUILTY.equalsIgnoreCase(verdict.getValue().getCategory())) {
+        if (verdict.getValue().getCategoryType().startsWith(GUILTY)) {
             events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
-        } else {
+        } else if (verdict.getValue().getCategoryType().startsWith(NOT_GUILTY)) { 
             events.add(new ConvictionDateRemoved(caseId, hearingId, offenceId));
         }
         return apply(events.stream());

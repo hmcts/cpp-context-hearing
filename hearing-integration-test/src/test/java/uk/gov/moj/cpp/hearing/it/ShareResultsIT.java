@@ -64,7 +64,7 @@ public class ShareResultsIT extends AbstractIT {
 
         UseCases.updateVerdict(requestSpec, initiateHearingCommand, hearingUpdateVerdictCommand -> {
             VerdictValue.Builder verdictValue = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue();
-            verdictValue.withCategory("GUILTY");
+            verdictValue.withCategoryType("GUILTY");
         });
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);

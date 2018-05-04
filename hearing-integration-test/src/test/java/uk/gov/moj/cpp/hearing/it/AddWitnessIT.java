@@ -23,6 +23,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTe
 
 import java.text.MessageFormat;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonObject;
 
@@ -197,7 +198,7 @@ public class AddWitnessIT extends AbstractIT {
 
 
         poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(),
-                        CPP_UID_HEADER.getValue()).build()).until(
+                        CPP_UID_HEADER.getValue()).build()).timeout(30, TimeUnit.SECONDS).until(
                                         status().is(OK), print(),
                                         payload().isJson(allOf(withJsonPath("$.hearingId",
                                                         is(initiateHearingTwo.getHearing().getId()

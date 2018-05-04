@@ -98,6 +98,9 @@
         "category": {
           "type": "string"
         },
+        "categoryType": {
+          "type": "string"
+        },
         "code": {
           "type": "string"
         },

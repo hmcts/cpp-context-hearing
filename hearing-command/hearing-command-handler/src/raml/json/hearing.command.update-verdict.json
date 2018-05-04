@@ -13,6 +13,7 @@
             "value": {
               "id": "0baecac5-222b-402d-9047-84803679edab",
               "category": "GUILTY",
+              "categoryType": "NOT_GUILTY",
               "code": "A1",
               "description": "Guilty By Jury On Judges Direction"
             },

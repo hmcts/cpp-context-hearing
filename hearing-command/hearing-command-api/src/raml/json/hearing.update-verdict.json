@@ -11,9 +11,10 @@
             "id": "0baecac5-222b-402d-9047-84803679edae",
             "value": {
               "id": "0baecac5-222b-402d-9047-84803679edab",
-              "category": "GUILTY",
+              "category": "Not Guilty",
+              "categoryType": "NOT_GUILTY",
               "code": "A1",
-              "description": "Guilty By Jury On Judges Direction"
+              "description": "Not guilty under section 17 Criminal Justice Act (1967): prosecution offer no evidence"
             },
 	    "verdictDate": "2017-02-20",
             "numberOfJurors": 10,
