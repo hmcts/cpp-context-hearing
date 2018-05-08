@@ -1,52 +1,55 @@
 {
-  "$schema":"http://json-schema.org/draft-04/schema#",
-  "type":"object",
-  "properties":{
-    "resultLines":{
-      "type":"array",
-      "items":{
-        "$ref":"#/definitions/resultLine"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "resultLines": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/resultLine"
       }
     }
   },
-  "additionalProperties":false,
-  "required":[
+  "additionalProperties": false,
+  "required": [
     "resultLines"
   ],
-  "definitions":{
-    "resultLine":{
-      "properties":{
-        "personId":{
-          "$ref":"#/definitions/uuid"
-        },
-        "caseId":{
-          "$ref":"#/definitions/uuid"
-        },
-        "offenceId":{
-          "$ref":"#/definitions/uuid"
-        },
-        "id":{
-          "$ref":"#/definitions/uuid"
+  "definitions": {
+    "resultLine": {
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
         },
         "resultDefinitionId":{
           "$ref":"#/definitions/uuid"
         },
-        "lastSharedResultId":{
-          "$ref":"#/definitions/uuid"
+        "complete": {
+          "type": "boolean"
         },
-        "level":{
-          "type":"string",
-          "enum":[
+        "lastSharedResultId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "caseId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "offenceId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "level": {
+          "type": "string",
+          "enum": [
             "DEFENDANT",
             "CASE",
             "OFFENCE"
           ]
         },
-        "resultLabel":{
-          "type":"string"
-        },
-        "complete": {
-          "type":"boolean"
+        "resultLabel": {
+          "type": "string"
         },
         "clerkOfTheCourtId": {
           "$ref": "#/definitions/uuid"
@@ -57,32 +60,32 @@
         "clerkOfTheCourtLastName": {
           "type": "string"
         },
-        "prompts":{
-          "type":"array",
-          "items":{
-            "type":"object",
-            "properties":{
-              "label":{
-                "type":"string"
+        "prompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
               },
-              "value":{
-                "type":"string"
+              "value": {
+                "type": "string"
               }
             },
-            "additionalProperties":false
+            "additionalProperties": false
           }
         }
       },
-      "additionalProperties":false,
-      "required":[
+      "additionalProperties": false,
+      "required": [
         "id",
-        "resultDefinitionId",
-        "complete"
+        "complete",
+        "resultDefinitionId"
       ]
     },
-    "uuid":{
-      "type":"string",
-      "pattern":"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   }
 }

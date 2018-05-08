@@ -2,13 +2,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "sharedTime": {
-      "type": "string",
-      "format": "date-time"
-    },
     "resultLines": {
       "type": "array",
       "items": {
@@ -18,8 +11,6 @@
   },
   "additionalProperties": false,
   "required": [
-    "hearingId",
-    "sharedTime",
     "resultLines"
   ],
   "definitions": {
@@ -86,7 +77,7 @@
       "required": [
         "id",
         "complete",
-        "resutlDefinitionId"
+        "resultDefinitionId"
       ]
     },
     "uuid": {

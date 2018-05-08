@@ -135,6 +135,8 @@ public class PublishResultsEventProcessorTest {
                                 withJsonPath("$.hearing.attendees[0].lastName", is(resultsShared.getResultLines().get(0).getClerkOfTheCourtLastName())),
 
                                 withJsonPath("$.hearing.attendees[1].type", is("JUDGE")),
+
+                                withJsonPath("$.hearing.attendees[1].personId", is(resultsShared.getHearing().getJudge().getId().toString())),
                                 withJsonPath("$.hearing.attendees[1].firstName", is(resultsShared.getHearing().getJudge().getFirstName())),
                                 withJsonPath("$.hearing.attendees[1].lastName", is(resultsShared.getHearing().getJudge().getLastName())),
                                 withJsonPath("$.hearing.attendees[1].title", is(resultsShared.getHearing().getJudge().getTitle())),
@@ -145,6 +147,7 @@ public class PublishResultsEventProcessorTest {
                                 withJsonPath("$.hearing.attendees[2].title", is(defenceCounselUpsert.getTitle())),
 
                                 withJsonPath("$.hearing.attendees[3].type", is("PROSECUTIONADVOCATE")),
+                                withJsonPath("$.hearing.attendees[3].personId", is(prosecutionCounselUpsert.getPersonId().toString())),
                                 withJsonPath("$.hearing.attendees[3].firstName", is(prosecutionCounselUpsert.getFirstName())),
                                 withJsonPath("$.hearing.attendees[3].lastName", is(prosecutionCounselUpsert.getLastName())),
                                 withJsonPath("$.hearing.attendees[3].title", is(prosecutionCounselUpsert.getTitle())),

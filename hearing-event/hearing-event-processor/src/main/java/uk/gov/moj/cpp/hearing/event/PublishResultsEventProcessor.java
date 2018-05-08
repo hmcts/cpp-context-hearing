@@ -106,6 +106,7 @@ public class PublishResultsEventProcessor {
         }
 
         attendees.add(Attendee.attendee()
+                .setPersonId(input.getHearing().getJudge().getId())
                 .setFirstName(input.getHearing().getJudge().getFirstName())
                 .setLastName(input.getHearing().getJudge().getLastName())
                 .setTitle(input.getHearing().getJudge().getTitle())
@@ -127,6 +128,7 @@ public class PublishResultsEventProcessor {
         attendees.addAll(
                 input.getProsecutionCounsels().values().stream()
                         .map(prosecutionCounselUpsert -> ProsecutionAdvocate.prosecutionAdvocate()
+                                .setPersonId(prosecutionCounselUpsert.getPersonId())
                                 //TODO - which cases do the prosecution counsellors handle?
                                 .setCaseIds(input.getCases().stream().map(c -> c.getCaseId()).collect(toList()))
                                 .setFirstName(prosecutionCounselUpsert.getFirstName())
