@@ -147,7 +147,7 @@ public class HearingCommandApiTest {
                 .collect(toMap(identity(), eventApiMethodsToHandlerNames::get)));
     }
 
-    @Test @Ignore("GPE-3390 Refactor")
+    @Test
     public void shouldUpdateWithSharedTimeWhenResultsAreShared() {
         final JsonEnvelope command = prepareShareResultsCommand();
 
@@ -158,7 +158,6 @@ public class HearingCommandApiTest {
                 withMetadataEnvelopedFrom(command).withName(COMMAND_SHARE_RESULTS),
                 payloadIsJson(allOf(
                         withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_SHARED_TIME), equalTo(ZonedDateTimes.toString(clock.now()))),
                         withJsonPath(format("$.%s", FIELD_RESULT_LINES), hasSize(2))
                 )))
         ));

@@ -1,6 +1,4 @@
 {
-  "hearingId": "7601f854-2e7b-4174-a83b-8ac564244b11",
-  "sharedTime": "2017-04-12T09:18:23Z",
   "resultLines": [
     {
       "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
@@ -12,6 +10,8 @@
       "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
       "clerkOfTheCourtFirstName": "David",
       "clerkOfTheCourtLastName": "Walliams",
+      "complete": true,
+      "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
       "prompts": [
         {
           "label": "Imprisonment duration",
@@ -33,6 +33,8 @@
       "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
       "clerkOfTheCourtFirstName": "David",
       "clerkOfTheCourtLastName": "Walliams",
+      "complete": true,
+      "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
       "prompts": [
         {
           "label": "Amount",
