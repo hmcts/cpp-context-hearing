@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -13,18 +13,14 @@ import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 @ServiceComponent(EVENT_LISTENER)
 public class DefenceCounselAddedEventListener {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefenceCounselAddedEventListener.class);
 
     @Inject
     private AhearingRepository ahearingRepository;

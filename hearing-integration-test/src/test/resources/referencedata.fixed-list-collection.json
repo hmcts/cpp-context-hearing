@@ -1,0 +1,18 @@
+{
+	"fixedListCollection": [
+		{
+			"id": "d06f6539-2a7c-4bc8-bca3-A1e5a225471a",
+			"version": "2018-04-19T10:44:50.219Z",
+			"elements": [
+				{
+					"code": "CON",
+					"value": "Convicted"
+				},
+				{
+					"code": "ACQ",
+					"value": "Acquitted"
+				}
+			]
+		}
+	]
+}

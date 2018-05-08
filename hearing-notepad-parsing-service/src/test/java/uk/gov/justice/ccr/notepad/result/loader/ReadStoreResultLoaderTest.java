@@ -1,5 +1,8 @@
 package uk.gov.justice.ccr.notepad.result.loader;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertNotSame;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,10 +13,13 @@ import static uk.gov.justice.ccr.notepad.util.FileUtil.givenPayload;
 
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import uk.gov.justice.ccr.notepad.service.ResultingQueryService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,10 +84,38 @@ public class ReadStoreResultLoaderTest {
         final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt();
 
         //then
-        assertThat(resultPrompts, hasSize(18));
+        Set<String> fixedList = resultPrompts.get(0).getFixedList();
+        assertThat(resultPrompts, hasSize(19));
         assertThat(resultPrompts.get(0).getPromptOrder(), is(1));
         assertThat(resultPrompts.get(0).getReference(), is(nullValue()));
         assertThat(resultPrompts.get(3).getKeywords(), hasItems("years"));
     }
 
+    @Test
+    public void resultPromptShouldLoadAssociatedFixedlist() throws Exception {
+        //given
+        given(resultingQueryService.getAllPromptFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
+        given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
+        given(jsonEnvelope.payloadAsJsonObject())
+                .willReturn(givenPayload("/referencedata.result.prompt-fixedlists.json"))
+                .willReturn(givenPayload("/referencedata.result.definitions.json"));
+
+        //when
+        final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt();
+
+        //then
+        List<ResultPrompt> resultPromptsWithFixedlist = resultPrompts.stream()
+                .filter(resultPrompt -> ResultType.FIXL == resultPrompt.getType())
+                .collect(Collectors.toList());
+
+        assertThat(resultPromptsWithFixedlist, hasSize(2));
+
+        assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasSize(2));
+        assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasItems("Acquitted","Convicted"));
+
+        assertThat(resultPromptsWithFixedlist.get(1).getFixedList(), hasSize(5));
+        assertThat(resultPromptsWithFixedlist.get(1).getFixedList(), hasItems("London Alcohol Abstinence Monitor",
+                "HLNY Alcohol Abstinence Monitor","Midlands GPS Tag Monitoring Centre","London GPS Tag Monitoring Centre"
+        ));
+    }
 }

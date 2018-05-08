@@ -4,6 +4,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
@@ -23,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -142,16 +143,18 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     private Map<String, Set<String>> loadResultPromptFixedList() {
-        final JsonArray resultPromptFixedListsJson = resultingQueryService.getAllPromptFixedLists(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultPromptFixedLists");
-        List<ResultPromptFixedList> resultPromptFixedLists = newArrayList();
-        resultPromptFixedListsJson.forEach(jsonValue -> {
-            ResultPromptFixedList resultPromptFixedList = new ResultPromptFixedList();
-            resultPromptFixedList.setId(((JsonObject) jsonValue).getString("fixedListId").trim());
-            resultPromptFixedList.setValue(((JsonObject) jsonValue).getString("value").trim());
-            resultPromptFixedLists.add(resultPromptFixedList);
-        });
-
-        return resultPromptFixedLists.stream().collect(groupingBy(ResultPromptFixedList::getId, Collectors.mapping(ResultPromptFixedList::getValue, Collectors.toCollection(TreeSet::new))));
+        return resultingQueryService.getAllPromptFixedLists(this.jsonEnvelope).payloadAsJsonObject()
+                .getJsonArray("fixedListCollection").getValuesAs(JsonObject.class)
+                .stream()
+                .flatMap(fixedList -> fixedList.getJsonArray("elements").getValuesAs(JsonObject.class)
+                        .stream()
+                        .map(element -> {
+                            final ResultPromptFixedList resultPromptFixedList = new ResultPromptFixedList();
+                            resultPromptFixedList.setId(fixedList.getString("id").trim());
+                            resultPromptFixedList.setValue(element.getString("value").trim());
+                            return resultPromptFixedList;
+                        })
+                ).collect(groupingBy(ResultPromptFixedList::getId, mapping(ResultPromptFixedList::getValue, toCollection(TreeSet::new))));
     }
 
     @Override

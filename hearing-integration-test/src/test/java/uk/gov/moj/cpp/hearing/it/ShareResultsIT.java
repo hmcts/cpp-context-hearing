@@ -11,14 +11,15 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import org.junit.Test;
-
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+
+import org.junit.Test;
+
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 @SuppressWarnings("unchecked")
