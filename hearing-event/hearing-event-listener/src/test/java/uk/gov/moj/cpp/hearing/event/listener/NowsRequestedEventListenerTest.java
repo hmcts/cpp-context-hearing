@@ -13,10 +13,10 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Nows;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
 
 import java.io.InputStream;
 import java.util.ArrayList;

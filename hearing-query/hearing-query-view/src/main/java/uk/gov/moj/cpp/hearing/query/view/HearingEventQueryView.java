@@ -5,13 +5,13 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
@@ -63,7 +63,7 @@ public class HearingEventQueryView {
     private HearingEventRepository hearingEventRepository;
 
     @Inject
-    private AhearingRepository hearingRepository;
+    private HearingRepository hearingRepository;
 
     @Inject
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
@@ -144,7 +144,7 @@ public class HearingEventQueryView {
 
     private JsonArrayBuilder defendantAndDefenceCounselAttributesFor(final UUID hearingId) {
 
-        Ahearing aHearing = hearingRepository.findById(hearingId);
+        Hearing aHearing = hearingRepository.findById(hearingId);
 
         final JsonArrayBuilder caseAttributesJsonArrayBuilder = createArrayBuilder();
 

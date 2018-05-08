@@ -5,10 +5,10 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import javax.inject.Inject;
@@ -64,7 +64,7 @@ public class CaseDefendantChangeEventListener {
 
         defendant.getDefendantCases().stream().filter(dc -> getDefendantCasePredicate(defendantDetailsToBeUpdated).test(dc)).forEach(dc -> {
             dc.setBailStatus(defendantDetailsToBeUpdated.getDefendant().getBailStatus());
-            dc.setCustodyTimeLimitDate(defendantDetailsToBeUpdated.getDefendant().getCustodyTimeLimitDate());
+            dc.setCustodyTimeLimitDate(defendantDetailsToBeUpdated.getDefendant().getCustodyTimeLimitDate().toLocalDate());
         });
 
         defendant.setInterpreterLanguage(defendantDetailsToBeUpdated.getDefendant().getInterpreter().getLanguage());

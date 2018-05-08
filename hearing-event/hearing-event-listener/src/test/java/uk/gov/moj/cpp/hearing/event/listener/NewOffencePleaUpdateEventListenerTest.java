@@ -25,10 +25,10 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,7 +66,7 @@ public class NewOffencePleaUpdateEventListenerTest {
                 .withValue(PleaValueType.GUILTY.name())
                 .build();
 
-        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
+        final Hearing hearing = Hearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withOffences(asList(
@@ -79,7 +79,7 @@ public class NewOffencePleaUpdateEventListenerTest {
                                 .build()))
                 .build();
 
-        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        final Offence offence = hearing.getDefendants().get(0).getOffences().get(0);
 
         when(this.offenceRepository.findBySnapshotKey(offence.getId())).thenReturn(offence);
 
@@ -106,7 +106,7 @@ public class NewOffencePleaUpdateEventListenerTest {
                 .withValue(PleaValueType.NOT_GUILTY.name())
                 .build();
 
-        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
+        final Hearing hearing = Hearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withOffences(asList(
@@ -119,7 +119,7 @@ public class NewOffencePleaUpdateEventListenerTest {
                                 .build()))
                 .build();
 
-        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        final Offence offence = hearing.getDefendants().get(0).getOffences().get(0);
 
         when(this.offenceRepository.findBySnapshotKey(offence.getId())).thenReturn(offence);
 

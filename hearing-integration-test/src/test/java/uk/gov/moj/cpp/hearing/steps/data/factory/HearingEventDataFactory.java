@@ -8,7 +8,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.val
 
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
@@ -37,9 +37,13 @@ public class HearingEventDataFactory {
         final ZonedDateTime lastModifiedTime = new UtcClock().now();
         final HearingEventDefinition randomHearingEventDefinition = values(HEARING_EVENT_DEFINITIONS).next();
 
-        return new HearingEvent(hearingEventId, randomHearingEventDefinition.getId(), hearingId,
-                randomHearingEventDefinition.getRecordedLabel(),null, lastModifiedTime,
-                randomHearingEventDefinition.isAlterable(), null);
+        return HearingEvent.hearingEvent()
+                .setId(hearingEventId)
+                .setHearingId(hearingId)
+                .setHearingEventDefinitionId(randomHearingEventDefinition.getId())
+                .setRecordedLabel(randomHearingEventDefinition.getRecordedLabel())
+                .setAlterable(randomHearingEventDefinition.isAlterable())
+                .setLastModifiedTime(lastModifiedTime);
     }
 
     public static HearingEvent hearingStartedEvent(final UUID hearingId) {
@@ -74,17 +78,17 @@ public class HearingEventDataFactory {
 
     public static HearingEventDefinitionData hearingEventDefinitionsWithOnlySequencedEvents() {
         START_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "Start Hearing", "Call Case On", 1, SEQUENCE_TYPE_SENTENCING, null, null, null, false);
-        IDENTIFY_DEFENDANT_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(),"Identify defendant", "Defendant Identified", 2, SEQUENCE_TYPE_SENTENCING, null, null, null, true);
+        IDENTIFY_DEFENDANT_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "Identify defendant", "Defendant Identified", 2, SEQUENCE_TYPE_SENTENCING, null, null, null, true);
         MITIGATION_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "<counsel.name>", "Defence <counsel.name> mitigated for <defendant.name>", 5, SEQUENCE_TYPE_SENTENCING, "defendant.name,counsel.name", "Mitigation by:", "defending <defendant.name>", true);
         END_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "End Hearing", "Hearing Ended", 7, SEQUENCE_TYPE_SENTENCING, null, null, null, false);
 
         final List<HearingEventDefinition> eventDefinitions = newArrayList(
                 START_HEARING_EVENT_DEFINITION,
                 IDENTIFY_DEFENDANT_HEARING_EVENT_DEFINITION,
-                new HearingEventDefinition(randomUUID(),"Take Plea", "Plea", 3, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
-                new HearingEventDefinition(randomUUID(),"Prosecution Opening", "Prosecution Opening", 4, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "Take Plea", "Plea", 3, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "Prosecution Opening", "Prosecution Opening", 4, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
                 MITIGATION_HEARING_EVENT_DEFINITION,
-                new HearingEventDefinition(randomUUID(),"Sentencing", "Sentencing", 6, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "Sentencing", "Sentencing", 6, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
                 END_HEARING_EVENT_DEFINITION
         );
 
@@ -96,8 +100,8 @@ public class HearingEventDataFactory {
 
     public static HearingEventDefinitionData hearingEventDefinitionsWithOnlyNonSequencedEvents() {
         final List<HearingEventDefinition> eventDefinitions = newArrayList(
-                new HearingEventDefinition(randomUUID(),"Prosecution challenges defence application", "Prosecution challenged defence application", null, null, null, null, null, true),
-                new HearingEventDefinition(randomUUID(),"Judge ruling: Contempt of court", "Judge ruling: Contempt of court", null, null, null, null, null, true)
+                new HearingEventDefinition(randomUUID(), "Prosecution challenges defence application", "Prosecution challenged defence application", null, null, null, null, null, true),
+                new HearingEventDefinition(randomUUID(), "Judge ruling: Contempt of court", "Judge ruling: Contempt of court", null, null, null, null, null, true)
         );
 
         HEARING_EVENT_DEFINITIONS = newArrayList();
@@ -135,18 +139,13 @@ public class HearingEventDataFactory {
     public static HearingEventDefinitionData hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents() {
         final List<HearingEventDefinition> eventDefinitions = newArrayList();
         eventDefinitions.addAll(hearingEventDefinitionsWithPauseAndResumeEvents().getEventDefinitions());
-        eventDefinitions.add(new HearingEventDefinition(randomUUID(),"Interpreter swears-in", "Interpreter sworn-in", 1, SEQUENCE_TYPE_NOT_REGISTERED, null, null, null, true));
-        eventDefinitions.add(new HearingEventDefinition(randomUUID(),"Probation reads oral PSR", "Probation read oral PSR", 2, SEQUENCE_TYPE_NOT_REGISTERED, null, null, null, true));
+        eventDefinitions.add(new HearingEventDefinition(randomUUID(), "Interpreter swears-in", "Interpreter sworn-in", 1, SEQUENCE_TYPE_NOT_REGISTERED, null, null, null, true));
+        eventDefinitions.add(new HearingEventDefinition(randomUUID(), "Probation reads oral PSR", "Probation read oral PSR", 2, SEQUENCE_TYPE_NOT_REGISTERED, null, null, null, true));
 
         HEARING_EVENT_DEFINITIONS = newArrayList();
         HEARING_EVENT_DEFINITIONS.addAll(eventDefinitions);
 
         return new HearingEventDefinitionData(randomUUID(), eventDefinitions);
-    }
-
-    public static HearingEvent mitigationEvent(final UUID hearingId, final DefenceCounselData defenceCounsel) {
-        final String recordedLabel = format("Defence %s mitigated for %s", defenceCounsel.getPersonName(), defenceCounsel.getMapOfDefendantIdToNames().values().stream().findFirst().orElse(null));
-        return newHearingEvent(hearingId, recordedLabel, MITIGATION_HEARING_EVENT_DEFINITION);
     }
 
     private static HearingEvent newHearingEvent(final UUID hearingId, final HearingEventDefinition hearingEventDefinition) {
@@ -159,8 +158,14 @@ public class HearingEventDataFactory {
         final ZonedDateTime eventTime = new UtcClock().now();
         final ZonedDateTime lastModifiedTime = new UtcClock().now();
 
-        return new HearingEvent(hearingEventId, hearingEventDefinition.getId(), hearingId, recordedLabel,
-                eventTime, lastModifiedTime, hearingEventDefinition.isAlterable(), null);
+        return HearingEvent.hearingEvent()
+                .setId(hearingEventId)
+                .setHearingId(hearingId)
+                .setHearingEventDefinitionId(hearingEventDefinition.getId())
+                .setEventTime(eventTime)
+                .setLastModifiedTime(lastModifiedTime)
+                .setAlterable(hearingEventDefinition.isAlterable())
+                .setRecordedLabel(recordedLabel);
     }
 
 }

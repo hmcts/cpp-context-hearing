@@ -12,17 +12,17 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import uk.gov.justice.services.common.converter.Converter;
 import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Attendee;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefendantCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Attendee;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Attendees;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Case;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
@@ -46,10 +46,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public final class HearingDetailsResponseConverter implements Converter<Ahearing, HearingDetailsResponse> {
+public final class HearingDetailsResponseConverter implements Converter<Hearing, HearingDetailsResponse> {
 
     @Override
-    public HearingDetailsResponse convert(final Ahearing source) {
+    public HearingDetailsResponse convert(final Hearing source) {
         if (null == source || null == source.getId()) {
             return new HearingDetailsResponse();
         }
@@ -177,10 +177,10 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
     }
 
     // DefenceWitnessesConverter
-    private static final class DefenceWitnessesConverter implements Converter<Ahearing, List<DefenceWitness>> {
+    private static final class DefenceWitnessesConverter implements Converter<Hearing, List<DefenceWitness>> {
 
         @Override
-        public List<DefenceWitness> convert(Ahearing source) {
+        public List<DefenceWitness> convert(Hearing source) {
             if (null == source || null == source.getId() || isEmpty(source.getDefendants())) {
                 return emptyList();
             }
@@ -218,10 +218,10 @@ public final class HearingDetailsResponseConverter implements Converter<Ahearing
 
     // CasesConverter
     //-----------------------------------------------------------------------
-    private static final class CasesConverter implements Converter<Ahearing, List<Case>> {
+    private static final class CasesConverter implements Converter<Hearing, List<Case>> {
 
         @Override
-        public List<Case> convert(final Ahearing source) {
+        public List<Case> convert(final Hearing source) {
             if (null == source || null == source.getId() || isEmpty(source.getDefendants())) {
                 return emptyList();
             }

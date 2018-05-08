@@ -3,18 +3,17 @@ package uk.gov.moj.cpp.hearing.query.view;
 import static java.time.ZonedDateTime.parse;
 import static java.util.UUID.randomUUID;
 
-import uk.gov.moj.cpp.hearing.persist.entity.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.AhearingDate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Judge;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -30,20 +29,20 @@ public class HearingTestUtils {
     public static final UUID HEARING_ID_1 = UUID.fromString("23ef34ec-63e5-422e-8071-9b3753008c10");
     public static final ZonedDateTime START_DATE_1 = parse("2018-02-22T10:30:00Z");
 
-    public static List<Ahearing> buildHearingList() {
+    public static List<Hearing> buildHearingList() {
         // 1. create the hearing object and set the attendees
-        final Ahearing ahearing = buildHering1(HEARING_ID_1, START_DATE_1);
-        final Judge judge = buildJudge(ahearing);
-        final ProsecutionAdvocate prosecutionAdvocate = buildProsecutionAdvocate(ahearing);
-        final DefenceAdvocate defenseAdvocate1 = buildDefenseAdvocate1(ahearing);
-        final DefenceAdvocate defenseAdvocate2 = buildDefenseAdvocate2(ahearing);
-        ahearing.setAttendees(Arrays.asList(judge, prosecutionAdvocate, defenseAdvocate1, defenseAdvocate2));
+        final Hearing hearing = buildHering1(HEARING_ID_1, START_DATE_1);
+        final Judge judge = buildJudge(hearing);
+        final ProsecutionAdvocate prosecutionAdvocate = buildProsecutionAdvocate(hearing);
+        final DefenceAdvocate defenseAdvocate1 = buildDefenseAdvocate1(hearing);
+        final DefenceAdvocate defenseAdvocate2 = buildDefenseAdvocate2(hearing);
+        hearing.setAttendees(Arrays.asList(judge, prosecutionAdvocate, defenseAdvocate1, defenseAdvocate2));
 
         // 2. create the defendants objects and set to hearing
-        final Defendant defendant1 = buildDefendant1(ahearing, defenseAdvocate1, defenseAdvocate2);
-        final Defendant defendant2 = buildDefendant2(ahearing, defenseAdvocate1, defenseAdvocate2);
+        final Defendant defendant1 = buildDefendant1(hearing, defenseAdvocate1, defenseAdvocate2);
+        final Defendant defendant2 = buildDefendant2(hearing, defenseAdvocate1, defenseAdvocate2);
         final List<Defendant> defendants = Arrays.asList(defendant1, defendant2);
-        ahearing.setDefendants(defendants);
+        hearing.setDefendants(defendants);
 
         // 3. link the defendants to to the defenseAdvocates
         defenseAdvocate1.setDefendants(defendants);
@@ -51,18 +50,18 @@ public class HearingTestUtils {
 
         // 4. create the legal case, offence and set the offence to the existent defendants
         final LegalCase legalCase1 = buildLegalCase1();
-        final Offence offence1 = buildOffence1(ahearing, defendant1, legalCase1);
+        final Offence offence1 = buildOffence1(hearing, defendant1, legalCase1);
         defendant1.setOffences(Arrays.asList(offence1));
         defendant2.setOffences(Arrays.asList(offence1));
 
-        ahearing.setWitnesses(Arrays.asList(buildWitness(ahearing, legalCase1)));
+        hearing.setWitnesses(Arrays.asList(buildWitness(hearing, legalCase1)));
 
         // 5. add the created hearing to the hearing list
-        return Arrays.asList(ahearing);
+        return Arrays.asList(hearing);
     }
 
-    public static Ahearing buildHering1(final UUID hearingId, final ZonedDateTime startDateTime) {
-        return Ahearing.builder()
+    public static Hearing buildHering1(final UUID hearingId, final ZonedDateTime startDateTime) {
+        return Hearing.builder()
                 .withId(hearingId)
                 .withHearingType("TRIAL")
                 .withStartDateTime(startDateTime)
@@ -74,9 +73,9 @@ public class HearingTestUtils {
                 .build();
     }
 
-    public static ProsecutionAdvocate buildProsecutionAdvocate(final Ahearing ahearing) {
+    public static ProsecutionAdvocate buildProsecutionAdvocate(final Hearing hearing) {
         return ProsecutionAdvocate.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), ahearing.getId()))
+                .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), hearing.getId()))
                 .withPersonId(UUID.fromString("35f4d841-a0eb-4a32-b75c-91d241bf83d3"))
                 .withFirstName("Brian J.")
                 .withLastName("Fox")
@@ -85,9 +84,9 @@ public class HearingTestUtils {
                 .build();
     }
 
-    public static DefenceAdvocate buildDefenseAdvocate1(final Ahearing ahearing) {
+    public static DefenceAdvocate buildDefenseAdvocate1(final Hearing hearing) {
         return DefenceAdvocate.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("743d333a-b270-4de6-a598-61abb64a8027"), ahearing.getId()))
+                .withId(new HearingSnapshotKey(UUID.fromString("743d333a-b270-4de6-a598-61abb64a8027"), hearing.getId()))
                 .withPersonId(UUID.fromString("effdc5c9-8c00-4ef8-abcf-9e2a79ed1daa"))
                 .withFirstName("Mark")
                 .withLastName("Zuckerberg")
@@ -96,9 +95,9 @@ public class HearingTestUtils {
                 .build();
     }
 
-    public static DefenceAdvocate buildDefenseAdvocate2(final Ahearing ahearing) {
+    public static DefenceAdvocate buildDefenseAdvocate2(final Hearing hearing) {
         return DefenceAdvocate.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("cdc14b89-6b4d-4e98-9641-826c355c51b8"), ahearing.getId()))
+                .withId(new HearingSnapshotKey(UUID.fromString("cdc14b89-6b4d-4e98-9641-826c355c51b8"), hearing.getId()))
                 .withPersonId(UUID.fromString("78651aea-02da-4be9-8e78-c1748ea89e0c"))
                 .withFirstName("Sean")
                 .withLastName("Parker")
@@ -107,11 +106,11 @@ public class HearingTestUtils {
                 .build();
     }
 
-    public static Defendant buildDefendant1(final Ahearing ahearing, final DefenceAdvocate defenseAdvocate1,
-            final DefenceAdvocate defenseAdvocate2) {
+    public static Defendant buildDefendant1(final Hearing hearing, final DefenceAdvocate defenseAdvocate1,
+                                            final DefenceAdvocate defenseAdvocate2) {
         return Defendant.builder()
-                        .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), ahearing.getId()))
-                        .withHearing(ahearing)
+                        .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), hearing.getId()))
+                        .withHearing(hearing)
                         .withPersonId(UUID.fromString("5a6e2001-91ed-4af2-99af-f30ddc9ef5af"))
                         .withFirstName("Ken")
                         .withLastName("Thompson")
@@ -134,11 +133,11 @@ public class HearingTestUtils {
                         .build();
     }
 
-    public static Defendant buildDefendant2(final Ahearing ahearing, final DefenceAdvocate defenseAdvocate1,
-            final DefenceAdvocate defenseAdvocate2) {
+    public static Defendant buildDefendant2(final Hearing hearing, final DefenceAdvocate defenseAdvocate1,
+                                            final DefenceAdvocate defenseAdvocate2) {
         return Defendant.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("3739b4e3-1f81-4d12-a99d-ad27ae672566"), ahearing.getId()))
-                .withHearing(ahearing)
+                .withId(new HearingSnapshotKey(UUID.fromString("3739b4e3-1f81-4d12-a99d-ad27ae672566"), hearing.getId()))
+                .withHearing(hearing)
                 .withPersonId(UUID.fromString("98583be4-8d4a-4552-9252-ceccd61d32db"))
                 .withFirstName("William Nelson")
                 .withLastName("Joy")
@@ -161,9 +160,9 @@ public class HearingTestUtils {
                 .build();
     }
 
-    public static Judge buildJudge(final Ahearing ahearing) {
+    public static Judge buildJudge(final Hearing hearing) {
         return Judge.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("a38d0d5f-a26c-436b-9b5e-4dc58f28878d"), ahearing.getId()))
+                .withId(new HearingSnapshotKey(UUID.fromString("a38d0d5f-a26c-436b-9b5e-4dc58f28878d"), hearing.getId()))
                 .withPersonId(UUID.fromString("c8912678-213f-421a-89c8-d0dc87ac3558"))
                 .withFirstName("Alan")
                 .withLastName("Mathison Turing")
@@ -178,10 +177,10 @@ public class HearingTestUtils {
                 .build();
     }
 
-    public static Offence buildOffence1(final Ahearing ahearing, final Defendant defendant,
-            final LegalCase legalCase) {
+    public static Offence buildOffence1(final Hearing hearing, final Defendant defendant,
+                                        final LegalCase legalCase) {
         return Offence.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("4b1318e4-1517-4e4f-a89d-6af0eafa5058"), ahearing.getId()))
+                .withId(new HearingSnapshotKey(UUID.fromString("4b1318e4-1517-4e4f-a89d-6af0eafa5058"), hearing.getId()))
                 .withDefendant(defendant)
                 .withCase(legalCase)
                 .withCode("UNKNOWN")
@@ -204,10 +203,10 @@ public class HearingTestUtils {
                 .build();
     }
 
-    public static Witness buildWitness(final Ahearing ahearing, final LegalCase legalCase) {
+    public static Witness buildWitness(final Hearing hearing, final LegalCase legalCase) {
         return Witness.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), ahearing.getId()))
-                .withHearing(ahearing)
+                .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), hearing.getId()))
+                .withHearing(hearing)
                 .withPersonId(UUID.fromString("5a6e2001-91ed-4af2-99af-f30ddc9ef5af"))
                 .withFirstName("Ken")
                 .withLastName("Thompson")
@@ -224,16 +223,10 @@ public class HearingTestUtils {
                 .withLegalCase(legalCase)
                 .build();
     }
-    public static AhearingDate buildHearingDate(final UUID ahearingId, final ZonedDateTime startDate) {
-        return AhearingDate.builder()
+    public static HearingDate buildHearingDate(final UUID ahearingId, final ZonedDateTime startDate) {
+        return HearingDate.builder()
                 .withDate(startDate)
                 .withId(new HearingSnapshotKey(UUID.randomUUID(), ahearingId))
                 .build();
-    }
-
-    public static Optional<Hearing> getHearing() {
-        final Hearing hearingA = new Hearing(randomUUID(), startDate, null, 1,
-                null, null, null);
-        return Optional.of(hearingA);
     }
 }

@@ -5,10 +5,10 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -21,7 +21,7 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 public class ProsecutionCounselAddedEventListener {
 
     @Inject
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -32,7 +32,7 @@ public class ProsecutionCounselAddedEventListener {
 
         ProsecutionCounselUpsert prosecutionCounselAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ProsecutionCounselUpsert.class);
 
-        Ahearing hearing = ahearingRepository.findBy(prosecutionCounselAdded.getHearingId());
+        Hearing hearing = hearingRepository.findBy(prosecutionCounselAdded.getHearingId());
 
         if (hearing == null){
             throw new RuntimeException("Hearing not found for prosecution counsel update.");
@@ -63,6 +63,6 @@ public class ProsecutionCounselAddedEventListener {
                 .setFirstName(prosecutionCounselAdded.getFirstName())
                 .setLastName(prosecutionCounselAdded.getLastName());
 
-        ahearingRepository.save(hearing);
+        hearingRepository.save(hearing);
     }
 }

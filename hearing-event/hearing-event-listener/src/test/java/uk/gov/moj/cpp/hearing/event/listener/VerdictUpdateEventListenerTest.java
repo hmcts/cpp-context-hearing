@@ -11,11 +11,11 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.UUID;
 
@@ -38,7 +38,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 public class VerdictUpdateEventListenerTest {
 
     @Mock
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @InjectMocks
     private VerdictUpdateEventListener verdictUpdateEventListener;
@@ -76,7 +76,7 @@ public class VerdictUpdateEventListenerTest {
                 .withVerdictDate(PAST_LOCAL_DATE.next())
                 .build();
 
-        Ahearing ahearing = Ahearing.builder()
+        Hearing hearing = Hearing.builder()
                 .withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
@@ -88,14 +88,14 @@ public class VerdictUpdateEventListenerTest {
                                 .build()))
                 .build();
 
-        when(this.ahearingRepository.findById(hearingId)).thenReturn(ahearing);
+        when(this.hearingRepository.findById(hearingId)).thenReturn(hearing);
 
         verdictUpdateEventListener.verdictUpdate(envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
                 objectToJsonObjectConverter.convert(verdictUpsert)));
 
-        verify(this.ahearingRepository).save(ahearing);
+        verify(this.hearingRepository).save(hearing);
 
-        Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        Offence offence = hearing.getDefendants().get(0).getOffences().get(0);
 
         assertThat(offence.getId().getId(), is(verdictUpsert.getOffenceId()));
         assertThat(offence.getId().getHearingId(), is(verdictUpsert.getHearingId()));

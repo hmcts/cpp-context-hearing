@@ -16,8 +16,8 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import javax.json.JsonObject;
@@ -63,8 +63,8 @@ public class CaseDefendantChangeEventListenerTest {
 
         JsonEnvelope envelope = getDefendantJsonEnvelope(hearingId, defendantId);
 
-        uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant defendant = uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant.builder()
-                .withAddress(uk.gov.moj.cpp.hearing.persist.entity.ex.Address.builder()
+        Defendant defendant = Defendant.builder()
+                .withAddress(uk.gov.moj.cpp.hearing.persist.entity.ha.Address.builder()
                         .withAddress1(STRING.next())
                         .withAddress2(STRING.next())
                         .withAddress3(STRING.next())

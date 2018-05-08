@@ -7,11 +7,11 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import javax.transaction.Transactional;
 public class DefenceCounselAddedEventListener {
 
     @Inject
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -34,7 +34,7 @@ public class DefenceCounselAddedEventListener {
 
         DefenceCounselUpsert defenceCounselUpsert = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DefenceCounselUpsert.class);
 
-        Ahearing hearing = ahearingRepository.findBy(defenceCounselUpsert.getHearingId());
+        Hearing hearing = hearingRepository.findBy(defenceCounselUpsert.getHearingId());
 
         if (hearing == null){
             throw new RuntimeException("hearing id is not found.");
@@ -94,6 +94,6 @@ public class DefenceCounselAddedEventListener {
                     }
                 }
         );
-        ahearingRepository.save(hearing);
+        hearingRepository.save(hearing);
     }
 }

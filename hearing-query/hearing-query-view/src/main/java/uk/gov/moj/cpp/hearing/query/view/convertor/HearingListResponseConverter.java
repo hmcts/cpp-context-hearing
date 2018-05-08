@@ -7,18 +7,18 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 
 import uk.gov.justice.services.common.converter.Converter;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponseDefendant;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponseHearing;
 import uk.gov.moj.cpp.hearing.query.view.response.LegalCase;
 
-public final class HearingListResponseConverter implements Converter<List<Ahearing>, HearingListResponse> {
+public final class HearingListResponseConverter implements Converter<List<Hearing>, HearingListResponse> {
     
     @Override
-    public HearingListResponse convert(final List<Ahearing> source) {
+    public HearingListResponse convert(final List<Hearing> source) {
         if (CollectionUtils.isEmpty(source)) {
             return new HearingListResponse();
         }
@@ -29,10 +29,10 @@ public final class HearingListResponseConverter implements Converter<List<Aheari
 
     // HearingConverter
     //-----------------------------------------------------------------------
-    private static final class HearingConverter implements Converter<Ahearing, HearingListResponseHearing> {
+    private static final class HearingConverter implements Converter<Hearing, HearingListResponseHearing> {
 
         @Override
-        public HearingListResponseHearing convert(final Ahearing source) {
+        public HearingListResponseHearing convert(final Hearing source) {
             if (null == source || null == source.getId()) {
                 return null;
             }

@@ -36,12 +36,6 @@
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
                     </dependency>
-                    <dependency>
-                        <groupId>uk.gov.moj.cpp.progression</groupId>
-                        <artifactId>progression-query-api</artifactId>
-                        <version>${progression.version}</version>
-                        <classifier>raml</classifier>
-                    </dependency>
                 </dependencies>
             </plugin>
         </plugins>

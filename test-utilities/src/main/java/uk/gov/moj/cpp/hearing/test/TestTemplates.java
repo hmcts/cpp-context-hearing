@@ -115,70 +115,81 @@ public class TestTemplates {
                         .withHearingDays(Arrays.asList(startDateTime))
                         .withNotBefore(false)
                         .withEstimateMinutes(INTEGER.next())
-                        .addDefendant(Defendant.builder()
-                                .withId(randomUUID())
-                                .withPersonId(randomUUID())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                                .withNationality(STRING.next())
-                                .withGender(STRING.next())
-                                .withAddress(
-                                        Address.builder()
-                                                .withAddress1(STRING.next())
-                                                .withAddress2(STRING.next())
-                                                .withAddress3(STRING.next())
-                                                .withAddress4(STRING.next())
-                                                .withPostCode(STRING.next())
-                                )
-                                .withDateOfBirth(PAST_LOCAL_DATE.next())
-                                .withDefenceOrganisation(STRING.next())
-                                .withInterpreter(
-                                        Interpreter.builder()
-                                                .withNeeded(false)
-                                                .withLanguage(STRING.next())
-                                )
-                                .addDefendantCase(
-                                        DefendantCase.builder()
-                                                .withCaseId(caseId)
-                                                .withBailStatus(STRING.next())
-                                                .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next())
-                                )
-                                .addOffence(
-                                        Offence.builder()
-                                                .withId(randomUUID())
-                                                .withCaseId(caseId)
-                                                .withOffenceCode(STRING.next())
-                                                .withWording(STRING.next())
-                                                .withSection(STRING.next())
-                                                .withStartDate(PAST_LOCAL_DATE.next())
-                                                .withEndDate(PAST_LOCAL_DATE.next())
-                                                .withOrderIndex(INTEGER.next())
-                                                .withCount(INTEGER.next())
-                                                .withConvictionDate(PAST_LOCAL_DATE.next())
-                                                .withLegislation(STRING.next())
-                                                .withTitle(STRING.next())
-                                )
-                        )
-                        .addWintess(Witness.builder()
-                                .withId(randomUUID())
-                                .withCaseId(caseId)
-                                .withType("Prosecution")
-                                .withClassification("Expert")
-                                .withPersonId(randomUUID())
-                                .withTitle(STRING.next())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                                .withGender(STRING.next())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next())
-                                .withEmail(STRING.next())
-                                .withFax(STRING.next())
-                                .withHomeTelephone(STRING.next())
-                                .withWorkTelephone(STRING.next())
-                                .withMobile(STRING.next())
-                                .withNationality(STRING.next())
-
+                        .addDefendant(initiateHearingDefendantTemplate(caseId))
+                        .addWitness(
+                                initiateHearingWitnessTemplate(caseId)
                         )
                 );
+    }
+
+    public static Defendant.Builder initiateHearingDefendantTemplate(UUID caseId) {
+        return Defendant.builder()
+                .withId(randomUUID())
+                .withPersonId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withNationality(STRING.next())
+                .withGender(STRING.next())
+                .withAddress(
+                        Address.builder()
+                                .withAddress1(STRING.next())
+                                .withAddress2(STRING.next())
+                                .withAddress3(STRING.next())
+                                .withAddress4(STRING.next())
+                                .withPostCode(STRING.next())
+                )
+                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                .withDefenceOrganisation(STRING.next())
+                .withInterpreter(
+                        Interpreter.builder()
+                                .withNeeded(false)
+                                .withLanguage(STRING.next())
+                )
+                .addDefendantCase(
+                        DefendantCase.builder()
+                                .withCaseId(caseId)
+                                .withBailStatus(STRING.next())
+                                .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next())
+                )
+                .addOffence(
+                        initiateHearingOffenceTemplate(caseId)
+                );
+    }
+
+    public static Offence.Builder initiateHearingOffenceTemplate(UUID caseId) {
+        return Offence.builder()
+                .withId(randomUUID())
+                .withCaseId(caseId)
+                .withOffenceCode(STRING.next())
+                .withWording(STRING.next())
+                .withSection(STRING.next())
+                .withStartDate(PAST_LOCAL_DATE.next())
+                .withEndDate(PAST_LOCAL_DATE.next())
+                .withOrderIndex(INTEGER.next())
+                .withCount(INTEGER.next())
+                .withConvictionDate(PAST_LOCAL_DATE.next())
+                .withLegislation(STRING.next())
+                .withTitle(STRING.next());
+    }
+
+    public static Witness.Builder initiateHearingWitnessTemplate(UUID caseId) {
+        return Witness.builder()
+                .withId(randomUUID())
+                .withCaseId(caseId)
+                .withType("Prosecution")
+                .withClassification("Expert")
+                .withPersonId(randomUUID())
+                .withTitle(STRING.next())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withGender(STRING.next())
+                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                .withEmail(STRING.next())
+                .withFax(STRING.next())
+                .withHomeTelephone(STRING.next())
+                .withWorkTelephone(STRING.next())
+                .withMobile(STRING.next())
+                .withNationality(STRING.next());
     }
 
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields(
@@ -203,7 +214,8 @@ public class TestTemplates {
         Arrays.stream(defendantIds).forEach(id ->
 
                 initiateHearingBuilder.getHearing().addDefendant(Defendant.builder()
-                        .withId(id).withPersonId(randomUUID())
+                        .withId(id)
+                        .withPersonId(randomUUID())
                         .withFirstName(STRING.next()).withLastName(STRING.next())
                         .addDefendantCase(DefendantCase.builder().withCaseId(caseId))
                         .addOffence(Offence.builder().withId(randomUUID()).withCaseId(caseId)

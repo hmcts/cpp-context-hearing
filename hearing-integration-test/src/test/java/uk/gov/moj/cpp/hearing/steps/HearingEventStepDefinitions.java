@@ -8,7 +8,6 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
-import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -27,14 +26,13 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.IntStream;
 
 import javax.json.JsonArrayBuilder;

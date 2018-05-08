@@ -9,16 +9,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.DefenceCounselToDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -126,7 +125,7 @@ public class HearingEventQueryViewTest {
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
 
     @Mock
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @InjectMocks
     private HearingEventQueryView hearingEventQueryView;
@@ -230,7 +229,7 @@ public class HearingEventQueryViewTest {
 
         when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithCaseAttributes());
 
-        Ahearing ahearing = Ahearing.builder()
+        Hearing hearing = Hearing.builder()
                 .withId(HEARING_ID)
                 .addAttendee(DefenceAdvocate.builder()
                         .withId(new HearingSnapshotKey(randomUUID(), HEARING_ID))
@@ -247,7 +246,7 @@ public class HearingEventQueryViewTest {
                                 .build())
                         .build())
                 .build();
-        when(ahearingRepository.findById(HEARING_ID)).thenReturn(ahearing);
+        when(hearingRepository.findById(HEARING_ID)).thenReturn(hearing);
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
@@ -492,8 +491,28 @@ public class HearingEventQueryViewTest {
 
     private List<HearingEvent> hearingEvents() {
         final List<HearingEvent> hearingEvents = new ArrayList<>();
-        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, WITNESS_ID));
-        hearingEvents.add(new HearingEvent(HEARING_EVENT_ID_2, HEARING_EVENT_DEFINITION_ID_2, HEARING_ID, RECORDED_LABEL_2, EVENT_TIME_2, LAST_MODIFIED_TIME_2, ALTERABLE_2, null));
+        hearingEvents.add(
+                HearingEvent.hearingEvent()
+                .setId(HEARING_EVENT_ID)
+                .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                .setHearingId(HEARING_ID)
+                .setRecordedLabel(RECORDED_LABEL)
+                .setEventTime(EVENT_TIME)
+                .setLastModifiedTime(LAST_MODIFIED_TIME)
+                .setAlterable(ALTERABLE)
+                .setWitnessId(WITNESS_ID)
+        );
+        hearingEvents.add(
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_2)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_2)
+                        .setHearingId(HEARING_ID)
+                        .setRecordedLabel(RECORDED_LABEL_2)
+                        .setEventTime(EVENT_TIME_2)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_2)
+                        .setAlterable(ALTERABLE_2)
+                        .setWitnessId(WITNESS_ID)
+        );
 
         return hearingEvents;
     }
@@ -518,13 +537,6 @@ public class HearingEventQueryViewTest {
                 new HearingEventDefinition(HEARING_EVENT_DEFINITION_ID, RECORDED_LABEL, ACTION_LABEL, SEQUENCE, GROUP_TYPE, null, null, null, ALTERABLE),
                 new HearingEventDefinition(HEARING_EVENT_DEFINITION_ID_2, RECORDED_LABEL_2, ACTION_LABEL_2, SEQUENCE_2, GROUP_TYPE, null, null, null, ALTERABLE_2),
                 new HearingEventDefinition(HEARING_EVENT_DEFINITION_ID_3, RECORDED_LABEL_3, ACTION_LABEL_3, null, null, null, null, null, ALTERABLE_3)
-        );
-    }
-
-    private List<DefenceCounselToDefendant> defenceCounselToDefendants() {
-        return newArrayList(
-                new DefenceCounselToDefendant(PERSON_ID, DEFENDANT_ID),
-                new DefenceCounselToDefendant(PERSON_ID_2, DEFENDANT_ID_2)
         );
     }
 

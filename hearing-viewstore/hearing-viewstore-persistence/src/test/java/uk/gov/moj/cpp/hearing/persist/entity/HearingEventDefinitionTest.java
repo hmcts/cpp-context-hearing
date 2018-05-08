@@ -12,6 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import org.junit.Test;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 
 public class HearingEventDefinitionTest {
 

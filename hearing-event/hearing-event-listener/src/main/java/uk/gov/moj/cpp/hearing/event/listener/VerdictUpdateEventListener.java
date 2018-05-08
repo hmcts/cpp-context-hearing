@@ -5,9 +5,9 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -18,7 +18,7 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 public class VerdictUpdateEventListener {
 
     @Inject
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @Inject
     JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -28,9 +28,9 @@ public class VerdictUpdateEventListener {
     public void verdictUpdate(final JsonEnvelope event) {
         final VerdictUpsert verdictUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), VerdictUpsert.class);
 
-        final Ahearing ahearing = ahearingRepository.findById(verdictUpdated.getHearingId());
+        final Hearing hearing = hearingRepository.findById(verdictUpdated.getHearingId());
 
-        final Offence offence = ahearing.getDefendants().stream()
+        final Offence offence = hearing.getDefendants().stream()
                 .flatMap(d -> d.getOffences().stream())
                 .filter(o -> o.getId().getId().equals(verdictUpdated.getOffenceId()))
                 .findFirst()
@@ -44,6 +44,6 @@ public class VerdictUpdateEventListener {
         offence.setNumberOfSplitJurors(verdictUpdated.getNumberOfSplitJurors());
         offence.setUnanimous(verdictUpdated.getUnanimous());
 
-        ahearingRepository.save(ahearing);
+        hearingRepository.save(hearing);
     }
 }

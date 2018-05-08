@@ -12,7 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
 @SuppressWarnings("CdiInjectionPointsInspection")
 @RunWith(CdiTestRunner.class)
@@ -58,7 +59,16 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     public void shouldLogAnHearingEvent() {
         givenNoHearingEventsExist();
 
-        hearingEventRepository.save(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, null));
+        hearingEventRepository.save(
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setAlterable(ALTERABLE)
+        );
 
         final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID);
 
@@ -76,7 +86,17 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     public void shouldNotBeAbleToSeeADeletedHearingEvent() {
         givenNoHearingEventsExist();
 
-        hearingEventRepository.save(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, null).builder().delete().build());
+        hearingEventRepository.save(
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setAlterable(ALTERABLE)
+                        .setDeleted(true)
+        );
 
         final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID);
 
@@ -139,9 +159,32 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
 
     private void givenHearingEventsExistWithDeletedOnes() {
         final List<HearingEvent> hearingEvents = newArrayList(
-                new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, null),
-                new HearingEvent(HEARING_EVENT_ID_2, HEARING_EVENT_DEFINITION_ID_2, HEARING_ID, RECORDED_LABEL_2, EVENT_TIME_2, LAST_MODIFIED_TIME_2, ALTERABLE, null),
-                new HearingEvent(HEARING_EVENT_ID_3, HEARING_EVENT_DEFINITION_ID_3, HEARING_ID, RECORDED_LABEL_3, EVENT_TIME_3, LAST_MODIFIED_TIME_3, ALTERABLE, null).builder().delete().build());
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setAlterable(ALTERABLE),
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_2)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_2)
+                        .setRecordedLabel(RECORDED_LABEL_2)
+                        .setEventTime(EVENT_TIME_2)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_2)
+                        .setAlterable(ALTERABLE),
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_3)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_3)
+                        .setRecordedLabel(RECORDED_LABEL_3)
+                        .setEventTime(EVENT_TIME_3)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_3)
+                        .setAlterable(ALTERABLE)
+                        .setDeleted(true)
+        );
 
         hearingEvents.forEach(hearingEvent -> hearingEventRepository.save(hearingEvent));
 
@@ -150,9 +193,31 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
 
     private void givenHearingEventsExistInRandomOrder() {
         final List<HearingEvent> hearingEvents = newArrayList(
-                new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, null),
-                new HearingEvent(HEARING_EVENT_ID_2, HEARING_EVENT_DEFINITION_ID_2, HEARING_ID, RECORDED_LABEL_2, EVENT_TIME_2, LAST_MODIFIED_TIME_2, ALTERABLE, null),
-                new HearingEvent(HEARING_EVENT_ID_3, HEARING_EVENT_DEFINITION_ID_3, HEARING_ID, RECORDED_LABEL_3, EVENT_TIME_3, LAST_MODIFIED_TIME_3, ALTERABLE, null));
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setAlterable(ALTERABLE),
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_2)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_2)
+                        .setRecordedLabel(RECORDED_LABEL_2)
+                        .setEventTime(EVENT_TIME_2)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_2)
+                        .setAlterable(ALTERABLE),
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_3)
+                        .setHearingId(HEARING_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_3)
+                        .setRecordedLabel(RECORDED_LABEL_3)
+                        .setEventTime(EVENT_TIME_3)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_3)
+                        .setAlterable(ALTERABLE)
+        );
 
         shuffle(hearingEvents, new Random(LONG.next()));
 

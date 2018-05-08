@@ -9,6 +9,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.text.MessageFormat;
 import java.util.UUID;
@@ -30,6 +31,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingDefendantTemplate;
 
 public class DefenceCounselIT extends AbstractIT {
 
@@ -114,52 +116,7 @@ public class DefenceCounselIT extends AbstractIT {
     public void addDefenceCounsel_shouldEdit() throws Exception {
 
         InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, (i) -> {
-            i.getHearing().addDefendant(
-
-                    Defendant.builder()
-                            .withId(randomUUID())
-                            .withPersonId(randomUUID())
-                            .withFirstName(STRING.next())
-                            .withLastName(STRING.next())
-                            .withNationality(STRING.next())
-                            .withGender(STRING.next())
-                            .withAddress(
-                                    Address.builder()
-                                            .withAddress1(STRING.next())
-                                            .withAddress2(STRING.next())
-                                            .withAddress3(STRING.next())
-                                            .withAddress4(STRING.next())
-                                            .withPostCode(STRING.next())
-                            )
-                            .withDateOfBirth(PAST_LOCAL_DATE.next())
-                            .withDefenceOrganisation(STRING.next())
-                            .withInterpreter(
-                                    Interpreter.builder()
-                                            .withNeeded(false)
-                                            .withLanguage(STRING.next())
-                            )
-                            .addDefendantCase(
-                                    DefendantCase.builder()
-                                            .withCaseId(i.getCases().get(0).getCaseId())
-                                            .withBailStatus(STRING.next())
-                                            .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next())
-                            )
-                            .addOffence(
-                                    Offence.builder()
-                                            .withId(randomUUID())
-                                            .withCaseId(i.getCases().get(0).getCaseId())
-                                            .withOffenceCode(STRING.next())
-                                            .withWording(STRING.next())
-                                            .withSection(STRING.next())
-                                            .withStartDate(PAST_LOCAL_DATE.next())
-                                            .withEndDate(PAST_LOCAL_DATE.next())
-                                            .withOrderIndex(INTEGER.next())
-                                            .withCount(INTEGER.next())
-                                            .withConvictionDate(PAST_LOCAL_DATE.next())
-                                            .withLegislation(STRING.next())
-                                            .withTitle(STRING.next())
-                            )
-            );
+            i.getHearing().addDefendant(initiateHearingDefendantTemplate(i.getCases().get(0).getCaseId()));
         });
 
         AddDefenceCounselCommand addDefenceCounselCommand = AddDefenceCounselCommand.builder()

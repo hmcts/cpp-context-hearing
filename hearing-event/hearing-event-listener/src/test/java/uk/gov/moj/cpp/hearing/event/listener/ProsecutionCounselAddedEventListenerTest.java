@@ -13,9 +13,9 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.ProsecutionAdvocate;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,7 +32,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 public class ProsecutionCounselAddedEventListenerTest {
 
     @Mock
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -44,7 +44,7 @@ public class ProsecutionCounselAddedEventListenerTest {
     private ProsecutionCounselAddedEventListener prosecutionCounselAddedEventListener;
 
     @Captor
-    private ArgumentCaptor<Ahearing> ahearingArgumentCaptor;
+    private ArgumentCaptor<Hearing> ahearingArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -64,19 +64,19 @@ public class ProsecutionCounselAddedEventListenerTest {
                 .withTitle("Mr")
                 .build();
 
-        Ahearing ahearing = Ahearing.builder().withId(prosecutionCounselUpsert.getHearingId()).build();
-        when(this.ahearingRepository.findBy(prosecutionCounselUpsert.getHearingId())).thenReturn(ahearing);
+        Hearing hearing = Hearing.builder().withId(prosecutionCounselUpsert.getHearingId()).build();
+        when(this.hearingRepository.findBy(prosecutionCounselUpsert.getHearingId())).thenReturn(hearing);
 
         this.prosecutionCounselAddedEventListener.prosecutionCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.newprosecution-counsel-added"),
                 objectToJsonObjectConverter.convert(prosecutionCounselUpsert)));
 
-        verify(this.ahearingRepository).save(ahearingArgumentCaptor.capture());
-        Ahearing savedHearing = ahearingArgumentCaptor.getValue();
-        assertThat(savedHearing, is(ahearing));
+        verify(this.hearingRepository).save(ahearingArgumentCaptor.capture());
+        Hearing savedHearing = ahearingArgumentCaptor.getValue();
+        assertThat(savedHearing, is(hearing));
         assertThat(savedHearing.getAttendees().size(), is(1));
         assertThat(savedHearing.getAttendees().get(0), instanceOf(ProsecutionAdvocate.class));
 
-        ProsecutionAdvocate prosecutionAdvocate = (ProsecutionAdvocate) ahearing.getAttendees().get(0);
+        ProsecutionAdvocate prosecutionAdvocate = (ProsecutionAdvocate) hearing.getAttendees().get(0);
 
         assertThat(prosecutionAdvocate.getId().getId(), is(prosecutionCounselUpsert.getAttendeeId()));
         assertThat(prosecutionAdvocate.getId().getHearingId(), is(prosecutionCounselUpsert.getHearingId()));
@@ -95,20 +95,20 @@ public class ProsecutionCounselAddedEventListenerTest {
                 .withTitle("XMr")
                 .build();
 
-        reset(this.ahearingRepository);
-        when(this.ahearingRepository.findBy(prosecutionCounselUpsert.getHearingId())).thenReturn(ahearing);
+        reset(this.hearingRepository);
+        when(this.hearingRepository.findBy(prosecutionCounselUpsert.getHearingId())).thenReturn(hearing);
 
         this.prosecutionCounselAddedEventListener.prosecutionCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.newprosecution-counsel-added"),
                 objectToJsonObjectConverter.convert(updateProsecutionCounselAdded)));
 
 
-        verify(this.ahearingRepository).save(this.ahearingArgumentCaptor.capture());
+        verify(this.hearingRepository).save(this.ahearingArgumentCaptor.capture());
         savedHearing = ahearingArgumentCaptor.getValue();
-        assertThat(savedHearing, is(ahearing));
+        assertThat(savedHearing, is(hearing));
         assertThat(savedHearing.getAttendees().size(), is(1));
         assertThat(savedHearing.getAttendees().get(0), instanceOf(ProsecutionAdvocate.class));
 
-        prosecutionAdvocate = (ProsecutionAdvocate) ahearing.getAttendees().get(0);
+        prosecutionAdvocate = (ProsecutionAdvocate) hearing.getAttendees().get(0);
 
         assertThat(prosecutionAdvocate.getId().getId(), is(prosecutionCounselUpsert.getAttendeeId()));
         assertThat(prosecutionAdvocate.getId().getHearingId(), is(updateProsecutionCounselAdded.getHearingId()));

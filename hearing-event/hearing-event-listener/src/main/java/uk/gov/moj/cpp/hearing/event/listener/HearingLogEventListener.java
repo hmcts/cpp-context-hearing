@@ -3,10 +3,10 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -88,9 +88,19 @@ public class HearingLogEventListener {
         final ZonedDateTime eventTime = fromJsonString(payload.getJsonString(FIELD_EVENT_TIME));
         final ZonedDateTime lastModifiedTime = fromJsonString(payload.getJsonString(FIELD_LAST_MODIFIED_TIME));
         final boolean alterable = payload.getBoolean(FIELD_ALTERABLE);
-        final UUID witnessId = payload.containsKey(FIELD_WITNESS_ID) == true ? fromString(payload.getString(FIELD_WITNESS_ID) ): null;
+        final UUID witnessId = payload.containsKey(FIELD_WITNESS_ID) ? fromString(payload.getString(FIELD_WITNESS_ID)) : null;
 
-        hearingEventRepository.save(new HearingEvent(hearingEventId, hearingEventDefinitionId, hearingId, recordedLabel, eventTime, lastModifiedTime, alterable,witnessId));
+        hearingEventRepository.save(
+                HearingEvent.hearingEvent()
+                        .setId(hearingEventId)
+                        .setHearingId(hearingId)
+                        .setHearingEventDefinitionId(hearingEventDefinitionId)
+                        .setRecordedLabel(recordedLabel)
+                        .setEventTime(eventTime)
+                        .setLastModifiedTime(lastModifiedTime)
+                        .setAlterable(alterable)
+                        .setWitnessId(witnessId)
+        );
     }
 
     @Handles("hearing.hearing-event-deleted")
@@ -100,7 +110,6 @@ public class HearingLogEventListener {
         final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
 
         final Optional<HearingEvent> optionalHearingEvent = hearingEventRepository.findOptionalById(hearingEventId);
-        optionalHearingEvent.ifPresent(hearingEvent -> hearingEventRepository.save(hearingEvent.builder().delete().build()));
+        optionalHearingEvent.ifPresent(hearingEvent -> hearingEventRepository.save(hearingEvent.setDeleted(true)));
     }
-
 }

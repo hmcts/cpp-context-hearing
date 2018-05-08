@@ -13,11 +13,11 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -35,7 +35,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 public class DefenceCounselAddedEventListenerTest {
 
     @Mock
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -47,7 +47,7 @@ public class DefenceCounselAddedEventListenerTest {
     private DefenceCounselAddedEventListener defenceCounselAddedEventListener;
 
     @Captor
-    private ArgumentCaptor<Ahearing> ahearingArgumentCaptor;
+    private ArgumentCaptor<Hearing> ahearingArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -68,24 +68,24 @@ public class DefenceCounselAddedEventListenerTest {
                 .withDefendantIds(asList(randomUUID(), randomUUID()))
                 .build();
 
-        Ahearing ahearing = Ahearing.builder()
+        Hearing hearing = Hearing.builder()
                 .withId(defenceCounselUpsert.getHearingId())
                 .withDefendants(asList(
                         Defendant.builder().withId(new HearingSnapshotKey(defenceCounselUpsert.getDefendantIds().get(0), defenceCounselUpsert.getHearingId())).build(),
                         Defendant.builder().withId(new HearingSnapshotKey(defenceCounselUpsert.getDefendantIds().get(1), defenceCounselUpsert.getHearingId())).build()))
                 .build();
-        when(this.ahearingRepository.findBy(defenceCounselUpsert.getHearingId())).thenReturn(ahearing);
+        when(this.hearingRepository.findBy(defenceCounselUpsert.getHearingId())).thenReturn(hearing);
 
         this.defenceCounselAddedEventListener.defenseCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.newdefence-counsel-added"),
                 objectToJsonObjectConverter.convert(defenceCounselUpsert)));
 
-        verify(this.ahearingRepository).save(ahearingArgumentCaptor.capture());
-        Ahearing savedHearing = ahearingArgumentCaptor.getValue();
-        assertThat(savedHearing, is(ahearing));
+        verify(this.hearingRepository).save(ahearingArgumentCaptor.capture());
+        Hearing savedHearing = ahearingArgumentCaptor.getValue();
+        assertThat(savedHearing, is(hearing));
         assertThat(savedHearing.getAttendees().size(), is(1));
         assertThat(savedHearing.getAttendees().get(0), instanceOf(DefenceAdvocate.class));
 
-        DefenceAdvocate defenceAdvocate = (DefenceAdvocate) ahearing.getAttendees().get(0);
+        DefenceAdvocate defenceAdvocate = (DefenceAdvocate) hearing.getAttendees().get(0);
 
         assertThat(defenceAdvocate.getId().getId(), is(defenceCounselUpsert.getAttendeeId()));
         assertThat(defenceAdvocate.getId().getHearingId(), is(defenceCounselUpsert.getHearingId()));
@@ -94,8 +94,8 @@ public class DefenceCounselAddedEventListenerTest {
         assertThat(defenceAdvocate.getTitle(), is(defenceCounselUpsert.getTitle()));
         assertThat(defenceAdvocate.getStatus(), is(defenceCounselUpsert.getStatus()));
 
-        assertThat(ahearing.getDefendants().get(0).getDefenceAdvocates(), hasItems(defenceAdvocate));
-        assertThat(ahearing.getDefendants().get(1).getDefenceAdvocates(), hasItems(defenceAdvocate));
+        assertThat(hearing.getDefendants().get(0).getDefenceAdvocates(), hasItems(defenceAdvocate));
+        assertThat(hearing.getDefendants().get(1).getDefenceAdvocates(), hasItems(defenceAdvocate));
     }
 
 }

@@ -25,10 +25,10 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.persist.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -143,7 +143,14 @@ public class HearingLogEventListenerTest {
     public void shouldDeleteAnExistingHearingEvent() {
         final JsonEnvelope event = prepareHearingEventDeletedEvent();
         when(hearingEventRepository.findOptionalById(HEARING_EVENT_ID)).thenReturn(
-                of(new HearingEvent(HEARING_EVENT_ID, HEARING_EVENT_DEFINITION_ID, HEARING_ID, RECORDED_LABEL, EVENT_TIME, LAST_MODIFIED_TIME, ALTERABLE, null))
+                of( HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setHearingId(HEARING_ID)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setAlterable(ALTERABLE))
         );
 
         hearingLogEventListener.hearingEventDeleted(event);

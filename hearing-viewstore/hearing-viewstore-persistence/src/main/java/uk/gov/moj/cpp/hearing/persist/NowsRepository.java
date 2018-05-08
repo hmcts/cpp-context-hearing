@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.persist;
 
 import org.apache.deltaspike.data.api.AbstractEntityRepository;
 import org.apache.deltaspike.data.api.Repository;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Nows;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 
 import java.util.List;
 import java.util.UUID;

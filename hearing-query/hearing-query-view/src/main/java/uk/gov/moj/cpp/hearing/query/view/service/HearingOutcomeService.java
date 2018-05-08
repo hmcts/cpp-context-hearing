@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import uk.gov.moj.cpp.hearing.persist.HearingOutcomeRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
+import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
 
 import java.util.List;
 import java.util.UUID;

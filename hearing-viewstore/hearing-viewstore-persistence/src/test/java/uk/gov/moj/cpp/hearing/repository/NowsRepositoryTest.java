@@ -6,13 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Nows;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsMaterialStatus;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.NowsResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;

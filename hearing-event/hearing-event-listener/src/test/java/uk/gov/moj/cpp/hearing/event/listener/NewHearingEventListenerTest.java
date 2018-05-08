@@ -45,19 +45,20 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.persist.WitnessRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Witness;
-import uk.gov.moj.cpp.hearing.repository.AhearingRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
+import uk.gov.moj.cpp.hearing.repository.WitnessRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
@@ -65,7 +66,7 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 public class NewHearingEventListenerTest {
 
     @Mock
-    private AhearingRepository ahearingRepository;
+    private HearingRepository hearingRepository;
 
     @Mock
     private WitnessRepository witnessRepository;
@@ -115,10 +116,8 @@ public class NewHearingEventListenerTest {
 
 
     private JsonEnvelope getInitiateAhearingJsonEnvelope(final List<Case> cases, final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing) {
-        //TODO review unexpected use of InitiateHearingCommand that contains cases
         final InitiateHearingCommand document = new InitiateHearingCommand(cases, hearing);
         final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-        //objectMapper.configure(DeserializationFeature.READ_ENUMS_USING_TO_STRING, true);
 
         String strJsonDocument;
         try {
@@ -136,11 +135,11 @@ public class NewHearingEventListenerTest {
         final InitiateHearingCommand command = initiateHearingCommandTemplate().build();
 
         final Case legalCase = command.getCases().get(0);
-        final Hearing hearing = command.getHearing();
+        final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing = command.getHearing();
         final uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant = command.getHearing().getDefendants().get(0);
         final uk.gov.moj.cpp.hearing.command.initiate.Offence offence = defendant.getOffences().get(0);
 
-        when(this.ahearingRepository.findBy(command.getHearing().getId())).thenReturn(null);
+        when(this.hearingRepository.findBy(command.getHearing().getId())).thenReturn(null);
 
         when(this.legalCaseRepository.findBy(legalCase.getCaseId()))
                 .thenReturn(
@@ -152,9 +151,9 @@ public class NewHearingEventListenerTest {
 
         this.newHearingEventListener.newHearingInitiated(getInitiateAhearingJsonEnvelope(command.getCases(), command.getHearing()));
 
-        final ArgumentCaptor<Ahearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Ahearing.class);
-        verify(this.ahearingRepository).save(hearingexArgumentCaptor.capture());
-        final Ahearing actualHearing = hearingexArgumentCaptor.getValue();
+        final ArgumentCaptor<Hearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+        verify(this.hearingRepository).save(hearingexArgumentCaptor.capture());
+        final Hearing actualHearing = hearingexArgumentCaptor.getValue();
 
         assertThat(actualHearing.getId(), is(hearing.getId()));
         assertThat(actualHearing.getCourtCentreId(), is(hearing.getCourtCentreId()));
@@ -164,9 +163,9 @@ public class NewHearingEventListenerTest {
         assertThat(actualHearing.getStartDateTime().toLocalDateTime(), is(hearing.getStartDateTime().toLocalDateTime()));
         assertThat(actualHearing.getHearingType(), is(hearing.getType()));
 
-        final uk.gov.moj.cpp.hearing.persist.entity.ex.Judge actualJudge = actualHearing.getAttendees().stream()
-                .filter(a -> a instanceof uk.gov.moj.cpp.hearing.persist.entity.ex.Judge)
-                .map(uk.gov.moj.cpp.hearing.persist.entity.ex.Judge.class::cast)
+        final Judge actualJudge = actualHearing.getAttendees().stream()
+                .filter(a -> a instanceof Judge)
+                .map(Judge.class::cast)
                 .findFirst()
                 .get();
 
@@ -188,9 +187,9 @@ public class NewHearingEventListenerTest {
         assertThat(actualDefendant.getInterpreterLanguage(), is(defendant.getInterpreter().getLanguage()));
         assertThat(actualDefendant.getDefenceSolicitorFirm(), is(defendant.getDefenceOrganisation()));
         assertThat(actualDefendant.getDefendantCases().get(0).getBailStatus(), is(defendant.getDefendantCases().get(0).getBailStatus()));
-        assertThat(actualDefendant.getDefendantCases().get(0).getCustodyTimeLimitDate().toLocalDateTime().toLocalDate(), is(defendant.getDefendantCases().get(0).getCustodyTimeLimitDate()));
+        assertThat(actualDefendant.getDefendantCases().get(0).getCustodyTimeLimitDate(), is(defendant.getDefendantCases().get(0).getCustodyTimeLimitDate()));
 
-        final uk.gov.moj.cpp.hearing.persist.entity.ex.Address actualAddress = actualDefendant.getAddress();
+        final Address actualAddress = actualDefendant.getAddress();
 
         assertThat(actualAddress.getAddress1(), is(defendant.getAddress().getAddress1()));
         assertThat(actualAddress.getAddress2(), is(defendant.getAddress().getAddress2()));
@@ -241,7 +240,7 @@ public class NewHearingEventListenerTest {
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
         final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(caseId, hearingId, offenceId, PAST_LOCAL_DATE.next());
 
-        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
+        final Hearing hearing = Hearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withOffences(asList(
@@ -252,7 +251,7 @@ public class NewHearingEventListenerTest {
                                 .build()))
                 .build();
 
-        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        final Offence offence = hearing.getDefendants().get(0).getOffences().get(0);
 
         when(this.offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
@@ -274,7 +273,7 @@ public class NewHearingEventListenerTest {
         final UUID hearingId = randomUUID();
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
         final ConvictionDateRemoved convictionDateRemoved = new ConvictionDateRemoved(caseId, hearingId, offenceId);
-        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
+        final Hearing hearing = Hearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withOffences(asList(
@@ -287,7 +286,7 @@ public class NewHearingEventListenerTest {
 
                 .build();
         
-        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        final Offence offence = hearing.getDefendants().get(0).getOffences().get(0);
         
         when(offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
@@ -315,7 +314,7 @@ public class NewHearingEventListenerTest {
         
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
         
-        final Ahearing ahearing = Ahearing.builder().withId(hearingId)
+        final Hearing hearing = Hearing.builder().withId(hearingId)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withId(new HearingSnapshotKey(defendantId, hearingId))
@@ -344,7 +343,7 @@ public class NewHearingEventListenerTest {
                 .withValue(pleaValue)
                 .build();
         
-        final Offence offence = ahearing.getDefendants().get(0).getOffences().get(0);
+        final Offence offence = hearing.getDefendants().get(0).getOffences().get(0);
         
         when(offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
@@ -366,19 +365,19 @@ public class NewHearingEventListenerTest {
         final JsonEnvelope event = getWitnessAddedEnvelope();
 
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(DEFENDANT_ID, HEARING_ID);
-        final Ahearing ahearing = Ahearing.builder().withId(HEARING_ID)
+        final Hearing hearing = Hearing.builder().withId(HEARING_ID)
                 .withDefendants(asList
                         (Defendant.builder()
                                 .withId(snapshotKey)
                                 .build()))
 
                 .build();
-        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(ahearing);
+        when(this.hearingRepository.findById(HEARING_ID)).thenReturn(hearing);
 
         this.newHearingEventListener.witnessAdded(event);
-        final ArgumentCaptor<Ahearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Ahearing.class);
-        verify(this.ahearingRepository).save(hearingexArgumentCaptor.capture());
-        final Ahearing actualHearing = hearingexArgumentCaptor.getValue();
+        final ArgumentCaptor<Hearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+        verify(this.hearingRepository).save(hearingexArgumentCaptor.capture());
+        final Hearing actualHearing = hearingexArgumentCaptor.getValue();
         final Witness expectedWitnessOutcome = actualHearing.getDefendants().get(0).getDefendantWitnesses().get(0);
         assertThat(expectedWitnessOutcome.getId().getId(), is(TARGET_ID));
         assertThat(expectedWitnessOutcome.getHearing().getId(), is(HEARING_ID));
@@ -391,9 +390,9 @@ public class NewHearingEventListenerTest {
     @Test
     public void shouldNotUpdateWitness_WhenHearingNotFound() {
         final JsonEnvelope event = getWitnessAddedEnvelope();
-        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(null);
+        when(this.hearingRepository.findById(HEARING_ID)).thenReturn(null);
         this.newHearingEventListener.witnessAdded(event);
-        verify(ahearingRepository, never()).save(any(Ahearing.class));
+        verify(hearingRepository, never()).save(any(Hearing.class));
 
     }
 
@@ -402,18 +401,18 @@ public class NewHearingEventListenerTest {
         final JsonEnvelope event = getWitnessEnrichEnvelope();
 
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(DEFENDANT_ID, HEARING_ID);
-        final Ahearing ahearing = Ahearing.builder().withId(HEARING_ID)
+        final Hearing hearing = Hearing.builder().withId(HEARING_ID)
                         .withDefendants(asList(Defendant.builder().withId(snapshotKey).build()))
 
                         .build();
-        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(ahearing);
+        when(this.hearingRepository.findById(HEARING_ID)).thenReturn(hearing);
         when(this.witnessRepository.findBy(new HearingSnapshotKey(TARGET_ID, HEARING_ID)))
                         .thenReturn(null);
         this.newHearingEventListener.initiateHearingWitnessEnriched(event);
-        final ArgumentCaptor<Ahearing> hearingexArgumentCaptor =
-                        ArgumentCaptor.forClass(Ahearing.class);
-        verify(this.ahearingRepository).saveAndFlush(hearingexArgumentCaptor.capture());
-        final Ahearing actualHearing = hearingexArgumentCaptor.getValue();
+        final ArgumentCaptor<Hearing> hearingexArgumentCaptor =
+                        ArgumentCaptor.forClass(Hearing.class);
+        verify(this.hearingRepository).saveAndFlush(hearingexArgumentCaptor.capture());
+        final Hearing actualHearing = hearingexArgumentCaptor.getValue();
         final Witness expectedWitnessOutcome =
                         actualHearing.getDefendants().get(0).getDefendantWitnesses().get(0);
         assertThat(expectedWitnessOutcome.getId().getId(), is(TARGET_ID));
@@ -427,9 +426,9 @@ public class NewHearingEventListenerTest {
     @Test
     public void shouldNotEnrichWitness_WhenHearingNotFound() {
         final JsonEnvelope event = getWitnessEnrichEnvelope();
-        when(this.ahearingRepository.findById(HEARING_ID)).thenReturn(null);
+        when(this.hearingRepository.findById(HEARING_ID)).thenReturn(null);
         this.newHearingEventListener.initiateHearingWitnessEnriched(event);
-        verify(ahearingRepository, never()).save(any(Ahearing.class));
+        verify(hearingRepository, never()).save(any(Hearing.class));
 
     }
     public JsonEnvelope getWitnessAddedEnvelope() {

@@ -10,7 +10,7 @@ import org.apache.deltaspike.data.api.Query;
 import org.apache.deltaspike.data.api.QueryParam;
 import org.apache.deltaspike.data.api.Repository;
 
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 
 /**
  * Repository for accessing LegalCase data.

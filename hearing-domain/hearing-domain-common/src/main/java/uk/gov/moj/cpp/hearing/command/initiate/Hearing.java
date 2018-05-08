@@ -243,7 +243,7 @@ public class Hearing implements Serializable {
             return this;
         }
 
-        public Builder addWintess(Witness.Builder witness){
+        public Builder addWitness(Witness.Builder witness){
             this.witnesses.add(witness);
             return this;
         }
@@ -277,7 +277,7 @@ public class Hearing implements Serializable {
 
         hearing.getDefendants().forEach(defendant -> builder.addDefendant(Defendant.from(defendant)));
 
-        hearing.getWitnesses().forEach( witness -> builder.addWintess(Witness.from(witness)));
+        hearing.getWitnesses().forEach( witness -> builder.addWitness(Witness.from(witness)));
 
         return builder;
     }

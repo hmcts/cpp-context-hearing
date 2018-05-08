@@ -5,7 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCaseTest.buildLegalCase1;
+import static uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCaseTest.buildLegalCase1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +19,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import uk.gov.moj.cpp.hearing.persist.entity.ex.Ahearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ex.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 
 @RunWith(CdiTestRunner.class)
 public class LegalCaseRepositoryTest {
 
-    private static final List<Ahearing> hearings = new ArrayList<>();
+    private static final List<Hearing> hearings = new ArrayList<>();
     private static final LegalCase legalCase1 = buildLegalCase1();
     
     @Inject
@@ -33,7 +33,7 @@ public class LegalCaseRepositoryTest {
     
     @BeforeClass
     public static void create() {
-        hearings.add(AhearingRepositoryTestUtils.buildHearing(legalCase1));
+        hearings.add(HearingRepositoryTestUtils.buildHearing(legalCase1));
     }
 
     @Before
