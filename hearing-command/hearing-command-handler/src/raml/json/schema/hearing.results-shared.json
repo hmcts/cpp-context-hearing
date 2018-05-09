@@ -6,8 +6,7 @@
       "$ref":"#/definitions/uuid"
     },
     "sharedTime":{
-      "type":"string",
-      "format":"date-time"
+      "type":"string"
     },
     "resultLines":{
       "type":"array",
@@ -249,10 +248,8 @@
       "required":[
         "address",
         "dateOfBirth",
-        "defenceOrganisation",
         "defendantCases",
         "firstName",
-        "gender",
         "id",
         "interpreter",
         "lastName",
@@ -282,11 +279,7 @@
         }
       },
       "required":[
-        "address1",
-        "address2",
-        "address3",
-        "address4",
-        "postCode"
+        "address1"
       ]
     },
     "interpreter":{
@@ -301,7 +294,6 @@
         }
       },
       "required":[
-        "language",
         "needed"
       ]
     },
@@ -320,9 +312,7 @@
         }
       },
       "required":[
-        "bailStatus",
-        "caseId",
-        "custodyTimeLimitDate"
+        "caseId"
       ]
     },
     "offence":{
@@ -387,14 +377,11 @@
       },
       "required":[
         "caseId",
-        "convictionDate",
         "count",
-        "endDate",
         "id",
         "legislation",
         "offenceCode",
         "orderIndex",
-        "section",
         "startDate",
         "title",
         "wording"
@@ -457,19 +444,12 @@
         "caseId",
         "classification",
         "dateOfBirth",
-        "email",
-        "fax",
         "firstName",
-        "gender",
-        "homeTelephone",
         "id",
         "lastName",
-        "mobile",
-        "nationality",
         "personId",
         "title",
-        "type",
-        "workTelephone"
+        "type"
       ]
     },
     "case":{
@@ -544,8 +524,7 @@
         "hearingId",
         "lastName",
         "personId",
-        "status",
-        "title"
+        "status"
       ]
     },
     "pleas":{
