@@ -44,6 +44,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
@@ -322,9 +323,10 @@ public class NewModelHearingAggregate implements Aggregate {
                 .build()
         );
 
-        if (verdict.getValue().getCategoryType().startsWith(GUILTY)) {
+        String categoryType = ofNullable(verdict.getValue().getCategoryType()).orElse("");
+        if (categoryType.startsWith(GUILTY)) {
             events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
-        } else if (verdict.getValue().getCategoryType().startsWith(NOT_GUILTY)) { 
+        } else if (categoryType.startsWith(NOT_GUILTY)) {
             events.add(new ConvictionDateRemoved(caseId, hearingId, offenceId));
         }
         return apply(events.stream());
