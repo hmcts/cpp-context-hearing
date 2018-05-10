@@ -35,7 +35,7 @@ public class ProsecutionCounselAddedEventListener {
         Ahearing hearing = ahearingRepository.findBy(prosecutionCounselAdded.getHearingId());
 
         if (hearing == null){
-            throw new RuntimeException("Hearing not found for prosecution councel update.");
+            throw new RuntimeException("Hearing not found for prosecution counsel update.");
         }
 
         ProsecutionAdvocate prosecutionAdvocate = hearing.getAttendees().stream()
