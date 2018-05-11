@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.util.stream.Collectors.toList;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
@@ -22,17 +26,27 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.persistence.NoResultException;
+import javax.transaction.Transactional;
 import static java.util.stream.Collectors.toList;
 
 public class HearingService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
+
 
     @Inject
     private HearingRepository hearingRepository;
 
     @Inject
-    NowsRepository nowsRepository;
+    private NowsRepository nowsRepository;
 
-    NowsMaterialRepository nowsMaterialRepository;
+    @Inject
+    private NowsMaterialRepository nowsMaterialRepository;
 
     @Transactional
     public HearingListResponse getHearingByDateV2(final LocalDate date) {
@@ -66,6 +80,21 @@ public class HearingService {
         return NowsResponse.builder().withNows(nowsList).build();
     }
 
+    @Transactional
+    public JsonObject getNowsRepository(final String q) {
+
+        final JsonObjectBuilder json = Json.createObjectBuilder();
+        try {
+            NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(UUID.fromString(q));
+            JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+            nowsMaterial.getUserGroups().forEach(s ->jsonArrayBuilder.add(s));
+            json.add("allowedUserGroups", jsonArrayBuilder.build());
+        } catch (final NoResultException e) {
+            LOGGER.info("No user groups found with materialId='{}'", q, e);
+        }
+
+        return json.build();
+    }
     private List<NowResult> populateNowResult(List<NowsResult> nowResult) {
         return nowResult.stream().map(result -> NowResult.builder()
         .withSequence(result.getSequence())

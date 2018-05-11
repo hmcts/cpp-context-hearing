@@ -17,6 +17,7 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +55,10 @@ public class AbstractIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     protected static final UUID USER_ID_VALUE = randomUUID();
+    protected static final UUID USER_ID_VALUE_AS_ADMIN = randomUUID();
+
     protected static final Header CPP_UID_HEADER = new Header(USER_ID, USER_ID_VALUE.toString());
+    protected static final Header CPP_UID_HEADER_AS_ADMIN = new Header(USER_ID, USER_ID_VALUE_AS_ADMIN.toString());
 
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
     protected static final Properties ENDPOINT_PROPERTIES = new Properties();
@@ -71,6 +75,7 @@ public class AbstractIT {
         readConfig();
         setRequestSpecification();
         setupAsAuthorisedUser(USER_ID_VALUE);
+        setupAsSystemUser(USER_ID_VALUE_AS_ADMIN);
         stubEnableAllCapabilities();
     }
 

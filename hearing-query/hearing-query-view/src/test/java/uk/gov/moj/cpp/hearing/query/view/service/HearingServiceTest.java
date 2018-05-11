@@ -36,6 +36,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCou
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
+import javax.json.JsonObject;
+import javax.json.JsonString;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -252,6 +254,39 @@ public class HearingServiceTest {
         assertThat(response.getNows().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId.toString()));
         assertThat(response.getNows().get(0).getNowResult().get(0).getSequence(), is(1));
 
+    }
+
+
+
+    @Test
+    public void shouldFindUserGroupsByMaterialId() throws Exception {
+        final UUID hearingId = randomUUID();
+        final UUID id = randomUUID();
+        final UUID defendantId = randomUUID();
+
+        final UUID nowsTypeId = randomUUID();
+        final UUID nowMaterialId = randomUUID();
+        final String language = "wales";
+
+        final Nows nows = new Nows();
+        nows.setId(id);
+        nows.setDefendantId(defendantId);
+        nows.setHearingId(hearingId);
+        nows.setNowsTypeId(nowsTypeId);
+
+        final NowsMaterial nowsMaterial = new NowsMaterial();
+        nowsMaterial.setId(nowMaterialId);
+        nowsMaterial.setNows(nows);
+        nowsMaterial.setStatus(NowsMaterialStatus.GENERATED);
+        nowsMaterial.setUserGroups(Arrays.asList("Lx", "GA"));
+        nowsMaterial.setLanguage(language);
+        nows.getMaterial().add(nowsMaterial);
+
+
+        when(nowsMaterialRepository.findBy(nowMaterialId)).thenReturn(nowsMaterial);
+
+        final JsonObject response = caseHearingService.getNowsRepository(nowMaterialId.toString());
+        assertThat(response.getJsonArray("allowedUserGroups").getValuesAs(JsonString.class).stream().map(jsonString -> jsonString.getString() ).collect(Collectors.toList()), is(nowsMaterial.getUserGroups()));
     }
 
     private static String format(final String... vals) {

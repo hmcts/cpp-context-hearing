@@ -146,3 +146,23 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.hearings-by-date.v2+json:
                     example:  !include json/hearing.get.hearings.v2.json
                     schema:  !include  json/schema/hearing.get.hearings.v2.json
+
+/search:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.query.search-by-material-id+json
+            name: hearing.query.search-by-material-id
+        ...
+      queryParameters:
+        q:
+          description: query
+          type: string
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.query.search-by-material-id+json:
+                    example:  !include json/hearing.query.search-by-material-id.json
+                    schema:  !include  json/schema/hearing.query.search-by-material-id.json
