@@ -7,17 +7,16 @@ import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 
 @Event("hearing.initiated")
-public class Initiated {
-//TODO - GPE-3032 CLEANUP - rename to HearingInitiated
+public class HearingInitiated {
 
     private List<Case> cases;
     private Hearing hearing;
 
-    public Initiated(){
+    public HearingInitiated(){
 
     }
 
-    public Initiated(List<Case> cases, Hearing hearing){
+    public HearingInitiated(List<Case> cases, Hearing hearing){
         this.cases = cases;
         this.hearing = hearing;
     }

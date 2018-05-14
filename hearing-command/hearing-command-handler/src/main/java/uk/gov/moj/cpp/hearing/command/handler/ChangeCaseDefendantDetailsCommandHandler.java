@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -28,6 +30,10 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 @ServiceComponent(COMMAND_HANDLER)
 public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHandler {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ChangeCaseDefendantDetailsCommandHandler.class.getName());
+
+
     @Inject
     public ChangeCaseDefendantDetailsCommandHandler(final EventSource eventSource, final Enveloper enveloper,
                                                     final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
@@ -36,6 +42,7 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
     @Handles("hearing.update-case-defendant-details")
     public void initiateCaseDefendantDetailsChange(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.update-case-defendant-details event received {}", envelope.payloadAsJsonObject());
 
         final CaseDefendantDetails caseDefendantDetails = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CaseDefendantDetails.class);
 
@@ -79,6 +86,7 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
     @Handles("hearing.update-case-defendant-details-against-hearing-aggregate")
     public void updateCaseDefendantDetails(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.update-case-defendant-details-against-hearing-aggregate event received {}", envelope.payloadAsJsonObject());
 
         final JsonObject payload = envelope.payloadAsJsonObject();
 

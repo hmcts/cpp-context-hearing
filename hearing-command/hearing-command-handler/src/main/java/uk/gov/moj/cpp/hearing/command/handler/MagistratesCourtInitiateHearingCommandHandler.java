@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -23,6 +25,9 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 @ServiceComponent(COMMAND_HANDLER)
 public class MagistratesCourtInitiateHearingCommandHandler extends AbstractCommandHandler {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(MagistratesCourtInitiateHearingCommandHandler.class.getName());
+
     @Inject
     public MagistratesCourtInitiateHearingCommandHandler(final EventSource eventSource, final Enveloper enveloper,
                                                          final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
@@ -31,6 +36,7 @@ public class MagistratesCourtInitiateHearingCommandHandler extends AbstractComma
 
     @Handles("hearing.record-sending-sheet-complete")
     public void recordSendingSheetComplete(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.debug("hearing.record-sending-sheet-complete event received {}", command.payloadAsJsonObject());
 
         final SendingSheetCompleted sendingSheetCompleted = jsonObjectToObjectConverter
                 .convert(command.payloadAsJsonObject(), SendingSheetCompleted.class);
@@ -41,6 +47,7 @@ public class MagistratesCourtInitiateHearingCommandHandler extends AbstractComma
 
     @Handles("hearing.record-mags-court-hearing")
     public void recordMagsCourtHearing(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.debug("hearing.record-mags-court-hearing event received {}", command.payloadAsJsonObject());
 
         final List<MagsCourtHearingRecorded> hearings2Initiate = new HearingTransformer()
                 .transform(jsonObjectToObjectConverter

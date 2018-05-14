@@ -5,6 +5,8 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -12,19 +14,23 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 @ServiceComponent(EVENT_PROCESSOR)
-public class NewModelPleaUpdateEventProcessor {
+public class PleaUpdateEventProcessor {
 
     private final Enveloper enveloper;
     private final Sender sender;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PleaUpdateEventProcessor.class);
+
     @Inject
-    public NewModelPleaUpdateEventProcessor(final Enveloper enveloper, final Sender sender) {
+    public PleaUpdateEventProcessor(final Enveloper enveloper, final Sender sender) {
         this.enveloper = enveloper;
         this.sender = sender;
     }
 
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdate(final JsonEnvelope envelop) {
+
+        LOGGER.debug("hearing.hearing-offence-plea-updated event received {}", envelop.payloadAsJsonObject());
 
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "hearing.offence-plea-updated").apply(envelop.payloadAsJsonObject()));
 

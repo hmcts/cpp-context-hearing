@@ -48,10 +48,10 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"squid:S2201"})
 @ServiceComponent(EVENT_LISTENER)
-public class NewHearingEventListener {
+public class InitiateHearingEventListener {
 
     private static final Logger LOGGER =
-            LoggerFactory.getLogger(NewHearingEventListener.class.getName());
+            LoggerFactory.getLogger(InitiateHearingEventListener.class.getName());
     @Inject
     private HearingRepository hearingRepository;
 
@@ -190,11 +190,10 @@ public class NewHearingEventListener {
                             return defendant;
                         })
                         .collect(Collectors.toList()))
-                .withWitnesses((hearing.getWitnesses() == null ? new ArrayList<Witness>() : hearing.getWitnesses().stream()
-                        .map(witnessIn -> {
-                            return translateWitness(hearing.getId(), witnessIn, id2Case.get(witnessIn.getCaseId())).build();
-                        }).collect((Collectors.toList()))))
-                .withJudge((Judge.Builder) Judge.builder()
+                .withWitnesses((hearing.getWitnesses() == null ? new ArrayList<>() : hearing.getWitnesses().stream()
+                        .map(witnessIn -> translateWitness(hearing.getId(), witnessIn, id2Case.get(witnessIn.getCaseId())).build()
+                        ).collect((Collectors.toList()))))
+                .withJudge(Judge.builder()
                         .withId(new HearingSnapshotKey(hearing.getJudge().getId(), hearing.getId()))
                         .withFirstName(hearing.getJudge().getFirstName())
                         .withLastName(hearing.getJudge().getLastName())
@@ -206,24 +205,23 @@ public class NewHearingEventListener {
     @Transactional
     @Handles("hearing.conviction-date-added")
     public void convictionDateUpdated(final JsonEnvelope event) {
+        LOGGER.debug("hearing.conviction-date-added event received {}", event.payloadAsJsonObject());
         final ConvictionDateAdded convictionDateAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateAdded.class);
-        save(convictionDateAdded.getOffenceId(), convictionDateAdded.getHearingId(), (o) -> {
-            o.setConvictionDate(convictionDateAdded.getConvictionDate());
-        });
+        save(convictionDateAdded.getOffenceId(), convictionDateAdded.getHearingId(), (o) -> o.setConvictionDate(convictionDateAdded.getConvictionDate()));
     }
 
     @Transactional
     @Handles("hearing.conviction-date-removed")
     public void convictionDateRemoved(final JsonEnvelope event) {
+        LOGGER.debug("hearing.conviction-date-removed event received {}", event.payloadAsJsonObject());
         final ConvictionDateRemoved convictionDateRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);
-        save(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId(), (o) -> {
-            o.setConvictionDate(null);
-        });
+        save(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId(), (o) -> o.setConvictionDate(null));
     }
 
     @Transactional
     @Handles("hearing.initiate-hearing-offence-plead")
     public void hearingInitiatedPleaData(final JsonEnvelope envelop) {
+        LOGGER.debug("hearing.initiate-hearing-offence-plead event received {}", envelop.payloadAsJsonObject());
         final InitiateHearingOffencePlead event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InitiateHearingOffencePlead.class);
         save(event.getOffenceId(), event.getHearingId(), (o) -> {
             o.setOriginHearingId(event.getOriginHearingId());

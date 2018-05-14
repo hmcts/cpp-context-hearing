@@ -24,7 +24,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 
 import java.time.LocalDate;
@@ -53,9 +53,9 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NewModelUpdatePleaCommandHandlerTest {
+public class UpdatePleaCommandHandlerTest {
 
-    @InjectMocks private NewModelUpdatePleaCommandHandler hearingCommandHandler;
+    @InjectMocks private UpdatePleaCommandHandler hearingCommandHandler;
 
     @Mock
     private EventStream hearingAggregateEventStream;
@@ -76,7 +76,7 @@ public class NewModelUpdatePleaCommandHandlerTest {
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(Initiated.class,
+    private final Enveloper enveloper = createEnveloperWithEvents(HearingInitiated.class,
             PleaUpsert.class,
             OffencePleaUpdated.class,
             ConvictionDateAdded.class,
@@ -136,7 +136,7 @@ public class NewModelUpdatePleaCommandHandlerTest {
                 .build();
         
         final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate() {{
-            apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+            apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
         }};
 
         when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingAggregateEventStream);
@@ -195,7 +195,7 @@ public class NewModelUpdatePleaCommandHandlerTest {
                 .build();
 
         final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate() {{
-            apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+            apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
         }};
 
         when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingAggregateEventStream);

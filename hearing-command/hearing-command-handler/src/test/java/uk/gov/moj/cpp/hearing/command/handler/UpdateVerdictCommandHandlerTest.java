@@ -26,7 +26,7 @@ import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.util.List;
@@ -57,7 +57,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.int
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NewModelUpdateVerdictCommandHandlerTest {
+public class UpdateVerdictCommandHandlerTest {
 
     @Mock
     private EventStream hearingEventStream;
@@ -76,14 +76,14 @@ public class NewModelUpdateVerdictCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            Initiated.class,
+            HearingInitiated.class,
             VerdictUpsert.class,
             ConvictionDateAdded.class,
             ConvictionDateRemoved.class
     );
 
     @InjectMocks
-    private NewModelUpdateVerdictCommandHandler hearingCommandHandler;
+    private UpdateVerdictCommandHandler hearingCommandHandler;
 
     @Before
     public void setup() {
@@ -125,7 +125,7 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                 .build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         setupMockedEventStream(hearingUpdateVerdictCommand.getHearingId(), this.hearingEventStream, newModelHearingAggregate);
 
@@ -203,7 +203,7 @@ public class NewModelUpdateVerdictCommandHandlerTest {
                 .build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         setupMockedEventStream(hearingUpdateVerdictCommand.getHearingId(), this.hearingEventStream, newModelHearingAggregate);
 

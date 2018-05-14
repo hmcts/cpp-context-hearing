@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -30,6 +32,9 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 @ServiceComponent(COMMAND_HANDLER)
 public class HearingEventCommandHandler extends AbstractCommandHandler {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(HearingEventCommandHandler.class.getName());
+
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
     private static final String FIELD_ACTION_LABEL = "actionLabel";
@@ -48,6 +53,8 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.create-hearing-event-definitions event received {}", envelope.payloadAsJsonObject());
+
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID hearingEventDefinitionsId = fromString(payload.getString(FIELD_GENERIC_ID));
         final List<HearingEventDefinition> hearingEventDefinitions = payload
@@ -72,6 +79,7 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.log-hearing-event")
     public void logHearingEvent(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.debug("hearing.command.log-hearing-event event received {}", command.payloadAsJsonObject());
 
         final LogEventCommand logEventCommand = this.jsonObjectToObjectConverter.convert(
                 command.payloadAsJsonObject(), LogEventCommand.class);
@@ -81,6 +89,7 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.correct-hearing-event")
     public void correctEvent(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.debug("hearing.command.correct-hearing-event event received {}", command.payloadAsJsonObject());
 
         final CorrectLogEventCommand logEventCommand = this.jsonObjectToObjectConverter.convert(
                 command.payloadAsJsonObject(), CorrectLogEventCommand.class);

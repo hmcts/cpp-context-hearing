@@ -21,7 +21,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -51,7 +50,7 @@ import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -59,10 +58,10 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 @SuppressWarnings({"serial", "unchecked"})
 @RunWith(MockitoJUnitRunner.class)
-public class NewModelShareResultsCommandHandlerTest {
+public class ShareResultsCommandHandlerTest {
 
     @InjectMocks
-    private NewModelShareResultsCommandHandler shareResultsCommandHandler;
+    private ShareResultsCommandHandler shareResultsCommandHandler;
 
     @Mock
     private EventStream caseEventStream;
@@ -132,7 +131,7 @@ public class NewModelShareResultsCommandHandlerTest {
     public void shouldRaiseDraftResultSaved() throws Exception {
 
         final NewModelHearingAggregate aggregate = new NewModelHearingAggregate() {{
-            apply(Stream.of(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
             apply(Stream.of(prosecutionCounselUpsert));
             apply(Stream.of(defenceCounselUpsert));
         }};
@@ -164,7 +163,7 @@ public class NewModelShareResultsCommandHandlerTest {
     public void shouldRaiseResultsSharedEvent() throws Exception {
 
         final NewModelHearingAggregate aggregate = new NewModelHearingAggregate() {{
-            apply(Stream.of(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
             apply(Stream.of(prosecutionCounselUpsert));
             apply(Stream.of(defenceCounselUpsert));
         }};

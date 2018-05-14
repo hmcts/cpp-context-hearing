@@ -63,7 +63,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventCommandHandlerTest {
@@ -239,7 +239,7 @@ public class HearingEventCommandHandlerTest {
                 PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false,null);
 
         setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"),
@@ -281,7 +281,7 @@ public class HearingEventCommandHandlerTest {
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false,null);
 
         setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
             a.apply(new HearingEventLogged(
                     logEvent.getHearingEventId(),
                     null,
@@ -333,7 +333,7 @@ public class HearingEventCommandHandlerTest {
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false);
 
         setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
             a.apply(new HearingEventLogged(
                     logEvent.getHearingEventId(),
                     null,
@@ -402,7 +402,7 @@ public class HearingEventCommandHandlerTest {
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false);
 
         setupMockedEventStream(correctLogEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"),

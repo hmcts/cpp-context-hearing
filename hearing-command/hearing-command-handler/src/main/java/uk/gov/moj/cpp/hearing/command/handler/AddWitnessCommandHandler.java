@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -25,6 +27,10 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 @ServiceComponent(COMMAND_HANDLER)
 public class AddWitnessCommandHandler extends AbstractCommandHandler {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(AddWitnessCommandHandler.class.getName());
+
+
     @Inject
     public AddWitnessCommandHandler(final EventSource eventSource, final Enveloper enveloper,
                                     final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
@@ -33,6 +39,8 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.add-witness")
     public void addWitness(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.command.add-witness event received {}", envelope.payloadAsJsonObject());
+
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID witnessId = fromString(payload.getString("id"));
         final UUID hearingId = fromString(payload.getString("hearingId"));
@@ -50,6 +58,8 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.defence-witness-added")
     public void defenceWitnessAdded(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.defence-witness-added event received {}", envelope.payloadAsJsonObject());
+
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID witnessId = fromString(payload.getString("witnessId"));
         final UUID hearingId = fromString(payload.getString("hearingId"));

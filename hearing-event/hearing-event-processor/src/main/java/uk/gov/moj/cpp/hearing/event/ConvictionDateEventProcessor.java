@@ -5,6 +5,8 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -26,6 +28,8 @@ public class ConvictionDateEventProcessor {
     private Sender sender;
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConvictionDateEventProcessor.class);
+
     @Inject
     public ConvictionDateEventProcessor(final Enveloper enveloper, final Sender sender,
             final JsonObjectToObjectConverter jsonObjectToObjectConverter,
@@ -37,6 +41,7 @@ public class ConvictionDateEventProcessor {
 
     @Handles("hearing.conviction-date-added")
     public void publishOffenceConvictionDateChangedPublicEvent(final JsonEnvelope event) {
+        LOGGER.debug("hearing.conviction-date-added event received {}", event.payloadAsJsonObject());
 
         ConvictionDateAdded convictionDateAdded = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(),
                 ConvictionDateAdded.class);
@@ -49,6 +54,7 @@ public class ConvictionDateEventProcessor {
 
     @Handles("hearing.conviction-date-removed")
     public void publishOffenceConvictionDateRemovedPublicEvent(final JsonEnvelope event) {
+        LOGGER.debug("hearing.conviction-date-removed event received {}", event.payloadAsJsonObject());
 
         ConvictionDateRemoved convictionDateRemoved = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);

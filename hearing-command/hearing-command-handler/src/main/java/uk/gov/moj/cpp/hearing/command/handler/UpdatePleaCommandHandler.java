@@ -4,6 +4,8 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -20,16 +22,21 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 
 @ServiceComponent(COMMAND_HANDLER)
-public class NewModelUpdatePleaCommandHandler extends AbstractCommandHandler {
+public class UpdatePleaCommandHandler extends AbstractCommandHandler {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(UpdatePleaCommandHandler.class.getName());
 
     @Inject
-    public NewModelUpdatePleaCommandHandler(final EventSource eventSource, final Enveloper enveloper,
-            final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
+    public UpdatePleaCommandHandler(final EventSource eventSource, final Enveloper enveloper,
+                                    final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
         super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
     }
 
     @Handles("hearing.hearing-offence-plea-update")
     public void updatePlea(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.hearing-offence-plea-update event received {}", envelope.payloadAsJsonObject());
+
         final HearingUpdatePleaCommand command = convertToObject(envelope, HearingUpdatePleaCommand.class);
         for (final Defendant defendant : command.getDefendants()) {
             for (final Offence offence : defendant.getOffences()) {
@@ -42,6 +49,8 @@ public class NewModelUpdatePleaCommandHandler extends AbstractCommandHandler {
     
     @Handles("hearing.offence-plea-updated")
     public void updateOffencePlea(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.offence-plea-updated event received {}", envelope.payloadAsJsonObject());
+
         final OffencePleaUpdated event = convertToObject(envelope, OffencePleaUpdated.class);
         aggregate(OffenceAggregate.class, event.getOffenceId(), envelope, 
                 (offenceAggregate) -> offenceAggregate.updatePlea(event.getHearingId(), event.getOffenceId(), event.getPleaDate(), event.getValue()));

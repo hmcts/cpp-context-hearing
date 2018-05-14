@@ -21,14 +21,6 @@ public final class HearingUpdatePleaCommand implements Serializable {
     private final UUID caseId;
     private final List<Defendant> defendants;
 
-    //TODO - GPE-3032 CLEANUP - the update command here needs to change.
-    // It should not carry the hearingId as the BE determines which hearing to apply the plea to. (which is always the latest)
-    // On the other hand the FE should never allow a plea to be set on a hearing that is not the latest.
-    // This is probably not much of a problem, since the FE will take the hearingId that it is currently looking at and specify.
-    // But there is a very small chance that a new hearing will arrive while the page is being viewed.
-
-    // I think the update plea should only contain offences.  Each offence is uniquely associated to a defendant, so the defendant info is redundant.
-
     @JsonCreator
     public HearingUpdatePleaCommand(@JsonProperty("hearingId") final UUID hearingId,
             @JsonProperty("caseId") final UUID caseId, @JsonProperty("defendants") final List<Defendant> defendants) {

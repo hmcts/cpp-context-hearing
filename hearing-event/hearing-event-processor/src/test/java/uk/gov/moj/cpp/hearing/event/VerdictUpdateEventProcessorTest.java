@@ -35,7 +35,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-public class NewModelVerdictUpdateEventProcessorTest {
+public class VerdictUpdateEventProcessorTest {
 
     @Mock
     private Sender sender;
@@ -62,7 +62,7 @@ public class NewModelVerdictUpdateEventProcessorTest {
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
     @InjectMocks
-    private NewModelVerdictUpdateEventProcessor newModelVerdictUpdateEventProcessor;
+    private VerdictUpdateEventProcessor verdictUpdateEventProcessor;
 
 
     @Before
@@ -92,7 +92,7 @@ public class NewModelVerdictUpdateEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
                 objectToJsonObjectConverter.convert(verdictUpsert));
 
-        this.newModelVerdictUpdateEventProcessor.verdictUpdate(event);
+        this.verdictUpdateEventProcessor.verdictUpdate(event);
 
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 

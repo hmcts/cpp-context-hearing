@@ -55,8 +55,8 @@ public class HearingEventListenerRamlConfigTest {
     @Before
     public void setup() throws IOException {
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingEventListener.class,
-                NewHearingEventListener.class,
-                NewModelPleaUpdateEventListener.class,
+                InitiateHearingEventListener.class,
+                PleaUpdateEventListener.class,
                 VerdictUpdateEventListener.class,
                 HearingLogEventListener.class,
                 DefenceCounselAddedEventListener.class,

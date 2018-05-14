@@ -33,10 +33,10 @@ public class HearingCommandHandlerRamlConfigTest {
                 .toArray();
 
         final List<String> allHandlerNames = getHandlerNames(
-                NewModelShareResultsCommandHandler.class,
-                NewModelInitiateHearingCommandHandler.class,
-                NewModelUpdatePleaCommandHandler.class,
-                NewModelUpdateVerdictCommandHandler.class,
+                ShareResultsCommandHandler.class,
+                InitiateHearingCommandHandler.class,
+                UpdatePleaCommandHandler.class,
+                UpdateVerdictCommandHandler.class,
                 AddDefenceCounselCommandHandler.class,
                 AddProsecutionCounselCommandHandler.class,
                 MagistratesCourtInitiateHearingCommandHandler.class,

@@ -63,7 +63,7 @@ import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NewHearingEventListenerTest {
+public class InitiateHearingEventListenerTest {
 
     @Mock
     private HearingRepository hearingRepository;
@@ -79,7 +79,7 @@ public class NewHearingEventListenerTest {
     private OffenceRepository offenceRepository;
 
     @InjectMocks
-    private NewHearingEventListener newHearingEventListener;
+    private InitiateHearingEventListener initiateHearingEventListener;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -149,7 +149,7 @@ public class NewHearingEventListenerTest {
                                 .build()
                 );
 
-        this.newHearingEventListener.newHearingInitiated(getInitiateAhearingJsonEnvelope(command.getCases(), command.getHearing()));
+        this.initiateHearingEventListener.newHearingInitiated(getInitiateAhearingJsonEnvelope(command.getCases(), command.getHearing()));
 
         final ArgumentCaptor<Hearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
         verify(this.hearingRepository).save(hearingexArgumentCaptor.capture());
@@ -255,7 +255,7 @@ public class NewHearingEventListenerTest {
 
         when(this.offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
-        newHearingEventListener.convictionDateUpdated(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
+        initiateHearingEventListener.convictionDateUpdated(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
                 objectToJsonObjectConverter.convert(convictionDateAdded)));
 
         verify(this.offenceRepository).saveAndFlush(offence);
@@ -290,7 +290,7 @@ public class NewHearingEventListenerTest {
         
         when(offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
-        newHearingEventListener.convictionDateRemoved(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
+        initiateHearingEventListener.convictionDateRemoved(envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
                 objectToJsonObjectConverter.convert(convictionDateRemoved)));
 
         verify(this.offenceRepository).saveAndFlush(offence);
@@ -347,7 +347,7 @@ public class NewHearingEventListenerTest {
         
         when(offenceRepository.findBySnapshotKey(snapshotKey)).thenReturn(offence);
 
-        newHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.initiate-hearing-offence-plead"),
+        initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.initiate-hearing-offence-plead"),
                 objectToJsonObjectConverter.convert(event)));
 
         verify(this.offenceRepository).saveAndFlush(offence);
@@ -374,7 +374,7 @@ public class NewHearingEventListenerTest {
                 .build();
         when(this.hearingRepository.findById(HEARING_ID)).thenReturn(hearing);
 
-        this.newHearingEventListener.witnessAdded(event);
+        this.initiateHearingEventListener.witnessAdded(event);
         final ArgumentCaptor<Hearing> hearingexArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
         verify(this.hearingRepository).save(hearingexArgumentCaptor.capture());
         final Hearing actualHearing = hearingexArgumentCaptor.getValue();
@@ -391,7 +391,7 @@ public class NewHearingEventListenerTest {
     public void shouldNotUpdateWitness_WhenHearingNotFound() {
         final JsonEnvelope event = getWitnessAddedEnvelope();
         when(this.hearingRepository.findById(HEARING_ID)).thenReturn(null);
-        this.newHearingEventListener.witnessAdded(event);
+        this.initiateHearingEventListener.witnessAdded(event);
         verify(hearingRepository, never()).save(any(Hearing.class));
 
     }
@@ -408,7 +408,7 @@ public class NewHearingEventListenerTest {
         when(this.hearingRepository.findById(HEARING_ID)).thenReturn(hearing);
         when(this.witnessRepository.findBy(new HearingSnapshotKey(TARGET_ID, HEARING_ID)))
                         .thenReturn(null);
-        this.newHearingEventListener.initiateHearingWitnessEnriched(event);
+        this.initiateHearingEventListener.initiateHearingWitnessEnriched(event);
         final ArgumentCaptor<Hearing> hearingexArgumentCaptor =
                         ArgumentCaptor.forClass(Hearing.class);
         verify(this.hearingRepository).saveAndFlush(hearingexArgumentCaptor.capture());
@@ -427,7 +427,7 @@ public class NewHearingEventListenerTest {
     public void shouldNotEnrichWitness_WhenHearingNotFound() {
         final JsonEnvelope event = getWitnessEnrichEnvelope();
         when(this.hearingRepository.findById(HEARING_ID)).thenReturn(null);
-        this.newHearingEventListener.initiateHearingWitnessEnriched(event);
+        this.initiateHearingEventListener.initiateHearingWitnessEnriched(event);
         verify(hearingRepository, never()).save(any(Hearing.class));
 
     }

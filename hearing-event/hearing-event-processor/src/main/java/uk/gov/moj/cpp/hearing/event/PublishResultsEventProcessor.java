@@ -63,7 +63,7 @@ public class PublishResultsEventProcessor {
 
     @Handles("hearing.results-shared")
     public void resultsShared(final JsonEnvelope event) {
-        LOGGER.debug("results-shared event received {}", event.payloadAsJsonObject());
+        LOGGER.debug("hearing.results-shared event received {}", event.payloadAsJsonObject());
 
         final ResultsShared input = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);

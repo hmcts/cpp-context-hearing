@@ -19,7 +19,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
@@ -50,7 +50,7 @@ public class NewModelHearingAggregateTest {
     public void initiate() {
         InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
-        Initiated result = (Initiated) new NewModelHearingAggregate().initiate(initiateHearingCommand).collect(Collectors.toList()).get(0);
+        HearingInitiated result = (HearingInitiated) new NewModelHearingAggregate().initiate(initiateHearingCommand).collect(Collectors.toList()).get(0);
 
         assertThat(result.getCases(), is(initiateHearingCommand.getCases()));
         assertThat(result.getHearing(), is(initiateHearingCommand.getHearing()));
@@ -121,7 +121,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         newModelHearingAggregate.logHearingEvent(logEventCommand).collect(Collectors.toList()).get(0);
 
@@ -154,7 +154,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         HearingEventLogged result = (HearingEventLogged) newModelHearingAggregate
                 .logHearingEvent(logEventCommand).collect(Collectors.toList()).get(0);
@@ -196,7 +196,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
         newModelHearingAggregate.logHearingEvent(LogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
                 .withHearingId(randomUUID())
@@ -253,7 +253,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) newModelHearingAggregate
                 .correctHearingEvent(correctLogEventCommand).collect(Collectors.toList()).get(0);
@@ -275,7 +275,7 @@ public class NewModelHearingAggregateTest {
         InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
         newModelHearingAggregate.logHearingEvent(LogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
                 .withHearingId(randomUUID())
@@ -337,7 +337,7 @@ public class NewModelHearingAggregateTest {
         InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
-        newModelHearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
         newModelHearingAggregate.logHearingEvent(LogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
                 .withHearingId(randomUUID())
@@ -394,7 +394,7 @@ public class NewModelHearingAggregateTest {
 
 
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
-        hearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         VerdictUpsert verdictUpsert = (VerdictUpsert) hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
@@ -464,7 +464,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
-        hearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
@@ -499,7 +499,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
-        hearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         ConvictionDateRemoved convictionDateRemoved = (ConvictionDateRemoved) hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
@@ -533,7 +533,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
-        hearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
@@ -568,7 +568,7 @@ public class NewModelHearingAggregateTest {
                 .build();
 
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
-        hearingAggregate.apply(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         List<Object> objects = hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
