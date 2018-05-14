@@ -189,7 +189,6 @@
         "lastName",
         "dateOfBirth",
         "address",
-        "nationality",
         "gender",
         "homeTelephone",
         "workTelephone",
