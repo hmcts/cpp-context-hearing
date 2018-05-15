@@ -25,7 +25,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
@@ -77,7 +77,7 @@ public class NewModelHearingAggregate implements Aggregate {
     @Override
     public Object apply(final Object event) {
         return match(event).with(
-                when(Initiated.class).apply(initiated -> {
+                when(HearingInitiated.class).apply(initiated -> {
                     this.cases = initiated.getCases();
                     this.hearing = initiated.getHearing();
                 }),
@@ -216,7 +216,7 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
     public Stream<Object> initiate(InitiateHearingCommand initiateHearingCommand) {
-        return apply(Stream.of(new Initiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
+        return apply(Stream.of(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
     }
 
     public Stream<Object> initiateHearingOffencePlea(final InitiateHearingOffencePleaCommand command) {

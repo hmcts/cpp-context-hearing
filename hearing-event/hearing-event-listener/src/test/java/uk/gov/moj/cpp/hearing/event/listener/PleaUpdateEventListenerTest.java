@@ -32,7 +32,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NewOffencePleaUpdateEventListenerTest {
+public class PleaUpdateEventListenerTest {
     
     private enum PleaValueType {GUILTY, NOT_GUILTY}
 
@@ -40,7 +40,7 @@ public class NewOffencePleaUpdateEventListenerTest {
     private OffenceRepository offenceRepository;
 
     @InjectMocks
-    private NewModelPleaUpdateEventListener newModelPleaUpdateEventListener;
+    private PleaUpdateEventListener pleaUpdateEventListener;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -83,10 +83,10 @@ public class NewOffencePleaUpdateEventListenerTest {
 
         when(this.offenceRepository.findBySnapshotKey(offence.getId())).thenReturn(offence);
 
-        newModelPleaUpdateEventListener.offencePleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
+        pleaUpdateEventListener.offencePleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
                 objectToJsonObjectConverter.convert(offencePleaUpdated)));
 
-        verify(this.offenceRepository).saveAndFlush(offence);
+        verify(this.offenceRepository).save(offence);
 
         assertThat(offence.getId().getId(), is(offencePleaUpdated.getOffenceId()));
         assertThat(offence.getId().getHearingId(), is(offencePleaUpdated.getHearingId()));
@@ -123,10 +123,10 @@ public class NewOffencePleaUpdateEventListenerTest {
 
         when(this.offenceRepository.findBySnapshotKey(offence.getId())).thenReturn(offence);
 
-        newModelPleaUpdateEventListener.offencePleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
+        pleaUpdateEventListener.offencePleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
                 objectToJsonObjectConverter.convert(offencePleaUpdated)));
 
-        verify(this.offenceRepository).saveAndFlush(offence);
+        verify(this.offenceRepository).save(offence);
 
         assertThat(offence.getId().getId(), is(offencePleaUpdated.getOffenceId()));
         assertThat(offence.getId().getHearingId(), is(offencePleaUpdated.getHearingId()));

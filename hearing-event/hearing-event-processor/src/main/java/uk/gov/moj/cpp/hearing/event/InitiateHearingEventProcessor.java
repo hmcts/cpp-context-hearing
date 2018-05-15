@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -37,8 +39,11 @@ public class InitiateHearingEventProcessor {
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventProcessor.class);
+
     @Handles("hearing.initiated")
     public void hearingInitiated(final JsonEnvelope event) {
+        LOGGER.debug("hearing.initiated event received {}", event.payloadAsJsonObject());
 
         JsonString hearingId = event.payloadAsJsonObject().getJsonObject("hearing").getJsonString("id");
 
@@ -82,6 +87,7 @@ public class InitiateHearingEventProcessor {
 
     @Handles("hearing.initiate-hearing-offence-enriched")
     public void hearingInitiateOffencePlea(final JsonEnvelope event) {
+        LOGGER.debug("hearing.initiate-hearing-offence-enriched event received {}", event.payloadAsJsonObject());
         this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.initiate-hearing-offence-plea").apply(event.payloadAsJsonObject()));
     }
 }

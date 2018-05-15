@@ -22,15 +22,16 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 @ServiceComponent(EVENT_PROCESSOR)
 public class WitnessAddedEventProcessor {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(WitnessAddedEventProcessor.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(WitnessAddedEventProcessor.class.getName());
+
     private static final String ID = "id";
     private static final String FIELD_HEARING_ID = "hearingId";
-    public static final String FIELD_CLASSIFICATION = "classification";
-    public static final String FIELD_TYPE = "type";
-    public static final String FIELD_TITLE = "title";
-    public static final String FIELD_FIRST_NAME = "firstName";
-    public static final String FIELD_LAST_NAME = "lastName";
+    private static final String FIELD_CLASSIFICATION = "classification";
+    private static final String FIELD_TYPE = "type";
+    private static final String FIELD_TITLE = "title";
+    private static final String FIELD_FIRST_NAME = "firstName";
+    private static final String FIELD_LAST_NAME = "lastName";
+
     @Inject
     private Enveloper enveloper;
 
@@ -39,39 +40,36 @@ public class WitnessAddedEventProcessor {
 
     @Handles("hearing.events.witness-added")
     public void publishWitnessAddedPublicEvent(final JsonEnvelope event) {
-
+        LOGGER.debug("hearing.events.witness-added event received {}", event.payloadAsJsonObject());
 
         final JsonObject payload = event.payloadAsJsonObject();
         final UUID witnessId = fromString(payload.getString(ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String type = payload.getString(FIELD_TYPE);
         final String classification = payload.getString(FIELD_CLASSIFICATION);
-        final String title = payload.containsKey(FIELD_TITLE)?payload.getString(FIELD_TITLE):"";
+        final String title = payload.containsKey(FIELD_TITLE) ? payload.getString(FIELD_TITLE) : "";
         final String firstName = payload.getString(FIELD_FIRST_NAME);
         final String lastName = payload.getString(FIELD_LAST_NAME);
         final JsonArray defendantIds = payload.getJsonArray("defendantIds");
 
         defendantIds.forEach(
-                defendantId -> 
-                    this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.defence-witness-added").apply(createObjectBuilder()
-                            .add("defendantId", ((JsonString)defendantId).getString())
-                            .add("witnessId", witnessId.toString())
-                            .add(FIELD_HEARING_ID, hearingId.toString())
-                            .add(FIELD_TYPE, type)
-                            .add(FIELD_CLASSIFICATION, classification)
-                            .add(FIELD_TITLE,title)
-                            .add(FIELD_FIRST_NAME,firstName)
-                            .add(FIELD_LAST_NAME,lastName)
-                                                        .build()))
-                
+                defendantId ->
+                        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.defence-witness-added").apply(createObjectBuilder()
+                                .add("defendantId", ((JsonString) defendantId).getString())
+                                .add("witnessId", witnessId.toString())
+                                .add(FIELD_HEARING_ID, hearingId.toString())
+                                .add(FIELD_TYPE, type)
+                                .add(FIELD_CLASSIFICATION, classification)
+                                .add(FIELD_TITLE, title)
+                                .add(FIELD_FIRST_NAME, firstName)
+                                .add(FIELD_LAST_NAME, lastName)
+                                .build()))
+
         );
 
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.events.witness-added")
-                .apply(createObjectBuilder()
-                        .add("witnessId", witnessId.toString())
-                        .build()));
-        LOGGER.info("public.hearing.events.witness-added raised");
+                .apply(createObjectBuilder().add("witnessId", witnessId.toString()).build()));
     }
 
 }

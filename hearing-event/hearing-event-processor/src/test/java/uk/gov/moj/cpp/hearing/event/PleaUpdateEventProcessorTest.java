@@ -36,7 +36,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 
 
-public class NewModelPleaUpdateEventProcessorTest {
+public class PleaUpdateEventProcessorTest {
 
     @Mock
     private Sender sender;
@@ -63,7 +63,7 @@ public class NewModelPleaUpdateEventProcessorTest {
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
     @InjectMocks
-    private NewModelPleaUpdateEventProcessor newModelPleaUpdateEventProcessor;
+    private PleaUpdateEventProcessor pleaUpdateEventProcessor;
 
 
     @Before
@@ -87,7 +87,7 @@ public class NewModelPleaUpdateEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
                 objectToJsonObjectConverter.convert(pleaUpsert));
 
-        this.newModelPleaUpdateEventProcessor.offencePleaUpdate(event);
+        this.pleaUpdateEventProcessor.offencePleaUpdate(event);
 
         verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
 

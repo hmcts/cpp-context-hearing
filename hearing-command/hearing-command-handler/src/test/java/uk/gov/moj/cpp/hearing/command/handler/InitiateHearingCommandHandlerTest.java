@@ -27,12 +27,11 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingDefenceWitnessEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.domain.event.Initiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -56,11 +55,11 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NewModelInitiateHearingCommandHandlerTest {
+public class InitiateHearingCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            Initiated.class,
+            HearingInitiated.class,
             InitiateHearingOffenceEnriched.class,
             InitiateHearingOffencePlead.class,
             InitiateHearingDefenceWitnessEnriched.class,
@@ -81,7 +80,7 @@ public class NewModelInitiateHearingCommandHandlerTest {
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
     @InjectMocks
-    private NewModelInitiateHearingCommandHandler hearingCommandHandler;
+    private InitiateHearingCommandHandler hearingCommandHandler;
 
     @Before
     public void setup() {

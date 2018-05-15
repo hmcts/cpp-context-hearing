@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -35,15 +37,18 @@ public class MagistratesCourtInitiateHearingEventProcessor {
     @Inject
     private ObjectToJsonValueConverter objectToJsonValueConverter;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MagistratesCourtInitiateHearingEventProcessor.class);
+
     @Handles("public.progression.events.sending-sheet-completed")
     public void recordSendSheetCompleted(final JsonEnvelope event) {
-
+        LOGGER.debug("public.progression.events.sending-sheet-completed event received {}", event.payloadAsJsonObject());
         sender.send(enveloper.withMetadataFrom(event, "hearing.record-sending-sheet-complete")
                 .apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.sending-sheet-recorded")
     public void processSendingSheetRecordedRecordMags(final JsonEnvelope event) {
+        LOGGER.debug("hearing.sending-sheet-recorded event received {}", event.payloadAsJsonObject());
 
         final SendingSheetCompletedRecorded sendingSheetCompletedRecorded = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), SendingSheetCompletedRecorded.class);
@@ -54,6 +59,7 @@ public class MagistratesCourtInitiateHearingEventProcessor {
 
     @Handles("hearing.mags-court-hearing-recorded")
     public void processMagistratesCourtHearing(final JsonEnvelope event) {
+        LOGGER.debug("hearing.mags-court-hearing-recorded event received {}", event.payloadAsJsonObject());
 
         final MagsCourtHearingRecorded magsCourtHearingRecorded = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), MagsCourtHearingRecorded.class);

@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -19,6 +21,9 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 @ServiceComponent(COMMAND_HANDLER)
 public class AddDefenceCounselCommandHandler extends AbstractCommandHandler {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(AddDefenceCounselCommandHandler.class.getName());
+
     @Inject
     public AddDefenceCounselCommandHandler(EventSource eventSource, Enveloper enveloper, AggregateService aggregateService, JsonObjectToObjectConverter jsonObjectToObjectConverter) {
         super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
@@ -26,6 +31,7 @@ public class AddDefenceCounselCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.add-defence-counsel")
     public void addDefenceCounsel(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.add-defence-counsel event received {}", envelope.payloadAsJsonObject());
 
         final JsonObject payload = envelope.payloadAsJsonObject();
         AddDefenceCounselCommand addDefenceCounselCommand = jsonObjectToObjectConverter.convert(payload, AddDefenceCounselCommand.class);

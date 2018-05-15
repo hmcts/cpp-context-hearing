@@ -16,11 +16,8 @@ import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithPauseAndResumeEvents;
 
 public class HearingEventDefinitionsIT extends AbstractIT {
-
-
+    
     private final UUID userId = randomUUID();
-
-    //TODO - GPE-3032 - none of these tests are validating the enrichment of hearing data in event definitions.  Follow hearingId.
 
     @Test
     public void shouldRecordAndReturnOnlyNonSequencedHearingEventDefinitions() {

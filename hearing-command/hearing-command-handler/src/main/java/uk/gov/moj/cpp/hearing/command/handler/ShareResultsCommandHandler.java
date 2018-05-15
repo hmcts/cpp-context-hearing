@@ -6,6 +6,8 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -21,20 +23,25 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 
 @ServiceComponent(COMMAND_HANDLER)
-public class NewModelShareResultsCommandHandler extends AbstractCommandHandler {
+public class ShareResultsCommandHandler extends AbstractCommandHandler {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(ShareResultsCommandHandler.class.getName());
 
     private final Clock clock;
 
     @Inject
-    public NewModelShareResultsCommandHandler(final EventSource eventSource, final Enveloper enveloper,
-            final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter,
-            final Clock clock) {
+    public ShareResultsCommandHandler(final EventSource eventSource, final Enveloper enveloper,
+                                      final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter,
+                                      final Clock clock) {
         super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
         this.clock = clock;
     }
 
     @Handles("hearing.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.save-draft-result event received {}", envelope.payloadAsJsonObject());
+
         final SaveDraftResultCommand command = convertToObject(envelope, SaveDraftResultCommand.class);
         final Stream<Object> events = Stream.of(DraftResultSaved.builder()
                 .withHearingId(command.getHearingId())
@@ -48,6 +55,8 @@ public class NewModelShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.share-results")
     public void shareResult(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.command.share-results event received {}", envelope.payloadAsJsonObject());
+
         final ShareResultsCommand command = convertToObject(envelope, ShareResultsCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope,
                 aggregate -> aggregate.shareResults(command, clock.now()));

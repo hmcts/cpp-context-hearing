@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -36,9 +38,11 @@ public class LogEventHearingEventProcessor {
     @Inject
     private ObjectToJsonValueConverter objectToJsonValueConverter;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogEventHearingEventProcessor.class);
 
     @Handles("hearing.hearing-event-logged")
     public void publishHearingEventLoggedPublicEvent(final JsonEnvelope event) {
+        LOGGER.debug("hearing.hearing-event-logged event received {}", event.payloadAsJsonObject());
 
         HearingEventLogged hearingEventLogged = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventLogged.class);
@@ -79,6 +83,7 @@ public class LogEventHearingEventProcessor {
 
     @Handles("hearing.hearing-event-ignored")
     public void publishHearingEventIgnoredPublicEvent(final JsonEnvelope event) {
+        LOGGER.debug("hearing.hearing-event-ignored event received {}", event.payloadAsJsonObject());
 
         HearingEventIgnored hearingEventIgnored = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventIgnored.class);

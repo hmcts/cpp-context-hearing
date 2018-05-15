@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -19,13 +21,17 @@ public class CaseDefendantDetailsChangeEventProcessor {
     @Inject
     private Sender sender;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CaseDefendantDetailsChangeEventProcessor.class);
+
     @Handles("public.progression.case-defendant-changed")
     public void processPublicCaseDefendantChanged(final JsonEnvelope event) {
+        LOGGER.debug("public.progression.case-defendant-changed event received {}", event.payloadAsJsonObject());
         sender.send(enveloper.withMetadataFrom(event, "hearing.update-case-defendant-details").apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.update-case-defendant-details-enriched-with-hearing-ids")
     public void enrichDefendantDetails(final JsonEnvelope event) {
+        LOGGER.debug("hearing.update-case-defendant-details-enriched-with-hearing-ids event received {}", event.payloadAsJsonObject());
         sender.send(enveloper.withMetadataFrom(event, "hearing.update-case-defendant-details-against-hearing-aggregate").apply(event.payloadAsJsonObject()));
     }
 }

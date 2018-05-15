@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -18,20 +20,25 @@ import javax.inject.Inject;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 @ServiceComponent(COMMAND_HANDLER)
-public class NewModelUpdateVerdictCommandHandler extends AbstractCommandHandler {
+public class UpdateVerdictCommandHandler extends AbstractCommandHandler {
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(GenerateNowsCommandHandler.class.getName());
 
     @Inject
-    public NewModelUpdateVerdictCommandHandler(EventSource eventSource, Enveloper enveloper, AggregateService aggregateService, JsonObjectToObjectConverter jsonObjectToObjectConverter) {
+    public UpdateVerdictCommandHandler(EventSource eventSource, Enveloper enveloper, AggregateService aggregateService,
+                                       JsonObjectToObjectConverter jsonObjectToObjectConverter) {
         super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
     }
 
     @Handles("hearing.command.update-verdict")
     public void updateVerdict(final JsonEnvelope command) throws EventStreamException {
+        LOGGER.debug("hearing.command.update-verdict event received {}", command.payloadAsJsonObject());
 
         final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = this.jsonObjectToObjectConverter.convert(command.payloadAsJsonObject(), HearingUpdateVerdictCommand.class);
 
-        for (Defendant defendant: hearingUpdateVerdictCommand.getDefendants()){
-            for (Offence offence: defendant.getOffences()){
+        for (Defendant defendant : hearingUpdateVerdictCommand.getDefendants()) {
+            for (Offence offence : defendant.getOffences()) {
 
                 aggregate(NewModelHearingAggregate.class, hearingUpdateVerdictCommand.getHearingId(), command,
                         hearingAggregate ->
@@ -41,7 +48,7 @@ public class NewModelUpdateVerdictCommandHandler extends AbstractCommandHandler 
                                         offence.getId(),
                                         offence.getVerdict()
                                 )
-                        );
+                );
             }
         }
     }

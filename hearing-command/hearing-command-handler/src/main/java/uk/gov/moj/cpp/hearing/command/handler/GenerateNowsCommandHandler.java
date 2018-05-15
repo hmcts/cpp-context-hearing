@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -21,6 +23,9 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 @ServiceComponent(COMMAND_HANDLER)
 public class GenerateNowsCommandHandler extends AbstractCommandHandler {
 
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(GenerateNowsCommandHandler.class.getName());
+
     @Inject
     public GenerateNowsCommandHandler(final EventSource eventSource, final Enveloper enveloper,
                                       final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
@@ -29,9 +34,11 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
 
 
     @Handles("hearing.command.generate-nows")
-    public void genarateNows(final JsonEnvelope envelop) throws EventStreamException {
-        final JsonObject payload = envelop.payloadAsJsonObject();
+    public void genarateNows(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.command.generate-nows event received {}", envelope.payloadAsJsonObject());
+
+        final JsonObject payload = envelope.payloadAsJsonObject();
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(payload, NowsRequested.class);
-        aggregate(NewModelHearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelop, a -> a.generateNows(nowsRequested));
+        aggregate(NewModelHearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelope, a -> a.generateNows(nowsRequested));
     }
 }
