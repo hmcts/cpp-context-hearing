@@ -37,6 +37,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_VERDICTS_BY_CASE_ID = "hearing.get.case.verdicts";
     private static final String ACTION_NAME_GET_OFFENCES_BY_HEARING_ID = "hearing.get.offences";
     private static final String ACTION_NAME_GET_NOWS = "hearing.get.nows";
+    private static final String HEARING_QUERY_SEARCH_BY_MATERIAL_ID = "hearing.query.search-by-material-id";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -204,6 +205,15 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_NOWS, "Listing Officers", "Court Clerks","System Users");
     }
 
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchByMaterialId() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_MATERIAL_ID, "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToSearchByMaterialId() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_MATERIAL_ID, "System Users");
+    }
 
     @Override
     protected Map<Class, Object> getProviderMocks() {

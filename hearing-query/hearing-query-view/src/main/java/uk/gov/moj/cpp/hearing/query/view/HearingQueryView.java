@@ -17,11 +17,15 @@ import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})
@@ -41,6 +45,8 @@ public class HearingQueryView {
 
     @Inject
     private HearingOutcomesConverter hearingOutcomesConverter;
+
+    static final String FIELD_QUERY = "q";
 
     @Handles("hearing.get.hearings-by-date.v2")
     public JsonEnvelope findHearingsByDateV2(final JsonEnvelope envelope) {
@@ -74,5 +80,11 @@ public class HearingQueryView {
         final NowsResponse nowsResponse = hearingService.getNows(hearingId.get());
         return enveloper.withMetadataFrom(envelope, "hearing.get.nows")
                 .apply(nowsResponse);
+    }
+
+    @Handles("hearing.query.search-by-material-id")
+    public JsonEnvelope searchByMaterialId(final JsonEnvelope envelope) {
+        return enveloper.withMetadataFrom(envelope, "hearing.query.search-by-material-id")
+                .apply(hearingService.getNowsRepository(envelope.payloadAsJsonObject().getString(FIELD_QUERY)));
     }
 }

@@ -149,3 +149,12 @@ rule "Query - API - hearing.get.nows"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.query.search-by-material-id"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.query.search-by-material-id");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"System Users"));
+  then
+    $outcome.setSuccess(true);
+end

@@ -54,4 +54,9 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.query.search-by-material-id")
+    public JsonEnvelope searchByMaterialId(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
 }

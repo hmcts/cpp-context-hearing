@@ -97,5 +97,19 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.nows[0].nowResult[0].sharedResultId", is(sharedResultId)),
                                 withJsonPath("$.nows[0].nowResult[0].sequence", is(1))
                         )));
+
+        final String searchAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.query.search-by-material-id"), materialId);
+        final String searchUrl = getBaseUri() + "/" + searchAPIEndPoint;
+
+        final String searchResponseType = "application/vnd.hearing.query.search-by-material-id+json";
+
+        poll(requestParams(searchUrl, searchResponseType).withHeader(CPP_UID_HEADER_AS_ADMIN.getName(), CPP_UID_HEADER_AS_ADMIN.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.allowedUserGroups[0]", is("courtAdmin")),
+                                withJsonPath("$.allowedUserGroups[1]", is("defence"))
+                        )));
     }
 }
