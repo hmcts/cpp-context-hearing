@@ -15,13 +15,13 @@ import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
+import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import javax.json.JsonObject;
-import java.time.ZoneId;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -34,10 +34,10 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseDefendantChangeEventListenerTest {
+public class CaseDefendantDetailsChangedEventListenerTest {
 
     @InjectMocks
-    private CaseDefendantChangeEventListener caseDefendantChangeEventListener;
+    private CaseDefendantDetailsChangedEventListener caseDefendantDetailsChangedEventListener;
 
     @Mock
     private DefendantRepository defendantRepository;
@@ -77,7 +77,7 @@ public class CaseDefendantChangeEventListenerTest {
 
         when(defendantRepository.findBy(new HearingSnapshotKey(defendantId, hearingId))).thenReturn(defendant);
 
-        caseDefendantChangeEventListener.defendantDetailsUpdated(envelope);
+        caseDefendantDetailsChangedEventListener.defendantDetailsUpdated(envelope);
 
         ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
 
@@ -96,26 +96,22 @@ public class CaseDefendantChangeEventListenerTest {
                 .withDefendant(
                         uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
                                 .withId(defendantId)
-                                .withPersonId(randomUUID())
+                                .withPerson(Person.builder().withId(randomUUID())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next())
                                 .withNationality(STRING.next())
                                 .withGender(STRING.next())
                                 .withAddress(generateAddress())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
                                 .withBailStatus(STRING.next())
-                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                                 .withDefenceOrganisation(STRING.next())
-                                .withInterpreter(generateInterpreter()))
+                                .withInterpreter(Interpreter.builder(STRING.next())))
                 .build();
 
         JsonObject jsonObject = objectToJsonObjectConverter.convert(document);
 
         return new DefaultJsonEnvelope(null, jsonObject);
-    }
-
-    private Interpreter.Builder generateInterpreter() {
-        return Interpreter.interpreter().withLanguage(STRING.next()).withNeeded(false);
     }
 
     private Address.Builder generateAddress() {

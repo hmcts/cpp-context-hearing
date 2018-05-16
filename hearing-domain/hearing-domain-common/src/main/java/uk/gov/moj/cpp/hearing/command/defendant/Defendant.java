@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -14,52 +13,28 @@ public class Defendant implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Address address;
+    private final UUID id;
+
+    private final Person person;
 
     private final String bailStatus;
 
-    private final ZonedDateTime custodyTimeLimitDate;
-
-    private final LocalDate dateOfBirth;
+    private final LocalDate custodyTimeLimitDate;
 
     private final String defenceOrganisation;
 
-    private final String firstName;
-
-    private final String gender;
-
-    private final UUID id;
-
     private final Interpreter interpreter;
-
-    private final String lastName;
-
-    private final String nationality;
-
-    private final UUID personId;
 
     @JsonCreator
     public Defendant(@JsonProperty("id") final UUID id,
-                     @JsonProperty("personId") final UUID personId,
-                     @JsonProperty("firstName") final String firstName,
-                     @JsonProperty("lastName") final String lastName,
-                     @JsonProperty("nationality") final String nationality,
-                     @JsonProperty("gender") final String gender,
-                     @JsonProperty("address") final Address address,
-                     @JsonProperty("dateOfBirth") final LocalDate dateOfBirth,
+                     @JsonProperty("person") final Person person,
                      @JsonProperty("bailStatus") final String bailStatus,
-                     @JsonProperty("custodyTimeLimitDate") final ZonedDateTime custodyTimeLimitDate,
+                     @JsonProperty("custodyTimeLimitDate") final LocalDate custodyTimeLimitDate,
                      @JsonProperty("defenceOrganisation") final String defenceOrganisation,
                      @JsonProperty("interpreter") final Interpreter interpreter) {
 
         this.id = id;
-        this.personId = personId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.nationality = nationality;
-        this.gender = gender;
-        this.address = address;
-        this.dateOfBirth = dateOfBirth;
+        this.person = person;
         this.bailStatus = bailStatus;
         this.custodyTimeLimitDate = custodyTimeLimitDate;
         this.defenceOrganisation = defenceOrganisation;
@@ -70,32 +45,26 @@ public class Defendant implements Serializable {
         return new Builder();
     }
 
-    public Address getAddress() {
-        return address;
+    public static Builder builder(Defendant defendant) {
+        return Defendant.builder()
+                .withId(defendant.getId())
+                .withPerson(Person.builder(defendant.getPerson()))
+                .withBailStatus(defendant.getBailStatus())
+                .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
+                .withDefenceOrganisation(defendant.getDefenceOrganisation())
+                .withInterpreter(Interpreter.builder(defendant.getInterpreter().getLanguage()));
     }
 
     public String getBailStatus() {
         return bailStatus;
     }
 
-    public ZonedDateTime getCustodyTimeLimitDate() {
+    public LocalDate getCustodyTimeLimitDate() {
         return custodyTimeLimitDate;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
     }
 
     public String getDefenceOrganisation() {
         return defenceOrganisation;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getGender() {
-        return gender;
     }
 
     public UUID getId() {
@@ -106,39 +75,19 @@ public class Defendant implements Serializable {
         return interpreter;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getNationality() {
-        return nationality;
-    }
-
-    public UUID getPersonId() {
-        return personId;
+    public Person getPerson() {
+        return person;
     }
 
     public static class Builder {
 
         private UUID id;
 
-        private UUID personId;
-
-        private String firstName;
-
-        private String lastName;
-
-        private String nationality;
-
-        private String gender;
-
-        private Address.Builder address;
-
-        private LocalDate dateOfBirth;
+        private Person.Builder person;
 
         private String bailStatus;
 
-        private ZonedDateTime custodyTimeLimitDate;
+        private LocalDate custodyTimeLimitDate;
 
         private String defenceOrganisation;
 
@@ -147,23 +96,13 @@ public class Defendant implements Serializable {
         private Builder() {
         }
 
-        public Builder withAddress(final Address.Builder address) {
-            this.address = address;
-            return this;
-        }
-
         public Builder withBailStatus(final String bailStatus) {
             this.bailStatus = bailStatus;
             return this;
         }
 
-        public Builder withCustodyTimeLimitDate(final ZonedDateTime custodyTimeLimitDate) {
+        public Builder withCustodyTimeLimitDate(final LocalDate custodyTimeLimitDate) {
             this.custodyTimeLimitDate = custodyTimeLimitDate;
-            return this;
-        }
-
-        public Builder withDateOfBirth(final LocalDate dateOfBirth) {
-            this.dateOfBirth = dateOfBirth;
             return this;
         }
 
@@ -172,18 +111,13 @@ public class Defendant implements Serializable {
             return this;
         }
 
-        public Builder withFirstName(final String firstName) {
-            this.firstName = firstName;
-            return this;
-        }
-
-        public Builder withGender(final String gender) {
-            this.gender = gender;
-            return this;
-        }
-
         public Builder withId(final UUID id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder withPerson(final Person.Builder person) {
+            this.person = person;
             return this;
         }
 
@@ -192,30 +126,9 @@ public class Defendant implements Serializable {
             return this;
         }
 
-        public Builder withLastName(final String lastName) {
-            this.lastName = lastName;
-            return this;
-        }
-
-        public Builder withNationality(final String nationality) {
-            this.nationality = nationality;
-            return this;
-        }
-
-        public Builder withPersonId(final UUID personId) {
-            this.personId = personId;
-            return this;
-        }
-
         public Defendant build() {
             return new Defendant(id,
-                    personId,
-                    firstName,
-                    lastName,
-                    nationality,
-                    gender,
-                    ofNullable(address).map(Address.Builder::build).orElse(null),
-                    dateOfBirth,
+                    ofNullable(person).map(Person.Builder::build).orElse(null),
                     bailStatus,
                     custodyTimeLimitDate,
                     defenceOrganisation,

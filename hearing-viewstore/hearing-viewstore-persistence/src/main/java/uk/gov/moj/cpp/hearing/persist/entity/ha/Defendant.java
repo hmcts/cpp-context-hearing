@@ -208,6 +208,26 @@ public class Defendant {
         return workTelephone;
     }
 
+    public void setWorkTelephone(String workTelephone) {
+        this.workTelephone = workTelephone;
+    }
+
+    public void setHomeTelephone(String homeTelephone) {
+        this.homeTelephone = homeTelephone;
+    }
+
+    public void setMobileTelephone(String mobileTelephone) {
+        this.mobileTelephone = mobileTelephone;
+    }
+
+    public void setFax(String fax) {
+        this.fax = fax;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getHomeTelephone() {
         return homeTelephone;
     }

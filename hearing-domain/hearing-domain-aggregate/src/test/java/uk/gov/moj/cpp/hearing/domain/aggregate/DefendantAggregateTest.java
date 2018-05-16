@@ -8,11 +8,11 @@ import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
+import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
 
-import java.time.ZoneId;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -55,26 +55,21 @@ public class DefendantAggregateTest {
                 .withAddress4(STRING.next())
                 .withPostcode(STRING.next());
 
-        final Interpreter.Builder interpreter = Interpreter.interpreter()
-                .withLanguage(STRING.next())
-                .withNeeded(false);
-
         final CaseDefendantDetailsCommand command = CaseDefendantDetailsCommand.builder()
                 .withCaseId(randomUUID())
-                .withCaseUrn(STRING.next())
                 .withDefendant(Defendant.builder()
                         .withId(randomUUID())
-                        .withPersonId(randomUUID())
+                        .withPerson(Person.builder().withId(randomUUID())
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next())
                         .withNationality(STRING.next())
                         .withGender(STRING.next())
                         .withAddress(address)
-                        .withDateOfBirth(PAST_LOCAL_DATE.next())
+                        .withDateOfBirth(PAST_LOCAL_DATE.next()))
                         .withBailStatus(STRING.next())
-                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                         .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(interpreter))
+                        .withInterpreter(Interpreter.builder(STRING.next())))
                 .build();
 
         RegisterHearingAgainstDefendant registerDefendantWithHearingCommand = RegisterHearingAgainstDefendant.builder()

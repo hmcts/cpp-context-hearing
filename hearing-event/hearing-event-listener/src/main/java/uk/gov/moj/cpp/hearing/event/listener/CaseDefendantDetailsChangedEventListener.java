@@ -15,11 +15,12 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import java.util.function.Predicate;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @ServiceComponent(EVENT_LISTENER)
-public class CaseDefendantChangeEventListener {
+public class CaseDefendantDetailsChangedEventListener {
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -37,37 +38,57 @@ public class CaseDefendantChangeEventListener {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantIn = defendantDetailsToBeUpdated.getDefendant();
 
-        final uk.gov.moj.cpp.hearing.command.defendant.Address addressIn = defendantIn.getAddress();
-
-        defendant.setFirstName(defendantIn.getFirstName());
-
-        defendant.setLastName(defendantIn.getLastName());
-
-        defendant.setDateOfBirth(defendantIn.getDateOfBirth());
-
-        defendant.setGender(defendantIn.getGender());
-
-        defendant.setNationality(defendantIn.getNationality());
-
         defendant.setDefenceSolicitorFirm(defendantIn.getDefenceOrganisation());
 
-        final Address address = ofNullable(addressIn).map(a -> Address.builder()
-                .withAddress1(addressIn.getAddress1())
-                .withAddress2(addressIn.getAddress2())
-                .withAddress3(addressIn.getAddress3())
-                .withAddress4(addressIn.getAddress4())
-                .withPostCode(addressIn.getPostCode())
-                .build())
-                .orElse(null);
+        final uk.gov.moj.cpp.hearing.command.defendant.Person person = defendantIn.getPerson();
 
-        defendant.setAddress(address);
+        if(nonNull(person)) {
+
+            defendant.setFirstName(person.getFirstName());
+
+            defendant.setLastName(person.getLastName());
+
+            defendant.setDateOfBirth(person.getDateOfBirth());
+
+            defendant.setNationality(person.getNationality());
+
+            defendant.setGender(person.getGender());
+
+            defendant.setWorkTelephone(person.getWorkTelephone());
+
+            defendant.setHomeTelephone(person.getHomeTelephone());
+
+            defendant.setMobileTelephone(person.getMobile());
+
+            defendant.setFax(person.getFax());
+
+            defendant.setEmail(person.getEmail());
+
+            final uk.gov.moj.cpp.hearing.command.defendant.Address addressIn = person.getAddress();
+
+            final Address address = ofNullable(addressIn).map(a -> Address.builder()
+                    .withAddress1(addressIn.getAddress1())
+                    .withAddress2(addressIn.getAddress2())
+                    .withAddress3(addressIn.getAddress3())
+                    .withAddress4(addressIn.getAddress4())
+                    .withPostCode(addressIn.getPostCode())
+                    .build())
+                    .orElse(null);
+
+            defendant.setAddress(address);
+        }
 
         defendant.getDefendantCases().stream().filter(dc -> getDefendantCasePredicate(defendantDetailsToBeUpdated).test(dc)).forEach(dc -> {
             dc.setBailStatus(defendantDetailsToBeUpdated.getDefendant().getBailStatus());
-            dc.setCustodyTimeLimitDate(defendantDetailsToBeUpdated.getDefendant().getCustodyTimeLimitDate().toLocalDate());
+            dc.setCustodyTimeLimitDate(defendantDetailsToBeUpdated.getDefendant().getCustodyTimeLimitDate());
         });
 
-        defendant.setInterpreterLanguage(defendantDetailsToBeUpdated.getDefendant().getInterpreter().getLanguage());
+        final uk.gov.moj.cpp.hearing.command.defendant.Interpreter interpreter = defendantIn.getInterpreter();
+
+        if(nonNull(interpreter)) {
+
+            defendant.setInterpreterLanguage(interpreter.getLanguage());
+        }
 
         defendantRepository.saveAndFlush(defendant);
     }

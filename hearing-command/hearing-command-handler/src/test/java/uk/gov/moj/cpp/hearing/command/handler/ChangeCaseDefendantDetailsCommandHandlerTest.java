@@ -21,12 +21,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
+import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -35,7 +35,6 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
@@ -87,21 +86,20 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
 
         CaseDefendantDetails caseDefendantChanged = CaseDefendantDetails.builder()
                 .withCaseId(randomUUID())
-                .withCaseUrn(STRING.next())
                 .addDefendant(
                         Defendant.builder()
                                 .withId(randomUUID())
-                                .withPersonId(randomUUID())
+                                .withPerson(Person.builder().withId(randomUUID())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next())
                                 .withNationality(STRING.next())
                                 .withGender(STRING.next())
                                 .withAddress(generateAddress())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
                                 .withBailStatus(STRING.next())
-                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                                 .withDefenceOrganisation(STRING.next())
-                                .withInterpreter(generateInterpreter())).build();
+                                .withInterpreter(Interpreter.builder(STRING.next()))).build();
 
         setupMockedEventStream(caseDefendantChanged.getDefendants().get(0).getId(), this.eventStream, new DefendantAggregate());
 
@@ -119,25 +117,24 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testUpdateCaseDefendantDetails() {
+    public void testUpdateCaseDefendantDetails() throws EventStreamException {
 
         CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearingsEvent = CaseDefendantDetailsWithHearings.builder()
                 .withCaseId(randomUUID())
-                .withCaseUrn(STRING.next())
-                .withDefendants(
+                .withDefendant(
                         Defendant.builder()
                                 .withId(randomUUID())
-                                .withPersonId(randomUUID())
+                                .withPerson(Person.builder().withId(randomUUID())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next())
                                 .withNationality(STRING.next())
                                 .withGender(STRING.next())
                                 .withAddress(generateAddress())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
                                 .withBailStatus(STRING.next())
-                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                                 .withDefenceOrganisation(STRING.next())
-                                .withInterpreter(generateInterpreter()))
+                                .withInterpreter(Interpreter.builder(STRING.next())))
                 .withHearingIds(Collections.singletonList(randomUUID()))
                 .build();
 
@@ -145,17 +142,12 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-details-against-hearing-aggregate"), objectToJsonObjectConverter.convert(caseDefendantDetailsWithHearingsEvent));
 
-        try {
 
-            changeDefendantDetailsCommandHandler.updateCaseDefendantDetails(envelope);
+        changeDefendantDetailsCommandHandler.updateCaseDefendantDetails(envelope);
 
-            assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                     jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-details-updated"),
                             payloadIsJson(allOf(withJsonPath("$.caseId", is(caseDefendantDetailsWithHearingsEvent.getCaseId().toString())))))));
-
-        } catch (EventStreamException e) {
-            fail(e.getMessage());
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -163,10 +155,6 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
         Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
-    }
-
-    private Interpreter.Builder generateInterpreter() {
-        return Interpreter.interpreter().withLanguage(STRING.next()).withNeeded(false);
     }
 
     private Address.Builder generateAddress() {

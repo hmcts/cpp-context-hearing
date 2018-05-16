@@ -15,6 +15,10 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.initiate-hearing-offence-enriched.json
                     example: !include json/hearing.initiate-hearing-offence-enriched.json
 
+                application/vnd.hearing.associate-hearing-id-with-offence+json:
+                    schema: !include json/schema/hearing.associate-hearing-id-with-offence.json
+                    example: !include json/hearing.associate-hearing-id-with-offence.json
+
                 application/vnd.hearing.initiate-hearing-offence-plea+json:
                     schema: !include json/schema/hearing.initiate-hearing-offence-plead.json
                     example: !include json/hearing.initiate-hearing-offence-plead.json
@@ -89,3 +93,16 @@ baseUri: message://command/handler/message/hearing
                 application/vnd.hearing.events.defendant-registered+json:
                     schema: !include json/schema/hearing.events.defendant-registered.json
                     example: !include json/hearing.events.defendant-registered.json
+
+# Case Defendant Offences Update
+                application/vnd.hearing.add-case-defendant-offence-enriched-with-hearing-ids+json:
+                    schema: !include json/schema/hearing.add-case-defendant-offence-enriched-with-hearing-ids.json
+                    example: !include json/hearing.add-case-defendant-offence-enriched-with-hearing-ids.json
+
+                application/vnd.hearing.update-case-defendant-offence-enriched-with-hearing-ids+json:
+                    schema: !include json/schema/hearing.update-case-defendant-offence-enriched-with-hearing-ids.json
+                    example: !include json/hearing.update-case-defendant-offence-enriched-with-hearing-ids.json
+
+                application/vnd.hearing.delete-case-defendant-offence-enriched-with-hearing-ids+json:
+                    schema: !include json/schema/hearing.delete-case-defendant-offence-enriched-with-hearing-ids.json
+                    example: !include json/hearing.delete-case-defendant-offence-enriched-with-hearing-ids.json

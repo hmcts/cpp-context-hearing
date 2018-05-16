@@ -23,16 +23,19 @@ import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingComma
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.AssociateHearingIdWithOffence;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingDefenceWitnessEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
@@ -63,7 +66,8 @@ public class InitiateHearingCommandHandlerTest {
             InitiateHearingOffenceEnriched.class,
             InitiateHearingOffencePlead.class,
             InitiateHearingDefenceWitnessEnriched.class,
-            RegisterHearingAgainstDefendant.class
+            RegisterHearingAgainstDefendant.class,
+            AssociateHearingIdWithOffence.class
     );
     @Mock
     private EventStream hearingEventStream;
@@ -202,7 +206,19 @@ public class InitiateHearingCommandHandlerTest {
 
         this.hearingCommandHandler.initiateHearingOffence(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(this.offenceEventStream), streamContaining(
+        List<Object> events = verifyAppendAndGetArgumentFrom(this.offenceEventStream).collect(Collectors.toList());
+
+        assertThat((JsonEnvelope) events.get(0),
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName("hearing.associate-hearing-id-with-offence"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.offenceId", is(offenceId.toString())),
+                                withJsonPath("$.hearingId", is(hearingId.toString()))
+                        ))).thatMatchesSchema()
+        );
+
+        assertThat((JsonEnvelope) events.get(1),
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
                                 .withName("hearing.initiate-hearing-offence-enriched"),
@@ -215,8 +231,8 @@ public class InitiateHearingCommandHandlerTest {
                                 withJsonPath("$.pleaDate", is(pleaDate.toString())),
                                 withJsonPath("$.value", is(value))
                         ))).thatMatchesSchema()
+        );
 
-        ));
     }
 
     @Test

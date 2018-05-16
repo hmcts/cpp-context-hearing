@@ -3,16 +3,15 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.offence.Offence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
@@ -24,8 +23,11 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
@@ -350,37 +352,12 @@ public class NewModelHearingAggregate implements Aggregate {
 
         if (!isPublished()) {
 
-            final Defendant defendant = command.getDefendants();
-
-            final Address address = defendant.getAddress();
-
-            final Interpreter interpreter = defendant.getInterpreter();
-
             return apply(
                     Stream.of(
                             DefendantDetailsUpdated.builder()
                                     .withCaseId(command.getCaseId())
                                     .withHearingId(command.getHearingIds().get(0))
-                                    .withDefendant(Defendant.builder()
-                                            .withId(defendant.getId())
-                                            .withPersonId(defendant.getPersonId())
-                                            .withFirstName(defendant.getFirstName())
-                                            .withLastName(defendant.getLastName())
-                                            .withNationality(defendant.getNationality())
-                                            .withGender(defendant.getGender())
-                                            .withAddress(Address.address()
-                                                    .withAddress1(address.getAddress1())
-                                                    .withAddress2(address.getAddress2())
-                                                    .withAddress3(address.getAddress3())
-                                                    .withAddress4(address.getAddress4())
-                                                    .withPostcode(address.getPostCode()))
-                                            .withDateOfBirth(defendant.getDateOfBirth())
-                                            .withBailStatus(defendant.getBailStatus())
-                                            .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
-                                            .withDefenceOrganisation(defendant.getDefenceOrganisation())
-                                            .withInterpreter(Interpreter.interpreter()
-                                                    .withLanguage(interpreter.getLanguage())
-                                                    .withNeeded(interpreter.getNeeded())))
+                                    .withDefendant(Defendant.builder(command.getDefendant()))
                                     .build()));
         }
 
@@ -389,6 +366,56 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public boolean isPublished() {
         return published;
+    }
+
+    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, Offence offence) {
+
+        if(!published) {
+            return apply(Stream.of(OffenceAdded.builder()
+                    .withId(offence.getId())
+                    .withHearingId(hearingId)
+                    .withDefendantId(defendantId)
+                    .withCaseId(caseId)
+                    .withOffenceCode(offence.getOffenceCode())
+                    .withWording(offence.getWording())
+                    .withStartDate(offence.getStartDate())
+                    .withEndDate(offence.getEndDate())
+                    .withCount(offence.getCount())
+                    .withConvictionDate(offence.getConvictionDate())
+                    .build()));
+        }
+
+        return apply(Stream.empty());
+    }
+
+    public Stream<Object> updateOffence(UUID hearingId, Offence offence) {
+
+        if(!published) {
+            return apply(Stream.of(OffenceUpdated.builder()
+                    .withHearingId(hearingId)
+                    .withId(offence.getId())
+                    .withOffenceCode(offence.getOffenceCode())
+                    .withWording(offence.getWording())
+                    .withStartDate(offence.getStartDate())
+                    .withEndDate(offence.getEndDate())
+                    .withCount(offence.getCount())
+                    .withConvictionDate(offence.getConvictionDate())
+                    .build()));
+        }
+
+        return apply(Stream.empty());
+    }
+
+    public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
+
+        if(!published) {
+            return apply(Stream.of(OffenceDeleted.builder()
+                    .withId(offenceId)
+                    .withHearingId(hearingId)
+                    .build()));
+        }
+
+        return apply(Stream.empty());
     }
 
     public static final class HearingEvent implements Serializable {

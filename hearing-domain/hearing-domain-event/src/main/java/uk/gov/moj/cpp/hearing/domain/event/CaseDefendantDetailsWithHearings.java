@@ -18,20 +18,16 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
 
     private final UUID caseId;
 
-    private final String caseUrn;
-
     private final Defendant defendant;
 
     private final List<UUID> hearingIds;
 
-    public CaseDefendantDetailsWithHearings(
+    private CaseDefendantDetailsWithHearings(
             @JsonProperty("caseId") UUID caseId,
-            @JsonProperty("caseUrn") String caseUrn,
             @JsonProperty("defendant") final Defendant defendant,
             @JsonProperty("hearingIds") final List<UUID> hearingIds) {
 
         this.caseId = caseId;
-        this.caseUrn = caseUrn;
         this.defendant = defendant;
         this.hearingIds = new ArrayList<>(hearingIds);
     }
@@ -42,10 +38,6 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
 
     public UUID getCaseId() {
         return caseId;
-    }
-
-    public String getCaseUrn() {
-        return caseUrn;
     }
 
     public Defendant getDefendant() {
@@ -60,8 +52,6 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
 
         private UUID caseId;
 
-        private String caseUrn;
-
         private Defendant.Builder defendant;
 
         private List<UUID> hearingIds;
@@ -74,12 +64,7 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
             return this;
         }
 
-        public Builder withCaseUrn(String caseUrn) {
-            this.caseUrn = caseUrn;
-            return this;
-        }
-
-        public Builder withDefendants(Defendant.Builder defendant) {
+        public Builder withDefendant(Defendant.Builder defendant) {
             this.defendant = defendant;
             return this;
         }
@@ -90,7 +75,7 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
         }
 
         public CaseDefendantDetailsWithHearings build() {
-            return new CaseDefendantDetailsWithHearings(caseId, caseUrn, ofNullable(defendant).map(Defendant.Builder::build).orElse(null), hearingIds);
+            return new CaseDefendantDetailsWithHearings(caseId, ofNullable(defendant).map(Defendant.Builder::build).orElse(null), hearingIds);
         }
     }
 }

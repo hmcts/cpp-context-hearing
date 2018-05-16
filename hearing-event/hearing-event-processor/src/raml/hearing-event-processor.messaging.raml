@@ -108,6 +108,31 @@ baseUri: message://event/processor/message/hearing
             example: !include json/hearing.update-case-defendant-details-against-hearing-aggregate.json
             schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
 
+# Case Defendant Offences Change
+        application/vnd.hearing.add-case-defendant-offence-enriched-with-hearing-ids+json:
+            example: !include json/hearing.add-case-defendant-offence-enriched-with-hearing-ids.json
+            schema: !include json/schema/hearing.add-case-defendant-offence-enriched-with-hearing-ids.json
+
+        application/vnd.hearing.update-case-defendant-offence-enriched-with-hearing-ids+json:
+            example: !include json/hearing.update-case-defendant-offence-enriched-with-hearing-ids.json
+            schema: !include json/schema/hearing.update-case-defendant-offence-enriched-with-hearing-ids.json
+
+        application/vnd.hearing.delete-case-defendant-offence-enriched-with-hearing-ids+json:
+            example: !include json/hearing.delete-case-defendant-offence-enriched-with-hearing-ids.json
+            schema: !include json/schema/hearing.delete-case-defendant-offence-enriched-with-hearing-ids.json
+
+        application/vnd.hearing.add-case-defendant-offence+json:
+            example: !include json/hearing.add-case-defendant-offence.json
+            schema: !include json/schema/hearing.add-case-defendant-offence.json
+
+        application/vnd.hearing.update-case-defendant-offence+json:
+            example: !include json/hearing.update-case-defendant-offence.json
+            schema: !include json/schema/hearing.update-case-defendant-offence.json
+
+        application/vnd.hearing.delete-case-defendant-offence+json:
+            example: !include json/hearing.delete-case-defendant-offence.json
+            schema: !include json/schema/hearing.delete-case-defendant-offence.json
+
         application/vnd.hearing.events.nows-requested+json:
             schema: !include json/schema/hearing.events.nows-requested.json
             example: !include json/hearing.events.nows-requested.json
@@ -125,3 +150,7 @@ baseUri: message://event/processor/message/hearing
                 schema: !include json/schema/public.progression.case-defendant-changed.json
                 example: !include json/public.progression.case-defendant-changed.json
 
+# Case Defendant Offences Changed
+        application/vnd.public.progression.defendant-offences-changed+json:
+                schema: !include json/schema/public.progression.defendant-offences-changed.json
+                example: !include json/public.progression.defendant-offences-changed.json

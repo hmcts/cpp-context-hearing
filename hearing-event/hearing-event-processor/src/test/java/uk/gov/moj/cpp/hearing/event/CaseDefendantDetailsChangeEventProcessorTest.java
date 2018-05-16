@@ -10,16 +10,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 
-import java.time.ZoneId;
 import java.util.Arrays;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -64,23 +62,23 @@ public class CaseDefendantDetailsChangeEventProcessorTest {
 
         CaseDefendantDetails defendantDetailsChangedPublicEvent = CaseDefendantDetails.builder()
                 .withCaseId(randomUUID())
-                .withCaseUrn(STRING.next())
                 .addDefendant(uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
                         .withId(randomUUID())
-                        .withPersonId(randomUUID())
-                        .withFirstName(STRING.next())
-                        .withLastName(STRING.next())
-                        .withNationality(STRING.next())
-                        .withGender(STRING.next())
-                        .withAddress(generateAddress())
-                        .withDateOfBirth(PAST_LOCAL_DATE.next())
+                        .withPerson(Person.builder()
+                                .withId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .withNationality(STRING.next())
+                                .withGender(STRING.next())
+                                .withAddress(generateAddress())
+                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
                         .withBailStatus(STRING.next())
-                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                         .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(generateInterpreter()))
+                        .withInterpreter(uk.gov.moj.cpp.hearing.command.defendant.Interpreter.builder(STRING.next())))
                 .build();
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.events.public-case-defendant-changed"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.case-defendant-changed"),
                 objectToJsonObjectConverter.convert(defendantDetailsChangedPublicEvent));
 
         caseDefendantDetailsChangeEventProcessor.processPublicCaseDefendantChanged(event);
@@ -103,20 +101,21 @@ public class CaseDefendantDetailsChangeEventProcessorTest {
 
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings = CaseDefendantDetailsWithHearings.builder()
                 .withCaseId(randomUUID())
-                .withCaseUrn(STRING.next())
-                .withDefendants(uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
+                .withDefendant(uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
                         .withId(randomUUID())
-                        .withPersonId(randomUUID())
-                        .withFirstName(STRING.next())
-                        .withLastName(STRING.next())
-                        .withNationality(STRING.next())
-                        .withGender(STRING.next())
-                        .withAddress(generateAddress())
-                        .withDateOfBirth(PAST_LOCAL_DATE.next())
+                        .withPerson(Person.builder()
+                                .withId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .withNationality(STRING.next())
+                                .withGender(STRING.next())
+                                .withAddress(generateAddress())
+                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
                         .withBailStatus(STRING.next())
-                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                         .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(generateInterpreter()))
+                        .withInterpreter(uk.gov.moj.cpp.hearing.command.defendant.Interpreter.builder(STRING.next()))
+                )
                 .withHearingIds(Arrays.asList(randomUUID(), randomUUID()))
                 .build();
 
@@ -144,11 +143,5 @@ public class CaseDefendantDetailsChangeEventProcessorTest {
                 .withAddress3(STRING.next())
                 .withAddress4(STRING.next())
                 .withPostcode(STRING.next());
-    }
-
-    private uk.gov.moj.cpp.hearing.command.defendant.Interpreter.Builder generateInterpreter() {
-        return uk.gov.moj.cpp.hearing.command.defendant.Interpreter.interpreter()
-                .withLanguage(STRING.next())
-                .withNeeded(false);
     }
 }

@@ -32,6 +32,15 @@ public class Address implements Serializable {
         return new Address.Builder();
     }
 
+    public static Builder builder(Address address) {
+        return Address.address()
+                .withAddress1(address.address1)
+                .withAddress2(address.address2)
+                .withAddress3(address.address3)
+                .withAddress4(address.address4)
+                .withPostcode(address.postCode);
+    }
+
     public String getAddress1() {
         return address1;
     }
