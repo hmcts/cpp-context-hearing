@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +33,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.junit.Assert.fail;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingsPleaAggregateTest {
@@ -179,5 +184,15 @@ public class HearingsPleaAggregateTest {
 
     }
 
+    @After
+    public void teardown() {
+        try {
+            // ensure aggregate is serializable
+            SerializationUtils.serialize(hearingsPleaAggregate);
+        } catch (SerializationException e) {
+            e.printStackTrace();
+            fail("Aggregate should be serializable");
+        }
+    }
 
 }

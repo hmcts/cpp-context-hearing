@@ -1,60 +1,66 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.UUID;
 
 public class CrownCourtHearing {
-  private final String ccHearingDate;
+    private final String ccHearingDate;
 
-  private final UUID courtCentreId;
+    private final UUID courtCentreId;
 
-  private final String courtCentreName;
+    private final String courtCentreName;
 
-  public CrownCourtHearing(final String ccHearingDate, final UUID courtCentreId, final String courtCentreName) {
-    this.ccHearingDate = ccHearingDate;
-    this.courtCentreId = courtCentreId;
-    this.courtCentreName = courtCentreName;
-  }
-
-  public String getCcHearingDate() {
-    return ccHearingDate;
-  }
-
-  public UUID getCourtCentreId() {
-    return courtCentreId;
-  }
-
-  public String getCourtCentreName() {
-    return courtCentreName;
-  }
-
-  public static Builder crownCourtHearing() {
-    return new CrownCourtHearing.Builder();
-  }
-
-  public static class Builder {
-    private String ccHearingDate;
-
-    private UUID courtCentreId;
-
-    private String courtCentreName;
-
-    public Builder withCcHearingDate(final String ccHearingDate) {
-      this.ccHearingDate = ccHearingDate;
-      return this;
+    @JsonCreator
+    public CrownCourtHearing(@JsonProperty("ccHearingDate") final String ccHearingDate,
+                             @JsonProperty("courtCentreId") final UUID courtCentreId,
+                             @JsonProperty("courtCentreName") final String courtCentreName) {
+        this.ccHearingDate = ccHearingDate;
+        this.courtCentreId = courtCentreId;
+        this.courtCentreName = courtCentreName;
     }
 
-    public Builder withCourtCentreId(final UUID courtCentreId) {
-      this.courtCentreId = courtCentreId;
-      return this;
+    public String getCcHearingDate() {
+        return ccHearingDate;
     }
 
-    public Builder withCourtCentreName(final String courtCentreName) {
-      this.courtCentreName = courtCentreName;
-      return this;
+    public UUID getCourtCentreId() {
+        return courtCentreId;
     }
 
-    public CrownCourtHearing build() {
-      return new CrownCourtHearing(ccHearingDate, courtCentreId, courtCentreName);
+    public String getCourtCentreName() {
+        return courtCentreName;
     }
-  }
+
+    public static Builder crownCourtHearing() {
+        return new CrownCourtHearing.Builder();
+    }
+
+    public static class Builder {
+        private String ccHearingDate;
+
+        private UUID courtCentreId;
+
+        private String courtCentreName;
+
+        public Builder withCcHearingDate(final String ccHearingDate) {
+            this.ccHearingDate = ccHearingDate;
+            return this;
+        }
+
+        public Builder withCourtCentreId(final UUID courtCentreId) {
+            this.courtCentreId = courtCentreId;
+            return this;
+        }
+
+        public Builder withCourtCentreName(final String courtCentreName) {
+            this.courtCentreName = courtCentreName;
+            return this;
+        }
+
+        public CrownCourtHearing build() {
+            return new CrownCourtHearing(ccHearingDate, courtCentreId, courtCentreName);
+        }
+    }
 }

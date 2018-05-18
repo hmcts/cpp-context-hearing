@@ -36,7 +36,7 @@ public class HearingsPleaAggregate implements Aggregate {
     private Boolean sendingSheetCompleteProcessed = false;
     private Map<UUID, Hearing> hearing = new HashMap<>();
     private Map<UUID, Plea> pleas = new HashMap<>();
-    private HearingTransformer hearingTransformer = new HearingTransformer();
+    private transient HearingTransformer hearingTransformer = new HearingTransformer();
 
     @Override
     public Object apply(final Object event) {

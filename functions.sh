@@ -41,6 +41,18 @@ function deployWiremock() {
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:copy -DoutputDirectory=$WILDFLY_DEPLOYMENT_DIR -Dartifact=uk.gov.justice.services:wiremock-service:1.1.0:war
 }
 
+function checkWiremock(){
+    while [ true ]
+    do 
+      CHECK_STRING="curl -i --connect-timeout 1 -s http://localhost:8080/__admin/"
+      echo -n $CHECK_STRING
+      CHECK=$( $CHECK_STRING )  >/dev/null 2>&1
+      echo $CHECK
+      echo $CHECK | grep "200 OK" >/dev/null 2>&1 && break
+      sleep $RETRY_DELAY
+    done 
+}
+
 function healthCheck {
   CONTEXT=("$CONTEXT_NAME-command-api"  "$CONTEXT_NAME-command-handler" "${CONTEXT_NAME}-query-api"  "${CONTEXT_NAME}-query-view" "${CONTEXT_NAME}-event-listener")
   CONTEXT_COUNT=${#CONTEXT[@]}
@@ -121,9 +133,11 @@ function deployAndTest {
   deleteAndDeployWars
   deployWiremock
   startVagrant
+  runEventBufferLiquibase
   createEventLog
   runLiquibase
   healthCheck
+  checkWiremock
   integrationTests
 }
 

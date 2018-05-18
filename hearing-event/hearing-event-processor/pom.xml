@@ -49,7 +49,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>uk.gov.justice.services</groupId>
+            <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>event-processor</artifactId>
         </dependency>
         <dependency>

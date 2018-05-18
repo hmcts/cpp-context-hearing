@@ -31,9 +31,7 @@
       "type": "object",
       "properties": {
         "caseUrn": {
-          "type": "string",
-          "minLength": 11,
-          "maxLength": 11
+          "type": "string"
         }
       },
       "additionalProperties": false,
