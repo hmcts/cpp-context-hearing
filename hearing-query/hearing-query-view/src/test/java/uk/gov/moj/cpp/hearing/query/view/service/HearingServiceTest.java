@@ -38,6 +38,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import javax.json.JsonObject;
 import javax.json.JsonString;
+import javax.persistence.NoResultException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -287,6 +288,14 @@ public class HearingServiceTest {
 
         final JsonObject response = caseHearingService.getNowsRepository(nowMaterialId.toString());
         assertThat(response.getJsonArray("allowedUserGroups").getValuesAs(JsonString.class).stream().map(jsonString -> jsonString.getString() ).collect(Collectors.toList()), is(nowsMaterial.getUserGroups()));
+    }
+
+    @Test
+    public void shouldNotFindUserGroupsByMaterialId() throws Exception {
+        final UUID nowMaterialId = randomUUID();
+        when(nowsMaterialRepository.findBy(nowMaterialId)).thenReturn(null);
+        final JsonObject response = caseHearingService.getNowsRepository(nowMaterialId.toString());
+        assertThat(response.getJsonArray("allowedUserGroups").size(), is(0));
     }
 
     private static String format(final String... vals) {

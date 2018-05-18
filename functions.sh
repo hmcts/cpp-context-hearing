@@ -165,6 +165,7 @@ function deployAndTest {
   createEventLog
   runLiquibase
   runEventBufferLiquibase
+  runFileServiceLiquibase
   if [[ "skipIntegrationTests" != "${1}" ]]; then
     healthCheck
     integrationTests

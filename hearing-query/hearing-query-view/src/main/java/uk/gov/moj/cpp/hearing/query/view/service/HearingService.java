@@ -82,17 +82,16 @@ public class HearingService {
 
     @Transactional
     public JsonObject getNowsRepository(final String q) {
-
+        LOGGER.debug("Searching for allowed user groups with materialId='{}'", q);
         final JsonObjectBuilder json = Json.createObjectBuilder();
-        try {
-            NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(UUID.fromString(q));
-            JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-            nowsMaterial.getUserGroups().forEach(s ->jsonArrayBuilder.add(s));
-            json.add("allowedUserGroups", jsonArrayBuilder.build());
-        } catch (final NoResultException e) {
-            LOGGER.info("No user groups found with materialId='{}'", q, e);
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+        NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(UUID.fromString(q));
+        if(nowsMaterial!=null) {
+            nowsMaterial.getUserGroups().forEach(s -> jsonArrayBuilder.add(s));
+        }else {
+            LOGGER.info("No user groups found with materialId='{}'", q);
         }
-
+        json.add("allowedUserGroups", jsonArrayBuilder.build());
         return json.build();
     }
     private List<NowResult> populateNowResult(List<NowsResult> nowResult) {
