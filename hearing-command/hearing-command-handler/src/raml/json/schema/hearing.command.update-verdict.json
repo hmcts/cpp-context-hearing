@@ -101,6 +101,12 @@
         "categoryType": {
           "type": "string"
         },
+        "verdictTypeId": {
+          "$ref": "#/definitions/uuidPattern"
+        },
+        "lesserOffence": {
+          "type": "string"
+        },
         "code": {
           "type": "string"
         },

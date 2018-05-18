@@ -482,7 +482,10 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                 return null;
             }
             return Value.builder()
+                    .withVerdictTypeId(toStringOrNull(source.getVerdictTypeId()))
                     .withCategory(source.getVerdictCategory())
+                    .withCategoryType(source.getVerdictCategoryType())
+                    .withLesserOffence(source.getLesserOffence())
                     .withCode(source.getVerdictCode())
                     .withDescription(source.getVerdictDescription())
                     .build();

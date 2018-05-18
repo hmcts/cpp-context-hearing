@@ -387,6 +387,7 @@ public class NewModelHearingAggregateTest {
                         .withCode(STRING.next())
                         .withCategory(STRING.next())
                         .withCategoryType(STRING.next())
+                        .withVerdictTypeId(randomUUID())
                 )
                 .withNumberOfJurors(integer(9, 12).next())
                 .withUnanimous(BOOLEAN.next())
@@ -410,6 +411,7 @@ public class NewModelHearingAggregateTest {
         assertThat(verdictUpsert.getVerdictId(), Matchers.is(verdict.getId()));
 
         assertThat(verdictUpsert.getVerdictValueId(), Matchers.is(verdict.getValue().getId()));
+        assertThat(verdictUpsert.getVerdictTypeId(), Matchers.is(verdict.getValue().getVerdictTypeId()));
         assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
         assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
         assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
@@ -458,6 +460,7 @@ public class NewModelHearingAggregateTest {
                         .withCode(STRING.next())
                         .withCategory(STRING.next())
                         .withCategoryType("GUILTY")
+                        .withVerdictTypeId(randomUUID())
                 )
                 .withNumberOfJurors(integer(9, 12).next())
                 .withUnanimous(BOOLEAN.next())
@@ -466,13 +469,24 @@ public class NewModelHearingAggregateTest {
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
-        ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(
+        List<Object> objects = hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
                 initiateHearingCommand.getCases().get(0).getCaseId(),
                 initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
                 verdict
-        ).collect(Collectors.toList()).get(1);
+        ).collect(Collectors.toList());
 
+        assertThat(objects.size(), Matchers.is(2));
+
+        VerdictUpsert verdictUpsert = (VerdictUpsert) objects.get(0);
+        ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) objects.get(1);
+
+        assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
+        assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
+        assertThat(verdictUpsert.getVerdictTypeId(), Matchers.is(verdict.getValue().getVerdictTypeId()));
+        assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
+        assertThat(verdictUpsert.getCategoryType(), Matchers.is(verdict.getValue().getCategoryType()));
+        
         assertThat(convictionDateAdded.getCaseId(), Matchers.is(initiateHearingCommand.getCases().get(0).getCaseId()));
         assertThat(convictionDateAdded.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
         assertThat(convictionDateAdded.getHearingId(), Matchers.is(initiateHearingCommand.getHearing().getId()));
@@ -493,6 +507,7 @@ public class NewModelHearingAggregateTest {
                         .withCode(STRING.next())
                         .withCategory(STRING.next())
                         .withCategoryType("NOT_GUILTY")
+                        .withVerdictTypeId(randomUUID())
                 )
                 .withNumberOfJurors(integer(9, 12).next())
                 .withUnanimous(BOOLEAN.next())
@@ -501,12 +516,23 @@ public class NewModelHearingAggregateTest {
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
-        ConvictionDateRemoved convictionDateRemoved = (ConvictionDateRemoved) hearingAggregate.updateVerdict(
+        List<Object> objects = hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
                 initiateHearingCommand.getCases().get(0).getCaseId(),
                 initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
                 verdict
-        ).collect(Collectors.toList()).get(1);
+        ).collect(Collectors.toList());
+
+        assertThat(objects.size(), Matchers.is(2));
+
+        VerdictUpsert verdictUpsert = (VerdictUpsert) objects.get(0);
+        ConvictionDateRemoved convictionDateRemoved = (ConvictionDateRemoved) objects.get(1);
+
+        assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
+        assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
+        assertThat(verdictUpsert.getVerdictTypeId(), Matchers.is(verdict.getValue().getVerdictTypeId()));
+        assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
+        assertThat(verdictUpsert.getCategoryType(), Matchers.is(verdict.getValue().getCategoryType()));
 
         assertThat(convictionDateRemoved.getCaseId(), Matchers.is(initiateHearingCommand.getCases().get(0).getCaseId()));
         assertThat(convictionDateRemoved.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
@@ -527,6 +553,8 @@ public class NewModelHearingAggregateTest {
                         .withCode(STRING.next())
                         .withCategory(STRING.next())
                         .withCategoryType("GUILTY_BUT_OF_LESSER_OFFENCE")
+                        .withLesserOffence("Obstructing a Police Officer")
+                        .withVerdictTypeId(randomUUID())
                 )
                 .withNumberOfJurors(integer(9, 12).next())
                 .withUnanimous(BOOLEAN.next())
@@ -535,13 +563,25 @@ public class NewModelHearingAggregateTest {
         NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
-        ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(
+        List<Object> objects = hearingAggregate.updateVerdict(
                 initiateHearingCommand.getHearing().getId(),
                 initiateHearingCommand.getCases().get(0).getCaseId(),
                 initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
                 verdict
-        ).collect(Collectors.toList()).get(1);
+        ).collect(Collectors.toList());
+        
+        assertThat(objects.size(), Matchers.is(2));
+        
+        VerdictUpsert verdictUpsert = (VerdictUpsert) objects.get(0);
+        ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) objects.get(1);
 
+        assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
+        assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
+        assertThat(verdictUpsert.getVerdictTypeId(), Matchers.is(verdict.getValue().getVerdictTypeId()));
+        assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
+        assertThat(verdictUpsert.getCategoryType(), Matchers.is(verdict.getValue().getCategoryType()));
+        assertThat(verdictUpsert.getLesserOffence(), Matchers.is(verdict.getValue().getLesserOffence()));
+        
         assertThat(convictionDateAdded.getCaseId(), Matchers.is(initiateHearingCommand.getCases().get(0).getCaseId()));
         assertThat(convictionDateAdded.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
         assertThat(convictionDateAdded.getHearingId(), Matchers.is(initiateHearingCommand.getHearing().getId()));
@@ -562,6 +602,7 @@ public class NewModelHearingAggregateTest {
                         .withCode(STRING.next())
                         .withCategory(STRING.next())
                         .withCategoryType("NO_VERDICT")
+                        .withVerdictTypeId(randomUUID())
                 )
                 .withNumberOfJurors(integer(9, 12).next())
                 .withUnanimous(BOOLEAN.next())
@@ -578,6 +619,14 @@ public class NewModelHearingAggregateTest {
         ).collect(Collectors.toList());
 
         assertThat(objects.size(), Matchers.is(1));
+        
+        VerdictUpsert verdictUpsert = (VerdictUpsert) objects.get(0);
+        
+        assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
+        assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
+        assertThat(verdictUpsert.getVerdictTypeId(), Matchers.is(verdict.getValue().getVerdictTypeId()));
+        assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
+        assertThat(verdictUpsert.getCategoryType(), Matchers.is(verdict.getValue().getCategoryType()));
     }
     
     private CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate() {

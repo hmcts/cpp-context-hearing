@@ -63,7 +63,16 @@ public class Offence {
 
     @Column(name = "verdict_category")
     private String verdictCategory;
+    
+    @Column(name = "verdict_category_type")
+    private String verdictCategoryType;
+    
+    @Column(name = "verdict_type_id")
+    private UUID verdictTypeId;    
 
+    @Column(name = "lesser_offence")
+    private String lesserOffence;
+    
     @Column(name = "verdict_description")
     private String verdictDescription;
 
@@ -110,6 +119,9 @@ public class Offence {
         this.pleaValue = builder.pleaValue;
         this.verdictCode = builder.verdictCode;
         this.verdictCategory = builder.verdictCategory;
+        this.verdictCategoryType = builder.verdictCategoryType;
+        this.verdictTypeId = builder.verdictTypeId;
+        this.lesserOffence = builder.lesserOffence;
         this.verdictDescription = builder.verdictDescription;
         this.verdictDate = builder.verdictDate;
         this.numberOfJurors = builder.numberOfJurors;
@@ -194,6 +206,18 @@ public class Offence {
         return verdictCategory;
     }
 
+    public String getVerdictCategoryType() {
+        return verdictCategoryType;
+    }
+
+    public UUID getVerdictTypeId() {
+        return verdictTypeId;
+    }
+
+    public String getLesserOffence() {
+        return lesserOffence;
+    }
+
     public String getVerdictDescription() {
         return verdictDescription;
     }
@@ -224,6 +248,18 @@ public class Offence {
 
     public void setVerdictCategory(String verdictCategory) {
         this.verdictCategory = verdictCategory;
+    }
+
+    public void setVerdictCategoryType(String verdictCategoryType) {
+        this.verdictCategoryType = verdictCategoryType;
+    }
+
+    public void setVerdictTypeId(UUID verdictTypeId) {
+        this.verdictTypeId = verdictTypeId;
+    }
+
+    public void setLesserOffence(String lesserOffence) {
+        this.lesserOffence = lesserOffence;
     }
 
     public void setVerdictDescription(String verdictDescription) {
@@ -271,6 +307,9 @@ public class Offence {
         private String pleaValue;
         private String verdictCode;
         private String verdictCategory;
+        private String verdictCategoryType;
+        private UUID verdictTypeId;
+        private String lesserOffence;
         private String verdictDescription;
         private LocalDate verdictDate;
         private Integer numberOfJurors;
@@ -358,6 +397,21 @@ public class Offence {
             return this;
         }
 
+        public Builder withVerdictCategoryType(final String verdictCategoryType) {
+            this.verdictCategoryType = verdictCategoryType;
+            return this;
+        }
+        
+        public Builder withVerdictTypeId(final UUID verdictTypeId) {
+            this.verdictTypeId = verdictTypeId;
+            return this;
+        }
+        
+        public Builder withLesserOffence(final String lesserOffence) {
+            this.lesserOffence = lesserOffence;
+            return this;
+        }
+        
         public Builder withVerdictDescription(final String verdictDescription) {
             this.verdictDescription = verdictDescription;
             return this;

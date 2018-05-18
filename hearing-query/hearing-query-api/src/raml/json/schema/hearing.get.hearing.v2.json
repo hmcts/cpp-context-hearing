@@ -205,6 +205,9 @@
         "title":{
           "type":"string"
         },
+        "convictionDate":{
+          "$ref":"#/definitions/datePattern"
+        },
         "legislation":{
           "type":"string"
         },
@@ -431,6 +434,15 @@
         "category":{
           "type":"string"
         },
+        "categoryType":{
+          "type":"string"
+        },
+        "verdictTypeId":{
+          "$ref":"#/definitions/uuid"
+        },        
+        "lesserOffence":{
+          "type":"string"
+        },        
         "code":{
           "type":"string"
         },

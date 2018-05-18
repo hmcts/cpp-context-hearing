@@ -1,19 +1,21 @@
 {
-  "caseId": "RANDOM_CASE_ID",
-  "hearingId": "RANDOM_HEARING_ID",
+  "caseId": "bf537ed1-4648-4a68-8429-96a69d5db49d",
+  "hearingId": "af537ed1-4648-4a68-8429-96a69d5db49d",
   "defendants": [
     {
-      "id": "RANDOM_DEFENDANT_ID",
-      "personId": "RANDOM_PERSON_ID",
+      "id": "cf537ed1-4648-4a68-8429-96a69d5db49d",
+      "personId": "df537ed1-4648-4a68-8429-96a69d5db49d",
       "offences": [
         {
-          "id": "RANDOM_OFFENCE_ID",
+          "id": "ef537ed1-4648-4a68-8429-96a69d5db49d",
           "verdict": {
-            "id": "RANDOM_VERDICT_ID",
+            "id": "3f537ed1-4648-4a68-8429-96a69d5db49d",
             "value": {
               "id": "0baecac5-222b-402d-9047-84803679edab",
               "category": "GUILTY",
               "categoryType": "NOT_GUILTY",
+              "verdictTypeId":"7baecac5-222b-402d-9047-84803679edab",
+              "lesserOffence": "Obstructing a Police Officer",
               "code": "A1",
               "description": "Guilty By Jury On Judges Direction"
             },

@@ -13,6 +13,8 @@
               "id": "0baecac5-222b-402d-9047-84803679edab",
               "category": "Not Guilty",
               "categoryType": "NOT_GUILTY",
+              "verdictTypeId":"7baecac5-222b-402d-9047-84803679edab",
+              "lesserOffence": "Obstructing a Police Officer",
               "code": "A1",
               "description": "Not guilty under section 17 Criminal Justice Act (1967): prosecution offer no evidence"
             },
