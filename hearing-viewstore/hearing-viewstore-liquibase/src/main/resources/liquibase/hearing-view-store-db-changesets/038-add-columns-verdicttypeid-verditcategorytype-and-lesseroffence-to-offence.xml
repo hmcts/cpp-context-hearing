@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="38" author="hearing" logicalFilePath="037-add-columns-verditcategorytype-and-lesseroffence-to-offence">
+
+        <addColumn tableName="ha_offence">
+            <column name="verdict_type_id" type="UUID" />
+            <column name="verdict_category_type" type="TEXT"/>
+            <column name="lesser_offence" type="TEXT"/>
+        </addColumn>
+
+    </changeSet>
+</databaseChangeLog>

@@ -14,7 +14,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
@@ -61,6 +60,7 @@ public class VerdictIT extends AbstractIT {
                                                         .withCategoryType("GUILTY")
                                                         .withCode("A1")
                                                         .withDescription("Guilty, by jury on judge's direction")
+                                                        .withVerdictTypeId(randomUUID())
                                                 ).withNumberOfJurors(integer(9, 12).next())
                                                 .withNumberOfSplitJurors(integer(0, 3).next())
                                                 .withUnanimous(BOOLEAN.next())
@@ -108,7 +108,9 @@ public class VerdictIT extends AbstractIT {
                                         is(verdict.getValue().getCode())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description",
                                         is(verdict.getValue().getDescription())),
-
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId",
+                                        is(verdict.getValue().getVerdictTypeId().toString())),
+                                
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate",
                                         is(verdict.getVerdictDate().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors",
@@ -146,6 +148,7 @@ public class VerdictIT extends AbstractIT {
                                                         .withCategoryType("NOT_GUILTY")
                                                         .withCode("A1")
                                                         .withDescription("Not guilty, by jury on judge's direction")
+                                                        .withVerdictTypeId(randomUUID())
                                                 ).withNumberOfJurors(integer(9, 12).next())
                                                 .withNumberOfSplitJurors(integer(0, 3).next())
                                                 .withUnanimous(BOOLEAN.next())
@@ -187,7 +190,9 @@ public class VerdictIT extends AbstractIT {
                                         is(verdict.getValue().getCode())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description",
                                         is(verdict.getValue().getDescription())),
-
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId",
+                                        is(verdict.getValue().getVerdictTypeId().toString())),
+                                
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate",
                                         is(verdict.getVerdictDate().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors",
@@ -223,8 +228,10 @@ public class VerdictIT extends AbstractIT {
                                                 .withValue(VerdictValue.builder().withId(randomUUID())
                                                         .withCategory("Not Guilty")
                                                         .withCategoryType("GUILTY_BUT_OF_LESSER_OFFENCE")
+                                                        .withLesserOffence("Obstructing a Police Officer")
                                                         .withCode("A1")
                                                         .withDescription("Not guilty but guilty of lesser/alternative offence not charged namely")
+                                                        .withVerdictTypeId(randomUUID())
                                                 ).withNumberOfJurors(integer(9, 12).next())
                                                 .withNumberOfSplitJurors(integer(0, 3).next())
                                                 .withUnanimous(BOOLEAN.next())
@@ -269,11 +276,17 @@ public class VerdictIT extends AbstractIT {
 
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category",
                                         is(verdict.getValue().getCategory())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.categoryType",
+                                        is(verdict.getValue().getCategoryType())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.lesserOffence",
+                                        is(verdict.getValue().getLesserOffence())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code",
                                         is(verdict.getValue().getCode())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description",
                                         is(verdict.getValue().getDescription())),
-
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId",
+                                        is(verdict.getValue().getVerdictTypeId().toString())),
+                                
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate",
                                         is(verdict.getVerdictDate().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors",
@@ -314,9 +327,11 @@ public class VerdictIT extends AbstractIT {
                                                         .withCategoryType("GUILTY")
                                                         .withCode("A1")
                                                         .withDescription("Guilty by judge alone  (under DVC&V Act 2004)")
+                                                        .withVerdictTypeId(randomUUID())
                                                 ).withNumberOfJurors(integer(9, 12).next())
                                                 .withNumberOfSplitJurors(integer(0, 3).next())
-                                                .withUnanimous(BOOLEAN.next()).withVerdictDate(guiltyConvictionDate))))
+                                                .withUnanimous(BOOLEAN.next())
+                                                .withVerdictDate(guiltyConvictionDate))))
                 .build();
 
         final EventListener publicEventVerdictUpdatedListener = listenFor("public.hearing.verdict-updated").withFilter(
@@ -357,11 +372,15 @@ public class VerdictIT extends AbstractIT {
 
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category",
                                         is(verdict.getValue().getCategory())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.categoryType",
+                                        is(verdict.getValue().getCategoryType())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code",
                                         is(verdict.getValue().getCode())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description",
                                         is(verdict.getValue().getDescription())),
-
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId",
+                                        is(verdict.getValue().getVerdictTypeId().toString())),
+                                
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate",
                                         is(verdict.getVerdictDate().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors",
@@ -390,9 +409,11 @@ public class VerdictIT extends AbstractIT {
                                                         .withCategoryType("FINDING")
                                                         .withCode("A1")
                                                         .withDescription("Defendant found under a disability")
+                                                        .withVerdictTypeId(randomUUID())
                                                 ).withNumberOfJurors(integer(9, 12).next())
                                                 .withNumberOfSplitJurors(integer(0, 3).next())
-                                                .withUnanimous(BOOLEAN.next()).withVerdictDate(findingConvictionDate))))
+                                                .withUnanimous(BOOLEAN.next())
+                                                .withVerdictDate(findingConvictionDate))))
                 .build();
 
         final EventListener findingCategoryTypeListener = listenFor("public.hearing.verdict-updated").withFilter(
@@ -424,11 +445,15 @@ public class VerdictIT extends AbstractIT {
 
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category",
                                         is(findingCategoryTypeVerdit.getValue().getCategory())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.categoryType",
+                                        is(findingCategoryTypeVerdit.getValue().getCategoryType())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code",
                                         is(findingCategoryTypeVerdit.getValue().getCode())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description",
                                         is(findingCategoryTypeVerdit.getValue().getDescription())),
-
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId",
+                                        is(findingCategoryTypeVerdit.getValue().getVerdictTypeId().toString())),
+                                
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate",
                                         is(findingCategoryTypeVerdit.getVerdictDate().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors",
@@ -470,9 +495,11 @@ public class VerdictIT extends AbstractIT {
                                                         .withCategoryType("GUILTY")
                                                         .withCode("A1")
                                                         .withDescription("Guilty, by jury on judge's direction")
+                                                        .withVerdictTypeId(randomUUID())
                                                 ).withNumberOfJurors(integer(9, 12).next())
                                                 .withNumberOfSplitJurors(integer(0, 3).next())
-                                                .withUnanimous(BOOLEAN.next()).withVerdictDate(guiltyConvictionDate))))
+                                                .withUnanimous(BOOLEAN.next())
+                                                .withVerdictDate(guiltyConvictionDate))))
                 .build();
 
         final EventListener publicEventVerdictUpdatedListener = listenFor("public.hearing.verdict-updated").withFilter(
@@ -513,11 +540,15 @@ public class VerdictIT extends AbstractIT {
 
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category",
                                         is(verdict.getValue().getCategory())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.categoryType",
+                                        is(verdict.getValue().getCategoryType())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code",
                                         is(verdict.getValue().getCode())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description",
                                         is(verdict.getValue().getDescription())),
-
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId",
+                                        is(verdict.getValue().getVerdictTypeId().toString())),
+                                
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate",
                                         is(verdict.getVerdictDate().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors",
@@ -546,6 +577,7 @@ public class VerdictIT extends AbstractIT {
                                                         .withCategoryType("NO_VERDICT")
                                                         .withCode("A1")
                                                         .withDescription("Jury unable to agree")
+                                                        .withVerdictTypeId(randomUUID())
                                                 ).withNumberOfJurors(integer(9, 12).next())
                                                 .withNumberOfSplitJurors(integer(0, 3).next())
                                                 .withUnanimous(BOOLEAN.next())
@@ -581,11 +613,15 @@ public class VerdictIT extends AbstractIT {
 
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category",
                                         is(noVerditCategoryTypeVerdit.getValue().getCategory())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.categoryType",
+                                        is(noVerditCategoryTypeVerdit.getValue().getCategoryType())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code",
                                         is(noVerditCategoryTypeVerdit.getValue().getCode())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description",
                                         is(noVerditCategoryTypeVerdit.getValue().getDescription())),
-
+                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId",
+                                        is(noVerditCategoryTypeVerdit.getValue().getVerdictTypeId().toString())),
+                                
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate",
                                         is(noVerditCategoryTypeVerdit.getVerdictDate().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors",

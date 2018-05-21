@@ -196,6 +196,7 @@ public class HearingTestUtils {
                 .withVerdictCode("A1")
                 .withVerdictCategory("GUILTY")
                 .withVerdictDescription("Guilty By Jury On Judges Direction")
+                .withVerdictTypeId(randomUUID())
                 .withVerdictDate(parse("2018-02-21T00:00:00Z").toLocalDate())
                 .withNumberOfJurors(10)
                 .withNumberOfSplitJurors(2)

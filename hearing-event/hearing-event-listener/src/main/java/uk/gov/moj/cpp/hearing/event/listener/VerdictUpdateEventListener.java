@@ -38,6 +38,9 @@ public class VerdictUpdateEventListener {
 
         offence.setVerdictCode(verdictUpdated.getCode());
         offence.setVerdictCategory(verdictUpdated.getCategory());
+        offence.setVerdictCategoryType(verdictUpdated.getCategoryType());
+        offence.setVerdictTypeId(verdictUpdated.getVerdictTypeId());
+        offence.setLesserOffence(verdictUpdated.getLesserOffence());
         offence.setVerdictDescription(verdictUpdated.getDescription());
         offence.setVerdictDate(verdictUpdated.getVerdictDate());
         offence.setNumberOfJurors(verdictUpdated.getNumberOfJurors());

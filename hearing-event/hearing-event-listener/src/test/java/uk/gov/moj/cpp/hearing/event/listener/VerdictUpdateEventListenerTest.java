@@ -67,7 +67,10 @@ public class VerdictUpdateEventListenerTest {
                 .withOffenceId(randomUUID())
                 .withVerdictId(randomUUID())
                 .withVerdictValueId(randomUUID())
+                .withVerdictTypeId(randomUUID())
                 .withCategory(STRING.next())
+                .withCategoryType(STRING.next())
+                .withLesserOffence(STRING.next())
                 .withCode(STRING.next())
                 .withDescription(STRING.next())
                 .withNumberOfJurors(INTEGER.next())
@@ -100,6 +103,9 @@ public class VerdictUpdateEventListenerTest {
         assertThat(offence.getId().getId(), is(verdictUpsert.getOffenceId()));
         assertThat(offence.getId().getHearingId(), is(verdictUpsert.getHearingId()));
         assertThat(offence.getVerdictCategory(), is(verdictUpsert.getCategory()));
+        assertThat(offence.getVerdictCategoryType(), is(verdictUpsert.getCategoryType()));
+        assertThat(offence.getVerdictTypeId(), is(verdictUpsert.getVerdictTypeId()));
+        assertThat(offence.getLesserOffence(), is(verdictUpsert.getLesserOffence()));
         assertThat(offence.getVerdictCode(), is(verdictUpsert.getCode()));
         assertThat(offence.getVerdictDescription(), is(verdictUpsert.getDescription()));
         assertThat(offence.getNumberOfJurors(), is(verdictUpsert.getNumberOfJurors()));

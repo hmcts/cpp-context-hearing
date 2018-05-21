@@ -22,8 +22,10 @@ public class VerdictUpsert implements Serializable {
     private UUID offenceId;
     private UUID verdictId;
     private UUID verdictValueId;
+    private UUID verdictTypeId;
     private String category;
     private String categoryType;
+    private String lesserOffence;
     private String code;
     private String description;
     private Integer numberOfJurors;
@@ -38,8 +40,10 @@ public class VerdictUpsert implements Serializable {
         this.offenceId = builder.offenceId;
         this.verdictId = builder.verdictId;
         this.verdictValueId = builder.verdictValueId;
+        this.verdictTypeId = builder.verdictTypeId;
         this.category = builder.category;
         this.categoryType = builder.categoryType;
+        this.lesserOffence = builder.lesserOffence;
         this.code = builder.code;
         this.description = builder.description;
         this.numberOfJurors = builder.numberOfJurors;
@@ -54,8 +58,10 @@ public class VerdictUpsert implements Serializable {
                          @JsonProperty("offenceId") UUID offenceId,
                          @JsonProperty("verdictId") UUID verdictId,
                          @JsonProperty("verdictValueId") UUID verdictValueId,
+                         @JsonProperty("verdictTypeId") UUID verdictTypeId,
                          @JsonProperty("category") String category,
                          @JsonProperty("categoryType") String categoryType,
+                         @JsonProperty("lesserOffence") String lesserOffence,
                          @JsonProperty("code") String code,
                          @JsonProperty("description") String description,
                          @JsonProperty("numberOfJurors") Integer numberOfJurors,
@@ -68,8 +74,10 @@ public class VerdictUpsert implements Serializable {
         this.offenceId = offenceId;
         this.verdictId = verdictId;
         this.verdictValueId = verdictValueId;
+        this.verdictTypeId = verdictTypeId;
         this.category = category;
         this.categoryType = categoryType;
+        this.lesserOffence = lesserOffence;
         this.code = code;
         this.description = description;
         this.numberOfJurors = numberOfJurors;
@@ -98,12 +106,20 @@ public class VerdictUpsert implements Serializable {
         return verdictValueId;
     }
 
+    public UUID getVerdictTypeId() {
+        return verdictTypeId;
+    }
+
     public String getCategory() {
         return category;
     }
 
     public String getCategoryType() {
         return categoryType;
+    }
+
+    public String getLesserOffence() {
+        return lesserOffence;
     }
 
     public String getCode() {
@@ -137,8 +153,10 @@ public class VerdictUpsert implements Serializable {
         private UUID offenceId;
         private UUID verdictId;
         private UUID verdictValueId;
+        private UUID verdictTypeId;
         private String category;
         private String categoryType;
+        private String lesserOffence;
         private String code;
         private String description;
         private Integer numberOfJurors;
@@ -171,6 +189,11 @@ public class VerdictUpsert implements Serializable {
             return this;
         }
 
+        public Builder withVerdictTypeId(UUID verdictTypeId) {
+            this.verdictTypeId = verdictTypeId;
+            return this;
+        }
+        
         public Builder withCategory(String category) {
             this.category = category;
             return this;
@@ -178,6 +201,11 @@ public class VerdictUpsert implements Serializable {
 
         public Builder withCategoryType(String categoryType) {
             this.categoryType = categoryType;
+            return this;
+        }
+        
+        public Builder withLesserOffence(String lesserOffence) {
+            this.lesserOffence = lesserOffence;
             return this;
         }
         
@@ -232,12 +260,20 @@ public class VerdictUpsert implements Serializable {
             return verdictValueId;
         }
 
+        public UUID getVerdictTypeId() {
+            return verdictTypeId;
+        }
+
         public String getCategory() {
             return category;
         }
 
         public String getCategoryType() {
             return categoryType;
+        }
+
+        public String getLesserOffence() {
+            return lesserOffence;
         }
 
         public String getCode() {
