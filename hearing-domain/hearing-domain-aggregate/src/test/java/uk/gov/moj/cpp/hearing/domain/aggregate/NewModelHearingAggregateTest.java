@@ -6,6 +6,7 @@ import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
+import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -18,12 +19,11 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -589,27 +589,22 @@ public class NewModelHearingAggregateTest {
                 .withAddress4(STRING.next())
                 .withPostcode(STRING.next());
 
-        final Interpreter.Builder interpreter = Interpreter.interpreter()
-                .withLanguage(STRING.next())
-                .withNeeded(false);
-
         return CaseDefendantDetailsWithHearingCommand.builder()
                 .withCaseId(randomUUID())
-                .withCaseUrn(STRING.next())
                 .withHearingIds(Collections.singletonList(randomUUID()))
                 .withDefendants(Defendant.builder()
                         .withId(randomUUID())
-                        .withPersonId(randomUUID())
-                        .withFirstName(STRING.next())
-                        .withLastName(STRING.next())
-                        .withNationality(STRING.next())
-                        .withGender(STRING.next())
-                        .withAddress(address)
-                        .withDateOfBirth(PAST_LOCAL_DATE.next())
+                        .withPerson(Person.builder().withId(randomUUID())
+                            .withFirstName(STRING.next())
+                            .withLastName(STRING.next())
+                            .withNationality(STRING.next())
+                            .withGender(STRING.next())
+                            .withAddress(address)
+                            .withDateOfBirth(PAST_LOCAL_DATE.next()))
                         .withBailStatus(STRING.next())
-                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                         .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(interpreter))
+                        .withInterpreter(Interpreter.builder(STRING.next())))
                 .build();
     }
 }

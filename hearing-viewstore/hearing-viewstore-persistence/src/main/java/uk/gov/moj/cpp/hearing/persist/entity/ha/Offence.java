@@ -250,6 +250,30 @@ public class Offence {
         this.convictionDate = convictionDate;
     }
 
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public void setWording(String wording) {
+        this.wording = wording;
+    }
+
+    public void setLegislation(String legislation) {
+        this.legislation = legislation;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
     public static Builder builder() {
         return new Builder();
     }

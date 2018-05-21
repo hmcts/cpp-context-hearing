@@ -1,27 +1,36 @@
 {
-  "caseId": "3155890c-2ef6-4343-85af-017b982101d1",
-  "caseUrn": "dRN9krtW8B",
-  "defendants": {
-    "address": {
-      "address1": "9gq5fUUp1g",
-      "address2": "z9KkAodEZg",
-      "address3": "UddXTKKFiG",
-      "address4": "Vy3yLafW8G",
-      "postcode": "AA1 1AA"
-    },
-    "bailStatus": "bailed",
-    "custodyTimeLimitDate": "2018-01-30T00:00:00.000Z",
-    "dateOfBirth": "1995-03-23",
-    "defenceOrganisation": "OZ01x17LLQ",
-    "firstName": "LTgCTZZzuE",
-    "gender": "Male",
-    "id": "312cdd69-af0b-490a-aebf-d5218af1b291",
-    "interpreter": {
-      "language": "English",
-      "needed": false
-    },
-    "lastName": "qoOqrRWj9N",
-    "nationality": "KcfFL5g8rB",
-    "personId": "308ad4d9-8ef5-4cd8-8c45-3bd596f5909e"
-  }
+  "caseId": "0baecac5-222b-402d-9047-84803679edae",
+  "defendants": [
+    {
+      "id": "2d1d2d8a-860c-479b-aa68-c4ad37850839",
+      "person": {
+        "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
+        "title": "Mr",
+        "firstName": "David",
+        "lastName": "LLOYD",
+        "dateOfBirth": "1980-07-15",
+        "nationality": "England",
+        "gender": "Male",
+        "homeTelephone": "02012345678",
+        "workTelephone": "02012345679",
+        "mobile": "07777777777",
+        "fax": "02011111111",
+        "email": "email@email.com",
+        "address": {
+          "address1": "14 Tottenham Court Road",
+          "address2": "London",
+          "address3": "England",
+          "address4": "UK",
+          "postCode": "W1T 1JY"
+        }
+      },
+      "bailStatus": "in custody",
+      "custodyTimeLimitDate": "2018-01-30",
+      "defenceOrganisation": "XYZ Solicitors",
+      "interpreter": {
+        "name": "Robert Carlyle",
+        "language": "English"
+      }
+    }
+  ]
 }

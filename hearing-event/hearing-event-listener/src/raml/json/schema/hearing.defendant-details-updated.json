@@ -2,100 +2,113 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
-    },
     "caseId": {
       "$ref": "#/definitions/uuid"
     },
-    "defendants": {
-      "items": {
-        "required": [
-          "id",
-          "personId",
-          "firstName",
-          "lastName",
-          "nationality",
-          "gender",
-          "address",
-          "dateOfBirth",
-          "interpreter"
-        ],
-        "properties": {
-          "id": {
-            "$ref": "#/definitions/uuid"
-          },
-          "personId": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "nationality": {
-            "type": "string"
-          },
-          "gender": {
-            "enum": [
-              "Male",
-              "Female",
-              "Not Specified"
-            ]
-          },
-          "address": {
-            "required": [
-              "address1"
-            ],
-            "properties": {
-              "address1": {
-                "type": "string"
-              },
-              "address2": {
-                "type": "string"
-              },
-              "address3": {
-                "type": "string"
-              },
-              "address4": {
-                "type": "string"
-              },
-              "postcode": {
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "dateOfBirth": {
-            "$ref": "#/definitions/datePattern"
-          },
-          "bailStatus": {
-            "type": "string"
-          },
-          "custodyTimeLimitDate": {
-            "$ref": "#/definitions/datePattern"
-          },
-          "defenceOrganisation": {
-            "type": "string"
-          },
-          "interpreter": {
-            "required": [
-              "needed"
-            ],
-            "properties": {
-              "needed": {
-                "type": "boolean"
-              },
-              "language": {
-                "type": "string"
-              }
-            },
-            "type": "object"
-          }
+    "defendant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
         },
-        "type": "object"
-      },
-      "type": "object"
+        "person": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/uuid"
+            },
+            "title": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "dateOfBirth": {
+              "$ref": "#/definitions/datePattern"
+            },
+            "nationality": {
+              "type": "string"
+            },
+            "gender": {
+              "type": "string"
+            },
+            "homeTelephone": {
+              "type": "string"
+            },
+            "workTelephone": {
+              "type": "string"
+            },
+            "mobile": {
+              "type": "string"
+            },
+            "fax": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "address": {
+              "type": "object",
+              "properties": {
+                "address1": {
+                  "type": "string"
+                },
+                "address2": {
+                  "type": "string"
+                },
+                "address3": {
+                  "type": "string"
+                },
+                "address4": {
+                  "type": "string"
+                },
+                "postCode": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "bailStatus": {
+          "type": "string"
+        },
+        "custodyTimeLimitDate": {
+          "$ref": "#/definitions/datePattern"
+        },
+        "defenceOrganisation": {
+          "type": "string"
+        },
+        "interpreter": {
+          "type": "object",
+          "properties": {
+            "needed": {
+              "type": "boolean"
+            },
+            "language": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
     }
   },
+  "required": [
+    "caseId",
+    "defendant",
+    "hearingId"
+  ],
   "definitions": {
     "uuid": {
       "type": "string",

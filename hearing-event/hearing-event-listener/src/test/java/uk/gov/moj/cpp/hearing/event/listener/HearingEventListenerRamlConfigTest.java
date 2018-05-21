@@ -7,14 +7,18 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.moj.cpp.hearing.domain.event.AssociateHearingIdWithOffence;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.NewMagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
 import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -47,8 +51,13 @@ public class HearingEventListenerRamlConfigTest {
             MagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
             CaseDefendantDetailsWithHearings.class.getAnnotation(Event.class).value(),
             RegisterHearingAgainstDefendant.class.getAnnotation(Event.class).value(),
-            NewMagsCourtHearingRecorded.class.getAnnotation(Event.class).value()
+            NewMagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
+            CaseDefendantOffenceWithHearingIds.class.getAnnotation(Event.class).value(),
+            UpdateOffenceOnHearings.class.getAnnotation(Event.class).value(),
+            DeleteOffenceFromHearings.class.getAnnotation(Event.class).value(),
+            AssociateHearingIdWithOffence.class.getAnnotation(Event.class).value()
     );
+
     private Map<String, String> handlerNames = new HashMap<>();
     private List<String> ramlActionNames;
 
@@ -62,7 +71,8 @@ public class HearingEventListenerRamlConfigTest {
                 DefenceCounselAddedEventListener.class,
                 ProsecutionCounselAddedEventListener.class,
                 NowsRequestedEventListener.class,
-                CaseDefendantChangeEventListener.class));
+                CaseDefendantDetailsChangedEventListener.class,
+                CaseDefendantOffencesChangedEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 

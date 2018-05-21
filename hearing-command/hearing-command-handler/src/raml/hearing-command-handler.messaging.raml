@@ -25,6 +25,11 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.update-case-defendant-details+json:
             schema: !include json/schema/hearing.update-case-defendant-details.json
             example: !include json/hearing.update-case-defendant-details.json
+
+        application/vnd.hearing.update-case-defendant-offences+json:
+            schema: !include json/schema/hearing.update-case-defendant-offences.json
+            example: !include json/hearing.update-case-defendant-offences.json
+
 # Log Event
         application/vnd.hearing.command.log-hearing-event+json:
             example: !include json/hearing.command.log-hearing-event.json
@@ -100,3 +105,14 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.update-case-defendant-details-against-hearing-aggregate+json:
             schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
             example: !include json/hearing.update-case-defendant-details-against-hearing-aggregate.json
+
+# Case Defendant Offences Update
+        application/vnd.hearing.add-case-defendant-offence+json:
+            schema: !include json/schema/hearing.add-case-defendant-offence.json
+            example: !include json/hearing.add-case-defendant-offence.json
+        application/vnd.hearing.update-case-defendant-offence+json:
+            schema: !include json/schema/hearing.update-case-defendant-offence.json
+            example: !include json/hearing.update-case-defendant-offence.json
+        application/vnd.hearing.delete-case-defendant-offence+json:
+            schema: !include json/schema/hearing.delete-case-defendant-offence.json
+            example: !include json/hearing.delete-case-defendant-offence.json

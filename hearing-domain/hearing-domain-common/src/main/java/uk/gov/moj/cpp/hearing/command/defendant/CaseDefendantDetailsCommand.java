@@ -10,16 +10,12 @@ public class CaseDefendantDetailsCommand {
 
     private final UUID caseId;
 
-    private final String caseUrn;
-
     private final Defendant defendant;
 
-    public CaseDefendantDetailsCommand(
+    private CaseDefendantDetailsCommand(
             @JsonProperty("caseId") UUID caseId,
-            @JsonProperty("caseUrn") String caseUrn,
             @JsonProperty("defendant") final Defendant defendant) {
         this.caseId = caseId;
-        this.caseUrn = caseUrn;
         this.defendant = defendant;
     }
 
@@ -31,10 +27,6 @@ public class CaseDefendantDetailsCommand {
         return caseId;
     }
 
-    public String getCaseUrn() {
-        return caseUrn;
-    }
-
     public Defendant getDefendant() {
         return defendant;
     }
@@ -42,8 +34,6 @@ public class CaseDefendantDetailsCommand {
     public static class Builder {
 
         private UUID caseId;
-
-        private String caseUrn;
 
         private Defendant.Builder defendent;
 
@@ -56,19 +46,13 @@ public class CaseDefendantDetailsCommand {
             return this;
         }
 
-        public Builder withCaseUrn(String caseUrn) {
-            this.caseUrn = caseUrn;
-            return this;
-        }
-
         public Builder withDefendant(Defendant.Builder defendent) {
             this.defendent = defendent;
             return this;
         }
 
         public CaseDefendantDetailsCommand build() {
-            return new CaseDefendantDetailsCommand(caseId, caseUrn, ofNullable(defendent).map(Defendant.Builder::build).orElse(null));
+            return new CaseDefendantDetailsCommand(caseId, ofNullable(defendent).map(Defendant.Builder::build).orElse(null));
         }
     }
-
 }

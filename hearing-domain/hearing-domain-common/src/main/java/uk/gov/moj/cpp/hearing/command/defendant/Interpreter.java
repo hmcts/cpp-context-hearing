@@ -8,33 +8,29 @@ public class Interpreter implements Serializable {
 
     private String language;
 
-    private Boolean needed;
-
     public Interpreter() {
     }
 
-    public Interpreter(final String language, final Boolean needed) {
+    public Interpreter(final String language) {
         this.language = language;
-        this.needed = needed;
     }
 
-    public static Builder interpreter() {
+    public static Builder builder() {
         return new Interpreter.Builder();
+    }
+
+    public static Builder builder(String language) {
+        return Interpreter.builder()
+                .withLanguage(language);
     }
 
     public String getLanguage() {
         return language;
     }
 
-    public Boolean getNeeded() {
-        return needed;
-    }
-
     public static class Builder {
 
         private String language;
-
-        private Boolean needed;
 
         private Builder() {
         }
@@ -44,13 +40,8 @@ public class Interpreter implements Serializable {
             return this;
         }
 
-        public Builder withNeeded(final Boolean needed) {
-            this.needed = needed;
-            return this;
-        }
-
         public Interpreter build() {
-            return new Interpreter(language, needed);
+            return new Interpreter(language);
         }
     }
 }

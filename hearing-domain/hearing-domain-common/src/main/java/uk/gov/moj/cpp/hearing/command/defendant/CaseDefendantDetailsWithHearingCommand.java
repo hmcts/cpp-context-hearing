@@ -12,20 +12,16 @@ public class CaseDefendantDetailsWithHearingCommand {
 
     private final UUID caseId;
 
-    private final String caseUrn;
-
-    private final Defendant defendants;
+    private final Defendant defendant;
 
     private final List<UUID> hearingIds;
 
-    public CaseDefendantDetailsWithHearingCommand(
+    private CaseDefendantDetailsWithHearingCommand(
             @JsonProperty("caseId") UUID caseId,
-            @JsonProperty("caseUrn") String caseUrn,
-            @JsonProperty("defendants") final Defendant defendants,
+            @JsonProperty("defendant") final Defendant defendant,
             @JsonProperty("hearingIds") final List<UUID> hearingIds) {
         this.caseId = caseId;
-        this.caseUrn = caseUrn;
-        this.defendants = defendants;
+        this.defendant = defendant;
         this.hearingIds = new ArrayList<>(hearingIds);
     }
 
@@ -37,12 +33,8 @@ public class CaseDefendantDetailsWithHearingCommand {
         return caseId;
     }
 
-    public String getCaseUrn() {
-        return caseUrn;
-    }
-
-    public Defendant getDefendants() {
-        return defendants;
+    public Defendant getDefendant() {
+        return defendant;
     }
 
     public List<UUID> getHearingIds() {
@@ -53,9 +45,7 @@ public class CaseDefendantDetailsWithHearingCommand {
 
         private UUID caseId;
 
-        private String caseUrn;
-
-        private Defendant.Builder defendants;
+        private Defendant.Builder defendant;
 
         private List<UUID> hearingIds;
 
@@ -68,13 +58,8 @@ public class CaseDefendantDetailsWithHearingCommand {
             return this;
         }
 
-        public Builder withCaseUrn(String caseUrn) {
-            this.caseUrn = caseUrn;
-            return this;
-        }
-
-        public Builder withDefendants(Defendant.Builder defendants) {
-            this.defendants = defendants;
+        public Builder withDefendants(Defendant.Builder defendant) {
+            this.defendant = defendant;
             return this;
         }
 
@@ -84,8 +69,7 @@ public class CaseDefendantDetailsWithHearingCommand {
         }
 
         public CaseDefendantDetailsWithHearingCommand build() {
-            return new CaseDefendantDetailsWithHearingCommand(caseId, caseUrn, ofNullable(defendants).map(Defendant.Builder::build).orElse(null), hearingIds);
+            return new CaseDefendantDetailsWithHearingCommand(caseId, ofNullable(defendant).map(Defendant.Builder::build).orElse(null), hearingIds);
         }
     }
-
 }

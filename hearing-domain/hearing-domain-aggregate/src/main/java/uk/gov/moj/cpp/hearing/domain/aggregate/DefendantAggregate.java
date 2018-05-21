@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.offence.Offence;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingDefenceWitnessEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
@@ -67,39 +67,27 @@ public class DefendantAggregate implements Aggregate {
 
     public Stream<Object> enrichCaseDefendantDetailsWithHearingIds(CaseDefendantDetailsCommand caseDefendantDetails) {
 
-        final Defendant defendant = caseDefendantDetails.getDefendant();
-
-        final Address address = defendant.getAddress();
-
-        final Interpreter interpreter = defendant.getInterpreter();
-
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings = CaseDefendantDetailsWithHearings.builder()
                 .withCaseId(caseDefendantDetails.getCaseId())
-                .withCaseUrn(caseDefendantDetails.getCaseUrn())
-                .withDefendants(Defendant.builder()
-                        .withId(defendant.getId())
-                        .withPersonId(defendant.getPersonId())
-                        .withFirstName(defendant.getFirstName())
-                        .withLastName(defendant.getLastName())
-                        .withNationality(defendant.getNationality())
-                        .withGender(defendant.getGender())
-                        .withAddress(Address.address()
-                                .withAddress1(address.getAddress1())
-                                .withAddress2(address.getAddress2())
-                                .withAddress3(address.getAddress3())
-                                .withAddress4(address.getAddress4())
-                                .withPostcode(address.getPostCode()))
-                        .withDateOfBirth(defendant.getDateOfBirth())
-                        .withBailStatus(defendant.getBailStatus())
-                        .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
-                        .withDefenceOrganisation(defendant.getDefenceOrganisation())
-                        .withInterpreter(Interpreter.interpreter()
-                                .withLanguage(interpreter.getLanguage())
-                                .withNeeded(interpreter.getNeeded())))
+                .withDefendant(Defendant.builder(caseDefendantDetails.getDefendant()))
                 .withHearingIds(hearingIds)
                 .build();
 
         return apply(Stream.of(caseDefendantDetailsWithHearings));
     }
 
+    public Stream<Object> enrichNewOffenceWithAllHearingIdsAssociatedToDefendant(UUID defendantId, UUID caseId, Offence offence) {
+        return apply(Stream.of(CaseDefendantOffenceWithHearingIds.builder()
+                .withId(offence.getId())
+                .withDefendantId(defendantId)
+                .withCaseId(caseId)
+                .withOffenceCode(offence.getOffenceCode())
+                .withWording(offence.getWording())
+                .withStartDate(offence.getStartDate())
+                .withEndDate(offence.getEndDate())
+                .withCount(offence.getCount())
+                .withConvictionDate(offence.getConvictionDate())
+                .withHearingIds(hearingIds)
+                .build()));
+    }
 }

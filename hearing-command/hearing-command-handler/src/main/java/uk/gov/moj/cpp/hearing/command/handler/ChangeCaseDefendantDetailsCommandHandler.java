@@ -11,11 +11,9 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
@@ -48,33 +46,9 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
         for (final Defendant defendant : caseDefendantDetails.getDefendants()) {
 
-            final Address address = defendant.getAddress();
-
-            final Interpreter interpreter = defendant.getInterpreter();
-
             final CaseDefendantDetailsCommand caseDefendantDetailsCommand = CaseDefendantDetailsCommand.builder()
                     .withCaseId(caseDefendantDetails.getCaseId())
-                    .withCaseUrn(caseDefendantDetails.getCaseUrn())
-                    .withDefendant(Defendant.builder()
-                            .withId(defendant.getId())
-                            .withPersonId(defendant.getPersonId())
-                            .withFirstName(defendant.getFirstName())
-                            .withLastName(defendant.getLastName())
-                            .withNationality(defendant.getNationality())
-                            .withGender(defendant.getGender())
-                            .withAddress(Address.address()
-                                    .withAddress1(address.getAddress1())
-                                    .withAddress2(address.getAddress2())
-                                    .withAddress3(address.getAddress3())
-                                    .withAddress4(address.getAddress4())
-                                    .withPostcode(address.getPostCode()))
-                            .withDateOfBirth(defendant.getDateOfBirth())
-                            .withBailStatus(defendant.getBailStatus())
-                            .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
-                            .withDefenceOrganisation(defendant.getDefenceOrganisation())
-                            .withInterpreter(Interpreter.interpreter()
-                                    .withLanguage(interpreter.getLanguage())
-                                    .withNeeded(interpreter.getNeeded())))
+                    .withDefendant(Defendant.builder(defendant))
                     .build();
 
             aggregate(DefendantAggregate.class,
@@ -92,37 +66,11 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings = jsonObjectToObjectConverter.convert(payload, CaseDefendantDetailsWithHearings.class);
 
-        final Defendant defendant = caseDefendantDetailsWithHearings.getDefendant();
-
-        final Address address = defendant.getAddress();
-
-        final Interpreter interpreter = defendant.getInterpreter();
-
         for (final UUID hearingId : caseDefendantDetailsWithHearings.getHearingIds()) {
 
             final CaseDefendantDetailsWithHearingCommand defendantWithHearingCommand = CaseDefendantDetailsWithHearingCommand.builder()
                     .withCaseId(caseDefendantDetailsWithHearings.getCaseId())
-                    .withCaseUrn(caseDefendantDetailsWithHearings.getCaseUrn())
-                    .withDefendants(Defendant.builder()
-                            .withId(defendant.getId())
-                            .withPersonId(defendant.getPersonId())
-                            .withFirstName(defendant.getFirstName())
-                            .withLastName(defendant.getLastName())
-                            .withNationality(defendant.getNationality())
-                            .withGender(defendant.getGender())
-                            .withAddress(Address.address()
-                                    .withAddress1(address.getAddress1())
-                                    .withAddress2(address.getAddress2())
-                                    .withAddress3(address.getAddress3())
-                                    .withAddress4(address.getAddress4())
-                                    .withPostcode(address.getPostCode()))
-                            .withDateOfBirth(defendant.getDateOfBirth())
-                            .withBailStatus(defendant.getBailStatus())
-                            .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
-                            .withDefenceOrganisation(defendant.getDefenceOrganisation())
-                            .withInterpreter(Interpreter.interpreter()
-                                    .withLanguage(interpreter.getLanguage())
-                                    .withNeeded(interpreter.getNeeded())))
+                    .withDefendants(Defendant.builder(caseDefendantDetailsWithHearings.getDefendant()))
                     .withHearingIds(Collections.singletonList(hearingId))
                     .build();
 

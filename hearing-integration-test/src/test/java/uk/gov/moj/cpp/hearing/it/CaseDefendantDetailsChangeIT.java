@@ -6,12 +6,12 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
+import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 
 import javax.json.JsonObject;
 import java.text.MessageFormat;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -59,7 +59,6 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
 
         final CaseDefendantDetails caseDefendantDetails = createCaseDefendantDetailsCommand(
                 initiateHearing.getCases().get(0).getCaseId(),
-                initiateHearing.getCases().get(0).getUrn(),
                 hearing.getDefendants());
 
         final String eventName = "public.progression.case-defendant-changed";
@@ -98,11 +97,11 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                         )));
     }
 
-    private CaseDefendantDetails createCaseDefendantDetailsCommand(UUID caseId, String caseUrn, List<uk.gov.moj.cpp.hearing.command.initiate.Defendant> defendants) {
+    private CaseDefendantDetails createCaseDefendantDetailsCommand(UUID caseId, List<uk.gov.moj.cpp.hearing.command.initiate.Defendant> defendants) {
 
         Function<uk.gov.moj.cpp.hearing.command.initiate.Defendant, uk.gov.moj.cpp.hearing.command.defendant.Defendant> mapDefendant = d -> uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
                 .withId(d.getId())
-                .withPersonId(d.getPersonId())
+                .withPerson(Person.builder().withId(d.getPersonId())
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
                 .withNationality(STRING.next())
@@ -113,18 +112,15 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                         .withAddress3(STRING.next())
                         .withAddress4(STRING.next())
                         .withPostcode(STRING.next()))
-                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                .withDateOfBirth(PAST_LOCAL_DATE.next()))
                 .withBailStatus(STRING.next())
-                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next().atStartOfDay(ZoneId.systemDefault()))
+                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                 .withDefenceOrganisation(STRING.next())
-                .withInterpreter(Interpreter.interpreter()
-                        .withLanguage(STRING.next())
-                        .withNeeded(true))
+                .withInterpreter(Interpreter.builder(STRING.next()))
                 .build();
 
         return CaseDefendantDetails.builder()
                 .withCaseId(caseId)
-                .withCaseUrn(caseUrn)
                 .addDefendants(defendants.stream().map(mapDefendant).collect(Collectors.toList()))
                 .build();
     }

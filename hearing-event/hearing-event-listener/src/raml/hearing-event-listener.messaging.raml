@@ -64,6 +64,20 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.defendant-details-updated.json
             example: !include json/hearing.defendant-details-updated.json
 
+# Add Case Defendant Offence
+        application/vnd.hearing.offence-added+json:
+            schema: !include json/schema/hearing.offence-added.json
+            example: !include json/hearing.offence-added.json
+
+# Update Case Defendant Offence
+        application/vnd.hearing.offence-updated+json:
+            schema: !include json/schema/hearing.offence-updated.json
+            example: !include json/hearing.offence-updated.json
+
+# Delete Case Defendant Offence
+        application/vnd.hearing.offence-deleted+json:
+            schema: !include json/schema/hearing.offence-deleted.json
+            example: !include json/hearing.offence-deleted.json
 # old
 
         application/vnd.hearing.hearing-event-definitions-created+json:

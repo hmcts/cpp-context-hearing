@@ -1,0 +1,106 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties": {
+    "modifiedDate": {
+      "$ref": "#/definitions/datePattern"
+    },
+    "updatedOffences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuidPattern"
+          },
+          "offenceCode": {
+            "type": "string"
+          },
+          "wording": {
+            "type": "string"
+          },
+          "startDate": {
+            "$ref": "#/definitions/datePattern"
+          },
+          "endDate": {
+            "$ref": "#/definitions/datePattern"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "convictionDate": {
+            "$ref": "#/definitions/datePattern"
+          },
+          "required": [
+            "id"
+          ]
+        }
+      }
+    },
+    "deletedOffences": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuidPattern"
+          },
+          "required": [
+            "id"
+          ]
+        }
+      }
+    },
+    "addedOffences": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "defendantId": {
+            "$ref": "#/definitions/uuidPattern"
+          },
+          "caseId": {
+            "$ref": "#/definitions/uuidPattern"
+          },
+          "offences": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/uuidPattern"
+                },
+                "offenceCode": {
+                  "type": "string"
+                },
+                "wording": {
+                  "type": "string"
+                },
+                "startDate": {
+                  "$ref": "#/definitions/datePattern"
+                },
+                "endDate": {
+                  "$ref": "#/definitions/datePattern"
+                },
+                "count": {
+                  "type": "integer"
+                },
+                "convictionDate": {
+                  "$ref": "#/definitions/datePattern"
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          },
+          "required": [
+            "defendantId",
+            "caseId",
+            "offences"
+          ]
+        }
+      }
+    },
+    "required": [
+      "modifiedDate"
+    ]
+  }
+}
