@@ -86,6 +86,6 @@ public class ResultingQueryServiceTest {
 
         final JsonEnvelope jsonEnvelope = captor.getValue();
 
-        assertThat(jsonEnvelope, new JsonEnvelopeMatcher().withMetadataOf(metadata().withName("referencedata.result.get-all-prompt-keyword-synonyms")));
+        assertThat(jsonEnvelope, new JsonEnvelopeMatcher().withMetadataOf(metadata().withName("referencedata.get-all-result-prompt-word-synonyms")));
     }
 }
