@@ -87,13 +87,13 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                                 withJsonPath("$.cases[0].caseId", is(initiateHearing.getCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.cases[0].caseUrn", equalStr(initiateHearing, "cases[0].urn")),
                                 withJsonPath("$.cases[0].defendants[0].defendantId", is(caseDefendantDetails.getDefendants().get(0).getId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].firstName", equalStr(caseDefendantDetails, "defendants[0].firstName")),
-                                withJsonPath("$.cases[0].defendants[0].lastName", equalStr(caseDefendantDetails, "defendants[0].lastName")),
-                                withJsonPath("$.cases[0].defendants[0].address.address1", equalStr(caseDefendantDetails, "defendants[0].address.address1")),
-                                withJsonPath("$.cases[0].defendants[0].address.address2", equalStr(caseDefendantDetails, "defendants[0].address.address2")),
-                                withJsonPath("$.cases[0].defendants[0].address.address3", equalStr(caseDefendantDetails, "defendants[0].address.address3")),
-                                withJsonPath("$.cases[0].defendants[0].address.address4", equalStr(caseDefendantDetails, "defendants[0].address.address4")),
-                                withJsonPath("$.cases[0].defendants[0].address.postCode", equalStr(caseDefendantDetails, "defendants[0].address.postCode"))
+                                withJsonPath("$.cases[0].defendants[0].firstName", equalStr(caseDefendantDetails, "defendants[0].person.firstName")),
+                                withJsonPath("$.cases[0].defendants[0].lastName", equalStr(caseDefendantDetails, "defendants[0].person.lastName")),
+                                withJsonPath("$.cases[0].defendants[0].address.address1", equalStr(caseDefendantDetails, "defendants[0].person.address.address1")),
+                                withJsonPath("$.cases[0].defendants[0].address.address2", equalStr(caseDefendantDetails, "defendants[0].person.address.address2")),
+                                withJsonPath("$.cases[0].defendants[0].address.address3", equalStr(caseDefendantDetails, "defendants[0].person.address.address3")),
+                                withJsonPath("$.cases[0].defendants[0].address.address4", equalStr(caseDefendantDetails, "defendants[0].person.address.address4")),
+                                withJsonPath("$.cases[0].defendants[0].address.postCode", equalStr(caseDefendantDetails, "defendants[0].person.address.postCode"))
                         )));
     }
 
