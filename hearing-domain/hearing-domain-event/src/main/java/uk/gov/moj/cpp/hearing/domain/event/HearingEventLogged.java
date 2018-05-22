@@ -1,11 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import uk.gov.justice.domain.annotation.Event;
-
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import uk.gov.justice.domain.annotation.Event;
+@SuppressWarnings({"squid:S00107"})
 @Event("hearing.hearing-event-logged")
 public class HearingEventLogged implements Serializable {
 
@@ -30,23 +30,23 @@ public class HearingEventLogged implements Serializable {
     private String caseUrn;
     private UUID caseId;
     private UUID witnessId;
-
+    private UUID counselId;
     public HearingEventLogged(
-            UUID hearingEventId,
-            UUID lastHearingEventId,
-            UUID hearingId,
-            UUID hearingEventDefinitionId,
-            String recordedLabel,
-            ZonedDateTime eventTime,
-            ZonedDateTime lastModifiedTime,
-            boolean alterable,
-            UUID courtCentreId,
-            String courtCentreName,
-            UUID courtRoomId,
-            String courtRoomName,
-            String hearingType,
-            String caseUrn,
-            UUID caseId, UUID witnessId) {
+            final UUID hearingEventId,
+            final UUID lastHearingEventId,
+            final UUID hearingId,
+            final UUID hearingEventDefinitionId,
+            final String recordedLabel,
+            final ZonedDateTime eventTime,
+            final ZonedDateTime lastModifiedTime,
+            final boolean alterable,
+            final UUID courtCentreId,
+            final String courtCentreName,
+            final UUID courtRoomId,
+            final String courtRoomName,
+            final String hearingType,
+            final String caseUrn,
+                    final UUID caseId, final UUID witnessId, final UUID counselId) {
 
         this.hearingEventId = hearingEventId;
         this.lastHearingEventId = lastHearingEventId;
@@ -64,6 +64,7 @@ public class HearingEventLogged implements Serializable {
         this.caseUrn = caseUrn;
         this.caseId = caseId;
         this.witnessId=witnessId;
+        this.counselId = counselId;
     }
 
     public HearingEventLogged() {
@@ -133,4 +134,9 @@ public class HearingEventLogged implements Serializable {
     public UUID getWitnessId() {
         return this.witnessId;
     }
+
+    public UUID getCounselId() {
+        return counselId;
+    }
+
 }

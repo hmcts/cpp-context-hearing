@@ -1,34 +1,36 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.repository.HearingRepository;
-
-import javax.inject.Inject;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import static java.util.UUID.fromString;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+
 @SuppressWarnings({"CdiInjectionPointsInspection", "WeakerAccess"})
 @ServiceComponent(QUERY_VIEW)
 public class HearingEventQueryView {
 
+    private static final String FIELD_COUNSEL_ID = "counselId";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO = "hearing.get-hearing-event-definitions.v2";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
@@ -118,7 +120,7 @@ public class HearingEventQueryView {
         hearingEvents.
                 forEach(hearingEvent ->
                         {
-                            JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
+                            final JsonObjectBuilder jsonObjectBuilder = createObjectBuilder()
                                     .add(FIELD_HEARING_EVENT_ID, hearingEvent.getId().toString())
                                     .add(FIELD_HEARING_EVENT_DEFINITION_ID, hearingEvent.getHearingEventDefinitionId().toString())
                                     .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
@@ -128,6 +130,10 @@ public class HearingEventQueryView {
 
                             if (hearingEvent.getWitnessId() != null) {
                                 jsonObjectBuilder.add(FIELD_WITNESS_ID, hearingEvent.getWitnessId().toString());
+                            }
+                            if (hearingEvent.getCounselId() != null) {
+                                jsonObjectBuilder.add(FIELD_COUNSEL_ID,
+                                                hearingEvent.getCounselId().toString());
                             }
                             eventLogJsonArrayBuilder.add(jsonObjectBuilder);
                         }
@@ -144,20 +150,20 @@ public class HearingEventQueryView {
 
     private JsonArrayBuilder defendantAndDefenceCounselAttributesFor(final UUID hearingId) {
 
-        Hearing aHearing = hearingRepository.findById(hearingId);
+        final Hearing aHearing = hearingRepository.findById(hearingId);
 
         final JsonArrayBuilder caseAttributesJsonArrayBuilder = createArrayBuilder();
 
         aHearing.getAttendees().stream()
                 .filter(a -> a instanceof DefenceAdvocate)
                 .map(DefenceAdvocate.class::cast)
-                .forEach(defenceAdvocate -> {
+                .forEach(defenceAdvocate ->
                     caseAttributesJsonArrayBuilder.add(
                             createObjectBuilder()
                                     .add(FIELD_COUNSEL_NAME, defenceAdvocate.getPersonId().toString())
                                     .add(FIELD_DEFENDANT_NAME, defenceAdvocate.getDefendants().get(0).getId().getId().toString())
-                    );
-                });
+                    )
+                );
 
         return caseAttributesJsonArrayBuilder;
     }
@@ -202,7 +208,7 @@ public class HearingEventQueryView {
         final JsonObjectBuilder eventDefinitionBuilder = createObjectBuilder();
 
         if (eventDefinition.getCaseAttribute() != null) {
-            JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
+            final JsonArrayBuilder jsonArrayBuilder = createArrayBuilder();
             Arrays.asList(eventDefinition.getCaseAttribute().split(",")).forEach(caseAttribute -> jsonArrayBuilder.add(caseAttribute.trim()));
             eventDefinitionBuilder.add(FIELD_CASE_ATTRIBUTES, jsonArrayBuilder.build());
         }

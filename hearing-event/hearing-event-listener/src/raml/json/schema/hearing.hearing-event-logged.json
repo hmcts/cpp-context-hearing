@@ -14,6 +14,9 @@
     "witnessId": {
       "$ref": "#/definitions/uuid"
     },
+    "counselId": {
+      "$ref": "#/definitions/uuid"
+    },	
     "hearingEventDefinitionId": {
       "$ref": "#/definitions/uuid"
     },

@@ -27,6 +27,9 @@ baseUri: message://event/processor/message/hearing
                   application/vnd.public.hearing.event-timestamp-corrected+json:
                       schema: !include json/schema/public.hearing.event-timestamp-corrected.json
                       example: !include json/public.hearing.event-timestamp-corrected.json
+                  application/vnd.public.hearing.events-updated+json:
+                      schema: !include json/schema/public.hearing.events-updated.json
+                      example: !include json/public.hearing.events-updated.json					  
 
 # Resulting
                   application/vnd.public.hearing.resulted+json:
@@ -50,9 +53,9 @@ baseUri: message://event/processor/message/hearing
                       example: !include json/public.hearing.verdict-updated.json
 
 # Witness-added
-                  application/vnd.public.hearing.events.witness-added+json:
-                      schema: !include json/schema/public.hearing.events.witness-added.json
-                      example: !include json/public.hearing.events.witness-added.json
+                  application/vnd.public.hearing.events.witness-added-updated+json:
+                      schema: !include json/schema/public.hearing.events.witness-added-updated.json
+                      example: !include json/public.hearing.events.witness-added-updated.json
                       
 # Conviction Date                      
                   application/vnd.public.hearing.offence-conviction-date-changed+json:

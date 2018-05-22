@@ -69,6 +69,15 @@ rule "Command - API - Action - hearing.log-hearing-event"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.update-hearing-events"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-hearing-events");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.correct-hearing-event"
   when
     $outcome: Outcome();
@@ -96,10 +105,10 @@ rule "Command - API - Action - hearing.update-verdict"
     $outcome.setSuccess(true);
 end
 
-rule "Command - API - Action - hearing.add-witness"
+rule "Command - API - Action - hearing.add-update-witness"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.add-witness");
+    $action: Action(name == "hearing.add-update-witness");
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
   then
     $outcome.setSuccess(true);

@@ -29,14 +29,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.util.Clock;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
@@ -49,7 +41,6 @@ import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -58,6 +49,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.justice.services.common.util.Clock;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandApiTest {
@@ -97,7 +95,8 @@ public class HearingCommandApiTest {
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "addDefenceCounsel",
-            "addProsecutionCounsel", "initiateHearing", "saveDraftResult");
+                                    "addProsecutionCounsel", "initiateHearing", "saveDraftResult",
+                                    "updateHearingEvents");
 
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;

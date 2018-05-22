@@ -13,6 +13,7 @@ import javax.json.JsonString;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -68,7 +69,8 @@ public class WitnessAddedEventProcessor {
         );
 
 
-        this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.events.witness-added")
+        this.sender.send(this.enveloper
+                        .withMetadataFrom(event, "public.hearing.events.witness-added-updated")
                 .apply(createObjectBuilder().add("witnessId", witnessId.toString()).build()));
     }
 

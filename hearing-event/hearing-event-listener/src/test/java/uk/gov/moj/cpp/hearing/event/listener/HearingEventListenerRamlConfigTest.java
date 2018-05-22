@@ -1,10 +1,23 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
+
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.AssociateHearingIdWithOffence;
@@ -22,18 +35,6 @@ import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
 import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 
 public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";
@@ -56,6 +57,7 @@ public class HearingEventListenerRamlConfigTest {
             UpdateOffenceOnHearings.class.getAnnotation(Event.class).value(),
             DeleteOffenceFromHearings.class.getAnnotation(Event.class).value(),
             AssociateHearingIdWithOffence.class.getAnnotation(Event.class).value()
+
     );
 
     private Map<String, String> handlerNames = new HashMap<>();
@@ -90,7 +92,7 @@ public class HearingEventListenerRamlConfigTest {
 
     @Test
     public void testEventsHandledProperly() {
-        List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event")
+        final List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event")
                 .scan().getNamesOfClassesWithAnnotation(Event.class)
                 .stream().map(className -> {
                     try {

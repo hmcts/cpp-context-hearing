@@ -23,14 +23,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOO
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
-
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +38,13 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingLogEventListenerTest {
@@ -92,6 +93,8 @@ public class HearingLogEventListenerTest {
     private static final String SEQUENCE_TYPE = STRING.next();
     private static final String GROUP_LABEL = STRING.next();
     private static final String ACTION_LABEL_EXTENSION = STRING.next();
+    private static final String FIELD_HEARING_EVENTS = "hearingEvents";
+
 
     @Mock
     private HearingEventRepository hearingEventRepository;
@@ -138,6 +141,34 @@ public class HearingLogEventListenerTest {
         assertThat(eventLogArgumentCaptor.getValue().getRecordedLabel(), is(RECORDED_LABEL));
         assertThat(eventLogArgumentCaptor.getValue().getEventTime().toString(), is(ZonedDateTimes.toString(EVENT_TIME)));
     }
+
+    @Test
+    public void shouldUpdateHearingEvents() {
+        final HearingEvent repoEvent = new HearingEvent();
+        repoEvent.setId(HEARING_EVENT_ID);
+        repoEvent.setHearingId(HEARING_ID);
+        final List<HearingEvent> repositoryHearingEvents =
+                        Arrays.asList(repoEvent);
+        final JsonEnvelope hearingEventsUpdated =
+                        prepareHearingEventsUpdated();
+        when(hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID))
+                        .thenReturn(repositoryHearingEvents);
+        hearingLogEventListener.hearingEventsUpdated(hearingEventsUpdated);
+        verify(hearingEventRepository).save(eventLogArgumentCaptor.capture());
+        assertThat(eventLogArgumentCaptor.getValue().getId(), is(HEARING_EVENT_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getHearingEventDefinitionId(),
+                        is(HEARING_EVENT_DEFINITION_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getHearingId(), is(HEARING_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getWitnessId(), is(WITNESS_ID));
+        assertThat(eventLogArgumentCaptor.getValue().getRecordedLabel(), is(RECORDED_LABEL));
+        assertThat(eventLogArgumentCaptor.getValue().getEventTime().toString(),
+                        is(ZonedDateTimes.toString(EVENT_TIME)));
+        assertThat(eventLogArgumentCaptor.getValue().getLastModifiedTime().toString(),
+                        is(ZonedDateTimes.toString(LAST_MODIFIED_TIME)));
+    }
+
+
+
 
     @Test
     public void shouldDeleteAnExistingHearingEvent() {
@@ -226,7 +257,7 @@ public class HearingLogEventListenerTest {
 
         hearingLogEventListener.hearingEventDefinitionsDeleted(prepareHearingEventDefinitionsDeletedEvent());
 
-        InOrder inOrder = inOrder(hearingEventDefinitionRepository);
+        final InOrder inOrder = inOrder(hearingEventDefinitionRepository);
         inOrder.verify(hearingEventDefinitionRepository).findAllActive();
         inOrder.verify(hearingEventDefinitionRepository, times(3)).save(hearingEventDefinitionArgumentCaptor.capture());
 
@@ -344,5 +375,24 @@ public class HearingLogEventListenerTest {
                 new HearingEventDefinition(HEARING_EVENT_DEFINITION_ID_3, RECORDED_LABEL_3, ACTION_LABEL_3, null,
                         null, null, null, null, ALTERABLE_3)
         );
+    }
+
+    private JsonEnvelope prepareHearingEventsUpdated() {
+        final JsonArrayBuilder arrayhearingEventArrayBuilderBuilder =
+                        createArrayBuilder().add(createObjectBuilder()
+                                        .add(FIELD_HEARING_EVENT_ID, HEARING_EVENT_ID.toString())
+                                        .add(FIELD_HEARING_EVENT_DEFINITION_ID,
+                                                        HEARING_EVENT_DEFINITION_ID.toString())
+                                        .add(FIELD_WITNESS_ID, WITNESS_ID.toString())
+                                        .add(FIELD_RECORDED_LABEL, RECORDED_LABEL.toString())
+                                        .add(FIELD_EVENT_TIME, ZonedDateTimes.toString(EVENT_TIME))
+                                        .add(FIELD_LAST_MODIFIED_TIME, ZonedDateTimes
+                                                        .toString(LAST_MODIFIED_TIME)));
+
+        return envelopeFrom(metadataWithRandomUUIDAndName(),
+                        createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString())
+                                        .add(FIELD_HEARING_EVENTS,
+                                                        arrayhearingEventArrayBuilderBuilder)
+                                        .build());
     }
 }

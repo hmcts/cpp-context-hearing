@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -18,10 +22,6 @@ import uk.gov.moj.cpp.hearing.event.message.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.event.message.eventlog.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.event.message.eventlog.PublicHearingEventLogged;
 
-import javax.inject.Inject;
-
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_PROCESSOR)
 public class LogEventHearingEventProcessor {
@@ -39,15 +39,16 @@ public class LogEventHearingEventProcessor {
     private ObjectToJsonValueConverter objectToJsonValueConverter;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogEventHearingEventProcessor.class);
+    private static final String PUBLIC_HEARING_EVENT_UPDATED = "public.hearing.events-updated";
 
     @Handles("hearing.hearing-event-logged")
     public void publishHearingEventLoggedPublicEvent(final JsonEnvelope event) {
         LOGGER.debug("hearing.hearing-event-logged event received {}", event.payloadAsJsonObject());
 
-        HearingEventLogged hearingEventLogged = this.jsonObjectToObjectConverter
+        final HearingEventLogged hearingEventLogged = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventLogged.class);
 
-        PublicHearingEventLogged eventLogged = PublicHearingEventLogged.builder()
+        final PublicHearingEventLogged eventLogged = PublicHearingEventLogged.builder()
                 .withHearingEventDefinition(HearingEventDefinition.builder()
                         .withHearingEventDefinitionId(hearingEventLogged.getHearingEventDefinitionId())
                         .withPriority(!hearingEventLogged.isAlterable())
@@ -73,19 +74,24 @@ public class LogEventHearingEventProcessor {
                 )
                 .build();
 
-        boolean isTimeStampCorrected = hearingEventLogged.getLastHearingEventId() != null;
+        final boolean isTimeStampCorrected = hearingEventLogged.getLastHearingEventId() != null;
 
-        String eventName = isTimeStampCorrected ? "public.hearing.event-timestamp-corrected" : "public.hearing.event-logged";
+        final String eventName = isTimeStampCorrected ? "public.hearing.event-timestamp-corrected" : "public.hearing.event-logged";
 
         this.sender.send(this.enveloper.withMetadataFrom(event, eventName)
                 .apply(this.objectToJsonValueConverter.convert(eventLogged)));
     }
 
+    @Handles("hearing.hearing-events-updated")
+    public void publishHearingEventsUpdatedEvent(final JsonEnvelope event) {
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_EVENT_UPDATED)
+                        .apply(event.payloadAsJsonObject()));
+    }
     @Handles("hearing.hearing-event-ignored")
     public void publishHearingEventIgnoredPublicEvent(final JsonEnvelope event) {
         LOGGER.debug("hearing.hearing-event-ignored event received {}", event.payloadAsJsonObject());
 
-        HearingEventIgnored hearingEventIgnored = this.jsonObjectToObjectConverter
+        final HearingEventIgnored hearingEventIgnored = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventIgnored.class);
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.event-ignored")

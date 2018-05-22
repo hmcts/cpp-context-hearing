@@ -51,6 +51,9 @@
     },
     "witnessId": {
       "$ref": "#/definitions/uuid"
+    },
+    "counselId": {
+      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,

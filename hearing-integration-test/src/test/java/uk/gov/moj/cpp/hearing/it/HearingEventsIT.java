@@ -1,18 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
-
-import java.text.MessageFormat;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
@@ -33,27 +20,48 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.correctLogEvent;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
+import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+
+import java.text.MessageFormat;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Test;
+
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
 public class HearingEventsIT extends AbstractIT {
 
     private final UUID userId = randomUUID();
-
+    private static final UUID COUNSEL_ID = randomUUID();
     @Test
     public void publishEvent_givenStartOfHearing() {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
-        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
 
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
-        LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), false, null);
+        final LogEventCommand logEventCommand =
+                        logEvent(requestSpec, asDefault(), initiateHearingCommand,
+                                        hearingEventDefinition.getId(), false, null, COUNSEL_ID);
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
                 initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -69,7 +77,7 @@ public class HearingEventsIT extends AbstractIT {
                                 withJsonPath("$.events[0].recordedLabel", is(logEventCommand.getRecordedLabel())),
                                 withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
                                 withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
-
+                                withJsonPath("$.events[0].counselId", is(logEventCommand.getCounselId().toString())),
                                 withJsonPath("$.events[0].alterable", is(false))
                         ))
                 );
@@ -79,17 +87,19 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEventWithWitness_givenStartOfHearing() {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
-        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
 
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
-        LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), false, randomUUID());
+        final LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(),
+                        initiateHearingCommand, hearingEventDefinition.getId(), false, randomUUID(),
+                        COUNSEL_ID);
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
                 initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -106,7 +116,7 @@ public class HearingEventsIT extends AbstractIT {
                                 withJsonPath("$.events[0].recordedLabel", is(logEventCommand.getRecordedLabel())),
                                 withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
                                 withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
-
+                                withJsonPath("$.events[0].counselId", is(logEventCommand.getCounselId().toString())),
                                 withJsonPath("$.events[0].alterable", is(false))
                         ))
                 );
@@ -116,32 +126,34 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishHearingIgnoredEvent_givenNoHearing() {
 
-        UUID hearingId = randomUUID();
+        final UUID hearingId = randomUUID();
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
-        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
 
-        LogEventCommand logEventCommand = logEventThatIsIgnored(requestSpec, asDefault(), hearingId, hearingEventDefinition.getId(),
+        final LogEventCommand logEventCommand = logEventThatIsIgnored(requestSpec, asDefault(), hearingId, hearingEventDefinition.getId(),
                 hearingEventDefinition.isAlterable(), "Hearing not found");
     }
 
     @Test
     public void publishEvent_givenIdentifyDefendantEvent() {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
-        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Identify defendant");
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Identify defendant");
 
         assertThat(hearingEventDefinition.isAlterable(), is(true));
 
-        LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), true, null);
+        final LogEventCommand logEventCommand =
+                        logEvent(requestSpec, asDefault(), initiateHearingCommand,
+                                        hearingEventDefinition.getId(), true, null, COUNSEL_ID);
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
                 initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -157,7 +169,7 @@ public class HearingEventsIT extends AbstractIT {
                                 withJsonPath("$.events[0].recordedLabel", is(logEventCommand.getRecordedLabel())),
                                 withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
                                 withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
-
+                                withJsonPath("$.events[0].counselId", is(logEventCommand.getCounselId().toString())),
                                 withJsonPath("$.events[0].alterable", is(true))
                         ))
                 );
@@ -167,16 +179,18 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEventCorrection_givenStartHearingEvent() {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
-        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
-        LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), false, null);
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+        final LogEventCommand logEventCommand =
+                        logEvent(requestSpec, asDefault(), initiateHearingCommand,
+                                        hearingEventDefinition.getId(), false, null, COUNSEL_ID);
 
-        CorrectLogEventCommand correctLogEventCommand = correctLogEvent(requestSpec, logEventCommand.getHearingEventId(),
+        final CorrectLogEventCommand correctLogEventCommand = correctLogEvent(requestSpec, logEventCommand.getHearingEventId(),
                 asDefault(), initiateHearingCommand, hearingEventDefinition.getId(), false);
 
 
@@ -203,27 +217,29 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishMultipleEventsAndCorrection_shouldReturnInEventTimeOrder() {
 
-        ZonedDateTime zonedDateTime = PAST_ZONED_DATE_TIME.next();
+        final ZonedDateTime zonedDateTime = PAST_ZONED_DATE_TIME.next();
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
-        HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
 
-        HearingEventDefinition startHearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
-        LogEventCommand startHearingLogEventCommand = logEvent(requestSpec,
+        final HearingEventDefinition startHearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+        final LogEventCommand startHearingLogEventCommand = logEvent(requestSpec,
                 e -> e.withEventTime(zonedDateTime),
-                initiateHearingCommand, startHearingEventDefinition.getId(), false, null);
+                        initiateHearingCommand, startHearingEventDefinition.getId(), false, null,
+                        COUNSEL_ID);
 
-        CorrectLogEventCommand correctLogEventCommand = correctLogEvent(requestSpec, startHearingLogEventCommand.getHearingEventId(),
+        final CorrectLogEventCommand correctLogEventCommand = correctLogEvent(requestSpec, startHearingLogEventCommand.getHearingEventId(),
                 e -> e.withEventTime(zonedDateTime.plusMinutes(40)),
                 initiateHearingCommand, startHearingEventDefinition.getId(), false);
 
-        HearingEventDefinition identifyDefendantEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Identify defendant");
-        LogEventCommand identifyDefendantLogEventCommand = logEvent(requestSpec,
+        final HearingEventDefinition identifyDefendantEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Identify defendant");
+        final LogEventCommand identifyDefendantLogEventCommand = logEvent(requestSpec,
                 e -> e.withEventTime(zonedDateTime.plusMinutes(20)),
-                initiateHearingCommand, identifyDefendantEventDefinition.getId(), true, null);
+                        initiateHearingCommand, identifyDefendantEventDefinition.getId(), true,
+                        null, COUNSEL_ID);
 
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
@@ -243,11 +259,58 @@ public class HearingEventsIT extends AbstractIT {
                 );
     }
 
-    private static HearingEventDefinition findEventDefinitionWithActionLabel(HearingEventDefinitionData hearingEventDefinitionData, String actionLabel) {
+    @Test
+    public void publishEvent_hearingEventsUpdated() {
+
+        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+
+        givenAUserHasLoggedInAsACourtClerk(userId);
+
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        final LogEventCommand logEventCommand =
+                        logEvent(requestSpec, asDefault(), initiateHearingCommand,
+                                        hearingEventDefinition.getId(), false, randomUUID(),
+                                        COUNSEL_ID);
+        final HearingEvent hearingEvent = new HearingEvent(logEventCommand.getHearingEventId(), logEventCommand.getHearingEventDefinitionId(), PAST_ZONED_DATE_TIME.next(), "RL1", PAST_ZONED_DATE_TIME.next(), logEventCommand.getWitnessId());
+
+        final String commandAPIEndPoint = MessageFormat.format(
+                        ENDPOINT_PROPERTIES.getProperty("hearing.update-hearing-events"),
+                        logEventCommand.getHearingId().toString());
+
+        final JsonObject hearingEventsUpdated = updateHearingEvents(requestSpec,
+                        logEventCommand.getHearingId(), Arrays.asList(hearingEvent),
+                        commandAPIEndPoint, CPP_UID_HEADER);
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
+                        initiateHearingCommand.getHearing().getId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                        .until(
+                                status().is(OK),
+                                print(),
+                                payload().isJson(allOf(
+
+                                        withJsonPath("$.hearingId", is(logEventCommand.getHearingId().toString())),
+                                        withJsonPath("$.events", hasSize(1)),
+
+                                        withJsonPath("$.events[0].hearingEventId", is(hearingEvent.getHearingEventId().toString())),
+                                        withJsonPath("$.events[0].hearingEventDefinitionId", is(hearingEvent.getHearingEventDefinitionId().toString())),
+                                        withJsonPath("$.events[0].recordedLabel", is(hearingEvent.getRecordedLabel())),
+                                        withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(hearingEvent.getEventTime()))),
+                                        withJsonPath("$.events[0].witnessId", is(hearingEvent.getWitnessId().toString())),
+                                        withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(hearingEvent.getLastModifiedTime())))
+                                ))
+                        );
+
+    }
+    
+    private static HearingEventDefinition findEventDefinitionWithActionLabel(final HearingEventDefinitionData hearingEventDefinitionData, final String actionLabel) {
         return hearingEventDefinitionData.getEventDefinitions().stream().filter(d -> d.getActionLabel().equals(actionLabel)).findFirst().get();
     }
 
-    public static HearingEventDefinitionData hearingDefinitionData(List<HearingEventDefinition> hearingEventDefinitions) {
+    public static HearingEventDefinitionData hearingDefinitionData(final List<HearingEventDefinition> hearingEventDefinitions) {
         return new HearingEventDefinitionData(randomUUID(), hearingEventDefinitions);
     }
 

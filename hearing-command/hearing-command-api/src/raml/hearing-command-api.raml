@@ -50,8 +50,8 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             requestType: application/vnd.hearing.update-verdict+json
             name: hearing.update-verdict
         (mapping):
-            requestType: application/vnd.hearing.add-witness+json
-            name: hearing.add-witness
+            requestType: application/vnd.hearing.add-update-witness+json
+            name: hearing.add-update-witness
         ...
       body:
         application/vnd.hearing.save-draft-result+json:
@@ -79,11 +79,11 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.update-verdict.json
             schema:
              !include json/schema/hearing.update-verdict.json
-        application/vnd.hearing.add-witness+json:
+        application/vnd.hearing.add-update-witness+json:
             example:
-             !include json/hearing.add-witness.json
+             !include json/hearing.add-update-witness.json
             schema:
-             !include json/schema/hearing.add-witness.json
+             !include json/schema/hearing.add-update-witness.json
       responses:
             202:
                 description: OK
@@ -118,6 +118,22 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.log-hearing-event+json:
             example: !include json/hearing.log-hearing-event.json
             schema: !include json/schema/hearing.log-hearing-event.json
+      responses:
+            202:
+              description: OK
+
+/hearings/{hearingId}/events:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.update-hearing-events+json
+            name: hearing.update-hearing-events	
+        ...
+      body:
+        application/vnd.hearing.update-hearing-events+json:
+            example: !include json/hearing.update-hearing-events.json
+            schema: !include json/schema/hearing.update-hearing-events.json			
       responses:
             202:
                 description: OK
