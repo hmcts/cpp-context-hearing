@@ -38,7 +38,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import javax.json.JsonObject;
 import javax.json.JsonString;
-import javax.persistence.NoResultException;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public class HearingServiceTest {
 
     @Test
     public void shouldFindHearingListByStartDate() throws Exception {
-        ZonedDateTime startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate().atStartOfDay(ZoneOffset.systemDefault());
+        LocalDate startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate();
         final List<Hearing> hearingList = HearingTestUtils.buildHearingList();
 
         when(hearingRepository.findByDate(startDateStartOfDay)).thenReturn(hearingList);
@@ -101,8 +101,8 @@ public class HearingServiceTest {
 
         assertEquals(hearing.getId().toString(), response.getHearingId());
         assertEquals(hearing.getHearingType(), response.getHearingType());
-        assertEquals(hearing.getStartDateTime().format(ISO_LOCAL_DATE), response.getStartDate());
-        assertEquals(hearing.getStartDateTime().format(ISO_LOCAL_TIME), response.getStartTime());
+        assertEquals(hearing.getHearingDays().get(0).getDateTime().format(ISO_LOCAL_DATE), response.getStartDate());
+        assertEquals(hearing.getHearingDays().get(0).getDateTime().format(ISO_LOCAL_TIME), response.getStartTime());
         assertEquals(hearing.getCourtCentreId().toString(), response.getCourtCentreId());
         assertEquals(hearing.getCourtCentreName(), response.getCourtCentreName());
         assertEquals(hearing.getRoomId().toString(), response.getRoomId());

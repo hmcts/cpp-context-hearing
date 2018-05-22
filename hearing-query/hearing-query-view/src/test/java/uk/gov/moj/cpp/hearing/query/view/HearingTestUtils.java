@@ -1,13 +1,10 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static java.time.ZonedDateTime.parse;
-import static java.util.UUID.randomUUID;
-
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
@@ -19,8 +16,9 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+
+import static java.time.ZonedDateTime.parse;
 
 public class HearingTestUtils {
 
@@ -64,7 +62,6 @@ public class HearingTestUtils {
         return Hearing.builder()
                 .withId(hearingId)
                 .withHearingType("TRIAL")
-                .withStartDateTime(startDateTime)
                 .withHearingDays(Arrays.asList(buildHearingDate(hearingId, startDateTime)))
                 .withCourtCentreId(UUID.fromString("e8821a38-546d-4b56-9992-ebdd772a561f"))
                 .withCourtCentreName("Liverpool Crown Court")
@@ -196,7 +193,7 @@ public class HearingTestUtils {
                 .withVerdictCode("A1")
                 .withVerdictCategory("GUILTY")
                 .withVerdictDescription("Guilty By Jury On Judges Direction")
-                .withVerdictTypeId(randomUUID())
+                .withVerdictTypeId(UUID.randomUUID())
                 .withVerdictDate(parse("2018-02-21T00:00:00Z").toLocalDate())
                 .withNumberOfJurors(10)
                 .withNumberOfSplitJurors(2)
@@ -226,7 +223,8 @@ public class HearingTestUtils {
     }
     public static HearingDate buildHearingDate(final UUID ahearingId, final ZonedDateTime startDate) {
         return HearingDate.builder()
-                .withDate(startDate)
+                .withDateTime(startDate)
+                .withDate(startDate.toLocalDate())
                 .withId(new HearingSnapshotKey(UUID.randomUUID(), ahearingId))
                 .build();
     }

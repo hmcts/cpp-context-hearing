@@ -56,8 +56,8 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
 
         return HearingDetailsResponse.builder()
                 .withHearingId(source.getId().toString())
-                .withStartDate(toDateStringOrNull(source.getStartDateTime()))
-                .withStartTime(toTimeStringOrNull(source.getStartDateTime()))
+                .withStartDate(toDateStringOrNull(isEmpty(source.getHearingDays()) ? null : source.getHearingDays().get(0).getDateTime()))
+                .withStartTime(toTimeStringOrNull(isEmpty(source.getHearingDays()) ? null : source.getHearingDays().get(0).getDateTime()))
                 .withHearingDays(source.getHearingDays().stream()
                         .map(ahd -> ahd.getDate().toString())
                         .collect(toList()))

@@ -160,7 +160,8 @@ public class InitiateHearingEventListenerTest {
         assertThat(actualHearing.getCourtCentreName(), is(hearing.getCourtCentreName()));
         assertThat(actualHearing.getRoomId(), is(hearing.getCourtRoomId()));
         assertThat(actualHearing.getRoomName(), is(hearing.getCourtRoomName()));
-        assertThat(actualHearing.getStartDateTime().toLocalDateTime(), is(hearing.getStartDateTime().toLocalDateTime()));
+        assertThat(actualHearing.getHearingDays().get(0).getDateTime().toLocalDateTime(), is(hearing.getStartDateTime().toLocalDateTime()));
+        assertThat(actualHearing.getHearingDays().get(0).getDate(), is(hearing.getStartDateTime().toLocalDate()));
         assertThat(actualHearing.getHearingType(), is(hearing.getType()));
 
         final Judge actualJudge = actualHearing.getAttendees().stream()

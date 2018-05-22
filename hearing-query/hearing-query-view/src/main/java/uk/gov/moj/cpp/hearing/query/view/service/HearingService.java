@@ -1,12 +1,10 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import static java.util.stream.Collectors.toList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
@@ -19,20 +17,15 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.persistence.NoResultException;
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
 import static java.util.stream.Collectors.toList;
 
 public class HearingService {
@@ -53,8 +46,7 @@ public class HearingService {
         if (null == date) {
             return new HearingListResponse();
         }
-        final ZonedDateTime zonedDateTime = date.atStartOfDay(ZoneOffset.systemDefault());
-        return new HearingListResponseConverter().convert(hearingRepository.findByDate(zonedDateTime));
+        return new HearingListResponseConverter().convert(hearingRepository.findByDate(date));
     }
 
     @Transactional

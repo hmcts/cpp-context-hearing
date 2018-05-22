@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,9 +30,6 @@ public class Hearing {
     @Column(name = "hearing_type")
     private String hearingType;
 
-    @Column(name = "start_date_time")
-    private ZonedDateTime startDateTime;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private List<HearingDate> hearingDays = new ArrayList<>();
 
@@ -58,7 +54,6 @@ public class Hearing {
     public Hearing(Builder builder) {
         this.id = builder.id;
         this.hearingType = builder.hearingType;
-        this.startDateTime = builder.startDateTime;
         this.hearingDays = builder.hearingDays;
         this.courtCentreId = builder.courtCentreId;
         this.courtCentreName = builder.courtCentreName;
@@ -105,10 +100,6 @@ public class Hearing {
         return hearingType;
     }
 
-    public ZonedDateTime getStartDateTime() {
-        return startDateTime;
-    }
-
     public List<HearingDate> getHearingDays() {
         return hearingDays;
     }
@@ -133,7 +124,6 @@ public class Hearing {
         private UUID id;
         private List<Defendant> defendants = new ArrayList<>();
         private String hearingType;
-        private ZonedDateTime startDateTime;
         private List<HearingDate> hearingDays = new ArrayList<>();
         private UUID courtCentreId;
         private String courtCentreName;
@@ -166,11 +156,6 @@ public class Hearing {
 
         public Builder withHearingType(String hearingType) {
             this.hearingType = hearingType;
-            return this;
-        }
-
-        public Builder withStartDateTime(ZonedDateTime startDateTime) {
-            this.startDateTime = startDateTime;
             return this;
         }
 

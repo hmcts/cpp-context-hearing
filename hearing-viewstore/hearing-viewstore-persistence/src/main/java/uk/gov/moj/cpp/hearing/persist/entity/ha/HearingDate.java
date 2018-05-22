@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -22,7 +23,11 @@ public class HearingDate {
     private Hearing hearing;
 
     @Column(name = "date")
-    private ZonedDateTime date;
+    private LocalDate date;
+
+    @Column(name = "date_time")
+    private ZonedDateTime dateTime;
+
 
     public HearingDate() {
     }
@@ -30,6 +35,7 @@ public class HearingDate {
     public HearingDate(Builder builder) {
         this.id = builder.id;
         this.hearing = builder.hearing;
+        this.dateTime = builder.dateTime;
         this.date = builder.date;
 
     }
@@ -42,14 +48,19 @@ public class HearingDate {
         return hearing;
     }
 
-    public ZonedDateTime getDate() {
+    public LocalDate getDate() {
         return date;
+    }
+
+    public ZonedDateTime getDateTime() {
+        return dateTime;
     }
 
     public static class Builder {
         private HearingSnapshotKey id;
         private Hearing hearing;
-        private ZonedDateTime date;
+        private LocalDate date;
+        private ZonedDateTime dateTime;
 
 
         protected Builder() {}
@@ -64,8 +75,13 @@ public class HearingDate {
             return this;
         }
 
-        public Builder withDate(ZonedDateTime date) {
+        public Builder withDate(LocalDate date) {
             this.date = date;
+            return this;
+        }
+
+        public Builder withDateTime(ZonedDateTime dateTime) {
+            this.dateTime = dateTime;
             return this;
         }
 
