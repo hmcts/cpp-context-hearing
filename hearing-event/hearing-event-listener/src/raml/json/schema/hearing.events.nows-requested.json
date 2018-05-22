@@ -1,8 +1,7 @@
 {
-  "$id": "http://example.com/example.json",
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "definitions": {},
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "properties": {
     "hearing": {

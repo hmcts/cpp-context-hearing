@@ -1,10 +1,14 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 public class Hearing {
+
     private UUID caseId;
 
     private String caseUrn;
@@ -23,7 +27,14 @@ public class Hearing {
 
     }
 
-    public Hearing(final UUID caseId, final String caseUrn, final String courtCentreId, final String courtCentreName, final List<Defendant> defendants, final LocalDate sendingCommittalDate, final String type) {
+    @JsonCreator
+    public Hearing(@JsonProperty("caseId") final UUID caseId,
+                   @JsonProperty("caseUrn") final String caseUrn,
+                   @JsonProperty("courtCentreId") final String courtCentreId,
+                   @JsonProperty("courtCentreName") final String courtCentreName,
+                   @JsonProperty("defendants") final List<Defendant> defendants,
+                   @JsonProperty("sendingCommittalDate") final LocalDate sendingCommittalDate,
+                   @JsonProperty("type") final String type) {
         this.caseId = caseId;
         this.caseUrn = caseUrn;
         this.courtCentreId = courtCentreId;

@@ -1,25 +1,28 @@
 {
-  "hearings":[
+  "hearings": [
     {
-      "hearingId":"23ef34ec-63e5-422e-8071-9b3753008c10",
-      "hearingType":"TRIAL",
-      "caseUrn":[
-        "32GD9387517"
-      ],
-      "defendants":[
+      "hearingId": "23ef34ec-63e5-422e-8071-9b3753008c10",
+      "hearingType": "TRIAL",
+      "cases": [
         {
-          "firstName":"Mark",
-          "lastName":"Zuckerberg"
+          "id": "1daefec3-2f76-8109-82d9-9b3753008c10",
+          "urn": "32GD9387517"
+        }
+      ],
+      "defendants": [
+        {
+          "firstName": "Mark",
+          "lastName": "Zuckerberg"
         },
         {
-          "firstName":"Sean",
-          "lastName":"Parker"
+          "firstName": "Sean",
+          "lastName": "Parker"
         }
       ],
       "witnesses": [
         {
           "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
-          "type":"Prosecution",
+          "type": "Prosecution",
           "classification": "Professional",
           "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
           "title": "Mr",
@@ -37,29 +40,32 @@
       ]
     },
     {
-      "hearingId":"1daefec3-2f76-8109-82d9-2e60544a6c01",
-      "hearingType":"TRIAL",
-      "caseUrn":[
-        "32GD9387518"
+      "hearingId": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "hearingType": "TRIAL",
+      "cases": [
+        {
+          "id": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+          "urn": "32GD9387518"
+        }
       ],
-      "defendants":[
+      "defendants": [
         {
-          "firstName":"Larry",
-          "lastName":"Wall"
+          "firstName": "Larry",
+          "lastName": "Wall"
         },
         {
-          "firstName":"Dennis",
-          "lastName":"Ritchie"
+          "firstName": "Dennis",
+          "lastName": "Ritchie"
         },
         {
-          "firstName":"James",
-          "lastName":"Gosling"
+          "firstName": "James",
+          "lastName": "Gosling"
         }
       ],
       "witnesses": [
         {
           "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
-          "type":"Prosecution",
+          "type": "Prosecution",
           "classification": "Professional",
           "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
           "title": "Mr",

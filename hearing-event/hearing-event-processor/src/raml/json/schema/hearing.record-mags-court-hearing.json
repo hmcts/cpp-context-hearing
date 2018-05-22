@@ -1,31 +1,10 @@
 {
   "$schema":"http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/progression/events/progression.events.sending-sheet-completed.json",
   "type":"object",
   "required": [
-    "hearing",
-    "crownCourtHearing"
+    "hearing"
   ],
   "properties":{
-    "crownCourtHearing":{
-      "required":[
-        "ccHearingDate",
-        "courtCentreName",
-        "courtCentreId"
-      ],
-      "type":"object",
-      "properties":{
-        "ccHearingDate":{
-          "$ref":"#/definitions/datePattern"
-        },
-        "courtCentreName":{
-          "type":"string"
-        },
-        "courtCentreId":{
-          "$ref":"#/definitions/uuidPattern"
-        }
-      }
-    },
     "hearing":{
       "required":[
         "courtCentreName",

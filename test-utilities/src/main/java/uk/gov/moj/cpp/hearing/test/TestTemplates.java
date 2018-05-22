@@ -22,6 +22,10 @@ import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.Witness;
+import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
+import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
 import uk.gov.moj.cpp.hearing.command.result.Level;
@@ -30,8 +34,8 @@ import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
-
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -315,4 +319,55 @@ public class TestTemplates {
                 ))
                 .build();
     }
+
+    public static class CaseDefendantDetailsChangedCommand {
+
+        private CaseDefendantDetailsChangedCommand(){}
+
+
+        public static CaseDefendantOffencesChangedCommand standard() {
+            return CaseDefendantOffencesChangedCommand.builder()
+                    .withModifiedDate(LocalDate.now())
+                    .build();
+
+        }
+
+        public static AddedOffence addedOffence() {
+            return AddedOffence.builder()
+                    .withDefendantId(randomUUID())
+                    .withCaseId(randomUUID())
+                    .withAddedOffences(asList(
+                            UpdatedOffence.builder()
+                                    .withId(randomUUID())
+                                    .withOffenceCode(STRING.next())
+                                    .withWording(STRING.next())
+                                    .withStartDate(PAST_LOCAL_DATE.next())
+                                    .withEndDate(PAST_LOCAL_DATE.next())
+                                    .withCount(INTEGER.next())
+                                    .withConvictionDate(PAST_LOCAL_DATE.next())
+                                    .build()
+                            )
+                    )
+                    .build();
+        }
+
+        public static UpdatedOffence updatedOffence() {
+            return UpdatedOffence.builder()
+                    .withId(randomUUID())
+                    .withOffenceCode(STRING.next())
+                    .withWording(STRING.next())
+                    .withStartDate(PAST_LOCAL_DATE.next())
+                    .withEndDate(PAST_LOCAL_DATE.next())
+                    .withCount(INTEGER.next())
+                    .withConvictionDate(PAST_LOCAL_DATE.next())
+                    .build();
+        }
+
+        public static DeletedOffence deletedOffence() {
+            return DeletedOffence.builder().withId(randomUUID()).build();
+        }
+
+    }
+
+
 }

@@ -1,39 +1,37 @@
 {
-  "$schema":"http://json-schema.org/draft-04/schema#",
-  "type":"object",
-  "additionalProperties":false,
-  "properties":{
-    "hearings":{
-      "type":"array",
-      "items":{
-        "$ref":"#/definitions/hearing"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "hearings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/hearing"
       }
     }
   },
-  "required":[
+  "required": [
     "hearings"
   ],
-  "definitions":{
-    "hearing":{
-      "type":"object",
-      "properties":{
-        "hearingId":{
-          "$ref":"#/definitions/uuid"
+  "definitions": {
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
         },
-        "hearingType":{
-          "type":"string"
+        "hearingType": {
+          "type": "string"
         },
-        "caseUrn":{
-          "type":"array",
-          "items":[
-            {
-              "type":"string"
-            }
-          ]
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/case"
+          }
         },
-        "defendants":{
-          "type":"array",
-          "$ref":"#/definitions/defendant"
+        "defendants": {
+          "type": "array",
+          "$ref": "#/definitions/defendant"
         },
         "witnesses": {
           "type": "array",
@@ -42,24 +40,39 @@
           }
         }
       },
-      "required":[
+      "required": [
         "hearingId",
         "hearingType",
-        "caseUrn",
+        "cases",
         "defendants"
       ]
     },
-    "defendant":{
-      "type":"array",
-      "properties":{
-        "firstName":{
-          "type":"string"
+    "case": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
         },
-        "lastName":{
-          "type":"string"
+        "urn": {
+          "type": "string"
         }
       },
-      "required":[
+      "required": [
+        "id",
+        "urn"
+      ]
+    },
+    "defendant": {
+      "type": "array",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
         "firstName",
         "lastName"
       ]
@@ -120,9 +133,9 @@
         "personId"
       ]
     },
-    "uuid":{
-      "type":"string",
-      "pattern":"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   }
 }

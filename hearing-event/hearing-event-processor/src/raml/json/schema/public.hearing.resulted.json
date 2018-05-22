@@ -20,6 +20,12 @@
         "id": {
           "$ref": "#/definitions/uuid"
         },
+        "startDateTime": {
+          "type": "string"
+        },
+        "hearingType": {
+          "type": "string"
+        },
         "courtCentre": {
           "$ref": "#/definitions/courtCentre"
         },
@@ -88,14 +94,31 @@
         },
         "title": {
           "type": "string"
+        },
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "status":{
+          "type": "string"
+        },
+        "defendantIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "caseIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "additionalProperties": false,
       "required": [
         "firstName",
         "lastName",
-        "type",
-        "title"
+        "type"
       ]
     },
     "defendant": {
@@ -119,12 +142,7 @@
             "language": {
               "type": "string"
             }
-          },
-          "additionalProperties": false,
-          "required": [
-            "name",
-            "language"
-          ]
+          }
         },
         "cases": {
           "type": "array",
@@ -137,7 +155,6 @@
       "required": [
         "id",
         "person",
-        "defenceOrganisation",
         "interpreter",
         "cases"
       ]
@@ -189,7 +206,6 @@
         "lastName",
         "dateOfBirth",
         "address",
-        "gender",
         "homeTelephone",
         "workTelephone",
         "mobile",
@@ -218,11 +234,7 @@
       },
       "additionalProperties": false,
       "required": [
-        "address1",
-        "address2",
-        "address3",
-        "address4",
-        "postCode"
+        "address1"
       ]
     },
     "case": {
@@ -251,8 +263,6 @@
       "required": [
         "id",
         "urn",
-        "bailStatus",
-        "custodyTimeLimitDate",
         "offences"
       ]
     },
@@ -288,12 +298,9 @@
       "required": [
         "id",
         "code",
-        "convictionDate",
         "plea",
-        "verdict",
         "wording",
-        "startDate",
-        "endDate"
+        "startDate"
       ]
     },
     "plea": {
@@ -360,6 +367,9 @@
       "type": "object",
       "properties": {
         "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "lastSharedResultId": {
           "$ref": "#/definitions/uuid"
         },
         "caseId": {

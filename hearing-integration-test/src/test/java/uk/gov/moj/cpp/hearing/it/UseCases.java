@@ -1,5 +1,40 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.ReadContext;
+import com.jayway.jsonpath.internal.JsonContext;
+import com.jayway.restassured.response.Header;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
+import org.apache.http.HttpStatus;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
+import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
+import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
+import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
+import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.Offence;
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
+import uk.gov.moj.cpp.hearing.it.PleaIT.PleaValueType;
+import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
@@ -11,7 +46,6 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -23,48 +57,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-
-import org.apache.http.HttpStatus;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.ReadContext;
-import com.jayway.jsonpath.internal.JsonContext;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.Response;
-import com.jayway.restassured.specification.RequestSpecification;
-
-import uk.gov.justice.progression.events.CaseDefendantOffencesChanged;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffence;
-import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
-import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
-import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.Offence;
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
-import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
-import uk.gov.moj.cpp.hearing.it.PleaIT.PleaValueType;
-import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
-
-@SuppressWarnings("unchecked")
 public class UseCases {
 
     public static <T> Consumer<T> asDefault() {
@@ -160,8 +152,6 @@ public class UseCases {
 
         return hearingUpdateVerdictCommand;
     }
-
-
 
 
     public static UUID initiateHearingWithOffenceAndPlea(final RequestSpecification requestSpec,
@@ -287,6 +277,7 @@ public class UseCases {
                         .withEventTime(PAST_ZONED_DATE_TIME.next())
                         .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
                         .withRecordedLabel(STRING.next())
+
                 , consumer).build();
 
         final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.event-timestamp-corrected")
@@ -424,83 +415,58 @@ public class UseCases {
         return logEvent;
     }
 
-    public static CaseDefendantOffencesChanged addOffence(final InitiateHearingCommand initiateHearingCommand) throws Exception {
+    public static CaseDefendantOffencesChangedCommand addOffence(UUID hearingId, Consumer<CaseDefendantOffencesChangedCommand> consumer) throws Exception {
 
-        final Hearing hearing = initiateHearingCommand.getHearing();
+        CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand = with(TestTemplates.CaseDefendantDetailsChangedCommand.standard(), command -> {
+            command.getAddedOffences().add(TestTemplates.CaseDefendantDetailsChangedCommand.addedOffence());
+        });
 
-        final String eventName = "public.progression.defendant-offences-changed";
-
-        final List<DefendantCaseOffence> addOffences = Arrays.asList(
-                DefendantCaseOffence.builder()
-                        .withDefendantId(hearing.getDefendants().get(0).getId())
-                        .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
-                        .withAddedOffences(Arrays.asList(
-                                uk.gov.moj.cpp.hearing.command.offence.Offence.builder()
-                                        .withId(randomUUID())
-                                        .withOffenceCode(STRING.next())
-                                        .withWording(STRING.next())
-                                        .withStartDate(PAST_LOCAL_DATE.next())
-                                        .withEndDate(PAST_LOCAL_DATE.next())
-                                        .withCount(INTEGER.next())
-                                        .withConvictionDate(PAST_LOCAL_DATE.next())
-                                        .build())).build());
-
-        final CaseDefendantOffencesChanged caseDefendantOffencesChanged = CaseDefendantOffencesChanged.builder()
-                .withModifiedDate(LocalDate.now())
-                .withAddedOffences(addOffences)
-                .build();
+        consumer.accept(caseDefendantOffencesChangedCommand);
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
-        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantOffencesChanged), JsonObject.class);
+        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantOffencesChangedCommand), JsonObject.class);
 
-        sendPublicEvent(hearing.getId(), eventName, jsonObject);
+        sendPublicEvent(hearingId, "public.progression.defendant-offences-changed", jsonObject);
 
-        return caseDefendantOffencesChanged;
+        return caseDefendantOffencesChangedCommand;
     }
 
-    public static CaseDefendantOffencesChanged updateOffence(final InitiateHearingCommand initiateHearingCommand) throws Exception {
-
-        final Hearing hearing = initiateHearingCommand.getHearing();
+    public static CaseDefendantOffencesChangedCommand updateOffence(UUID hearingId, Consumer<CaseDefendantOffencesChangedCommand> consumer) throws Exception {
 
         final String eventName = "public.progression.defendant-offences-changed";
 
-        final List<uk.gov.moj.cpp.hearing.command.offence.Offence> updatedOffences = Collections.singletonList(convertOffence(hearing));
+        CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand = with(TestTemplates.CaseDefendantDetailsChangedCommand.standard(), command -> {
+            command.getUpdatedOffences().add(TestTemplates.CaseDefendantDetailsChangedCommand.updatedOffence());
+        });
 
-        final CaseDefendantOffencesChanged caseDefendantOffencesChanged = CaseDefendantOffencesChanged.builder()
-                .withModifiedDate(LocalDate.now())
-                .withUpdateOffences(updatedOffences)
-                .build();
+        consumer.accept(caseDefendantOffencesChangedCommand);
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
-        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantOffencesChanged), JsonObject.class);
+        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantOffencesChangedCommand), JsonObject.class);
 
-        sendPublicEvent(hearing.getId(), eventName, jsonObject);
+        sendPublicEvent(hearingId, eventName, jsonObject);
 
-        return caseDefendantOffencesChanged;
+        return caseDefendantOffencesChangedCommand;
     }
 
-    public static CaseDefendantOffencesChanged deleteOffence(final InitiateHearingCommand initiateHearingCommand) throws Exception {
+    public static CaseDefendantOffencesChangedCommand deleteOffence(UUID hearingId, Consumer<CaseDefendantOffencesChangedCommand> consumer ) throws Exception {
 
-        final Hearing hearing = initiateHearingCommand.getHearing();
+        CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand = with(TestTemplates.CaseDefendantDetailsChangedCommand.standard(), command -> {
+            command.getDeletedOffences().add(TestTemplates.CaseDefendantDetailsChangedCommand.deletedOffence());
+        });
 
-        final String eventName = "public.progression.defendant-offences-changed";
 
-        final List<UUID> deletedOffences = Collections.singletonList(hearing.getDefendants().get(0).getOffences().get(0).getId());
-
-        final CaseDefendantOffencesChanged caseDefendantOffencesChanged = CaseDefendantOffencesChanged.builder()
-                .withModifiedDate(LocalDate.now())
-                .withDeletedOffences(deletedOffences)
-                .build();
+        consumer.accept(caseDefendantOffencesChangedCommand);
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
-        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantOffencesChanged), JsonObject.class);
+        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantOffencesChangedCommand), JsonObject.class);
 
-        sendPublicEvent(hearing.getId(), eventName, jsonObject);
+        sendPublicEvent(hearingId, "public.progression.defendant-offences-changed", jsonObject);
 
-        return caseDefendantOffencesChanged;
+        return caseDefendantOffencesChangedCommand;
     }
 
     private static void sendPublicEvent(final UUID uuid, final String eventName, final JsonObject jsonObject) {
@@ -509,19 +475,5 @@ public class UseCases {
                 eventName,
                 jsonObject,
                 metadataOf(uuid, eventName).withUserId(randomUUID().toString()).build());
-    }
-
-    private static uk.gov.moj.cpp.hearing.command.offence.Offence convertOffence(final Hearing hearing) {
-        final Function<uk.gov.moj.cpp.hearing.command.initiate.Offence, uk.gov.moj.cpp.hearing.command.offence.Offence> mapOffence = o -> uk.gov.moj.cpp.hearing.command.offence.Offence.builder()
-                .withId(o.getId())
-                .withOffenceCode(STRING.next())
-                .withWording(STRING.next())
-                .withStartDate(PAST_LOCAL_DATE.next())
-                .withEndDate(PAST_LOCAL_DATE.next())
-                .withCount(INTEGER.next())
-                .withConvictionDate(PAST_LOCAL_DATE.next())
-                .build();
-
-        return mapOffence.apply(hearing.getDefendants().get(0).getOffences().get(0));
     }
 }

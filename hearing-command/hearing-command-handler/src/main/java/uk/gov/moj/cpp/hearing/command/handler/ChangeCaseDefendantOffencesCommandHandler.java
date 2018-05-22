@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import uk.gov.justice.progression.events.CaseDefendantOffencesChanged;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -9,8 +8,10 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffence;
-import uk.gov.moj.cpp.hearing.command.offence.Offence;
+import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
+import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
@@ -35,29 +36,29 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
     @Handles("hearing.update-case-defendant-offences")
     public void updateCaseDefendantOffences(final JsonEnvelope envelope) throws EventStreamException {
 
-        final CaseDefendantOffencesChanged caseDefendantOffencesChanged = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CaseDefendantOffencesChanged.class);
+        final CaseDefendantOffencesChangedCommand command = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CaseDefendantOffencesChangedCommand.class);
 
-        for (DefendantCaseOffence defendantCaseOffence : caseDefendantOffencesChanged.getAddedOffences()) {
-            for (Offence offence : defendantCaseOffence.getAddedOffences()) {
+        for (AddedOffence addedOffence : command.getAddedOffences()) {
+            for (UpdatedOffence offence : addedOffence.getOffences()) {
                 aggregate(DefendantAggregate.class,
-                        defendantCaseOffence.getDefendantId(),
+                        addedOffence.getDefendantId(),
                         envelope,
-                        defendantAggregate -> defendantAggregate.enrichNewOffenceWithAllHearingIdsAssociatedToDefendant(defendantCaseOffence.getDefendantId(), defendantCaseOffence.getCaseId(), offence));
+                        defendantAggregate -> defendantAggregate.enrichNewOffenceWithAllHearingIdsAssociatedToDefendant(addedOffence.getDefendantId(), addedOffence.getCaseId(), offence));
             }
         }
 
-        for (Offence offence : caseDefendantOffencesChanged.getUpdatedOffences()) {
+        for (UpdatedOffence offence : command.getUpdatedOffences()) {
             aggregate(OffenceAggregate.class,
                     offence.getId(),
                     envelope,
                     offenceAggregate -> offenceAggregate.enrichEditOffenceCommandWithHearingIds(offence));
         }
 
-        for (UUID offence : caseDefendantOffencesChanged.getDeletedOffences()) {
+        for (DeletedOffence offence : command.getDeletedOffences()) {
             aggregate(OffenceAggregate.class,
-                    offence,
+                    offence.getId(),
                     envelope,
-                    offenceAggregate -> offenceAggregate.enrichDeleteOffenceCommandWithHearingIds(offence));
+                    offenceAggregate -> offenceAggregate.enrichDeleteOffenceCommandWithHearingIds(offence.getId()));
         }
     }
 
@@ -72,7 +73,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
                             hearingId,
                             caseDefendantOffenceWithHearingIds.getDefendantId(),
                             caseDefendantOffenceWithHearingIds.getCaseId(),
-                            Offence.builder()
+                            UpdatedOffence.builder()
                                     .withId(caseDefendantOffenceWithHearingIds.getId())
                                     .withOffenceCode(caseDefendantOffenceWithHearingIds.getOffenceCode())
                                     .withWording(caseDefendantOffenceWithHearingIds.getWording())
@@ -92,7 +93,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
 
         for (UUID hearingId : updateOffenceOnHearings.getHearingIds()) {
             aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->
-                    hearingAggregate.updateOffence(hearingId, Offence.builder()
+                    hearingAggregate.updateOffence(hearingId, UpdatedOffence.builder()
                             .withId(updateOffenceOnHearings.getId())
                             .withOffenceCode(updateOffenceOnHearings.getOffenceCode())
                             .withWording(updateOffenceOnHearings.getWording())

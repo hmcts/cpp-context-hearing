@@ -18,7 +18,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.offence.Offence;
+import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
@@ -402,7 +402,7 @@ public class NewModelHearingAggregate implements Aggregate {
         return published;
     }
 
-    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final Offence offence) {
+    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final UpdatedOffence offence) {
 
         if(!published) {
             return apply(Stream.of(OffenceAdded.builder()
@@ -422,7 +422,7 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.empty());
     }
 
-    public Stream<Object> updateOffence(final UUID hearingId, final Offence offence) {
+    public Stream<Object> updateOffence(final UUID hearingId, final UpdatedOffence offence) {
 
         if(!published) {
             return apply(Stream.of(OffenceUpdated.builder()

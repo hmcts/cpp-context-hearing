@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.nows.events;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ public class NowsRequested implements Serializable {
     private Hearing hearing;
 
     @JsonCreator
-    public NowsRequested(Hearing hearing) {
+    public NowsRequested(@JsonProperty("hearing") Hearing hearing) {
         this.hearing = hearing;
     }
 

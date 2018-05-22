@@ -5,8 +5,11 @@
     "id": {
       "$ref": "#/definitions/uuid"
     },
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
+    "hearingIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uuid"
+      }
     },
     "defendantId": {
       "$ref": "#/definitions/uuid"
@@ -35,7 +38,7 @@
   },
   "required": [
     "id",
-    "hearingId",
+    "hearingIds",
     "defendantId",
     "caseId"
   ],

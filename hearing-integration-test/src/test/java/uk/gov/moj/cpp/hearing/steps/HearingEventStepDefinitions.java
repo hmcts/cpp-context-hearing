@@ -10,6 +10,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static javax.servlet.http.HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -165,7 +166,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
     }
 
 
-    public static void thenHearingEventDefinitionsAreRecorded( final HearingEventDefinitionData hearingEventDefinitions) {
+    public static void thenHearingEventDefinitionsAreRecorded(final HearingEventDefinitionData hearingEventDefinitions) {
         final List<HearingEventDefinition> eventDefinitions = newArrayList(hearingEventDefinitions.getEventDefinitions());
 
         sortBasedOnSequenceTypeSequenceAndActionLabel(eventDefinitions);
@@ -216,7 +217,6 @@ public class HearingEventStepDefinitions extends AbstractIT {
     }
 
 
-
     private static void sortBasedOnSequenceTypeSequenceAndActionLabel(final List<HearingEventDefinition> eventDefinitions) {
         eventDefinitions.sort((ed1, ed2) -> ComparisonChain.start()
                 .compare(ed1.getSequenceType(), ed2.getSequenceType(), Ordering.explicit(SEQUENCE_TYPE_SENTENCING, SEQUENCE_TYPE_PAUSE_RESUME, SEQUENCE_TYPE_NOT_REGISTERED).nullsLast())
@@ -226,12 +226,10 @@ public class HearingEventStepDefinitions extends AbstractIT {
     }
 
 
-
     private static String getQueryEventDefinitionsUrl() {
         final String queryEventDefinitionsEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-definitions.v2");
         return format("%s/%s", getBaseUri(), queryEventDefinitionsEndPoint);
     }
-
 
 
 }

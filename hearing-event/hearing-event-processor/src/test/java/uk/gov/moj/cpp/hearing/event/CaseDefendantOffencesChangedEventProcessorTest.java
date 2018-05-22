@@ -9,12 +9,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.progression.events.CaseDefendantOffencesChanged;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
 import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
 import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
@@ -59,7 +59,7 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
     @Test
     public void processPublicCaseDefendantOffencesChanged() {
 
-        final CaseDefendantOffencesChanged caseDefendantOffencesChanged = CaseDefendantOffencesChanged.builder()
+        final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = CaseDefendantOffencesChangedCommand.builder()
                 .withModifiedDate(LocalDate.now())
                 .build();
 

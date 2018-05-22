@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.nows.events;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 
 
@@ -8,7 +11,8 @@ public class DefendantIdObj implements Serializable {
 
     private String defendantId;
 
-    public DefendantIdObj(String defendantId) {
+    @JsonCreator
+    public DefendantIdObj(@JsonProperty("defendantId") String defendantId) {
         this.defendantId = defendantId;
     }
 

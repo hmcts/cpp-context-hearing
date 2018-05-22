@@ -5,8 +5,11 @@
     "id": {
       "$ref": "#/definitions/uuid"
     },
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
+    "hearingIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uuid"
+      }
     },
     "offenceCode": {
       "type": "string"
@@ -29,7 +32,9 @@
   },
   "required": [
     "id",
-    "hearingId"
+    "offenceCode",
+    "wording",
+    "hearingIds"
   ],
   "definitions": {
     "uuid": {

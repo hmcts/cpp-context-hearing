@@ -1,11 +1,12 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import org.junit.Test;
-import uk.gov.justice.progression.events.CaseDefendantOffencesChanged;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 
 import java.text.MessageFormat;
+import java.util.concurrent.TimeUnit;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
@@ -36,7 +37,14 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
 
         final InitiateHearingCommand initiateHearing = initiateHearing(requestSpec, asDefault());
 
-        final CaseDefendantOffencesChanged caseDefendantOffencesChanged = addOffence(initiateHearing);
+        final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = addOffence(initiateHearing.getHearing().getId(), command -> {
+            command.getAddedOffences().forEach(addedOffence -> {
+                addedOffence
+                        .setCaseId(initiateHearing.getCases().get(0).getCaseId())
+                        .setDefendantId(initiateHearing.getHearing().getDefendants().get(0).getId());
+            });
+
+        });
 
         final String queryAPIEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
 
@@ -45,6 +53,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
         final String responseType = "application/vnd.hearing.get.hearing.v2+json";
 
         poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -54,7 +63,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
                                 withJsonPath("$.cases[0].defendants[0].defendantId", is(initiateHearing.getHearing().getDefendants().get(0).getId().toString())),
                                 withJsonPath("$.cases[0].defendants[0].offences", hasSize(2)),
                                 withJsonPath("$.cases[0].defendants[0].offences[*].id", hasItems(
-                                        caseDefendantOffencesChanged.getAddedOffences().get(0).getAddedOffences().get(0).getId().toString(),
+                                        caseDefendantOffencesChanged.getAddedOffences().get(0).getOffences().get(0).getId().toString(),
                                         initiateHearing.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString()))
                         )));
     }
@@ -64,7 +73,11 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
 
         final InitiateHearingCommand initiateHearing = initiateHearing(requestSpec, asDefault());
 
-        final CaseDefendantOffencesChanged caseDefendantOffencesChanged = updateOffence(initiateHearing);
+        final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = updateOffence(initiateHearing.getHearing().getId(), command -> {
+            command.getUpdatedOffences().forEach(updatedOffence ->  {
+                updatedOffence.setId(initiateHearing.getHearing().getDefendants().get(0).getOffences().get(0).getId());
+            });
+        });
 
         final String queryAPIEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
 
@@ -73,6 +86,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
         final String responseType = "application/vnd.hearing.get.hearing.v2+json";
 
         poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -108,7 +122,11 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
                 ));
 
 
-        deleteOffence(initiateHearing);
+        deleteOffence(initiateHearing.getHearing().getId(), command -> {
+            command.getDeletedOffences().forEach(deletedOffence  ->  {
+                deletedOffence.setId(initiateHearing.getHearing().getDefendants().get(0).getOffences().get(0).getId());
+            });
+        });
 
         final String queryAPIEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
 
@@ -117,6 +135,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
         final String responseType = "application/vnd.hearing.get.hearing.v2+json";
 
         poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

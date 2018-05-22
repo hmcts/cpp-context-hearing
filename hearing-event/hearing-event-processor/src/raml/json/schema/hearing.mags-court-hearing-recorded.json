@@ -1,12 +1,11 @@
 {
   "$schema":"http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/progression/events/hearing.record-mags-court-hearing.json",
   "type":"object",
   "required": [
-    "hearing"
+    "originatingHearing"
   ],
   "properties":{
-    "hearing":{
+    "originatingHearing":{
       "required":[
         "courtCentreName",
         "courtCentreId",

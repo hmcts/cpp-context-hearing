@@ -29,7 +29,7 @@
             },
             "recordedLabel":{
                "type":"string"
-            },
+            }
          },
          "required":[
             "hearingEventId",

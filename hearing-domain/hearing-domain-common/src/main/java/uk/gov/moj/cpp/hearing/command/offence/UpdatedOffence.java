@@ -6,30 +6,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public final class Offence {
+public final class UpdatedOffence {
 
-    private final UUID id;
+    private UUID id;
 
-    private final String offenceCode;
+    private String offenceCode;
 
-    private final String wording;
+    private String wording;
 
-    private final LocalDate startDate;
+    private LocalDate startDate;
 
-    private final LocalDate endDate;
+    private LocalDate endDate;
 
-    private final Integer count;
+    private Integer count;
 
-    private final LocalDate convictionDate;
+    private LocalDate convictionDate;
 
     @JsonCreator
-    public Offence(@JsonProperty("id") final UUID id,
-                   @JsonProperty("offenceCode") final String offenceCode,
-                   @JsonProperty("wording") final String wording,
-                   @JsonProperty("startDate") final LocalDate startDate,
-                   @JsonProperty("endDate") final LocalDate endDate,
-                   @JsonProperty("count") final Integer count,
-                   @JsonProperty("convictionDate") final LocalDate convictionDate) {
+    public UpdatedOffence(@JsonProperty("id") final UUID id,
+                          @JsonProperty("offenceCode") final String offenceCode,
+                          @JsonProperty("wording") final String wording,
+                          @JsonProperty("startDate") final LocalDate startDate,
+                          @JsonProperty("endDate") final LocalDate endDate,
+                          @JsonProperty("count") final Integer count,
+                          @JsonProperty("convictionDate") final LocalDate convictionDate) {
         this.id = id;
         this.offenceCode = offenceCode;
         this.wording = wording;
@@ -65,6 +65,41 @@ public final class Offence {
 
     public LocalDate getConvictionDate() {
         return convictionDate;
+    }
+
+    public UpdatedOffence setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public UpdatedOffence setOffenceCode(String offenceCode) {
+        this.offenceCode = offenceCode;
+        return this;
+    }
+
+    public UpdatedOffence setWording(String wording) {
+        this.wording = wording;
+        return this;
+    }
+
+    public UpdatedOffence setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+        return this;
+    }
+
+    public UpdatedOffence setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+        return this;
+    }
+
+    public UpdatedOffence setCount(Integer count) {
+        this.count = count;
+        return this;
+    }
+
+    public UpdatedOffence setConvictionDate(LocalDate convictionDate) {
+        this.convictionDate = convictionDate;
+        return this;
     }
 
     public static Builder builder() {
@@ -122,8 +157,8 @@ public final class Offence {
             return this;
         }
 
-        public Offence build() {
-            return new Offence(id, offenceCode, wording, startDate, endDate, count, convictionDate);
+        public UpdatedOffence build() {
+            return new UpdatedOffence(id, offenceCode, wording, startDate, endDate, count, convictionDate);
         }
     }
 }

@@ -99,9 +99,16 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
 
     private CaseDefendantDetails createCaseDefendantDetailsCommand(UUID caseId, List<uk.gov.moj.cpp.hearing.command.initiate.Defendant> defendants) {
 
-        Function<uk.gov.moj.cpp.hearing.command.initiate.Defendant, uk.gov.moj.cpp.hearing.command.defendant.Defendant> mapDefendant = d -> uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
-                .withId(d.getId())
-                .withPerson(Person.builder().withId(d.getPersonId())
+        return CaseDefendantDetails.builder()
+                .withCaseId(caseId)
+                .addDefendants(defendants.stream().map(this::mapDefendant).collect(Collectors.toList()))
+                .build();
+    }
+
+    private uk.gov.moj.cpp.hearing.command.defendant.Defendant mapDefendant(uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant){
+        return uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
+                .withId(defendant.getId())
+                .withPerson(Person.builder().withId(defendant.getPersonId())
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
                 .withNationality(STRING.next())
@@ -117,11 +124,6 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                 .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                 .withDefenceOrganisation(STRING.next())
                 .withInterpreter(Interpreter.builder(STRING.next()))
-                .build();
-
-        return CaseDefendantDetails.builder()
-                .withCaseId(caseId)
-                .addDefendants(defendants.stream().map(mapDefendant).collect(Collectors.toList()))
                 .build();
     }
 }

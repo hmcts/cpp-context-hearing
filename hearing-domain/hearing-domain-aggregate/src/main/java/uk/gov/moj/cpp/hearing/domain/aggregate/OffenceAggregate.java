@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
-import uk.gov.moj.cpp.hearing.command.offence.Offence;
+import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.domain.event.AssociateHearingIdWithOffence;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
@@ -73,7 +73,7 @@ public class OffenceAggregate implements Aggregate {
         return plea;
     }
 
-    public Stream<Object> enrichEditOffenceCommandWithHearingIds(final Offence offence) {
+    public Stream<Object> enrichEditOffenceCommandWithHearingIds(final UpdatedOffence offence) {
 
         return apply(Stream.of(UpdateOffenceOnHearings.builder()
                 .withId(offence.getId())

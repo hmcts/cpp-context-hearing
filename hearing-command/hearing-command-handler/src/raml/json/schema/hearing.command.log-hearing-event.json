@@ -30,27 +30,6 @@
     },
     "alterable": {
       "type": "boolean"
-    },
-    "courtCentreId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "courtCentreName": {
-      "type": "string"
-    },
-    "courtRoomId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "courtRoomName": {
-      "type": "string"
-    },
-    "hearingType": {
-      "type": "string"
-    },
-    "caseUrn": {
-      "type": "string"
-    },
-    "caseId": {
-      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,
@@ -60,15 +39,7 @@
     "hearingEventDefinitionId",
     "recordedLabel",
     "eventTime",
-    "lastModifiedTime",
-    "alterable",
-    "courtCentreId",
-    "courtCentreName",
-    "courtRoomId",
-    "courtRoomName",
-    "hearingType",
-    "caseUrn",
-    "caseId"
+    "lastModifiedTime"
   ],
   "definitions": {
     "uuid": {

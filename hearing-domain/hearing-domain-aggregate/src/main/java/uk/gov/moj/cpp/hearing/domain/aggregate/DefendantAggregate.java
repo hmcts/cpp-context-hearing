@@ -4,7 +4,7 @@ import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
-import uk.gov.moj.cpp.hearing.command.offence.Offence;
+import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
@@ -76,7 +76,7 @@ public class DefendantAggregate implements Aggregate {
         return apply(Stream.of(caseDefendantDetailsWithHearings));
     }
 
-    public Stream<Object> enrichNewOffenceWithAllHearingIdsAssociatedToDefendant(UUID defendantId, UUID caseId, Offence offence) {
+    public Stream<Object> enrichNewOffenceWithAllHearingIdsAssociatedToDefendant(UUID defendantId, UUID caseId, UpdatedOffence offence) {
         return apply(Stream.of(CaseDefendantOffenceWithHearingIds.builder()
                 .withId(offence.getId())
                 .withDefendantId(defendantId)
