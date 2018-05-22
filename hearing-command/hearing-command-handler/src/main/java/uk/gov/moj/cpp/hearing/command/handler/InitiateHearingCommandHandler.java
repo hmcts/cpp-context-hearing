@@ -13,7 +13,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterCaseWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
@@ -72,6 +74,13 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
         LOGGER.debug("hearing.command.register-defendant-with-hearing event received {}", envelope.payloadAsJsonObject());
         final RegisterDefendantWithHearingCommand command = convertToObject(envelope, RegisterDefendantWithHearingCommand.class);
         aggregate(DefendantAggregate.class, command.getDefendantId(), envelope, defendantAggregate -> defendantAggregate.registerHearingId(command));
+    }
+
+    @Handles("hearing.command.register-case-with-hearing")
+    public void recordHearingCase(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.command.register-case-with-hearing event received {}", envelope.payloadAsJsonObject());
+        final RegisterCaseWithHearingCommand command = convertToObject(envelope, RegisterCaseWithHearingCommand.class);
+        aggregate(CaseAggregate.class, command.getCaseId(), envelope, caseAggregate -> caseAggregate.registerHearingId(command));
     }
 
 }

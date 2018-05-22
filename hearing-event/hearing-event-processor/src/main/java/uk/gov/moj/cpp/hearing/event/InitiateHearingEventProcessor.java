@@ -9,8 +9,10 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
+import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterCaseWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
 
 import javax.inject.Inject;
@@ -71,12 +73,22 @@ public class InitiateHearingEventProcessor {
                         .add(DEFENDANT_ID, defendant.getId().toString())
                         .build()));
             }
+
             this.sender.send(this.enveloper.withMetadataFrom(event,
                     "hearing.command.initiate-hearing-defence-witness-enrich")
                     .apply(createObjectBuilder().add(HEARING_ID, hearingId)
                             .add(DEFENDANT_ID, defendant.getId().toString())
                             .build()));
 
+            for (DefendantCase defendantCase : defendant.getDefendantCases()) {
+
+                final RegisterCaseWithHearingCommand registerCaseWithHearingCommand = RegisterCaseWithHearingCommand.builder()
+                        .withCaseId(defendantCase.getCaseId())
+                        .withHearingId(UUID.fromString(hearingId.getString()))
+                        .build();
+
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.register-case-with-hearing").apply(registerCaseWithHearingCommand));
+            }
         }
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.initiated").apply(createObjectBuilder()

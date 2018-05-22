@@ -90,12 +90,12 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
                         Defendant.builder()
                                 .withId(randomUUID())
                                 .withPerson(Person.builder().withId(randomUUID())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                                .withNationality(STRING.next())
-                                .withGender(STRING.next())
-                                .withAddress(generateAddress())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
+                                        .withFirstName(STRING.next())
+                                        .withLastName(STRING.next())
+                                        .withNationality(STRING.next())
+                                        .withGender(STRING.next())
+                                        .withAddress(generateAddress())
+                                        .withDateOfBirth(PAST_LOCAL_DATE.next()))
                                 .withBailStatus(STRING.next())
                                 .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                                 .withDefenceOrganisation(STRING.next())
@@ -125,12 +125,12 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
                         Defendant.builder()
                                 .withId(randomUUID())
                                 .withPerson(Person.builder().withId(randomUUID())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                                .withNationality(STRING.next())
-                                .withGender(STRING.next())
-                                .withAddress(generateAddress())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
+                                        .withFirstName(STRING.next())
+                                        .withLastName(STRING.next())
+                                        .withNationality(STRING.next())
+                                        .withGender(STRING.next())
+                                        .withAddress(generateAddress())
+                                        .withDateOfBirth(PAST_LOCAL_DATE.next()))
                                 .withBailStatus(STRING.next())
                                 .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
                                 .withDefenceOrganisation(STRING.next())
@@ -146,8 +146,8 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
         changeDefendantDetailsCommandHandler.updateCaseDefendantDetails(envelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                    jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-details-updated"),
-                            payloadIsJson(allOf(withJsonPath("$.caseId", is(caseDefendantDetailsWithHearingsEvent.getCaseId().toString())))))));
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-details-updated"),
+                        payloadIsJson(allOf(withJsonPath("$.caseId", is(caseDefendantDetailsWithHearingsEvent.getCaseId().toString())))))));
     }
 
     @SuppressWarnings("unchecked")

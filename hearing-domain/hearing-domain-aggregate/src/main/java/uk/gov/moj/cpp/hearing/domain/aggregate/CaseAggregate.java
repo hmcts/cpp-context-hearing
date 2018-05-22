@@ -2,9 +2,15 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterCaseWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
@@ -16,9 +22,12 @@ public class CaseAggregate implements Aggregate {
 
     private Boolean sendingSheetCompleteProcessed = false;
 
+    private List<UUID> hearingIds = new ArrayList<>();
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(
+                when(RegisterCaseWithHearingCommand.class).apply(caseWithHearingCommand -> hearingIds.add(caseWithHearingCommand.getHearingId())),
                 when(SendingSheetCompletedRecorded.class).apply(e -> sendingSheetCompleteProcessed = true),
                 otherwiseDoNothing());
     }
@@ -29,5 +38,13 @@ public class CaseAggregate implements Aggregate {
         } else {
             return apply(Stream.of(new SendingSheetCompletedPreviouslyRecorded(sendingSheetCompleted.getCrownCourtHearing(), sendingSheetCompleted.getHearing())));
         }
+    }
+
+    public Stream<Object> registerHearingId(RegisterCaseWithHearingCommand command) {
+        return apply(Stream.of(
+                RegisterCaseWithHearingCommand.builder()
+                        .withCaseId(command.getCaseId())
+                        .withHearingId(command.getHearingId())
+                        .build()));
     }
 }

@@ -106,6 +106,10 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
             example: !include json/hearing.update-case-defendant-details-against-hearing-aggregate.json
 
+        application/vnd.hearing.command.register-case-with-hearing+json:
+                    schema: !include json/schema/hearing.command.register-case-with-hearing.json
+                    example: !include json/hearing.command.register-case-with-hearing.json
+
 # Case Defendant Offences Update
         application/vnd.hearing.add-case-defendant-offence+json:
             schema: !include json/schema/hearing.add-case-defendant-offence.json
