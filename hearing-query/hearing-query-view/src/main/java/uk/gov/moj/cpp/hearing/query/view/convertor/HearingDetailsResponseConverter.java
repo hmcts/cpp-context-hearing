@@ -18,6 +18,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
@@ -33,6 +34,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Value;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Verdict;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,8 +58,8 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
 
         return HearingDetailsResponse.builder()
                 .withHearingId(source.getId().toString())
-                .withStartDate(toDateStringOrNull(isEmpty(source.getHearingDays()) ? null : source.getHearingDays().get(0).getDateTime()))
-                .withStartTime(toTimeStringOrNull(isEmpty(source.getHearingDays()) ? null : source.getHearingDays().get(0).getDateTime()))
+                .withStartDate(toDateStringOrNull(getHearingDayDate(source.getHearingDays())))
+                .withStartTime(toTimeStringOrNull(getHearingDayDate(source.getHearingDays())))
                 .withHearingDays(source.getHearingDays().stream()
                         .map(ahd -> ahd.getDate().toString())
                         .collect(toList()))
@@ -73,8 +75,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                 .build();
     }
 
-    // Private methods
-    //-----------------------------------------------------------------------
+
     private static String toStringOrNull(final Object source) {
         return ofNullable(source).map(Object::toString).orElse(null);
     }
@@ -85,6 +86,14 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
 
     private static String toDateStringOrNull(final Temporal source) {
         return ofNullable(source).map(ISO_LOCAL_DATE::format).orElse(null);
+    }
+
+    private static ZonedDateTime getHearingDayDate(final  List<HearingDate>  source) {
+        if (isEmpty(source)) {
+            return null;
+        }else{
+            return source.get(0).getDateTime();
+        }
     }
 
     // JudgeConverter

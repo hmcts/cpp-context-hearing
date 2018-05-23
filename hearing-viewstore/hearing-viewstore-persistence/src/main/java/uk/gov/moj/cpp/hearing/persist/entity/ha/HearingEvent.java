@@ -39,6 +39,9 @@ public class HearingEvent {
     @Column(name = "witnessid")
     private UUID witnessId;
 
+    @Column(name = "counselId")
+    private UUID counselId;
+
     public HearingEvent() {
         // for JPA
     }
@@ -79,48 +82,57 @@ public class HearingEvent {
         return witnessId;
     }
 
-    public HearingEvent setId(UUID id) {
+    public HearingEvent setId(final UUID id) {
         this.id = id;
         return this;
     }
 
-    public HearingEvent setHearingEventDefinitionId(UUID hearingEventDefinitionId) {
+    public HearingEvent setHearingEventDefinitionId(final UUID hearingEventDefinitionId) {
         this.hearingEventDefinitionId = hearingEventDefinitionId;
         return this;
     }
 
-    public HearingEvent setHearingId(UUID hearingId) {
+    public HearingEvent setHearingId(final UUID hearingId) {
         this.hearingId = hearingId;
         return this;
     }
 
-    public HearingEvent setRecordedLabel(String recordedLabel) {
+    public HearingEvent setRecordedLabel(final String recordedLabel) {
         this.recordedLabel = recordedLabel;
         return this;
     }
 
-    public HearingEvent setEventTime(ZonedDateTime eventTime) {
+    public HearingEvent setEventTime(final ZonedDateTime eventTime) {
         this.eventTime = eventTime;
         return this;
     }
 
-    public HearingEvent setLastModifiedTime(ZonedDateTime lastModifiedTime) {
+    public HearingEvent setLastModifiedTime(final ZonedDateTime lastModifiedTime) {
         this.lastModifiedTime = lastModifiedTime;
         return this;
     }
 
-    public HearingEvent setAlterable(boolean alterable) {
+    public HearingEvent setAlterable(final boolean alterable) {
         this.alterable = alterable;
         return this;
     }
 
-    public HearingEvent setDeleted(boolean deleted) {
+    public HearingEvent setDeleted(final boolean deleted) {
         this.deleted = deleted;
         return this;
     }
 
-    public HearingEvent setWitnessId(UUID witnessId) {
+    public HearingEvent setWitnessId(final UUID witnessId) {
         this.witnessId = witnessId;
+        return this;
+    }
+
+    public UUID getCounselId() {
+        return counselId;
+    }
+
+    public HearingEvent setCounselId(final UUID counselId) {
+        this.counselId = counselId;
         return this;
     }
 

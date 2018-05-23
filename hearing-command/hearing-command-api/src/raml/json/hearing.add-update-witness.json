@@ -5,7 +5,7 @@
   "title":"Mr",
   "firstName":"David",
   "lastName":"LLOYD",
-  "defendantIds": [
+  "defendants": [
     {
       "defendantId": "a06f6539-2a7c-4bc8-bca3-A1e5a225471c"
     },

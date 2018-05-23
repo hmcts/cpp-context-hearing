@@ -29,6 +29,21 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.json.JsonArrayBuilder;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -48,21 +63,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-
-import java.time.ZoneId;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.json.JsonArrayBuilder;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,6 +84,7 @@ public class HearingEventCommandHandlerTest {
     private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
 
     private static final UUID HEARING_ID = randomUUID();
+    private static final UUID COUNSEL_ID = randomUUID();
 
     private static final String ACTION_LABEL = STRING.next();
     private static final String RECORDED_LABEL = STRING.next();
@@ -117,7 +118,7 @@ public class HearingEventCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
     @Spy
-    private Enveloper enveloper = createEnveloperWithEvents(
+    private final Enveloper enveloper = createEnveloperWithEvents(
             HearingEventLogged.class, HearingEventDefinitionsCreated.class,
             HearingEventDeleted.class, HearingEventIgnored.class,
             HearingEventDefinitionsDeleted.class);
@@ -233,10 +234,11 @@ public class HearingEventCommandHandlerTest {
     @Test
     public void logHearingEvent_shouldRaiseHearingEventLogged() throws Exception {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
-        LogEventCommand logEvent = new LogEventCommand(randomUUID(), randomUUID(), randomUUID(), STRING.next(),
-                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false,null);
+        final LogEventCommand logEvent = new LogEventCommand(randomUUID(), randomUUID(), randomUUID(), STRING.next(),
+                                        PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(),
+                                        false, null, COUNSEL_ID);
 
         setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
@@ -255,6 +257,9 @@ public class HearingEventCommandHandlerTest {
                                 withJsonPath("$.alterable", is(logEvent.getAlterable())),
                                 withJsonPath("$.hearingEventDefinitionId", is(logEvent.getHearingEventDefinitionId().toString())),
                                 withJsonPath("$.hearingEventId", is(logEvent.getHearingEventId().toString())),
+                                                        withJsonPath("$.counselId", is(logEvent
+                                                                        .getCounselId()
+                                                                        .toString())),
                                 withJsonPath("$.hearingId", is(logEvent.getHearingId().toString())),
                                 withJsonPath("$.recordedLabel", is(logEvent.getRecordedLabel())),
                                 withJsonPath("$.eventTime", is(logEvent.getEventTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString())),
@@ -275,10 +280,11 @@ public class HearingEventCommandHandlerTest {
     @Test
     public void logHearingEvent_shouldIgnoreLogEvent_givenEventHasAlreadyBeenLogged() throws Exception {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
-        LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
-                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false,null);
+        final LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
+                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
+                        PAST_ZONED_DATE_TIME.next(), false, null, null);
 
         setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
@@ -298,7 +304,7 @@ public class HearingEventCommandHandlerTest {
                     initiateHearingCommand.getHearing().getType(),
                     initiateHearingCommand.getCases().get(0).getUrn(),
                     initiateHearingCommand.getCases().get(0).getCaseId(),
-                    logEvent.getWitnessId()));
+                                            logEvent.getWitnessId(), logEvent.getCounselId()));
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"),
@@ -324,12 +330,13 @@ public class HearingEventCommandHandlerTest {
 
     @Test
     public void correctHearingEvent_shouldDeleteOldEventAndAddANewEvent() throws Exception {
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
-        LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
-                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false,null);
+        final LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
+                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
+                        PAST_ZONED_DATE_TIME.next(), false, null, null);
 
-        CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(logEvent.getHearingEventId(), randomUUID(), initiateHearingCommand.getHearing().getId(),
+        final CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(logEvent.getHearingEventId(), randomUUID(), initiateHearingCommand.getHearing().getId(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false);
 
         setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
@@ -350,7 +357,7 @@ public class HearingEventCommandHandlerTest {
                     initiateHearingCommand.getHearing().getType(),
                     initiateHearingCommand.getCases().get(0).getUrn(),
                     initiateHearingCommand.getCases().get(0).getCaseId(),
-                    null));
+                                            null, logEvent.getCounselId()));
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"),
@@ -358,7 +365,7 @@ public class HearingEventCommandHandlerTest {
 
         hearingEventCommandHandler.correctEvent(command);
 
-        List<Object> events = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
+        final List<Object> events = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
 
         assertThat((JsonEnvelope) events.get(0),
 
@@ -396,9 +403,9 @@ public class HearingEventCommandHandlerTest {
 
     @Test
     public void correctHearingEvent_shouldIgnoreCorrection_givenNoPreviousEventFound() throws Exception {
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
-        CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(randomUUID(), randomUUID(), initiateHearingCommand.getHearing().getId(),
+        final CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(randomUUID(), randomUUID(), initiateHearingCommand.getHearing().getId(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false);
 
         setupMockedEventStream(correctLogEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
@@ -426,9 +433,9 @@ public class HearingEventCommandHandlerTest {
         ));
     }
 
-    private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
+    private <T extends Aggregate> void setupMockedEventStream(final UUID id, final EventStream eventStream, final T aggregate) {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
-        Class<T> clz = (Class<T>) aggregate.getClass();
+        final Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
     }
 }

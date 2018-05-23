@@ -1,6 +1,27 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
@@ -23,8 +44,11 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
+
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -35,24 +59,12 @@ import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
 @SuppressWarnings({"squid:S00107", "squid:S1602"})
 public class NewModelHearingAggregate implements Aggregate {
+
+    private static final String WITNESS_ID = "witnessId";
+
+    private static final String HEARING_EVENTS = "hearingEvents";
 
     private static final long serialVersionUID = 1L;
 
@@ -62,17 +74,23 @@ public class NewModelHearingAggregate implements Aggregate {
     private static final String REASON_ALREADY_DELETED = "Already deleted";
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
     private static final String REASON_HEARING_NOT_FOUND = "Hearing not found";
+    private static final String HEARING_EVENT_ID = "hearingEventId";
+    private static final String HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
+    private static final String RECORDED_LABEL = "recordedLabel";
+    private static final String EVENT_TIME = "eventTime";
+    private static final String LAST_MODIFIED_TIME = "lastModifiedTime";
+    private static final String HEARING_ID = "hearingId";
 
     private List<Case> cases;
     private Hearing hearing;
 
-    private Map<UUID, HearingEvent> hearingHevents = new HashMap<>();
+    private final Map<UUID, HearingEvent> hearingHevents = new HashMap<>();
 
-    private Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels = new HashMap<>();
-    private Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
+    private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels = new HashMap<>();
+    private final Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
 
-    private Map<UUID, Plea> pleas = new HashMap<>();
-    private Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
+    private final Map<UUID, Plea> pleas = new HashMap<>();
+    private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
 
     private boolean published = false;
 
@@ -217,7 +235,7 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(events.stream());
     }
 
-    public Stream<Object> initiate(InitiateHearingCommand initiateHearingCommand) {
+    public Stream<Object> initiate(final InitiateHearingCommand initiateHearingCommand) {
         return apply(Stream.of(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
     }
 
@@ -234,7 +252,7 @@ public class NewModelHearingAggregate implements Aggregate {
         ));
     }
 
-    public Stream<Object> logHearingEvent(LogEventCommand logEventCommand) {
+    public Stream<Object> logHearingEvent(final LogEventCommand logEventCommand) {
 
         if (hearing == null) {
             return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand)));
@@ -264,10 +282,36 @@ public class NewModelHearingAggregate implements Aggregate {
                 this.hearing.getType(),
                 this.cases.get(0).getUrn(), //TODO - doesn't support multiple cases yet.
                 this.cases.get(0).getCaseId(),
-                logEventCommand.getWitnessId())));
+                        logEventCommand.getWitnessId(), logEventCommand.getCounselId())));
     }
 
-    public Stream<Object> correctHearingEvent(CorrectLogEventCommand logEventCommand) {
+    public Stream<Object> updateHearingEvents(final JsonObject payload) {
+        final UUID hearingId = fromString(payload.getString(HEARING_ID));
+        if (hearing == null) {
+            return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND,
+                            hearingId)));
+        }
+
+        final List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents =
+                        new ArrayList<>();
+        final JsonArray hearingEventsArray = payload.getJsonArray(HEARING_EVENTS);
+        hearingEventsArray.getValuesAs(JsonObject.class).stream().forEach(hearingEvent -> {
+
+            hearingEvents.add(new uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent(
+                            fromString(hearingEvent.getString(HEARING_EVENT_ID)),
+                            fromString(hearingEvent.getString(HEARING_EVENT_DEFINITION_ID)),
+                            ZonedDateTimes.fromString(hearingEvent.getString(LAST_MODIFIED_TIME)),
+                            hearingEvent.getString(RECORDED_LABEL),
+                            ZonedDateTimes.fromString(hearingEvent.getString(EVENT_TIME)),
+
+                            hearingEvent.containsKey(WITNESS_ID)
+                                            ? fromString(hearingEvent.getString(WITNESS_ID))
+                                            : null));
+        });
+        return hearingEvents.isEmpty() ? Stream.empty()
+                        : Stream.of(new HearingEventsUpdated(hearingId, hearingEvents));
+    }
+    public Stream<Object> correctHearingEvent(final CorrectLogEventCommand logEventCommand) {
 
         if (hearing == null) {
             return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand)));
@@ -300,11 +344,12 @@ public class NewModelHearingAggregate implements Aggregate {
                         this.hearing.getType(),
                         this.cases.get(0).getUrn(),
                         this.cases.get(0).getCaseId(),
+                                        null,
                         null)
         ));
     }
 
-    public Stream<Object> updateVerdict(UUID hearingId, UUID caseId, UUID offenceId, Verdict verdict) {
+    public Stream<Object> updateVerdict(final UUID hearingId, final UUID caseId, final UUID offenceId, final Verdict verdict) {
 
         final List<Object> events = new ArrayList<>();
 
@@ -327,7 +372,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 .build()
         );
 
-        String categoryType = ofNullable(verdict.getValue().getCategoryType()).orElse("");
+        final String categoryType = ofNullable(verdict.getValue().getCategoryType()).orElse("");
         if (categoryType.startsWith(GUILTY)) {
             events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
         } else if (categoryType.startsWith(NOT_GUILTY)) {
@@ -350,7 +395,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> updateDefendantDetails(CaseDefendantDetailsWithHearingCommand command) {
+    public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {
 
         if (!isPublished()) {
 
@@ -425,7 +470,7 @@ public class NewModelHearingAggregate implements Aggregate {
         private static final long serialVersionUID = 1L;
 
         private boolean deleted;
-        private HearingEventLogged hearingEventLogged;
+        private final HearingEventLogged hearingEventLogged;
 
         public HearingEvent(final HearingEventLogged hearingEventLogged) {
             this.hearingEventLogged = hearingEventLogged;
@@ -435,7 +480,7 @@ public class NewModelHearingAggregate implements Aggregate {
             return deleted;
         }
 
-        public void setDeleted(boolean deleted) {
+        public void setDeleted(final boolean deleted) {
             this.deleted = deleted;
         }
 
@@ -445,7 +490,7 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
 
-    public Stream<Object> addWitness(UUID hearingId, UUID witnessId, String type, String classification, String title, String firstName, String lastName, List<DefendantId> defendantIdList) {
+    public Stream<Object> addWitness(final UUID hearingId, final UUID witnessId, final String type, final String classification, final String title, final String firstName, final String lastName, final List<DefendantId> defendantIdList) {
         return apply(Stream.of(new WitnessAdded(
                 witnessId,
                 hearingId,
@@ -465,7 +510,7 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
 
-    private HearingEventIgnored generateHearingIgnoredMessage(String reason, CorrectLogEventCommand logEventCommand) {
+    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final CorrectLogEventCommand logEventCommand) {
         return new HearingEventIgnored(
                 logEventCommand.getHearingEventId(),
                 logEventCommand.getHearingId(),
@@ -477,7 +522,7 @@ public class NewModelHearingAggregate implements Aggregate {
         );
     }
 
-    private HearingEventIgnored generateHearingIgnoredMessage(String reason, LogEventCommand logEventCommand) {
+    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final LogEventCommand logEventCommand) {
         return new HearingEventIgnored(
                 logEventCommand.getHearingEventId(),
                 logEventCommand.getHearingId(),
@@ -486,6 +531,13 @@ public class NewModelHearingAggregate implements Aggregate {
                 logEventCommand.getEventTime(),
                 reason,
                 logEventCommand.getAlterable()
+        );
+    }
+
+    private HearingEventIgnored generateHearingIgnoredMessage(final String reason,final UUID hearingId) {
+        return new HearingEventIgnored(
+                        hearingId,
+                        reason
         );
     }
 }

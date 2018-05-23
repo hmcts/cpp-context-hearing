@@ -1,31 +1,5 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-
-import java.io.IOException;
-import java.time.ZoneId;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -40,6 +14,37 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
+import java.io.IOException;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.UUID;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
@@ -85,14 +90,14 @@ public class LogEventHearingEventProcessorTest {
     @Test
     public void shouldPublishHearingEventLoggedPublicEvent() {
 
-        UUID lastHearingEventId = null;
+        final UUID lastHearingEventId = null;
 
-        String caseUrn = (STRING.next() + STRING.next()).substring(0, 11);
+        final String caseUrn = (STRING.next() + STRING.next()).substring(0, 11);
 
-        HearingEventLogged event = new HearingEventLogged(randomUUID(), lastHearingEventId, randomUUID(),
+        final HearingEventLogged event = new HearingEventLogged(randomUUID(), lastHearingEventId, randomUUID(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), true,
                 randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), caseUrn, randomUUID(),
-                null);
+                                        null, null);
 
         this.logEventHearingEventProcessor.publishHearingEventLoggedPublicEvent(
                 createEnvelope("hearing.hearing-event-logged", this.objectToJsonObjectConverter.convert(event))
@@ -122,14 +127,14 @@ public class LogEventHearingEventProcessorTest {
     @Test
     public void shouldPublishHearingEventTimeStampCorrectedPublicEvent() {
 
-        UUID lastHearingEventId = randomUUID();
+        final UUID lastHearingEventId = randomUUID();
 
-        String caseUrn = (STRING.next() + STRING.next()).substring(0, 11);
+        final String caseUrn = (STRING.next() + STRING.next()).substring(0, 11);
 
-        HearingEventLogged event = new HearingEventLogged(randomUUID(), lastHearingEventId, randomUUID(),
+        final HearingEventLogged event = new HearingEventLogged(randomUUID(), lastHearingEventId, randomUUID(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), true,
                 randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), caseUrn, randomUUID(),
-                null);
+                                        null, null);
 
         this.logEventHearingEventProcessor.publishHearingEventLoggedPublicEvent(
                 createEnvelope("hearing.hearing-event-logged", this.objectToJsonObjectConverter.convert(event))
@@ -149,7 +154,7 @@ public class LogEventHearingEventProcessorTest {
     @Test
     public void publishHearingVerdictUpdatedPublicEvent() throws IOException {
 
-        HearingEventIgnored hearingEventIgnored = new HearingEventIgnored(
+        final HearingEventIgnored hearingEventIgnored = new HearingEventIgnored(
                 randomUUID(), randomUUID(), randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), STRING.next(), false
         );
 
@@ -164,6 +169,28 @@ public class LogEventHearingEventProcessorTest {
                         withJsonPath("$.hearingId", equalTo(hearingEventIgnored.getHearingId().toString()))
                         )
                 )));
+    }
+
+    @Test
+    public void publishHearingEventsUpdated() throws IOException {
+
+        final HearingEventsUpdated hearingEventsUpdated =
+                        new HearingEventsUpdated(randomUUID(),
+                                        Arrays.asList(new HearingEvent(randomUUID(), randomUUID(),
+                                                        PAST_ZONED_DATE_TIME.next(), "RL",
+                                                        PAST_ZONED_DATE_TIME.next(),
+                                                        randomUUID())));
+
+        this.logEventHearingEventProcessor.publishHearingEventsUpdatedEvent(createEnvelope(
+                        "hearing.hearing-events-updated",
+                        this.objectToJsonObjectConverter.convert(hearingEventsUpdated)));
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                        metadata().withName("public.hearing.events-updated"),
+                        payloadIsJson(allOf(withJsonPath("$.hearingId",
+                                        equalTo(hearingEventsUpdated.getHearingId()
+                                                        .toString()))))));
     }
 
 }

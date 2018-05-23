@@ -50,17 +50,17 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
-import uk.gov.moj.cpp.hearing.repository.WitnessRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+import uk.gov.moj.cpp.hearing.repository.WitnessRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitiateHearingEventListenerTest {
@@ -381,13 +381,44 @@ public class InitiateHearingEventListenerTest {
         final Hearing actualHearing = hearingexArgumentCaptor.getValue();
         final Witness expectedWitnessOutcome = actualHearing.getDefendants().get(0).getDefendantWitnesses().get(0);
         assertThat(expectedWitnessOutcome.getId().getId(), is(TARGET_ID));
-        assertThat(expectedWitnessOutcome.getHearing().getId(), is(HEARING_ID));
         assertThat(expectedWitnessOutcome.getType(), is(WITNESS_TYPE));
         assertThat(expectedWitnessOutcome.getClassification(), is(WITNESS_CLASSIFICATION));
         assertThat(expectedWitnessOutcome.getFirstName(), is(FIRSTNAME));
         assertThat(expectedWitnessOutcome.getLastName(), is(LASTNAME));
     }
 
+    @Test
+    public void shouldUpdateExistingWitness() {
+        final JsonEnvelope event = getWitnessAddedEnvelope();
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(DEFENDANT_ID, HEARING_ID);
+        final Witness witness = Witness.builder()
+                        .withId(new HearingSnapshotKey(TARGET_ID,
+                                        HEARING_ID))
+                        .build();
+        final Defendant defendant = Defendant.builder().withId(snapshotKey)
+                        .withDefendantWitnesses(asList(witness))
+                        .build(); 
+        witness.getDefendants().add(defendant);
+
+        final Hearing hearing = Hearing.builder().withId(HEARING_ID)
+                        .withDefendants(asList(defendant))
+                        .build();
+        when(this.hearingRepository.findById(HEARING_ID)).thenReturn(hearing);
+
+        this.initiateHearingEventListener.witnessAdded(event);
+        final ArgumentCaptor<Hearing> hearingexArgumentCaptor =
+                        ArgumentCaptor.forClass(Hearing.class);
+        verify(this.hearingRepository).save(hearingexArgumentCaptor.capture());
+        final Hearing actualHearing = hearingexArgumentCaptor.getValue();
+        final Witness expectedWitnessOutcome =
+                        actualHearing.getDefendants().get(0).getDefendantWitnesses().get(0);
+        assertThat(expectedWitnessOutcome.getId().getId(), is(TARGET_ID));
+        assertThat(expectedWitnessOutcome.getType(), is(WITNESS_TYPE));
+        assertThat(expectedWitnessOutcome.getClassification(), is(WITNESS_CLASSIFICATION));
+        assertThat(expectedWitnessOutcome.getFirstName(), is(FIRSTNAME));
+        assertThat(expectedWitnessOutcome.getLastName(), is(LASTNAME));
+    }
     @Test
     public void shouldNotUpdateWitness_WhenHearingNotFound() {
         final JsonEnvelope event = getWitnessAddedEnvelope();

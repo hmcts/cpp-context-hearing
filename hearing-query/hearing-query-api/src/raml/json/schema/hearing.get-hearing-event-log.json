@@ -30,6 +30,9 @@
         "witnessId": {
           "$ref": "#/definitions/uuid"
         },
+        "counselId": {
+          "$ref": "#/definitions/uuid"
+        },
         "recordedLabel": {
           "type": "string"
         },

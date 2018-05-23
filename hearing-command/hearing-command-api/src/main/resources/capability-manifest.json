@@ -21,10 +21,15 @@
       "action": "hearing.create-hearing-event-definitions"
     },
     {
+      "name": "hearing.update-hearing-events",
+      "type": "action",
+      "action": "hearing.update-hearing-events"
+    },
+	{
       "name": "hearing.log-hearing-event",
       "type": "action",
       "action": "hearing.log-hearing-event"
-    },
+    },    
     {
       "name": "hearing.correct-hearing-event",
       "type": "action",
@@ -51,9 +56,9 @@
       "action": "hearing.update-verdict"
     },
     {
-      "name": "hearing.add-witness",
+      "name": "hearing.add-update-witness",
       "type": "action",
-      "action": "hearing.add-witness"
+      "action": "hearing.add-update-witness"
     }
   ]
 }

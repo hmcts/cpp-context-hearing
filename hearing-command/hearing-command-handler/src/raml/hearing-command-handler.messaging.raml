@@ -34,6 +34,9 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.log-hearing-event+json:
             example: !include json/hearing.command.log-hearing-event.json
             schema: !include json/schema/hearing.command.log-hearing-event.json
+        application/vnd.hearing.command.update-hearing-events+json:
+            example: !include json/hearing.command.update-hearing-events.json
+            schema: !include json/schema/hearing.command.update-hearing-events.json			
 
         application/vnd.hearing.create-hearing-event-definitions+json:
             example: !include json/hearing.create-hearing-event-definitions.json
@@ -86,9 +89,9 @@ baseUri:  message://command/handler/message/hearing
             schema:  !include json/schema/hearing.record-mags-court-hearing.json
 
 # Add Witness
-        application/vnd.hearing.command.add-witness+json:
-            example: !include json/hearing.command.add-witness.json
-            schema:  !include json/schema/hearing.command.add-witness.json
+        application/vnd.hearing.command.add-update-witness+json:
+            example: !include json/hearing.command.add-update-witness.json
+            schema:  !include json/schema/hearing.command.add-update-witness.json
         application/vnd.hearing.defence-witness-added+json:
             schema: !include json/schema/hearing.defence-witness-added.json
             example: !include json/hearing.defence-witness-added.json

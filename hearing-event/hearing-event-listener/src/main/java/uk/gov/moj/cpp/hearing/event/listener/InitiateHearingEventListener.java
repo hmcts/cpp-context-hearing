@@ -13,26 +13,27 @@ import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
-import uk.gov.moj.cpp.hearing.repository.WitnessRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCaseKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+import uk.gov.moj.cpp.hearing.repository.WitnessRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -43,6 +44,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.transaction.Transactional;
 
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,7 +165,7 @@ public class InitiateHearingEventListener {
                     id2Case.put(legalCase.getId(), legalCase);
                 }
         );
-        final Hearing aHearing = Hearing.builder()
+        final Hearing hearingEntity = Hearing.builder()
                 .withId(hearing.getId())
                 .withHearingType(hearing.getType())
                 .withCourtCentreId(hearing.getCourtCentreId())
@@ -199,7 +201,7 @@ public class InitiateHearingEventListener {
                         .withLastName(hearing.getJudge().getLastName())
                         .withTitle(hearing.getJudge().getTitle()))
                 .build();
-        this.hearingRepository.save(aHearing);
+        this.hearingRepository.save(hearingEntity);
     }
 
     @Transactional
@@ -299,14 +301,80 @@ public class InitiateHearingEventListener {
     @Transactional
     @Handles("hearing.events.witness-added")
     public void witnessAdded(final JsonEnvelope event) {
-
-        addWitness(event);
-    }
-
-    private void addWitness(final JsonEnvelope event) {
-
         final JsonObject payload = event.payloadAsJsonObject();
         LOGGER.debug("hearing.events.witness-added listener payload {} ", payload);
+        final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
+        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
+        final Hearing hearing = hearingRepository.findById(hearingId);
+        if (hearing != null) {
+            final Witness hearingWitness = hearing.getDefendants().stream()
+                            .map(d -> d.getDefendantWitnesses()).flatMap(w -> w.stream())
+                            .filter(w -> w.getId().equals(new HearingSnapshotKey(id, hearingId)))
+                            .findFirst().orElse(null);
+            if (hearingWitness == null) {
+                addWitness(event, hearing);
+            } else {
+                updateWitness(event, hearing, hearingWitness);
+            }
+        }
+
+    }
+
+    private void updateWitness(final JsonEnvelope event, final Hearing hearing,
+                    final Witness witness) {
+        final JsonObject payload = event.payloadAsJsonObject();
+        final String type = payload.getString(FIELD_TYPE);
+        final String classification = payload.getString(FIELD_CLASSIFICATION);
+        final String title =
+                        payload.containsKey(FIELD_TITLE) ? payload.getString(FIELD_TITLE) : null;
+        final String firstName = payload.getString(FIELD_FIRST_NAME);
+        final String lastName = payload.getString(FIELD_LAST_NAME);
+        final Set<String> commandWitnessDefendantIds = payload.getJsonArray("defendantIds").stream()
+                        .map(d -> ((JsonString) d).getString()).collect(Collectors.toSet());
+        final Set<String> hearingWitnessDefendantId = witness.getDefendants().stream()
+                        .map(d -> d.getId().getId().toString()).collect(Collectors.toSet());
+        final Set<String> addedDefendants =
+                        Sets.difference(commandWitnessDefendantIds, hearingWitnessDefendantId);
+        final Set<String> removedDefendants =
+                        Sets.difference(hearingWitnessDefendantId, commandWitnessDefendantIds);
+
+
+        witness.setType(type);
+        witness.setClassification(classification);
+        if (title != null) {
+            witness.setTitle(title);
+        }
+        witness.setFirstName(firstName);
+        witness.setLastName(lastName);
+
+        addedDefendants.forEach(defendantId -> {
+            final Defendant defendant = hearing.getDefendants().stream()
+                            .filter(d -> d.getId().getId().toString()
+                                            .equals(defendantId))
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException(String.format(
+                                            "hearingId %s witness added for unkown defendantId %s ",
+                                            hearing.getId(), defendantId)));
+            witness.getDefendants().add(defendant);
+            defendant.getDefendantWitnesses().add(witness);
+        });
+        removedDefendants.forEach(defendantId -> {
+            final Defendant defendant = hearing.getDefendants().stream()
+                            .filter(d -> d.getId().getId().toString().equals(defendantId))
+                            .findFirst()
+                            .orElse(null);
+            if (defendant != null) {
+                witness.getDefendants().remove(defendant);
+                defendant.getDefendantWitnesses().remove(witness);
+            }
+        });
+        hearingRepository.save(hearing);
+
+    }
+
+    private void addWitness(final JsonEnvelope event, final Hearing hearing) {
+
+        final JsonObject payload = event.payloadAsJsonObject();
         final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String type = payload.getString(FIELD_TYPE);
@@ -317,8 +385,7 @@ public class InitiateHearingEventListener {
         final String lastName = payload.getString(FIELD_LAST_NAME);
         final JsonArray defendantIds = payload.getJsonArray("defendantIds");
 
-        final Hearing hearing = hearingRepository.findById(hearingId);
-        if (hearing != null) {
+       if (hearing != null) {
             final Witness witness = Witness.builder()
                     .withId(new HearingSnapshotKey(id, hearingId))
                     .withHearing(hearing)
@@ -335,13 +402,15 @@ public class InitiateHearingEventListener {
                                 .equals(((JsonString) defendantId).getString()))
                         .findFirst()
                         .orElseThrow(() -> new RuntimeException(String.format(
-                                "hearing %s witness added for unkown defendant %s ",
+                                "hearingId is %s witness added for unkown defendant with Id %s ",
                                 hearing.getId(), defendantId)));
+
                 witness.getDefendants().add(defendant);
                 defendant.getDefendantWitnesses().add(witness);
             });
+            
             hearingRepository.save(hearing);
         }
-    }
 
+    }
 }

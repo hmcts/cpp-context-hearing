@@ -1,33 +1,35 @@
 package uk.gov.moj.cpp.hearing.command.logEvent;
 
 
+import java.time.ZonedDateTime;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
 public class LogEventCommand {
 
-    private UUID hearingEventId;
-    private UUID hearingId;
-    private UUID hearingEventDefinitionId;
-    private String recordedLabel;
-    private ZonedDateTime eventTime;
-    private ZonedDateTime lastModifiedTime;
-    private Boolean alterable;
-    private UUID witnessId;
+    private final UUID hearingEventId;
+    private final UUID hearingId;
+    private final UUID hearingEventDefinitionId;
+    private final String recordedLabel;
+    private final ZonedDateTime eventTime;
+    private final ZonedDateTime lastModifiedTime;
+    private final Boolean alterable;
+    private final UUID witnessId;
+    private final UUID counselId;
 
     @JsonCreator
-    public LogEventCommand(@JsonProperty("hearingEventId") UUID hearingEventId,
-                           @JsonProperty("hearingId") UUID hearingId,
-                           @JsonProperty("hearingEventDefinitionId") UUID hearingEventDefinitionId,
-                           @JsonProperty("recordedLabel") String recordedLabel,
-                           @JsonProperty("eventTime") ZonedDateTime eventTime,
-                           @JsonProperty("lastModifiedTime") ZonedDateTime lastModifiedTime,
-                           @JsonProperty("alterable") Boolean alterable,
-                           @JsonProperty("witnessId") UUID witnessId) {
+    public LogEventCommand(@JsonProperty("hearingEventId") final UUID hearingEventId,
+                           @JsonProperty("hearingId") final UUID hearingId,
+                           @JsonProperty("hearingEventDefinitionId") final UUID hearingEventDefinitionId,
+                           @JsonProperty("recordedLabel") final String recordedLabel,
+                           @JsonProperty("eventTime") final ZonedDateTime eventTime,
+                           @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
+                           @JsonProperty("alterable") final Boolean alterable,
+                           @JsonProperty("witnessId") final UUID witnessId,
+                    @JsonProperty("counselId") final UUID counselId) {
 
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
@@ -37,6 +39,7 @@ public class LogEventCommand {
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
         this.witnessId=witnessId;
+        this.counselId = counselId;
     }
 
     public UUID getHearingEventId() {
@@ -69,6 +72,10 @@ public class LogEventCommand {
     }
 
 
+    public UUID getCounselId() {
+        return counselId;
+    }
+
     public UUID getWitnessId() {
         return witnessId;
     }
@@ -82,49 +89,57 @@ public class LogEventCommand {
         private ZonedDateTime lastModifiedTime;
         private Boolean alterable;
         private UUID witnessId;
+        private UUID counselId;
 
-        public Builder withHearingEventId(UUID hearingEventId) {
+        public Builder withHearingEventId(final UUID hearingEventId) {
             this.hearingEventId = hearingEventId;
             return this;
         }
 
-        public Builder withHearingId(UUID hearingId) {
+        public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
             return this;
         }
 
-        public Builder withHearingEventDefinitionId(UUID hearingEventDefinitionId) {
+        public Builder withHearingEventDefinitionId(final UUID hearingEventDefinitionId) {
             this.hearingEventDefinitionId = hearingEventDefinitionId;
             return this;
         }
 
-        public Builder withRecordedLabel(String recordedLabel) {
+        public Builder withRecordedLabel(final String recordedLabel) {
             this.recordedLabel = recordedLabel;
             return this;
         }
 
-        public Builder withEventTime(ZonedDateTime eventTime) {
+        public Builder withEventTime(final ZonedDateTime eventTime) {
             this.eventTime = eventTime;
             return this;
         }
 
-        public Builder withLastModifiedTime(ZonedDateTime lastModifiedTime) {
+        public Builder withLastModifiedTime(final ZonedDateTime lastModifiedTime) {
             this.lastModifiedTime = lastModifiedTime;
             return this;
         }
 
-        public Builder withAlterable(Boolean alterable) {
+        public Builder withAlterable(final Boolean alterable) {
             this.alterable = alterable;
             return this;
         }
 
-        public Builder withWitnessId(UUID witnessId) {
+        public Builder withWitnessId(final UUID witnessId) {
             this.witnessId = witnessId;
             return this;
         }
 
+        public Builder withCounselId(final UUID counselId) {
+            this.counselId = counselId;
+            return this;
+        }
+
         public LogEventCommand build() {
-            return new LogEventCommand(hearingEventId, hearingId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable,witnessId);
+            return new LogEventCommand(hearingEventId, hearingId, hearingEventDefinitionId,
+                            recordedLabel, eventTime, lastModifiedTime, alterable, witnessId,
+                            counselId);
         }
     }
 

@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import uk.gov.justice.domain.annotation.Event;
-
 import java.time.ZonedDateTime;
 import java.util.UUID;
+
+import uk.gov.justice.domain.annotation.Event;
 
 @Event("hearing.hearing-event-ignored")
 public class HearingEventIgnored {
@@ -29,6 +29,11 @@ public class HearingEventIgnored {
 
     public HearingEventIgnored() {
         // default constructor for Jackson serialisation
+    }
+
+    public HearingEventIgnored(final UUID hearingId, final String reason) {
+        this.hearingId = hearingId;
+        this.reason = reason;
     }
 
     public UUID getHearingEventId() {

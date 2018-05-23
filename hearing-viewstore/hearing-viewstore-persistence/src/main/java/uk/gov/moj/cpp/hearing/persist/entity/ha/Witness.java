@@ -1,5 +1,11 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -9,11 +15,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ha_witness")
@@ -80,7 +81,7 @@ public class Witness {
 
     }
 
-    public Witness(Builder builder) {
+    public Witness(final Builder builder) {
         this.id = builder.id;
         this.hearing = builder.hearing;
         this.legalCase = builder.legalCase;
@@ -176,6 +177,28 @@ public class Witness {
         return defendants;
     }
 
+
+    public void setType(final String type) {
+        this.type = type;
+    }
+
+    public void setClassification(final String classification) {
+        this.classification = classification;
+    }
+
+    public void setTitle(final String title) {
+        this.title = title;
+    }
+
+    public void setFirstName(final String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(final String lastName) {
+        this.lastName = lastName;
+    }
+
+
     public static class Builder {
 
         private HearingSnapshotKey id;
@@ -237,7 +260,7 @@ public class Witness {
             return this;
         }
 
-        public Builder withTitle(String title){
+        public Builder withTitle(final String title){
             this.title = title;
             return this;
         }
