@@ -26,7 +26,6 @@
         <authorisation.service.version>0.1.19</authorisation.service.version>
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <datafactory.version>0.8</datafactory.version>
-        <progression.version>2.0.96-R2-SNAPSHOT</progression.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
     </properties>
     <modules>

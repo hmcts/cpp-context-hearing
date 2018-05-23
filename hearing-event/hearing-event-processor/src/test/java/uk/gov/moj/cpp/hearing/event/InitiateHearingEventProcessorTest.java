@@ -87,7 +87,7 @@ public class InitiateHearingEventProcessorTest {
 
         this.initiateHearingEventProcessor.hearingInitiated(event);
 
-        verify(this.sender, times(4)).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender, times(5)).send(this.envelopeArgumentCaptor.capture());
 
         final List<JsonEnvelope> envelopes = this.envelopeArgumentCaptor.getAllValues();
 
@@ -120,9 +120,17 @@ public class InitiateHearingEventProcessorTest {
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
         );
 
-
         assertThat(
                 envelopes.get(3), jsonEnvelope(
+                        metadata().withName("hearing.command.register-case-with-hearing"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.caseId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getCaseId().toString())),
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
+                        .thatMatchesSchema()
+        );
+
+        assertThat(
+                envelopes.get(4), jsonEnvelope(
                         metadata().withName("public.hearing.initiated"),
                         payloadIsJson(withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))))
                         .thatMatchesSchema()
