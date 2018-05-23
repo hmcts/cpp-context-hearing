@@ -56,11 +56,10 @@ public class HearingRepositoryTest {
         return zdt.toLocalDate().atStartOfDay(zdt.getZone());
     }
 
-    @Ignore("Need to resolve issue with Date JPA function running on Deltaspike's TestRunner/ H2 in memory DB")
     @Test
     public void shouldFindByStartDate() throws Exception {
         final ZonedDateTime localTime = atStartOfDay(HearingRepositoryTestUtils.START_DATE_1);
-        assertEquals(1, hearingRepository.findByDate(localTime).size());
+        assertEquals(1, hearingRepository.findByDate(localTime.toLocalDate()).size());
 
     }
 
@@ -74,8 +73,7 @@ public class HearingRepositoryTest {
         final Hearing hearing = hearingRepository.findById(HearingRepositoryTestUtils.HEARING_ID_1);
         assertNotNull(hearing);
         assertEquals(HearingRepositoryTestUtils.HEARING_ID_1, hearing.getId());
-        assertEquals(HearingRepositoryTestUtils.START_DATE_1, hearing.getStartDateTime());
-        assertEquals(HearingRepositoryTestUtils.START_DATE_1, (hearing.getHearingDays().get(0)).getDate());
+        assertEquals(HearingRepositoryTestUtils.START_DATE_1, (hearing.getHearingDays().get(0)).getDateTime());
     }
 
     @Test

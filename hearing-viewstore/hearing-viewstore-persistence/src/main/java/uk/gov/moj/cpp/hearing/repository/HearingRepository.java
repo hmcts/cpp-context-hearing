@@ -4,7 +4,7 @@ import static org.apache.deltaspike.data.api.SingleResultType.OPTIONAL;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +20,7 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     @Query(value = "from Hearing h where h.id = :id", singleResult = OPTIONAL)
     public abstract Hearing findById(@QueryParam("id") final UUID id);
 
-    @Query(value = "SELECT ahd.hearing from HearingDate ahd where date(ahd.date) = date(:dateTime)")
-    public abstract List<Hearing> findByDate(@QueryParam("dateTime") final ZonedDateTime dateTime);
+    @Query(value = "SELECT ahd.hearing from HearingDate ahd where ahd.date = :date")
+    public abstract List<Hearing> findByDate(@QueryParam("date") final LocalDate date);
 
 }
