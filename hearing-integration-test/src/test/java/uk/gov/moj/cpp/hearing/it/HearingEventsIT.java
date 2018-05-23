@@ -276,7 +276,8 @@ public class HearingEventsIT extends AbstractIT {
                         logEvent(requestSpec, asDefault(), initiateHearingCommand,
                                         hearingEventDefinition.getId(), false, randomUUID(),
                                         COUNSEL_ID);
-        final HearingEvent hearingEvent = new HearingEvent(logEventCommand.getHearingEventId(), logEventCommand.getHearingEventDefinitionId(), PAST_ZONED_DATE_TIME.next(), "RL1", PAST_ZONED_DATE_TIME.next(), logEventCommand.getWitnessId());
+        final HearingEvent hearingEvent =
+                        new HearingEvent(logEventCommand.getHearingEventId(), "RL1");
 
         final String commandAPIEndPoint = MessageFormat.format(
                         ENDPOINT_PROPERTIES.getProperty("hearing.update-hearing-events"),
@@ -296,11 +297,8 @@ public class HearingEventsIT extends AbstractIT {
                                         withJsonPath("$.events", hasSize(1)),
 
                                         withJsonPath("$.events[0].hearingEventId", is(hearingEvent.getHearingEventId().toString())),
-                                        withJsonPath("$.events[0].hearingEventDefinitionId", is(hearingEvent.getHearingEventDefinitionId().toString())),
-                                        withJsonPath("$.events[0].recordedLabel", is(hearingEvent.getRecordedLabel())),
-                                        withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(hearingEvent.getEventTime()))),
-                                        withJsonPath("$.events[0].witnessId", is(hearingEvent.getWitnessId().toString())),
-                                        withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(hearingEvent.getLastModifiedTime())))
+                                                                                        withJsonPath("$.events[0].recordedLabel",
+                                                                                                        is(hearingEvent.getRecordedLabel()))
                                 ))
                         );
 

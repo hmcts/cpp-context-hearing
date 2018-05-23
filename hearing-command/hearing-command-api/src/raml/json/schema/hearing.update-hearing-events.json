@@ -10,7 +10,6 @@
          }
       }
    },
-   "additionalProperties":false,
    "required":[
       "hearingEvents"
    ],
@@ -24,31 +23,13 @@
             "hearingEventId":{
                "$ref":"#/definitions/uuid"
             },
-            "hearingEventDefinitionId":{
-               "$ref":"#/definitions/uuid"
-            },
-            "witnessId":{
-               "$ref":"#/definitions/uuid"
-            },
             "recordedLabel":{
                "type":"string"
-            },
-            "eventTime":{
-               "type":"string",
-               "format":"date-time"
-            },
-            "lastModifiedTime":{
-               "type":"string",
-               "format":"date-time"
             }
          },
-         "additionalProperties":false,
          "required":[
             "hearingEventId",
-            "hearingEventDefinitionId",
-            "recordedLabel",
-            "eventTime",
-            "lastModifiedTime"
+            "recordedLabel"
          ]
       }
    }

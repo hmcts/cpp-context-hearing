@@ -641,22 +641,13 @@ public class NewModelHearingAggregateTest {
                         initiateHearingCommandTemplate().build();
 
         final UUID hearingEventId = randomUUID();
-        final UUID hearingEventDefitionId = randomUUID();
-        final String lastModifiedTime = "2016-11-12T09:25Z";
-        final String eventTime = "2016-11-12T09:27:12Z";
-        final UUID witnessId = randomUUID();
 
         final JsonObject updateHearingEvents = Json.createObjectBuilder()
                         .add("hearingId", initiateHearingCommand.getHearing().getId().toString())
                         .add("hearingEvents", Json.createArrayBuilder().add(Json
                                         .createObjectBuilder()
                                         .add("hearingEventId", hearingEventId.toString())
-                                        .add("hearingEventDefinitionId",
-                                                        hearingEventDefitionId.toString())
-                                        .add("lastModifiedTime", lastModifiedTime)
-                                        .add("recordedLabel", "RL")
-                                        .add("eventTime", eventTime)
-                                        .add("witnessId", witnessId.toString())))
+                                        .add("recordedLabel", "RL")))
                         .build();
 
         final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
@@ -668,15 +659,8 @@ public class NewModelHearingAggregateTest {
                         .get(0);
 
         assertThat(result.getHearingEvents().get(0).getHearingEventId(), is(hearingEventId));
-        assertThat(result.getHearingEvents().get(0).getHearingEventDefinitionId(),
-                        is(hearingEventDefitionId));
-        assertThat(result.getHearingEvents().get(0).getLastModifiedTime().toString(),
-                        is(lastModifiedTime));
         assertThat(result.getHearingEvents().get(0).getRecordedLabel(),
                         is("RL"));
-        assertThat(result.getHearingEvents().get(0).getEventTime().toString(),
-                        is(eventTime));
-        assertThat(result.getHearingEvents().get(0).getWitnessId(), is(witnessId));
         assertThat(result.getHearingId(), is(initiateHearingCommand.getHearing().getId()));
     }
 

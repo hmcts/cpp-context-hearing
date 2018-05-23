@@ -15,7 +15,6 @@ import javax.inject.Inject;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -134,18 +133,7 @@ public class HearingLogEventListener {
             final HearingEvent repositoryEvent = hearingEventIdToHEaringEvent.get(hearingEventId);
 
             if (repositoryEvent != null) {
-                repositoryEvent.setHearingEventDefinitionId(
-                                fromString(hearingEvent
-                                                .getString(FIELD_HEARING_EVENT_DEFINITION_ID)));
                 repositoryEvent.setRecordedLabel(hearingEvent.getString(FIELD_RECORDED_LABEL));
-                repositoryEvent.setEventTime(ZonedDateTimes
-                                .fromString(hearingEvent.getString(FIELD_EVENT_TIME)));
-                repositoryEvent.setLastModifiedTime(ZonedDateTimes
-                                .fromString(hearingEvent.getString(FIELD_LAST_MODIFIED_TIME)));
-                if (hearingEvent.containsKey(FIELD_WITNESS_ID)) {
-                    repositoryEvent.setWitnessId(
-                                    fromString(hearingEvent.getString(FIELD_WITNESS_ID)));
-                }
                 hearingEventRepository.save(repositoryEvent);
             }
         });

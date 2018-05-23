@@ -341,12 +341,7 @@ public class UseCases {
         hearingEvents.stream().forEach(event -> {
             final JsonObject hearingEvent = Json.createObjectBuilder()
                             .add("hearingEventId", event.getHearingEventId().toString())
-                            .add("hearingEventDefinitionId",
-                                            event.getHearingEventDefinitionId().toString())
-                            .add("lastModifiedTime", event.getLastModifiedTime().toString())
                             .add("recordedLabel", event.getRecordedLabel())
-                            .add("eventTime", event.getEventTime().toString())
-                            .add("witnessId", event.getWitnessId().toString())
                             .build();
             hearingEventsArray.add(hearingEvent);
         });
@@ -373,21 +368,9 @@ public class UseCases {
                                                                         is(hearingEvents.get(0).getHearingEventId()
                                                                                         .toString())),
                                                         withJsonPath("$.hearingEvents[0].recordedLabel",
-                                                                        is(hearingEvents.get(0).getRecordedLabel())),
-                                                        withJsonPath("$.hearingEvents[0].eventTime",
-                                                                        is(ZonedDateTimes.toString(
-                                                                                        hearingEvents.get(0).getEventTime()))),
-                                                        withJsonPath("$.hearingEvents[0].lastModifiedTime",
-                                                                        is(ZonedDateTimes.toString(
-                                                                                        hearingEvents.get(0).getLastModifiedTime()))),
-
-                                                        withJsonPath("$.hearingEvents[0].hearingEventDefinitionId",
-                                                                        is(hearingEvents.get(0).getHearingEventDefinitionId()
-                                                                                        .toString())),
-                                                        withJsonPath("$.hearingEvents[0].witnessId",
                                                                         is(hearingEvents.get(0)
-                                                                                        .getWitnessId()
-                                                                                        .toString()))
+                                                                                        .getRecordedLabel()))
+
 
                         )));
 

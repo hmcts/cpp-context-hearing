@@ -156,15 +156,8 @@ public class HearingLogEventListenerTest {
         hearingLogEventListener.hearingEventsUpdated(hearingEventsUpdated);
         verify(hearingEventRepository).save(eventLogArgumentCaptor.capture());
         assertThat(eventLogArgumentCaptor.getValue().getId(), is(HEARING_EVENT_ID));
-        assertThat(eventLogArgumentCaptor.getValue().getHearingEventDefinitionId(),
-                        is(HEARING_EVENT_DEFINITION_ID));
         assertThat(eventLogArgumentCaptor.getValue().getHearingId(), is(HEARING_ID));
-        assertThat(eventLogArgumentCaptor.getValue().getWitnessId(), is(WITNESS_ID));
         assertThat(eventLogArgumentCaptor.getValue().getRecordedLabel(), is(RECORDED_LABEL));
-        assertThat(eventLogArgumentCaptor.getValue().getEventTime().toString(),
-                        is(ZonedDateTimes.toString(EVENT_TIME)));
-        assertThat(eventLogArgumentCaptor.getValue().getLastModifiedTime().toString(),
-                        is(ZonedDateTimes.toString(LAST_MODIFIED_TIME)));
     }
 
 
@@ -381,13 +374,7 @@ public class HearingLogEventListenerTest {
         final JsonArrayBuilder arrayhearingEventArrayBuilderBuilder =
                         createArrayBuilder().add(createObjectBuilder()
                                         .add(FIELD_HEARING_EVENT_ID, HEARING_EVENT_ID.toString())
-                                        .add(FIELD_HEARING_EVENT_DEFINITION_ID,
-                                                        HEARING_EVENT_DEFINITION_ID.toString())
-                                        .add(FIELD_WITNESS_ID, WITNESS_ID.toString())
-                                        .add(FIELD_RECORDED_LABEL, RECORDED_LABEL.toString())
-                                        .add(FIELD_EVENT_TIME, ZonedDateTimes.toString(EVENT_TIME))
-                                        .add(FIELD_LAST_MODIFIED_TIME, ZonedDateTimes
-                                                        .toString(LAST_MODIFIED_TIME)));
+                                        .add(FIELD_RECORDED_LABEL, RECORDED_LABEL.toString()));
 
         return envelopeFrom(metadataWithRandomUUIDAndName(),
                         createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString())

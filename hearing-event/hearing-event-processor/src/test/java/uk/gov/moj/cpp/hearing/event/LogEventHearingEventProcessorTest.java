@@ -176,10 +176,7 @@ public class LogEventHearingEventProcessorTest {
 
         final HearingEventsUpdated hearingEventsUpdated =
                         new HearingEventsUpdated(randomUUID(),
-                                        Arrays.asList(new HearingEvent(randomUUID(), randomUUID(),
-                                                        PAST_ZONED_DATE_TIME.next(), "RL",
-                                                        PAST_ZONED_DATE_TIME.next(),
-                                                        randomUUID())));
+                                        Arrays.asList(new HearingEvent(randomUUID(), "RL")));
 
         this.logEventHearingEventProcessor.publishHearingEventsUpdatedEvent(createEnvelope(
                         "hearing.hearing-events-updated",

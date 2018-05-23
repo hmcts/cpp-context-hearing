@@ -6,20 +6,6 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
@@ -44,7 +30,6 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
@@ -59,10 +44,22 @@ import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
 @SuppressWarnings({"squid:S00107", "squid:S1602"})
 public class NewModelHearingAggregate implements Aggregate {
-
-    private static final String WITNESS_ID = "witnessId";
 
     private static final String HEARING_EVENTS = "hearingEvents";
 
@@ -75,10 +72,7 @@ public class NewModelHearingAggregate implements Aggregate {
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
     private static final String REASON_HEARING_NOT_FOUND = "Hearing not found";
     private static final String HEARING_EVENT_ID = "hearingEventId";
-    private static final String HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String RECORDED_LABEL = "recordedLabel";
-    private static final String EVENT_TIME = "eventTime";
-    private static final String LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String HEARING_ID = "hearingId";
 
     private List<Case> cases;
@@ -299,14 +293,7 @@ public class NewModelHearingAggregate implements Aggregate {
 
             hearingEvents.add(new uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent(
                             fromString(hearingEvent.getString(HEARING_EVENT_ID)),
-                            fromString(hearingEvent.getString(HEARING_EVENT_DEFINITION_ID)),
-                            ZonedDateTimes.fromString(hearingEvent.getString(LAST_MODIFIED_TIME)),
-                            hearingEvent.getString(RECORDED_LABEL),
-                            ZonedDateTimes.fromString(hearingEvent.getString(EVENT_TIME)),
-
-                            hearingEvent.containsKey(WITNESS_ID)
-                                            ? fromString(hearingEvent.getString(WITNESS_ID))
-                                            : null));
+                            hearingEvent.getString(RECORDED_LABEL)));
         });
         return hearingEvents.isEmpty() ? Stream.empty()
                         : Stream.of(new HearingEventsUpdated(hearingId, hearingEvents));
@@ -415,7 +402,7 @@ public class NewModelHearingAggregate implements Aggregate {
         return published;
     }
 
-    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, Offence offence) {
+    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final Offence offence) {
 
         if(!published) {
             return apply(Stream.of(OffenceAdded.builder()
@@ -435,7 +422,7 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.empty());
     }
 
-    public Stream<Object> updateOffence(UUID hearingId, Offence offence) {
+    public Stream<Object> updateOffence(final UUID hearingId, final Offence offence) {
 
         if(!published) {
             return apply(Stream.of(OffenceUpdated.builder()
