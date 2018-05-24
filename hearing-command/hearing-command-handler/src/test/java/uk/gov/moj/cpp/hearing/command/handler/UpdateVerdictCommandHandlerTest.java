@@ -95,6 +95,12 @@ public class UpdateVerdictCommandHandlerTest {
     public void updateVerdict_toGuilty() throws EventStreamException {
 
         InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        
+        initiateHearingCommand.getHearing().getDefendants().stream()
+        .flatMap(d -> d.getOffences().stream())
+        .findFirst()
+        .get()
+        .setConvictionDate(null);
 
         HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.builder()
                 .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())

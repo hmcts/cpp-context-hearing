@@ -26,7 +26,9 @@ import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Matchers;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
@@ -56,6 +58,10 @@ import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 public class NewModelHearingAggregateTest {
 
     private static final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
+
+    
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
 
     @After
@@ -473,10 +479,17 @@ public class NewModelHearingAggregateTest {
     }
 
     @Test
-    public void updateVerdict_whenCategoryTypeIsGuiltyShouldUpdateConvictionDate() {
+    public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyAndCurrentCategoryTypeIsGuiltyType_shouldUpdateConvictionDate() {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
-
+        
+        // previous category type is not guilty hence conviction date is null
+        initiateHearingCommand.getHearing().getDefendants().stream()
+        .flatMap(d -> d.getOffences().stream())
+        .findFirst()
+        .get()
+        .setConvictionDate(null);
+        
         final Verdict verdict = Verdict.builder()
                 .withId(randomUUID())
                 .withVerdictDate(PAST_LOCAL_DATE.next())
@@ -520,7 +533,7 @@ public class NewModelHearingAggregateTest {
     }
 
     @Test
-    public void updateVerdict_whenCategoryTypeIsNotGuiltyShouldClearConvictionDate() {
+    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyTypeAndCurrentCategoryTypeIsNotGuiltyType_shouldClearConvictionDate() {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
@@ -564,12 +577,12 @@ public class NewModelHearingAggregateTest {
         assertThat(convictionDateRemoved.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
         assertThat(convictionDateRemoved.getHearingId(), Matchers.is(initiateHearingCommand.getHearing().getId()));
     }
-    
+
     @Test
-    public void updateVerdict_whenCategoryTypeStartsWithGuiltyShouldUpdateConvictionDate() {
+    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyTypeAndCurrentCategoryTypeIsGuiltyType_shouldNotUpdateConvictionDate() {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
-
+        
         final Verdict verdict = Verdict.builder()
                 .withId(randomUUID())
                 .withVerdictDate(PAST_LOCAL_DATE.next())
@@ -596,10 +609,9 @@ public class NewModelHearingAggregateTest {
                 verdict
         ).collect(Collectors.toList());
         
-        assertThat(objects.size(), Matchers.is(2));
+        assertThat(objects.size(), Matchers.is(1));
         
         final VerdictUpsert verdictUpsert = (VerdictUpsert) objects.get(0);
-        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) objects.get(1);
 
         assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
         assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
@@ -607,18 +619,20 @@ public class NewModelHearingAggregateTest {
         assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
         assertThat(verdictUpsert.getCategoryType(), Matchers.is(verdict.getValue().getCategoryType()));
         assertThat(verdictUpsert.getLesserOffence(), Matchers.is(verdict.getValue().getLesserOffence()));
-        
-        assertThat(convictionDateAdded.getCaseId(), Matchers.is(initiateHearingCommand.getCases().get(0).getCaseId()));
-        assertThat(convictionDateAdded.getOffenceId(), Matchers.is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId()));
-        assertThat(convictionDateAdded.getHearingId(), Matchers.is(initiateHearingCommand.getHearing().getId()));
-        assertThat(convictionDateAdded.getConvictionDate(), Matchers.is(verdict.getVerdictDate()));
     }
-    
+
     @Test
-    public void updateVerdict_whenCategoryTypeNotStartsWithGuiltyShouldNotClearOrUpdateConvictionDate() {
+    public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryTypeIsNotGuiltyType_shouldNotUpdateConvictionDate() {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
+        // previous category type is not guilty hence conviction date is null
+        initiateHearingCommand.getHearing().getDefendants().stream()
+        .flatMap(d -> d.getOffences().stream())
+        .findFirst()
+        .get()
+        .setConvictionDate(null);
+        
         final Verdict verdict = Verdict.builder()
                 .withId(randomUUID())
                 .withVerdictDate(PAST_LOCAL_DATE.next())
@@ -627,7 +641,8 @@ public class NewModelHearingAggregateTest {
                         .withDescription(STRING.next())
                         .withCode(STRING.next())
                         .withCategory(STRING.next())
-                        .withCategoryType("NO_VERDICT")
+                        .withCategoryType("FINDINGS")
+                        .withLesserOffence("Obstructing a police officer")
                         .withVerdictTypeId(randomUUID())
                 )
                 .withNumberOfJurors(integer(9, 12).next())
@@ -643,16 +658,52 @@ public class NewModelHearingAggregateTest {
                 initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
                 verdict
         ).collect(Collectors.toList());
-
+        
         assertThat(objects.size(), Matchers.is(1));
         
         final VerdictUpsert verdictUpsert = (VerdictUpsert) objects.get(0);
-        
+
         assertThat(verdictUpsert.getCode(), Matchers.is(verdict.getValue().getCode()));
         assertThat(verdictUpsert.getDescription(), Matchers.is(verdict.getValue().getDescription()));
         assertThat(verdictUpsert.getVerdictTypeId(), Matchers.is(verdict.getValue().getVerdictTypeId()));
         assertThat(verdictUpsert.getCategory(), Matchers.is(verdict.getValue().getCategory()));
         assertThat(verdictUpsert.getCategoryType(), Matchers.is(verdict.getValue().getCategoryType()));
+        assertThat(verdictUpsert.getLesserOffence(), Matchers.is(verdict.getValue().getLesserOffence()));
+    }
+
+    @Test
+    public void updateVerdict_whenOffenceDoesNotExist_shouldThrowException() {
+
+        exception.expect(RuntimeException.class);
+        exception.expectMessage("Offence id is not present");
+        
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        
+        final Verdict verdict = Verdict.builder()
+                .withId(randomUUID())
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withValue(VerdictValue.builder()
+                        .withId(randomUUID())
+                        .withDescription(STRING.next())
+                        .withCode(STRING.next())
+                        .withCategory(STRING.next())
+                        .withCategoryType("GUILTY_BUT_OF_LESSER_OFFENCE")
+                        .withLesserOffence("Obstructing a Police Officer")
+                        .withVerdictTypeId(randomUUID())
+                )
+                .withNumberOfJurors(integer(9, 12).next())
+                .withUnanimous(BOOLEAN.next())
+                .build();
+
+        final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
+        hearingAggregate.updateVerdict(
+                initiateHearingCommand.getHearing().getId(),
+                initiateHearingCommand.getCases().get(0).getCaseId(),
+                randomUUID(),
+                verdict
+        ).collect(Collectors.toList());
     }
 
     @Test
@@ -736,11 +787,11 @@ public class NewModelHearingAggregateTest {
                 .withDefendants(Defendant.builder()
                         .withId(randomUUID())
                         .withPerson(Person.builder().withId(randomUUID())
-                        .withFirstName(STRING.next())
-                        .withLastName(STRING.next())
-                        .withNationality(STRING.next())
-                        .withGender(STRING.next())
-                        .withAddress(address)
+                            .withFirstName(STRING.next())
+                            .withLastName(STRING.next())
+                            .withNationality(STRING.next())
+                            .withGender(STRING.next())
+                            .withAddress(address)
                             .withDateOfBirth(PAST_LOCAL_DATE.next()))
                         .withBailStatus(STRING.next())
                         .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())

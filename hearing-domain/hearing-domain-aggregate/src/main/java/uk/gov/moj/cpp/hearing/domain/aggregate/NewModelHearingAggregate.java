@@ -65,7 +65,6 @@ public class NewModelHearingAggregate implements Aggregate {
     private static final long serialVersionUID = 1L;
 
     private static final String GUILTY = "GUILTY";
-    private static final String NOT_GUILTY = "NOT_GUILTY";
     private static final String REASON_ALREADY_LOGGED = "Already logged";
     private static final String REASON_ALREADY_DELETED = "Already deleted";
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
@@ -359,10 +358,22 @@ public class NewModelHearingAggregate implements Aggregate {
         );
 
         final String categoryType = ofNullable(verdict.getValue().getCategoryType()).orElse("");
+        
+        final LocalDate offenceConvictionDate = this.hearing.getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> offenceId.equals(o.getId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Offence id is not present"))
+                .getConvictionDate();
+        
         if (categoryType.startsWith(GUILTY)) {
-            events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
-        } else if (categoryType.startsWith(NOT_GUILTY)) {
-            events.add(new ConvictionDateRemoved(caseId, hearingId, offenceId));
+            if (offenceConvictionDate == null) {
+                events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
+            }
+        } else {
+            if (offenceConvictionDate != null) {
+                events.add(new ConvictionDateRemoved(caseId, hearingId, offenceId));
+            }
         }
         return apply(events.stream());
     }
