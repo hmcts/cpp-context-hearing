@@ -11,6 +11,8 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -50,8 +52,10 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
                                 withJsonPath("$.cases[0].caseId", is(initiateHearing.getCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.cases[0].caseUrn", is(initiateHearing.getCases().get(0).getUrn())),
                                 withJsonPath("$.cases[0].defendants[0].defendantId", is(initiateHearing.getHearing().getDefendants().get(0).getId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[1].id", is(caseDefendantOffencesChanged.getAddedOffences().get(0).getAddedOffences().get(0).getId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(initiateHearing.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString()))
+                                withJsonPath("$.cases[0].defendants[0].offences", hasSize(2)),
+                                withJsonPath("$.cases[0].defendants[0].offences[*].id", hasItems(
+                                        caseDefendantOffencesChanged.getAddedOffences().get(0).getAddedOffences().get(0).getId().toString(),
+                                        initiateHearing.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString()))
                         )));
     }
 
