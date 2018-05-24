@@ -4,6 +4,7 @@ package uk.gov.moj.cpp.hearing.test;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_UTC_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -43,7 +44,7 @@ public class TestTemplates {
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplateWithOnlyMandatoryFields() {
 
         final UUID caseId = randomUUID();
-        final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next();
+        final ZonedDateTime startDateTime = FUTURE_UTC_DATE_TIME.next();
 
         return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
