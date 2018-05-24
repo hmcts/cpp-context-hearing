@@ -277,8 +277,7 @@ public class UseCases {
                         .withEventTime(PAST_ZONED_DATE_TIME.next())
                         .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
                         .withRecordedLabel(STRING.next())
-
-                , consumer).build();
+                        , consumer).withCounselId(randomUUID()).withWitnessId(randomUUID()).build();
 
         final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.event-timestamp-corrected")
                 .withFilter(isJson(allOf(

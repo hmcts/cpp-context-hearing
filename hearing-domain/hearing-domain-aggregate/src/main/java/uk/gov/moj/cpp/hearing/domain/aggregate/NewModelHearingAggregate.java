@@ -6,8 +6,21 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
@@ -33,7 +46,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
-
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -43,20 +55,6 @@ import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
-
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602"})
 public class NewModelHearingAggregate implements Aggregate {
@@ -331,8 +329,8 @@ public class NewModelHearingAggregate implements Aggregate {
                         this.hearing.getType(),
                         this.cases.get(0).getUrn(),
                         this.cases.get(0).getCaseId(),
-                                        null,
-                        null)
+                        logEventCommand.getWitnessId(),
+                        logEventCommand.getCounselId())
         ));
     }
 

@@ -208,7 +208,8 @@ public class HearingEventsIT extends AbstractIT {
                                 withJsonPath("$.events[0].recordedLabel", is(correctLogEventCommand.getRecordedLabel())),
                                 withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(correctLogEventCommand.getEventTime()))),
                                 withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(correctLogEventCommand.getLastModifiedTime()))),
-
+                                withJsonPath("$.events[0].counselId", is(correctLogEventCommand.getCounselId().toString())),
+                                withJsonPath("$.events[0].witnessId", is(correctLogEventCommand.getWitnessId().toString())),
                                 withJsonPath("$.events[0].alterable", is(false))
                         ))
                 );

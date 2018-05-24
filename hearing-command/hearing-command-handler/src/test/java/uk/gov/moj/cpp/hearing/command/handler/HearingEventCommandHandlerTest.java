@@ -337,7 +337,8 @@ public class HearingEventCommandHandlerTest {
                         PAST_ZONED_DATE_TIME.next(), false, null, null);
 
         final CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(logEvent.getHearingEventId(), randomUUID(), initiateHearingCommand.getHearing().getId(),
-                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false);
+                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
+                        PAST_ZONED_DATE_TIME.next(), false, randomUUID(), randomUUID());
 
         setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
@@ -389,6 +390,8 @@ public class HearingEventCommandHandlerTest {
                                 withJsonPath("$.eventTime", is(correctLogEvent.getEventTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString())),
                                 withJsonPath("$.lastHearingEventId", is(correctLogEvent.getHearingEventId().toString())),
                                 withJsonPath("$.lastModifiedTime", is(correctLogEvent.getLastModifiedTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString())),
+                                withJsonPath("$.counselId", is(correctLogEvent.getCounselId().toString())),
+                                withJsonPath("$.witnessId", is(correctLogEvent.getWitnessId().toString())),                                
                                 withJsonPath("$.caseId", is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.caseUrn", is(initiateHearingCommand.getCases().get(0).getUrn())),
                                 withJsonPath("$.courtCentreId", is(initiateHearingCommand.getHearing().getCourtCentreId().toString())),
@@ -406,7 +409,8 @@ public class HearingEventCommandHandlerTest {
         final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(randomUUID(), randomUUID(), initiateHearingCommand.getHearing().getId(),
-                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false);
+                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
+                        PAST_ZONED_DATE_TIME.next(), false, randomUUID(), randomUUID());
 
         setupMockedEventStream(correctLogEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));

@@ -198,6 +198,7 @@ public class NewModelHearingAggregateTest {
                 .withRecordedLabel(STRING.next())
                 .withHearingEventDefinitionId(randomUUID())
                 .withAlterable(false)
+                        .withCounselId(randomUUID()).withWitnessId(randomUUID())
                 .build();
 
         final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
@@ -237,6 +238,8 @@ public class NewModelHearingAggregateTest {
         assertThat(hearingEventLogged.getCaseUrn(), is(initiateHearingCommand.getCases().get(0).getUrn()));
         assertThat(hearingEventLogged.getCaseId(), is(initiateHearingCommand.getCases().get(0).getCaseId()));
         assertThat(hearingEventLogged.getHearingType(), is(initiateHearingCommand.getHearing().getType()));
+        assertThat(hearingEventLogged.getCounselId(), is(correctLogEventCommand.getCounselId()));
+        assertThat(hearingEventLogged.getWitnessId(), is(correctLogEventCommand.getWitnessId()));
     }
 
     @Test
