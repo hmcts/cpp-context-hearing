@@ -141,6 +141,9 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.delete-case-defendant-offence.json
 
 # Nows
+        application/vnd.hearing.events.nows-material-status-updated+json:
+            schema: !include json/schema/hearing.events.nows-material-status-updated.json
+            example: !include json/hearing.events.nows-material-status-updated.json
         application/vnd.hearing.events.nows-requested+json:
             schema: !include json/schema/hearing.events.nows-requested.json
             example: !include json/hearing.events.nows-requested.json

@@ -18,7 +18,6 @@ public class HearingCommandApi {
 
     @Inject
     public HearingCommandApi(final Sender sender, final Enveloper enveloper) {
-        assert null != sender && null != enveloper;
         this.sender = sender;
         this.enveloper = enveloper;
     }
@@ -65,6 +64,10 @@ public class HearingCommandApi {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.generate-nows").apply(command.payloadAsJsonObject()));
     }
 
+    @Handles("hearing.update-nows-material-status")
+    public void updateNowsMaterialStatus(final JsonEnvelope command) {
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-nows-material-status").apply(command.payloadAsJsonObject()));
+    }
     @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.share-results").apply(envelope.payloadAsJsonObject()));

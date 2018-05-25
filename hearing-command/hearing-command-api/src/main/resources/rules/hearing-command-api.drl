@@ -122,3 +122,12 @@ rule "Command - API - Action - hearing.generate-nows"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.update-nows-material-status"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-nows-material-status");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

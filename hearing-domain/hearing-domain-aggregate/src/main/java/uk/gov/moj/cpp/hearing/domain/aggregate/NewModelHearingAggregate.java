@@ -54,6 +54,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602"})
@@ -494,6 +495,9 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.of(nowsRequested));
     }
 
+    public Stream<Object> nowsMaterialStatusUpdated(final NowsMaterialStatusUpdated nowsRequested) {
+        return apply(Stream.of(nowsRequested));
+    }
 
     private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final CorrectLogEventCommand logEventCommand) {
         return new HearingEventIgnored(

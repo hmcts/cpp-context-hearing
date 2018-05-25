@@ -74,6 +74,7 @@ public class HearingEventListenerRamlConfigTest {
                 DefenceCounselAddedEventListener.class,
                 ProsecutionCounselAddedEventListener.class,
                 NowsRequestedEventListener.class,
+                NowsGeneratedEventListener.class, 
                 CaseDefendantDetailsChangedEventListener.class,
                 CaseDefendantOffencesChangedEventListener.class));
 
@@ -93,7 +94,7 @@ public class HearingEventListenerRamlConfigTest {
 
     @Test
     public void testEventsHandledProperly() {
-        final List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event")
+        List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event", "uk.gov.moj.cpp.hearing.nows.events")
                 .scan().getNamesOfClassesWithAnnotation(Event.class)
                 .stream().map(className -> {
                     try {
@@ -103,7 +104,6 @@ public class HearingEventListenerRamlConfigTest {
                     }
                 })
                 .collect(toList());
-        eventHandlerNames.add("hearing.events.nows-requested");
         eventHandlerNames.removeAll(this.handlerNamesToIgnore);
 
         assertThat(this.ramlActionNames, containsInAnyOrder(eventHandlerNames.toArray()));

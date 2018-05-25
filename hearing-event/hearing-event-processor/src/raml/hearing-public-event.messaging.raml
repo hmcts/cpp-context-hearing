@@ -29,7 +29,7 @@ baseUri: message://event/processor/message/hearing
                       example: !include json/public.hearing.event-timestamp-corrected.json
                   application/vnd.public.hearing.events-updated+json:
                       schema: !include json/schema/public.hearing.events-updated.json
-                      example: !include json/public.hearing.events-updated.json					  
+                      example: !include json/public.hearing.events-updated.json           
 
 # Resulting
                   application/vnd.public.hearing.resulted+json:
@@ -56,7 +56,7 @@ baseUri: message://event/processor/message/hearing
                   application/vnd.public.hearing.events.witness-added-updated+json:
                       schema: !include json/schema/public.hearing.events.witness-added-updated.json
                       example: !include json/public.hearing.events.witness-added-updated.json
-                      
+
 # Conviction Date                      
                   application/vnd.public.hearing.offence-conviction-date-changed+json:
                       schema: !include json/schema/public.hearing.offence-conviction-date-changed.json
@@ -64,6 +64,11 @@ baseUri: message://event/processor/message/hearing
                   application/vnd.public.hearing.offence-conviction-date-removed+json:
                       schema: !include json/schema/public.hearing.offence-conviction-date-removed.json
                       example: !include json/public.hearing.offence-conviction-date-removed.json
+
+# Nows
+                  application/vnd.public.hearing.events.nows-material-status-updated+json:
+                      schema: !include json/schema/public.hearing.events.nows-material-status-updated.json
+                      example: !include json/public.hearing.events.nows-material-status-updated.json
                   application/vnd.public.hearing.events.nows-requested+json:
                       schema: !include json/schema/public.hearing.events.nows-requested.json
                       example: !include json/public.hearing.events.nows-requested.json

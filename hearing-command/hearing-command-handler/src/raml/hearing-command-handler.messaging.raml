@@ -95,10 +95,14 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.defence-witness-added+json:
             schema: !include json/schema/hearing.defence-witness-added.json
             example: !include json/hearing.defence-witness-added.json
+
+# Nows
         application/vnd.hearing.command.generate-nows+json:
             example: !include json/hearing.command.generate-nows.json
             schema:  !include json/schema/hearing.command.generate-nows.json
-
+        application/vnd.hearing.command.update-nows-material-status+json:
+            example: !include json/hearing.command.update-nows-material-status.json
+            schema:  !include json/schema/hearing.command.update-nows-material-status.json
 
 # Case Defendant Details Update
         application/vnd.hearing.command.register-defendant-with-hearing+json:

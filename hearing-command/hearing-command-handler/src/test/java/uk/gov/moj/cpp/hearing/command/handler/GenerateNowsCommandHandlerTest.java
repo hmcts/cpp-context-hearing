@@ -16,7 +16,9 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import java.io.InputStream;
@@ -44,7 +46,8 @@ public class GenerateNowsCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            NowsRequested.class
+            NowsRequested.class,
+            NowsMaterialStatusUpdated.class
     );
     @Mock
     private EventStream hearingEventStream;
@@ -90,6 +93,28 @@ public class GenerateNowsCommandHandlerTest {
         ));
     }
 
+    @Test
+    public void nowsGeneratedTest() throws Throwable {
+
+        final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), NowsMaterialStatusType.GENERATED);
+
+        setupMockedEventStream(nowsMaterialStatusUpdated.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-nows-material-status"), objectToJsonObjectConverter.convert(nowsMaterialStatusUpdated));
+
+        this.generateNowsCommandHandler.nowsGenerated(jsonEnvelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(jsonEnvelope)
+                                .withName("hearing.events.nows-material-status-updated"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(nowsMaterialStatusUpdated.getHearingId().toString())),
+                                withJsonPath("$.materialId", equalTo(nowsMaterialStatusUpdated.getMaterialId().toString())),
+                                withJsonPath("$.status", equalTo(nowsMaterialStatusUpdated.getStatus().name()))
+                        )))
+        ));
+    }
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
         Class<T> clz = (Class<T>) aggregate.getClass();

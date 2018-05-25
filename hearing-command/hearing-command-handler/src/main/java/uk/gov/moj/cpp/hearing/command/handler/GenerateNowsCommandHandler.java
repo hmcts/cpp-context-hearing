@@ -11,11 +11,11 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import java.util.UUID;
 
 import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
@@ -40,5 +40,14 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(payload, NowsRequested.class);
         aggregate(NewModelHearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelope, a -> a.generateNows(nowsRequested));
+    }
+
+    @Handles("hearing.command.update-nows-material-status")
+    public void nowsGenerated(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.command.update-nows-material-status {}", envelope.payloadAsJsonObject());
+
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final NowsMaterialStatusUpdated nowsRequested = jsonObjectToObjectConverter.convert(payload, NowsMaterialStatusUpdated.class);
+        aggregate(NewModelHearingAggregate.class, nowsRequested.getHearingId(), envelope, a -> a.nowsMaterialStatusUpdated(nowsRequested));
     }
 }

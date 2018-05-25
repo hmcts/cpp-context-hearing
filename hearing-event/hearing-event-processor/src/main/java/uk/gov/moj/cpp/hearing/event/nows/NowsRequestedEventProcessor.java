@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.UUID;
 
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
@@ -32,24 +31,26 @@ import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistration
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class NowsRequestedEventProcessor {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedEventProcessor.class);
 
-    @Inject
-    private Enveloper enveloper;
-    @Inject
-    private Sender sender;
+    private final Enveloper enveloper;
+    private final Sender sender;
+    private final DocmosisService docmosisService;
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private final FileStorer fileStorer;
 
     @Inject
-    private DocmosisService docmosisService;
-
-    @Inject
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
-    @Inject
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    @Inject
-    private FileStorer fileStorer;
+    private NowsRequestedEventProcessor(final Enveloper enveloper, final Sender sender, final DocmosisService docmosisService,
+            final JsonObjectToObjectConverter jsonObjectToObjectConverter, final ObjectToJsonObjectConverter objectToJsonObjectConverter, final FileStorer fileStorer) {
+        this.enveloper = enveloper;
+        this.sender = sender;
+        this.docmosisService = docmosisService;
+        this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
+        this.objectToJsonObjectConverter = objectToJsonObjectConverter;
+        this.fileStorer = fileStorer;
+    }
 
     @Handles("hearing.events.nows-requested")
     public void processNowsRequested(final JsonEnvelope event) throws FileServiceException {
@@ -67,6 +68,15 @@ public class NowsRequestedEventProcessor {
                 .apply(this.objectToJsonObjectConverter.convert(nowsRequested)));
     }
 
+    @Handles("hearing.events.nows-material-status-updated")
+    public void propagateNowsMaterialStatusUpdated(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "public.hearing.events.nows-material-status-updated")
+                .apply(createObjectBuilder()
+                        .add("materialId", envelope.payloadAsJsonObject().getJsonString("materialId"))
+                        .build()
+                 ));
+    }
+
     private void addDocumentToMaterial(final String filename, final InputStream fileContent) {
         try {
             final JsonObject metadata = createObjectBuilder().add("fileName", filename).build();
@@ -75,7 +85,6 @@ public class NowsRequestedEventProcessor {
             LOGGER.error("Error while uploading file {}",filename);
             throw new FileUploadException(e);
         }
-
     }
 
 }

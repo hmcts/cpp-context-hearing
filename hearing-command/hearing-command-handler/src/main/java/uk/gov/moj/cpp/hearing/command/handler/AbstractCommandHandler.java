@@ -22,7 +22,6 @@ abstract class AbstractCommandHandler {
     
     public AbstractCommandHandler(final EventSource eventSource, final Enveloper enveloper, final AggregateService aggregateService,
             final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
-        assert null != eventSource && null != enveloper && null != aggregateService && null != jsonObjectToObjectConverter;
         this.eventSource = eventSource;
         this.enveloper = enveloper;
         this.aggregateService = aggregateService;

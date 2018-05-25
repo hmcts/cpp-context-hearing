@@ -94,7 +94,7 @@ public class HearingCommandApiTest {
 
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
-            "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "addDefenceCounsel",
+            "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
                                     "addProsecutionCounsel", "initiateHearing", "saveDraftResult",
                                     "updateHearingEvents");
 
@@ -205,7 +205,7 @@ public class HearingCommandApiTest {
         }
     }
 
-    private Map<String, String> apiMethodsToHandlerNames(final Class clazz) {
+    private Map<String, String> apiMethodsToHandlerNames(final Class<?> clazz) {
         return stream(clazz.getMethods())
                 .filter(method -> method.getAnnotation(Handles.class) != null)
                 .collect(toMap(Method::getName, method -> method.getAnnotation(Handles.class).value()));
