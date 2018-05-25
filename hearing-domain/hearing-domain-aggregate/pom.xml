@@ -10,7 +10,7 @@
    <dependencies>
 
        <dependency>
-           <groupId>uk.gov.justice.framework-api</groupId>
+           <groupId>uk.gov.justice.services</groupId>
            <artifactId>framework-api-domain</artifactId>
            <scope>provided</scope>
        </dependency>

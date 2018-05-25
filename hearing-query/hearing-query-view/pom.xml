@@ -16,6 +16,7 @@
         <dependency>
             <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>query-view</artifactId>
+            <type>pom</type>
         </dependency>
 
         <dependency>

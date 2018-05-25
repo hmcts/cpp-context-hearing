@@ -21,6 +21,7 @@
         <dependency>
             <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>command-handler</artifactId>
+            <type>pom</type>
         </dependency>
 
         <!-- project Dependencies -->
