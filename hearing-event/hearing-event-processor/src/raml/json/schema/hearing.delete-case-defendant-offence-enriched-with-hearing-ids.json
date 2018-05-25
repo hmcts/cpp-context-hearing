@@ -14,7 +14,7 @@
   },
   "required": [
     "id",
-    "hearingId"
+    "hearingIds"
   ],
   "definitions": {
     "uuid": {
