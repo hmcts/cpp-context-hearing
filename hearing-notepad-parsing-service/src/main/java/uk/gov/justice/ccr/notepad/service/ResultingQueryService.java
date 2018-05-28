@@ -44,7 +44,7 @@ public class ResultingQueryService {
 
     public JsonEnvelope getAllPromptKeywordSynonyms(final JsonEnvelope envelope) {
 
-        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.result.get-all-prompt-keyword-synonyms")
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-prompt-word-synonyms")
                 .apply(createObjectBuilder().build());
         return requester.request(requestEnvelope);
     }
