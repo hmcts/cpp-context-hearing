@@ -2,12 +2,14 @@ package uk.gov.moj.cpp.hearing.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -35,10 +37,14 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -48,6 +54,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -87,6 +94,9 @@ public class PublishResultsEventProcessorTest {
     @InjectMocks
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
+    @Mock
+    private NowsDataProcessor nowsDataProcessor;
+
     @InjectMocks
     private PublishResultsEventProcessor publishResultsEventProcessor;
 
@@ -108,17 +118,40 @@ public class PublishResultsEventProcessorTest {
         Plea plea = resultsShared.getPleas().values().iterator().next();
         VerdictUpsert verdict = resultsShared.getVerdicts().values().iterator().next();
 
+        final List<Nows> nows = Arrays.asList(
+                new Nows()
+        );
+        uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing hearing = new uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing().setId(UUID.randomUUID());
+        Mockito.when(nowsDataProcessor.createNows(Mockito.any())).thenReturn(nows);
+        Mockito.when(nowsDataProcessor.translateReferenceData(resultsShared)).thenReturn(hearing);
+
         ResultLine resultLine = resultsShared.getResultLines().get(0);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
+        Mockito.when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+
+        List<JsonEnvelope> outgoingMessages = envelopeArgumentCaptor.getAllValues();
+
+        JsonEnvelope createNowsMessage = outgoingMessages.get(0);
+        assertThat(createNowsMessage, jsonEnvelope(
+                metadata().withName(PublishResultsEventProcessor.HEARING_GENERATE_NOWS_V2_COMMAND),
+                payloadIsJson(allOf(
+                        withJsonPath("$.hearing.id", is(hearing.getId().toString()))))
+        ));
+
+        //deserialise
+        GenerateNowsCommand generateNowsCommandOut = jsonObjectToObjectConverter.convert(createNowsMessage.payloadAsJsonObject(), GenerateNowsCommand.class);
+        Assert.assertEquals( generateNowsCommandOut.getHearing().getId(), hearing.getId());
+
+        JsonEnvelope shareMessage = outgoingMessages.get(1);
 
         assertThat(
-                envelopeArgumentCaptor.getValue(), jsonEnvelope(
+                shareMessage, jsonEnvelope(
                         metadata().withName("public.hearing.resulted"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearing.id", is(resultsShared.getHearingId().toString())),
@@ -171,7 +204,6 @@ public class PublishResultsEventProcessorTest {
                                 withJsonPath("$.hearing.defendants[0].person.email", is("")),
                                 withJsonPath("$.hearing.defendants[0].defenceOrganisation", is(defendant.getDefenceOrganisation())),
                                 withJsonPath("$.hearing.defendants[0].interpreter.language", is(defendant.getInterpreter().getLanguage())),
-                                withJsonPath("$.hearing.defendants[0].interpreter.name", is("")),
                                 withJsonPath("$.hearing.defendants[0].cases[0].id", is(defendant.getDefendantCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.hearing.defendants[0].cases[0].bailStatus", is(defendant.getDefendantCases().get(0).getBailStatus())),
                                 withJsonPath("$.hearing.defendants[0].cases[0].urn", is(resultsShared.getCases().get(0).getUrn())),

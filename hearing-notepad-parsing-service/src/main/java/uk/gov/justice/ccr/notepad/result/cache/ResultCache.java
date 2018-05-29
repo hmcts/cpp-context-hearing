@@ -108,7 +108,7 @@ public class ResultCache {
                         });
 
                     });
-                });
+                 });
         return resultPromptsIndexByKeyWord;
     }
 

@@ -22,6 +22,8 @@ import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
+import java.util.UUID;
+
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
 
@@ -82,7 +84,11 @@ public class ShareResultsIT extends AbstractIT {
                         withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is("NOT_GUILTY"))
                 )));
 
+        // this will change when real reference dtaa service is available and can be stubbe3d out
+        // this matches DefaultNowsReferenceData
+        UUID defaultReferenceDataUUID = UUID.fromString("87631590-bd78-49b2-bd6f-ad7030904e73");
         final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand), template -> {
+            template.getResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
             template.getResultLines().forEach(rl -> rl.setDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId()));
         });
 
