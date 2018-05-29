@@ -50,7 +50,7 @@
         "resultDefinitionId":{
           "$ref":"#/definitions/uuid"
         },
-        "personId":{
+        "defendantId":{
           "$ref":"#/definitions/uuid"
         },
         "caseId":{
