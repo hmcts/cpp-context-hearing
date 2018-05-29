@@ -83,7 +83,7 @@ public class ShareResultsIT extends AbstractIT {
                 )));
 
         final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand), template -> {
-            template.getResultLines().forEach(rl -> rl.setPersonId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId()));
+            template.getResultLines().forEach(rl -> rl.setDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId()));
         });
 
         makeCommand(requestSpec, "hearing.share-results")

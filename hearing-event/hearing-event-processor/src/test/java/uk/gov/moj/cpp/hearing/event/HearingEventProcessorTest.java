@@ -253,7 +253,7 @@ public class HearingEventProcessorTest {
         final JsonArray resultLines = createArrayBuilder().add(
                 createObjectBuilder()
                         .add(FIELD_GENERIC_ID, GENERIC_ID.toString())
-                        .add(FIELD_PERSON_ID, PERSON_ID.toString())
+                        .add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString())
                         .add(FIELD_CASE_ID, CASE_ID.toString())
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
                         .add(FIELD_LEVEL, LEVEL)

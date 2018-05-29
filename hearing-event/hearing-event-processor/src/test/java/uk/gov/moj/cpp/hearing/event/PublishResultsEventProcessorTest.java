@@ -204,7 +204,7 @@ public class PublishResultsEventProcessorTest {
 
                                 withJsonPath("$.hearing.sharedResultLines[0].id", is(resultLine.getId().toString())),
                                 withJsonPath("$.hearing.sharedResultLines[0].caseId", is(resultLine.getCaseId().toString())),
-                                withJsonPath("$.hearing.sharedResultLines[0].personId", is(resultLine.getPersonId().toString())),
+                                withJsonPath("$.hearing.sharedResultLines[0].defendantId", is(resultLine.getDefendantId().toString())),
                                 withJsonPath("$.hearing.sharedResultLines[0].offenceId", is(resultLine.getOffenceId().toString())),
                                 withJsonPath("$.hearing.sharedResultLines[0].level", is(resultLine.getLevel().toString())),
                                 withJsonPath("$.hearing.sharedResultLines[0].label", is(resultLine.getResultLabel())),
@@ -332,7 +332,7 @@ public class PublishResultsEventProcessorTest {
                         ResultLine.builder()
                                 .withId(randomUUID())
                                 .withCaseId(caseId)
-                                .withPersonId(defendantId)
+                                .withDefendantId(defendantId)
                                 .withOffenceId(offenceId)
                                 .withClerkOfTheCourtId(randomUUID())
                                 .withClerkOfTheCourtFirstName(STRING.next())

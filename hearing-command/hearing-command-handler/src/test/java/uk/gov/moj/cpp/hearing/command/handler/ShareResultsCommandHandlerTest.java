@@ -187,7 +187,7 @@ public class ShareResultsCommandHandlerTest {
                                 withJsonPath("$.sharedTime", is(ZonedDateTimes.toString(sharedTime))),
                                 withJsonPath("$.resultLines[0].id", is(shareResultsCommand.getResultLines().get(0).getId().toString())),
                                 withoutJsonPath("$.resultLines[0].lastSharedResultId"),
-                                withJsonPath("$.resultLines[0].personId", is(shareResultsCommand.getResultLines().get(0).getPersonId().toString())),
+                                withJsonPath("$.resultLines[0].defendantId", is(shareResultsCommand.getResultLines().get(0).getDefendantId().toString())),
                                 withJsonPath("$.resultLines[0].offenceId", is(shareResultsCommand.getResultLines().get(0).getOffenceId().toString())),
                                 withJsonPath("$.resultLines[0].caseId", is(shareResultsCommand.getResultLines().get(0).getCaseId().toString())),
                                 withJsonPath("$.resultLines[0].level", is(shareResultsCommand.getResultLines().get(0).getLevel().name())),

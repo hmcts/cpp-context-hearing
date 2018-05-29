@@ -9,7 +9,7 @@ public class SharedResultLine {
     private UUID id;
     private UUID lastSharedResultId;
     private UUID caseId;
-    private UUID personId;
+    private UUID defendantId;
     private UUID offenceId;
     private String level;
     private String label;
@@ -29,8 +29,8 @@ public class SharedResultLine {
         return caseId;
     }
 
-    public UUID getPersonId() {
-        return personId;
+    public UUID getDefendantId() {
+        return defendantId;
     }
 
     public UUID getOffenceId() {
@@ -68,8 +68,8 @@ public class SharedResultLine {
         return this;
     }
 
-    public SharedResultLine setPersonId(UUID personId) {
-        this.personId = personId;
+    public SharedResultLine setDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
         return this;
     }
 

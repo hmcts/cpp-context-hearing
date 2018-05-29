@@ -24,7 +24,7 @@ public final class ResultLine implements Serializable {
     private UUID resultDefinitionId;
     private UUID lastSharedResultId;
     private UUID caseId;
-    private UUID personId;
+    private UUID defendantId;
     private UUID offenceId;
     private Level level;
     private String resultLabel;
@@ -39,7 +39,7 @@ public final class ResultLine implements Serializable {
                          @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
                          @JsonProperty("lastSharedResultId") final UUID lastSharedResultId,
                          @JsonProperty("caseId") final UUID caseId,
-                         @JsonProperty("personId") final UUID personId,
+                         @JsonProperty("defendantId") final UUID defendantId,
                          @JsonProperty("offenceId") final UUID offenceId,
                          @JsonProperty("level") final Level level,
                          @JsonProperty("resultLabel") final String resultLabel,
@@ -52,7 +52,7 @@ public final class ResultLine implements Serializable {
         this.resultDefinitionId = resultDefinitionId;
         this.lastSharedResultId = lastSharedResultId;
         this.caseId = caseId;
-        this.personId = personId;
+        this.defendantId = defendantId;
         this.offenceId = offenceId;
         this.level = level;
         this.resultLabel = resultLabel;
@@ -69,7 +69,7 @@ public final class ResultLine implements Serializable {
         this.resultDefinitionId = builder.resultDefinitionId;
         this.lastSharedResultId = builder.lastSharedResultId;
         this.caseId = builder.caseId;
-        this.personId = builder.personId;
+        this.defendantId = builder.defendantId;
         this.offenceId = builder.offenceId;
         this.level = builder.level;
         this.resultLabel = builder.resultLabel;
@@ -96,8 +96,8 @@ public final class ResultLine implements Serializable {
         return caseId;
     }
 
-    public UUID getPersonId() {
-        return personId;
+    public UUID getDefendantId() {
+        return defendantId;
     }
 
     public UUID getOffenceId() {
@@ -152,8 +152,8 @@ public final class ResultLine implements Serializable {
         this.caseId = caseId;
     }
 
-    public void setPersonId(UUID personId) {
-        this.personId = personId;
+    public void setDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
     }
 
     public void setOffenceId(UUID offenceId) {
@@ -199,7 +199,7 @@ public final class ResultLine implements Serializable {
         final ResultLine that = (ResultLine) o;
         return Objects.equals(this.id, that.id) && Objects.equals(this.resultDefinitionId, that.resultDefinitionId)
                 && Objects.equals(this.lastSharedResultId, that.lastSharedResultId)
-                && Objects.equals(this.caseId, that.caseId) && Objects.equals(this.personId, that.personId)
+                && Objects.equals(this.caseId, that.caseId) && Objects.equals(this.defendantId, that.defendantId)
                 && Objects.equals(this.offenceId, that.offenceId) && Objects.equals(this.level, that.level)
                 && Objects.equals(this.resultLabel, that.resultLabel) && Objects.equals(this.complete, that.complete)
                 && Objects.equals(this.clerkOfTheCourtId, that.clerkOfTheCourtId)
@@ -210,7 +210,7 @@ public final class ResultLine implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.id, this.lastSharedResultId, this.caseId, this.personId, this.offenceId, this.level,
+        return Objects.hash(this.id, this.lastSharedResultId, this.caseId, this.defendantId, this.offenceId, this.level,
                 this.resultLabel, this.clerkOfTheCourtId, this.clerkOfTheCourtFirstName, this.clerkOfTheCourtLastName, this.prompts);
     }
 
@@ -224,7 +224,7 @@ public final class ResultLine implements Serializable {
         private UUID resultDefinitionId;
         private UUID lastSharedResultId;
         private UUID caseId;
-        private UUID personId;
+        private UUID defendantId;
         private UUID offenceId;
         private Level level;
         private String resultLabel;
@@ -254,8 +254,8 @@ public final class ResultLine implements Serializable {
             return this;
         }
 
-        public Builder withPersonId(final UUID personId) {
-            this.personId = personId;
+        public Builder withDefendantId(final UUID defendantId) {
+            this.defendantId = defendantId;
             return this;
         }
 
