@@ -82,7 +82,7 @@ public class ResultingQueryServiceTest {
                         .build());
         when(requester.request(captor.capture())).thenReturn(null);
 
-        resultingQueryService.getAllPromptKeywordSynonyms(command);
+        resultingQueryService.getAllResultPromptWordSynonyms(command);
 
         final JsonEnvelope jsonEnvelope = captor.getValue();
 

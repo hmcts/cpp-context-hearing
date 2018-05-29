@@ -36,13 +36,13 @@ public class ResultingQueryService {
         return requester.request(requestEnvelope);
     }
 
-    public JsonEnvelope getAllPromptFixedLists(final JsonEnvelope envelope) {
+    public JsonEnvelope getAllFixedLists(final JsonEnvelope envelope) {
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-fixed-list")
                 .apply(createObjectBuilder().build());
         return requester.request(requestEnvelope);
     }
 
-    public JsonEnvelope getAllPromptKeywordSynonyms(final JsonEnvelope envelope) {
+    public JsonEnvelope getAllResultPromptWordSynonyms(final JsonEnvelope envelope) {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-prompt-word-synonyms")
                 .apply(createObjectBuilder().build());

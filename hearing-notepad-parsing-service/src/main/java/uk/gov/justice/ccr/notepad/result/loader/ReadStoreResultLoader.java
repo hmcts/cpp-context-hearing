@@ -123,7 +123,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                     resultPrompt.setKeywords(getKeywordsForPrompts(promptJson));
 
                     final String fixedListId = promptJson.getString("fixedListId", null);
-                    if (fixedListId != null && (ResultType.FIXL == resultPrompt.getType() || ResultType.FIXLM == resultPrompt.getType() )) {
+                    if (fixedListId != null && (ResultType.FIXL == resultPrompt.getType() || ResultType.FIXLM == resultPrompt.getType())) {
                         resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId.trim()));
                     }
                     resultPrompts.add(resultPrompt);
@@ -143,7 +143,7 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     private Map<String, Set<String>> loadResultPromptFixedList() {
-        return resultingQueryService.getAllPromptFixedLists(this.jsonEnvelope).payloadAsJsonObject()
+        return resultingQueryService.getAllFixedLists(this.jsonEnvelope).payloadAsJsonObject()
                 .getJsonArray("fixedListCollection").getValuesAs(JsonObject.class)
                 .stream()
                 .flatMap(fixedList -> fixedList.getJsonArray("elements").getValuesAs(JsonObject.class)
@@ -159,14 +159,15 @@ public class ReadStoreResultLoader implements ResultLoader {
 
     @Override
     public List<ResultPromptSynonym> loadResultPromptSynonym() {
-        final List<ResultPromptSynonym> resultPromptSynonyms = newArrayList();
-        final JsonArray resultPromptSynonymsJson = resultingQueryService.getAllPromptKeywordSynonyms(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultPromptKeywordSynonyms");
-        resultPromptSynonymsJson.forEach(jsonValue -> {
-            ResultPromptSynonym resultPromptSynonym = new ResultPromptSynonym();
-            resultPromptSynonym.setWord(((JsonObject) jsonValue).getString("word").replaceAll(" ", "").trim().toLowerCase());
-            resultPromptSynonym.setSynonym(((JsonObject) jsonValue).getString("synonym").trim().toLowerCase());
-            resultPromptSynonyms.add(resultPromptSynonym);
-        });
-        return resultPromptSynonyms;
+        return resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope).payloadAsJsonObject()
+                .getJsonArray("synonymCollection").getValuesAs(JsonObject.class)
+                .stream()
+                .map(wordSynonymJson -> {
+                    final ResultPromptSynonym resultPromptSynonym = new ResultPromptSynonym();
+                    resultPromptSynonym.setWord(wordSynonymJson.getString("word").trim().toLowerCase());
+                    resultPromptSynonym.setSynonym(wordSynonymJson.getString("synonym").trim().toLowerCase());
+                    return resultPromptSynonym;
+                })
+                .collect(toList());
     }
 }

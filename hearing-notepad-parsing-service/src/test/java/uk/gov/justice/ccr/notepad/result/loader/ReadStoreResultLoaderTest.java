@@ -1,8 +1,5 @@
 package uk.gov.justice.ccr.notepad.result.loader;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertNotSame;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -64,7 +61,7 @@ public class ReadStoreResultLoaderTest {
 
     @Test
     public void loadResultPromptSynonym() throws Exception {
-        given(resultingQueryService.getAllPromptKeywordSynonyms(jsonEnvelope)).willReturn(jsonEnvelope);
+        given(resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.result.prompt-keyword-synonyms.json"));
 
@@ -74,7 +71,7 @@ public class ReadStoreResultLoaderTest {
     @Test
     public void loadResultPrompts() throws Exception {
         //given
-        given(resultingQueryService.getAllPromptFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
+        given(resultingQueryService.getAllFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
         given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.result.prompt-fixedlists.json"))
@@ -94,7 +91,7 @@ public class ReadStoreResultLoaderTest {
     @Test
     public void resultPromptShouldLoadAssociatedFixedlist() throws Exception {
         //given
-        given(resultingQueryService.getAllPromptFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
+        given(resultingQueryService.getAllFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
         given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.result.prompt-fixedlists.json"))
