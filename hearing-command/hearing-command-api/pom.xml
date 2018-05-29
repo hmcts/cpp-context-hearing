@@ -45,7 +45,6 @@
         <dependency>
             <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>command-api</artifactId>
-            <type>pom</type>
         </dependency>
 
         <dependency>

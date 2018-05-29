@@ -40,7 +40,6 @@
         <dependency>
             <groupId>uk.gov.moj.cpp.common</groupId>
             <artifactId>query-api</artifactId>
-            <type>pom</type>
         </dependency>
 
         <dependency>
