@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -20,6 +23,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
@@ -28,6 +32,16 @@ public class DefendantAggregateTest {
 
     @InjectMocks
     private DefendantAggregate defendantAggregate;
+
+    @After
+    public void teardown() {
+        try {
+            // ensure aggregate is serializable
+            SerializationUtils.serialize(defendantAggregate);
+        } catch (SerializationException e) {
+            fail("Aggregate should be serializable");
+        }
+    }
 
     @Test
     public void testRegisteringHearing() {

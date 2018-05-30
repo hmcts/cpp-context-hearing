@@ -28,7 +28,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.NewMagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
@@ -53,7 +52,6 @@ public class HearingEventListenerRamlConfigTest {
             MagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
             CaseDefendantDetailsWithHearings.class.getAnnotation(Event.class).value(),
             RegisterHearingAgainstDefendant.class.getAnnotation(Event.class).value(),
-            NewMagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
             CaseDefendantOffenceWithHearingIds.class.getAnnotation(Event.class).value(),
             UpdateOffenceOnHearings.class.getAnnotation(Event.class).value(),
             DeleteOffenceFromHearings.class.getAnnotation(Event.class).value(),

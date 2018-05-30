@@ -2,10 +2,13 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.util.UUID;
 @SuppressWarnings({"squid:S00107"})
 @Event("hearing.defence-witness-added")
-public class DefenceWitnessAdded {
+public class DefenceWitnessAdded implements Serializable{
+
+    private static final long serialVersionUID = 1L;
     private final UUID witnessId;
     private final UUID defendantId;
     private final UUID hearingId;

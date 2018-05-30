@@ -1,12 +1,15 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import uk.gov.justice.domain.annotation.Event;
 
 @Event("hearing.hearing-event-ignored")
-public class HearingEventIgnored {
+public class HearingEventIgnored implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID hearingEventId;
     private UUID hearingId;

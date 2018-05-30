@@ -3,12 +3,15 @@ package uk.gov.moj.cpp.hearing.domain.event;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Event("hearing.offence-updated")
 @SuppressWarnings("squid:S00107")
-public class OffenceUpdated {
+public class OffenceUpdated implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID id;
 

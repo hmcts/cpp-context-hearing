@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import java.io.Serializable;
 import java.util.List;
 
 import uk.gov.justice.domain.annotation.Event;
@@ -7,7 +8,9 @@ import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 
 @Event("hearing.initiated")
-public class HearingInitiated {
+public class HearingInitiated implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private List<Case> cases;
     private Hearing hearing;

@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -10,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.initiate-hearing-offence-plead")
-public final class InitiateHearingOffencePlead {
+public final class InitiateHearingOffencePlead implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     
     private final UUID offenceId;
     private final UUID caseId;

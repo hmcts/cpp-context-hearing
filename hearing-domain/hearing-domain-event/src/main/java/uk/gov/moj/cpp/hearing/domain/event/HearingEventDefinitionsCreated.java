@@ -5,11 +5,14 @@ import static java.util.Collections.unmodifiableList;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
 @Event("hearing.hearing-event-definitions-created")
-public class HearingEventDefinitionsCreated {
+public class HearingEventDefinitionsCreated implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID id;
     private List<HearingEventDefinition> eventDefinitions;

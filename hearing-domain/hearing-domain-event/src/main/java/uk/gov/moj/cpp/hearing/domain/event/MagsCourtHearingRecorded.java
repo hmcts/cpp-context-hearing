@@ -4,6 +4,7 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -11,7 +12,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.mags-court-hearing-recorded")
-public class MagsCourtHearingRecorded {
+public class MagsCourtHearingRecorded implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Hearing originatingHearing;
     private LocalDate convictionDate;

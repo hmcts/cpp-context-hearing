@@ -3,7 +3,11 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Address {
+import java.io.Serializable;
+
+public class Address implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String address1;
 

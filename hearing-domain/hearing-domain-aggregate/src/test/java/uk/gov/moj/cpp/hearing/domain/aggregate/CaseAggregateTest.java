@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,12 +26,24 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.junit.Assert.fail;
+
 @RunWith(MockitoJUnitRunner.class)
 public class CaseAggregateTest {
 
 
     @InjectMocks
     private CaseAggregate caseAggregate;
+
+    @After
+    public void teardown() {
+        try {
+            // ensure aggregate is serializable
+            SerializationUtils.serialize(caseAggregate);
+        } catch (SerializationException e) {
+            fail("Aggregate should be serializable");
+        }
+    }
 
     @Test
     public void testRecordSendingSheetComplete() throws Exception {

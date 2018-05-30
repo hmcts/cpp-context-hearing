@@ -2,11 +2,14 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Event("hearing.initiate-hearing-offence-enriched")
-public class InitiateHearingOffenceEnriched {
+public class InitiateHearingOffenceEnriched implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     private UUID offenceId;
     private UUID caseId;
     private UUID defendantId;

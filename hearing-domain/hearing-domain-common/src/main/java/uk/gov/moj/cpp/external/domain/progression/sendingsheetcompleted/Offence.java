@@ -1,9 +1,13 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class Offence {
+public class Offence  implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private String category;
 
     private LocalDate convictionDate;

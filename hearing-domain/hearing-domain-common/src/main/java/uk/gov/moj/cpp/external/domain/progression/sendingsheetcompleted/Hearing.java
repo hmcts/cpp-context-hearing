@@ -3,11 +3,14 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public class Hearing {
+public class Hearing implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID caseId;
 

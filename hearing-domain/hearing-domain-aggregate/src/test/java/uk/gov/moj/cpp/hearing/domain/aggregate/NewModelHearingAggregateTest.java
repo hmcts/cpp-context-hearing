@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
@@ -21,7 +22,10 @@ import java.util.stream.Stream;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Matchers;
+import org.junit.After;
 import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
@@ -52,6 +56,18 @@ import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 public class NewModelHearingAggregateTest {
 
     private static final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
+
+
+    @After
+    public void teardown() {
+        try {
+            // ensure aggregate is serializable
+            SerializationUtils.serialize(newModelHearingAggregate);
+        } catch (SerializationException e) {
+            fail("Aggregate should be serializable");
+        }
+    }
+
 
     @Test
     public void initiate() {

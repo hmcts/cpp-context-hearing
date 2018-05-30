@@ -3,10 +3,13 @@ package uk.gov.moj.cpp.hearing.domain.event;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Event("hearing.offence-deleted")
-public class OffenceDeleted {
+public class OffenceDeleted implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID id;
 
