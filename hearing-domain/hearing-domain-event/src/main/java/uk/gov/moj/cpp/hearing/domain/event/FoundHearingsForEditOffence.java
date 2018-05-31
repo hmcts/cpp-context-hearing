@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
@@ -9,17 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Event("hearing.add-case-defendant-offence-enriched-with-hearing-ids")
+@Event("hearing.events.found-hearings-for-edit-offence")
 @SuppressWarnings("squid:S00107")
-public class CaseDefendantOffenceWithHearingIds implements Serializable {
+public class FoundHearingsForEditOffence implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private final UUID id;
-
-    private final UUID defendantId;
-
-    private final UUID caseId;
 
     private final String offenceCode;
 
@@ -35,19 +32,16 @@ public class CaseDefendantOffenceWithHearingIds implements Serializable {
 
     private final List<UUID> hearingIds;
 
-    private CaseDefendantOffenceWithHearingIds(@JsonProperty("id") final UUID id,
-                                               @JsonProperty("defendantId") final UUID defendantId,
-                                               @JsonProperty("caseId") final UUID caseId,
-                                               @JsonProperty("offenceCode") final String offenceCode,
-                                               @JsonProperty("wording") final String wording,
-                                               @JsonProperty("startDate") final LocalDate startDate,
-                                               @JsonProperty("endDate") final LocalDate endDate,
-                                               @JsonProperty("count") final Integer count,
-                                               @JsonProperty("convictionDate") final LocalDate convictionDate,
-                                               @JsonProperty("hearingIds") final List<UUID> hearingIds) {
+    @JsonCreator
+    private FoundHearingsForEditOffence(@JsonProperty("id") final UUID id,
+                                        @JsonProperty("offenceCode") final String offenceCode,
+                                        @JsonProperty("wording") final String wording,
+                                        @JsonProperty("startDate") final LocalDate startDate,
+                                        @JsonProperty("endDate") final LocalDate endDate,
+                                        @JsonProperty("count") final Integer count,
+                                        @JsonProperty("convictionDate") final LocalDate convictionDate,
+                                        @JsonProperty("hearingIds") final List<UUID> hearingIds) {
         this.id = id;
-        this.defendantId = defendantId;
-        this.caseId = caseId;
         this.offenceCode = offenceCode;
         this.wording = wording;
         this.startDate = startDate;
@@ -59,18 +53,6 @@ public class CaseDefendantOffenceWithHearingIds implements Serializable {
 
     public UUID getId() {
         return id;
-    }
-
-    public List<UUID> getHearingIds() {
-        return new ArrayList<>(hearingIds);
-    }
-
-    public UUID getDefendantId() {
-        return defendantId;
-    }
-
-    public UUID getCaseId() {
-        return caseId;
     }
 
     public String getOffenceCode() {
@@ -97,6 +79,10 @@ public class CaseDefendantOffenceWithHearingIds implements Serializable {
         return convictionDate;
     }
 
+    public List<UUID> getHearingIds() {
+        return new ArrayList<>(hearingIds);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -104,10 +90,6 @@ public class CaseDefendantOffenceWithHearingIds implements Serializable {
     public static class Builder {
 
         private UUID id;
-
-        private UUID defendantId;
-
-        private UUID caseId;
 
         private String offenceCode;
 
@@ -133,16 +115,6 @@ public class CaseDefendantOffenceWithHearingIds implements Serializable {
 
         public Builder withHearingIds(final List<UUID> hearingIds) {
             this.hearingIds = new ArrayList<>(hearingIds);
-            return this;
-        }
-
-        public Builder withDefendantId(final UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-
-        public Builder withCaseId(final UUID caseId) {
-            this.caseId = caseId;
             return this;
         }
 
@@ -176,8 +148,9 @@ public class CaseDefendantOffenceWithHearingIds implements Serializable {
             return this;
         }
 
-        public CaseDefendantOffenceWithHearingIds build() {
-            return new CaseDefendantOffenceWithHearingIds(id, defendantId, caseId, offenceCode, wording, startDate, endDate, count, convictionDate, hearingIds);
+        public FoundHearingsForEditOffence build() {
+            return new FoundHearingsForEditOffence(id, offenceCode, wording, startDate, endDate, count, convictionDate, hearingIds);
         }
+
     }
 }

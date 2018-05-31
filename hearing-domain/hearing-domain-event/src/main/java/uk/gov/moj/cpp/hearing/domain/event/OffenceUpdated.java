@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Event("hearing.offence-updated")
+@Event("hearing.events.offence-updated")
 @SuppressWarnings("squid:S00107")
 public class OffenceUpdated implements Serializable {
 

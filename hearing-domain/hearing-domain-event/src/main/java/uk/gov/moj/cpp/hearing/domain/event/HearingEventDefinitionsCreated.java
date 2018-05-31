@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import static java.util.Collections.unmodifiableList;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 
@@ -17,7 +19,10 @@ public class HearingEventDefinitionsCreated implements Serializable {
     private UUID id;
     private List<HearingEventDefinition> eventDefinitions;
 
-    public HearingEventDefinitionsCreated(final UUID uuid, final List<HearingEventDefinition> eventDefinitions) {
+    @JsonCreator
+    public HearingEventDefinitionsCreated(
+            @JsonProperty("uuid") final UUID uuid,
+            @JsonProperty("eventDefinitions") final List<HearingEventDefinition> eventDefinitions) {
         this.id = uuid;
         this.eventDefinitions = unmodifiableList(eventDefinitions);
     }

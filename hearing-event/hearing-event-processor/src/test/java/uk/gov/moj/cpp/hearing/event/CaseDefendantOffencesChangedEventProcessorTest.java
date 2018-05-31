@@ -15,9 +15,9 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
-import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
-import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -72,7 +72,7 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
 
         assertThat(
                 this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                        metadata().withName("hearing.update-case-defendant-offences"),
+                        metadata().withName("hearing.command.defendant-offences-changed"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.modifiedDate", is(caseDefendantOffencesChanged.getModifiedDate().toString()))
                                 )
@@ -85,14 +85,14 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
     @Test
     public void addCaseDefendantOffence() {
 
-        CaseDefendantOffenceWithHearingIds offence = CaseDefendantOffenceWithHearingIds.builder()
+        FoundHearingsForNewOffence offence = FoundHearingsForNewOffence.builder()
                 .withId(randomUUID())
                 .withHearingIds(Collections.singletonList(randomUUID()))
                 .withDefendantId(randomUUID())
                 .withCaseId(randomUUID())
                 .build();
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.add-case-defendant-offence-enriched-with-hearing-ids"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-hearings-for-new-offence"),
                 objectToJsonObjectConverter.convert(offence));
 
         caseDefendantOffencesChangedEventProcessor.addCaseDefendantOffence(event);
@@ -101,7 +101,7 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
 
         assertThat(
                 this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                        metadata().withName("hearing.add-case-defendant-offence"),
+                        metadata().withName("hearing.command.add-new-offence-to-hearings"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(offence.getId().toString())),
                                 withJsonPath("$.hearingIds[0]", is(offence.getHearingIds().get(0).toString())),
@@ -116,12 +116,12 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
     @Test
     public void updateCaseDefendantOffence() {
 
-        UpdateOffenceOnHearings offence = UpdateOffenceOnHearings.builder()
+        FoundHearingsForEditOffence offence = FoundHearingsForEditOffence.builder()
                 .withId(randomUUID())
                 .withHearingIds(Collections.singletonList(randomUUID()))
                 .build();
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offence-enriched-with-hearing-ids"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-hearings-for-edit-offence"),
                 objectToJsonObjectConverter.convert(offence));
 
         caseDefendantOffencesChangedEventProcessor.updateCaseDefendantOffence(event);
@@ -130,7 +130,7 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
 
         assertThat(
                 this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                        metadata().withName("hearing.update-case-defendant-offence"),
+                        metadata().withName("hearing.command.update-offence-on-hearings"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(offence.getId().toString())),
                                 withJsonPath("$.hearingIds[0]", is(offence.getHearingIds().get(0).toString()))
@@ -143,12 +143,12 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
     @Test
     public void deleteCaseDefendantOffence() {
 
-        DeleteOffenceFromHearings offence = DeleteOffenceFromHearings.builder()
+        FoundHearingsForDeleteOffence offence = FoundHearingsForDeleteOffence.builder()
                 .withId(randomUUID())
                 .withHearingIds(Collections.singletonList(randomUUID()))
                 .build();
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.delete-case-defendant-offence-enriched-with-hearing-id"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-hearings-for-delete-offence"),
                 objectToJsonObjectConverter.convert(offence));
 
         caseDefendantOffencesChangedEventProcessor.deleteCaseDefendantOffence(event);
@@ -157,7 +157,7 @@ public class CaseDefendantOffencesChangedEventProcessorTest {
 
         assertThat(
                 this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                        metadata().withName("hearing.delete-case-defendant-offence"),
+                        metadata().withName("hearing.command.delete-offence-on-hearings"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(offence.getId().toString())),
                                 withJsonPath("$.hearingIds[0]", is(offence.getHearingIds().get(0).toString()))

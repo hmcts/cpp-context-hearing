@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
@@ -22,6 +23,7 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
 
     private final List<UUID> hearingIds;
 
+    @JsonCreator
     private CaseDefendantDetailsWithHearings(
             @JsonProperty("caseId") UUID caseId,
             @JsonProperty("defendant") final Defendant defendant,

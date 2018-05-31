@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
@@ -7,7 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Event("hearing.offence-added")
+@Event("hearing.events.offence-added")
 @SuppressWarnings("squid:S00107")
 public class OffenceAdded implements Serializable {
 
@@ -33,6 +34,7 @@ public class OffenceAdded implements Serializable {
 
     private final LocalDate convictionDate;
 
+    @JsonCreator
     private OffenceAdded(@JsonProperty("id") final UUID id,
                          @JsonProperty("hearingId") final UUID hearingId,
                          @JsonProperty("defendantId") final UUID defendantId,

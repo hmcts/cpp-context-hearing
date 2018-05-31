@@ -15,9 +15,9 @@ import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
-import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
-import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 
 import javax.inject.Inject;
 import java.util.UUID;
@@ -33,7 +33,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
         super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
     }
 
-    @Handles("hearing.update-case-defendant-offences")
+    @Handles("hearing.command.defendant-offences-changed")
     public void updateCaseDefendantOffences(final JsonEnvelope envelope) throws EventStreamException {
 
         final CaseDefendantOffencesChangedCommand command = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CaseDefendantOffencesChangedCommand.class);
@@ -43,7 +43,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
                 aggregate(DefendantAggregate.class,
                         addedOffence.getDefendantId(),
                         envelope,
-                        defendantAggregate -> defendantAggregate.enrichNewOffenceWithAllHearingIdsAssociatedToDefendant(addedOffence.getDefendantId(), addedOffence.getCaseId(), offence));
+                        defendantAggregate -> defendantAggregate.lookupHearingsForNewOffenceOnDefendant(addedOffence.getDefendantId(), addedOffence.getCaseId(), offence));
             }
         }
 
@@ -51,64 +51,64 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
             aggregate(OffenceAggregate.class,
                     offence.getId(),
                     envelope,
-                    offenceAggregate -> offenceAggregate.enrichEditOffenceCommandWithHearingIds(offence));
+                    offenceAggregate -> offenceAggregate.lookupHearingsForEditOffenceOnOffence(offence));
         }
 
         for (DeletedOffence offence : command.getDeletedOffences()) {
             aggregate(OffenceAggregate.class,
                     offence.getId(),
                     envelope,
-                    offenceAggregate -> offenceAggregate.enrichDeleteOffenceCommandWithHearingIds(offence.getId()));
+                    offenceAggregate -> offenceAggregate.lookupHearingsForDeleteOffenceOnOffence(offence.getId()));
         }
     }
 
-    @Handles("hearing.add-case-defendant-offence")
+    @Handles("hearing.command.add-new-offence-to-hearings")
     public void addOffenceForExistingHearing(final JsonEnvelope envelope) throws EventStreamException {
 
-        final CaseDefendantOffenceWithHearingIds caseDefendantOffenceWithHearingIds = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CaseDefendantOffenceWithHearingIds.class);
+        final FoundHearingsForNewOffence foundHearingsForNewOffence = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), FoundHearingsForNewOffence.class);
 
-        for (UUID hearingId : caseDefendantOffenceWithHearingIds.getHearingIds()) {
+        for (UUID hearingId : foundHearingsForNewOffence.getHearingIds()) {
             aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->
                     hearingAggregate.addOffence(
                             hearingId,
-                            caseDefendantOffenceWithHearingIds.getDefendantId(),
-                            caseDefendantOffenceWithHearingIds.getCaseId(),
+                            foundHearingsForNewOffence.getDefendantId(),
+                            foundHearingsForNewOffence.getCaseId(),
                             UpdatedOffence.builder()
-                                    .withId(caseDefendantOffenceWithHearingIds.getId())
-                                    .withOffenceCode(caseDefendantOffenceWithHearingIds.getOffenceCode())
-                                    .withWording(caseDefendantOffenceWithHearingIds.getWording())
-                                    .withStartDate(caseDefendantOffenceWithHearingIds.getStartDate())
-                                    .withEndDate(caseDefendantOffenceWithHearingIds.getEndDate())
-                                    .withCount(caseDefendantOffenceWithHearingIds.getCount())
-                                    .withConvictionDate(caseDefendantOffenceWithHearingIds.getConvictionDate())
+                                    .withId(foundHearingsForNewOffence.getId())
+                                    .withOffenceCode(foundHearingsForNewOffence.getOffenceCode())
+                                    .withWording(foundHearingsForNewOffence.getWording())
+                                    .withStartDate(foundHearingsForNewOffence.getStartDate())
+                                    .withEndDate(foundHearingsForNewOffence.getEndDate())
+                                    .withCount(foundHearingsForNewOffence.getCount())
+                                    .withConvictionDate(foundHearingsForNewOffence.getConvictionDate())
                                     .build()
                     ));
         }
     }
 
-    @Handles("hearing.update-case-defendant-offence")
+    @Handles("hearing.command.update-offence-on-hearings")
     public void updateOffence(final JsonEnvelope envelope) throws EventStreamException {
 
-        final UpdateOffenceOnHearings updateOffenceOnHearings = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), UpdateOffenceOnHearings.class);
+        final FoundHearingsForEditOffence foundHearingsForEditOffence = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), FoundHearingsForEditOffence.class);
 
-        for (UUID hearingId : updateOffenceOnHearings.getHearingIds()) {
+        for (UUID hearingId : foundHearingsForEditOffence.getHearingIds()) {
             aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->
                     hearingAggregate.updateOffence(hearingId, UpdatedOffence.builder()
-                            .withId(updateOffenceOnHearings.getId())
-                            .withOffenceCode(updateOffenceOnHearings.getOffenceCode())
-                            .withWording(updateOffenceOnHearings.getWording())
-                            .withStartDate(updateOffenceOnHearings.getStartDate())
-                            .withEndDate(updateOffenceOnHearings.getEndDate())
-                            .withCount(updateOffenceOnHearings.getCount())
-                            .withConvictionDate(updateOffenceOnHearings.getConvictionDate())
+                            .withId(foundHearingsForEditOffence.getId())
+                            .withOffenceCode(foundHearingsForEditOffence.getOffenceCode())
+                            .withWording(foundHearingsForEditOffence.getWording())
+                            .withStartDate(foundHearingsForEditOffence.getStartDate())
+                            .withEndDate(foundHearingsForEditOffence.getEndDate())
+                            .withCount(foundHearingsForEditOffence.getCount())
+                            .withConvictionDate(foundHearingsForEditOffence.getConvictionDate())
                             .build()));
         }
     }
 
-    @Handles("hearing.delete-case-defendant-offence")
+    @Handles("hearing.command.delete-offence-on-hearings")
     public void deleteOffence(final JsonEnvelope envelope) throws EventStreamException {
 
-        final DeleteOffenceFromHearings offenceWithHearingIds = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), DeleteOffenceFromHearings.class);
+        final FoundHearingsForDeleteOffence offenceWithHearingIds = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), FoundHearingsForDeleteOffence.class);
 
         for (UUID hearingId : offenceWithHearingIds.getHearingIds()) {
             aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->

@@ -38,7 +38,7 @@ public class CaseDefendantOffencesChangedEventListener {
     private LegalCaseRepository legalCaseRepository;
 
     @Transactional
-    @Handles("hearing.offence-added")
+    @Handles("hearing.events.offence-added")
     public void addOffence(final JsonEnvelope envelope) {
 
         final OffenceAdded offenceToBeAdded = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceAdded.class);
@@ -63,7 +63,7 @@ public class CaseDefendantOffencesChangedEventListener {
     }
 
     @Transactional
-    @Handles("hearing.offence-updated")
+    @Handles("hearing.events.offence-updated")
     public void updateOffence(final JsonEnvelope envelope) {
 
         final OffenceUpdated offenceToBeUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceUpdated.class);
@@ -87,7 +87,7 @@ public class CaseDefendantOffencesChangedEventListener {
     }
 
     @Transactional
-    @Handles("hearing.offence-deleted")
+    @Handles("hearing.events.offence-deleted")
     public void deleteOffence(final JsonEnvelope envelope) {
 
         final OffenceDeleted offenceToBeDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceDeleted.class);

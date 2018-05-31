@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 
@@ -19,8 +21,10 @@ public class HearingEventsUpdated implements Serializable {
         // default constructor for Jackson serialisation
     }
 
-
-    public HearingEventsUpdated(final UUID hearingId, final List<HearingEvent> hearingEvents) {
+@JsonCreator
+    public HearingEventsUpdated(
+        @JsonProperty("hearingId") final UUID hearingId,
+        @JsonProperty("hearingEvents") final List<HearingEvent> hearingEvents) {
         this.hearingId = hearingId;
         this.hearingEvents = hearingEvents;
     }

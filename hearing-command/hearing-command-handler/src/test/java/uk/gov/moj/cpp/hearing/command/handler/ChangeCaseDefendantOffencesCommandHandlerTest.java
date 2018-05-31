@@ -24,12 +24,12 @@ import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
-import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -57,9 +57,9 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            CaseDefendantOffenceWithHearingIds.class,
-            UpdateOffenceOnHearings.class,
-            DeleteOffenceFromHearings.class,
+            FoundHearingsForNewOffence.class,
+            FoundHearingsForEditOffence.class,
+            FoundHearingsForDeleteOffence.class,
             OffenceAdded.class,
             OffenceUpdated.class,
             OffenceDeleted.class
@@ -108,12 +108,12 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
 
         setupMockedEventStream(addedOffences.get(0).getDefendantId(), this.eventStream, new DefendantAggregate());
 
-        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offences"), objectToJsonObjectConverter.convert(caseDefendantOffencesChanged));
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.defendant-offences-changed"), objectToJsonObjectConverter.convert(caseDefendantOffencesChanged));
 
         changeCaseDefendantOffencesCommandHandler.updateCaseDefendantOffences(envelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.add-case-defendant-offence-enriched-with-hearing-ids"),
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.found-hearings-for-new-offence"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(caseDefendantOffencesChanged.getAddedOffences().get(0).getOffences().get(0).getId().toString())),
                                 withJsonPath("$.defendantId", is(caseDefendantOffencesChanged.getAddedOffences().get(0).getDefendantId().toString())),
@@ -138,7 +138,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
         changeCaseDefendantOffencesCommandHandler.updateCaseDefendantOffences(envelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.update-case-defendant-offence-enriched-with-hearing-ids"),
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.found-hearings-for-edit-offence"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(caseDefendantOffencesChanged.getUpdatedOffences().get(0).getId().toString()))
                         )))));
@@ -161,7 +161,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
         changeCaseDefendantOffencesCommandHandler.updateCaseDefendantOffences(envelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.delete-case-defendant-offence-enriched-with-hearing-ids"),
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.found-hearings-for-delete-offence"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(caseDefendantOffencesChanged.getDeletedOffences().get(0).getId().toString()))
                         )))));
@@ -172,26 +172,26 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
 
         final UUID hearingId = randomUUID();
 
-        final CaseDefendantOffenceWithHearingIds caseDefendantOffenceWithHearingIds = CaseDefendantOffenceWithHearingIds.builder()
+        final FoundHearingsForNewOffence foundHearingsForNewOffence = FoundHearingsForNewOffence.builder()
                 .withId(randomUUID())
                 .withHearingIds(Collections.singletonList(hearingId))
                 .withDefendantId(randomUUID())
                 .withCaseId(randomUUID())
                 .build();
 
-        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-case-defendant-offence"), objectToJsonObjectConverter.convert(caseDefendantOffenceWithHearingIds));
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-case-defendant-offence"), objectToJsonObjectConverter.convert(foundHearingsForNewOffence));
 
         setupMockedEventStream(hearingId, this.eventStream, new NewModelHearingAggregate());
 
         changeCaseDefendantOffencesCommandHandler.addOffenceForExistingHearing(envelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.offence-added"),
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.offence-added"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.id", is(caseDefendantOffenceWithHearingIds.getId().toString())),
-                                withJsonPath("$.hearingId", is(caseDefendantOffenceWithHearingIds.getHearingIds().get(0).toString())),
-                                withJsonPath("$.defendantId", is(caseDefendantOffenceWithHearingIds.getDefendantId().toString())),
-                                withJsonPath("$.caseId", is(caseDefendantOffenceWithHearingIds.getCaseId().toString()))
+                                withJsonPath("$.id", is(foundHearingsForNewOffence.getId().toString())),
+                                withJsonPath("$.hearingId", is(foundHearingsForNewOffence.getHearingIds().get(0).toString())),
+                                withJsonPath("$.defendantId", is(foundHearingsForNewOffence.getDefendantId().toString())),
+                                withJsonPath("$.caseId", is(foundHearingsForNewOffence.getCaseId().toString()))
                         )))));
     }
 
@@ -200,21 +200,21 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
 
         final UUID hearingId = randomUUID();
 
-        final UpdateOffenceOnHearings updateOffenceOnHearings = UpdateOffenceOnHearings.builder()
+        final FoundHearingsForEditOffence foundHearingsForEditOffence = FoundHearingsForEditOffence.builder()
                 .withId(randomUUID())
                 .withHearingIds(Collections.singletonList(hearingId))
                 .build();
 
-        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offence"), objectToJsonObjectConverter.convert(updateOffenceOnHearings));
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offence"), objectToJsonObjectConverter.convert(foundHearingsForEditOffence));
 
         setupMockedEventStream(hearingId, this.eventStream, new NewModelHearingAggregate());
 
         changeCaseDefendantOffencesCommandHandler.updateOffence(envelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.offence-updated"),
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.offence-updated"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.id", is(updateOffenceOnHearings.getId().toString()))
+                                withJsonPath("$.id", is(foundHearingsForEditOffence.getId().toString()))
                         )))));
     }
 
@@ -223,21 +223,21 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
 
         final UUID hearingId = randomUUID();
 
-        final DeleteOffenceFromHearings deleteOffenceFromHearings = DeleteOffenceFromHearings.builder()
+        final FoundHearingsForDeleteOffence foundHearingsForDeleteOffence = FoundHearingsForDeleteOffence.builder()
                 .withId(randomUUID())
                 .withHearingIds(Collections.singletonList(hearingId))
                 .build();
 
-        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.delete-case-defendant-offence"), objectToJsonObjectConverter.convert(deleteOffenceFromHearings));
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.delete-case-defendant-offence"), objectToJsonObjectConverter.convert(foundHearingsForDeleteOffence));
 
         setupMockedEventStream(hearingId, this.eventStream, new NewModelHearingAggregate());
 
         changeCaseDefendantOffencesCommandHandler.deleteOffence(envelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.offence-deleted"),
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.offence-deleted"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.id", is(deleteOffenceFromHearings.getId().toString()))
+                                withJsonPath("$.id", is(foundHearingsForDeleteOffence.getId().toString()))
                         )))));
     }
 

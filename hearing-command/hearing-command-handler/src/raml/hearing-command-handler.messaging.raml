@@ -10,25 +10,25 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.initiate.json
             schema:  !include json/schema/hearing.initiate.json
 
-        application/vnd.hearing.command.initiate-hearing-offence+json:
-            schema: !include json/schema/hearing.command.initiate-hearing-offence.json
-            example: !include json/hearing.command.initiate-hearing-offence.json
+        application/vnd.hearing.command.lookup-plea-on-offence-for-hearing+json:
+            schema: !include json/schema/hearing.command.lookup-plea-on-offence-for-hearing.json
+            example: !include json/hearing.command.lookup-plea-on-offence-for-hearing.json
 
-        application/vnd.hearing.command.initiate-hearing-offence-plea+json:
-            schema: !include json/schema/hearing.command.initiate-hearing-offence-plea.json
-            example: !include json/hearing.command.initiate-hearing-offence-plea.json
+        application/vnd.hearing.command.update-hearing-with-inherited-plea+json:
+            schema: !include json/schema/hearing.command.update-hearing-with-inherited-plea.json
+            example: !include json/hearing.command.update-hearing-with-inherited-plea.json
 
-        application/vnd.hearing.command.initiate-hearing-defence-witness-enrich+json:
-            schema: !include json/schema/hearing.command.initiate-hearing-defence-witness-enrich.json
-            example: !include json/hearing.command.initiate-hearing-defence-witness-enrich.json
+        application/vnd.hearing.command.lookup-witnesses-on-defendant-for-hearing+json:
+            schema: !include json/schema/hearing.command.lookup-witnesses-on-defendant-for-hearing.json
+            example: !include json/hearing.command.lookup-witnesses-on-defendant-for-hearing.json
 
-        application/vnd.hearing.update-case-defendant-details+json:
-            schema: !include json/schema/hearing.update-case-defendant-details.json
-            example: !include json/hearing.update-case-defendant-details.json
+        application/vnd.hearing.command.register-hearing-against-defendant+json:
+            schema: !include json/schema/hearing.command.register-hearing-against-defendant.json
+            example: !include json/hearing.command.register-hearing-against-defendant.json
 
-        application/vnd.hearing.update-case-defendant-offences+json:
-            schema: !include json/schema/hearing.update-case-defendant-offences.json
-            example: !include json/hearing.update-case-defendant-offences.json
+        application/vnd.hearing.command.register-hearing-against-case+json:
+            schema: !include json/schema/hearing.command.register-hearing-against-case.json
+            example: !include json/hearing.command.register-hearing-against-case.json
 
 # Log Event
         application/vnd.hearing.command.log-hearing-event+json:
@@ -105,25 +105,34 @@ baseUri:  message://command/handler/message/hearing
             schema:  !include json/schema/hearing.command.update-nows-material-status.json
 
 # Case Defendant Details Update
-        application/vnd.hearing.command.register-defendant-with-hearing+json:
-            schema: !include json/schema/hearing.command.register-defendant-with-hearing.json
-            example: !include json/hearing.command.register-defendant-with-hearing.json
-
         application/vnd.hearing.update-case-defendant-details-against-hearing-aggregate+json:
             schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
             example: !include json/hearing.update-case-defendant-details-against-hearing-aggregate.json
 
-        application/vnd.hearing.command.register-case-with-hearing+json:
-                    schema: !include json/schema/hearing.command.register-case-with-hearing.json
-                    example: !include json/hearing.command.register-case-with-hearing.json
+        application/vnd.hearing.update-case-defendant-details+json:
+            schema: !include json/schema/hearing.update-case-defendant-details.json
+            example: !include json/hearing.update-case-defendant-details.json
 
 # Case Defendant Offences Update
-        application/vnd.hearing.add-case-defendant-offence+json:
-            schema: !include json/schema/hearing.add-case-defendant-offence.json
-            example: !include json/hearing.add-case-defendant-offence.json
-        application/vnd.hearing.update-case-defendant-offence+json:
-            schema: !include json/schema/hearing.update-case-defendant-offence.json
-            example: !include json/hearing.update-case-defendant-offence.json
-        application/vnd.hearing.delete-case-defendant-offence+json:
-            schema: !include json/schema/hearing.delete-case-defendant-offence.json
-            example: !include json/hearing.delete-case-defendant-offence.json
+        application/vnd.hearing.command.defendant-offences-changed+json:
+            schema: !include json/schema/hearing.command.defendant-offences-changed.json
+            example: !include json/hearing.command.defendant-offences-changed.json
+
+        application/vnd.hearing.command.add-new-offence-to-hearings+json:
+            schema: !include json/schema/hearing.command.add-new-offence-to-hearings.json
+            example: !include json/hearing.command.add-new-offence-to-hearings.json
+
+        application/vnd.hearing.command.update-offence-on-hearings+json:
+            schema: !include json/schema/hearing.command.update-offence-on-hearings.json
+            example: !include json/hearing.command.update-offence-on-hearings.json
+
+        application/vnd.hearing.command.delete-offence-on-hearings+json:
+            schema: !include json/schema/hearing.command.delete-offence-on-hearings.json
+            example: !include json/hearing.command.delete-offence-on-hearings.json
+
+
+
+
+
+
+

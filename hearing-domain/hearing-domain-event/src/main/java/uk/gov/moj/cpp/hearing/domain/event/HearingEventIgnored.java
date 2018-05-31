@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 @Event("hearing.hearing-event-ignored")
@@ -19,8 +21,14 @@ public class HearingEventIgnored implements Serializable {
     private String reason;
     private boolean alterable;
 
-    public HearingEventIgnored(final UUID hearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final String recordedLabel,
-                               final ZonedDateTime eventTime, final String reason, final boolean alterable) {
+    @JsonCreator
+    public HearingEventIgnored(@JsonProperty("hearingEventId") final UUID hearingEventId,
+                               @JsonProperty("hearingId") final UUID hearingId,
+                               @JsonProperty("hearingEventDefinitionId") final UUID hearingEventDefinitionId,
+                               @JsonProperty("recordedLabel") final String recordedLabel,
+                               @JsonProperty("eventTime") final ZonedDateTime eventTime,
+                               @JsonProperty("reason") final String reason,
+                               @JsonProperty("alterable") final boolean alterable) {
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
         this.hearingEventDefinitionId = hearingEventDefinitionId;

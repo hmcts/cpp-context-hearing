@@ -32,7 +32,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCase;
@@ -146,7 +146,7 @@ public class InitiateHearingEventListener {
     }
 
     @Transactional
-    @Handles("hearing.initiated")
+    @Handles("hearing.events.initiated")
     public void newHearingInitiated(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
         LOGGER.debug("hearing.initiated event received {}", payload);
@@ -222,10 +222,10 @@ public class InitiateHearingEventListener {
     }
 
     @Transactional
-    @Handles("hearing.initiate-hearing-offence-plead")
+    @Handles("hearing.events.inherited-plea")
     public void hearingInitiatedPleaData(final JsonEnvelope envelop) {
-        LOGGER.debug("hearing.initiate-hearing-offence-plead event received {}", envelop.payloadAsJsonObject());
-        final InitiateHearingOffencePlead event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InitiateHearingOffencePlead.class);
+        LOGGER.debug("hearing.events.inherited-plea event received {}", envelop.payloadAsJsonObject());
+        final InheritedPlea event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InheritedPlea.class);
         save(event.getOffenceId(), event.getHearingId(), (o) -> {
             o.setOriginHearingId(event.getOriginHearingId());
             o.setPleaDate(event.getPleaDate());
@@ -234,8 +234,10 @@ public class InitiateHearingEventListener {
         });
     }
 
+    //TODO - this event is being emitted from defendantAggregate - this is incorrect
+    // There should be an event processor method that translates this into another event that arrives on the hearingAggregate.
     @Transactional
-    @Handles("hearing.initiate-hearing-defence-witness-enriched")
+    @Handles("hearing.events.found-witnesses-for-hearing-to-inherit")
     public void initiateHearingWitnessEnriched(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
         LOGGER.debug("hearing.initiate-hearing-defence-witness-enriched listener payload {} ",
@@ -299,6 +301,7 @@ public class InitiateHearingEventListener {
                 "Offence id is not found on hearing id: " + hearingId));
     }
 
+    //TODO - this event handler needs to be moved into its own event listener class - this handler does not form part of the initiate hearing process.
     @Transactional
     @Handles("hearing.events.witness-added")
     public void witnessAdded(final JsonEnvelope event) {

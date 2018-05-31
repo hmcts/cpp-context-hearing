@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import uk.gov.justice.domain.annotation.Event;
 @SuppressWarnings({"squid:S00107"})
 @Event("hearing.hearing-event-logged")
@@ -31,22 +34,26 @@ public class HearingEventLogged implements Serializable {
     private UUID caseId;
     private UUID witnessId;
     private UUID counselId;
+
+    @JsonCreator
     public HearingEventLogged(
-            final UUID hearingEventId,
-            final UUID lastHearingEventId,
-            final UUID hearingId,
-            final UUID hearingEventDefinitionId,
-            final String recordedLabel,
-            final ZonedDateTime eventTime,
-            final ZonedDateTime lastModifiedTime,
-            final boolean alterable,
-            final UUID courtCentreId,
-            final String courtCentreName,
-            final UUID courtRoomId,
-            final String courtRoomName,
-            final String hearingType,
-            final String caseUrn,
-                    final UUID caseId, final UUID witnessId, final UUID counselId) {
+            @JsonProperty("hearingEventId") final UUID hearingEventId,
+            @JsonProperty("lastHearingEventId") final UUID lastHearingEventId,
+            @JsonProperty("hearingId") final UUID hearingId,
+            @JsonProperty("hearingEventDefinitionId") final UUID hearingEventDefinitionId,
+            @JsonProperty("recordedLabel") final String recordedLabel,
+            @JsonProperty("eventTime") final ZonedDateTime eventTime,
+            @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
+            @JsonProperty("alterable") final boolean alterable,
+            @JsonProperty("courtCentreId") final UUID courtCentreId,
+            @JsonProperty("courtCentreName") final String courtCentreName,
+            @JsonProperty("courtRoomId") final UUID courtRoomId,
+            @JsonProperty("courtRoomName") final String courtRoomName,
+            @JsonProperty("hearingType") final String hearingType,
+            @JsonProperty("caseUrn") final String caseUrn,
+            @JsonProperty("caseId") final UUID caseId,
+            @JsonProperty("witnessId") final UUID witnessId,
+            @JsonProperty("counselId") final UUID counselId) {
 
         this.hearingEventId = hearingEventId;
         this.lastHearingEventId = lastHearingEventId;

@@ -1,12 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-@Event("hearing.associate-hearing-id-with-offence")
-public final class AssociateHearingIdWithOffence implements Serializable {
+@Event("hearing.events.registered-hearing-against-offence")
+public final class RegisteredHearingAgainstOffence implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -14,7 +16,8 @@ public final class AssociateHearingIdWithOffence implements Serializable {
 
     private final UUID hearingId;
 
-    private AssociateHearingIdWithOffence(final UUID offenceId, final UUID hearingId) {
+    @JsonCreator
+    private RegisteredHearingAgainstOffence(@JsonProperty("offenceId") final UUID offenceId, @JsonProperty("hearingId") final UUID hearingId) {
         this.offenceId = offenceId;
         this.hearingId = hearingId;
     }
@@ -47,8 +50,8 @@ public final class AssociateHearingIdWithOffence implements Serializable {
             return this;
         }
 
-        public AssociateHearingIdWithOffence build() {
-            return new AssociateHearingIdWithOffence(offenceId, hearingId);
+        public RegisteredHearingAgainstOffence build() {
+            return new RegisteredHearingAgainstOffence(offenceId, hearingId);
         }
     }
 }

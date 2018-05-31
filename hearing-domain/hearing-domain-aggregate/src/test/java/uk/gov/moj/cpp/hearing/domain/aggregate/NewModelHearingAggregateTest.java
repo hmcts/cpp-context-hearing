@@ -36,7 +36,7 @@ import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
@@ -50,7 +50,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
@@ -87,7 +87,7 @@ public class NewModelHearingAggregateTest {
 
     @Test
     public void initiateHearingOffencePlea() {
-        final InitiateHearingOffencePleaCommand command = new InitiateHearingOffencePleaCommand(
+        final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
                 randomUUID(),
                 randomUUID(),
                 randomUUID(),
@@ -96,8 +96,8 @@ public class NewModelHearingAggregateTest {
                 PAST_LOCAL_DATE.next(),
                 "GUILTY"
         );
-        newModelHearingAggregate.initiateHearingOffencePlea(command)
-                .map(InitiateHearingOffencePlead.class::cast)
+        newModelHearingAggregate.inheritPlea(command)
+                .map(InheritedPlea.class::cast)
                 .forEach(event -> {
                     assertThat(event.getCaseId(), is(command.getCaseId()));
                     assertThat(event.getDefendantId(), is(command.getDefendantId()));

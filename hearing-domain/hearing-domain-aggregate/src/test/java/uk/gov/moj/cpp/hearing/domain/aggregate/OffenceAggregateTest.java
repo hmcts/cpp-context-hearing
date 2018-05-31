@@ -4,8 +4,8 @@ import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
+import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 
 import java.time.LocalDate;
@@ -38,29 +38,29 @@ public class OffenceAggregateTest {
     @Test
     public void initiateHearingOffence_withPreviousPlea() {
 
-        InitiateHearingOffenceCommand initiateHearingOffenceCommand = new InitiateHearingOffenceCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID());
+        LookupPleaOnOffenceForHearingCommand lookupPleaOnOffenceForHearingCommand = new LookupPleaOnOffenceForHearingCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID());
         UUID originHearingId = randomUUID();
         LocalDate pleaDate = PAST_LOCAL_DATE.next();
         String value = STRING.next();
 
-        offenceAggregate.apply(new OffencePleaUpdated(originHearingId, initiateHearingOffenceCommand.getOffenceId(), pleaDate, value));
+        offenceAggregate.apply(new OffencePleaUpdated(originHearingId, lookupPleaOnOffenceForHearingCommand.getOffenceId(), pleaDate, value));
 
-        InitiateHearingOffenceEnriched initiateHearingOffenceEnriched = (InitiateHearingOffenceEnriched) offenceAggregate.initiateHearingOffence(initiateHearingOffenceCommand).collect(Collectors.toList()).get(1);
-        assertThat(initiateHearingOffenceEnriched.getOriginHearingId(), is(originHearingId));
-        assertThat(initiateHearingOffenceEnriched.getOffenceId(), is(initiateHearingOffenceCommand.getOffenceId()));
-        assertThat(initiateHearingOffenceEnriched.getDefendantId(), is(initiateHearingOffenceCommand.getDefendantId()));
-        assertThat(initiateHearingOffenceEnriched.getCaseId(), is(initiateHearingOffenceCommand.getCaseId()));
-        assertThat(initiateHearingOffenceEnriched.getHearingId(), is(initiateHearingOffenceCommand.getHearingId()));
-        assertThat(initiateHearingOffenceEnriched.getPleaDate(), is(pleaDate));
-        assertThat(initiateHearingOffenceEnriched.getValue(), is(value));
+        FoundPleaForHearingToInherit foundPleaForHearingToInherit = (FoundPleaForHearingToInherit) offenceAggregate.lookupPleaForHearing(lookupPleaOnOffenceForHearingCommand).collect(Collectors.toList()).get(1);
+        assertThat(foundPleaForHearingToInherit.getOriginHearingId(), is(originHearingId));
+        assertThat(foundPleaForHearingToInherit.getOffenceId(), is(lookupPleaOnOffenceForHearingCommand.getOffenceId()));
+        assertThat(foundPleaForHearingToInherit.getDefendantId(), is(lookupPleaOnOffenceForHearingCommand.getDefendantId()));
+        assertThat(foundPleaForHearingToInherit.getCaseId(), is(lookupPleaOnOffenceForHearingCommand.getCaseId()));
+        assertThat(foundPleaForHearingToInherit.getHearingId(), is(lookupPleaOnOffenceForHearingCommand.getHearingId()));
+        assertThat(foundPleaForHearingToInherit.getPleaDate(), is(pleaDate));
+        assertThat(foundPleaForHearingToInherit.getValue(), is(value));
     }
 
     @Test
     public void initiateHearingOffence_withNoPreviousPlea() {
 
-        InitiateHearingOffenceCommand initiateHearingOffenceCommand = new InitiateHearingOffenceCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID());
+        LookupPleaOnOffenceForHearingCommand lookupPleaOnOffenceForHearingCommand = new LookupPleaOnOffenceForHearingCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID());
 
-        List<Object> events = offenceAggregate.initiateHearingOffence(initiateHearingOffenceCommand).collect(Collectors.toList());
+        List<Object> events = offenceAggregate.lookupPleaForHearing(lookupPleaOnOffenceForHearingCommand).collect(Collectors.toList());
 
         assertThat(events.get(0), not(offenceAggregate.getPlea()));
     }

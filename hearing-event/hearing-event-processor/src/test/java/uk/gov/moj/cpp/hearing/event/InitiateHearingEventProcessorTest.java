@@ -93,7 +93,7 @@ public class InitiateHearingEventProcessorTest {
 
         assertThat(
                 envelopes.get(0), jsonEnvelope(
-                        metadata().withName("hearing.command.register-defendant-with-hearing"),
+                        metadata().withName("hearing.command.register-hearing-against-defendant"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.defendantId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
@@ -102,7 +102,7 @@ public class InitiateHearingEventProcessorTest {
 
         assertThat(
                 envelopes.get(1), jsonEnvelope(
-                        metadata().withName("hearing.command.initiate-hearing-offence"),
+                        metadata().withName("hearing.command.lookup-plea-on-offence-for-hearing"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
                                 withJsonPath("$.caseId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCaseId().toString())),
@@ -111,18 +111,18 @@ public class InitiateHearingEventProcessorTest {
                         .thatMatchesSchema()
         );
 
-        //TODO: missing schema
         assertThat(
                 envelopes.get(2), jsonEnvelope(
-                        metadata().withName("hearing.command.initiate-hearing-defence-witness-enrich"),
+                        metadata().withName("hearing.command.lookup-witnesses-on-defendant-for-hearing"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.defendantId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
+                        .thatMatchesSchema()
         );
 
         assertThat(
                 envelopes.get(3), jsonEnvelope(
-                        metadata().withName("hearing.command.register-case-with-hearing"),
+                        metadata().withName("hearing.command.register-hearing-against-case"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.caseId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
@@ -158,7 +158,7 @@ public class InitiateHearingEventProcessorTest {
                 .add("value", value)
                 .build();
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.initiate-hearing-offence-enriched"), payload);
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-plea-for-hearing-to-inherit"), payload);
 
         this.initiateHearingEventProcessor.hearingInitiateOffencePlea(event);
 
@@ -166,7 +166,7 @@ public class InitiateHearingEventProcessorTest {
 
         assertThat(
                 this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                        metadata().withName("hearing.command.initiate-hearing-offence-plea"),
+                        metadata().withName("hearing.command.update-hearing-with-inherited-plea"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(offenceId.toString())),
                                 withJsonPath("$.caseId", is(caseId.toString())),

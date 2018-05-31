@@ -12,9 +12,9 @@ import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.defendant.Person;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,12 +46,12 @@ public class DefendantAggregateTest {
     @Test
     public void testRegisteringHearing() {
 
-        RegisterDefendantWithHearingCommand expected = RegisterDefendantWithHearingCommand.builder()
+        RegisterHearingAgainstDefendantCommand expected = RegisterHearingAgainstDefendantCommand.builder()
                 .withDefendantId(randomUUID())
                 .withHearingId(randomUUID())
                 .build();
 
-        RegisterHearingAgainstDefendant result = (RegisterHearingAgainstDefendant) defendantAggregate.registerHearingId(expected).collect(Collectors.toList()).get(0);
+        RegisteredHearingAgainstDefendant result = (RegisteredHearingAgainstDefendant) defendantAggregate.registerHearing(expected).collect(Collectors.toList()).get(0);
 
         assertThat(result.getDefendantId(), is(expected.getDefendantId()));
         assertThat(result.getHearingId(), is(expected.getHearingId()));
@@ -86,7 +86,7 @@ public class DefendantAggregateTest {
                         .withInterpreter(Interpreter.builder(STRING.next())))
                 .build();
 
-        RegisterHearingAgainstDefendant registerDefendantWithHearingCommand = RegisterHearingAgainstDefendant.builder()
+        RegisteredHearingAgainstDefendant registerDefendantWithHearingCommand = RegisteredHearingAgainstDefendant.builder()
                 .withDefendantId(randomUUID())
                 .withHearingId(previousHearingId)
                 .build();

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
@@ -8,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Event("hearing.delete-case-defendant-offence-enriched-with-hearing-ids")
-public class DeleteOffenceFromHearings implements Serializable {
+@Event("hearing.events.found-hearings-for-delete-offence")
+public class FoundHearingsForDeleteOffence implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -17,7 +18,9 @@ public class DeleteOffenceFromHearings implements Serializable {
 
     private final List<UUID> hearingIds;
 
-    private DeleteOffenceFromHearings(@JsonProperty("id") final UUID id, @JsonProperty("hearingIds") final List<UUID> hearingIds) {
+    @JsonCreator
+    private FoundHearingsForDeleteOffence(@JsonProperty("id") final UUID id,
+                                          @JsonProperty("hearingIds") final List<UUID> hearingIds) {
         this.id = id;
         this.hearingIds = new ArrayList<>(hearingIds);
     }
@@ -53,8 +56,8 @@ public class DeleteOffenceFromHearings implements Serializable {
             return this;
         }
 
-        public DeleteOffenceFromHearings build() {
-            return new DeleteOffenceFromHearings(id, hearingIds);
+        public FoundHearingsForDeleteOffence build() {
+            return new FoundHearingsForDeleteOffence(id, hearingIds);
         }
     }
 }

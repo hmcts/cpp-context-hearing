@@ -11,14 +11,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterCaseWithHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonString;
-import java.util.UUID;
 
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -28,8 +27,6 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 public class InitiateHearingEventProcessor {
 
     private static final String HEARING_ID = "hearingId";
-    private static final String OFFENCE_ID = "offenceId";
-    private static final String CASE_ID = "caseId";
     private static final String DEFENDANT_ID = "defendantId";
 
     @Inject
@@ -43,11 +40,9 @@ public class InitiateHearingEventProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventProcessor.class);
 
-    @Handles("hearing.initiated")
+    @Handles("hearing.events.initiated")
     public void hearingInitiated(final JsonEnvelope event) {
-        LOGGER.debug("hearing.initiated event received {}", event.payloadAsJsonObject());
-
-        JsonString hearingId = event.payloadAsJsonObject().getJsonObject("hearing").getJsonString("id");
+        LOGGER.debug("hearing.events.initiated event received {}", event.payloadAsJsonObject());
 
         final InitiateHearingCommand initiateHearingCommand = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), InitiateHearingCommand.class);
 
@@ -55,51 +50,53 @@ public class InitiateHearingEventProcessor {
 
         for (final Defendant defendant : initiateHearingCommand.getHearing().getDefendants()) {
 
-            final RegisterDefendantWithHearingCommand command = RegisterDefendantWithHearingCommand.builder()
-                    .withDefendantId(defendant.getId())
-                    .withHearingId(UUID.fromString(hearingId.getString()))
-                    .build();
-
             this.sender.send(this.enveloper
-                    .withMetadataFrom(event, "hearing.command.register-defendant-with-hearing")
-                    .apply(command));
+                    .withMetadataFrom(event, "hearing.command.register-hearing-against-defendant")
+                    .apply(RegisterHearingAgainstDefendantCommand.builder()
+                            .withDefendantId(defendant.getId())
+                            .withHearingId(initiateHearingCommand.getHearing().getId())
+                            .build()));
 
             for (Offence offence : defendant.getOffences()) {
                 cases.add(offence.getCaseId().toString());
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.initiate-hearing-offence").apply(createObjectBuilder()
-                        .add(HEARING_ID, hearingId)
-                        .add(OFFENCE_ID, offence.getId().toString())
-                        .add(CASE_ID, offence.getCaseId().toString())
-                        .add(DEFENDANT_ID, defendant.getId().toString())
-                        .build()));
+
+                this.sender.send(this.enveloper
+                        .withMetadataFrom(event, "hearing.command.lookup-plea-on-offence-for-hearing")
+                        .apply(LookupPleaOnOffenceForHearingCommand.lookupPleaOnOffenceForHearingCommand()
+                                .setHearingId(initiateHearingCommand.getHearing().getId())
+                                .setDefendantId(defendant.getId())
+                                .setOffenceId(offence.getId())
+                                .setCaseId(offence.getCaseId())
+                        ));
             }
 
             this.sender.send(this.enveloper.withMetadataFrom(event,
-                    "hearing.command.initiate-hearing-defence-witness-enrich")
-                    .apply(createObjectBuilder().add(HEARING_ID, hearingId)
+                    "hearing.command.lookup-witnesses-on-defendant-for-hearing")
+                    .apply(createObjectBuilder().add(HEARING_ID, initiateHearingCommand.getHearing().getId().toString())
                             .add(DEFENDANT_ID, defendant.getId().toString())
                             .build()));
 
             for (DefendantCase defendantCase : defendant.getDefendantCases()) {
 
-                final RegisterCaseWithHearingCommand registerCaseWithHearingCommand = RegisterCaseWithHearingCommand.builder()
+                final RegisterHearingAgainstCaseCommand registerHearingAgainstCaseCommand = RegisterHearingAgainstCaseCommand.builder()
                         .withCaseId(defendantCase.getCaseId())
-                        .withHearingId(UUID.fromString(hearingId.getString()))
+                        .withHearingId(initiateHearingCommand.getHearing().getId())
                         .build();
 
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.register-case-with-hearing").apply(registerCaseWithHearingCommand));
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-case")
+                        .apply(registerHearingAgainstCaseCommand));
             }
         }
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.initiated").apply(createObjectBuilder()
-                .add(HEARING_ID, hearingId)
+                .add(HEARING_ID, initiateHearingCommand.getHearing().getId().toString())
                 .add("cases", cases.build())
                 .build()));
     }
 
-    @Handles("hearing.initiate-hearing-offence-enriched")
+    @Handles("hearing.events.found-plea-for-hearing-to-inherit")
     public void hearingInitiateOffencePlea(final JsonEnvelope event) {
-        LOGGER.debug("hearing.initiate-hearing-offence-enriched event received {}", event.payloadAsJsonObject());
-        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.initiate-hearing-offence-plea").apply(event.payloadAsJsonObject()));
+        LOGGER.debug("hearing.events.found-plea-for-hearing-to-inherit event received {}", event.payloadAsJsonObject());
+        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-plea").apply(event.payloadAsJsonObject()));
     }
 }

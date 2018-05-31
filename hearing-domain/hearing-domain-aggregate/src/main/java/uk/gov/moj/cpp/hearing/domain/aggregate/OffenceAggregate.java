@@ -1,13 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffenceCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
-import uk.gov.moj.cpp.hearing.domain.event.AssociateHearingIdWithOffence;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
-import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -31,26 +31,26 @@ public class OffenceAggregate implements Aggregate {
     public Object apply(Object event) {
         return match(event).with(
                 when(OffencePleaUpdated.class).apply((offencePleaUpdated) -> this.plea = offencePleaUpdated),
-                when(AssociateHearingIdWithOffence.class).apply(offence -> hearingIds.add(offence.getHearingId())),
+                when(RegisteredHearingAgainstOffence.class).apply(offence -> hearingIds.add(offence.getHearingId())),
                 otherwiseDoNothing()
         );
     }
 
-    public Stream<Object> initiateHearingOffence(InitiateHearingOffenceCommand initiateHearingOffenceCommand) {
+    public Stream<Object> lookupPleaForHearing(LookupPleaOnOffenceForHearingCommand lookupPleaOnOffenceForHearingCommand) {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        streamBuilder.add(AssociateHearingIdWithOffence.builder()
-                .withOffenceId(initiateHearingOffenceCommand.getOffenceId())
-                .withHearingId(initiateHearingOffenceCommand.getHearingId())
+        streamBuilder.add(RegisteredHearingAgainstOffence.builder()
+                .withOffenceId(lookupPleaOnOffenceForHearingCommand.getOffenceId())
+                .withHearingId(lookupPleaOnOffenceForHearingCommand.getHearingId())
                 .build());
 
         if (this.plea != null) {
-            streamBuilder.add(new InitiateHearingOffenceEnriched(
-                    initiateHearingOffenceCommand.getOffenceId(),
-                    initiateHearingOffenceCommand.getCaseId(),
-                    initiateHearingOffenceCommand.getDefendantId(),
-                    initiateHearingOffenceCommand.getHearingId(),
+            streamBuilder.add(new FoundPleaForHearingToInherit(
+                    lookupPleaOnOffenceForHearingCommand.getOffenceId(),
+                    lookupPleaOnOffenceForHearingCommand.getCaseId(),
+                    lookupPleaOnOffenceForHearingCommand.getDefendantId(),
+                    lookupPleaOnOffenceForHearingCommand.getHearingId(),
                     plea.getHearingId(),
                     plea.getPleaDate(),
                     plea.getValue()
@@ -73,9 +73,9 @@ public class OffenceAggregate implements Aggregate {
         return plea;
     }
 
-    public Stream<Object> enrichEditOffenceCommandWithHearingIds(final UpdatedOffence offence) {
+    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final UpdatedOffence offence) {
 
-        return apply(Stream.of(UpdateOffenceOnHearings.builder()
+        return apply(Stream.of(FoundHearingsForEditOffence.builder()
                 .withId(offence.getId())
                 .withOffenceCode(offence.getOffenceCode())
                 .withWording(offence.getWording())
@@ -88,9 +88,9 @@ public class OffenceAggregate implements Aggregate {
 
     }
 
-    public Stream<Object> enrichDeleteOffenceCommandWithHearingIds(final UUID offenceId) {
+    public Stream<Object> lookupHearingsForDeleteOffenceOnOffence(final UUID offenceId) {
 
-        return apply(Stream.of(DeleteOffenceFromHearings.builder()
+        return apply(Stream.of(FoundHearingsForDeleteOffence.builder()
                 .withId(offenceId)
                 .withHearingIds(hearingIds)
                 .build()));

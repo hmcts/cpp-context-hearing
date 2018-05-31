@@ -18,19 +18,19 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.AssociateHearingIdWithOffence;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingDefenceWitnessEnriched;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.domain.event.FoundWitnessesForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -63,11 +63,11 @@ public class InitiateHearingCommandHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             HearingInitiated.class,
-            InitiateHearingOffenceEnriched.class,
-            InitiateHearingOffencePlead.class,
-            InitiateHearingDefenceWitnessEnriched.class,
-            RegisterHearingAgainstDefendant.class,
-            AssociateHearingIdWithOffence.class
+            FoundPleaForHearingToInherit.class,
+            InheritedPlea.class,
+            FoundWitnessesForHearingToInherit.class,
+            RegisteredHearingAgainstDefendant.class,
+            RegisteredHearingAgainstOffence.class
     );
     @Mock
     private EventStream hearingEventStream;
@@ -109,7 +109,7 @@ public class InitiateHearingCommandHandlerTest {
         assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
-                                .withName("hearing.initiated"),
+                                .withName("hearing.events.initiated"),
 
                         payloadIsJson(allOf(
 
@@ -211,7 +211,7 @@ public class InitiateHearingCommandHandlerTest {
         assertThat((JsonEnvelope) events.get(0),
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
-                                .withName("hearing.associate-hearing-id-with-offence"),
+                                .withName("hearing.events.registered-hearing-against-offence"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(offenceId.toString())),
                                 withJsonPath("$.hearingId", is(hearingId.toString()))
@@ -221,7 +221,7 @@ public class InitiateHearingCommandHandlerTest {
         assertThat((JsonEnvelope) events.get(1),
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
-                                .withName("hearing.initiate-hearing-offence-enriched"),
+                                .withName("hearing.events.found-plea-for-hearing-to-inherit"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(offenceId.toString())),
                                 withJsonPath("$.defendantId", is(defendantId.toString())),
@@ -238,8 +238,8 @@ public class InitiateHearingCommandHandlerTest {
     @Test
     public void initiateHearingOffencePlea() throws Throwable {
 
-        final InitiateHearingOffencePleaCommand input =
-                new InitiateHearingOffencePleaCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), PAST_LOCAL_DATE.next(), "GUILTY");
+        final UpdateHearingWithInheritedPleaCommand input =
+                new UpdateHearingWithInheritedPleaCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), PAST_LOCAL_DATE.next(), "GUILTY");
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(input));
 
@@ -250,7 +250,7 @@ public class InitiateHearingCommandHandlerTest {
         assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(command)
-                                .withName("hearing.initiate-hearing-offence-plead"),
+                                .withName("hearing.events.inherited-plea"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(input.getOffenceId().toString())),
                                 withJsonPath("$.defendantId", is(input.getDefendantId().toString())),
@@ -281,7 +281,7 @@ public class InitiateHearingCommandHandlerTest {
         this.hearingCommandHandler.initiateHearingDefenceWitness(command);
         assertThat(verifyAppendAndGetArgumentFrom(this.defendantEventStream),
                 streamContaining(jsonEnvelope(withMetadataEnvelopedFrom(command)
-                                .withName("hearing.initiate-hearing-defence-witness-enriched"),
+                                .withName("hearing.events.found-witnesses-for-hearing-to-inherit"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.id",
                                         is(witnessId.toString())),
@@ -302,7 +302,7 @@ public class InitiateHearingCommandHandlerTest {
     @Test
     public void recordHearingDefendant() throws EventStreamException {
 
-        RegisterDefendantWithHearingCommand command = RegisterDefendantWithHearingCommand.builder()
+        RegisterHearingAgainstDefendantCommand command = RegisterHearingAgainstDefendantCommand.builder()
                 .withDefendantId(randomUUID())
                 .withHearingId(randomUUID())
                 .build();
@@ -315,7 +315,7 @@ public class InitiateHearingCommandHandlerTest {
 
         assertThat(verifyAppendAndGetArgumentFrom(defendantEventStream), streamContaining(
                 jsonEnvelope(
-                        withMetadataEnvelopedFrom(envelope).withName("hearing.events.defendant-registered"),
+                        withMetadataEnvelopedFrom(envelope).withName("hearing.events.registered-hearing-against-defendant"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.defendantId", is(command.getDefendantId().toString())),
                                 withJsonPath("$.hearingId", is(command.getHearingId().toString()))

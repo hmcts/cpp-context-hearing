@@ -26,22 +26,22 @@ public class CaseDefendantOffencesChangedEventProcessor {
     @Handles("public.progression.defendant-offences-changed")
     public void processPublicCaseDefendantOffencesChanged(final JsonEnvelope event) {
         LOGGER.debug("public.progression.defendant-offences-changed event received {}", event.payloadAsJsonObject());
-        sender.send(enveloper.withMetadataFrom(event, "hearing.update-case-defendant-offences").apply(event.payloadAsJsonObject()));
+        sender.send(enveloper.withMetadataFrom(event, "hearing.command.defendant-offences-changed").apply(event.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.add-case-defendant-offence-enriched-with-hearing-ids")
+    @Handles("hearing.events.found-hearings-for-new-offence")
     public void addCaseDefendantOffence(final JsonEnvelope event) {
-        sender.send(enveloper.withMetadataFrom(event, "hearing.add-case-defendant-offence").apply(event.payloadAsJsonObject()));
+        sender.send(enveloper.withMetadataFrom(event, "hearing.command.add-new-offence-to-hearings").apply(event.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.update-case-defendant-offence-enriched-with-hearing-ids")
+    @Handles("hearing.events.found-hearings-for-edit-offence")
     public void updateCaseDefendantOffence(final JsonEnvelope event) {
-        sender.send(enveloper.withMetadataFrom(event, "hearing.update-case-defendant-offence").apply(event.payloadAsJsonObject()));
+        sender.send(enveloper.withMetadataFrom(event, "hearing.command.update-offence-on-hearings").apply(event.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.delete-case-defendant-offence-enriched-with-hearing-ids")
+    @Handles("hearing.events.found-hearings-for-delete-offence")
     public void deleteCaseDefendantOffence(final JsonEnvelope event) {
-        sender.send(enveloper.withMetadataFrom(event, "hearing.delete-case-defendant-offence").apply(event.payloadAsJsonObject()));
+        sender.send(enveloper.withMetadataFrom(event, "hearing.command.delete-offence-on-hearings").apply(event.payloadAsJsonObject()));
     }
 
 }

@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 
@@ -22,8 +24,15 @@ public class WitnessAdded implements Serializable {
     private String lastName;
     private List<UUID> defendantIds;
 
-
-    public WitnessAdded(UUID id, UUID hearingId, String type, String classification, String title, String firstName, String lastName,  List<UUID> defendantIds) {
+    @JsonCreator
+    public WitnessAdded(@JsonProperty("id") UUID id,
+                        @JsonProperty("hearingId") UUID hearingId,
+                        @JsonProperty("type") String type,
+                        @JsonProperty("classification") String classification,
+                        @JsonProperty("title") String title,
+                        @JsonProperty("firstName") String firstName,
+                        @JsonProperty("lastName") String lastName,
+                        @JsonProperty("defendantIds") List<UUID> defendantIds) {
         this.hearingId = hearingId;
         this.id = id;
         this.type = type;

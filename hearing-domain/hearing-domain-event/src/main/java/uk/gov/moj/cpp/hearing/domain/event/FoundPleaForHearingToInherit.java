@@ -1,15 +1,18 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-@Event("hearing.initiate-hearing-offence-enriched")
-public class InitiateHearingOffenceEnriched implements Serializable {
+@Event("hearing.events.found-plea-for-hearing-to-inherit")
+public class FoundPleaForHearingToInherit implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     private UUID offenceId;
     private UUID caseId;
     private UUID defendantId;
@@ -18,7 +21,14 @@ public class InitiateHearingOffenceEnriched implements Serializable {
     private LocalDate pleaDate;
     private String value;
 
-    public InitiateHearingOffenceEnriched(UUID offenceId, UUID caseId, UUID defendantId, UUID hearingId, UUID originHearingId, LocalDate pleaDate, String value) {
+    @JsonCreator
+    public FoundPleaForHearingToInherit(@JsonProperty("offenceId") UUID offenceId,
+                                        @JsonProperty("caseId") UUID caseId,
+                                        @JsonProperty("defendantId") UUID defendantId,
+                                        @JsonProperty("hearingId") UUID hearingId,
+                                        @JsonProperty("originHearingId") UUID originHearingId,
+                                        @JsonProperty("pleaDate") LocalDate pleaDate,
+                                        @JsonProperty("value") String value) {
         this.offenceId = offenceId;
         this.caseId = caseId;
         this.defendantId = defendantId;

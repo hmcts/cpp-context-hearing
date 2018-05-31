@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class RegisterCaseWithHearingCommand implements Serializable {
+public class RegisterHearingAgainstCaseCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -15,7 +15,7 @@ public class RegisterCaseWithHearingCommand implements Serializable {
     private final UUID hearingId;
 
     @JsonCreator
-    private RegisterCaseWithHearingCommand(@JsonProperty("caseId") UUID caseId, @JsonProperty("hearingId") UUID hearingId) {
+    private RegisterHearingAgainstCaseCommand(@JsonProperty("caseId") UUID caseId, @JsonProperty("hearingId") UUID hearingId) {
         this.caseId = caseId;
         this.hearingId = hearingId;
     }
@@ -51,8 +51,8 @@ public class RegisterCaseWithHearingCommand implements Serializable {
             return this;
         }
 
-        public RegisterCaseWithHearingCommand build() {
-            return new RegisterCaseWithHearingCommand(caseId, hearingId);
+        public RegisterHearingAgainstCaseCommand build() {
+            return new RegisterHearingAgainstCaseCommand(caseId, hearingId);
         }
     }
 }

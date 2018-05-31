@@ -31,7 +31,7 @@ public final class OffencePleaUpdated implements Serializable{
         this.value = value;
     }
 
-    @JsonIgnore // avoid serialisation by this constructor
+    @JsonIgnore
     private OffencePleaUpdated(final Builder builder) {
         this.hearingId = builder.hearingId;
         this.offenceId = builder.offenceId;

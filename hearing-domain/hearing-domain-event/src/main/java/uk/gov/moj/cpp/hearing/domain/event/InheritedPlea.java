@@ -1,33 +1,36 @@
-package uk.gov.moj.cpp.hearing.command.initiate;
+package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public final class InitiateHearingOffencePleaCommand implements Serializable {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@Event("hearing.events.inherited-plea")
+public final class InheritedPlea implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private UUID offenceId;
-    private UUID caseId;
-    private UUID defendantId;
-    private UUID hearingId;
-    private UUID originHearingId;
-    private LocalDate pleaDate;
-    private String value;
+    private final UUID offenceId;
+    private final UUID caseId;
+    private final UUID defendantId;
+    private final UUID hearingId;
+    private final UUID originHearingId;
+    private final LocalDate pleaDate;
+    private final String value;
 
     @JsonCreator
-    public InitiateHearingOffencePleaCommand(@JsonProperty("offenceId") UUID offenceId,
-            @JsonProperty("caseId") UUID caseId, 
-            @JsonProperty("defendantId") UUID defendantId,
-            @JsonProperty("hearingId") UUID hearingId, 
-            @JsonProperty("originHearingId") UUID originHearingId,
-            @JsonProperty("pleaDate") LocalDate pleaDate, 
-            @JsonProperty("value") String value) {
+    public InheritedPlea(@JsonProperty("offenceId") final UUID offenceId,
+                         @JsonProperty("caseId") final UUID caseId,
+                         @JsonProperty("defendantId") final UUID defendantId,
+                         @JsonProperty("hearingId") final UUID hearingId,
+                         @JsonProperty("originHearingId") final UUID originHearingId,
+                         @JsonProperty("pleaDate") final LocalDate pleaDate,
+                         @JsonProperty("value") final String value) {
         this.offenceId = offenceId;
         this.caseId = caseId;
         this.defendantId = defendantId;
@@ -36,9 +39,9 @@ public final class InitiateHearingOffencePleaCommand implements Serializable {
         this.pleaDate = pleaDate;
         this.value = value;
     }
-    
+
     @JsonIgnore
-    private InitiateHearingOffencePleaCommand(final Builder builder) {
+    private InheritedPlea(final Builder builder) {
         this.offenceId = builder.offenceId;
         this.caseId = builder.caseId;
         this.defendantId = builder.defendantId;
@@ -81,7 +84,7 @@ public final class InitiateHearingOffencePleaCommand implements Serializable {
     }
     
     public static final class Builder {
-        
+    
         private UUID offenceId;
         private UUID caseId;
         private UUID defendantId;
@@ -125,8 +128,8 @@ public final class InitiateHearingOffencePleaCommand implements Serializable {
             return this;
         }
         
-        public InitiateHearingOffencePleaCommand build() {
-            return new InitiateHearingOffencePleaCommand(this);
+        public InheritedPlea build() {
+            return new InheritedPlea(this);
         }
     }
 }

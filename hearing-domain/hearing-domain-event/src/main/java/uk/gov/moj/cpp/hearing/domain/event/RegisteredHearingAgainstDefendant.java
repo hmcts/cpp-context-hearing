@@ -1,13 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-@Event("hearing.events.defendant-registered")
-public final class RegisterHearingAgainstDefendant implements Serializable {
+@Event("hearing.events.registered-hearing-against-defendant")
+public final class RegisteredHearingAgainstDefendant implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -15,7 +16,8 @@ public final class RegisterHearingAgainstDefendant implements Serializable {
 
     private final UUID hearingId;
 
-    public RegisterHearingAgainstDefendant(
+    @JsonCreator
+    public RegisteredHearingAgainstDefendant(
             @JsonProperty("defendantId") final UUID defendantId,
             @JsonProperty("hearingId") final UUID hearingId) {
         this.defendantId = defendantId;
@@ -23,7 +25,7 @@ public final class RegisterHearingAgainstDefendant implements Serializable {
     }
 
     public static Builder builder() {
-        return new RegisterHearingAgainstDefendant.Builder();
+        return new RegisteredHearingAgainstDefendant.Builder();
     }
 
     public UUID getDefendantId() {
@@ -53,8 +55,8 @@ public final class RegisterHearingAgainstDefendant implements Serializable {
             return this;
         }
 
-        public RegisterHearingAgainstDefendant build() {
-            return new RegisterHearingAgainstDefendant(defendantId, hearingId);
+        public RegisteredHearingAgainstDefendant build() {
+            return new RegisteredHearingAgainstDefendant(defendantId, hearingId);
         }
     }
 }

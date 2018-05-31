@@ -3,15 +3,15 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterDefendantWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.LookupWitnessesOnDefendantForHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingDefenceWitnessEnriched;
-import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.FoundWitnessesForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 
-import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +35,7 @@ public class DefendantAggregate implements Aggregate {
 
         return match(event)
                 .with(
-                        when(RegisterHearingAgainstDefendant.class).apply(defendant -> hearingIds.add(defendant.getHearingId())),
+                        when(RegisteredHearingAgainstDefendant.class).apply(defendant -> hearingIds.add(defendant.getHearingId())),
                         when(DefenceWitnessAdded.class).apply(witnessAdded -> defenceWitnessAdded.add(witnessAdded)),
                         otherwiseDoNothing());
     }
@@ -44,25 +44,31 @@ public class DefendantAggregate implements Aggregate {
         return apply(Stream.of(new DefenceWitnessAdded(witnessId, defendantId, hearingId, type, classification, title, firstName, lastName)));
     }
 
-    public Stream<Object> initiateHearingDefenceWitness(final JsonObject payload) {
+    public Stream<Object> lookupWitnessesForHearing(final LookupWitnessesOnDefendantForHearingCommand lookupWitnessesOnDefendantForHearingCommand) {
 
-        final String hearingId = payload.getString("hearingId");
-        final String defendantId = payload.getString("defendantId");
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         defenceWitnessAdded.forEach(witness ->
-                streamBuilder.add(new InitiateHearingDefenceWitnessEnriched(
-                        witness.getWitnessId().toString(), hearingId, witness.getType(),
-                        witness.getClassification(), witness.getTitle(), witness.getFirstName(),
-                        witness.getLastName(), defendantId)));
+                streamBuilder.add(
+                        FoundWitnessesForHearingToInherit.foundWitnessesForHearingToInherit()
+                                .setId(witness.getWitnessId())
+                                .setHearingId(lookupWitnessesOnDefendantForHearingCommand.getHearingId())
+                                .setDefendantId(lookupWitnessesOnDefendantForHearingCommand.getDefendantId())
+                                .setFirstName(witness.getFirstName())
+                                .setLastName(witness.getLastName())
+                                .setTitle(witness.getTitle())
+                                .setClassification(witness.getClassification())
+                                .setType(witness.getType())
+                ));
         return apply(streamBuilder.build());
     }
 
-    public Stream<Object> registerHearingId(RegisterDefendantWithHearingCommand command) {
+    public Stream<Object> registerHearing(RegisterHearingAgainstDefendantCommand command) {
         return apply(Stream.of(
-                RegisterHearingAgainstDefendant.builder()
+                RegisteredHearingAgainstDefendant.builder()
                         .withDefendantId(command.getDefendantId())
                         .withHearingId(command.getHearingId())
-                        .build()));
+                        .build()
+        ));
     }
 
     public Stream<Object> enrichCaseDefendantDetailsWithHearingIds(CaseDefendantDetailsCommand caseDefendantDetails) {
@@ -76,8 +82,8 @@ public class DefendantAggregate implements Aggregate {
         return apply(Stream.of(caseDefendantDetailsWithHearings));
     }
 
-    public Stream<Object> enrichNewOffenceWithAllHearingIdsAssociatedToDefendant(UUID defendantId, UUID caseId, UpdatedOffence offence) {
-        return apply(Stream.of(CaseDefendantOffenceWithHearingIds.builder()
+    public Stream<Object> lookupHearingsForNewOffenceOnDefendant(UUID defendantId, UUID caseId, UpdatedOffence offence) {
+        return apply(Stream.of(FoundHearingsForNewOffence.builder()
                 .withId(offence.getId())
                 .withDefendantId(defendantId)
                 .withCaseId(caseId)
@@ -88,6 +94,7 @@ public class DefendantAggregate implements Aggregate {
                 .withCount(offence.getCount())
                 .withConvictionDate(offence.getConvictionDate())
                 .withHearingIds(hearingIds)
-                .build()));
+                .build()
+        ));
     }
 }

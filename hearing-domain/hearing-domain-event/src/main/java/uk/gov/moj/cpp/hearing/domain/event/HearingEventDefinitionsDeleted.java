@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
@@ -12,7 +14,8 @@ public class HearingEventDefinitionsDeleted implements Serializable {
 
     private UUID id;
 
-    public HearingEventDefinitionsDeleted(final UUID id) {
+    @JsonCreator
+    public HearingEventDefinitionsDeleted(@JsonProperty("id") final UUID id) {
         this.id = id;
     }
 

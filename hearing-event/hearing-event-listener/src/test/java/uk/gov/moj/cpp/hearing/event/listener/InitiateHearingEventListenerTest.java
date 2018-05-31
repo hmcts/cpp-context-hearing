@@ -48,7 +48,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -334,7 +334,7 @@ public class InitiateHearingEventListenerTest {
 
                 .build();
         
-        final InitiateHearingOffencePlead event = InitiateHearingOffencePlead.builder()
+        final InheritedPlea event = InheritedPlea.builder()
                 .withOffenceId(offenceId)
                 .withCaseId(caseId)
                 .withDefendantId(defendantId)

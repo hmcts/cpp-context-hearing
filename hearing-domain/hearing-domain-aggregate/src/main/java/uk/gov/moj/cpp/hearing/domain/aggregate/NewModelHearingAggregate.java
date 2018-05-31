@@ -28,7 +28,7 @@ import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingOffencePleaCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
@@ -45,7 +45,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffencePlead;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -94,7 +94,7 @@ public class NewModelHearingAggregate implements Aggregate {
                     this.hearing = initiated.getHearing();
                 }),
 
-                when(InitiateHearingOffencePlead.class).apply(inheritedPlea -> {
+                when(InheritedPlea.class).apply(inheritedPlea -> {
                     pleas.computeIfAbsent(inheritedPlea.getOffenceId(), offenceId -> Plea.plea()
                             .setOriginHearingId(inheritedPlea.getHearingId())
                             .setOffenceId(offenceId)
@@ -161,7 +161,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 otherwiseDoNothing()
         );
     }
-    
+
     public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
         return apply(Stream.of(
                 ProsecutionCounselUpsert.builder()
@@ -231,8 +231,8 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.of(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
     }
 
-    public Stream<Object> initiateHearingOffencePlea(final InitiateHearingOffencePleaCommand command) {
-        return apply(Stream.of(InitiateHearingOffencePlead.builder()
+    public Stream<Object> inheritPlea(final UpdateHearingWithInheritedPleaCommand command) {
+        return apply(Stream.of(InheritedPlea.builder()
                 .withOffenceId(command.getOffenceId())
                 .withCaseId(command.getCaseId())
                 .withDefendantId(command.getDefendantId())
@@ -274,28 +274,29 @@ public class NewModelHearingAggregate implements Aggregate {
                 this.hearing.getType(),
                 this.cases.get(0).getUrn(), //TODO - doesn't support multiple cases yet.
                 this.cases.get(0).getCaseId(),
-                        logEventCommand.getWitnessId(), logEventCommand.getCounselId())));
+                logEventCommand.getWitnessId(), logEventCommand.getCounselId())));
     }
 
     public Stream<Object> updateHearingEvents(final JsonObject payload) {
         final UUID hearingId = fromString(payload.getString(HEARING_ID));
         if (hearing == null) {
             return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND,
-                            hearingId)));
+                    hearingId)));
         }
 
         final List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents =
-                        new ArrayList<>();
+                new ArrayList<>();
         final JsonArray hearingEventsArray = payload.getJsonArray(HEARING_EVENTS);
         hearingEventsArray.getValuesAs(JsonObject.class).stream().forEach(hearingEvent -> {
 
             hearingEvents.add(new uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent(
-                            fromString(hearingEvent.getString(HEARING_EVENT_ID)),
-                            hearingEvent.getString(RECORDED_LABEL)));
+                    fromString(hearingEvent.getString(HEARING_EVENT_ID)),
+                    hearingEvent.getString(RECORDED_LABEL)));
         });
         return hearingEvents.isEmpty() ? Stream.empty()
-                        : Stream.of(new HearingEventsUpdated(hearingId, hearingEvents));
+                : Stream.of(new HearingEventsUpdated(hearingId, hearingEvents));
     }
+
     public Stream<Object> correctHearingEvent(final CorrectLogEventCommand logEventCommand) {
 
         if (hearing == null) {
@@ -414,7 +415,7 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final UpdatedOffence offence) {
 
-        if(!published) {
+        if (!published) {
             return apply(Stream.of(OffenceAdded.builder()
                     .withId(offence.getId())
                     .withHearingId(hearingId)
@@ -434,7 +435,7 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> updateOffence(final UUID hearingId, final UpdatedOffence offence) {
 
-        if(!published) {
+        if (!published) {
             return apply(Stream.of(OffenceUpdated.builder()
                     .withHearingId(hearingId)
                     .withId(offence.getId())
@@ -452,7 +453,7 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
 
-        if(!published) {
+        if (!published) {
             return apply(Stream.of(OffenceDeleted.builder()
                     .withId(offenceId)
                     .withHearingId(hearingId)
@@ -461,31 +462,6 @@ public class NewModelHearingAggregate implements Aggregate {
 
         return apply(Stream.empty());
     }
-
-    public static final class HearingEvent implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        private boolean deleted;
-        private final HearingEventLogged hearingEventLogged;
-
-        public HearingEvent(final HearingEventLogged hearingEventLogged) {
-            this.hearingEventLogged = hearingEventLogged;
-        }
-
-        public boolean isDeleted() {
-            return deleted;
-        }
-
-        public void setDeleted(final boolean deleted) {
-            this.deleted = deleted;
-        }
-
-        public HearingEventLogged getHearingEventLogged() {
-            return hearingEventLogged;
-        }
-    }
-
 
     public Stream<Object> addWitness(final UUID hearingId, final UUID witnessId, final String type, final String classification, final String title, final String firstName, final String lastName, final List<DefendantId> defendantIdList) {
         return apply(Stream.of(new WitnessAdded(
@@ -534,10 +510,34 @@ public class NewModelHearingAggregate implements Aggregate {
         );
     }
 
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason,final UUID hearingId) {
+    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {
         return new HearingEventIgnored(
-                        hearingId,
-                        reason
+                hearingId,
+                reason
         );
+    }
+
+    public static final class HearingEvent implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private boolean deleted;
+        private final HearingEventLogged hearingEventLogged;
+
+        public HearingEvent(final HearingEventLogged hearingEventLogged) {
+            this.hearingEventLogged = hearingEventLogged;
+        }
+
+        public boolean isDeleted() {
+            return deleted;
+        }
+
+        public void setDeleted(final boolean deleted) {
+            this.deleted = deleted;
+        }
+
+        public HearingEventLogged getHearingEventLogged() {
+            return hearingEventLogged;
+        }
     }
 }

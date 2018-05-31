@@ -20,19 +20,19 @@ import org.junit.Test;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.moj.cpp.hearing.domain.event.AssociateHearingIdWithOffence;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantOffenceWithHearingIds;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.InitiateHearingOffenceEnriched;
+import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.DeleteOffenceFromHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
-import uk.gov.moj.cpp.hearing.domain.event.UpdateOffenceOnHearings;
-import uk.gov.moj.cpp.hearing.domain.event.RegisterHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
@@ -42,7 +42,7 @@ public class HearingEventListenerRamlConfigTest {
     private static final String CONTENT_TYPE_PREFIX = "application/vnd.";
     private final List<String> handlerNamesToIgnore = asList(
 
-            InitiateHearingOffenceEnriched.class.getAnnotation(Event.class).value(),
+            FoundPleaForHearingToInherit.class.getAnnotation(Event.class).value(),
             OffencePleaUpdated.class.getAnnotation(Event.class).value(),
             DefenceWitnessAdded.class.getAnnotation(Event.class).value(),
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
@@ -51,11 +51,11 @@ public class HearingEventListenerRamlConfigTest {
             SendingSheetCompletedPreviouslyRecorded.class.getAnnotation(Event.class).value(),
             MagsCourtHearingRecorded.class.getAnnotation(Event.class).value(),
             CaseDefendantDetailsWithHearings.class.getAnnotation(Event.class).value(),
-            RegisterHearingAgainstDefendant.class.getAnnotation(Event.class).value(),
-            CaseDefendantOffenceWithHearingIds.class.getAnnotation(Event.class).value(),
-            UpdateOffenceOnHearings.class.getAnnotation(Event.class).value(),
-            DeleteOffenceFromHearings.class.getAnnotation(Event.class).value(),
-            AssociateHearingIdWithOffence.class.getAnnotation(Event.class).value(),
+            RegisteredHearingAgainstDefendant.class.getAnnotation(Event.class).value(),
+            FoundHearingsForNewOffence.class.getAnnotation(Event.class).value(),
+            FoundHearingsForEditOffence.class.getAnnotation(Event.class).value(),
+            FoundHearingsForDeleteOffence.class.getAnnotation(Event.class).value(),
+            RegisteredHearingAgainstOffence.class.getAnnotation(Event.class).value(),
             RegisteredHearingAgainstCase.class.getAnnotation(Event.class).value()
     );
 
