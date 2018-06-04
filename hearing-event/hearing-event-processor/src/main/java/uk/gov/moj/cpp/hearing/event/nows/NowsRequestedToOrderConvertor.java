@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
-public class NowsRequestedToOrderConvertor {
+public class  NowsRequestedToOrderConvertor {
     private static final String COURTCLERK = "COURTCLERK";
 
     private NowsRequestedToOrderConvertor() {

@@ -4,6 +4,8 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -15,6 +17,7 @@ public class HearingCommandApi {
 
     private final Sender sender;
     private final Enveloper enveloper;
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingCommandApi.class);
 
     @Inject
     public HearingCommandApi(final Sender sender, final Enveloper enveloper) {
@@ -68,6 +71,11 @@ public class HearingCommandApi {
     public void updateNowsMaterialStatus(final JsonEnvelope command) {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-nows-material-status").apply(command.payloadAsJsonObject()));
     }
+    @Handles("hearing.generate-nows.v2")
+    public void generateNowsV2(final JsonEnvelope command) {
+        LOGGER.info("******* generateNowsV2 hearing.generate-nows.v2 N/A");
+    }
+
     @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.share-results").apply(envelope.payloadAsJsonObject()));

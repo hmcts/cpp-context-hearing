@@ -1,0 +1,471 @@
+{
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "hearing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "hearingType": {
+          "type": "string"
+        },
+        "startDateTime": {
+          "type": "string"
+        },
+        "hearingDates": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "string"
+          }
+        },
+        "courtCentre": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "courtCentreId": {
+              "type": "string"
+            },
+            "courtCentreName": {
+              "type": "string"
+            },
+            "courtRoomId": {
+              "type": "string"
+            },
+            "courtRoomName": {
+              "type": "string"
+            }
+          }
+        },
+        "attendees": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "defendants": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "defendantId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "cases": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "caseId": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "defendants": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "person": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "dateOfBirth": {
+                    "type": "string"
+                  },
+                  "nationality": {
+                    "type": "string"
+                  },
+                  "gender": {
+                    "type": "string"
+                  },
+                  "homeTelephone": {
+                    "type": "string"
+                  },
+                  "workTelephone": {
+                    "type": "string"
+                  },
+                  "mobile": {
+                    "type": "string"
+                  },
+                  "fax": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "addressId": {
+                        "type": "string"
+                      },
+                      "address1": {
+                        "type": "string"
+                      },
+                      "address2": {
+                        "type": "string"
+                      },
+                      "address3": {
+                        "type": "string"
+                      },
+                      "address4": {
+                        "type": "string"
+                      },
+                      "postCode": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "bailStatus": {
+                "type": "string"
+              },
+              "defenceOrganisation": {
+                "type": "string"
+              },
+              "interpreter": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "string"
+                  }
+                }
+              },
+              "cases": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "urn": {
+                      "type": "string"
+                    },
+                    "bailStatus": {
+                      "type": "string"
+                    },
+                    "custodyTimeLimitDate": {
+                      "type": "string"
+                    },
+                    "offences": {
+                      "type": "array",
+                      "additionalItems": false,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "convictionDate": {
+                            "type": "string"
+                          },
+                          "plea": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              },
+                              "date": {
+                                "type": "string"
+                              },
+                              "enteredHearingId": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "verdict": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                              "typeId": {
+                                "type": "string"
+                              },
+                              "verdictDescription": {
+                                "type": "string"
+                              },
+                              "verdictCategory": {
+                                "type": "string"
+                              },
+                              "lesserOrAlternativeOffence": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                  "offenceTypeId": {
+                                    "type": "string"
+                                  },
+                                  "code": {
+                                    "type": "string"
+                                  },
+                                  "convictionDate": {
+                                    "type": "string"
+                                  },
+                                  "wording": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "numberOfSplitJurors": {
+                                "type": "string"
+                              },
+                              "verdictDate": {
+                                "type": "string"
+                              },
+                              "numberOfJurors": {
+                                "type": "integer"
+                              },
+                              "unanimous": {
+                                "type": "boolean"
+                              },
+                              "enteredHearingId": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "wording": {
+                            "type": "string"
+                          },
+                          "startDate": {
+                            "type": "string"
+                          },
+                          "endDate": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "sharedResultLines": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "caseId": {
+                "type": "string"
+              },
+              "defendantId": {
+                "type": "string"
+              },
+              "offenceId": {
+                "type": "string"
+              },
+              "level": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "rank": {
+                "type": "integer"
+              },
+              "prompts": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "nows": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "nowsTypeId": {
+                "type": "string"
+              },
+              "defendantId": {
+                "type": "string"
+              },
+              "material": {
+                "type": "array",
+                "additionalItems": false,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "nowResult": {
+                      "type": "array",
+                      "additionalItems": false,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "sharedResultId": {
+                            "type": "string"
+                          },
+                          "sequence": {
+                            "type": "integer"
+                          },
+                          "promptRefs": {
+                            "type": "array",
+                            "additionalItems": false,
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "type": "string"
+                    },
+                    "userGroups": {
+                      "type": "array",
+                      "additionalItems": false,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "group": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "nowTypes": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "templateName": {
+                "type": "string"
+              },
+              "rank": {
+                "type": "integer"
+              },
+              "staticText": {
+                "type": "string"
+              },
+              "staticTextWelsh": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string"
+              },
+              "jurisdiction": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

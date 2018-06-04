@@ -11,6 +11,8 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.message.shareResults.Address;
 import uk.gov.moj.cpp.hearing.message.shareResults.Attendee;
 import uk.gov.moj.cpp.hearing.message.shareResults.Case;
@@ -43,6 +45,7 @@ public class PublishResultsEventProcessor {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(PublishResultsEventProcessor.class.getName());
+    public static final String HEARING_GENERATE_NOWS_V2_COMMAND = "hearing.command.generate-nows.v2";
 
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -52,13 +55,16 @@ public class PublishResultsEventProcessor {
 
     private final Sender sender;
 
+    private NowsDataProcessor nowsDataProcessor;
+
     @Inject
     public PublishResultsEventProcessor(final Enveloper enveloper, final Sender sender, final JsonObjectToObjectConverter jsonObjectToObjectConverter,
-                                        final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
+                                        final ObjectToJsonObjectConverter objectToJsonObjectConverter, final NowsDataProcessor nowsDataProcessor) {
         this.enveloper = enveloper;
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
+        this.nowsDataProcessor = nowsDataProcessor;
     }
 
     @Handles("hearing.results-shared")
@@ -67,6 +73,17 @@ public class PublishResultsEventProcessor {
 
         final ResultsShared input = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
+
+        final List<Nows> nows = nowsDataProcessor.createNows(input);
+
+        if (!nows.isEmpty()) {
+            GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand();
+            uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing hearing = nowsDataProcessor.translateReferenceData(input);
+            hearing.setNows(nows);
+            generateNowsCommand.setHearing(hearing);
+            this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_GENERATE_NOWS_V2_COMMAND)
+                    .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
+        }
 
         ShareResultsMessage shareResultsMessage = ShareResultsMessage.shareResultsMessage()
                 .setHearing(Hearing.hearing()
@@ -129,7 +146,7 @@ public class PublishResultsEventProcessor {
                 input.getProsecutionCounsels().values().stream()
                         .map(prosecutionCounselUpsert -> ProsecutionAdvocate.prosecutionAdvocate()
                                 .setPersonId(prosecutionCounselUpsert.getPersonId())
-                                //TODO - which cases do the prosecution counsellors handle?
+                                //NOTYET - which cases do the prosecution counsellors handle?
                                 .setCaseIds(input.getCases().stream().map(c -> c.getCaseId()).collect(toList()))
                                 .setFirstName(prosecutionCounselUpsert.getFirstName())
                                 .setLastName(prosecutionCounselUpsert.getLastName())
@@ -171,7 +188,6 @@ public class PublishResultsEventProcessor {
                         .setDefenceOrganisation(defendant.getDefenceOrganisation())
                         .setInterpreter(Interpreter.interpreter()
                                 .setLanguage(defendant.getInterpreter().getLanguage())
-                                .setName("")//TODO 'needed' value from initiate?
                         )
                         .setCases(mapCases(input, defendant))
                 )
@@ -206,7 +222,6 @@ public class PublishResultsEventProcessor {
                                 input.getPleas().values().stream()
                                         .filter(p -> p.getOffenceId().equals(o.getId()))
                                         .map(p -> Plea.plea()
-                                                //TODO - do we need plea id?
                                                 .setId(p.getOffenceId())
                                                 .setValue(p.getValue())
                                                 .setDate(p.getPleaDate())
