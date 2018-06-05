@@ -60,9 +60,10 @@ public class HearingEventListenerTest {
 
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_LEVEL = "level";
-    private static final String FIELD_RESULT_LINES = "resultLines";
+    private static final String FIELD_COMPLETED_RESULT_LINES = "completedResultLines";
     private static final String FIELD_RESULT_LABEL = "resultLabel";
     private static final String FIELD_PROMPTS = "prompts";
+    private static final String FIELD_PROMPT_ID = "id";
     private static final String FIELD_PROMPT_LABEL = "label";
     private static final String FIELD_PROMPT_VALUE = "value";
     private static final String FIELD_SHARED_TIME = "sharedTime";
@@ -97,8 +98,10 @@ public class HearingEventListenerTest {
 
     private static final String LEVEL = "OFFENCE";
     private static final String RESULT_LABEL = "Imprisonment";
+    private static final UUID PROMPT_ID_1 = randomUUID();
     private static final String PROMPT_LABEL_1 = "Imprisonment duration";
     private static final String PROMPT_VALUE_1 = "1 year 6 months";
+    private static final UUID PROMPT_ID_2 = randomUUID();
     private static final String PROMPT_LABEL_2 = "Prison";
     private static final String PROMPT_VALUE_2 = "Wormwood Scrubs";
     private static final ZonedDateTime SHARED_TIME = PAST_ZONED_DATE_TIME.next();
@@ -212,7 +215,7 @@ public class HearingEventListenerTest {
     }
 
     private JsonEnvelope getResultsSharedJsonEnvelope() {
-        final JsonArrayBuilder resultLines = createArrayBuilder()
+        final JsonArrayBuilder completedResultLines = createArrayBuilder()
                 .add(createObjectBuilder()
                         .add(FIELD_GENERIC_ID, RESULT_LINE_ID.toString())
                         .add(FIELD_PERSON_ID, PERSON_ID.toString())
@@ -222,9 +225,11 @@ public class HearingEventListenerTest {
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL)
                         .add(FIELD_PROMPTS, createArrayBuilder()
                                 .add(createObjectBuilder()
+                                        .add(FIELD_PROMPT_ID, PROMPT_ID_1.toString())
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_1)
                                         .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_1))
                                 .add(createObjectBuilder()
+                                        .add(FIELD_PROMPT_ID, PROMPT_ID_2.toString())
                                         .add(FIELD_PROMPT_LABEL, PROMPT_LABEL_2)
                                         .add(FIELD_PROMPT_VALUE, PROMPT_VALUE_2))))
                 .add(createObjectBuilder()
@@ -245,7 +250,7 @@ public class HearingEventListenerTest {
         final JsonObject resultsShared = createObjectBuilder()
                 .add(FIELD_HEARING_ID, HEARING_ID.toString())
                 .add(FIELD_SHARED_TIME, ZonedDateTimes.toString(SHARED_TIME))
-                .add(FIELD_RESULT_LINES, resultLines)
+                .add(FIELD_COMPLETED_RESULT_LINES, completedResultLines)
                 .build();
 
         return envelopeFrom(metadataWithRandomUUIDAndName(), resultsShared);

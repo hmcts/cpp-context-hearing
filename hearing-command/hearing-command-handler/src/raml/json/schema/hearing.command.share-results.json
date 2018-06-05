@@ -1,91 +1,134 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "properties": {
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "resultLines": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/resultLine"
-      }
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   },
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "additionalProperties": false,
-  "required": [
-    "resultLines"
-  ],
-  "definitions": {
-    "resultLine": {
+  "properties": {
+    "courtClerk": {
+      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "id": {
           "$ref": "#/definitions/uuid"
         },
-        "resultDefinitionId":{
-          "$ref":"#/definitions/uuid"
-        },
-        "complete": {
-          "type": "boolean"
-        },
-        "lastSharedResultId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "defendantId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "caseId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "offenceId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "level": {
-          "type": "string",
-          "enum": [
-            "DEFENDANT",
-            "CASE",
-            "OFFENCE"
-          ]
-        },
-        "resultLabel": {
+        "firstName": {
           "type": "string"
         },
-        "clerkOfTheCourtId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "clerkOfTheCourtFirstName": {
+        "lastName": {
           "type": "string"
-        },
-        "clerkOfTheCourtLastName": {
-          "type": "string"
-        },
-        "prompts": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "label": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              }
-            },
-            "additionalProperties": false
-          }
         }
       },
-      "additionalProperties": false,
       "required": [
         "id",
-        "complete",
-        "resultDefinitionId"
+        "firstName",
+        "lastName"
       ]
     },
-    "uuid": {
-      "type": "string",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "completedResultLines": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuid"
+          },
+          "lastSharedResultId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "resultDefinitionId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "caseId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "defendantId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "offenceId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "DEFENDANT",
+              "CASE",
+              "OFFENCE"
+            ]
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "prompts": {
+            "type": "array",
+            "additionalItems": false,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/uuid"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "value"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "resultDefinitionId",
+          "caseId",
+          "defendantId",
+          "offenceId",
+          "level",
+          "resultLabel",
+          "prompts"
+        ]
+      }
+    },
+    "uncompletedResultLines": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuid"
+          },
+          "resultDefinitionId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "defendantId": {
+            "$ref": "#/definitions/uuid"
+          }
+        },
+        "required": [
+          "id",
+          "resultDefinitionId",
+          "defendantId"
+        ]
+      }
     }
-  }
+  },
+  "required": [
+    "courtClerk",
+    "completedResultLines"
+  ]
 }

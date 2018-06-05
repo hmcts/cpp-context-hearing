@@ -11,7 +11,7 @@ public final class SaveDraftResultCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID hearingId;
+    private  UUID hearingId;
     private final UUID targetId;
     private final UUID defendantId;
     private final UUID offenceId;
@@ -32,6 +32,10 @@ public final class SaveDraftResultCommand implements Serializable {
 
     public UUID getHearingId() {
         return hearingId;
+    }
+
+    public void setHearingId(UUID hearingId) {
+        this.hearingId = hearingId;
     }
 
     public UUID getTargetId() {

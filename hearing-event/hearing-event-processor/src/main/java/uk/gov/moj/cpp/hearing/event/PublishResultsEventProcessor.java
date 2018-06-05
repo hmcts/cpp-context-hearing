@@ -9,7 +9,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.result.ResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
@@ -110,17 +110,17 @@ public class PublishResultsEventProcessor {
     }
 
     private static List<Attendee> mapAttendees(ResultsShared input) {
-        List<Attendee> attendees = new ArrayList<>();
 
-        if (!input.getResultLines().isEmpty()) {
-            ResultLine resultLine = input.getResultLines().get(0);
-            attendees.add(Attendee.attendee()
-                    .setPersonId(resultLine.getClerkOfTheCourtId())
-                    .setFirstName(resultLine.getClerkOfTheCourtFirstName())
-                    .setLastName(resultLine.getClerkOfTheCourtLastName())
-                    .setTitle("")
-                    .setType("COURTCLERK"));
-        }
+        final List<Attendee> attendees = new ArrayList<>();
+
+        final CourtClerk courtClerk = input.getCourtClerk();
+
+        attendees.add(Attendee.attendee()
+                .setPersonId(courtClerk.getId())
+                .setFirstName(courtClerk.getFirstName())
+                .setLastName(courtClerk.getLastName())
+                .setTitle("")
+                .setType("COURTCLERK"));
 
         attendees.add(Attendee.attendee()
                 .setPersonId(input.getHearing().getJudge().getId())
@@ -253,8 +253,7 @@ public class PublishResultsEventProcessor {
     }
 
     private List<SharedResultLine> mapSharedResultsLines(ResultsShared input) {
-        return input.getResultLines().stream()
-                .filter(ResultLine::isComplete)
+        return input.getCompletedResultLines().stream()
                 .map(rl -> SharedResultLine.sharedResultLine()
                         .setId(rl.getId())
                         .setLastSharedResultId(rl.getLastSharedResultId())

@@ -1,86 +1,96 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Optional.ofNullable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Optional.ofNullable;
 
-@SuppressWarnings({"squid:S2384", "squid:S1067"})
+@SuppressWarnings("squid:S2384")
 public final class ShareResultsCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private UUID hearingId;
-    private List<ResultLine> resultLines;
+
+    private final CourtClerk courtClerk;
+
+    private final List<UncompletedResultLine> uncompletedResultLines;
+
+    private final List<CompletedResultLine> completedResultLines;
 
     @JsonCreator
-    protected ShareResultsCommand(@JsonProperty("hearingId") final UUID hearingId,
-            @JsonProperty("resultLines") final List<ResultLine> resultLines) {
+    private ShareResultsCommand(
+            @JsonProperty("hearingId") final UUID hearingId,
+            @JsonProperty("courtClerk") final CourtClerk courtClerk,
+            @JsonProperty("uncompletedResultLines") final List<UncompletedResultLine> uncompletedResultLines,
+            @JsonProperty("completedResultLines") final List<CompletedResultLine> completedResultLines) {
         this.hearingId = hearingId;
-        this.resultLines = unmodifiableList(ofNullable(resultLines).orElseGet(ArrayList::new));
-    }
-
-    public List<ResultLine> getResultLines() {
-        return resultLines;
+        this.courtClerk = courtClerk;
+        this.uncompletedResultLines = ofNullable(uncompletedResultLines).orElseGet(ArrayList::new);
+        this.completedResultLines = ofNullable(completedResultLines).orElseGet(ArrayList::new);
     }
 
     public UUID getHearingId() {
         return hearingId;
     }
 
-    public void setHearingId(UUID hearingId) {
-        this.hearingId = hearingId;
+    public CourtClerk getCourtClerk() {
+        return courtClerk;
     }
 
-    public void setResultLines(List<ResultLine> resultLines) {
-        this.resultLines = resultLines;
+    public List<UncompletedResultLine> getUncompletedResultLines() {
+        return uncompletedResultLines;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final ShareResultsCommand that = (ShareResultsCommand) o;
-        return Objects.equals(this.hearingId, that.hearingId) && Objects.equals(this.resultLines, that.resultLines);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.hearingId, this.resultLines);
+    public List<CompletedResultLine> getCompletedResultLines() {
+        return completedResultLines;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
+    public void setHearingId(UUID hearingId) {
+        this.hearingId = hearingId;
+    }
+
     public static final class Builder {
 
         private UUID hearingId;
-        private List<ResultLine> resultLines;
+
+        private CourtClerk courtClerk;
+
+        private List<UncompletedResultLine> uncompletedResultLines;
+
+        private List<CompletedResultLine> completedResultLines;
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
             return this;
         }
 
-        public Builder withResultLines(final List<ResultLine> resultLines) {
-            this.resultLines = resultLines;
+        public Builder withCourtClerk(final CourtClerk courtClerk) {
+            this.courtClerk = courtClerk;
+            return this;
+        }
+
+        public Builder withUncompletedResultLines(final List<UncompletedResultLine> uncompletedResultLines) {
+            this.uncompletedResultLines = uncompletedResultLines;
+            return this;
+        }
+
+        public Builder withCompletedResultLines(final List<CompletedResultLine> completedResultLines) {
+            this.completedResultLines = completedResultLines;
             return this;
         }
 
         public ShareResultsCommand build() {
-            return new ShareResultsCommand(this.hearingId, this.resultLines);
+            return new ShareResultsCommand(hearingId, courtClerk, uncompletedResultLines, completedResultLines);
         }
     }
 }

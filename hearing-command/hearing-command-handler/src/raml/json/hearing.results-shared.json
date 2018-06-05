@@ -1,7 +1,19 @@
 {
   "hearingId":"96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
   "sharedTime":"2018-04-30T18:32:04.238Z",
-  "resultLines":[
+  "courtClerk": {
+    "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
+    "firstName": "David",
+    "lastName": "Walliams"
+  },
+  "uncompletedResultLines": [
+    {
+      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
+      "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
+      "defendantId":"ed24255c-1665-4fbe-ad7a-968a9b4f11c3"
+    }
+  ],
+  "completedResultLines": [
     {
       "id":"f0fc2f65-861a-4771-9ce3-83717be9b7db",
       "resultDefinitionId":"d02383bc-248d-4681-a36d-21255bd5ca4a",
@@ -10,39 +22,14 @@
       "offenceId":"6c3e1949-56b6-455e-b71d-561b9098e581",
       "level":"DEFENDANT",
       "resultLabel":"BYplqrmzDe",
-      "complete":true,
-      "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-      "clerkOfTheCourtFirstName": "David",
-      "clerkOfTheCourtLastName": "Walliams",
       "prompts":[
         {
+          "id":"e01df1c0-acde-4b60-a184-66948911ac4b",
           "label":"7Kogixij1j",
           "value":"QtHjiBzBVZ"
         },
         {
-          "label":"4nNv7kr1of",
-          "value":"m5CeaoJTq1"
-        }
-      ]
-    },
-    {
-      "id":"e01df1c0-acde-4b60-a184-66948911ac4a",
-      "resultDefinitionId":"d02383bc-248d-4681-a36d-21255bd5ca4a",
-      "caseId":"9ee1c692-c19d-4e0d-8b6e-ea0d49139500",
-      "defendantId":"ef1a0d92-53c7-4bfd-bb1c-a4ee1c82a27c",
-      "offenceId":"52ce3f54-df54-49b2-b5a9-66e9d573cc5b",
-      "level":"DEFENDANT",
-      "resultLabel":"BYplqrmzDe",
-      "complete":false,
-      "clerkOfTheCourtId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-      "clerkOfTheCourtFirstName": "David",
-      "clerkOfTheCourtLastName": "Walliams",
-      "prompts":[
-        {
-          "label":"7Kogixij1j",
-          "value":"QtHjiBzBVZ"
-        },
-        {
+          "id":"e01df1c0-acde-4b60-a184-66948911ac4c",
           "label":"4nNv7kr1of",
           "value":"m5CeaoJTq1"
         }

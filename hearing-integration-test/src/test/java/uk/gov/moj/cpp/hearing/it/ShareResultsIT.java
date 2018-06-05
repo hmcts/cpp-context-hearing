@@ -1,5 +1,15 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.plea.Plea;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
+import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+
+import java.util.UUID;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -9,28 +19,19 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.plea.Plea;
-import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
-import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
-import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
-
-import org.junit.Test;
-
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
-
-import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
 
     @Test
-    public void shouldRaiseDraftResultSaved() throws Exception {
+    public void shouldRaiseDraftResultSaved() {
 
-        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplateWithHearingId(UseCases.initiateHearing(requestSpec, asDefault()));
+        final InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, asDefault());
+
+        final SaveDraftResultCommand saveDraftResultCommand = with(saveDraftResultCommandTemplate(initiateHearingCommand),
+                template -> template.setHearingId(initiateHearingCommand.getHearing().getId()));
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
@@ -55,7 +56,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    public void shouldRaiseResultsSharedEvent() throws Exception {
+    public void shouldRaiseResultsSharedEvent() {
 
         final InitiateHearingCommand initiateHearingCommand = UseCases.initiateHearing(requestSpec, asDefault());
 
@@ -84,13 +85,15 @@ public class ShareResultsIT extends AbstractIT {
                         withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is("NOT_GUILTY"))
                 )));
 
-        // this will change when real reference dtaa service is available and can be stubbe3d out
+        // this will change when real reference data service is available and can be stubbed out
         // this matches DefaultNowsReferenceData
-        UUID defaultReferenceDataUUID = UUID.fromString("87631590-bd78-49b2-bd6f-ad7030904e73");
-        final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand), template -> {
-            template.getResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
-            template.getResultLines().forEach(rl -> rl.setDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId()));
-        });
+        final UUID defaultReferenceDataUUID = UUID.fromString("87631590-bd78-49b2-bd6f-ad7030904e73");
+
+        final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand),
+                template -> {
+                    template.getCompletedResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
+                    template.getCompletedResultLines().forEach(rl -> rl.setDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId()));
+                });
 
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")

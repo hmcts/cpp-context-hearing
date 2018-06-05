@@ -1,30 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
-import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-
-import java.time.ZonedDateTime;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -54,7 +28,33 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
+import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 @SuppressWarnings({"serial", "unchecked"})
 @RunWith(MockitoJUnitRunner.class)
@@ -95,7 +95,7 @@ public class ShareResultsCommandHandlerTest {
 
     @BeforeClass
     public static void init() {
-        initiateHearingCommand = TestTemplates.initiateHearingCommandTemplate().build();
+        initiateHearingCommand = initiateHearingCommandTemplate().build();
         metadataId = UUID.randomUUID();
         sharedTime = new UtcClock().now();
         prosecutionCounselUpsert = ProsecutionCounselUpsert.builder()
@@ -138,7 +138,8 @@ public class ShareResultsCommandHandlerTest {
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
 
-        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplateWithHearingId(initiateHearingCommand);
+        final SaveDraftResultCommand saveDraftResultCommand = with(saveDraftResultCommandTemplate(initiateHearingCommand),
+                template -> template.setHearingId(initiateHearingCommand.getHearing().getId()));
 
         final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(saveDraftResultCommand));
 
@@ -170,9 +171,8 @@ public class ShareResultsCommandHandlerTest {
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
 
-        final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand), template -> {
-            template.setHearingId(initiateHearingCommand.getHearing().getId());
-        });
+        final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand),
+                template -> template.setHearingId(initiateHearingCommand.getHearing().getId()));
 
         final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
 
@@ -185,17 +185,17 @@ public class ShareResultsCommandHandlerTest {
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearingId", is(shareResultsCommand.getHearingId().toString())),
                                 withJsonPath("$.sharedTime", is(ZonedDateTimes.toString(sharedTime))),
-                                withJsonPath("$.resultLines[0].id", is(shareResultsCommand.getResultLines().get(0).getId().toString())),
-                                withoutJsonPath("$.resultLines[0].lastSharedResultId"),
-                                withJsonPath("$.resultLines[0].defendantId", is(shareResultsCommand.getResultLines().get(0).getDefendantId().toString())),
-                                withJsonPath("$.resultLines[0].offenceId", is(shareResultsCommand.getResultLines().get(0).getOffenceId().toString())),
-                                withJsonPath("$.resultLines[0].caseId", is(shareResultsCommand.getResultLines().get(0).getCaseId().toString())),
-                                withJsonPath("$.resultLines[0].level", is(shareResultsCommand.getResultLines().get(0).getLevel().name())),
-                                withJsonPath("$.resultLines[0].resultLabel", is(shareResultsCommand.getResultLines().get(0).getResultLabel())),
-                                withJsonPath("$.resultLines[0].prompts[0].label", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(0).getLabel())),
-                                withJsonPath("$.resultLines[0].prompts[0].value", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(0).getValue())),
-                                withJsonPath("$.resultLines[0].prompts[1].label", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(1).getLabel())),
-                                withJsonPath("$.resultLines[0].prompts[1].value", is(shareResultsCommand.getResultLines().get(0).getPrompts().get(1).getValue())),
+                                withJsonPath("$.completedResultLines[0].id", is(shareResultsCommand.getCompletedResultLines().get(0).getId().toString())),
+                                withoutJsonPath("$.completedResultLines[0].lastSharedResultId"),
+                                withJsonPath("$.completedResultLines[0].defendantId", is(shareResultsCommand.getCompletedResultLines().get(0).getDefendantId().toString())),
+                                withJsonPath("$.completedResultLines[0].offenceId", is(shareResultsCommand.getCompletedResultLines().get(0).getOffenceId().toString())),
+                                withJsonPath("$.completedResultLines[0].caseId", is(shareResultsCommand.getCompletedResultLines().get(0).getCaseId().toString())),
+                                withJsonPath("$.completedResultLines[0].level", is(shareResultsCommand.getCompletedResultLines().get(0).getLevel().name())),
+                                withJsonPath("$.completedResultLines[0].resultLabel", is(shareResultsCommand.getCompletedResultLines().get(0).getResultLabel())),
+                                withJsonPath("$.completedResultLines[0].prompts[0].label", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(0).getLabel())),
+                                withJsonPath("$.completedResultLines[0].prompts[0].value", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(0).getValue())),
+                                withJsonPath("$.completedResultLines[0].prompts[1].label", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(1).getLabel())),
+                                withJsonPath("$.completedResultLines[0].prompts[1].value", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(1).getValue())),
 
                                 withJsonPath("$.cases.[0].caseId", is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
                                 withJsonPath("$.cases.[0].urn", is(initiateHearingCommand.getCases().get(0).getUrn())),

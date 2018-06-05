@@ -1,8 +1,17 @@
 package uk.gov.moj.cpp.hearing.domain.event.result;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.Optional.ofNullable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.domain.annotation.Event;
+import uk.gov.moj.cpp.hearing.command.initiate.Case;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
+import uk.gov.moj.cpp.hearing.domain.Plea;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -12,69 +21,59 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Optional.ofNullable;
 
-import uk.gov.justice.domain.annotation.Event;
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.command.result.ResultLine;
-import uk.gov.moj.cpp.hearing.domain.Plea;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
-
-@SuppressWarnings({"squid:S2384", "squid:S1067"})
+@SuppressWarnings({"squid:S2384", "pmd:BeanMembersShouldSerialize"})
 @Event("hearing.results-shared")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class ResultsShared implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private final UUID hearingId;
+
     private final ZonedDateTime sharedTime;
-    private final List<ResultLine> resultLines;
+
+    private final CourtClerk courtClerk;
+
+    private final List<UncompletedResultLine> uncompletedResultLines;
+
+    private final List<CompletedResultLine> completedResultLines;
+
     private final Hearing hearing;
+
     private final List<Case> cases;
+
     private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
+
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels;
+
     private final Map<UUID, VerdictUpsert> verdicts;
+
     private final Map<UUID, Plea> pleas;
 
     @JsonCreator
-    protected ResultsShared(@JsonProperty("hearingId") final UUID hearingId, 
-            @JsonProperty("sharedTime") final ZonedDateTime sharedTime, 
-            @JsonProperty("resultLines") final List<ResultLine> resultLines,
-            @JsonProperty("hearing") final Hearing hearing,
-            @JsonProperty("cases") final List<Case> cases,
-            @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
-            @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
-            @JsonProperty("pleas") final Map<UUID, Plea> pleas,
-            @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts) {
+    private ResultsShared(@JsonProperty("hearingId") final UUID hearingId,
+                            @JsonProperty("sharedTime") final ZonedDateTime sharedTime,
+                            @JsonProperty("courtClerk") final CourtClerk courtClerk,
+                            @JsonProperty("uncompletedResultLines") final List<UncompletedResultLine> uncompletedResultLines,
+                            @JsonProperty("completedResultLines") final List<CompletedResultLine> completedResultLines,
+                            @JsonProperty("hearing") final Hearing hearing,
+                            @JsonProperty("cases") final List<Case> cases,
+                            @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
+                            @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
+                            @JsonProperty("pleas") final Map<UUID, Plea> pleas,
+                            @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
-        this.resultLines = unmodifiableList(ofNullable(resultLines).orElseGet(ArrayList::new));
+        this.courtClerk = courtClerk;
+        this.uncompletedResultLines = ofNullable(uncompletedResultLines).orElseGet(ArrayList::new);
+        this.completedResultLines = ofNullable(completedResultLines).orElseGet(ArrayList::new);
         this.hearing = hearing;
-        this.cases = unmodifiableList(ofNullable(cases).orElseGet(ArrayList::new));
-        this.prosecutionCounsels = unmodifiableMap(ofNullable(prosecutionCounsels).orElseGet(HashMap::new));
-        this.defenceCounsels = unmodifiableMap(ofNullable(defenceCounsels).orElseGet(HashMap::new));
-        this.pleas = unmodifiableMap(ofNullable(pleas).orElseGet(HashMap::new));
-        this.verdicts = unmodifiableMap(ofNullable(verdicts).orElseGet(HashMap::new));
-    }
-
-    @JsonIgnore
-    private ResultsShared(final Builder builder) {
-        this.hearingId = builder.hearingId;
-        this.sharedTime = builder.sharedTime;
-        this.resultLines = unmodifiableList(ofNullable(builder.resultLines).orElseGet(ArrayList::new));
-        this.hearing = builder.hearing;
-        this.cases = unmodifiableList(ofNullable(builder.cases).orElseGet(ArrayList::new));
-        this.prosecutionCounsels = unmodifiableMap(ofNullable(builder.prosecutionCounsels).orElseGet(HashMap::new));
-        this.defenceCounsels = unmodifiableMap(ofNullable(builder.defenceCounsels).orElseGet(HashMap::new));
-        this.pleas = unmodifiableMap(ofNullable(builder.pleas).orElseGet(HashMap::new));
-        this.verdicts = unmodifiableMap(ofNullable(builder.verdicts).orElseGet(HashMap::new));
+        this.cases = ofNullable(cases).orElseGet(ArrayList::new);
+        this.prosecutionCounsels = ofNullable(prosecutionCounsels).orElseGet(HashMap::new);
+        this.defenceCounsels = ofNullable(defenceCounsels).orElseGet(HashMap::new);
+        this.pleas = ofNullable(pleas).orElseGet(HashMap::new);
+        this.verdicts = ofNullable(verdicts).orElseGet(HashMap::new);
     }
 
     public UUID getHearingId() {
@@ -85,16 +84,12 @@ public final class ResultsShared implements Serializable {
         return sharedTime;
     }
 
-    public List<ResultLine> getResultLines() {
-        return resultLines;
-    }
-
     public Hearing getHearing() {
         return hearing;
     }
 
     public List<Case> getCases() {
-        return cases;
+        return new ArrayList<>(cases);
     }
 
     public Map<UUID, ProsecutionCounselUpsert> getProsecutionCounsels() {
@@ -113,23 +108,46 @@ public final class ResultsShared implements Serializable {
         return pleas;
     }
 
+    public CourtClerk getCourtClerk() {
+        return courtClerk;
+    }
+
+    public List<UncompletedResultLine> getUncompletedResultLines() {
+        return uncompletedResultLines;
+    }
+
+    public List<CompletedResultLine> getCompletedResultLines() {
+        return completedResultLines;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
 
-    @SuppressWarnings("PMD.BeanMembersShouldSerialize")
     public static final class Builder {
 
         private UUID hearingId;
+
         private ZonedDateTime sharedTime;
-        private List<ResultLine> resultLines;
+
+        private CourtClerk courtClerk;
+
+        private List<UncompletedResultLine> uncompletedResultLines;
+
+        private List<CompletedResultLine> completedResultLines;
+
         private Hearing hearing;
+
         private List<Case> cases;
+
         private Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
+
         private Map<UUID, DefenceCounselUpsert> defenceCounsels;
+
         private Map<UUID, VerdictUpsert> verdicts;
+
         private Map<UUID, Plea> pleas;
-        
+
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
             return this;
@@ -139,8 +157,19 @@ public final class ResultsShared implements Serializable {
             this.sharedTime = sharedTime;
             return this;
         }
-        public Builder withResultLines(final List<ResultLine> resultLines) {
-            this.resultLines = resultLines;
+
+        public Builder withCourtClerk(final CourtClerk courtClerk) {
+            this.courtClerk = courtClerk;
+            return this;
+        }
+
+        public Builder withUncompletedResultLines(final List<UncompletedResultLine> uncompletedResultLines) {
+            this.uncompletedResultLines = uncompletedResultLines;
+            return this;
+        }
+
+        public Builder withCompletedResultLines(final List<CompletedResultLine> completedResultLines) {
+            this.completedResultLines = completedResultLines;
             return this;
         }
 
@@ -175,7 +204,18 @@ public final class ResultsShared implements Serializable {
         }
 
         public ResultsShared build() {
-            return new ResultsShared(this);
+            return new ResultsShared(
+                    hearingId,
+                    sharedTime,
+                    courtClerk,
+                    uncompletedResultLines,
+                    completedResultLines,
+                    hearing,
+                    cases,
+                    prosecutionCounsels,
+                    defenceCounsels,
+                    pleas,
+                    verdicts);
         }
     }
 }

@@ -11,8 +11,9 @@ import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
-import uk.gov.moj.cpp.hearing.command.result.ResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
+import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -63,7 +64,7 @@ public class NowsDataProcessorTest {
         Assert.assertEquals(defenceUserGroup, material.getUserGroups().get(0).getGroup());
         Assert.assertEquals(1, material.getNowResult().size());
         NowResult nowResult = material.getNowResult().get(0);
-        ResultLine inputResultLine = testDescription.dataIn.getResultLines().get(0);
+        CompletedResultLine inputResultLine = testDescription.dataIn.getCompletedResultLines().get(0);
         Assert.assertEquals(nowResult.getSharedResultId(), inputResultLine.getId());
         Assert.assertEquals(1, nowResult.getPromptRefs().size());
         ResultPrompt resultPrompt = inputResultLine.getPrompts().get(0);
@@ -80,14 +81,14 @@ public class NowsDataProcessorTest {
     @Test
     public void testResultDefinitionNotMappedToNow() {
         TestDescription testDescription;
-        BiFunction<ResultLine, Integer, List<ResultLine>> resultLineFilter;
+        BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilter;
         resultLineFilter = (rl, index) -> Arrays.asList(rl);
         testDescription = testMultipleDefendantsDefault1NowPerDefendant(1, resultLineFilter);
         //check green path
         Assert.assertEquals(1, testDescription.outputNows.size());
         resultLineFilter = (rl, index) -> {
             // replace result line with an unmapped (to now)
-            rl = ResultLine.builder().withId(UUID.randomUUID()).withDefendantId(rl.getDefendantId()).withResultDefinitionId(UUID.randomUUID()).build();
+            rl = CompletedResultLine.builder().withId(UUID.randomUUID()).withDefendantId(rl.getDefendantId()).withResultDefinitionId(UUID.randomUUID()).build();
             return Arrays.asList(rl);
         };
 
@@ -110,8 +111,8 @@ public class NowsDataProcessorTest {
                 )
         );
         Mockito.when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(primaryResultDefinition.getId())).thenReturn(referenceNow);
-        BiFunction<ResultLine, Integer, List<ResultLine>> resultLineFilter = (rl, defendantIndex) -> {
-            ResultLine primaryResultLine = ResultLine.builder().withResultDefinitionId(primaryResultDefinition.getId()).withDefendantId(rl.getDefendantId()).build();
+        BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilter = (rl, defendantIndex) -> {
+            CompletedResultLine primaryResultLine = CompletedResultLine.builder().withResultDefinitionId(primaryResultDefinition.getId()).withDefendantId(rl.getDefendantId()).build();
             return Arrays.asList(primaryResultLine);
         };
         TestDescription testDescription;
@@ -123,11 +124,12 @@ public class NowsDataProcessorTest {
         // retest adding in the the mandatory non primary result line
         testDescription = testMultipleDefendantsDefault1NowPerDefendant(1,
                 (rl, index) -> {
-                    List<ResultLine> results = Arrays.asList(rl);
+                    List<Object> results = Arrays.asList(rl);
+
                     //if this is the primary createNows a non primary mandatory
                     if (rl.getResultDefinitionId() == primaryResultDefinition.getId()) {
                         results.add(
-                                ResultLine.builder().withId(UUID.randomUUID())
+                                CompletedResultLine.builder().withId(UUID.randomUUID())
                                         .withDefendantId(rl.getDefendantId())
                                         .withResultDefinitionId(mandatoryNonPrimaryResultDefinition.getId())
                                         .build());
@@ -142,16 +144,25 @@ public class NowsDataProcessorTest {
 
     @Test
     public void testMultipleDefendantsIncompleteLines() {
-        BiFunction<ResultLine, Integer, List<ResultLine>> resultLineFilterByDefendantIndex = (rl, index) ->
+        BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilterByDefendantIndex = (rl, index) ->
         {
             Boolean isComplete = index % 2 == 0;
-            return Arrays.asList(ResultLine.builder()
-                    .withId(rl.getId())
-                    .withPrompts(rl.getPrompts())
-                    .withComplete(isComplete)
-                    .withDefendantId(rl.getDefendantId())
-                    .withResultDefinitionId(rl.getResultDefinitionId())
-                    .build());
+            Object resultLine;
+            if (isComplete) {
+                resultLine = CompletedResultLine.builder().withId(rl.getId())
+                        .withResultPrompts(rl.getPrompts())
+                        .withDefendantId(rl.getDefendantId())
+                        .withResultDefinitionId(rl.getResultDefinitionId())
+                        .build();
+            } else
+            {
+                  resultLine = UncompletedResultLine.builder().withId(rl.getId())
+                  .withResultDefinitionId(rl.getResultDefinitionId())
+                  .withDefendantId(rl.getDefendantId())
+                  .build();
+            }
+
+            return Arrays.asList(resultLine);
         };
         TestDescription testDescription = testMultipleDefendantsDefault1NowPerDefendant(5, resultLineFilterByDefendantIndex);
         List<Nows> nows = testDescription.outputNows;
@@ -186,7 +197,9 @@ public class NowsDataProcessorTest {
         return resultDefinitionRefIn;
     }
 
-    public TestDescription testMultipleDefendantsDefault1NowPerDefendant(int defendantCount, BiFunction<ResultLine, Integer, List<ResultLine>> resultLineFilterByDefendantIndex) {
+
+
+    public TestDescription testMultipleDefendantsDefault1NowPerDefendant(int defendantCount, BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilterByDefendantIndex) {
 
         TestDescription result = new TestDescription();
         ResultDefinition resultDefinitionRefIn = mockReferenceData();
@@ -230,8 +243,8 @@ public class NowsDataProcessorTest {
                 .setId(UUID.randomUUID())
                 .setPrompts(
                 Arrays.asList(
-                        Prompt.prompt().setLabel("label1").setUserGroups(Arrays.asList(defenceUserGroup)),
-                        Prompt.prompt().setLabel("label2").setUserGroups(Arrays.asList(defenceUserGroup))
+                        Prompt.prompt().setId(UUID.randomUUID()).setLabel("label1").setUserGroups(Arrays.asList(defenceUserGroup)),
+                        Prompt.prompt().setId(UUID.randomUUID()).setLabel("label2").setUserGroups(Arrays.asList(defenceUserGroup))
                 )
         );
 
@@ -257,8 +270,8 @@ public class NowsDataProcessorTest {
 
         ResultDefinition primaryResultDefinition = ResultDefinition.resultDefinition().setId(UUID.randomUUID()).setPrompts(
                 Arrays.asList(
-                        Prompt.prompt().setLabel("label1").setUserGroups(Arrays.asList(defenceUserGroup, courtClerkUserGroup)),
-                        Prompt.prompt().setLabel("label2").setUserGroups(Arrays.asList(defenceUserGroup, prosecutionUserGroup, courtClerkUserGroup))
+                        Prompt.prompt().setId(UUID.randomUUID()).setLabel("label1").setUserGroups(Arrays.asList(defenceUserGroup, courtClerkUserGroup)),
+                        Prompt.prompt().setId(UUID.randomUUID()).setLabel("label2").setUserGroups(Arrays.asList(defenceUserGroup, prosecutionUserGroup, courtClerkUserGroup))
                 )
         );
 
@@ -299,12 +312,12 @@ public class NowsDataProcessorTest {
         List<ResultDefinition> resultDefinitions = Arrays.asList(
                 ResultDefinition.resultDefinition().setId(UUID.randomUUID()).setPrompts(
                         Arrays.asList(
-                                Prompt.prompt().setLabel("label1.1").setUserGroups(Arrays.asList(defenceUserGroup, courtClerkUserGroup))
+                                Prompt.prompt().setId(UUID.randomUUID()).setLabel("label1.1").setUserGroups(Arrays.asList(defenceUserGroup, courtClerkUserGroup))
                         )
                 ),
                 ResultDefinition.resultDefinition().setId(UUID.randomUUID()).setPrompts(
                         Arrays.asList(
-                                Prompt.prompt().setLabel("label2.1").setUserGroups(Arrays.asList(defenceUserGroup, courtClerkUserGroup, prosecutionUserGroup))
+                                Prompt.prompt().setId(UUID.randomUUID()).setLabel("label2.1").setUserGroups(Arrays.asList(defenceUserGroup, courtClerkUserGroup, prosecutionUserGroup))
                         )
                 )
         );
@@ -368,7 +381,7 @@ public class NowsDataProcessorTest {
                     ugSum.addAll(ugGroups1);
                     ugSum.addAll(ugGroups2);
                     String label = "" + nowRefsDone + "." + resultDefinitionsDone + "." + promptsDone;
-                    Prompt prompt = Prompt.prompt().setUserGroups(ugSum).setLabel(label);
+                    Prompt prompt = Prompt.prompt().setId(UUID.randomUUID()).setUserGroups(ugSum).setLabel(label);
                     prompts.add(prompt);
                 }
                 resultDefinitions.add(resultDefinition);
@@ -397,22 +410,21 @@ public class NowsDataProcessorTest {
         primaryResultDefinitions.forEach(primaryResultDefinition -> Mockito.when(referenceDataService.getResultDefinitionById(primaryResultDefinition.getId())).thenReturn(primaryResultDefinition));
         //make a result line for each result definition and make a prompt for each contained prompt
 
-        BiFunction<ResultLine, Integer, List<ResultLine>> resultLineFilter = (rlIn, defendantIndex) -> {
-            List<ResultLine> resultLines = new ArrayList<>();
+        BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilter = (rlIn, defendantIndex) -> {
+            final List<Object> resultLines = new ArrayList<>();
             primaryResultDefinitions.forEach(
                     primaryResultDefinition -> {
                         List<ResultPrompt> resultPrompts =
                                 primaryResultDefinition.getPrompts().stream().map(
-                                        promptDef -> ResultPrompt.builder().withLabel(promptDef.getLabel())
+                                        promptDef -> ResultPrompt.builder().withId(promptDef.getId()).withLabel(promptDef.getLabel())
                                                 .withValue(promptDef.getLabel() + "value").build()
                                 ).collect(Collectors.toList());
 
-                        ResultLine resultLine = ResultLine.builder()
+                        CompletedResultLine resultLine = CompletedResultLine.builder()
                                 .withId(UUID.randomUUID())
                                 .withResultDefinitionId(primaryResultDefinition.getId())
-                                .withComplete(true)
                                 .withDefendantId(rlIn.getDefendantId())
-                                .withPrompts(resultPrompts).build();
+                                .withResultPrompts(resultPrompts).build();
                         resultLines.add(resultLine);
                     }
             );
@@ -428,19 +440,18 @@ public class NowsDataProcessorTest {
         Mockito.when(referenceDataService.getResultDefinitionById(primaryResultDefinition.getId())).thenReturn(primaryResultDefinition);
         //make a result line for each result definition and make a prompt for each contained prompt
 
-        BiFunction<ResultLine, Integer, List<ResultLine>> resultLineFilter = (rl, defendantIndex) -> {
+        BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilter = (rl, defendantIndex) -> {
             List<ResultPrompt> resultPrompts =
                     primaryResultDefinition.getPrompts().stream().map(
-                            promptDef -> ResultPrompt.builder().withLabel(promptDef.getLabel())
+                            promptDef -> ResultPrompt.builder().withId(promptDef.getId()).withLabel(promptDef.getLabel())
                                     .withValue(promptDef.getLabel() + "value").build()
                     ).collect(Collectors.toList());
 
-            ResultLine resultLine = ResultLine.builder()
+            CompletedResultLine resultLine = CompletedResultLine.builder()
                     .withId(UUID.randomUUID())
                     .withResultDefinitionId(primaryResultDefinition.getId())
-                    .withComplete(true)
                     .withDefendantId(rl.getDefendantId())
-                    .withPrompts(resultPrompts).build();
+                    .withResultPrompts(resultPrompts).build();
             return Arrays.asList(resultLine);
         };
         return testMultipleDefendantsDefault1NowPerDefendant(1, resultLineFilter);
@@ -525,18 +536,20 @@ public class NowsDataProcessorTest {
         return createResultsShared(resultDefinition, defendantCount, null);
     }
 
-    private ResultsShared.Builder createResultsShared(ResultDefinition resultDefinition, int defendantCount, BiFunction<ResultLine, Integer, List<ResultLine>> resultLineFilterByDefendantIndex) {
+    private ResultsShared.Builder createResultsShared(ResultDefinition resultDefinition, int defendantCount, BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilterByDefendantIndex) {
         if (null == resultLineFilterByDefendantIndex) {
             resultLineFilterByDefendantIndex = (rl, index) -> Arrays.asList(rl);
         }
 
         final List<UUID> defendantIds = new ArrayList<>();
 
-        List<ResultLine> resultLines = new ArrayList<>();
-
         final Hearing.Builder hearingBuilder =
                 Hearing.builder()
                         .withId(UUID.randomUUID());
+
+        final List<CompletedResultLine> completeResultLines = new ArrayList<>();
+        final List<UncompletedResultLine> uncompletedResultLines = new ArrayList<>();
+
 
         for (int defDone = 0; defDone < defendantCount; defDone++) {
             UUID defendantId = UUID.randomUUID();
@@ -552,18 +565,19 @@ public class NowsDataProcessorTest {
                                     .withPostCode("DB1 1BD"))
                             .withInterpreter(Interpreter.builder().withLanguage("Thai"))
             );
-            List<ResultLine> resultLine = resultLineFilterByDefendantIndex.apply(
-                    ResultLine.builder()
+            List<Object> oResultLines = resultLineFilterByDefendantIndex.apply(
+                    CompletedResultLine.builder()
                             .withId(UUID.randomUUID())
                             .withResultDefinitionId(resultDefinition.getId())
-                            .withComplete(Boolean.TRUE)
                             .withDefendantId(defendantId)
-                            .withPrompts(
+                            .withResultPrompts(
                                     resultDefinition.getPrompts().stream().map(
-                                            p -> ResultPrompt.builder().withLabel(p.getLabel()).withValue("value").build()
+                                            p -> ResultPrompt.builder().withId(p.getId()).withLabel(p.getLabel()).withValue("value").build()
                                     ).collect(Collectors.toList()))
                             .build(), defDone);
-            resultLines.addAll(resultLine);
+            completeResultLines.addAll(oResultLines.stream().filter(l -> l instanceof CompletedResultLine ).map(cl->(CompletedResultLine)cl).collect(Collectors.toList()));
+            uncompletedResultLines.addAll(oResultLines.stream().filter(l -> l instanceof UncompletedResultLine ).map(cl->(UncompletedResultLine)cl).collect(Collectors.toList()));
+
         }
 
         DefenceCounselUpsert defenceCounselUpsert = DefenceCounselUpsert.builder()
@@ -581,7 +595,8 @@ public class NowsDataProcessorTest {
         return ResultsShared.builder()
                 .withHearing(hearingBuilder
                         .build())
-                .withResultLines(resultLines)
+                .withCompletedResultLines(completeResultLines)
+                .withUncompletedResultLines(uncompletedResultLines)
                 .withDefenceCounsels(defenseCounselUpserts)
                 .withProsecutionCounsels(prosecutionCounselUpserts)
                 ;

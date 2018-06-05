@@ -1,17 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.toList;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static javax.json.Json.createReader;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-
-import java.io.StringReader;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
+import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
@@ -19,12 +12,18 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
+import java.io.StringReader;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static javax.json.Json.createReader;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
@@ -34,7 +33,7 @@ public class HearingEventListener {
     private static final String FIELD_TARGET_ID = "targetId";
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_DRAFT_RESULT = "draftResult";
-    private static final String FIELD_RESULT_LINES = "resultLines";
+    private static final String FIELD_COMPLETED_RESULT_LINES = "completedResultLines";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_RESULTS = "results";
@@ -58,11 +57,14 @@ public class HearingEventListener {
 
     @Handles("hearing.results-shared")
     public void updateDraftResultWithLastSharedResultIdFromSharedResults(final JsonEnvelope event) {
+
         final JsonObject payload = event.payloadAsJsonObject();
+
         final List<HearingOutcome> hearingOutcomes = this.hearingOutcomeRepository.findByHearingId(fromString(payload.getString(FIELD_HEARING_ID)));
+
         final Map<UUID, JsonObject> hearingOutcomeToDraftResultMap = newHashMap();
 
-        payload.getJsonArray(FIELD_RESULT_LINES).getValuesAs(JsonObject.class).forEach(resultLine -> {
+        payload.getJsonArray(FIELD_COMPLETED_RESULT_LINES).getValuesAs(JsonObject.class).forEach(resultLine -> {
             final String sharedResultLineId = resultLine.getString(FIELD_GENERIC_ID);
             hearingOutcomes.forEach(hearingOutcome -> {
 

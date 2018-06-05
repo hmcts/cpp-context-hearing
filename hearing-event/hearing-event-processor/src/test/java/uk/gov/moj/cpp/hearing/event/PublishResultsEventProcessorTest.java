@@ -29,8 +29,9 @@ import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.Level;
-import uk.gov.moj.cpp.hearing.command.result.ResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
@@ -125,7 +126,7 @@ public class PublishResultsEventProcessorTest {
         Mockito.when(nowsDataProcessor.createNows(Mockito.any())).thenReturn(nows);
         Mockito.when(nowsDataProcessor.translateReferenceData(resultsShared)).thenReturn(hearing);
 
-        ResultLine resultLine = resultsShared.getResultLines().get(0);
+        CompletedResultLine resultLine = resultsShared.getCompletedResultLines().get(0);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
@@ -162,10 +163,10 @@ public class PublishResultsEventProcessorTest {
                                 withJsonPath("$.hearing.courtCentre.courtRoomName", is(resultsShared.getHearing().getCourtRoomName())),
                                 withJsonPath("$.hearing.startDateTime", is(ZonedDateTimes.toString(resultsShared.getHearing().getStartDateTime()))),
 
-                                withJsonPath("$.hearing.attendees[0].personId", is(resultsShared.getResultLines().get(0).getClerkOfTheCourtId().toString())),
+                                withJsonPath("$.hearing.attendees[0].personId", is(resultsShared.getCourtClerk().getId().toString())),
                                 withJsonPath("$.hearing.attendees[0].type", is("COURTCLERK")),
-                                withJsonPath("$.hearing.attendees[0].firstName", is(resultsShared.getResultLines().get(0).getClerkOfTheCourtFirstName())),
-                                withJsonPath("$.hearing.attendees[0].lastName", is(resultsShared.getResultLines().get(0).getClerkOfTheCourtLastName())),
+                                withJsonPath("$.hearing.attendees[0].firstName", is(resultsShared.getCourtClerk().getFirstName())),
+                                withJsonPath("$.hearing.attendees[0].lastName", is(resultsShared.getCourtClerk().getLastName())),
 
                                 withJsonPath("$.hearing.attendees[1].type", is("JUDGE")),
 
@@ -359,20 +360,21 @@ public class PublishResultsEventProcessorTest {
                         .withUnanimous(BOOLEAN.next())
                         .withHearingId(hearingId)
                         .build()))
-                .withResultLines(asList(
-                        ResultLine.builder()
+                .withCourtClerk(CourtClerk.builder()
+                        .withId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .build())
+                .withCompletedResultLines(asList(
+                        CompletedResultLine.builder()
                                 .withId(randomUUID())
                                 .withCaseId(caseId)
                                 .withDefendantId(defendantId)
                                 .withOffenceId(offenceId)
-                                .withClerkOfTheCourtId(randomUUID())
-                                .withClerkOfTheCourtFirstName(STRING.next())
-                                .withClerkOfTheCourtLastName(STRING.next())
-                                .withComplete(true)
                                 .withLevel(Level.CASE)
                                 .withResultDefinitionId(randomUUID())
                                 .withResultLabel(STRING.next())
-                                .withPrompts(asList(ResultPrompt.builder()
+                                .withResultPrompts(asList(ResultPrompt.builder()
                                         .withLabel(STRING.next())
                                         .withValue(STRING.next())
                                         .build()))
