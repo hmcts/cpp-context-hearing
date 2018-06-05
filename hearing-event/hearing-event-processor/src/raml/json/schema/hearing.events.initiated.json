@@ -397,9 +397,6 @@
             "format": "date-time"
           }
         },
-        "notBefore": {
-          "type": "boolean"
-        },
         "estimateMinutes": {
           "type": "number"
         },

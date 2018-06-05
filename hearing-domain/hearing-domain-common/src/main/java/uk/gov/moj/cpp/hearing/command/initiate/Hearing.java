@@ -28,7 +28,6 @@ public class Hearing implements Serializable {
     private final Judge judge;
     private final ZonedDateTime startDateTime;
     private final List<ZonedDateTime> hearingDays;
-    private final Boolean notBefore;
     private final Integer estimateMinutes;
     private final List<Defendant> defendants;
     private final List<Witness> witnesses;
@@ -43,7 +42,6 @@ public class Hearing implements Serializable {
                    @JsonProperty("judge") final Judge judge,
                    @JsonProperty("startDateTime") final ZonedDateTime startDateTime,
                    @JsonProperty("hearingDays") final List<ZonedDateTime> hearingDays,
-                   @JsonProperty("notBefore") final Boolean notBefore,
                    @JsonProperty("estimateMinutes") final Integer estimateMinutes,
                    @JsonProperty("defendants") final List<Defendant> defendants,
                    @JsonProperty("witnesses") final List<Witness> witnesses) {
@@ -56,7 +54,6 @@ public class Hearing implements Serializable {
         this.judge = judge;
         this.startDateTime = startDateTime;
         this.hearingDays = hearingDays;
-        this.notBefore = notBefore;
         this.estimateMinutes = estimateMinutes;
         this.defendants = defendants;
         this.witnesses = witnesses;
@@ -98,10 +95,6 @@ public class Hearing implements Serializable {
         return hearingDays;
     }
 
-    public Boolean isNotBefore() {
-        return notBefore;
-    }
-
     public Integer getEstimateMinutes() {
         return estimateMinutes;
     }
@@ -126,7 +119,6 @@ public class Hearing implements Serializable {
         private Judge.Builder judge;
         private ZonedDateTime startDateTime;
         private List<ZonedDateTime> hearingDays;
-        private boolean notBefore;
         private Integer estimateMinutes;
         private List<Defendant.Builder> defendants = new ArrayList<>();
         private List<Witness.Builder> witnesses = new ArrayList<>();
@@ -165,10 +157,6 @@ public class Hearing implements Serializable {
 
         public ZonedDateTime getStartDateTime() {
             return startDateTime;
-        }
-
-        public boolean isNotBefore() {
-            return notBefore;
         }
 
         public Integer getEstimateMinutes() {
@@ -228,11 +216,6 @@ public class Hearing implements Serializable {
             return this;
         }
 
-        public Builder withNotBefore(boolean notBefore) {
-            this.notBefore = notBefore;
-            return this;
-        }
-
         public Builder withEstimateMinutes(Integer estimateMinutes) {
             this.estimateMinutes = estimateMinutes;
             return this;
@@ -251,7 +234,7 @@ public class Hearing implements Serializable {
         public Hearing build() {
             return new Hearing(id, type, courtCentreId, courtCentreName, courtRoomId, courtRoomName,
                     ofNullable(judge).map(Judge.Builder::build).orElse(null),
-                    startDateTime, hearingDays, notBefore, estimateMinutes,
+                    startDateTime, hearingDays, estimateMinutes,
                     unmodifiableList(defendants.stream().map(Defendant.Builder::build).collect(Collectors.toList())),
                     unmodifiableList(witnesses.stream().map(Witness.Builder::build).collect(Collectors.toList())));
         }
@@ -272,7 +255,6 @@ public class Hearing implements Serializable {
                 .withJudge(Judge.from(hearing.getJudge()))
                 .withStartDateTime(hearing.getStartDateTime())
                 .withHearingDays(hearing.getHearingDays())
-                .withNotBefore(hearing.isNotBefore())
                 .withEstimateMinutes(hearing.getEstimateMinutes());
 
         hearing.getDefendants().forEach(defendant -> builder.addDefendant(Defendant.from(defendant)));

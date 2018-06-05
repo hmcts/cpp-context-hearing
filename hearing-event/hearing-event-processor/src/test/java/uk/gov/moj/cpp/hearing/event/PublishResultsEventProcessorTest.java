@@ -263,7 +263,6 @@ public class PublishResultsEventProcessorTest {
                         .withType(STRING.next())
                         .withStartDateTime(ZonedDateTime.now(ZoneId.of("UTC")))
                         .withEstimateMinutes(INTEGER.next())
-                        .withNotBefore(BOOLEAN.next())
                         .withJudge(Judge.builder()
                                 .withId(randomUUID())
                                 .withTitle(STRING.next())

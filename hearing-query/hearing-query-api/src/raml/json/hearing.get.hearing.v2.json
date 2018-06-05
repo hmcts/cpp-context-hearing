@@ -11,6 +11,7 @@
       "firstName":"Alan",
       "lastName":"Mathison Turing"
    },
+   "hearingDays":["2018-02-22"],
    "roomId":"e7721a38-546d-4b56-9992-ebdd772a561b",
    "courtCentreId":"e8821a38-546d-4b56-9992-ebdd772a561f",
    "attendees":{

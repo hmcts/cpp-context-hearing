@@ -39,6 +39,14 @@
         "$ref":"#/definitions/case"
       }
     },
+    "hearingDays": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "format": "date"
+      }
+    },
     "defenceWitnesses":{
       "type":"array",
       "items":{
@@ -52,6 +60,7 @@
     "courtCentreId",
     "courtCentreName",
     "hearingId",
+    "hearingDays",
     "hearingType",
     "judge",
     "roomId",

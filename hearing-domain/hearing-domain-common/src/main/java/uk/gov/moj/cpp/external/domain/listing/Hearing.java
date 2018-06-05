@@ -19,7 +19,6 @@ public class Hearing implements Serializable {
     private String courtRoomId;
     private String courtRoomName;
     private String type;
-    private Boolean notBefore;
     private ZonedDateTime startDateTime;
     private int estimateMinutes;
     private List<Defendant> defendants;
@@ -69,9 +68,6 @@ public class Hearing implements Serializable {
         return new ArrayList(defendants);
     }
 
-    public Boolean getNotBefore() {
-        return notBefore;
-    }
 
     public void setId(UUID id) {
         this.id = id;
@@ -101,9 +97,6 @@ public class Hearing implements Serializable {
         this.type = type;
     }
 
-    public void setNotBefore(Boolean notBefore) {
-        this.notBefore = notBefore;
-    }
 
     public void setStartDateTime(ZonedDateTime startDateTime) {
         this.startDateTime = startDateTime;

@@ -118,7 +118,6 @@ public class TestTemplates {
                         )
                         .withStartDateTime(startDateTime)
                         .withHearingDays(Arrays.asList(startDateTime))
-                        .withNotBefore(false)
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(initiateHearingDefendantTemplate(caseId))
                         .addWitness(

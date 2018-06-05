@@ -139,9 +139,6 @@
             "format":"date-time"
           }
         },
-        "notBefore":{
-          "type":"boolean"
-        },
         "estimateMinutes":{
           "type":"integer"
         },
@@ -168,7 +165,6 @@
         "hearingDays",
         "id",
         "judge",
-        "notBefore",
         "startDateTime",
         "type"
       ]

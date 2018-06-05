@@ -17,7 +17,7 @@
       "lastName": "Flewitt"
     },
     "startDateTime": "2016-06-01T10:00:00Z",
-    "notBefore": true,
+    "hearingDays":["2016-06-01T10:00:00Z"],
     "estimateMinutes": 7200,
     "defendants": [
       {

@@ -17,7 +17,6 @@
       "lastName": "Flewitt"
     },
     "startDateTime": "2016-06-01T10:00:00Z",
-    "notBefore": true,
     "estimateMinutes": 7200,
     "defendants": [
       {
