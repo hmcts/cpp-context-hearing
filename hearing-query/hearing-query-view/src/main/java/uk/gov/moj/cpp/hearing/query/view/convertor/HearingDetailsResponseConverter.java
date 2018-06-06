@@ -46,6 +46,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class HearingDetailsResponseConverter implements Converter<Hearing, HearingDetailsResponse> {
@@ -61,7 +62,8 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                 .withStartDate(toDateStringOrNull(getHearingDayDate(source.getHearingDays())))
                 .withStartTime(toTimeStringOrNull(getHearingDayDate(source.getHearingDays())))
                 .withHearingDays(source.getHearingDays().stream()
-                        .map(ahd -> ahd.getDate().toString())
+                        .map(ahd -> ahd.getDateTime().toInstant().toString())
+                        .sorted()
                         .collect(toList()))
                 .withRoomName(source.getRoomName())
                 .withHearingType(source.getHearingType())
@@ -92,7 +94,11 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
         if (isEmpty(source)) {
             return null;
         }else{
-            return source.get(0).getDateTime();
+            final List<ZonedDateTime> hearingDays = source.stream()
+                    .map(HearingDate::getDateTime)
+                    .sorted()
+                    .collect(Collectors.toList());
+            return hearingDays.get(0);
         }
     }
 

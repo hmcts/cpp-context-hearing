@@ -1,6 +1,16 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_UTC_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
+
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
@@ -31,16 +41,6 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_UTC_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
-
 public class TestTemplates {
 
     private TestTemplates() {
@@ -51,6 +51,7 @@ public class TestTemplates {
 
         final UUID caseId = randomUUID();
         final ZonedDateTime startDateTime = FUTURE_UTC_DATE_TIME.next();
+        final ZonedDateTime secondDateTime = startDateTime.plusDays(2);
 
         return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
@@ -72,7 +73,7 @@ public class TestTemplates {
                                         .withLastName(STRING.next())
                         )
                         .withStartDateTime(startDateTime)
-                        .withHearingDays(Arrays.asList(startDateTime))
+                        .withHearingDays(Arrays.asList(startDateTime, secondDateTime))
                         .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()
                                 .withId(randomUUID())

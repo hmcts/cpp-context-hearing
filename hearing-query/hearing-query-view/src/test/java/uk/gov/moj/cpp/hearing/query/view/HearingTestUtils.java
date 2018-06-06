@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static java.time.ZonedDateTime.parse;
+
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
@@ -18,18 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static java.time.ZonedDateTime.parse;
-
 public class HearingTestUtils {
 
     public static final LocalDate startDate = LocalDate.now();
 
     public static final UUID HEARING_ID_1 = UUID.fromString("23ef34ec-63e5-422e-8071-9b3753008c10");
     public static final ZonedDateTime START_DATE_1 = parse("2018-02-22T10:30:00Z");
+    public static final ZonedDateTime END_DATE_1 = parse("2018-02-24T15:45:00Z");
 
     public static List<Hearing> buildHearingList() {
         // 1. create the hearing object and set the attendees
-        final Hearing hearing = buildHering1(HEARING_ID_1, START_DATE_1);
+        final Hearing hearing = buildHering1(HEARING_ID_1, START_DATE_1, END_DATE_1);
         final Judge judge = buildJudge(hearing);
         final ProsecutionAdvocate prosecutionAdvocate = buildProsecutionAdvocate(hearing);
         final DefenceAdvocate defenseAdvocate1 = buildDefenseAdvocate1(hearing);
@@ -58,11 +59,12 @@ public class HearingTestUtils {
         return Arrays.asList(hearing);
     }
 
-    public static Hearing buildHering1(final UUID hearingId, final ZonedDateTime startDateTime) {
+    public static Hearing buildHering1(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime) {
         return Hearing.builder()
                 .withId(hearingId)
                 .withHearingType("TRIAL")
-                .withHearingDays(Arrays.asList(buildHearingDate(hearingId, startDateTime)))
+                .withHearingDays(Arrays.asList(buildHearingDate(hearingId, startDateTime),
+                        buildHearingDate(hearingId, endDateTime)))
                 .withCourtCentreId(UUID.fromString("e8821a38-546d-4b56-9992-ebdd772a561f"))
                 .withCourtCentreName("Liverpool Crown Court")
                 .withRoomId(UUID.fromString("e7721a38-546d-4b56-9992-ebdd772a561b"))

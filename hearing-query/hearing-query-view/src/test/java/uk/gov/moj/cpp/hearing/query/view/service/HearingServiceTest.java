@@ -11,21 +11,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
@@ -35,12 +29,9 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
-import javax.json.JsonObject;
-import javax.json.JsonString;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,11 +40,14 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingServiceTest {
@@ -101,8 +95,11 @@ public class HearingServiceTest {
 
         assertEquals(hearing.getId().toString(), response.getHearingId());
         assertEquals(hearing.getHearingType(), response.getHearingType());
+        assertEquals(2, hearing.getHearingDays().size());
         assertEquals(hearing.getHearingDays().get(0).getDateTime().format(ISO_LOCAL_DATE), response.getStartDate());
         assertEquals(hearing.getHearingDays().get(0).getDateTime().format(ISO_LOCAL_TIME), response.getStartTime());
+        assertEquals(hearing.getHearingDays().get(0).getDateTime().toInstant().toString(), HearingTestUtils.START_DATE_1.toInstant().toString());
+        assertEquals(hearing.getHearingDays().get(1).getDateTime().toInstant().toString(), HearingTestUtils.END_DATE_1.toInstant().toString());
         assertEquals(hearing.getCourtCentreId().toString(), response.getCourtCentreId());
         assertEquals(hearing.getCourtCentreName(), response.getCourtCentreName());
         assertEquals(hearing.getRoomId().toString(), response.getRoomId());

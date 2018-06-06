@@ -5,6 +5,7 @@ import static com.jayway.jsonpath.Filter.filter;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -73,7 +74,10 @@ public class InitiateHearingIT extends AbstractIT {
                                 withJsonPath("$.roomName", equalStr(hearing, "courtRoomName")),
                                 withJsonPath("$.roomId", equalStr(hearing, "courtRoomId")),
                                 withJsonPath("$.courtCentreId", equalStr(hearing, "courtCentreId")),
-                                withJsonPath("$.hearingDays[0]",equalStr(hearing,"hearingDays[0]",ISO_LOCAL_DATE)),
+                                withJsonPath("$.hearingDays[0]",
+                                        equalStr(hearing,"hearingDays[0]", ISO_INSTANT)),
+                                withJsonPath("$.hearingDays[1]",
+                                        equalStr(hearing,"hearingDays[1]", ISO_INSTANT)),
                                 withJsonPath("$.judge.id", equalStr(hearing, "judge.id")),
                                 withJsonPath("$.judge.title", equalStr(hearing, "judge.title")),
                                 withJsonPath("$.judge.firstName", equalStr(hearing, "judge.firstName")),
