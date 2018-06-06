@@ -17,6 +17,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
@@ -26,6 +27,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -51,6 +53,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChangeCaseDefendantOffencesCommandHandlerTest {
@@ -170,18 +173,22 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testAddOffenceForExistingHearing() throws EventStreamException {
 
-        final UUID hearingId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final FoundHearingsForNewOffence foundHearingsForNewOffence = FoundHearingsForNewOffence.builder()
                 .withId(randomUUID())
-                .withHearingIds(Collections.singletonList(hearingId))
-                .withDefendantId(randomUUID())
+                .withHearingIds(Collections.singletonList(initiateHearingCommand.getHearing().getId()))
+                .withDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getId())
                 .withCaseId(randomUUID())
                 .build();
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-case-defendant-offence"), objectToJsonObjectConverter.convert(foundHearingsForNewOffence));
 
-        setupMockedEventStream(hearingId, this.eventStream, new NewModelHearingAggregate());
+        final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
+        setupMockedEventStream(initiateHearingCommand.getHearing().getId(), this.eventStream, hearingAggregate);
 
         changeCaseDefendantOffencesCommandHandler.addOffenceForExistingHearing(envelope);
 
@@ -198,16 +205,21 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testUpdateOffence() throws EventStreamException {
 
-        final UUID hearingId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final FoundHearingsForEditOffence foundHearingsForEditOffence = FoundHearingsForEditOffence.builder()
                 .withId(randomUUID())
-                .withHearingIds(Collections.singletonList(hearingId))
+                .withHearingIds(Collections.singletonList(initiateHearingCommand.getHearing().getId()))
                 .build();
 
-        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offence"), objectToJsonObjectConverter.convert(foundHearingsForEditOffence));
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offence"),
+                objectToJsonObjectConverter.convert(foundHearingsForEditOffence));
 
-        setupMockedEventStream(hearingId, this.eventStream, new NewModelHearingAggregate());
+        final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
+        setupMockedEventStream(initiateHearingCommand.getHearing().getId(), this.eventStream, hearingAggregate);
 
         changeCaseDefendantOffencesCommandHandler.updateOffence(envelope);
 
@@ -221,16 +233,21 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testDeleteOffence() throws EventStreamException {
 
-        final UUID hearingId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final FoundHearingsForDeleteOffence foundHearingsForDeleteOffence = FoundHearingsForDeleteOffence.builder()
                 .withId(randomUUID())
-                .withHearingIds(Collections.singletonList(hearingId))
+                .withHearingIds(Collections.singletonList(initiateHearingCommand.getHearing().getId()))
                 .build();
 
-        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.delete-case-defendant-offence"), objectToJsonObjectConverter.convert(foundHearingsForDeleteOffence));
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.delete-case-defendant-offence"),
+                objectToJsonObjectConverter.convert(foundHearingsForDeleteOffence));
 
-        setupMockedEventStream(hearingId, this.eventStream, new NewModelHearingAggregate());
+        final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
+        setupMockedEventStream(initiateHearingCommand.getHearing().getId(), this.eventStream, hearingAggregate);
 
         changeCaseDefendantOffencesCommandHandler.deleteOffence(envelope);
 
