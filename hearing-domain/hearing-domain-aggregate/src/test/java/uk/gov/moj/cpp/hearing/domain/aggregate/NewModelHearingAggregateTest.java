@@ -12,6 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import java.util.Collections;
 import java.util.List;
@@ -450,13 +451,17 @@ public class NewModelHearingAggregateTest {
     }
 
     @Test
-    public void updateDefendantDetails_shouldIgnore_when_resultshared() {
+    public void updateDefendantDetails_shouldIgnore_when_resultShared() {
 
         final int expected = 0;
+
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
 
         final CaseDefendantDetailsWithHearingCommand command = initiateDefendantCommandTemplate();
 
         final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         hearingAggregate.apply(ResultsShared.builder().build());
 
@@ -467,15 +472,25 @@ public class NewModelHearingAggregateTest {
 
 
     @Test
-    public void updateDefendantDetails_shouldUpdate_when_resultnotshared() {
+    public void updateDefendantDetails_shouldUpdate_when_resultNotShared() {
 
-        final CaseDefendantDetailsWithHearingCommand command = initiateDefendantCommandTemplate();
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+
+        final CaseDefendantDetailsWithHearingCommand command = with(initiateDefendantCommandTemplate(),
+                template -> template.getDefendant().setId(initiateHearingCommand.getHearing().getDefendants().get(0).getId()));
 
         final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
 
         final DefendantDetailsUpdated result = (DefendantDetailsUpdated) hearingAggregate.updateDefendantDetails(command).collect(Collectors.toList()).get(0);
 
         assertThat(result.getCaseId(), Matchers.is(command.getCaseId()));
+
+        assertThat(initiateHearingCommand.getHearing().getDefendants().get(0).getFirstName(), Matchers.is(result.getDefendant().getPerson().getFirstName()));
+
+        assertThat(initiateHearingCommand.getHearing().getDefendants().get(0).getLastName(), Matchers.is(result.getDefendant().getPerson().getLastName()));
+
     }
 
     @Test

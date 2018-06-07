@@ -19,13 +19,13 @@ public class Offence implements Serializable {
 
     private final UUID id;
     private final UUID caseId;
-    private final String offenceCode;
-    private final String wording;
+    private String offenceCode;
+    private String wording;
     private final String section;
-    private final LocalDate startDate;
-    private final LocalDate endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private final Integer orderIndex;
-    private final Integer count;
+    private Integer count;
     private LocalDate convictionDate;
     private Plea plea;
     private final String title;
@@ -73,8 +73,17 @@ public class Offence implements Serializable {
         return offenceCode;
     }
 
+    public Offence setOffenceCode(final String offenceCode) {
+        this.offenceCode = offenceCode;
+        return this;
+    }
     public String getWording() {
         return wording;
+    }
+
+    public Offence setWording(final String wording) {
+        this.wording = wording;
+        return this;
     }
 
     public String getSection() {
@@ -86,9 +95,19 @@ public class Offence implements Serializable {
         return startDate;
     }
 
+    public Offence setStartDate(final LocalDate startDate) {
+        this.startDate = startDate;
+        return this;
+    }
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     public LocalDate getEndDate() {
         return endDate;
+    }
+
+    public Offence setEndDate(final LocalDate endDate) {
+        this.endDate = endDate;
+        return this;
     }
 
     public Integer getOrderIndex() {
@@ -97,6 +116,11 @@ public class Offence implements Serializable {
 
     public Integer getCount() {
         return count;
+    }
+
+    public Offence setCount(final Integer count) {
+        this.count = count;
+        return this;
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

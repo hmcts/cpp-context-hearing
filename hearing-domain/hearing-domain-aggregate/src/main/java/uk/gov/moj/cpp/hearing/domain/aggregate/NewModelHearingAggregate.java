@@ -1,33 +1,16 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.fromString;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
+import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
@@ -57,7 +40,26 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602"})
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
 public class NewModelHearingAggregate implements Aggregate {
 
     private static final String HEARING_EVENTS = "hearingEvents";
@@ -157,6 +159,70 @@ public class NewModelHearingAggregate implements Aggregate {
                             .orElseThrow(() -> new RuntimeException("Invalid offence id on conviction date message"))
                             .setConvictionDate(null);
                 }),
+
+                when(DefendantDetailsUpdated.class).apply(defendantDetailsUpdated -> this.hearing.getDefendants().stream()
+                        .filter(d -> d.getId().equals(defendantDetailsUpdated.getDefendant().getId()))
+                        .forEach(d -> {
+                             d.setDefenceOrganisation(defendantDetailsUpdated.getDefendant().getDefenceOrganisation())
+                                     .setPersonId(defendantDetailsUpdated.getDefendant().getPerson().getId())
+                                     .setFirstName(defendantDetailsUpdated.getDefendant().getPerson().getFirstName())
+                                     .setLastName(defendantDetailsUpdated.getDefendant().getPerson().getLastName())
+                                     .setGender(defendantDetailsUpdated.getDefendant().getPerson().getGender())
+                                     .setNationality(defendantDetailsUpdated.getDefendant().getPerson().getNationality())
+                                     .setDateOfBirth(defendantDetailsUpdated.getDefendant().getPerson().getDateOfBirth())
+                                     .setAddress(ofNullable(defendantDetailsUpdated.getDefendant().getPerson().getAddress())
+                                             .map(a -> Address.builder()
+                                                     .withAddress1(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress1())
+                                                     .withAddress2(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress2())
+                                                     .withAddress3(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress3())
+                                                     .withAddress4(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress4())
+                                                     .withPostCode(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getPostCode())
+                                                     .build())
+                                             .orElse(null))
+                                     .setInterpreter(ofNullable(defendantDetailsUpdated.getDefendant().getInterpreter())
+                                             .map(i -> Interpreter.builder()
+                                                     .withLanguage(defendantDetailsUpdated.getDefendant().getInterpreter().getLanguage())
+                                                     .build())
+                                             .orElse(null))
+                                     .getDefendantCases().stream()
+                                     .filter(dc -> dc.getCaseId().equals(defendantDetailsUpdated.getCaseId()))
+                                     .forEach(dc -> {
+                                         dc.setBailStatus(defendantDetailsUpdated.getDefendant().getBailStatus());
+                                         dc.setCustodyTimeLimitDate(defendantDetailsUpdated.getDefendant().getCustodyTimeLimitDate());
+                                     });
+                        })),
+
+                when(OffenceAdded.class).apply(offenceAdded ->
+                        this.hearing.getDefendants().stream()
+                                .filter(d -> d.getId().equals(offenceAdded.getDefendantId()))
+                                .forEach(d -> d.getOffences().add(Offence.builder()
+                                        .withId(offenceAdded.getId())
+                                        .withCaseId(offenceAdded.getCaseId())
+                                        .withOffenceCode(offenceAdded.getOffenceCode())
+                                        .withWording(offenceAdded.getWording())
+                                        .withStartDate(offenceAdded.getStartDate())
+                                        .withEndDate(offenceAdded.getEndDate())
+                                        .withCount(offenceAdded.getCount())
+                                        .withConvictionDate(offenceAdded.getConvictionDate())
+                                        .build()))),
+
+                when(OffenceUpdated.class).apply(offenceUpdated ->
+                        this.hearing.getDefendants().stream()
+                                .forEach(d -> d.getOffences().stream()
+                                        .filter(o -> o.getId().equals(offenceUpdated.getId()))
+                                        .forEach(o -> {
+                                            o.setOffenceCode(offenceUpdated.getOffenceCode());
+                                            o.setWording(offenceUpdated.getWording());
+                                            o.setStartDate(offenceUpdated.getStartDate());
+                                            o.setEndDate(offenceUpdated.getEndDate());
+                                            o.setCount(offenceUpdated.getCount());
+                                            o.setConvictionDate(offenceUpdated.getConvictionDate());
+                                        }))),
+
+                when(OffenceDeleted.class).apply(offenceDeleted ->
+                        this.hearing.getDefendants().stream()
+                                .forEach(d -> d.getOffences().removeIf(o -> o.getId().equals(offenceDeleted.getId())))
+                ),
 
                 otherwiseDoNothing()
         );
@@ -359,14 +425,14 @@ public class NewModelHearingAggregate implements Aggregate {
         );
 
         final String categoryType = ofNullable(verdict.getValue().getCategoryType()).orElse("");
-        
+
         final LocalDate offenceConvictionDate = this.hearing.getDefendants().stream()
                 .flatMap(d -> d.getOffences().stream())
                 .filter(o -> offenceId.equals(o.getId()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Offence id is not present"))
                 .getConvictionDate();
-        
+
         if (categoryType.startsWith(GUILTY)) {
             if (offenceConvictionDate == null) {
                 events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
@@ -398,14 +464,11 @@ public class NewModelHearingAggregate implements Aggregate {
     public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {
 
         if (!isPublished()) {
-
-            return apply(
-                    Stream.of(
-                            DefendantDetailsUpdated.builder()
-                                    .withCaseId(command.getCaseId())
-                                    .withHearingId(command.getHearingIds().get(0))
-                                    .withDefendant(Defendant.builder(command.getDefendant()))
-                                    .build()));
+            return apply(Stream.of(DefendantDetailsUpdated.builder()
+                    .withCaseId(command.getCaseId())
+                    .withHearingId(command.getHearingIds().get(0))
+                    .withDefendant(Defendant.builder(command.getDefendant()))
+                    .build()));
         }
 
         return Stream.empty();

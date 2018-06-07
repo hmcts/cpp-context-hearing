@@ -13,7 +13,7 @@ public class Defendant implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
+    private UUID id;
 
     private final Person person;
 
@@ -69,6 +69,10 @@ public class Defendant implements Serializable {
 
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public Interpreter getInterpreter() {

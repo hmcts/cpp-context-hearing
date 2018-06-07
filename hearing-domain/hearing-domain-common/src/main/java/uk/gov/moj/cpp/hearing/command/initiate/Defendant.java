@@ -22,15 +22,15 @@ public class Defendant implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID id;
-    private final UUID personId;
-    private final String firstName;
-    private final String lastName;
-    private final String nationality;
-    private final String gender;
-    private final Address address;
-    private final LocalDate dateOfBirth;
-    private final String defenceOrganisation;
-    private final Interpreter interpreter;
+    private UUID personId;
+    private String firstName;
+    private String lastName;
+    private String nationality;
+    private String gender;
+    private Address address;
+    private LocalDate dateOfBirth;
+    private String defenceOrganisation;
+    private Interpreter interpreter;
     private final List<DefendantCase> defendantCases;
     private final List<Offence> offences;
 
@@ -69,24 +69,54 @@ public class Defendant implements Serializable {
         return personId;
     }
 
+    public Defendant setPersonId(UUID personId) {
+        this.personId = personId;
+        return this;
+    }
+
     public String getFirstName() {
         return firstName;
+    }
+
+    public Defendant setFirstName(final String firstName) {
+        this.firstName = firstName;
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
+    public Defendant setLastName(final String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
+
     public String getNationality() {
         return nationality;
+    }
+
+    public Defendant setNationality(final String nationality) {
+        this.nationality = nationality;
+        return this;
     }
 
     public String getGender() {
         return gender;
     }
 
+    public Defendant setGender(final String gender) {
+        this.gender = gender;
+        return this;
+    }
+
     public Address getAddress() {
         return address;
+    }
+
+    public Defendant setAddress(final Address address) {
+        this.address = address;
+        return this;
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -94,12 +124,27 @@ public class Defendant implements Serializable {
         return dateOfBirth;
     }
 
+    public Defendant setDateOfBirth(final LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+        return this;
+    }
+
     public String getDefenceOrganisation() {
         return defenceOrganisation;
     }
 
+    public Defendant setDefenceOrganisation(final String defenceOrganisation) {
+        this.defenceOrganisation = defenceOrganisation;
+        return this;
+    }
+
     public Interpreter getInterpreter() {
         return interpreter;
+    }
+
+    public Defendant setInterpreter(final Interpreter interpreter) {
+        this.interpreter = interpreter;
+        return this;
     }
 
     public List<DefendantCase> getDefendantCases() {
@@ -109,7 +154,6 @@ public class Defendant implements Serializable {
     public List<Offence> getOffences() {
         return offences;
     }
-
 
     public static class Builder {
 
@@ -244,7 +288,7 @@ public class Defendant implements Serializable {
                     dateOfBirth, defenceOrganisation,
                     ofNullable(interpreter).map(Interpreter.Builder::build).orElse(null),
                     unmodifiableList(defendantCases.stream().map(DefendantCase.Builder::build).collect(Collectors.toList())),
-                    unmodifiableList(offences.stream().map(Offence.Builder::build).collect(Collectors.toList())));
+                    offences.stream().map(Offence.Builder::build).collect(Collectors.toList()));
         }
     }
 

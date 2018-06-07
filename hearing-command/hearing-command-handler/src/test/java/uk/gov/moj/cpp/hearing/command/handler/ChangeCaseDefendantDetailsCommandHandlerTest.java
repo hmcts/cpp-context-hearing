@@ -19,13 +19,16 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
+import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.defendant.Person;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -47,6 +50,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStrea
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChangeCaseDefendantDetailsCommandHandlerTest {
@@ -119,6 +124,12 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
     @Test
     public void testUpdateCaseDefendantDetails() throws EventStreamException {
 
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+
+        final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
         CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearingsEvent = CaseDefendantDetailsWithHearings.builder()
                 .withCaseId(randomUUID())
                 .withDefendant(
@@ -138,10 +149,10 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
                 .withHearingIds(Collections.singletonList(randomUUID()))
                 .build();
 
-        setupMockedEventStream(caseDefendantDetailsWithHearingsEvent.getHearingIds().get(0), this.eventStream, new NewModelHearingAggregate());
+        setupMockedEventStream(caseDefendantDetailsWithHearingsEvent.getHearingIds().get(0), this.eventStream, hearingAggregate);
 
-        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-details-against-hearing-aggregate"), objectToJsonObjectConverter.convert(caseDefendantDetailsWithHearingsEvent));
-
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-details-against-hearing-aggregate"),
+                objectToJsonObjectConverter.convert(caseDefendantDetailsWithHearingsEvent));
 
         changeDefendantDetailsCommandHandler.updateCaseDefendantDetails(envelope);
 

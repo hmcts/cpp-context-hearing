@@ -14,8 +14,8 @@ public class DefendantCase implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID caseId;
-    private final String bailStatus;
-    private final LocalDate custodyTimeLimitDate;
+    private String bailStatus;
+    private LocalDate custodyTimeLimitDate;
 
     @JsonCreator
     public DefendantCase(@JsonProperty("caseId") final UUID caseId,
@@ -38,6 +38,14 @@ public class DefendantCase implements Serializable {
 
     public LocalDate getCustodyTimeLimitDate() {
         return custodyTimeLimitDate;
+    }
+
+    public void setBailStatus(String bailStatus) {
+        this.bailStatus = bailStatus;
+    }
+
+    public void setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
+        this.custodyTimeLimitDate = custodyTimeLimitDate;
     }
 
     public static class Builder {
