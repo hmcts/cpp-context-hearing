@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.event;
 
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
-import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Address;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
@@ -16,7 +15,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Person;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.Now;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -26,16 +25,19 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
+@SuppressWarnings("squid:S1188")
 public class NowsDataProcessor {
-
 
     private final ReferenceDataService referenceDataService;
 
@@ -49,271 +51,257 @@ public class NowsDataProcessor {
 
     public List<Nows> createNows(ResultsShared resultsShared) {
         final List<Nows> nows = new ArrayList<>();
-        final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearingIn = resultsShared.getHearing();
-        hearingIn.getDefendants().forEach(
-                d -> nows.addAll(createNowsForDefendant(resultsShared, d))
+
+        resultsShared.getHearing().getDefendants().forEach(defendant -> {
+
+                    if (anyUncompletedResultLinesForDefendant(resultsShared, defendant)) {
+                        return; //we don't generate any NOW for the defendant if they have any uncompleted result lines.
+                    }
+
+                    final List<CompletedResultLine> completedResultLines4Defendant = resultsShared.getCompletedResultLines().stream()
+                            .filter(resultLine -> resultLine.getDefendantId().equals(defendant.getId()))
+                            .collect(toList());
+
+                    nows.addAll(createNowsForDefendant(defendant, completedResultLines4Defendant));
+                }
         );
+
         return nows;
     }
 
     public Hearing translateReferenceData(ResultsShared resultsShared) {
-        final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearingIn = resultsShared.getHearing();
-        final Hearing hearingOut = Hearing.hearing().setId(hearingIn.getId()).setDefendants(
-                hearingIn.getDefendants().stream().map(
-                        din -> Defendants.defendants()
-                                .setId(din.getId())
-                                .setPerson(Person.person()
-                                        .setId(din.getPersonId())
-                                        .setAddress(
-                                        Address.address()
-                                        .setAddress1(din.getAddress().getAddress1())
-                                        .setPostCode(din.getAddress().getPostCode())))
-                                .setCases(
-                                        din.getDefendantCases().stream().map(
-                                                caseIn -> Cases.cases()
-                                                        .setId(caseIn.getCaseId()))
-                                                .collect(Collectors.toList()))
-                                .setInterpreter(
-                                        Optional.of(din).map(Defendant::getInterpreter).map(
-                                                i->Interpreter.interpreter().setLanguage(i.getLanguage())).orElse(null)                                )
 
+        List<Attendees> attendees = new ArrayList<>();
+
+        resultsShared.getDefenceCounsels().forEach((id, defenseCounsel) ->
+                attendees.add(
+                        Attendees.attendees()
+                                .setAttendeeId(defenseCounsel.getAttendeeId())
+                                .setType(DEFENCE_COUNSEL_ATTENDEE_TYPE)
+                                .setFirstName(defenseCounsel.getFirstName())
+                                .setStatus(defenseCounsel.getStatus())
+                                .setTitle(defenseCounsel.getTitle())
                 )
-                        .collect(Collectors.toList())
+
         );
 
-        hearingOut.setAttendees(new ArrayList<>());
-
-        resultsShared.getDefenceCounsels().forEach(
-                (id, defenseCounselUpsert) -> {
-                    defenseCounselUpsert.getFirstName();
-                    defenseCounselUpsert.getLastName();
-                    defenseCounselUpsert.getHearingId();
-                    defenseCounselUpsert.getPersonId();
-                    defenseCounselUpsert.getStatus();
-                    defenseCounselUpsert.getTitle();
-                    defenseCounselUpsert.getStatus();
-                    hearingOut.getAttendees().add(
-                            Attendees.attendees()
-                                    .setAttendeeId(defenseCounselUpsert.getAttendeeId())
-                                    .setType(DEFENCE_COUNSEL_ATTENDEE_TYPE)
-                                    .setFirstName(defenseCounselUpsert.getFirstName())
-                                    .setStatus(defenseCounselUpsert.getStatus())
-                                    .setTitle(defenseCounselUpsert.getTitle())
-                    );
-                }
+        resultsShared.getProsecutionCounsels().forEach((id, prosecutionCounsel) ->
+                attendees.add(
+                        Attendees.attendees()
+                                .setAttendeeId(prosecutionCounsel.getAttendeeId())
+                                .setType(PROSECUTION_COUNSEL_ATTENDEE_TYPE)
+                                .setCases(resultsShared.getCases().stream()
+                                        .map(caseIn -> Cases.cases().setId(caseIn.getCaseId())).collect(toList())
+                                )
+                                .setFirstName(prosecutionCounsel.getFirstName())
+                                .setStatus(prosecutionCounsel.getStatus())
+                                .setTitle(prosecutionCounsel.getTitle())
+                )
         );
 
-        resultsShared.getProsecutionCounsels().values().forEach(
-                prosecutionCounselUpsert ->
-                    hearingOut.getAttendees().add(
-                            Attendees.attendees()
-                                    .setAttendeeId(prosecutionCounselUpsert.getAttendeeId())
-                                    .setType(PROSECUTION_COUNSEL_ATTENDEE_TYPE)
-                                    .setCases(resultsShared.getCases().stream().map(caseIn ->
-                                            Cases.cases().setId(caseIn.getCaseId())).collect(Collectors.toList()))
-                                    .setFirstName(prosecutionCounselUpsert.getFirstName())
-                                    .setStatus(prosecutionCounselUpsert.getStatus())
-                                    .setTitle(prosecutionCounselUpsert.getTitle())
-                    )
-        );
+        return Hearing.hearing()
+                .setId(resultsShared.getHearing().getId())
+                .setDefendants(
+                        resultsShared.getHearing().getDefendants().stream()
+                                .map(defendant -> Defendants.defendants()
+                                        .setId(defendant.getId())
+                                        .setPerson(Person.person()
+                                                .setId(defendant.getPersonId())
+                                                .setAddress(
+                                                        Address.address()
+                                                                .setAddress1(defendant.getAddress().getAddress1())
+                                                                .setPostCode(defendant.getAddress().getPostCode())))
+                                        .setCases(
+                                                defendant.getDefendantCases().stream().map(
+                                                        caseIn -> Cases.cases()
+                                                                .setId(caseIn.getCaseId()))
+                                                        .collect(toList()))
+                                        .setInterpreter(
+                                                Optional.of(defendant).map(Defendant::getInterpreter).map(
+                                                        i -> Interpreter.interpreter().setLanguage(i.getLanguage())).orElse(null))
 
-
-        return hearingOut;
+                                )
+                                .collect(toList())
+                )
+                .setAttendees(attendees);
     }
 
-    private Map<UUID, List<CompletedResultLine>> identifyCompleteResultLines(final List<CompletedResultLine> resultLines4Defendant) {
-       final Map<UUID, List<CompletedResultLine>> resultDefinitionId2CompleteResultLines = new
-               HashMap<>();
-        resultLines4Defendant.forEach(
-                resultLine -> {
-                        if (!resultDefinitionId2CompleteResultLines.containsKey(resultLine.getResultDefinitionId())) {
-                            resultDefinitionId2CompleteResultLines.put(resultLine.getResultDefinitionId(), new ArrayList<>());
-                        }
-                        resultDefinitionId2CompleteResultLines.get(resultLine.getResultDefinitionId()).add(resultLine);
-                }
-        );
-        return resultDefinitionId2CompleteResultLines;
+    public Set<NowDefinition> findNowDefinitions(final List<CompletedResultLine> resultLines) {
+        return resultLines.stream()
+                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultLine.getResultDefinitionId()))
+                .filter(Objects::nonNull)
+                .collect(toSet());
     }
 
+    private List<Nows> createNowsForDefendant(Defendant defendant, List<CompletedResultLine> resultLines) {
 
-    private Map<UUID, Now> identifyNowsToGenerate(final List<CompletedResultLine> resultLines4Defendant) {
+        final Set<UUID> completedResultDefinitionIds = resultLines.stream()
+                .map(CompletedResultLine::getResultDefinitionId)
+                .collect(toSet());
 
-        final Map<UUID, Now> nowsToGenerate = new HashMap<>();
-
-        resultLines4Defendant.forEach(
-                resultLine -> {
-                        Now nowsDefinition = referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultLine.getResultDefinitionId());
-                        if (nowsDefinition != null) {
-                            nowsToGenerate.put(nowsDefinition.getId(), nowsDefinition);
-                        }
-                }
-        );
-        return nowsToGenerate;
-    }
-
-
-    private List<Nows> createNowsForDefendant(ResultsShared resultsShared, Defendant defendant) {
         final List<Nows> results = new ArrayList<>();
 
-        final List<CompletedResultLine> completedResultLines4Defendant = resultsShared.getCompletedResultLines().stream()
-                .filter(resultLine -> resultLine.getDefendantId().equals(defendant.getId()))
-                .collect(Collectors.toList());
+        for (NowDefinition nowDefinition : findNowDefinitions(resultLines)) {
 
-        if (resultsShared.getUncompletedResultLines().stream().anyMatch(l->l.getDefendantId().equals(defendant.getId()))) {
-            return Collections.emptyList();
-        }
+            if (anyMandatoryResultLineNotPresent(completedResultDefinitionIds, nowDefinition)) {
+                return Collections.emptyList(); //This will suspend any now generation for the defendant.
+            }
 
-        // calculate distinct result definitions from all result lines that are complete
-        final Map<UUID, Now> nowsToGenerate = identifyNowsToGenerate(completedResultLines4Defendant);
+            final Set<UUID> resultDefinitionIds4Now = nowDefinition.getResultDefinitions().stream()
+                    .map(ResultDefinitions::getId)
+                    .collect(toSet());
 
-        final Map<UUID, List<CompletedResultLine>> resultDefinitionId2CompleteResultLines =
-                identifyCompleteResultLines(completedResultLines4Defendant);
+            final List<CompletedResultLine> resultLines4Now = resultLines.stream()
+                    .filter(l -> resultDefinitionIds4Now.contains(l.getResultDefinitionId()))
+                    .collect(toList());
 
-        boolean abort = false;
+            if (!anyNewlyCompletedResultLines(resultLines4Now)) {
+                continue; //skip generation of the current NOW since there are no new result lines for it.
+            }
 
-            for (Now now : nowsToGenerate.values()) {
-                final List<CompletedResultLine> resultLines = new ArrayList<>();
-                //check that all the mandatories are present for this defendant
-                // should have these here
-                for (ResultDefinitions resultDefinition : now.getResultDefinitions()) {
-                    //check that all the mandatories are present for this defendant
-                    if (resultDefinition.getMandatory() && !resultDefinitionId2CompleteResultLines.containsKey(resultDefinition.getId())) {
-                        abort = true;
-                        //NOTYET collate reasons for failure
-                    }
-                    // are there any result definitions that have incomplete resultdefinitions ?
-                    else {
-                        resultLines.addAll(resultDefinitionId2CompleteResultLines.get(resultDefinition.getId()));
-                    }
-                }
-                long resultLinesChangedCount = resultLines.stream().filter(resultLine -> resultLine.getLastSharedResultId() == null).count();
-                if (resultLinesChangedCount == 0) {
-                    abort = true;
-                }
-                if (abort) {
-                    //NOTYET - notify user of abort due to missing mandatory
-                    return new ArrayList<>();
-                }
-                results.add(createNowInstance(now, resultLines, defendant.getId()));
+            results.add(createNow(nowDefinition, resultLines4Now, defendant.getId()));
         }
         return results;
     }
 
-    private void parseNowForUserGroup(final String userGroup, final List<CompletedResultLine> resultLines,
-                                 final Map<Set<String>, List<UserGroups>> fullPromptIds2UserGroups,
-                                 final Map<Set<String>, Material> fullPromptIds2Material) {
-        final Set<String> fullPromptIds = new HashSet<>();
-        final Set<ResultPrompt> resultPrompts = new HashSet<>();
-        final Material material = Material.material().setNowResult(new ArrayList<>());
-        resultLines.forEach(
-                resultLine -> {
-                    ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId());
-                    NowResult nowResult = NowResult.nowResult().setSharedResultId(resultLine.getId());
-                    //NOTYET is rank the same as sequence
-                    nowResult.setSequence(resultDefinition.getRank());
-                    nowResult.setPromptRefs(new ArrayList<>());
-                    for (ResultPrompt resultPrompt : resultLine.getPrompts()) {
-                        //look up reference data
-                        final Prompt prompt = getPromptById(resultDefinition, resultPrompt.getId());
-                        boolean isUserGroupMatch = prompt != null && promptUserGroupMatch(prompt, userGroup);
-                        //map this to the result definition Id
-                        if (isUserGroupMatch) {
-                            // no prompt (value) id is prompt is
-                            String fullPromptId = resultLine.getId() + "/" + prompt.getLabel();
-                            fullPromptIds.add(fullPromptId);
-                            resultPrompts.add(resultPrompt);
-                            PromptRefs promptRefs = PromptRefs.promptRefs().setLabel(prompt.getLabel());
-                            nowResult.getPromptRefs().add(promptRefs);
-                        }
-                    }
-                    if (!nowResult.getPromptRefs().isEmpty()) {
-                        material.getNowResult().add(nowResult);
-                    }
-                }
-        );
-        if (!fullPromptIds2UserGroups.containsKey(fullPromptIds)) {
-            fullPromptIds2UserGroups.put(fullPromptIds, new ArrayList<>());
-            fullPromptIds2Material.put(fullPromptIds, material);
-        }
-        fullPromptIds2UserGroups.get(fullPromptIds).add(UserGroups.userGroups().setGroup(userGroup));
-    }
+    private Nows createNow(final NowDefinition nowDefinition, final List<CompletedResultLine> resultLines4Now, final UUID defendantId) {
 
-    private Set<String> extractUserGroups(final List<CompletedResultLine> resultLines) {
-        final Set<String> userGroups = new HashSet<>();
-        resultLines.stream().forEach(
-                resultLine -> {
-                    ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId());
-                    if (resultDefinition.getUserGroups() != null) {
-                        resultDefinition.getUserGroups().forEach(ug->userGroups.add(ug));
-                    }
-                    if (resultDefinition.getPrompts() != null) {
-                        resultDefinition.getPrompts().forEach(
-                                prompt -> {
-                                    if (prompt.getUserGroups() != null) {
-                                        for (String userGroup : prompt.getUserGroups()) {
-                                            userGroups.add(userGroup);
-                                        }
-                                    }
-                                }
-                        );
-                    }
-                }
-        );
-        return userGroups;
-    }
+        final Map<NowVariant, List<String>> variantToUserGroupsMappings = calculateVariants(resultLines4Now);
 
-    private Nows createNowInstance(final Now now, final List<CompletedResultLine> resultLines, final UUID defendantId) {
-        //calculate the variants
-        //calculate the set of user groups to consider
-        //NOTYET could examine actual results not reference data to deterrmine this
-        final Set<String> userGroups = extractUserGroups(resultLines);
+        final List<Material> materials = new ArrayList<>();
 
-        // calculate the variants - a variant being a set of distinct prompts
-        // createNows a map from the set of included result prompt ids sets to use groups
-        final Map<Set<String>, List<UserGroups>> fullPromptIds2UserGroups = new HashMap<>();
-        final Map<Set<String>, Material> fullPromptIds2Material = new HashMap<>();
-        for (String userGroup : userGroups) {
-            parseNowForUserGroup(userGroup, resultLines, fullPromptIds2UserGroups, fullPromptIds2Material);
-        }
+        variantToUserGroupsMappings.forEach((variant, userGroups) -> {
 
-        final Nows result = Nows.nows()
+            //The userGroups of the prompts are not bounded by the userGroups of the resultDefinition.  I'm told that the userGroups
+            //of the resultDefinition is more of a default for when no prompts are present.  So if a userGroup has a prompt,
+            //it has the enclosing resultDefinition too.
+
+            final Set<CompletedResultLine> resultLines4Variant = Stream.concat(
+                    resultLines4Now.stream()
+                            .filter(resultLine -> variant.getResultDefinitionsIds().contains(resultLine.getResultDefinitionId())),
+                    resultLines4Now.stream()
+                            .filter(resultLine -> resultLine.getPrompts().stream().anyMatch(prompt -> variant.getResultPromptIds().contains(prompt.getId())))
+            ).collect(toSet());
+
+            final List<NowResult> nowResults = resultLines4Variant.stream()
+                    .map(resultLine -> {
+                        final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId());
+
+                        final List<PromptRefs> promptRefs = resultDefinition.getPrompts().stream()
+                                .filter(prompt -> variant.getResultPromptIds().contains(prompt.getId())) //filter out prompts that this variant should not have.
+                                .map(prompt -> PromptRefs.promptRefs().setLabel(prompt.getLabel()))
+                                .collect(toList());
+
+                        return NowResult.nowResult()
+                                .setSharedResultId(resultLine.getId())
+                                .setSequence(resultDefinition.getRank())
+                                .setPromptRefs(promptRefs);
+                    })
+                    .collect(toList());
+
+            materials.add(Material.material()
+                    .setId(UUID.randomUUID())
+                    .setNowResult(nowResults)
+                    .setUserGroups(userGroups.stream()
+                            .map(userGroup -> UserGroups.userGroups().setGroup(userGroup))
+                            .collect(toList())
+                    ));
+        });
+
+        return Nows.nows()
+                .setId(UUID.randomUUID())
                 .setDefendantId(defendantId.toString())
-                .setNowsTypeId(now.getId().toString());
-
-        result.setMaterial(new ArrayList<>());
-        //for each variant add a now
-        for (Map.Entry<Set<String>, List<UserGroups>> entry : fullPromptIds2UserGroups.entrySet()) {
-            List<UserGroups> userGroupsForMaterial = fullPromptIds2UserGroups.get(entry.getKey());
-            Material material = fullPromptIds2Material.get(entry.getKey());
-            material.setUserGroups(userGroupsForMaterial);
-            result.getMaterial().add(material);
-        }
-
-        return result;
+                .setNowsTypeId(nowDefinition.getId().toString())
+                .setMaterial(materials);
     }
 
-    private boolean promptUserGroupMatch(final Prompt prompt, final String userGroup) {
+    private Map<NowVariant, List<String>> calculateVariants(final List<CompletedResultLine> resultLines4Now) {
+        final Map<NowVariant, List<String>> variantToUserGroupsMappings = new HashMap<>();
 
-        boolean result = false;
-        if (prompt != null && prompt.getUserGroups() != null && userGroup != null) {
-            for (String ug : prompt.getUserGroups()) {
-                if (ug.equalsIgnoreCase(userGroup)) {
-                    result = true;
-                    break;
-                }
+        for (final String userGroup : extractUserGroupsFromResultLinesAndPrompts(resultLines4Now)) {
+
+            final Set<UUID> resultDefinitionsIds4UserGroup = resultLines4Now.stream()
+                    .map(resultLine -> referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId()))
+                    .filter(resultDefinition -> resultDefinition.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
+                    .map(ResultDefinition::getId)
+                    .collect(toSet());
+
+            final Set<UUID> resultPromptIds4UserGroup = resultLines4Now.stream()
+                    .map(resultLine -> referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId()))
+                    .flatMap(resultDefinition -> resultDefinition.getPrompts().stream())
+                    .filter(resultPrompt -> resultPrompt.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
+                    .map(Prompt::getId)
+                    .collect(toSet());
+
+            variantToUserGroupsMappings.computeIfAbsent(new NowVariant(resultDefinitionsIds4UserGroup, resultPromptIds4UserGroup), (v) -> new ArrayList<>())
+                    .add(userGroup);
+        }
+        return variantToUserGroupsMappings;
+    }
+
+    private Set<String> extractUserGroupsFromResultLinesAndPrompts(final List<CompletedResultLine> resultLines) {
+
+        return resultLines.stream()
+                .flatMap(resultLine -> {
+                            ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId());
+
+                            return Stream.concat(
+                                    resultDefinition.getUserGroups().stream(),
+                                    resultDefinition.getPrompts().stream().flatMap(prompt -> prompt.getUserGroups().stream())
+
+                            );
+                        }
+                ).collect(toSet());
+    }
+
+    private static boolean anyUncompletedResultLinesForDefendant(final ResultsShared resultsShared, final Defendant defendant) {
+        return resultsShared.getUncompletedResultLines().stream().anyMatch(l -> l.getDefendantId().equals(defendant.getId()));
+    }
+
+    private static boolean anyMandatoryResultLineNotPresent(final Set<UUID> completedResultDefinitionIds, final NowDefinition nowDefinition) {
+        return nowDefinition.getResultDefinitions().stream().anyMatch(resultDefinitions -> resultDefinitions.getMandatory() &&
+                !completedResultDefinitionIds.contains(resultDefinitions.getId()));
+    }
+
+    private static boolean anyNewlyCompletedResultLines(final List<CompletedResultLine> resultLines4Now) {
+        //TODO - this line tests if we have new result lines, if we don't we don't generate the NOW,- GPE-4480 will change this logic
+        return resultLines4Now.stream().anyMatch(resultLine -> resultLine.getLastSharedResultId() == null);
+    }
+
+    private static class NowVariant {
+        private final Set<UUID> resultDefinitionsIds;
+        private final Set<UUID> resultPromptIds;
+
+        NowVariant(final Set<UUID> resultDefinitionsIds, final Set<UUID> resultPromptIds) {
+            this.resultDefinitionsIds = resultDefinitionsIds;
+            this.resultPromptIds = resultPromptIds;
+        }
+
+        Set<UUID> getResultDefinitionsIds() {
+            return resultDefinitionsIds;
+        }
+
+        Set<UUID> getResultPromptIds() {
+            return resultPromptIds;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
             }
-        }
-        return result;
-    }
-
-    private Prompt getPromptById(final ResultDefinition resultDefinition, final UUID promptId) {
-        for (Prompt prompt : resultDefinition.getPrompts()) {
-            if (promptId.equals(prompt.getId())) {
-                return prompt;
+            if (o == null || getClass() != o.getClass()) {
+                return false;
             }
+            NowVariant that = (NowVariant) o;
+            return Objects.equals(resultDefinitionsIds, that.resultDefinitionsIds) &&
+                    Objects.equals(resultPromptIds, that.resultPromptIds);
         }
-        return null;
-    }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(resultDefinitionsIds, resultPromptIds);
+        }
+    }
 
 }

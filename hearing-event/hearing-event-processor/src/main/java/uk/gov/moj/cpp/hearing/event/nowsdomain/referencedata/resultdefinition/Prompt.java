@@ -1,12 +1,16 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 public class Prompt {
 
-    private java.util.UUID id;
+    private UUID id;
 
     private String label;
 
-    private java.util.List<String> userGroups;
+    private List<String> userGroups = new ArrayList<>();
 
     private Boolean mandatory;
 
@@ -22,11 +26,11 @@ public class Prompt {
         return new Prompt();
     }
 
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Prompt setId(java.util.UUID id) {
+    public Prompt setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -40,11 +44,11 @@ public class Prompt {
         return this;
     }
 
-    public java.util.List<String> getUserGroups() {
+    public List<String> getUserGroups() {
         return this.userGroups;
     }
 
-    public Prompt setUserGroups(java.util.List<String> userGroups) {
+    public Prompt setUserGroups(List<String> userGroups) {
         this.userGroups = userGroups;
         return this;
     }

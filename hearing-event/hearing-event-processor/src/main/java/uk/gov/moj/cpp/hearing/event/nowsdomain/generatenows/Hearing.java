@@ -1,36 +1,35 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
+import java.util.List;
+import java.util.UUID;
+
 public class Hearing {
 
-    private java.util.UUID id;
+    private UUID id;
 
     private String hearingType;
 
     private String startDateTime;
 
-    private java.util.List<String> hearingDates;
+    private List<String> hearingDates;
 
     private CourtCentre courtCentre;
 
-    private java.util.List<Attendees> attendees;
+    private List<Attendees> attendees;
 
-    private java.util.List<Defendants> defendants;
+    private List<Defendants> defendants;
 
-    private java.util.List<SharedResultLines> sharedResultLines;
+    private List<SharedResultLines> sharedResultLines;
 
-    private java.util.List<Nows> nows;
+    private List<Nows> nows;
 
-    private java.util.List<NowTypes> nowTypes;
+    private List<NowTypes> nowTypes;
 
-    public static Hearing hearing() {
-        return new Hearing();
-    }
-
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Hearing setId(java.util.UUID id) {
+    public Hearing setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -53,11 +52,11 @@ public class Hearing {
         return this;
     }
 
-    public java.util.List<String> getHearingDates() {
+    public List<String> getHearingDates() {
         return this.hearingDates;
     }
 
-    public Hearing setHearingDates(java.util.List<String> hearingDates) {
+    public Hearing setHearingDates(List<String> hearingDates) {
         this.hearingDates = hearingDates;
         return this;
     }
@@ -71,48 +70,52 @@ public class Hearing {
         return this;
     }
 
-    public java.util.List<Attendees> getAttendees() {
+    public List<Attendees> getAttendees() {
         return this.attendees;
     }
 
-    public Hearing setAttendees(java.util.List<Attendees> attendees) {
+    public Hearing setAttendees(List<Attendees> attendees) {
         this.attendees = attendees;
         return this;
     }
 
-    public java.util.List<Defendants> getDefendants() {
+    public List<Defendants> getDefendants() {
         return this.defendants;
     }
 
-    public Hearing setDefendants(java.util.List<Defendants> defendants) {
+    public Hearing setDefendants(List<Defendants> defendants) {
         this.defendants = defendants;
         return this;
     }
 
-    public java.util.List<SharedResultLines> getSharedResultLines() {
+    public List<SharedResultLines> getSharedResultLines() {
         return this.sharedResultLines;
     }
 
-    public Hearing setSharedResultLines(java.util.List<SharedResultLines> sharedResultLines) {
+    public Hearing setSharedResultLines(List<SharedResultLines> sharedResultLines) {
         this.sharedResultLines = sharedResultLines;
         return this;
     }
 
-    public java.util.List<Nows> getNows() {
+    public List<Nows> getNows() {
         return this.nows;
     }
 
-    public Hearing setNows(java.util.List<Nows> nows) {
+    public Hearing setNows(List<Nows> nows) {
         this.nows = nows;
         return this;
     }
 
-    public java.util.List<NowTypes> getNowTypes() {
+    public List<NowTypes> getNowTypes() {
         return this.nowTypes;
     }
 
-    public Hearing setNowTypes(java.util.List<NowTypes> nowTypes) {
+    public Hearing setNowTypes(List<NowTypes> nowTypes) {
         this.nowTypes = nowTypes;
         return this;
+    }
+
+    public static Hearing hearing() {
+        return new Hearing();
     }
 }

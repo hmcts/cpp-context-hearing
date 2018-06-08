@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows;
 
+import java.util.UUID;
+
 public class ResultDefinitions {
 
-    private java.util.UUID id;
+    private UUID id;
 
     private Boolean mandatory;
 
@@ -10,15 +12,11 @@ public class ResultDefinitions {
 
     private Integer sequence;
 
-    public static ResultDefinitions resultDefinitions() {
-        return new ResultDefinitions();
-    }
-
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public ResultDefinitions setId(java.util.UUID id) {
+    public ResultDefinitions setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -48,5 +46,9 @@ public class ResultDefinitions {
     public ResultDefinitions setSequence(Integer sequence) {
         this.sequence = sequence;
         return this;
+    }
+
+    public static ResultDefinitions resultDefinitions() {
+        return new ResultDefinitions();
     }
 }

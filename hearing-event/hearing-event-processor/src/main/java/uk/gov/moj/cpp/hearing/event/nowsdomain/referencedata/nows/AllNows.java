@@ -1,18 +1,20 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows;
 
+import java.util.List;
+
 public class AllNows {
 
-    private java.util.List<Now> nows;
+    private List<NowDefinition> nows;
 
     public static AllNows allNows() {
         return new AllNows();
     }
 
-    public java.util.List<Now> getNows() {
+    public List<NowDefinition> getNows() {
         return this.nows;
     }
 
-    public AllNows setNows(java.util.List<Now> nows) {
+    public AllNows setNows(List<NowDefinition> nows) {
         this.nows = nows;
         return this;
     }
