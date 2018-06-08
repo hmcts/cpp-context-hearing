@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
 
+import java.time.LocalDate;
+import java.util.Set;
+
 public final class DefenceCounsel {
 
     private final String attendeeId;
@@ -8,6 +11,7 @@ public final class DefenceCounsel {
     private final String title;
     private final String firstName;
     private final String lastName;
+    private final Set<LocalDate> hearingDates;
 
     private DefenceCounsel(final Builder builder) {
         this.attendeeId = builder.attendeeId;
@@ -16,6 +20,7 @@ public final class DefenceCounsel {
         this.title = builder.title;
         this.firstName = builder.firstName;
         this.lastName = builder.lastName;
+        this.hearingDates  = builder.hearingDates;
     }
     
     public String getAttendeeId() {
@@ -42,6 +47,10 @@ public final class DefenceCounsel {
         return lastName;
     }
 
+    public Set<LocalDate> getHearingDates() {
+        return hearingDates;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -54,6 +63,7 @@ public final class DefenceCounsel {
         private String title;
         private String firstName;
         private String lastName;
+        private Set<LocalDate> hearingDates;
         
         public Builder withAttendeeId(final String attendeeId) {
             this.attendeeId = attendeeId;
@@ -84,7 +94,11 @@ public final class DefenceCounsel {
             this.lastName = lastName;
             return this;
         }
-        
+
+        public Builder withHearingDates(final Set<LocalDate> hearingDates) {
+            this.hearingDates = hearingDates;
+            return this;
+        }
         public DefenceCounsel build() {
             return new DefenceCounsel(this);
         }

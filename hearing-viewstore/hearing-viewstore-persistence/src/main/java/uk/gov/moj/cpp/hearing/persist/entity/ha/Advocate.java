@@ -3,7 +3,12 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
+
+import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Entity
 @DiscriminatorValue("ADVOCATE")
@@ -11,6 +16,9 @@ public class Advocate extends Attendee {
 
     @Column(name = "status")
     private String status;
+    
+    @Transient
+    private Set<LocalDate> hearingDates;
 
     public Advocate() {
         super();
@@ -30,6 +38,18 @@ public class Advocate extends Attendee {
         return this;
     }
 
+    public Set<LocalDate> getHearingDates() {
+        return hearingDates;
+    }
+
+    public void addHearingDate(final LocalDate hearingDay) {
+        if (null == hearingDates) {
+            hearingDates = new TreeSet<>();
+        }
+        if (null != hearingDay) {
+            this.hearingDates.add(hearingDay);
+        }
+    }
     public static class AdvocateBuilder extends Attendee.Builder {
 
         private String status;

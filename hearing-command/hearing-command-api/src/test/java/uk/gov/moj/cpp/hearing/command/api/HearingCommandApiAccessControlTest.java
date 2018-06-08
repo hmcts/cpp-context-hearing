@@ -24,6 +24,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_SHARE_RESULTS_EVENT = "hearing.share-results";
     private static final String ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT = "hearing.create-hearing-event-definitions";
     private static final String ACTION_NAME_GENERATE_NOWS = "hearing.generate-nows";
+    private static final String ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS = "hearing.update-nows-material-status";
+    private static final String ACTION_NAME_DELETE_ATTENDEE = "hearing.delete-attendee";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -194,6 +196,43 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         assertFailureOutcome(results);
     }
 
+    @Test
+    public void shouldAllowAuthorisedUserToUpdateNowsMaterialStatus() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToUpdateNowsMaterialStatus() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToDeleteAtendee() {
+        final Action action = createActionFor(ACTION_NAME_DELETE_ATTENDEE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToDeleteAtendee() {
+        final Action action = createActionFor(ACTION_NAME_DELETE_ATTENDEE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
 
     @Override
     protected Map<Class, Object> getProviderMocks() {

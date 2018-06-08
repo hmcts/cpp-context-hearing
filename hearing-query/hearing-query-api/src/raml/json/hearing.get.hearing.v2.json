@@ -21,7 +21,8 @@
             "title":"MR",
             "status":"QC",
             "firstName":"Brian J.",
-            "lastName":"Fox"
+            "lastName":"Fox",
+            "hearingDates": [ "2018-02-22" ]
          }
       ],
       "defenceCounsels":[
@@ -31,7 +32,8 @@
             "status":"QC",
             "title":"MR",
             "firstName":"Mark",
-            "lastName":"Zuckerberg"
+            "lastName":"Zuckerberg",
+            "hearingDates": [ "2018-02-22" ]
          },
          {
             "attendeeId":"cdc14b89-6b4d-4e98-9641-826c355c51b8",
@@ -39,7 +41,8 @@
             "status":"QC",
             "title":"MR",
             "firstName":"Sean",
-            "lastName":"Parker"
+            "lastName":"Parker",
+            "hearingDates": [ "2018-02-22" ]
          }
       ]
    },

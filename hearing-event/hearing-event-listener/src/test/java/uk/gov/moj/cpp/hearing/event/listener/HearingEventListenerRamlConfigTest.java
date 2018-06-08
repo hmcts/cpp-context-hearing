@@ -74,7 +74,8 @@ public class HearingEventListenerRamlConfigTest {
                 NowsRequestedEventListener.class,
                 NowsGeneratedEventListener.class, 
                 CaseDefendantDetailsChangedEventListener.class,
-                CaseDefendantOffencesChangedEventListener.class));
+                CaseDefendantOffencesChangedEventListener.class,
+                AttendeeDeletedEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 

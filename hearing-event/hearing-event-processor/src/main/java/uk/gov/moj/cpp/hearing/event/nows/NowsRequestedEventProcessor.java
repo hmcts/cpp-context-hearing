@@ -42,7 +42,7 @@ public class NowsRequestedEventProcessor {
     private final FileStorer fileStorer;
 
     @Inject
-    private NowsRequestedEventProcessor(final Enveloper enveloper, final Sender sender, final DocmosisService docmosisService,
+    public NowsRequestedEventProcessor(final Enveloper enveloper, final Sender sender, final DocmosisService docmosisService,
             final JsonObjectToObjectConverter jsonObjectToObjectConverter, final ObjectToJsonObjectConverter objectToJsonObjectConverter, final FileStorer fileStorer) {
         this.enveloper = enveloper;
         this.sender = sender;

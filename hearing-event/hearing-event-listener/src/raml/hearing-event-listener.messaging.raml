@@ -94,6 +94,11 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.events.nows-requested.json
             example: !include json/hearing.events.nows-requested.json
 
+# Attendees
+        application/vnd.hearing.events.attendee-deleted+json:
+            schema: !include json/schema/hearing.events.attendee-deleted.json
+            example: !include json/hearing.events.attendee-deleted.json
+
 # Event Definitions
         application/vnd.hearing.hearing-event-definitions-created+json:
             schema:  !include json/schema/hearing.hearing-event-definitions-created.json
@@ -111,8 +116,3 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.hearing-event-deleted+json:
             schema: !include json/schema/hearing.hearing-event-deleted.json
             example: !include json/hearing.hearing-event-deleted.json
-
-
-
-
-

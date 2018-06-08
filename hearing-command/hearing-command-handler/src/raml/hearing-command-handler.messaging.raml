@@ -108,6 +108,11 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.command.update-nows-material-status.json
             schema:  !include json/schema/hearing.command.update-nows-material-status.json
 
+# Attendees
+        application/vnd.hearing.command.delete-attendee+json:
+            example: !include json/hearing.command.delete-attendee.json
+            schema: !include json/schema/hearing.command.delete-attendee.json
+
 # Case Defendant Details Update
         application/vnd.hearing.update-case-defendant-details-against-hearing-aggregate+json:
             schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
@@ -133,10 +138,3 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.delete-offence-on-hearings+json:
             schema: !include json/schema/hearing.command.delete-offence-on-hearings.json
             example: !include json/hearing.command.delete-offence-on-hearings.json
-
-
-
-
-
-
-

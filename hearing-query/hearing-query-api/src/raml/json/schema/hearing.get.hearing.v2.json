@@ -43,8 +43,7 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "type": "string",
-        "format": "date"
+        "$ref":"#/definitions/datePattern"
       }
     },
     "defenceWitnesses":{
@@ -111,6 +110,12 @@
         },
         "lastName":{
           "type":"string"
+        },
+        "hearingDays": {
+          "type": "array",
+          "items": {
+            "$ref":"#/definitions/datePattern"
+          }
         }
       },
       "required":[
@@ -142,6 +147,12 @@
         },
         "lastName":{
           "type":"string"
+        },
+        "hearingDays": {
+          "type": "array",
+          "items": {
+            "$ref":"#/definitions/datePattern"
+          }
         }
       },
       "required":[

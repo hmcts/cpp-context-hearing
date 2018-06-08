@@ -132,6 +132,7 @@ public class TestUtilities {
 
             Response writeResponse = given().spec(requestSpec).and()
                     .contentType(type)
+                    .accept(type)
                     .body(ofNullable(this.payloadAsString).orElse(""))
                     .header(CPP_UID_HEADER).when()
                     .post(url)

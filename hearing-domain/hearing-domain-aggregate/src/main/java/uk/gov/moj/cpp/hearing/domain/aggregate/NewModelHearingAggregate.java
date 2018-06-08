@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCo
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.Plea;
+import uk.gov.moj.cpp.hearing.domain.event.AttendeeDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
@@ -549,6 +550,10 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> nowsMaterialStatusUpdated(final NowsMaterialStatusUpdated nowsRequested) {
         return apply(Stream.of(nowsRequested));
+    }
+
+    public Stream<Object> deleteAtendee(final AttendeeDeleted attendeeDeleted) {
+        return apply(Stream.of(attendeeDeleted));
     }
 
     private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final CorrectLogEventCommand logEventCommand) {

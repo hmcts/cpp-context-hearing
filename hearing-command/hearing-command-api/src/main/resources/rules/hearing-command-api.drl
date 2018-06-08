@@ -131,3 +131,12 @@ rule "Command - API - Action - hearing.update-nows-material-status"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.delete-attendee"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.delete-attendee");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

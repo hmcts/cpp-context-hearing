@@ -138,11 +138,13 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
             return Attendees.builder()
                     .withProsecutionCounsels(source.stream()
                             .filter(p -> p instanceof ProsecutionAdvocate)
-                            .map(p -> new ProsecutionCounselConverter().convert((ProsecutionAdvocate) p))
+                            .map(ProsecutionAdvocate.class::cast)
+                            .map(p -> new ProsecutionCounselConverter().convert(p))
                             .collect(toList()))
                     .withDefenceCounsels(source.stream()
                             .filter(d -> d instanceof DefenceAdvocate)
-                            .map(d -> new DefenseCounselConverter().convert((DefenceAdvocate) d))
+                            .map(DefenceAdvocate.class::cast)
+                            .map(d -> new DefenseCounselConverter().convert(d))
                             .collect(toList()))
                     .build();
         }
@@ -163,6 +165,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                     .withTitle(source.getTitle())
                     .withFirstName(source.getFirstName())
                     .withLastName(source.getLastName())
+                    .withHearingDates(source.getHearingDates())
                     .build();
         }
     }
@@ -177,7 +180,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                 return null;
             }
 
-            String defendantId = source.getDefendants().isEmpty() ? "" :
+            final String defendantId = source.getDefendants().isEmpty() ? "" :
                     source.getDefendants().get(0).getId().getId().toString();
 
             return DefenceCounsel.builder()
@@ -187,6 +190,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                     .withFirstName(source.getFirstName())
                     .withLastName(source.getLastName())
                     .withDefendantId(defendantId)
+                    .withHearingDates(source.getHearingDates())
                     .build();
         }
     }

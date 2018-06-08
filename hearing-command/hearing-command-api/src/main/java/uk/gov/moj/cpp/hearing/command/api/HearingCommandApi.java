@@ -57,9 +57,7 @@ public class HearingCommandApi {
 
     @Handles("hearing.add-update-witness")
     public void addWitness(final JsonEnvelope command) {
-        this.sender.send(this.enveloper
-                        .withMetadataFrom(command, "hearing.command.add-update-witness")
-                        .apply(command.payloadAsJsonObject()));
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.add-update-witness").apply(command.payloadAsJsonObject()));
     }
 
     @Handles("hearing.generate-nows")
@@ -79,5 +77,10 @@ public class HearingCommandApi {
     @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.share-results").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.delete-attendee")
+    public void deleteAttendee(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.delete-attendee").apply(envelope.payloadAsJsonObject()));
     }
 }

@@ -153,6 +153,11 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.events.nows-requested.json
             example: !include json/hearing.events.nows-requested.json
 
+# Attendees
+        application/vnd.hearing.events.attendee-deleted+json:
+            schema: !include json/schema/hearing.events.attendee-deleted.json
+            example: !include json/hearing.events.attendee-deleted.json
+
 /public.event:
   post:
     body:

@@ -98,6 +98,7 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.update-nows-material-status+json:
             example: !include json/hearing.update-nows-material-status.json
             schema: !include json/schema/hearing.update-nows-material-status.json
+
       responses:
             202:
                 description: OK
@@ -180,6 +181,22 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.share-results+json:
             example: !include json/hearing.share-results.json
             schema: !include json/schema/hearing.share-results.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/attendees/{attendeeId}:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.delete-attendee+json
+            name: hearing.delete-attendee
+        ...
+      body:
+        application/vnd.hearing.delete-attendee+json:
+            example: !include json/hearing.delete-attendee.json
+            schema: !include json/schema/hearing.delete-attendee.json
       responses:
             202:
                 description: OK
