@@ -1,8 +1,13 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
 public class ResultDefinition {
 
-    private java.util.UUID id;
+    private UUID id;
 
     private String label;
 
@@ -14,23 +19,19 @@ public class ResultDefinition {
 
     private String version;
 
-    private java.util.List<Prompt> prompts;
+    private List<Prompt> prompts = new ArrayList<>();
 
-    private java.util.Date startDate;
+    private Date startDate;
 
-    private java.util.Date endDate;
+    private Date endDate;
 
-    private java.util.List<String> userGroups;
+    private List<String> userGroups = new ArrayList<>();
 
-    public static ResultDefinition resultDefinition() {
-        return new ResultDefinition();
-    }
-
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public ResultDefinition setId(java.util.UUID id) {
+    public ResultDefinition setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -80,39 +81,43 @@ public class ResultDefinition {
         return this;
     }
 
-    public java.util.List<Prompt> getPrompts() {
+    public List<Prompt> getPrompts() {
         return this.prompts;
     }
 
-    public ResultDefinition setPrompts(java.util.List<Prompt> prompts) {
+    public ResultDefinition setPrompts(List<Prompt> prompts) {
         this.prompts = prompts;
         return this;
     }
 
-    public java.util.Date getStartDate() {
+    public Date getStartDate() {
         return this.startDate;
     }
 
-    public ResultDefinition setStartDate(java.util.Date startDate) {
+    public ResultDefinition setStartDate(Date startDate) {
         this.startDate = startDate;
         return this;
     }
 
-    public java.util.Date getEndDate() {
+    public Date getEndDate() {
         return this.endDate;
     }
 
-    public ResultDefinition setEndDate(java.util.Date endDate) {
+    public ResultDefinition setEndDate(Date endDate) {
         this.endDate = endDate;
         return this;
     }
 
-    public java.util.List<String> getUserGroups() {
+    public List<String> getUserGroups() {
         return this.userGroups;
     }
 
-    public ResultDefinition setUserGroups(java.util.List<String> userGroups) {
+    public ResultDefinition setUserGroups(List<String> userGroups) {
         this.userGroups = userGroups;
         return this;
+    }
+
+    public static ResultDefinition resultDefinition() {
+        return new ResultDefinition();
     }
 }

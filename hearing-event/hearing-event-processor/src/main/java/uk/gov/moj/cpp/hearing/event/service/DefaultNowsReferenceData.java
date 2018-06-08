@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.Now;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -21,7 +21,7 @@ public class DefaultNowsReferenceData {
     public AllNows defaultAllNows() {
         return new AllNows().setNows(
                 Arrays.asList(
-                        new Now().setId(nowId1).setResultDefinitions(
+                        new NowDefinition().setId(nowId1).setResultDefinitions(
                                 Arrays.asList(
                                    new ResultDefinitions().setId(resultDefinitionId1)
                                            .setPrimaryResult(true)

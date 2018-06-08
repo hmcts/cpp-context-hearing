@@ -20,14 +20,13 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Cases;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Defendants;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.Now;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -104,7 +103,7 @@ public class NowsDataProcessorTest {
         ResultDefinition primaryResultDefinition = ResultDefinition.resultDefinition().setId(UUID.randomUUID());
         ResultDefinition mandatoryNonPrimaryResultDefinition = ResultDefinition.resultDefinition().setId(UUID.randomUUID());
         // inject a now that has 2 mandatories one primary, 1 non primary
-        Now referenceNow = Now.now().setId(UUID.randomUUID()).setResultDefinitions(
+        NowDefinition referenceNow = NowDefinition.now().setId(UUID.randomUUID()).setResultDefinitions(
                 Arrays.asList(
                         ResultDefinitions.resultDefinitions().setPrimaryResult(true).setMandatory(true).setId(primaryResultDefinition.getId()),
                         ResultDefinitions.resultDefinitions().setPrimaryResult(false).setMandatory(true).setId(mandatoryNonPrimaryResultDefinition.getId())
@@ -154,12 +153,11 @@ public class NowsDataProcessorTest {
                         .withDefendantId(rl.getDefendantId())
                         .withResultDefinitionId(rl.getResultDefinitionId())
                         .build();
-            } else
-            {
-                  resultLine = UncompletedResultLine.builder().withId(rl.getId())
-                  .withResultDefinitionId(rl.getResultDefinitionId())
-                  .withDefendantId(rl.getDefendantId())
-                  .build();
+            } else {
+                resultLine = UncompletedResultLine.builder().withId(rl.getId())
+                        .withResultDefinitionId(rl.getResultDefinitionId())
+                        .withDefendantId(rl.getDefendantId())
+                        .build();
             }
 
             return Arrays.asList(resultLine);
@@ -198,7 +196,6 @@ public class NowsDataProcessorTest {
     }
 
 
-
     public TestDescription testMultipleDefendantsDefault1NowPerDefendant(int defendantCount, BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilterByDefendantIndex) {
 
         TestDescription result = new TestDescription();
@@ -207,7 +204,7 @@ public class NowsDataProcessorTest {
         ResultsShared.Builder resultsSharedBuilder = createResultsShared(resultDefinitionRefIn, defendantCount, resultLineFilterByDefendantIndex);
         result.dataIn = resultsSharedBuilder.build();
         UUID resultDefinitionId = resultDefinitionRefIn.getId();
-        Now nowRefIn = Now.now().setId(UUID.randomUUID());
+        NowDefinition nowRefIn = NowDefinition.now().setId(UUID.randomUUID());
         nowRefIn.setResultDefinitions(
                 Arrays.asList(
                         ResultDefinitions.resultDefinitions()
@@ -242,14 +239,14 @@ public class NowsDataProcessorTest {
         ResultDefinition primaryResultDefinition = ResultDefinition.resultDefinition()
                 .setId(UUID.randomUUID())
                 .setPrompts(
-                Arrays.asList(
-                        Prompt.prompt().setId(UUID.randomUUID()).setLabel("label1").setUserGroups(Arrays.asList(defenceUserGroup)),
-                        Prompt.prompt().setId(UUID.randomUUID()).setLabel("label2").setUserGroups(Arrays.asList(defenceUserGroup))
-                )
-        );
+                        Arrays.asList(
+                                Prompt.prompt().setId(UUID.randomUUID()).setLabel("label1").setUserGroups(Arrays.asList(defenceUserGroup)),
+                                Prompt.prompt().setId(UUID.randomUUID()).setLabel("label2").setUserGroups(Arrays.asList(defenceUserGroup))
+                        )
+                );
 
         // inject a now that has 2 mandatories one primary, 1 non primary
-        Now referenceNow = Now.now().setId(UUID.randomUUID()).setResultDefinitions(
+        NowDefinition referenceNow = NowDefinition.now().setId(UUID.randomUUID()).setResultDefinitions(
                 Arrays.asList(
                         ResultDefinitions.resultDefinitions().setPrimaryResult(true)
                                 .setMandatory(true)
@@ -275,7 +272,7 @@ public class NowsDataProcessorTest {
                 )
         );
 
-        Now referenceNow = Now.now().setId(UUID.randomUUID()).setResultDefinitions(
+        NowDefinition referenceNow = NowDefinition.now().setId(UUID.randomUUID()).setResultDefinitions(
                 Arrays.asList(
                         ResultDefinitions.resultDefinitions()
                                 .setPrimaryResult(true)
@@ -322,7 +319,7 @@ public class NowsDataProcessorTest {
                 )
         );
 
-        Now referenceNow = Now.now().setId(UUID.randomUUID()).setResultDefinitions(
+        NowDefinition referenceNow = NowDefinition.now().setId(UUID.randomUUID()).setResultDefinitions(
                 Arrays.asList(
                         ResultDefinitions.resultDefinitions().setPrimaryResult(true)
                                 .setMandatory(true).setId(resultDefinitions.get(0).getId()),
@@ -331,7 +328,7 @@ public class NowsDataProcessorTest {
                 )
         );
 
-        Map<UUID, Now> resultDefinitionId2Now = new HashMap();
+        Map<UUID, NowDefinition> resultDefinitionId2Now = new HashMap();
         resultDefinitionId2Now.put(resultDefinitions.get(0).getId(), referenceNow);
 
         TestDescription testDescription = testMultiVariants(resultDefinitions, resultDefinitionId2Now);
@@ -353,12 +350,12 @@ public class NowsDataProcessorTest {
                 Arrays.asList(defenceUserGroup, courtClerkUserGroup), Arrays.asList(prosecutionUserGroup), Arrays.asList(prisonOfficerUserGroup)
         );
 
-        final Map<UUID, Now> resultDefinitionId2Now = new HashMap();
+        final Map<UUID, NowDefinition> resultDefinitionId2Now = new HashMap();
         List<ResultDefinition> resultDefinitions = new ArrayList<>();
 
         for (int nowRefsDone = 0; nowRefsDone < nowRefsTarget; nowRefsDone++) {
             List<ResultDefinitions> resultDefinitionRefs = new ArrayList<>();
-            Now referenceNow = Now.now().setId(UUID.randomUUID()).setResultDefinitions(resultDefinitionRefs);
+            NowDefinition referenceNow = NowDefinition.now().setId(UUID.randomUUID()).setResultDefinitions(resultDefinitionRefs);
             for (int resultDefinitionsDone = 0; resultDefinitionsDone < resultDefinitionsPerNow; resultDefinitionsDone++) {
 
                 boolean primary = resultDefinitionsDone == 0;
@@ -401,7 +398,7 @@ public class NowsDataProcessorTest {
     }
 
 
-    TestDescription testMultiVariants(List<ResultDefinition> primaryResultDefinitions, Map<UUID, Now> resultDefinitionId2ReferenceNow) {
+    TestDescription testMultiVariants(List<ResultDefinition> primaryResultDefinitions, Map<UUID, NowDefinition> resultDefinitionId2ReferenceNow) {
 
         resultDefinitionId2ReferenceNow.keySet().forEach(
                 resultDefinitionId ->
@@ -434,7 +431,7 @@ public class NowsDataProcessorTest {
         //the non primary non mandatory is not present hence no now
     }
 
-    private TestDescription testMultiVariants(ResultDefinition primaryResultDefinition, Now referenceNow) {
+    private TestDescription testMultiVariants(ResultDefinition primaryResultDefinition, NowDefinition referenceNow) {
 
         Mockito.when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(primaryResultDefinition.getId())).thenReturn(referenceNow);
         Mockito.when(referenceDataService.getResultDefinitionById(primaryResultDefinition.getId())).thenReturn(primaryResultDefinition);
@@ -575,8 +572,8 @@ public class NowsDataProcessorTest {
                                             p -> ResultPrompt.builder().withId(p.getId()).withLabel(p.getLabel()).withValue("value").build()
                                     ).collect(Collectors.toList()))
                             .build(), defDone);
-            completeResultLines.addAll(oResultLines.stream().filter(l -> l instanceof CompletedResultLine ).map(cl->(CompletedResultLine)cl).collect(Collectors.toList()));
-            uncompletedResultLines.addAll(oResultLines.stream().filter(l -> l instanceof UncompletedResultLine ).map(cl->(UncompletedResultLine)cl).collect(Collectors.toList()));
+            completeResultLines.addAll(oResultLines.stream().filter(l -> l instanceof CompletedResultLine).map(cl -> (CompletedResultLine) cl).collect(Collectors.toList()));
+            uncompletedResultLines.addAll(oResultLines.stream().filter(l -> l instanceof UncompletedResultLine).map(cl -> (UncompletedResultLine) cl).collect(Collectors.toList()));
 
         }
 

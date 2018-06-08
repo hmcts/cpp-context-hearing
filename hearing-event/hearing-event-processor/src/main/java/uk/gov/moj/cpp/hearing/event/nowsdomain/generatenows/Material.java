@@ -1,33 +1,32 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
+import java.util.List;
+import java.util.UUID;
+
 public class Material {
 
-    private java.util.UUID id;
+    private UUID id;
 
-    private java.util.List<NowResult> nowResult;
+    private List<NowResult> nowResult;
 
     private String language;
 
-    private java.util.List<UserGroups> userGroups;
+    private List<UserGroups> userGroups;
 
-    public static Material material() {
-        return new Material();
-    }
-
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Material setId(java.util.UUID id) {
+    public Material setId(UUID id) {
         this.id = id;
         return this;
     }
 
-    public java.util.List<NowResult> getNowResult() {
+    public List<NowResult> getNowResult() {
         return this.nowResult;
     }
 
-    public Material setNowResult(java.util.List<NowResult> nowResult) {
+    public Material setNowResult(List<NowResult> nowResult) {
         this.nowResult = nowResult;
         return this;
     }
@@ -41,12 +40,16 @@ public class Material {
         return this;
     }
 
-    public java.util.List<UserGroups> getUserGroups() {
+    public List<UserGroups> getUserGroups() {
         return this.userGroups;
     }
 
-    public Material setUserGroups(java.util.List<UserGroups> userGroups) {
+    public Material setUserGroups(List<UserGroups> userGroups) {
         this.userGroups = userGroups;
         return this;
+    }
+
+    public static Material material() {
+        return new Material();
     }
 }

@@ -12,6 +12,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.message.shareResults.Address;
 import uk.gov.moj.cpp.hearing.message.shareResults.Attendee;
@@ -43,9 +44,7 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 @ServiceComponent(EVENT_PROCESSOR)
 public class PublishResultsEventProcessor {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(PublishResultsEventProcessor.class.getName());
-    public static final String HEARING_GENERATE_NOWS_V2_COMMAND = "hearing.command.generate-nows.v2";
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsEventProcessor.class.getName());
 
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -77,11 +76,27 @@ public class PublishResultsEventProcessor {
         final List<Nows> nows = nowsDataProcessor.createNows(input);
 
         if (!nows.isEmpty()) {
-            GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand();
-            uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing hearing = nowsDataProcessor.translateReferenceData(input);
-            hearing.setNows(nows);
-            generateNowsCommand.setHearing(hearing);
-            this.sender.send(this.enveloper.withMetadataFrom(event, HEARING_GENERATE_NOWS_V2_COMMAND)
+            GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
+                    .setHearing(
+                            nowsDataProcessor.translateReferenceData(input)
+                                    .setNows(nows)
+                                    .setNowTypes(
+                                            nowsDataProcessor.findNowDefinitions(input.getCompletedResultLines())
+                                                    .stream()
+                                                    .map(resultDefinition -> NowTypes.nowTypes()
+                                                            .setId(resultDefinition.getId())
+                                                            .setDescription(resultDefinition.getName())//TODO - check this.
+                                                            .setJurisdiction(resultDefinition.getJurisdiction())
+                                                            .setPriority(resultDefinition.getUrgentTimeLimitInMinutes().toString())//TODO - check this.
+                                                            .setRank(resultDefinition.getRank())
+                                                            .setStaticText(resultDefinition.getText())
+                                                            .setStaticTextWelsh(resultDefinition.getWelshText())
+                                                            .setTemplateName(resultDefinition.getTemplateName()))
+                                                    .collect(toList())
+                                    )
+
+                    );
+            this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows.v2")
                     .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
         }
 

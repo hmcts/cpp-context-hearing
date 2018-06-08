@@ -1,24 +1,23 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
+import java.util.List;
+import java.util.UUID;
+
 public class Nows {
 
-    private java.util.UUID id;
+    private UUID id;
 
     private String nowsTypeId;
 
     private String defendantId;
 
-    private java.util.List<Material> material;
+    private List<Material> material;
 
-    public static Nows nows() {
-        return new Nows();
-    }
-
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Nows setId(java.util.UUID id) {
+    public Nows setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -41,12 +40,16 @@ public class Nows {
         return this;
     }
 
-    public java.util.List<Material> getMaterial() {
+    public List<Material> getMaterial() {
         return this.material;
     }
 
-    public Nows setMaterial(java.util.List<Material> material) {
+    public Nows setMaterial(List<Material> material) {
         this.material = material;
         return this;
+    }
+
+    public static Nows nows() {
+        return new Nows();
     }
 }

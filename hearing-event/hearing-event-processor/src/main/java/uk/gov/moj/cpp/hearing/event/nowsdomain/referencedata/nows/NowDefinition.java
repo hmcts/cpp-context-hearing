@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows;
 
-public class Now {
+import java.util.List;
+import java.util.UUID;
 
-    private java.util.UUID id;
+public class NowDefinition {
+
+    private UUID id;
 
     private String version;
 
@@ -20,17 +23,13 @@ public class Now {
 
     private Integer urgentTimeLimitInMinutes;
 
-    private java.util.List<ResultDefinitions> resultDefinitions;
+    private List<ResultDefinitions> resultDefinitions;
 
-    public static Now now() {
-        return new Now();
-    }
-
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Now setId(java.util.UUID id) {
+    public NowDefinition setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -39,7 +38,7 @@ public class Now {
         return this.version;
     }
 
-    public Now setVersion(String version) {
+    public NowDefinition setVersion(String version) {
         this.version = version;
         return this;
     }
@@ -48,7 +47,7 @@ public class Now {
         return this.name;
     }
 
-    public Now setName(String name) {
+    public NowDefinition setName(String name) {
         this.name = name;
         return this;
     }
@@ -57,7 +56,7 @@ public class Now {
         return this.templateName;
     }
 
-    public Now setTemplateName(String templateName) {
+    public NowDefinition setTemplateName(String templateName) {
         this.templateName = templateName;
         return this;
     }
@@ -66,7 +65,7 @@ public class Now {
         return this.jurisdiction;
     }
 
-    public Now setJurisdiction(String jurisdiction) {
+    public NowDefinition setJurisdiction(String jurisdiction) {
         this.jurisdiction = jurisdiction;
         return this;
     }
@@ -75,7 +74,7 @@ public class Now {
         return this.rank;
     }
 
-    public Now setRank(Integer rank) {
+    public NowDefinition setRank(Integer rank) {
         this.rank = rank;
         return this;
     }
@@ -84,7 +83,7 @@ public class Now {
         return this.text;
     }
 
-    public Now setText(String text) {
+    public NowDefinition setText(String text) {
         this.text = text;
         return this;
     }
@@ -93,7 +92,7 @@ public class Now {
         return this.welshText;
     }
 
-    public Now setWelshText(String welshText) {
+    public NowDefinition setWelshText(String welshText) {
         this.welshText = welshText;
         return this;
     }
@@ -102,17 +101,21 @@ public class Now {
         return this.urgentTimeLimitInMinutes;
     }
 
-    public Now setUrgentTimeLimitInMinutes(Integer urgentTimeLimitInMinutes) {
+    public NowDefinition setUrgentTimeLimitInMinutes(Integer urgentTimeLimitInMinutes) {
         this.urgentTimeLimitInMinutes = urgentTimeLimitInMinutes;
         return this;
     }
 
-    public java.util.List<ResultDefinitions> getResultDefinitions() {
+    public List<ResultDefinitions> getResultDefinitions() {
         return this.resultDefinitions;
     }
 
-    public Now setResultDefinitions(java.util.List<ResultDefinitions> resultDefinitions) {
+    public NowDefinition setResultDefinitions(List<ResultDefinitions> resultDefinitions) {
         this.resultDefinitions = resultDefinitions;
         return this;
+    }
+
+    public static NowDefinition now() {
+        return new NowDefinition();
     }
 }
