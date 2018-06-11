@@ -121,7 +121,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     public void hearingMultipleeDays_shouldRemoveAllAttendeeAndHearingDayAssociationsGreaterOrEqualAGivenDate() throws Exception {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, data -> {
-            final ZonedDateTime startDateTime = data.getHearing().getStartDateTime();
+            final ZonedDateTime startDateTime = ZonedDateTime.now();
             data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
         });
 
@@ -181,7 +181,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     public void hearingMultipleeDays_shouldRemoveOnlyAttendeeAndHearingDayAssociationsEqualAGivenDate() throws Exception {
 
         final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, data -> {
-            final ZonedDateTime startDateTime = data.getHearing().getStartDateTime();
+            final ZonedDateTime startDateTime = ZonedDateTime.now();
             data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
         });
 

@@ -139,8 +139,6 @@ public class HearingEventProcessorTest {
     private static final String FIELD_CASE_URN = "caseUrn";
     private static final String FIELD_DURATION = "duration";
     private static final String FIELD_HEARING_TYPE = "hearingType";
-    private static final String FIELD_START_DATE_TIME = "startDateTime";
-    private static final String FIELD_ESTIMATE_MINUTES = "estimateMinutes";
 
     private static final String FIELD_COURT_CENTRE = "courtCentre";
     private static final String FIELD_COURT_CENTRE_NAME = "courtCentreName";
@@ -372,8 +370,6 @@ public class HearingEventProcessorTest {
         final JsonObjectBuilder hearing = createObjectBuilder();
         hearing.add(FIELD_GENERIC_ID, GENERIC_ID.toString());
         hearing.add(FIELD_GENERIC_TYPE, HEARING_TYPE);
-        hearing.add(FIELD_START_DATE_TIME, START_DATE_TIME);
-        hearing.add(FIELD_ESTIMATE_MINUTES, DURATION);
         hearing.add(FIELD_CASE_ID, CASE_ID.toString());
         final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString())
                 .add("hearing", hearing).build();

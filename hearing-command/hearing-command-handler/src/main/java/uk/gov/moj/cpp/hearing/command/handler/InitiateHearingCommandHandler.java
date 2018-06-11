@@ -1,41 +1,30 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.core.aggregate.AggregateService;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.LookupWitnessesOnDefendantForHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
-import javax.inject.Inject;
-
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class InitiateHearingCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(InitiateHearingCommandHandler.class.getName());
-
-    @Inject
-    public InitiateHearingCommandHandler(final EventSource eventSource, final Enveloper enveloper,
-                                         final AggregateService aggregateService, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
-        super(eventSource, enveloper, aggregateService, jsonObjectToObjectConverter);
-    }
 
     @Handles("hearing.initiate")
     public void initiate(final JsonEnvelope envelope) throws EventStreamException {

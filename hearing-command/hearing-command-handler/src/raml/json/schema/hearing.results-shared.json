@@ -150,19 +150,12 @@
         "judge":{
           "$ref":"#/definitions/judge"
         },
-        "startDateTime":{
-          "type":"string",
-          "format":"date-time"
-        },
         "hearingDays":{
           "type":"array",
           "items":{
             "type":"string",
             "format":"date-time"
           }
-        },
-        "estimateMinutes":{
-          "type":"integer"
         },
         "defendants":{
           "type":"array",
@@ -183,11 +176,9 @@
         "courtRoomId",
         "courtRoomName",
         "defendants",
-        "estimateMinutes",
         "hearingDays",
         "id",
         "judge",
-        "startDateTime",
         "type"
       ]
     },

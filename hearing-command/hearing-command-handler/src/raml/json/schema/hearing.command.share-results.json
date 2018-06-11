@@ -9,8 +9,8 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "additionalProperties": false,
   "properties": {
-    "hearingId": {
-      "$ref": "#/definitions/uuid"
+    "hearingId":{
+      "$ref":"#/definitions/uuid"
     },
     "courtClerk": {
       "type": "object",
@@ -131,6 +131,7 @@
     }
   },
   "required": [
+    "hearingId",
     "courtClerk",
     "completedResultLines"
   ]

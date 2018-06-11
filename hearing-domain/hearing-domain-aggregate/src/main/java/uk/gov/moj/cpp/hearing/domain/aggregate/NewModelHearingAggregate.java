@@ -1,5 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.doNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -10,6 +17,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
+import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -24,6 +32,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
@@ -41,8 +50,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -54,11 +61,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.fromString;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
 public class NewModelHearingAggregate implements Aggregate {
@@ -75,18 +79,13 @@ public class NewModelHearingAggregate implements Aggregate {
     private static final String HEARING_EVENT_ID = "hearingEventId";
     private static final String RECORDED_LABEL = "recordedLabel";
     private static final String HEARING_ID = "hearingId";
-
-    private List<Case> cases;
-    private Hearing hearing;
-
     private final Map<UUID, HearingEvent> hearingHevents = new HashMap<>();
-
     private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels = new HashMap<>();
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
-
     private final Map<UUID, Plea> pleas = new HashMap<>();
     private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
-
+    private List<Case> cases;
+    private Hearing hearing;
     private boolean published = false;
 
     @Override
@@ -164,33 +163,33 @@ public class NewModelHearingAggregate implements Aggregate {
                 when(DefendantDetailsUpdated.class).apply(defendantDetailsUpdated -> this.hearing.getDefendants().stream()
                         .filter(d -> d.getId().equals(defendantDetailsUpdated.getDefendant().getId()))
                         .forEach(d -> {
-                             d.setDefenceOrganisation(defendantDetailsUpdated.getDefendant().getDefenceOrganisation())
-                                     .setPersonId(defendantDetailsUpdated.getDefendant().getPerson().getId())
-                                     .setFirstName(defendantDetailsUpdated.getDefendant().getPerson().getFirstName())
-                                     .setLastName(defendantDetailsUpdated.getDefendant().getPerson().getLastName())
-                                     .setGender(defendantDetailsUpdated.getDefendant().getPerson().getGender())
-                                     .setNationality(defendantDetailsUpdated.getDefendant().getPerson().getNationality())
-                                     .setDateOfBirth(defendantDetailsUpdated.getDefendant().getPerson().getDateOfBirth())
-                                     .setAddress(ofNullable(defendantDetailsUpdated.getDefendant().getPerson().getAddress())
-                                             .map(a -> Address.builder()
-                                                     .withAddress1(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress1())
-                                                     .withAddress2(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress2())
-                                                     .withAddress3(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress3())
-                                                     .withAddress4(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress4())
-                                                     .withPostCode(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getPostCode())
-                                                     .build())
-                                             .orElse(null))
-                                     .setInterpreter(ofNullable(defendantDetailsUpdated.getDefendant().getInterpreter())
-                                             .map(i -> Interpreter.builder()
-                                                     .withLanguage(defendantDetailsUpdated.getDefendant().getInterpreter().getLanguage())
-                                                     .build())
-                                             .orElse(null))
-                                     .getDefendantCases().stream()
-                                     .filter(dc -> dc.getCaseId().equals(defendantDetailsUpdated.getCaseId()))
-                                     .forEach(dc -> {
-                                         dc.setBailStatus(defendantDetailsUpdated.getDefendant().getBailStatus());
-                                         dc.setCustodyTimeLimitDate(defendantDetailsUpdated.getDefendant().getCustodyTimeLimitDate());
-                                     });
+                            d.setDefenceOrganisation(defendantDetailsUpdated.getDefendant().getDefenceOrganisation())
+                                    .setPersonId(defendantDetailsUpdated.getDefendant().getPerson().getId())
+                                    .setFirstName(defendantDetailsUpdated.getDefendant().getPerson().getFirstName())
+                                    .setLastName(defendantDetailsUpdated.getDefendant().getPerson().getLastName())
+                                    .setGender(defendantDetailsUpdated.getDefendant().getPerson().getGender())
+                                    .setNationality(defendantDetailsUpdated.getDefendant().getPerson().getNationality())
+                                    .setDateOfBirth(defendantDetailsUpdated.getDefendant().getPerson().getDateOfBirth())
+                                    .setAddress(ofNullable(defendantDetailsUpdated.getDefendant().getPerson().getAddress())
+                                            .map(a -> Address.builder()
+                                                    .withAddress1(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress1())
+                                                    .withAddress2(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress2())
+                                                    .withAddress3(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress3())
+                                                    .withAddress4(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress4())
+                                                    .withPostCode(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getPostCode())
+                                                    .build())
+                                            .orElse(null))
+                                    .setInterpreter(ofNullable(defendantDetailsUpdated.getDefendant().getInterpreter())
+                                            .map(i -> Interpreter.builder()
+                                                    .withLanguage(defendantDetailsUpdated.getDefendant().getInterpreter().getLanguage())
+                                                    .build())
+                                            .orElse(null))
+                                    .getDefendantCases().stream()
+                                    .filter(dc -> dc.getCaseId().equals(defendantDetailsUpdated.getCaseId()))
+                                    .forEach(dc -> {
+                                        dc.setBailStatus(defendantDetailsUpdated.getDefendant().getBailStatus());
+                                        dc.setCustodyTimeLimitDate(defendantDetailsUpdated.getDefendant().getCustodyTimeLimitDate());
+                                    });
                         })),
 
                 when(OffenceAdded.class).apply(offenceAdded ->
@@ -224,7 +223,9 @@ public class NewModelHearingAggregate implements Aggregate {
                         this.hearing.getDefendants().stream()
                                 .forEach(d -> d.getOffences().removeIf(o -> o.getId().equals(offenceDeleted.getId())))
                 ),
-
+                when(HearingDetailChanged.class).apply(hearingDetailChanged -> {
+                    doNothing();
+                }),
                 otherwiseDoNothing()
         );
     }
@@ -399,6 +400,17 @@ public class NewModelHearingAggregate implements Aggregate {
                         this.cases.get(0).getCaseId(),
                         logEventCommand.getWitnessId(),
                         logEventCommand.getCounselId())
+        ));
+    }
+
+    public Stream<Object> updateHearingDetails(final UUID id, final String type, final UUID courtRoomId, final String courtRoomName, final Judge judge, final List<ZonedDateTime> hearingDays) {
+
+        if (hearing == null) {
+            return apply(Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.change-hearing-detail' event as hearing not found", id)));
+        }
+
+        return apply(Stream.of(
+                new HearingDetailChanged(id, type, courtRoomId, courtRoomName, judge, hearingDays)
         ));
     }
 
@@ -590,9 +602,8 @@ public class NewModelHearingAggregate implements Aggregate {
     public static final class HearingEvent implements Serializable {
 
         private static final long serialVersionUID = 1L;
-
-        private boolean deleted;
         private final HearingEventLogged hearingEventLogged;
+        private boolean deleted;
 
         public HearingEvent(final HearingEventLogged hearingEventLogged) {
             this.hearingEventLogged = hearingEventLogged;

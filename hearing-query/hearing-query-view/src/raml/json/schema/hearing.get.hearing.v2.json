@@ -44,7 +44,7 @@
       "minItems": 1,
       "items": {
         "type": "string",
-        "format": "date"
+        "format": "date-time"
       }
     },
     "defenceWitnesses":{

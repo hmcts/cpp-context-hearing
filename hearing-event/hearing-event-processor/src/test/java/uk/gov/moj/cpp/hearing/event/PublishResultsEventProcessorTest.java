@@ -64,6 +64,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
@@ -71,6 +72,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 
 public class PublishResultsEventProcessorTest {
 
+    public static final String ARBITRARY_HEARING_START_DATE = "2016-06-01T10:00:00Z";
     @Mock
     private Sender sender;
 
@@ -161,7 +163,7 @@ public class PublishResultsEventProcessorTest {
                                 withJsonPath("$.hearing.courtCentre.courtCentreName", is(resultsShared.getHearing().getCourtCentreName())),
                                 withJsonPath("$.hearing.courtCentre.courtRoomId", is(resultsShared.getHearing().getCourtRoomId().toString())),
                                 withJsonPath("$.hearing.courtCentre.courtRoomName", is(resultsShared.getHearing().getCourtRoomName())),
-                                withJsonPath("$.hearing.startDateTime", is(ZonedDateTimes.toString(resultsShared.getHearing().getStartDateTime()))),
+                                withJsonPath("$.hearing.startDateTime", is(ZonedDateTimes.toString(resultsShared.getHearing().getHearingDays().get(0)))),
 
                                 withJsonPath("$.hearing.attendees[0].personId", is(resultsShared.getCourtClerk().getId().toString())),
                                 withJsonPath("$.hearing.attendees[0].type", is("COURTCLERK")),
@@ -262,8 +264,6 @@ public class PublishResultsEventProcessorTest {
                 .withHearing(Hearing.builder()
                         .withId(hearingId)
                         .withType(STRING.next())
-                        .withStartDateTime(ZonedDateTime.now(ZoneId.of("UTC")))
-                        .withEstimateMinutes(INTEGER.next())
                         .withJudge(Judge.builder()
                                 .withId(randomUUID())
                                 .withTitle(STRING.next())
@@ -272,6 +272,7 @@ public class PublishResultsEventProcessorTest {
                         )
                         .withCourtCentreId(randomUUID())
                         .withCourtCentreName(STRING.next())
+                        .withHearingDays(Arrays.asList(ZonedDateTimes.fromString(ARBITRARY_HEARING_START_DATE)))
                         .withCourtRoomId(randomUUID())
                         .withCourtRoomName(STRING.next())
                         .addDefendant(Defendant.builder()

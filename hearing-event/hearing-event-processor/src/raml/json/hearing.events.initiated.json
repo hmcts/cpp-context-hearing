@@ -16,8 +16,6 @@
       "firstName": "Neil",
       "lastName": "Flewitt"
     },
-    "startDateTime": "2016-06-01T10:00:00Z",
-    "estimateMinutes": 7200,
     "defendants": [
       {
         "id": "0baecac5-222b-402d-9047-84803679edac",

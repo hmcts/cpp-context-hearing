@@ -108,7 +108,7 @@ public class PublishResultsEventProcessor {
                         .setAttendees(mapAttendees(input))
                         .setDefendants(mapDefendants(input))
                         .setSharedResultLines(mapSharedResultsLines(input))
-                        .setStartDateTime(input.getHearing().getStartDateTime())
+                        .setStartDateTime(input.getHearing().getHearingDays().get(0))
                 )
                 .setSharedTime(ZonedDateTime.now());
 

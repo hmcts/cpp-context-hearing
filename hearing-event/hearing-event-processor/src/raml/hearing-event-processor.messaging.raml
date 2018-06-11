@@ -158,6 +158,11 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.events.attendee-deleted.json
             example: !include json/hearing.events.attendee-deleted.json
 
+# Hearing Detail Change
+        application/vnd.hearing.change-hearing-detail+json:
+                schema: !include json/schema/hearing.change-hearing-detail.json
+                example: !include json/hearing.change-hearing-detail.json
+
 /public.event:
   post:
     body:
@@ -181,7 +186,12 @@ baseUri: message://event/processor/message/hearing
                 example: !include json/material.material-added.json
         application/vnd.public.hearing.events.nows-material-status-updated+json:
                 schema: !include json/schema/public.hearing.events.nows-material-status-updated.json
-                example: !include json/public.hearing.events.nows-material-status-updated.json				
+                example: !include json/public.hearing.events.nows-material-status-updated.json
         application/vnd.public.resultinghmps.event.nows-material-status-updated+json:
                 schema: !include json/schema/public.resultinghmps.event.nows-material-status-updated.json
-                example: !include json/public.resultinghmps.event.nows-material-status-updated.json				
+                example: !include json/public.resultinghmps.event.nows-material-status-updated.json
+
+# Listing Hearing Detail Changed
+        application/vnd.public.hearing-detail-changed+json:
+                schema: !include json/schema/public.hearing-detail-changed.json
+                example: !include json/public.hearing-detail-changed.json

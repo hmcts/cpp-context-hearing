@@ -90,7 +90,7 @@ public class InitiateHearingIT extends AbstractIT {
                         )));
 
         final String getHearingByStartDateQueryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-date.v2"), hearing.getStartDateTime().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString());
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-date.v2"), hearing.getHearingDays().get(0).withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString());
         final String getHearingByStartDateUrl = getBaseUri() + "/" + getHearingByStartDateQueryAPIEndPoint;
 
         final String getHearingByStartDateResponseType = "application/vnd.hearing.get.hearings-by-date.v2+json";

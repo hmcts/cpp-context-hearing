@@ -388,10 +388,6 @@
         "judge": {
           "$ref": "#/definitions/judge"
         },
-        "startDateTime": {
-          "type": "string",
-          "format": "date-time"
-        },
         "hearingDays": {
           "type": "array",
           "minItems": 1,
@@ -399,9 +395,6 @@
             "type": "string",
             "format": "date-time"
           }
-        },
-        "estimateMinutes": {
-          "type": "number"
         },
         "defendants": {
           "type": "array",
@@ -417,9 +410,7 @@
         "courtRoomId",
         "courtRoomName",
         "judge",
-        "startDateTime",
         "hearingDays",
-        "estimateMinutes",
         "defendants"
       ]
     }

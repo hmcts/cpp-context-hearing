@@ -72,9 +72,7 @@ public class TestTemplates {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(startDateTime)
                         .withHearingDays(Arrays.asList(startDateTime, secondDateTime))
-                        .withEstimateMinutes(INTEGER.next())
                         .addDefendant(Defendant.builder()
                                 .withId(randomUUID())
                                 .withPersonId(randomUUID())
@@ -119,9 +117,7 @@ public class TestTemplates {
                                         .withFirstName(STRING.next())
                                         .withLastName(STRING.next())
                         )
-                        .withStartDateTime(startDateTime)
                         .withHearingDays(Arrays.asList(startDateTime))
-                        .withEstimateMinutes(INTEGER.next())
                         .addDefendant(initiateHearingDefendantTemplate(caseId))
                         .addWitness(
                                 initiateHearingWitnessTemplate(caseId)
@@ -214,9 +210,7 @@ public class TestTemplates {
                                 .withTitle(STRING.next())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next()))
-                        .withStartDateTime(startDateTime)
                         .withHearingDays(Arrays.asList(startDateTime))
-                        .withEstimateMinutes(INTEGER.next())
                 );
         Arrays.stream(defendantIds).forEach(id ->
 

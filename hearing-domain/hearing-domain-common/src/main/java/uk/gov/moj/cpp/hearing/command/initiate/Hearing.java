@@ -26,9 +26,7 @@ public class Hearing implements Serializable {
     private final UUID courtRoomId;
     private final String courtRoomName;
     private final Judge judge;
-    private final ZonedDateTime startDateTime;
     private final List<ZonedDateTime> hearingDays;
-    private final Integer estimateMinutes;
     private final List<Defendant> defendants;
     private final List<Witness> witnesses;
 
@@ -40,9 +38,7 @@ public class Hearing implements Serializable {
                    @JsonProperty("courtRoomId") final UUID courtRoomId,
                    @JsonProperty("courtRoomName") final String courtRoomName,
                    @JsonProperty("judge") final Judge judge,
-                   @JsonProperty("startDateTime") final ZonedDateTime startDateTime,
                    @JsonProperty("hearingDays") final List<ZonedDateTime> hearingDays,
-                   @JsonProperty("estimateMinutes") final Integer estimateMinutes,
                    @JsonProperty("defendants") final List<Defendant> defendants,
                    @JsonProperty("witnesses") final List<Witness> witnesses) {
         this.id = id;
@@ -52,11 +48,31 @@ public class Hearing implements Serializable {
         this.courtRoomId = courtRoomId;
         this.courtRoomName = courtRoomName;
         this.judge = judge;
-        this.startDateTime = startDateTime;
         this.hearingDays = hearingDays;
-        this.estimateMinutes = estimateMinutes;
         this.defendants = defendants;
         this.witnesses = witnesses;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder from(Hearing hearing) {
+        Builder builder = builder()
+                .withId(hearing.getId())
+                .withType(hearing.getType())
+                .withCourtCentreId(hearing.getCourtCentreId())
+                .withCourtCentreName(hearing.getCourtCentreName())
+                .withCourtRoomId(hearing.getCourtRoomId())
+                .withCourtRoomName(hearing.getCourtRoomName())
+                .withJudge(Judge.from(hearing.getJudge()))
+                .withHearingDays(hearing.getHearingDays());
+
+        hearing.getDefendants().forEach(defendant -> builder.addDefendant(Defendant.from(defendant)));
+
+        hearing.getWitnesses().forEach(witness -> builder.addWitness(Witness.from(witness)));
+
+        return builder;
     }
 
     public UUID getId() {
@@ -87,26 +103,17 @@ public class Hearing implements Serializable {
         return judge;
     }
 
-    public ZonedDateTime getStartDateTime() {
-        return startDateTime;
-    }
-
     public List<ZonedDateTime> getHearingDays() {
         return hearingDays;
-    }
-
-    public Integer getEstimateMinutes() {
-        return estimateMinutes;
     }
 
     public List<Defendant> getDefendants() {
         return defendants;
     }
 
-    public  List<Witness> getWitnesses(){
+    public List<Witness> getWitnesses() {
         return witnesses;
     }
-
 
     public static class Builder {
 
@@ -117,9 +124,7 @@ public class Hearing implements Serializable {
         private UUID courtRoomId;
         private String courtRoomName;
         private Judge.Builder judge;
-        private ZonedDateTime startDateTime;
         private List<ZonedDateTime> hearingDays;
-        private Integer estimateMinutes;
         private List<Defendant.Builder> defendants = new ArrayList<>();
         private List<Witness.Builder> witnesses = new ArrayList<>();
 
@@ -155,19 +160,11 @@ public class Hearing implements Serializable {
             return judge;
         }
 
-        public ZonedDateTime getStartDateTime() {
-            return startDateTime;
-        }
-
-        public Integer getEstimateMinutes() {
-            return estimateMinutes;
-        }
-
         public List<Defendant.Builder> getDefendants() {
             return defendants;
         }
 
-        public List<Witness.Builder> getWitnesses(){
+        public List<Witness.Builder> getWitnesses() {
             return witnesses;
         }
 
@@ -206,18 +203,8 @@ public class Hearing implements Serializable {
             return this;
         }
 
-        public Builder withStartDateTime(ZonedDateTime startDateTime) {
-            this.startDateTime = startDateTime;
-            return this;
-        }
-
         public Builder withHearingDays(List<ZonedDateTime> hearingDays) {
             this.hearingDays = hearingDays;
-            return this;
-        }
-
-        public Builder withEstimateMinutes(Integer estimateMinutes) {
-            this.estimateMinutes = estimateMinutes;
             return this;
         }
 
@@ -226,7 +213,7 @@ public class Hearing implements Serializable {
             return this;
         }
 
-        public Builder addWitness(Witness.Builder witness){
+        public Builder addWitness(Witness.Builder witness) {
             this.witnesses.add(witness);
             return this;
         }
@@ -234,34 +221,10 @@ public class Hearing implements Serializable {
         public Hearing build() {
             return new Hearing(id, type, courtCentreId, courtCentreName, courtRoomId, courtRoomName,
                     ofNullable(judge).map(Judge.Builder::build).orElse(null),
-                    startDateTime, hearingDays, estimateMinutes,
+                    hearingDays,
                     unmodifiableList(defendants.stream().map(Defendant.Builder::build).collect(Collectors.toList())),
                     unmodifiableList(witnesses.stream().map(Witness.Builder::build).collect(Collectors.toList())));
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder from(Hearing hearing) {
-        Builder builder = builder()
-                .withId(hearing.getId())
-                .withType(hearing.getType())
-                .withCourtCentreId(hearing.getCourtCentreId())
-                .withCourtCentreName(hearing.getCourtCentreName())
-                .withCourtRoomId(hearing.getCourtRoomId())
-                .withCourtRoomName(hearing.getCourtRoomName())
-                .withJudge(Judge.from(hearing.getJudge()))
-                .withStartDateTime(hearing.getStartDateTime())
-                .withHearingDays(hearing.getHearingDays())
-                .withEstimateMinutes(hearing.getEstimateMinutes());
-
-        hearing.getDefendants().forEach(defendant -> builder.addDefendant(Defendant.from(defendant)));
-
-        hearing.getWitnesses().forEach( witness -> builder.addWitness(Witness.from(witness)));
-
-        return builder;
     }
 }
 

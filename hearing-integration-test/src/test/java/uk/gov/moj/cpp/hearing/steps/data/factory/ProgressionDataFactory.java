@@ -43,8 +43,6 @@ public class ProgressionDataFactory {
                                 .add("firstName", dataFactory.getFirstName())
                                 .add("lastName", dataFactory.getLastName())
                         )
-                        .add("startDateTime", ZonedDateTimes.toString(PAST_ZONED_DATE_TIME.next()))
-                        .add("estimateMinutes", 7200)
                         .add("defendants", createArrayBuilder()
                                 .add(
                                         createObjectBuilder()
