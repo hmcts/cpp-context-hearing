@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.core.Is;
 import org.junit.Test;
@@ -217,7 +218,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         publicEventTopic.waitFor();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build()).timeout(20L, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
