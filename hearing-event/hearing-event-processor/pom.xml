@@ -12,6 +12,8 @@
 
     <properties>
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
+        <material.version>2.0.105-R2-SNAPSHOT</material.version>
+        <resultinghmps.version>1.0.26-R2-SNAPSHOT</resultinghmps.version>
     </properties>
 
     <build>
@@ -36,6 +38,30 @@
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
                     </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.material</groupId>
+                        <artifactId>material-command-api</artifactId>
+                        <version>${material.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>*</groupId>
+                                <artifactId>*</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.resultinghmps</groupId>
+                        <artifactId>resultinghmps-command-api</artifactId>
+                        <version>${resultinghmps.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
                 </dependencies>
             </plugin>
         </plugins>
@@ -59,6 +85,14 @@
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>file-service-persistence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-cdi</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>

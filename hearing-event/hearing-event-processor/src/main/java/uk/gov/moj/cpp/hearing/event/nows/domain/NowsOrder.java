@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.nows.domain;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class NowsOrder implements Serializable {
 
@@ -16,6 +17,15 @@ public class NowsOrder implements Serializable {
     private List<NowsOrderResult> defendantResults = new ArrayList<NowsOrderResult>();
     private String staticText;
     private String staticTextWelsh;
+    private List<UUID> materialIds;
+
+    public List<UUID> getMaterialIds() {
+        return materialIds;
+    }
+
+    public void setMaterialIds(List<UUID> materialIds) {
+        this.materialIds = materialIds;
+    }
 
     public String getOrderName() {
         return orderName;
@@ -103,7 +113,7 @@ public class NowsOrder implements Serializable {
         private List<NowsOrderResult> defendantResults = new ArrayList<NowsOrderResult>();
         private String staticText;
         private String staticTextWelsh;
-
+        private List<UUID> materialIds;
         private Builder() {
         }
 
@@ -151,7 +161,10 @@ public class NowsOrder implements Serializable {
             this.staticTextWelsh = staticTextWelsh;
             return this;
         }
-
+        public Builder withMaterialIds(List<UUID> materialId) {
+            this.materialIds = materialId;
+            return this;
+        }
         public NowsOrder build() {
             NowsOrder nowsOrder = new NowsOrder();
             nowsOrder.setOrderName(orderName);
@@ -163,6 +176,7 @@ public class NowsOrder implements Serializable {
             nowsOrder.setDefendantResults(defendantResults);
             nowsOrder.setStaticText(staticText);
             nowsOrder.setStaticTextWelsh(staticTextWelsh);
+            nowsOrder.setMaterialIds(materialIds);
             return nowsOrder;
         }
     }

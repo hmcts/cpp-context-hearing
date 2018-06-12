@@ -8,9 +8,7 @@
   },
   "additionalProperties":false,
   "required":[
-    "hearingId",
-    "materialId",
-    "status"
+    "materialId"
   ],
   "definitions":{
     "uuidPattern":{

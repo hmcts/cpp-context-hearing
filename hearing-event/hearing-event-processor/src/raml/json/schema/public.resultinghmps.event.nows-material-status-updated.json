@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",    
+  "properties": {
+    "hearingId": {
+      "$id": "/properties/hearingId",
+      "type": "string"
+    },
+    "materialId": {
+      "$id": "/properties/materialId",
+      "type": "string"
+    },
+    "status": {
+      "enum": ["requested","generated"]
+    }
+  },
+  "definitions": {}
+}

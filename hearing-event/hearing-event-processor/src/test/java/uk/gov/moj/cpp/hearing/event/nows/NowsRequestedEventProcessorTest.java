@@ -1,37 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.fileservice.api.FileServiceException;
-import uk.gov.justice.services.fileservice.api.FileStorer;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
-import uk.gov.moj.cpp.hearing.event.nows.service.DocmosisService;
-import uk.gov.moj.cpp.hearing.event.nows.service.exception.DocumentGenerationException;
-import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
-import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
-import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
-
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -49,8 +17,47 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.fileservice.api.FileServiceException;
+import uk.gov.justice.services.fileservice.api.FileStorer;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
+import uk.gov.moj.cpp.hearing.event.nows.service.DocmosisService;
+import uk.gov.moj.cpp.hearing.event.nows.service.UploadMaterialService;
+import uk.gov.moj.cpp.hearing.event.nows.service.exception.DocumentGenerationException;
+import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
+import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
+import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
+
 public class NowsRequestedEventProcessorTest {
 
+    public static final String USER_ID = UUID.randomUUID().toString();
+    public static final UUID fileId = UUID.randomUUID();
     @InjectMocks
     private NowsRequestedEventProcessor nowsRequestedEventProcessor;
 
@@ -62,6 +69,9 @@ public class NowsRequestedEventProcessorTest {
 
     @Mock
     private JsonEnvelope responseEnvelope;
+
+    @Mock
+    private UploadMaterialService uploadMaterialService;
 
     @Mock
     private DocmosisService docmosisService;
@@ -80,6 +90,9 @@ public class NowsRequestedEventProcessorTest {
 
     @Captor
     private ArgumentCaptor<JsonObject> jsonObjectArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<UUID> uuidArgumentCaptor;
 
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
@@ -105,16 +118,19 @@ public class NowsRequestedEventProcessorTest {
 
         final InputStream is = NowsRequestedToOrderConvertorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
-        NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
+        final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsRequested));
 
-        byte[] bytesIn = new byte[2];
+        final byte[] bytesIn = new byte[2];
         when(docmosisService.generateDocument(any(), any(), any())).thenReturn(bytesIn);
+        when(fileStorer.store(Mockito.any(JsonObject.class), Mockito.any(InputStream.class)))
+                        .thenReturn(fileId);
         this.nowsRequestedEventProcessor.processNowsRequested(event);
 
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        verify(this.uploadMaterialService).uploadFile(this.uuidArgumentCaptor.capture(),this.uuidArgumentCaptor.capture(),this.uuidArgumentCaptor.capture(),this.uuidArgumentCaptor.capture());
         verify(this.fileStorer).store(jsonObjectArgumentCaptor.capture(), inputStreamArgumentCaptor.capture());
 
         assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
@@ -126,6 +142,10 @@ public class NowsRequestedEventProcessorTest {
         assertThat(jsonObjectArgumentCaptor.getValue().getString("fileName"),
                 is(startsWith(nowsRequested.getHearing().getNowTypes().get(0).getDescription())));
         assertThat(inputStreamArgumentCaptor.getValue().read(new byte[2]), is(bytesIn.length));
+        assertThat(uuidArgumentCaptor.getAllValues().get(0).toString(), is(USER_ID));
+        assertThat(uuidArgumentCaptor.getAllValues().get(1).toString(), is(nowsRequested.getHearing().getId().toString()));
+        assertThat(uuidArgumentCaptor.getAllValues().get(2).toString(), is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()));
+        assertThat(uuidArgumentCaptor.getAllValues().get(3).toString(), is(fileId.toString()));
     }
 
     @Test
@@ -133,7 +153,7 @@ public class NowsRequestedEventProcessorTest {
 
         final InputStream is = NowsRequestedToOrderConvertorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
-        NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
+        final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested"),
                 objectToJsonObjectConverter.convert(nowsRequested));
@@ -151,13 +171,13 @@ public class NowsRequestedEventProcessorTest {
 
         final InputStream is = NowsRequestedToOrderConvertorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
-        NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
+        final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested"),
                 objectToJsonObjectConverter.convert(nowsRequested));
 
         expectedException.expect(FileUploadException.class);
-        byte[] bytesIn = new byte[2];
+        final byte[] bytesIn = new byte[2];
         when(docmosisService.generateDocument(any(), any(), any())).thenReturn(bytesIn);
         doThrow(new FileUploadException()).when(fileStorer).store(any(), any());
         this.nowsRequestedEventProcessor.processNowsRequested(event);

@@ -43,7 +43,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
 
         final Hearing hearing = initiateHearingCommand.getHearing();
 
-        UUID attendeeId = randomUUID();
+        final UUID attendeeId = randomUUID();
 
         final AddDefenceCounselCommand defenceCounsel = AddDefenceCounselCommand.builder()
                 .withAttendeeId(attendeeId)
@@ -95,7 +95,9 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         publicEventTopic.waitFor();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                                        .withHeader(CPP_UID_HEADER.getName(),
+                                                        CPP_UID_HEADER.getValue())
+                                        .build()).timeout(30L, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -160,7 +162,9 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         publicEventTopic.waitFor();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                                        .withHeader(CPP_UID_HEADER.getName(),
+                                                        CPP_UID_HEADER.getValue())
+                                        .build()).timeout(30L, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -218,7 +222,9 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         publicEventTopic.waitFor();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build()).timeout(20L, TimeUnit.SECONDS)
+                                        .withHeader(CPP_UID_HEADER.getName(),
+                                                        CPP_UID_HEADER.getValue())
+                                        .build()).timeout(30L, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

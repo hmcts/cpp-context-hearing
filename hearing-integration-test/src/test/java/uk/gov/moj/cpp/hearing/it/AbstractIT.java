@@ -16,6 +16,8 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockUpdateHmpsMaterialStatus;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 
@@ -77,6 +79,8 @@ public class AbstractIT {
         setupAsAuthorisedUser(USER_ID_VALUE);
         setupAsSystemUser(USER_ID_VALUE_AS_ADMIN);
         stubEnableAllCapabilities();
+        mockMaterialUpload();
+        mockUpdateHmpsMaterialStatus();
     }
 
     protected JSONObject getExistingHearing(final String hearingId) {
@@ -152,7 +156,7 @@ public class AbstractIT {
                 return dateTimeFormatter.format(((LocalDate) dateTime).atStartOfDay());
             }
             return dateTimeFormatter.format(dateTime);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("Cannot get string property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
             return EMPTY;
         }
@@ -165,7 +169,7 @@ public class AbstractIT {
     protected static String getString(final Object bean, final String name) {
         try {
             return EMPTY + PropertyUtils.getNestedProperty(bean, name);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("Cannot get string property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
             return EMPTY;
         }
@@ -174,7 +178,7 @@ public class AbstractIT {
     protected static Integer getInteger(final Object bean, final String name) {
         try {
             return Integer.parseInt(getString(bean, name));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("Cannot get integer property: " + name + " from bean " + bean.getClass().getCanonicalName(), e.getMessage(), e);
             return null;
         }
@@ -191,16 +195,16 @@ public class AbstractIT {
     public static Matcher<ResponseData> print() {
         return new BaseMatcher<ResponseData>() {
             @Override
-            public boolean matches(Object o) {
+            public boolean matches(final Object o) {
                 if (o instanceof ResponseData) {
-                    ResponseData responseData = (ResponseData) o;
+                    final ResponseData responseData = (ResponseData) o;
                     System.out.println(responseData.getPayload());
                 }
                 return true;
             }
 
             @Override
-            public void describeTo(Description description) {
+            public void describeTo(final Description description) {
             }
         };
 

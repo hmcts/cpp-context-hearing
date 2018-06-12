@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.UUID.fromString;
 
 public class  NowsRequestedToOrderConvertor {
     private static final String COURTCLERK = "COURTCLERK";
@@ -49,6 +50,7 @@ public class  NowsRequestedToOrderConvertor {
                     .withDefendantResults(getDefendantResult(nowsRequested, now))
                     .withStaticText(getNowType(nowsRequested, now).getStaticText())
                     .withStaticTextWelsh(getNowType(nowsRequested, now).getStaticTextWelsh())
+                    .withMaterialIds(now.getMaterial().stream().map(material -> fromString(material.getId())).collect(Collectors.toList()))
                     .build();
             nowsOrders.add(nowsOrder);
         });
