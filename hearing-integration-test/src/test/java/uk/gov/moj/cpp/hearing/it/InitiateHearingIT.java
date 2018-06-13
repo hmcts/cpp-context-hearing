@@ -1,9 +1,19 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.jayway.jsonpath.JsonPath;
+import org.junit.Test;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
+
+import java.text.MessageFormat;
+import java.time.ZoneId;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.Criteria.where;
 import static com.jayway.jsonpath.Filter.filter;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
@@ -16,95 +26,57 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplateWithOnlyMandatoryFields;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.it.PleaIT.PleaValueType;
-import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
-
-import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import com.jayway.jsonpath.Filter;
-import com.jayway.jsonpath.JsonPath;
-import org.junit.Test;
-
+@SuppressWarnings("unchecked")
 public class InitiateHearingIT extends AbstractIT {
 
     @Test
-    public void initiateHearing_withOnlyMandatoryFields(){
+    public void initiateHearing_withOnlyMandatoryFields() {
 
-        InitiateHearingCommand initiateHearing = initiateHearingCommandTemplateWithOnlyMandatoryFields().build();
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate().build())
+        );
 
-        final Hearing hearing = initiateHearing.getHearing();
+        final Hearing hearing = hearingOne.it().getHearing();
 
-        TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
-
-        makeCommand(requestSpec, "hearing.initiate")
-                .ofType("application/vnd.hearing.initiate+json")
-                .withPayload(initiateHearing)
-                .executeSuccessfully();
-
-        publicEventTopic.waitFor();
-
-        final String getHearingQueryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
-        final String getHearingUrl = getBaseUri() + "/" + getHearingQueryAPIEndPoint;
-
-
-        final String getHearingResponseType = "application/vnd.hearing.get.hearing.v2+json";
-
-        poll(requestParams(getHearingUrl, getHearingResponseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString())),
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
                                 withJsonPath("$.hearingType", equalStr(hearing, "type")),
                                 withJsonPath("$.courtCentreName", equalStr(hearing, "courtCentreName")),
                                 withJsonPath("$.roomName", equalStr(hearing, "courtRoomName")),
                                 withJsonPath("$.roomId", equalStr(hearing, "courtRoomId")),
                                 withJsonPath("$.courtCentreId", equalStr(hearing, "courtCentreId")),
-                                withJsonPath("$.hearingDays[0]",
-                                        equalStr(hearing,"hearingDays[0]", ISO_INSTANT)),
-                                withJsonPath("$.hearingDays[1]",
-                                        equalStr(hearing,"hearingDays[1]", ISO_INSTANT)),
+                                withJsonPath("$.hearingDays[0]", equalStr(hearing, "hearingDays[0]", ISO_INSTANT)),
+                                withJsonPath("$.hearingDays[1]", equalStr(hearing, "hearingDays[1]", ISO_INSTANT)),
                                 withJsonPath("$.judge.id", equalStr(hearing, "judge.id")),
                                 withJsonPath("$.judge.title", equalStr(hearing, "judge.title")),
                                 withJsonPath("$.judge.firstName", equalStr(hearing, "judge.firstName")),
                                 withJsonPath("$.judge.lastName", equalStr(hearing, "judge.lastName")),
-                                withJsonPath("$.cases[0].caseId", equalStr(initiateHearing, "cases[0].caseId")),
-                                withJsonPath("$.cases[0].caseUrn", equalStr(initiateHearing, "cases[0].urn")),
-                                withJsonPath("$.cases[0].defendants[0].defendantId", equalStr(hearing, "defendants[0].id")),
+                                withJsonPath("$.cases[0].caseId", is(hearingOne.getFirstCaseId().toString())),
+                                withJsonPath("$.cases[0].caseUrn", is(hearingOne.getFirstCaseUrn())),
+                                withJsonPath("$.cases[0].defendants[0].defendantId", is(hearingOne.getFirstDefendantId().toString())),
                                 withJsonPath("$.cases[0].defendants[0].firstName", equalStr(hearing, "defendants[0].firstName")),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].id", equalStr(hearing, "defendants[0].offences[0].id"))
+                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString()))
                         )));
 
-        final String getHearingByStartDateQueryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-by-date.v2"), hearing.getHearingDays().get(0).withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString());
-        final String getHearingByStartDateUrl = getBaseUri() + "/" + getHearingByStartDateQueryAPIEndPoint;
-
-        final String getHearingByStartDateResponseType = "application/vnd.hearing.get.hearings-by-date.v2+json";
-
-
-        Filter idFilter = filter(
-                where("hearingId").is(initiateHearing.getHearing().getId().toString())
-        );
-
-        poll(requestParams(getHearingByStartDateUrl, getHearingByStartDateResponseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        poll(requestParams(getURL("hearing.get.hearings-by-date.v2", hearing.getHearingDays().get(0).withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString())
+                , "application/vnd.hearing.get.hearings-by-date.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                withJsonPath(JsonPath.compile("$.hearings[?].hearingId", idFilter), hasItem(initiateHearing.getHearing().getId().toString()))
+                                withJsonPath(JsonPath.compile("$.hearings[?].hearingId", filter(
+                                        where("hearingId").is(hearingOne.getHearingId().toString())
+                                )), hasItem(hearingOne.getHearingId().toString()))
                         )));
 
 
@@ -113,31 +85,19 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_shouldInitiateHearing_whenInitiateHearingCommandIsMade() {
 
-        InitiateHearingCommand initiateHearing = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        );
 
-        final Hearing hearing = initiateHearing.getHearing();
+        final Hearing hearing = hearingOne.it().getHearing();
 
-        TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
-
-        makeCommand(requestSpec, "hearing.initiate")
-                .ofType("application/vnd.hearing.initiate+json")
-                .withPayload(initiateHearing)
-                .executeSuccessfully();
-
-        publicEventTopic.waitFor();
-
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearing.getHearing().getId());
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-
-        final String responseType = "application/vnd.hearing.get.hearing.v2+json";
-
-        poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString())),
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
                                 withJsonPath("$.hearingType", equalStr(hearing, "type")),
                                 withJsonPath("$.courtCentreName", equalStr(hearing, "courtCentreName")),
                                 withJsonPath("$.roomName", equalStr(hearing, "courtRoomName")),
@@ -147,8 +107,8 @@ public class InitiateHearingIT extends AbstractIT {
                                 withJsonPath("$.judge.title", equalStr(hearing, "judge.title")),
                                 withJsonPath("$.judge.firstName", equalStr(hearing, "judge.firstName")),
                                 withJsonPath("$.judge.lastName", equalStr(hearing, "judge.lastName")),
-                                withJsonPath("$.cases[0].caseId", equalStr(initiateHearing, "cases[0].caseId")),
-                                withJsonPath("$.cases[0].caseUrn", equalStr(initiateHearing, "cases[0].urn")),
+                                withJsonPath("$.cases[0].caseId", is(hearingOne.getFirstCaseId().toString())),
+                                withJsonPath("$.cases[0].caseUrn", is(hearingOne.getFirstCaseUrn())),
                                 withJsonPath("$.cases[0].defendants[0].defendantId", equalStr(hearing, "defendants[0].id")),
                                 withJsonPath("$.cases[0].defendants[0].firstName", equalStr(hearing, "defendants[0].firstName")),
                                 withJsonPath("$.cases[0].defendants[0].lastName", equalStr(hearing, "defendants[0].lastName")),
@@ -186,84 +146,72 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_withAPreviousPlea_Guilty_shouldHaveConvictionDate() throws Throwable {
 
-        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        );
 
-        final UUID offenceId = UseCases.initiateHearingWithOffenceAndPlea(requestSpec, PleaValueType.GUILTY, pleaDate);
+        final UpdatePleaCommandHelper pleaOne = new UpdatePleaCommandHelper(
+                UseCases.updatePlea(requestSpec, hearingOne.getHearingId(), hearingOne.getFirstOffenceIdForFirstDefendant(),
+                        updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.GUILTY).build())
+        );
 
-        final InitiateHearingCommand secondInitiateHearingCommand = with(initiateHearingCommandTemplate(), command -> {
-            command.getHearing().withId(UUID.randomUUID());
-            command.getHearing().getDefendants().get(0).getOffences().get(0).withId(offenceId);
-        }).build();
+        final InitiateHearingCommandHelper hearingTwo = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
+                    i.getCases().get(0).withCaseId(hearingOne.getFirstCaseId());
+                    i.getHearing().getDefendants().get(0).withId(hearingOne.getFirstDefendantId());
+                    i.getHearing().getDefendants().get(0).getOffences().get(0).withId(hearingOne.getFirstOffenceIdForFirstDefendant());
+                    i.getHearing().getDefendants().get(0).getOffences().get(0).withCaseId(hearingOne.getFirstCaseId());
+                    i.getHearing().getDefendants().get(0).getDefendantCases().get(0).withCaseId(hearingOne.getFirstCaseId());
+                }).build())
+        );
 
-        final UUID hearingId = secondInitiateHearingCommand.getHearing().getId();
-        final UUID caseId = secondInitiateHearingCommand.getCases().get(0).getCaseId();
-        final UUID defendantId = secondInitiateHearingCommand.getHearing().getDefendants().get(0).getId();
-
-        final EventListener eventListener = listenFor("public.hearing.initiated")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
-
-        makeCommand(requestSpec, "hearing.initiate")
-                .ofType("application/vnd.hearing.initiate+json")
-                .withPayload(secondInitiateHearingCommand)
-                .executeSuccessfully();
-
-        eventListener.waitFor();
-
-        final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingId);
-
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(getURL("hearing.get.hearing.v2", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
                 .timeout(10, TimeUnit.SECONDS)
                 .until(
-                    status().is(OK),
-                    payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
-                            withJsonPath("$.cases[0].caseId", is(caseId.toString())),
-                            withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", equalDate(pleaDate)),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", equalEnum(PleaValueType.GUILTY))
-                            )));
+                        status().is(OK),
+                        payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingTwo.getHearingId().toString())),
+                                withJsonPath("$.cases[0].caseId", is(hearingTwo.getFirstCaseId().toString())),
+                                withJsonPath("$.cases[0].defendants[0].defendantId", is(hearingTwo.getFirstDefendantId().toString())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", equalDate(pleaOne.getFirstPleaDate())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingTwo.getFirstOffenceIdForFirstDefendant().toString())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaOne.getFirstPleaDate())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", equalEnum(pleaOne.getFirstPleaValue()))
+                        )));
     }
 
     @Test
     public void initiateHearing_withAPreviousPlea_NotGuilty_shouldNotHaveConvictionDate() throws Throwable {
 
-        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        );
 
-        final UUID offenceId = UseCases.initiateHearingWithOffenceAndPlea(requestSpec, PleaValueType.NOT_GUILTY, pleaDate);
+        final UpdatePleaCommandHelper pleaOne = new UpdatePleaCommandHelper(
+                UseCases.updatePlea(requestSpec, hearingOne.getHearingId(), hearingOne.getFirstOffenceIdForFirstDefendant(),
+                        updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.NOT_GUILTY).build())
+        );
 
-        final InitiateHearingCommand secondInitiateHearingCommand = with(initiateHearingCommandTemplate(), command -> {
-            command.getHearing().withId(UUID.randomUUID());
-            command.getHearing().getDefendants().get(0).getOffences().get(0).withId(offenceId);
-        }).build();
+        final InitiateHearingCommandHelper hearingTwo = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
+                    i.getCases().get(0).withCaseId(hearingOne.getFirstCaseId());
+                    i.getHearing().getDefendants().get(0).withId(hearingOne.getFirstDefendantId());
+                    i.getHearing().getDefendants().get(0).getOffences().get(0).withId(hearingOne.getFirstOffenceIdForFirstDefendant());
+                    i.getHearing().getDefendants().get(0).getOffences().get(0).withCaseId(hearingOne.getFirstCaseId());
+                    i.getHearing().getDefendants().get(0).getDefendantCases().get(0).withCaseId(hearingOne.getFirstCaseId());
+                }).build())
+        );
 
-        final UUID hearingId = secondInitiateHearingCommand.getHearing().getId();
-        final UUID caseId = secondInitiateHearingCommand.getCases().get(0).getCaseId();
-        final UUID defendantId = secondInitiateHearingCommand.getHearing().getDefendants().get(0).getId();
-
-        final EventListener eventListener = listenFor("public.hearing.initiated")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
-
-        makeCommand(requestSpec, "hearing.initiate")
-                .ofType("application/vnd.hearing.initiate+json")
-                .withPayload(secondInitiateHearingCommand)
-                .executeSuccessfully();
-
-        eventListener.waitFor();
-
-        final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingId);
-
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(getURL("hearing.get.hearing.v2", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
                 .timeout(10, TimeUnit.SECONDS)
                 .until(
-                    status().is(OK),
-                    payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())),
-                            withJsonPath("$.cases[0].caseId", is(caseId.toString())),
-                            withJsonPath("$.cases[0].defendants[0].defendantId", is(defendantId.toString())),
-                            hasNoJsonPath("$.cases[0].defendants[0].offences[0].convictionDate"),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].id", is(offenceId.toString())),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaDate)),
-                            withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", equalEnum(PleaValueType.NOT_GUILTY))
-        )));
+                        status().is(OK),
+                        payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingTwo.getHearingId().toString())),
+                                withJsonPath("$.cases[0].caseId", is(hearingTwo.getFirstCaseId().toString())),
+                                withJsonPath("$.cases[0].defendants[0].defendantId", is(hearingTwo.getFirstDefendantId().toString())),
+                                hasNoJsonPath("$.cases[0].defendants[0].offences[0].convictionDate"),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingTwo.getFirstOffenceIdForFirstDefendant().toString())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", equalDate(pleaOne.getFirstPleaDate())),
+                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", equalEnum(pleaOne.getFirstPleaValue()))
+                        )));
     }
 }

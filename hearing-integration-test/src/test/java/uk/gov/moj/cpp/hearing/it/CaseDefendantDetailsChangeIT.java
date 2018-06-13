@@ -9,12 +9,13 @@ import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
+import uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates;
 
 import javax.json.JsonObject;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
@@ -33,7 +34,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplateWithOnlyMandatoryFields;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
@@ -43,7 +44,7 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
     @Test
     public void updateCaseDefendantDetals_shouldUpdateDefendant_givenResultNotShared() throws Exception {
 
-        final InitiateHearingCommand initiateHearing = initiateHearingCommandTemplateWithOnlyMandatoryFields().build();
+        final InitiateHearingCommand initiateHearing = minimalInitiateHearingTemplate().build();
 
         final Hearing hearing = initiateHearing.getHearing();
 

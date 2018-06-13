@@ -1,58 +1,39 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
-import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddProsecutionCounselCommandTemplates.addProsecutionCounselCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-
-import java.text.MessageFormat;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
-
+@SuppressWarnings("unchecked")
 public class ProsecutionCounselIT extends AbstractIT {
-
 
     @Test
     public void addProsecutionCounsel_shouldAdd() throws Exception {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        );
 
-        AddProsecutionCounselCommand firstProsecutionCounsel = AddProsecutionCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(initiateHearingCommand.getHearing().getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .build();
+        final AddProsecutionCounselCommand firstProsecutionCounsel = UseCases.addProsecutionCounsel(requestSpec, hearingOne.getHearingId(),
+                addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
+        );
 
-
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-prosecution-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(firstProsecutionCounsel)
-                .executeSuccessfully();
-
-
-        final String queryEndpoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearingCommand.getHearing().getId());
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
@@ -65,24 +46,11 @@ public class ProsecutionCounselIT extends AbstractIT {
                                 withJsonPath("$.attendees.prosecutionCounsels.[0].title", is(firstProsecutionCounsel.getTitle()))
                         )));
 
+        final AddProsecutionCounselCommand secondProsecutionCounsel = UseCases.addProsecutionCounsel(requestSpec, hearingOne.getHearingId(),
+                addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
+        );
 
-        AddProsecutionCounselCommand secondProsecutionCounsel = AddProsecutionCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(initiateHearingCommand.getHearing().getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .build();
-
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-prosecution-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(secondProsecutionCounsel)
-                .executeSuccessfully();
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -104,28 +72,15 @@ public class ProsecutionCounselIT extends AbstractIT {
     @Test
     public void addProsecutionCounsel_shouldEdit() throws Exception {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        );
 
-        AddProsecutionCounselCommand firstProsecutionCounsel = AddProsecutionCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(initiateHearingCommand.getHearing().getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .build();
+        final AddProsecutionCounselCommand firstProsecutionCounsel = UseCases.addProsecutionCounsel(requestSpec, hearingOne.getHearingId(),
+                addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
+        );
 
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-prosecution-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(firstProsecutionCounsel)
-                .executeSuccessfully();
-
-        final String queryEndpoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearingCommand.getHearing().getId());
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -137,18 +92,16 @@ public class ProsecutionCounselIT extends AbstractIT {
                                 withJsonPath("$.attendees.prosecutionCounsels.[0].title", is(firstProsecutionCounsel.getTitle()))
                         )));
 
-        firstProsecutionCounsel.setFirstName(STRING.next())
-                .setLastName(STRING.next())
-                .setTitle(STRING.next())
-                .setStatus(STRING.next());
+        UseCases.addProsecutionCounsel(requestSpec, hearingOne.getHearingId(),
+                with(firstProsecutionCounsel, counsel -> {
+                    counsel.setFirstName(STRING.next())
+                            .setLastName(STRING.next())
+                            .setTitle(STRING.next())
+                            .setStatus(STRING.next());
+                })
+        );
 
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-prosecution-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(firstProsecutionCounsel)
-                .executeSuccessfully();
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),

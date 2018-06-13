@@ -55,8 +55,9 @@ public final class ShareResultsCommand implements Serializable {
         return new Builder();
     }
 
-    public void setHearingId(UUID hearingId) {
+    public ShareResultsCommand setHearingId(UUID hearingId) {
         this.hearingId = hearingId;
+        return this;
     }
 
     public static final class Builder {

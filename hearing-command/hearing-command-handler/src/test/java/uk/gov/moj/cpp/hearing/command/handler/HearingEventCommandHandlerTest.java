@@ -26,7 +26,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOO
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import java.time.ZoneId;
@@ -234,7 +234,7 @@ public class HearingEventCommandHandlerTest {
     @Test
     public void logHearingEvent_shouldRaiseHearingEventLogged() throws Exception {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final LogEventCommand logEvent = new LogEventCommand(randomUUID(), randomUUID(), randomUUID(), STRING.next(),
                                         PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(),
@@ -280,7 +280,7 @@ public class HearingEventCommandHandlerTest {
     @Test
     public void logHearingEvent_shouldIgnoreLogEvent_givenEventHasAlreadyBeenLogged() throws Exception {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
                         randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
@@ -330,7 +330,7 @@ public class HearingEventCommandHandlerTest {
 
     @Test
     public void correctHearingEvent_shouldDeleteOldEventAndAddANewEvent() throws Exception {
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
                         randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
@@ -406,7 +406,7 @@ public class HearingEventCommandHandlerTest {
 
     @Test
     public void correctHearingEvent_shouldIgnoreCorrection_givenNoPreviousEventFound() throws Exception {
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(randomUUID(), randomUUID(), initiateHearingCommand.getHearing().getId(),
                         randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),

@@ -19,6 +19,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import javax.json.JsonObject;
 import java.util.List;
@@ -38,7 +39,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
@@ -81,7 +82,7 @@ public class InitiateHearingEventProcessorTest {
     @Test
     public void publishHearingInitiatedEvent() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.initiated"), objectToJsonObjectConverter.convert(initiateHearingCommand));
 

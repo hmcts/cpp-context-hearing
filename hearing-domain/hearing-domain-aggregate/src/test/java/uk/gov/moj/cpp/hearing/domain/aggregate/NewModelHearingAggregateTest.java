@@ -11,7 +11,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import java.util.Collections;
@@ -78,7 +78,7 @@ public class NewModelHearingAggregateTest {
 
     @Test
     public void initiate() {
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final HearingInitiated result = (HearingInitiated) new NewModelHearingAggregate().initiate(initiateHearingCommand).collect(Collectors.toList()).get(0);
 
@@ -138,7 +138,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void logHearingEvent_shouldIgnore_givenAPreviousEventId() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
@@ -171,7 +171,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void logHearingEvent_shouldLog() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
@@ -212,7 +212,7 @@ public class NewModelHearingAggregateTest {
 
         final UUID previousHearingEventId = randomUUID();
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final CorrectLogEventCommand correctLogEventCommand = CorrectLogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
@@ -272,7 +272,7 @@ public class NewModelHearingAggregateTest {
 
         final UUID previousHearingEventId = randomUUID();
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final CorrectLogEventCommand correctLogEventCommand = CorrectLogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
@@ -305,7 +305,7 @@ public class NewModelHearingAggregateTest {
 
         final UUID previousHearingEventId = randomUUID();
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
         newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
@@ -367,7 +367,7 @@ public class NewModelHearingAggregateTest {
 
         final UUID previousHearingEventId = randomUUID();
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final NewModelHearingAggregate newModelHearingAggregate = new NewModelHearingAggregate();
         newModelHearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
@@ -409,7 +409,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void updateVerdict_shouldUpdateVerdict() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final Verdict verdict = Verdict.builder()
                 .withId(randomUUID())
@@ -455,7 +455,7 @@ public class NewModelHearingAggregateTest {
 
         final int expected = 0;
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final CaseDefendantDetailsWithHearingCommand command = initiateDefendantCommandTemplate();
 
@@ -474,7 +474,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void updateDefendantDetails_shouldUpdate_when_resultNotShared() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final CaseDefendantDetailsWithHearingCommand command = with(initiateDefendantCommandTemplate(),
                 template -> template.getDefendant().setId(initiateHearingCommand.getHearing().getDefendants().get(0).getId()));
@@ -496,7 +496,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyAndCurrentCategoryTypeIsGuiltyType_shouldUpdateConvictionDate() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
         
         // previous category type is not guilty hence conviction date is null
         initiateHearingCommand.getHearing().getDefendants().stream()
@@ -550,7 +550,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyTypeAndCurrentCategoryTypeIsNotGuiltyType_shouldClearConvictionDate() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final Verdict verdict = Verdict.builder()
                 .withId(randomUUID())
@@ -596,7 +596,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyTypeAndCurrentCategoryTypeIsGuiltyType_shouldNotUpdateConvictionDate() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
         
         final Verdict verdict = Verdict.builder()
                 .withId(randomUUID())
@@ -639,7 +639,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryTypeIsNotGuiltyType_shouldNotUpdateConvictionDate() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         // previous category type is not guilty hence conviction date is null
         initiateHearingCommand.getHearing().getDefendants().stream()
@@ -691,8 +691,8 @@ public class NewModelHearingAggregateTest {
 
         exception.expect(RuntimeException.class);
         exception.expectMessage("Offence id is not present");
-        
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
         
         final Verdict verdict = Verdict.builder()
                 .withId(randomUUID())
@@ -724,8 +724,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void updateHearingEvents_shouldUpdate() {
 
-        final InitiateHearingCommand initiateHearingCommand =
-                        initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final UUID hearingEventId = randomUUID();
 

@@ -28,6 +28,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -51,8 +52,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.basicShareResultsCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -95,7 +95,7 @@ public class ShareResultsCommandHandlerTest {
 
     @BeforeClass
     public static void init() {
-        initiateHearingCommand = initiateHearingCommandTemplate().build();
+        initiateHearingCommand = standardInitiateHearingTemplate().build();
         metadataId = UUID.randomUUID();
         sharedTime = new UtcClock().now();
         prosecutionCounselUpsert = ProsecutionCounselUpsert.builder()
@@ -171,8 +171,11 @@ public class ShareResultsCommandHandlerTest {
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
 
-        final ShareResultsCommand shareResultsCommand = with(basicShareResultsCommandTemplate(initiateHearingCommand),
-                template -> template.setHearingId(initiateHearingCommand.getHearing().getId()));
+        final ShareResultsCommand shareResultsCommand = TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate(
+                initiateHearingCommand.getHearing().getDefendants().get(0).getId(),
+                initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
+                initiateHearingCommand.getCases().get(0).getCaseId()
+        ).setHearingId(initiateHearingCommand.getHearing().getId());
 
         final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
 

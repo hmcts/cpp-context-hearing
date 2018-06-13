@@ -1,96 +1,55 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
-import uk.gov.moj.cpp.hearing.command.initiate.Address;
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
-
-import java.text.MessageFormat;
-import java.util.UUID;
+import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
-import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingDefendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.standardAddDefenceCounselCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.defendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+@SuppressWarnings("unchecked")
 public class DefenceCounselIT extends AbstractIT {
 
     @Test
     public void addDefenceCounsel_shouldAdd() throws Exception {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        );
 
-        AddDefenceCounselCommand firstDefenceCounsel = AddDefenceCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(initiateHearingCommand.getHearing().getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .addDefendantId(DefendantId.builder().withDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
-                .build();
+        final AddDefenceCounselCommand firstDefenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
+                standardAddDefenceCounselCommandTemplate(hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
+        );
 
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-defence-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(firstDefenceCounsel)
-                .executeSuccessfully();
-
-
-        final String queryEndpoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearingCommand.getHearing().getId());
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.attendees.defenceCounsels.[0].attendeeId", is(firstDefenceCounsel.getAttendeeId().toString())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].defendantId", is(firstDefenceCounsel.getDefendantIds().get(0).getDefendantId().toString())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].status", is(firstDefenceCounsel.getStatus())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].firstName", is(firstDefenceCounsel.getFirstName())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].lastName", is(firstDefenceCounsel.getLastName())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].title", is(firstDefenceCounsel.getTitle()))
                         )));
 
-        AddDefenceCounselCommand secondDefenceCounsel = AddDefenceCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(initiateHearingCommand.getHearing().getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .addDefendantId(DefendantId.builder().withDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
-                .build();
+        final AddDefenceCounselCommand secondDefenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
+                standardAddDefenceCounselCommandTemplate(hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
+        );
 
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-defence-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(secondDefenceCounsel)
-                .executeSuccessfully();
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -115,69 +74,45 @@ public class DefenceCounselIT extends AbstractIT {
     @Test
     public void addDefenceCounsel_shouldEdit() throws Exception {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, (i) -> {
-            i.getHearing().addDefendant(initiateHearingDefendantTemplate(i.getCases().get(0).getCaseId()));
-        });
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
+                    i.getHearing().getDefendants().add(defendantTemplate(i.getCases().get(0).getCaseId()));
+                }).build())
+        );
 
-        AddDefenceCounselCommand addDefenceCounselCommand = AddDefenceCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(initiateHearingCommand.getHearing().getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .addDefendantId(DefendantId.builder().withDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
-                .build();
+        final AddDefenceCounselCommand firstDefenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
+                standardAddDefenceCounselCommandTemplate(hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
+        );
 
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-defence-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(addDefenceCounselCommand)
-                .executeSuccessfully();
-
-
-        final String queryEndpoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), initiateHearingCommand.getHearing().getId());
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                withJsonPath("$.attendees.defenceCounsels.[0].attendeeId", is(addDefenceCounselCommand.getAttendeeId().toString())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].status", is(addDefenceCounselCommand.getStatus())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].firstName", is(addDefenceCounselCommand.getFirstName())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].lastName", is(addDefenceCounselCommand.getLastName())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].title", is(addDefenceCounselCommand.getTitle()))
+                                withJsonPath("$.attendees.defenceCounsels.[0].attendeeId", is(firstDefenceCounsel.getAttendeeId().toString())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].defendantId", is(hearingOne.getFirstDefendantId().toString())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].status", is(firstDefenceCounsel.getStatus())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].firstName", is(firstDefenceCounsel.getFirstName())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].lastName", is(firstDefenceCounsel.getLastName())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].title", is(firstDefenceCounsel.getTitle()))
                         )));
 
-        UUID secondDefendantId = initiateHearingCommand.getHearing().getDefendants().get(1).getId();
+        UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(), with(firstDefenceCounsel, counsel -> {
+            counsel.clearAllDefendantIds();
+            counsel.addDefendantId(DefendantId.builder().withDefendantId(hearingOne.getSecondDefendantId()).build());
+        }));
 
-        addDefenceCounselCommand.withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withStatus(STRING.next())
-                .withTitle(STRING.next())
-                .clearAllDefendantIds()
-                .addDefendantId(DefendantId.builder().withDefendantId(secondDefendantId).build());
-
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-defence-counsel+json")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .withPayload(addDefenceCounselCommand)
-                .executeSuccessfully();
-
-        poll(requestParams(getBaseUri() + "/" + queryEndpoint, "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
-                                withJsonPath("$.attendees.defenceCounsels.[0].attendeeId", is(addDefenceCounselCommand.getAttendeeId().toString())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].defendantId", is(initiateHearingCommand.getHearing().getDefendants().get(1).getId().toString())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].status", is(addDefenceCounselCommand.getStatus())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].firstName", is(addDefenceCounselCommand.getFirstName())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].lastName", is(addDefenceCounselCommand.getLastName())),
-                                withJsonPath("$.attendees.defenceCounsels.[0].title", is(addDefenceCounselCommand.getTitle()))
+                                withJsonPath("$.attendees.defenceCounsels.[0].attendeeId", is(firstDefenceCounsel.getAttendeeId().toString())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].defendantId", is(hearingOne.getSecondDefendantId().toString())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].status", is(firstDefenceCounsel.getStatus())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].firstName", is(firstDefenceCounsel.getFirstName())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].lastName", is(firstDefenceCounsel.getLastName())),
+                                withJsonPath("$.attendees.defenceCounsels.[0].title", is(firstDefenceCounsel.getTitle()))
                         )));
     }
 }

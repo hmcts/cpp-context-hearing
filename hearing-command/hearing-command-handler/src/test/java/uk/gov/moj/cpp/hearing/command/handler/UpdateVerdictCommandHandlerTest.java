@@ -54,7 +54,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOO
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateVerdictCommandHandlerTest {
@@ -94,13 +94,13 @@ public class UpdateVerdictCommandHandlerTest {
     @Test
     public void updateVerdict_toGuilty() throws EventStreamException {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
-        
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+
         initiateHearingCommand.getHearing().getDefendants().stream()
-        .flatMap(d -> d.getOffences().stream())
-        .findFirst()
-        .get()
-        .setConvictionDate(null);
+                .flatMap(d -> d.getOffences().stream())
+                .findFirst()
+                .get()
+                .setConvictionDate(null);
 
         HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.builder()
                 .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
@@ -178,9 +178,9 @@ public class UpdateVerdictCommandHandlerTest {
     @Test
     public void updateVerdict_toNotGuilty() throws EventStreamException {
 
-        InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
-        HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.builder()
+        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.builder()
                 .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())
                 .withHearingId(initiateHearingCommand.getHearing().getId())
                 .addDefendant(Defendant.builder()

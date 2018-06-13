@@ -55,7 +55,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitiateHearingCommandHandlerTest {
@@ -95,7 +95,7 @@ public class InitiateHearingCommandHandlerTest {
     @Test
     public void initiateHearing() throws Throwable {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final UUID caseId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCaseId();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();

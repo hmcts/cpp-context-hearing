@@ -53,7 +53,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChangeCaseDefendantOffencesCommandHandlerTest {
@@ -173,7 +173,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testAddOffenceForExistingHearing() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final FoundHearingsForNewOffence foundHearingsForNewOffence = FoundHearingsForNewOffence.builder()
                 .withId(randomUUID())
@@ -205,7 +205,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testUpdateOffence() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final FoundHearingsForEditOffence foundHearingsForEditOffence = FoundHearingsForEditOffence.builder()
                 .withId(randomUUID())
@@ -233,7 +233,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testDeleteOffence() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
 
         final FoundHearingsForDeleteOffence foundHearingsForDeleteOffence = FoundHearingsForDeleteOffence.builder()
                 .withId(randomUUID())

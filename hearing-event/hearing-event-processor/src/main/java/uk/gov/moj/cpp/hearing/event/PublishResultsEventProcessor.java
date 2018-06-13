@@ -37,10 +37,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
-@SuppressWarnings({"squid:S1188"})
+@SuppressWarnings({"squid:S1188", "squid:S2221"})
 @ServiceComponent(EVENT_PROCESSOR)
 public class PublishResultsEventProcessor {
 
@@ -73,31 +74,36 @@ public class PublishResultsEventProcessor {
         final ResultsShared input = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
 
-        final List<Nows> nows = nowsDataProcessor.createNows(input);
+        try {
+            final List<Nows> nows = nowsDataProcessor.createNows(input);
 
-        if (!nows.isEmpty()) {
-            GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
-                    .setHearing(
-                            nowsDataProcessor.translateReferenceData(input)
-                                    .setNows(nows)
-                                    .setNowTypes(
-                                            nowsDataProcessor.findNowDefinitions(input.getCompletedResultLines())
-                                                    .stream()
-                                                    .map(resultDefinition -> NowTypes.nowTypes()
-                                                            .setId(resultDefinition.getId())
-                                                            .setDescription(resultDefinition.getName())//TODO - check this.
-                                                            .setJurisdiction(resultDefinition.getJurisdiction())
-                                                            .setPriority(resultDefinition.getUrgentTimeLimitInMinutes().toString())//TODO - check this.
-                                                            .setRank(resultDefinition.getRank())
-                                                            .setStaticText(resultDefinition.getText())
-                                                            .setStaticTextWelsh(resultDefinition.getWelshText())
-                                                            .setTemplateName(resultDefinition.getTemplateName()))
-                                                    .collect(toList())
-                                    )
 
-                    );
-            this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows.v2")
-                    .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
+            if (!nows.isEmpty()) {
+                GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
+                        .setHearing(
+                                nowsDataProcessor.translateReferenceData(input)
+                                        .setNows(nows)
+                                        .setNowTypes(
+                                                nowsDataProcessor.findNowDefinitions(input.getCompletedResultLines())
+                                                        .stream()
+                                                        .map(resultDefinition -> NowTypes.nowTypes()
+                                                                .setId(resultDefinition.getId())
+                                                                .setDescription(resultDefinition.getName())
+                                                                .setJurisdiction(resultDefinition.getJurisdiction())
+                                                                .setPriority(ofNullable(resultDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
+                                                                .setRank(resultDefinition.getRank())
+                                                                .setStaticText(resultDefinition.getText())
+                                                                .setStaticTextWelsh(resultDefinition.getWelshText())
+                                                                .setTemplateName(resultDefinition.getTemplateName()))
+                                                        .collect(toList())
+                                        )
+
+                        );
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows.v2")
+                        .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
+            }
+        } catch (Exception e) {
+            LOGGER.error("NOWS processing generated exception", e);
         }
 
         ShareResultsMessage shareResultsMessage = ShareResultsMessage.shareResultsMessage()

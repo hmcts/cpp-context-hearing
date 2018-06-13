@@ -1,5 +1,18 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.hamcrest.core.Is;
+import org.junit.Test;
+import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
@@ -14,24 +27,10 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
-import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import org.hamcrest.core.Is;
-import org.junit.Test;
-
-import uk.gov.moj.cpp.hearing.command.DefendantId;
-import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.standardAddDefenceCounselCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 @SuppressWarnings({"unchecked", "serial"})
 public class DeleteAttendeeHearingDayIT extends AbstractIT {
@@ -39,38 +38,25 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     @Test
     public void hearingSingleDay_shouldRemoveOnlyAttendeeAndHearingDayAssociationForAnEspecificAttendeeAndGivenDate() throws Exception {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, asDefault());
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        );
 
-        final Hearing hearing = initiateHearingCommand.getHearing();
+        final Hearing hearing = hearingOne.it().getHearing();
 
-        final UUID attendeeId = randomUUID();
-
-        final AddDefenceCounselCommand defenceCounsel = AddDefenceCounselCommand.builder()
-                .withAttendeeId(attendeeId)
-                .withPersonId(randomUUID())
-                .withHearingId(hearing.getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .addDefendantId(DefendantId.builder().withDefendantId(hearing.getDefendants().get(0).getId()))
-                .build();
+        final AddDefenceCounselCommand defenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
+                standardAddDefenceCounselCommandTemplate(hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
+        );
 
         final AddProsecutionCounselCommand prosecutionCounsel = AddProsecutionCounselCommand.builder()
                 .withAttendeeId(randomUUID())
                 .withPersonId(randomUUID())
-                .withHearingId(hearing.getId())
+                .withHearingId(hearingOne.getHearingId())
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
                 .withTitle(STRING.next())
                 .withStatus(STRING.next())
                 .build();
-
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-defence-counsel+json")
-                .withArgs(hearing.getId())
-                .withPayload(defenceCounsel)
-                .executeSuccessfully();
 
         makeCommand(requestSpec, "hearing.update-hearing")
                 .ofType("application/vnd.hearing.add-prosecution-counsel+json")
@@ -78,26 +64,24 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
                 .withPayload(prosecutionCounsel)
                 .executeSuccessfully();
 
-
         final Map<String, Object> deleteAttendeeCommand = new HashMap<String, Object>() {{
             put("hearingDate", hearing.getHearingDays().get(0).toLocalDate());
         }};
 
         makeCommand(requestSpec, "hearing.delete-attendee")
                 .ofType("application/vnd.hearing.delete-attendee+json")
-                .withArgs(hearing.getId(),defenceCounsel.getAttendeeId())
+                .withArgs(hearing.getId(), defenceCounsel.getAttendeeId())
                 .withPayload(deleteAttendeeCommand)
                 .executeSuccessfully();
 
         final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.events.attendee-deleted")
-                .withFilter(isJson(withJsonPath("$.attendeeId", Is.is(defenceCounsel.getAttendeeId().toString()))));
+                .withFilter(isJson(withJsonPath("$.attendeeId", is(defenceCounsel.getAttendeeId().toString()))));
 
         publicEventTopic.waitFor();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
-                                        .withHeader(CPP_UID_HEADER.getName(),
-                                                        CPP_UID_HEADER.getValue())
-                                        .build())
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -120,39 +104,24 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     @Test
     public void hearingMultipleeDays_shouldRemoveAllAttendeeAndHearingDayAssociationsGreaterOrEqualAGivenDate() throws Exception {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, data -> {
-            final ZonedDateTime startDateTime = ZonedDateTime.now();
-            data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
-        });
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
+                    final ZonedDateTime startDateTime = ZonedDateTime.now();
+                    data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
+                }).build())
+        );
 
-        final Hearing hearing = initiateHearingCommand.getHearing();
-
-        final AddDefenceCounselCommand defenceCounsel = AddDefenceCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(hearing.getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .addDefendantId(DefendantId.builder().withDefendantId(hearing.getDefendants().get(0).getId()))
-                .build();
-
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-defence-counsel+json")
-                .withArgs(hearing.getId())
-                .withPayload(defenceCounsel)
-                .executeSuccessfully();
-
-
+        final AddDefenceCounselCommand defenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
+                standardAddDefenceCounselCommandTemplate(hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
+        );
 
         final Map<String, Object> deleteAttendeeCommand = new HashMap<String, Object>() {{
-            put("hearingDate", hearing.getHearingDays().get(0).toLocalDate());
+            put("hearingDate", hearingOne.it().getHearing().getHearingDays().get(0).toLocalDate());
         }};
 
         makeCommand(requestSpec, "hearing.delete-attendee")
                 .ofType("application/vnd.hearing.delete-attendee+json")
-                .withArgs(hearing.getId(),defenceCounsel.getAttendeeId())
+                .withArgs(hearingOne.getHearingId(), defenceCounsel.getAttendeeId())
                 .withPayload(deleteAttendeeCommand)
                 .executeSuccessfully();
 
@@ -161,10 +130,9 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
 
         publicEventTopic.waitFor();
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
-                                        .withHeader(CPP_UID_HEADER.getName(),
-                                                        CPP_UID_HEADER.getValue())
-                                        .build())
+        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -180,31 +148,18 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     @Test
     public void hearingMultipleeDays_shouldRemoveOnlyAttendeeAndHearingDayAssociationsEqualAGivenDate() throws Exception {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearing(requestSpec, data -> {
-            final ZonedDateTime startDateTime = ZonedDateTime.now();
-            data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
-        });
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
+                    final ZonedDateTime startDateTime = ZonedDateTime.now();
+                    data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
+                }).build())
+        );
 
-        final Hearing hearing = initiateHearingCommand.getHearing();
+        final AddDefenceCounselCommand defenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
+                standardAddDefenceCounselCommandTemplate(hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
+        );
 
-        final AddDefenceCounselCommand defenceCounsel = AddDefenceCounselCommand.builder()
-                .withAttendeeId(randomUUID())
-                .withPersonId(randomUUID())
-                .withHearingId(hearing.getId())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withTitle(STRING.next())
-                .withStatus(STRING.next())
-                .addDefendantId(DefendantId.builder().withDefendantId(hearing.getDefendants().get(0).getId()))
-                .build();
-
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-defence-counsel+json")
-                .withArgs(hearing.getId())
-                .withPayload(defenceCounsel)
-                .executeSuccessfully();
-
-
+        final Hearing hearing = hearingOne.it().getHearing();
 
         final Map<String, Object> deleteAttendeeCommand = new HashMap<String, Object>() {{
             put("hearingDate", hearing.getHearingDays().get(1).toLocalDate());
@@ -212,7 +167,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
 
         makeCommand(requestSpec, "hearing.delete-attendee")
                 .ofType("application/vnd.hearing.delete-attendee+json")
-                .withArgs(hearing.getId(),defenceCounsel.getAttendeeId())
+                .withArgs(hearing.getId(), defenceCounsel.getAttendeeId())
                 .withPayload(deleteAttendeeCommand)
                 .executeSuccessfully();
 
@@ -222,9 +177,8 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         publicEventTopic.waitFor();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
-                                        .withHeader(CPP_UID_HEADER.getName(),
-                                                        CPP_UID_HEADER.getValue())
-                                        .build())
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

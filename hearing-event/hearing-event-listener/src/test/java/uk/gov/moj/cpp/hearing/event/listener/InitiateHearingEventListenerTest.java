@@ -16,7 +16,7 @@ import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithR
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateHearingCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 import java.io.StringReader;
 import java.time.LocalDate;
@@ -132,7 +132,7 @@ public class InitiateHearingEventListenerTest {
     @Test
     public void shouldInsertAhearingWhenInitiated() {
 
-        final InitiateHearingCommand command = initiateHearingCommandTemplate().build();
+        final InitiateHearingCommand command = standardInitiateHearingTemplate().build();
 
         final Case legalCase = command.getCases().get(0);
         final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing = command.getHearing();
@@ -237,7 +237,7 @@ public class InitiateHearingEventListenerTest {
 
         final UUID caseId = randomUUID();
         final UUID offenceId = randomUUID();
-        final UUID hearingId = offenceId;
+        final UUID hearingId = randomUUID();
         final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(offenceId, hearingId);
         final ConvictionDateAdded convictionDateAdded = new ConvictionDateAdded(caseId, hearingId, offenceId, PAST_LOCAL_DATE.next());
 
