@@ -97,7 +97,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
                                         .withHeader(CPP_UID_HEADER.getName(),
                                                         CPP_UID_HEADER.getValue())
-                                        .build()).timeout(30L, TimeUnit.SECONDS)
+                                        .build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -164,7 +164,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
                                         .withHeader(CPP_UID_HEADER.getName(),
                                                         CPP_UID_HEADER.getValue())
-                                        .build()).timeout(30L, TimeUnit.SECONDS)
+                                        .build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -224,7 +224,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
         poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
                                         .withHeader(CPP_UID_HEADER.getName(),
                                                         CPP_UID_HEADER.getValue())
-                                        .build()).timeout(30L, TimeUnit.SECONDS)
+                                        .build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
