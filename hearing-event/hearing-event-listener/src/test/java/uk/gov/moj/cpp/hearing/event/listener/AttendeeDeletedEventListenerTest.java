@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.reset;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
@@ -175,28 +176,19 @@ public class AttendeeDeletedEventListenerTest {
         assertThat(hearingDateIdArgumentCaptor.getAllValues(), hasItems(hearingDateId, futureHearingDateId));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void shouldFailureToFindHearingWhenAttendeeDeletedEventIsRaised() throws Exception {
+    @Test
+    public void shouldFailureToFindHearingWhenAttendeeDeletedEventIsRaised() {
         final AttendeeDeleted attendeeDeleted = new AttendeeDeleted(hearingId, attendeeId, startDateTime.toLocalDate());
 
         when(hearingRepository.findById(hearingId)).thenReturn(null);
-        when(attendeeHearingDateRespository.delete(hearingId, attendeeId, hearingDateId)).thenReturn(0);
 
         attendeeDeletedEventListener.onAttendeeDeleted(envelopeFrom(metadataWithRandomUUID("hearing.events.attendee-deleted"),
                 objectToJsonObjectConverter.convert(attendeeDeleted)));
 
-        final ArgumentCaptor<UUID> hearingIdArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
-        final ArgumentCaptor<UUID> attendeeIdArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
-        final ArgumentCaptor<UUID> hearingDateIdArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
-
-        verify(this.attendeeHearingDateRespository).delete(hearingIdArgumentCaptor.capture(), attendeeIdArgumentCaptor.capture(), hearingDateIdArgumentCaptor.capture());
-
-        assertThat(hearingIdArgumentCaptor.getValue(), is(hearingId));
-        assertThat(attendeeIdArgumentCaptor.getValue(), is(attendeeId));
-        assertThat(hearingDateIdArgumentCaptor.getValue(), is(hearingSingleDay.getHearingDays().get(0).getId().getId()));
+       verifyNoMoreInteractions(attendeeHearingDateRespository);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void shouldFailureToFindHearingDayWhenAttendeeDeletedEventIsRaised() throws Exception {
         final AttendeeDeleted attendeeDeleted = new AttendeeDeleted(hearingId, attendeeId, startDateTime.toLocalDate());
 

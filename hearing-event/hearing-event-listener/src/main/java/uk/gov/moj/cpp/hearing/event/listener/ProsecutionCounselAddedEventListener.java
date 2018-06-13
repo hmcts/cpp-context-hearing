@@ -43,45 +43,44 @@ public class ProsecutionCounselAddedEventListener {
 
         final Hearing hearing = hearingRepository.findBy(prosecutionCounselAdded.getHearingId());
 
-        if (hearing == null){
-            throw new IllegalArgumentException("Hearing not found by id: " + prosecutionCounselAdded.getHearingId() + " for add prosecution counsel");
+        if (hearing != null) {
+
+            final ProsecutionAdvocate prosecutionAdvocate = hearing.getAttendees().stream()
+                    .filter(a -> a instanceof ProsecutionAdvocate)
+                    .map(ProsecutionAdvocate.class::cast)
+                    .filter(a -> a.getId().getId().equals(prosecutionCounselAdded.getAttendeeId()))
+                    .findFirst()
+                    .orElseGet(() -> {
+
+                        final ProsecutionAdvocate prosecutionCounselor = ProsecutionAdvocate.builder()
+                                .withId(new HearingSnapshotKey(prosecutionCounselAdded.getAttendeeId(), hearing.getId()))
+                                .build();
+
+                        if (hearing.getAttendees() == null) {
+                            hearing.setAttendees(new ArrayList<>());
+                        }
+                        hearing.getAttendees().add(prosecutionCounselor);
+                        return prosecutionCounselor;
+                    });
+
+            prosecutionAdvocate
+                    .setStatus(prosecutionCounselAdded.getStatus())
+                    .setPersonId(prosecutionCounselAdded.getPersonId())
+                    .setTitle(prosecutionCounselAdded.getTitle())
+                    .setFirstName(prosecutionCounselAdded.getFirstName())
+                    .setLastName(prosecutionCounselAdded.getLastName());
+
+            this.hearingRepository.saveAndFlush(hearing);
+
+            hearing.getHearingDays().forEach(hearingDay ->
+                    this.attendeeHearingDateRespository.saveAndFlush(
+                            AttendeeHearingDate.builder()
+                                    .withId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()))
+                                    .withAttendeeId(prosecutionAdvocate.getId().getId())
+                                    .withHearingDateId(hearingDay.getId().getId())
+                                    .build()
+                    )
+            );
         }
-
-        final ProsecutionAdvocate prosecutionAdvocate = hearing.getAttendees().stream()
-                .filter(a -> a instanceof ProsecutionAdvocate)
-                .map(ProsecutionAdvocate.class::cast)
-                .filter(a -> a.getId().getId().equals(prosecutionCounselAdded.getAttendeeId()))
-                .findFirst()
-                .orElseGet(() -> {
-
-                    final ProsecutionAdvocate prosecutionCounselor = ProsecutionAdvocate.builder()
-                            .withId(new HearingSnapshotKey(prosecutionCounselAdded.getAttendeeId(), hearing.getId()))
-                            .build();
-
-                    if (hearing.getAttendees() == null) {
-                        hearing.setAttendees(new ArrayList<>());
-                    }
-                    hearing.getAttendees().add(prosecutionCounselor);
-                    return prosecutionCounselor;
-                });
-
-        prosecutionAdvocate
-                .setStatus(prosecutionCounselAdded.getStatus())
-                .setPersonId(prosecutionCounselAdded.getPersonId())
-                .setTitle(prosecutionCounselAdded.getTitle())
-                .setFirstName(prosecutionCounselAdded.getFirstName())
-                .setLastName(prosecutionCounselAdded.getLastName());
-
-        this.hearingRepository.saveAndFlush(hearing);
-
-        hearing.getHearingDays().forEach(hearingDay ->
-            this.attendeeHearingDateRespository.saveAndFlush(
-                    AttendeeHearingDate.builder()
-                        .withId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()))
-                        .withAttendeeId(prosecutionAdvocate.getId().getId())
-                        .withHearingDateId(hearingDay.getId().getId())
-                        .build()
-                   )
-        );
     }
 }

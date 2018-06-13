@@ -35,10 +35,7 @@ public class NowsGeneratedEventListener {
     @Handles("hearing.events.nows-material-status-updated")
     public void nowsGenerated(final JsonEnvelope event) {
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NowsMaterialStatusUpdated.class);
-        final int result = nowsMaterialRepository.updateStatus(nowsMaterialStatusUpdated.getMaterialId(), valueOf(nowsMaterialStatusUpdated.getStatus().name()));
-        if (result == 0) {
-           throw new IllegalStateException(nowsMaterialStatusUpdated + " event failure to update nows material view store status");
-        }
+        this.nowsMaterialRepository.updateStatus(nowsMaterialStatusUpdated.getMaterialId(), valueOf(nowsMaterialStatusUpdated.getStatus().name()));
         LOGGER.info("{} event had updated the nows material viewstore successfully status", nowsMaterialStatusUpdated);
     }
 }
