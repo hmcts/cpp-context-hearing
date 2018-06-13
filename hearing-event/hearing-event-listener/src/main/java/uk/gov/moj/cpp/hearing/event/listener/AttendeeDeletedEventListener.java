@@ -43,18 +43,16 @@ public class AttendeeDeletedEventListener {
     public void onAttendeeDeleted(final JsonEnvelope envelope) {
         final AttendeeDeleted attendeeDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), AttendeeDeleted.class);
         final Hearing hearing = hearingRepository.findById(attendeeDeleted.getHearingId());
-        if (null == hearing) {
-            throw new IllegalArgumentException("Cannot find hearing by id: " + attendeeDeleted.getHearingId());
+        if (null != hearing) {
+            final List<HearingDate> hearingDays = hearing.getHearingDays().stream()
+                    .filter(hearingDay -> hearingDay.getDate().compareTo(attendeeDeleted.getHearingDate()) >= 0)
+                    .collect(toList());
+            hearingDays.forEach(hearingDay -> {
+                final int result = this.attendeeHearingDateRespository.delete(attendeeDeleted.getHearingId(), attendeeDeleted.getAttendeeId(), hearingDay.getId().getId());
+                if (result == 0) {
+                    LOGGER.info("Attendee {} already deleted for hearing {} from day >= {}", attendeeDeleted.getAttendeeId(), attendeeDeleted.getHearingId(), attendeeDeleted.getHearingDate());
+                }
+            });
         }
-        final List<HearingDate> hearingDays = hearing.getHearingDays().stream()
-                .filter(hearingDay -> hearingDay.getDate().compareTo(attendeeDeleted.getHearingDate()) >= 0)
-                .collect(toList());
-        hearingDays.forEach(hearingDay -> {
-            final int result = this.attendeeHearingDateRespository.delete(attendeeDeleted.getHearingId(), attendeeDeleted.getAttendeeId(), hearingDay.getId().getId());
-            if (result == 0) {
-                throw new IllegalStateException("Cannot delete the attendee: " + attendeeDeleted.getAttendeeId() + " by hearing date: " + attendeeDeleted.getHearingDate() + " and hearing id: " + attendeeDeleted.getHearingId());
-            }
-        });
-        LOGGER.info("Attendee {} successfuly deleted from hearing {} from day >= {}", attendeeDeleted.getAttendeeId(), attendeeDeleted.getHearingId(), attendeeDeleted.getHearingDate());
     }
 }

@@ -68,7 +68,7 @@ public class NowsGeneratedEventListenerTest {
         assertThat(nowsMaterialStatusArgumentCaptor.getValue(), is(GENERATED));
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void shouldFailureToUpdateNowsMaterialStatusToGenerated() throws Exception {
 
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), NowsMaterialStatusType.GENERATED);

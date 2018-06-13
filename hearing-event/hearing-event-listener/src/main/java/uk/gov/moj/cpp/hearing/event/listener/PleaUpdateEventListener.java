@@ -44,19 +44,18 @@ public class PleaUpdateEventListener {
 
         final Offence offence = offenceRepository.findBySnapshotKey(new HearingSnapshotKey(event.getOffenceId(), event.getHearingId()));
 
-        if (offence == null){
-            throw new HandlerExecutionException("Offence not found by offenceId: " + event.getOffenceId() + " and hearingId: " + event.getHearingId(), null);
-        }
+        if (offence != null) {
 
-        offence.setPleaDate(event.getPleaDate());
-        offence.setPleaValue(event.getValue());
-        offenceRepository.save(offence);
+            offence.setPleaDate(event.getPleaDate());
+            offence.setPleaValue(event.getValue());
+            offenceRepository.save(offence);
 
-        final List<Offence> inheritedOffences = offenceRepository.findByOffenceIdOriginHearingId(event.getOffenceId(), event.getHearingId());
-        for (Offence inheritedOffence: inheritedOffences){
-            inheritedOffence.setPleaDate(event.getPleaDate());
-            inheritedOffence.setPleaValue(event.getValue());
-            offenceRepository.save(inheritedOffence);
+            final List<Offence> inheritedOffences = offenceRepository.findByOffenceIdOriginHearingId(event.getOffenceId(), event.getHearingId());
+            for (Offence inheritedOffence : inheritedOffences) {
+                inheritedOffence.setPleaDate(event.getPleaDate());
+                inheritedOffence.setPleaValue(event.getValue());
+                offenceRepository.save(inheritedOffence);
+            }
         }
     }
 

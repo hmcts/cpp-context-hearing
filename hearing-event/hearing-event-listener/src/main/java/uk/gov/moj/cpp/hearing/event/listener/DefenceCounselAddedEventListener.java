@@ -45,74 +45,73 @@ public class DefenceCounselAddedEventListener {
 
         final Hearing hearing = hearingRepository.findBy(defenceCounselUpsert.getHearingId());
 
-        if (hearing == null){
-            throw new IllegalArgumentException("Hearing not found by id: " + defenceCounselUpsert.getHearingId() + " for add defence counsel");
-        }
+        if (hearing != null) {
 
-        final DefenceAdvocate defenceAdvocate = hearing.getAttendees().stream()
-                .filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(defenceCounselUpsert.getAttendeeId()))
-                .map(DefenceAdvocate.class::cast)
-                .findFirst()
-                .orElseGet(() -> {
-                    final DefenceAdvocate defenceCounselor = DefenceAdvocate.builder()
-                            .withId(new HearingSnapshotKey(defenceCounselUpsert.getAttendeeId(), hearing.getId()))
-                            .build();
-                    hearing.getAttendees().add(defenceCounselor);
-                    return defenceCounselor;
-                });
+            final DefenceAdvocate defenceAdvocate = hearing.getAttendees().stream()
+                    .filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(defenceCounselUpsert.getAttendeeId()))
+                    .map(DefenceAdvocate.class::cast)
+                    .findFirst()
+                    .orElseGet(() -> {
+                        final DefenceAdvocate defenceCounselor = DefenceAdvocate.builder()
+                                .withId(new HearingSnapshotKey(defenceCounselUpsert.getAttendeeId(), hearing.getId()))
+                                .build();
+                        hearing.getAttendees().add(defenceCounselor);
+                        return defenceCounselor;
+                    });
 
-        defenceAdvocate
-                .setStatus(defenceCounselUpsert.getStatus())
-                .setPersonId(defenceCounselUpsert.getPersonId())
-                .setTitle(defenceCounselUpsert.getTitle())
-                .setFirstName(defenceCounselUpsert.getFirstName())
-                .setLastName(defenceCounselUpsert.getLastName());
+            defenceAdvocate
+                    .setStatus(defenceCounselUpsert.getStatus())
+                    .setPersonId(defenceCounselUpsert.getPersonId())
+                    .setTitle(defenceCounselUpsert.getTitle())
+                    .setFirstName(defenceCounselUpsert.getFirstName())
+                    .setLastName(defenceCounselUpsert.getLastName());
 
-        final List<Defendant> defendantsToRemove = new ArrayList<>();
-        for (Defendant defendant: defenceAdvocate.getDefendants()){
+            final List<Defendant> defendantsToRemove = new ArrayList<>();
+            for (Defendant defendant : defenceAdvocate.getDefendants()) {
 
-            if (!defenceCounselUpsert.getDefendantIds().contains(defendant.getId().getId())){
-                defendantsToRemove.add(defendant);
-                defendant.getDefenceAdvocates().removeIf(da -> da.getId().getId().equals(defenceAdvocate.getId().getId()));
-            }
-        }
-        defenceAdvocate.getDefendants().removeAll(defendantsToRemove);
-
-        defenceCounselUpsert.getDefendantIds().forEach(
-                defendantId -> {
-                    Defendant defendant = hearing.getDefendants().stream()
-                            .filter(d -> d.getId().getId().equals(defendantId))
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException(
-                                            String.format("hearing %s defence counsel %s added for unknown defendant %s ",
-                                                    hearing.getId(),
-                                                    defenceCounselUpsert.getAttendeeId(),
-                                                    defendantId
-                                            )
-                                    )
-                            );
-                    if (defenceAdvocate.getDefendants().stream()
-                            .noneMatch(d -> d.getId().getId().equals(defendantId))) {
-                        defenceAdvocate.getDefendants().add(defendant);
-                    }
-
-                    if (defendant.getDefenceAdvocates().stream()
-                            .noneMatch(d -> d.getId().getId().equals(defenceAdvocate.getId().getId()))) {
-                        defendant.getDefenceAdvocates().add(defenceAdvocate);
-                    }
+                if (!defenceCounselUpsert.getDefendantIds().contains(defendant.getId().getId())) {
+                    defendantsToRemove.add(defendant);
+                    defendant.getDefenceAdvocates().removeIf(da -> da.getId().getId().equals(defenceAdvocate.getId().getId()));
                 }
-        );
+            }
+            defenceAdvocate.getDefendants().removeAll(defendantsToRemove);
 
-        this.hearingRepository.saveAndFlush(hearing);
+            defenceCounselUpsert.getDefendantIds().forEach(
+                    defendantId -> {
+                        Defendant defendant = hearing.getDefendants().stream()
+                                .filter(d -> d.getId().getId().equals(defendantId))
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException(
+                                                String.format("hearing %s defence counsel %s added for unknown defendant %s ",
+                                                        hearing.getId(),
+                                                        defenceCounselUpsert.getAttendeeId(),
+                                                        defendantId
+                                                )
+                                        )
+                                );
+                        if (defenceAdvocate.getDefendants().stream()
+                                .noneMatch(d -> d.getId().getId().equals(defendantId))) {
+                            defenceAdvocate.getDefendants().add(defendant);
+                        }
 
-        hearing.getHearingDays().forEach(hearingDay ->
-            this.attendeeHearingDateRespository.saveAndFlush(
-                    AttendeeHearingDate.builder()
-                        .withId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()))
-                        .withAttendeeId(defenceAdvocate.getId().getId())
-                        .withHearingDateId(hearingDay.getId().getId())
-                        .build()
+                        if (defendant.getDefenceAdvocates().stream()
+                                .noneMatch(d -> d.getId().getId().equals(defenceAdvocate.getId().getId()))) {
+                            defendant.getDefenceAdvocates().add(defenceAdvocate);
+                        }
+                    }
+            );
+
+            this.hearingRepository.saveAndFlush(hearing);
+
+            hearing.getHearingDays().forEach(hearingDay ->
+                    this.attendeeHearingDateRespository.saveAndFlush(
+                            AttendeeHearingDate.builder()
+                                    .withId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()))
+                                    .withAttendeeId(defenceAdvocate.getId().getId())
+                                    .withHearingDateId(hearingDay.getId().getId())
+                                    .build()
                     )
-        );
+            );
+        }
     }
 }

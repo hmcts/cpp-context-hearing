@@ -37,6 +37,7 @@ import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
@@ -97,7 +98,7 @@ public class TestTemplates {
 
     public static InitiateHearingCommand.Builder initiateHearingCommandTemplate() {
         final UUID caseId = randomUUID();
-        final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next();
+        final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
         return InitiateHearingCommand.builder()
                 .addCase(Case.builder()
                         .withCaseId(caseId)
