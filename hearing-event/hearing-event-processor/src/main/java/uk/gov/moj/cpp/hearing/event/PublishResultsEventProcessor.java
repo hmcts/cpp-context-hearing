@@ -279,6 +279,7 @@ public class PublishResultsEventProcessor {
                         .setLevel(rl.getLevel().name())
                         .setPrompts(rl.getPrompts().stream()
                                 .map(p -> Prompt.prompt()
+                                        .setId(p.getId())
                                         .setLabel(p.getLabel())
                                         .setValue(p.getValue()))
                                 .collect(Collectors.toList())

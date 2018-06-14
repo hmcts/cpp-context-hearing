@@ -1,9 +1,14 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
+import java.util.UUID;
+
 public class Prompt {
 
+    private UUID id;
     private String label;
     private String value;
+
+    public UUID getId() { return id; }
 
     public String getLabel() {
         return label;
@@ -11,6 +16,11 @@ public class Prompt {
 
     public String getValue() {
         return value;
+    }
+
+    public Prompt setId(final UUID id) {
+        this.id = id;
+        return this;
     }
 
     public Prompt setLabel(String label) {
