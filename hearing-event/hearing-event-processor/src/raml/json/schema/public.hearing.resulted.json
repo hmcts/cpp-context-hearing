@@ -395,6 +395,9 @@
           "items": {
             "type": "object",
             "properties": {
+              "id": {
+                "$ref": "#/definitions/uuid"
+              },
               "label": {
                 "type": "string"
               },
@@ -402,7 +405,10 @@
                 "type": "string"
               }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+              "id"
+            ]
           }
         }
       },

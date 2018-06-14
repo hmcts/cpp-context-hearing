@@ -89,10 +89,12 @@
         "rank": 1,
         "prompts": [
           {
+            "id": "7567766c-6fb9-11e8-adc0-fa7ae01bbebc",
             "label": "Imprisonment duration",
             "value": "1 year 6 months"
           },
           {
+            "id": "75677b1c-6fb9-11e8-adc0-fa7ae01bbebc",
             "label": "Prison",
             "value": "Wormwood Scrubs"
           }
