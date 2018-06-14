@@ -3,8 +3,18 @@ package uk.gov.moj.cpp.hearing.it;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ShareResultsCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
@@ -12,6 +22,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdateVerdictCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
@@ -66,6 +77,39 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldRaiseResultsSharedEvent() {
+        final UUID primaryResultDefinitionId = UUID.randomUUID();
+        final UUID mandatoryPromptId = UUID.randomUUID();
+        final String mandatoryPromptLabel = "label1";
+        AllNows allNows = AllNows.allNows()
+                .setNows(Arrays.asList(
+                        NowDefinition.now().setId(UUID.randomUUID())
+                                .setResultDefinitions(Arrays.asList(
+                                        ResultDefinitions.resultDefinitions()
+                                                .setId(primaryResultDefinitionId)
+                                                .setMandatory(true)
+                                                .setPrimaryResult(true)
+                                ))
+                ));
+
+        ReferenceDataStub.stubGetAllNowsMetaData(allNows);
+
+        final String userGroup1 = "DefenseCounsel";
+        AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
+                Arrays.asList(ResultDefinition.resultDefinition()
+                        .setId(primaryResultDefinitionId)
+                        .setUserGroups(Arrays.asList(userGroup1))
+                        .setPrompts(
+                                Arrays.asList(
+                                        Prompt.prompt().setId(mandatoryPromptId)
+                                                .setMandatory(true)
+                                                .setLabel("label1")
+                                                .setUserGroups(Arrays.asList(userGroup1))
+                                )
+                        )
+                )
+        );
+
+        ReferenceDataStub.stubGetAllResultDefinitions(allResultDefinitions);
 
         InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
@@ -108,6 +152,11 @@ public class ShareResultsIT extends AbstractIT {
                         standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId()),
                         command -> {
                             command.getCompletedResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
+                            command.getCompletedResultLines().get(0).setResultDefinitionId(primaryResultDefinitionId);
+                            ResultPrompt original = command.getCompletedResultLines().get(0).getPrompts().get(0);
+                            command.getCompletedResultLines().get(0).getPrompts().set(0, ResultPrompt.builder().withId(mandatoryPromptId).withLabel(mandatoryPromptLabel).withValue(original.getLabel()).build());
+                            command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
+
                         })
                 )
         );

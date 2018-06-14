@@ -17,7 +17,9 @@ public class ResultDefinition {
 
     private Integer rank;
 
-    private String version;
+    private List<WordGroups> wordGroups;
+
+    private List<String> userGroups = new ArrayList<>();
 
     private List<Prompt> prompts = new ArrayList<>();
 
@@ -25,7 +27,11 @@ public class ResultDefinition {
 
     private Date endDate;
 
-    private List<String> userGroups = new ArrayList<>();
+    private String version;
+
+    public static ResultDefinition resultDefinition() {
+        return new ResultDefinition();
+    }
 
     public UUID getId() {
         return this.id;
@@ -72,12 +78,21 @@ public class ResultDefinition {
         return this;
     }
 
-    public String getVersion() {
-        return this.version;
+    public List<WordGroups> getWordGroups() {
+        return this.wordGroups;
     }
 
-    public ResultDefinition setVersion(String version) {
-        this.version = version;
+    public ResultDefinition setWordGroups(List<WordGroups> wordGroups) {
+        this.wordGroups = wordGroups;
+        return this;
+    }
+
+    public List<String> getUserGroups() {
+        return this.userGroups;
+    }
+
+    public ResultDefinition setUserGroups(List<String> userGroups) {
+        this.userGroups = userGroups;
         return this;
     }
 
@@ -108,16 +123,12 @@ public class ResultDefinition {
         return this;
     }
 
-    public List<String> getUserGroups() {
-        return this.userGroups;
+    public String getVersion() {
+        return version;
     }
 
-    public ResultDefinition setUserGroups(List<String> userGroups) {
-        this.userGroups = userGroups;
+    public ResultDefinition setVersion(String version) {
+        this.version = version;
         return this;
-    }
-
-    public static ResultDefinition resultDefinition() {
-        return new ResultDefinition();
     }
 }

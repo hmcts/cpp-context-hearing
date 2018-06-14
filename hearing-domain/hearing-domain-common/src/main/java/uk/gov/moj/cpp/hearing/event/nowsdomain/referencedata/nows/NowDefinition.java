@@ -25,6 +25,10 @@ public class NowDefinition {
 
     private List<ResultDefinitions> resultDefinitions;
 
+    public static NowDefinition now() {
+        return new NowDefinition();
+    }
+
     public UUID getId() {
         return this.id;
     }
@@ -113,9 +117,5 @@ public class NowDefinition {
     public NowDefinition setResultDefinitions(List<ResultDefinitions> resultDefinitions) {
         this.resultDefinitions = resultDefinitions;
         return this;
-    }
-
-    public static NowDefinition now() {
-        return new NowDefinition();
     }
 }

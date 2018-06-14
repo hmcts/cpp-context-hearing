@@ -108,7 +108,7 @@ public class HearingEventProcessorTest {
     private static final String FIELD_LEVEL = "level";
     private static final String FIELD_RESULT_LINES = "resultLines";
     private static final String FIELD_RESULT_LABEL = "resultLabel";
-    private static final String FIELD_PROMPTS = "prompts";
+    private static final String FIELD_PROMPTS = "prompt";
     private static final String FIELD_PROMPT_LABEL = "label";
     private static final String FIELD_VALUE = "value";
     private static final String FIELD_PERSON_ID = "personId";
@@ -242,7 +242,7 @@ public class HearingEventProcessorTest {
         verify(this.sender, times(sendCount)).send(this.envelopeArgumentCaptor.capture());
         List<JsonEnvelope> messages = this.envelopeArgumentCaptor.getAllValues();
 
-        final JsonEnvelope result =  messages.get(0);//this.envelopeArgumentCaptor.getValue();
+        final JsonEnvelope result = messages.get(0);//this.envelopeArgumentCaptor.getValue();
         final JsonObject resultingPayload = result.payloadAsJsonObject();
         return (C) jsonObjectToObjectConverter.convert(resultingPayload, commandClass);
     }

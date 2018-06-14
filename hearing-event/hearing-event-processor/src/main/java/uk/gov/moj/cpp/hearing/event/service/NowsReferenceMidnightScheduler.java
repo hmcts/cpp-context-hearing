@@ -20,7 +20,7 @@ public class NowsReferenceMidnightScheduler {
     @Schedule(hour = "23", minute = "59", second = "59", persistent = false)
     public void runJob() {
         LOGGER.error("Running job... to reload result cache ");
-            nowsReferenceCache.reload();
-        }
+        nowsReferenceCache.reload();
+    }
 
 }

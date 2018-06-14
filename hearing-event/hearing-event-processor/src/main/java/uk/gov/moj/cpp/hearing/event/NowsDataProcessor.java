@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -43,6 +44,10 @@ public class NowsDataProcessor {
 
     public static final String DEFENCE_COUNSEL_ATTENDEE_TYPE = "DefenseCounsel";
     public static final String PROSECUTION_COUNSEL_ATTENDEE_TYPE = "ProsecutionCounsel";
+
+    public void setContext(JsonEnvelope context) {
+        referenceDataService.setContext(context);
+    }
 
     @Inject
     public NowsDataProcessor(final ReferenceDataService referenceDataService) {
@@ -233,7 +238,7 @@ public class NowsDataProcessor {
                     .map(Prompt::getId)
                     .collect(toSet());
 
-            variantToUserGroupsMappings.computeIfAbsent(new NowVariant(resultDefinitionsIds4UserGroup, resultPromptIds4UserGroup), (v) -> new ArrayList<>())
+            variantToUserGroupsMappings.computeIfAbsent(new NowVariant(resultDefinitionsIds4UserGroup, resultPromptIds4UserGroup), v -> new ArrayList<>())
                     .add(userGroup);
         }
         return variantToUserGroupsMappings;
@@ -264,7 +269,6 @@ public class NowsDataProcessor {
     }
 
     private static boolean anyNewlyCompletedResultLines(final List<CompletedResultLine> resultLines4Now) {
-        //TODO - this line tests if we have new result lines, if we don't we don't generate the NOW,- GPE-4480 will change this logic
         return resultLines4Now.stream().anyMatch(resultLine -> resultLine.getLastSharedResultId() == null);
     }
 

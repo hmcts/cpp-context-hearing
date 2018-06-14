@@ -5,28 +5,22 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 
 import javax.inject.Inject;
-import javax.json.JsonObject;
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithDefaults;
 
 public class NowsReferenceDataLoader {
-
-    private static final String GET_ALL_NOWS_REQUEST_ID = "referencedata.query.get-all-nows-definitions";
-    private static final String GET_RESULT_DEFINITION_REQUEST_ID = "referencedata.query.get-result-definitions.v2";
+    private static final String GET_ALL_NOWS_REQUEST_ID = "referencedata.get-all-now-metadata";
+    private static final String GET_ALL_RESULT_DEFINITIONS_REQUEST_ID = "referencedata.get-all-result-definitions";
 
     private static final String AS_OF_DATE_QUERY_PARAMETER = "asOfDate";
 
-    private static final String RESULT_DEFINITION_ID_QUERY_PARAMETER = "resultDefinitionId";
+    private JsonEnvelope context;
 
     @Inject
     @ServiceComponent(Component.EVENT_PROCESSOR)
@@ -38,35 +32,30 @@ public class NowsReferenceDataLoader {
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-    public AllNows loadAllNowsReference(LocalDate localDate) {
-
-        final JsonObject jsonObject = createObjectBuilder().build();
-        final Metadata metadata = metadataWithDefaults().build();
-        JsonEnvelope envelopeIn = new DefaultJsonEnvelope(metadata, jsonObject);
-
-        String strLocalDate = localDate.toString();
-        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelopeIn, GET_ALL_NOWS_REQUEST_ID)
-                .apply(createObjectBuilder().add(AS_OF_DATE_QUERY_PARAMETER, strLocalDate).build());
-
-        JsonEnvelope jsonResultEnvelope =  requester.request(requestEnvelope);
-
-        return  jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), AllNows.class);
-
+    public void setContext(JsonEnvelope context) {
+        this.context = context;
     }
 
-    public ResultDefinition getResultDefinitionById(UUID resultDefinitionId) {
+    public AllNows loadAllNowsReference(LocalDate localDate) {
 
-           final JsonObject jsonObject = createObjectBuilder().build();
-        final Metadata metadata = metadataWithDefaults().build();
-        JsonEnvelope envelopeIn = new DefaultJsonEnvelope(metadata, jsonObject);
+        String strLocalDate = localDate.toString();
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_NOWS_REQUEST_ID)
+                .apply(createObjectBuilder().add(AS_OF_DATE_QUERY_PARAMETER, strLocalDate).build());
 
-        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelopeIn, GET_RESULT_DEFINITION_REQUEST_ID)
-                .apply(createObjectBuilder().add(RESULT_DEFINITION_ID_QUERY_PARAMETER, resultDefinitionId.toString()).build());
+        JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
 
-        JsonEnvelope jsonResultEnvelope =  requester.request(requestEnvelope);
+        return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), AllNows.class);
+    }
 
-        return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), ResultDefinition.class);
+    public AllResultDefinitions loadAllResultDefinitions(LocalDate localDate) {
 
+        final String strLocalDate = localDate.toString();
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_RESULT_DEFINITIONS_REQUEST_ID)
+                .apply(createObjectBuilder().add(AS_OF_DATE_QUERY_PARAMETER, strLocalDate).build());
+
+        JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
+
+        return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), AllResultDefinitions.class);
     }
 
 

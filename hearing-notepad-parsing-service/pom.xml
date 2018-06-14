@@ -3,14 +3,14 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>2.0.113-R2-SNAPSHOT</version>
+        <version>2.0.115-R2-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-notepad-parsing-service</artifactId>
     <packaging>war</packaging>
 
     <properties>
         <cpp.service-component>QUERY_API</cpp.service-component>
-        <referencedata.version>2.0.149-R2-SNAPSHOT</referencedata.version>
+        <referencedata.version>2.0.152-R2-SNAPSHOT</referencedata.version>
     </properties>
 
     <dependencies>

@@ -78,6 +78,16 @@ public class TestUtilities {
         return new EventListener(mediaType);
     }
 
+    public static class JsonUtil {
+        public static String toJsonString(final Object o) throws JsonProcessingException {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            return mapper.writeValueAsString(o);
+        }
+    }
 
     public static class CommandBuilder {
         private RequestSpecification requestSpec;
@@ -106,6 +116,7 @@ public class TestUtilities {
             return this;
         }
 
+
         public CommandBuilder withPayload(final Object payload) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
@@ -114,7 +125,7 @@ public class TestUtilities {
                 mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
                 mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-                this.payloadAsString = mapper.writeValueAsString(payload);
+                this.payloadAsString = JsonUtil.toJsonString(payload);
 
                 System.out.println("Command Payload: ");
                 System.out.println(this.payloadAsString);

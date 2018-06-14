@@ -23,9 +23,9 @@ public class DefaultNowsReferenceData {
                 Arrays.asList(
                         new NowDefinition().setId(nowId1).setResultDefinitions(
                                 Arrays.asList(
-                                   new ResultDefinitions().setId(resultDefinitionId1)
-                                           .setPrimaryResult(true)
-                                           .setMandatory(true)
+                                        new ResultDefinitions().setId(resultDefinitionId1)
+                                                .setPrimaryResult(true)
+                                                .setMandatory(true)
                                 )
                         )
                 )
@@ -36,13 +36,13 @@ public class DefaultNowsReferenceData {
         return new ResultDefinition().setId(resultDefinitionId1)
                 .setPrompts(
                         Arrays.asList(
-                             new Prompt().setLabel(PROMPT_LABEL1_1)
-                             .setUserGroups(Arrays.asList(DEFENCE_COUNSEL_USER_GROUP))
+                                new Prompt().setLabel(PROMPT_LABEL1_1)
+                                        .setUserGroups(Arrays.asList(DEFENCE_COUNSEL_USER_GROUP))
                         )
                 );
     }
 
-    public Map<UUID,  ResultDefinition> defaultId2ResultDefinition() {
+    public Map<UUID, ResultDefinition> defaultId2ResultDefinition() {
         HashMap result = new HashMap<>();
         ResultDefinition def1 = defaultResultDefinition1();
         result.put(def1.getId(), def1);

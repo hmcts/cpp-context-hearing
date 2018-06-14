@@ -74,9 +74,10 @@ public class PublishResultsEventProcessor {
         final ResultsShared input = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
 
+        nowsDataProcessor.setContext(event);
+
         try {
             final List<Nows> nows = nowsDataProcessor.createNows(input);
-
 
             if (!nows.isEmpty()) {
                 GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
@@ -221,7 +222,7 @@ public class PublishResultsEventProcessor {
                         .setId(defendantCase.getCaseId())
                         .setUrn(input.getCases().stream()
                                 .filter(c -> c.getCaseId().equals(defendantCase.getCaseId()))
-                                .map(c -> c.getUrn())
+                                .map(uk.gov.moj.cpp.hearing.command.initiate.Case::getUrn)
                                 .findFirst()
                                 .orElse(null))
                         .setBailStatus(defendantCase.getBailStatus())

@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,8 +9,6 @@ public class Prompt {
 
     private String label;
 
-    private List<String> userGroups = new ArrayList<>();
-
     private Boolean mandatory;
 
     private String type;
@@ -19,6 +16,12 @@ public class Prompt {
     private Integer sequence;
 
     private String duration;
+
+    private List<String> wordGroup;
+
+    private List<String> userGroups;
+
+    private UUID fixedListId;
 
     private String reference;
 
@@ -41,15 +44,6 @@ public class Prompt {
 
     public Prompt setLabel(String label) {
         this.label = label;
-        return this;
-    }
-
-    public List<String> getUserGroups() {
-        return this.userGroups;
-    }
-
-    public Prompt setUserGroups(List<String> userGroups) {
-        this.userGroups = userGroups;
         return this;
     }
 
@@ -86,6 +80,33 @@ public class Prompt {
 
     public Prompt setDuration(String duration) {
         this.duration = duration;
+        return this;
+    }
+
+    public List<String> getWordGroup() {
+        return this.wordGroup;
+    }
+
+    public Prompt setWordGroup(List<String> wordGroup) {
+        this.wordGroup = wordGroup;
+        return this;
+    }
+
+    public List<String> getUserGroups() {
+        return this.userGroups;
+    }
+
+    public Prompt setUserGroups(List<String> userGroups) {
+        this.userGroups = userGroups;
+        return this;
+    }
+
+    public UUID getFixedListId() {
+        return this.fixedListId;
+    }
+
+    public Prompt setFixedListId(UUID fixedListId) {
+        this.fixedListId = fixedListId;
         return this;
     }
 

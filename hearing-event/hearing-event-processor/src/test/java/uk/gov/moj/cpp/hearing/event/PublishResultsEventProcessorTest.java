@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.event;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -39,11 +38,12 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -64,7 +64,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
@@ -122,7 +121,29 @@ public class PublishResultsEventProcessorTest {
         VerdictUpsert verdict = resultsShared.getVerdicts().values().iterator().next();
 
         final List<Nows> nows = Arrays.asList(
-                new Nows()
+                Nows.nows()
+                        .setDefendantId(UUID.randomUUID().toString())
+                        .setId(UUID.randomUUID())
+                        .setMaterial(
+                                Arrays.asList(
+                                        Material.material()
+                                                .setId(UUID.randomUUID())
+                                                .setLanguage("Welsh")
+                                                .setNowResult(
+                                                        Arrays.asList(
+                                                                NowResult.nowResult()
+                                                                        .setSharedResultId(UUID.randomUUID())
+                                                                        .setSequence(123)
+                                                                        .setPromptRefs(
+                                                                                Arrays.asList(
+                                                                                        PromptRefs.promptRefs()
+                                                                                                .setLabel("label1"))
+                                                                        )
+                                                        )
+                                                )
+                                )
+                        )
+                        .setNowsTypeId(UUID.randomUUID().toString())
         );
         uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing hearing = new uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing().setId(UUID.randomUUID());
         Mockito.when(nowsDataProcessor.createNows(Mockito.any())).thenReturn(nows);
@@ -149,9 +170,19 @@ public class PublishResultsEventProcessorTest {
 
         //deserialise
         GenerateNowsCommand generateNowsCommandOut = jsonObjectToObjectConverter.convert(createNowsMessage.payloadAsJsonObject(), GenerateNowsCommand.class);
-        Assert.assertEquals( generateNowsCommandOut.getHearing().getId(), hearing.getId());
-
-        JsonEnvelope shareMessage = outgoingMessages.get(1);
+        assertThat(generateNowsCommandOut.getHearing().getId(), is(hearing.getId()));
+        final Nows nowsIn = nows.get(0);
+        final Nows nowsOut = generateNowsCommandOut.getHearing().getNows().get(0);
+        assertThat(nowsOut.getId(), is(nowsIn.getId()));
+        assertThat(nowsOut.getDefendantId(), is(nowsIn.getDefendantId()));
+        assertThat(nowsOut.getNowsTypeId(), is(nowsIn.getNowsTypeId()));
+        final Material materialIn = nowsIn.getMaterial().get(0);
+        final Material materialOut = nowsOut.getMaterial().get(0);
+        assertThat(materialIn.getId(), is(materialOut.getId()));
+        assertThat(materialIn.getLanguage(), is(materialOut.getLanguage()));
+        assertThat(materialIn.getNowResult().get(0).getSharedResultId(), is(materialOut.getNowResult().get(0).getSharedResultId()));
+        assertThat(materialIn.getNowResult().get(0).getPromptRefs().get(0).getLabel(), is(materialOut.getNowResult().get(0).getPromptRefs().get(0).getLabel()));
+        final JsonEnvelope shareMessage = outgoingMessages.get(1);
 
         assertThat(
                 shareMessage, jsonEnvelope(

@@ -12,6 +12,10 @@ public class ResultDefinitions {
 
     private Integer sequence;
 
+    public static ResultDefinitions resultDefinitions() {
+        return new ResultDefinitions();
+    }
+
     public UUID getId() {
         return this.id;
     }
@@ -46,9 +50,5 @@ public class ResultDefinitions {
     public ResultDefinitions setSequence(Integer sequence) {
         this.sequence = sequence;
         return this;
-    }
-
-    public static ResultDefinitions resultDefinitions() {
-        return new ResultDefinitions();
     }
 }
