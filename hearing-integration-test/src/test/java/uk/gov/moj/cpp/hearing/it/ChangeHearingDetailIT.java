@@ -92,7 +92,7 @@ public class ChangeHearingDetailIT extends AbstractIT {
     private Hearing createHearing() {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
         );
 
         final String queryAPIEndPoint = MessageFormat

@@ -95,7 +95,7 @@ public class ShareResultsCommandHandlerTest {
 
     @BeforeClass
     public static void init() {
-        initiateHearingCommand = standardInitiateHearingTemplate().build();
+        initiateHearingCommand = standardInitiateHearingTemplate();
         metadataId = UUID.randomUUID();
         sharedTime = new UtcClock().now();
         prosecutionCounselUpsert = ProsecutionCounselUpsert.builder()

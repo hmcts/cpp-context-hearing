@@ -84,25 +84,6 @@ public class UseCases {
         return initiateHearing;
     }
 
-    @Deprecated
-    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final Consumer<InitiateHearingCommand.Builder> consumer) {
-        final InitiateHearingCommand initiateHearing = with(standardInitiateHearingTemplate(), consumer).build();
-
-        final Hearing hearing = initiateHearing.getHearing();
-
-        final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
-
-        makeCommand(requestSpec, "hearing.initiate")
-                .ofType("application/vnd.hearing.initiate+json")
-                .withPayload(initiateHearing)
-                .executeSuccessfully();
-
-        publicEventTopic.waitFor();
-
-        return initiateHearing;
-    }
-
     public static HearingUpdatePleaCommand updatePlea(final RequestSpecification requestSpec, final UUID hearingId, final UUID offenceId,
                                                       final HearingUpdatePleaCommand hearingUpdatePleaCommand) {
 

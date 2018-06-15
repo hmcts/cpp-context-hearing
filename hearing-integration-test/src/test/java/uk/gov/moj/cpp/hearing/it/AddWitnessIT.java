@@ -6,7 +6,6 @@ import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import javax.json.JsonObject;
 import java.text.MessageFormat;
@@ -16,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -55,7 +55,7 @@ public class AddWitnessIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
                             i.getHearing().getDefendants().add(defendantTemplate(i.getCases().get(0).getCaseId()));
-                        }).build()
+                        })
                 ));
 
         Hearing hearing = hearingOne.it().getHearing();
@@ -69,7 +69,7 @@ public class AddWitnessIT extends AbstractIT {
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearing.getId().toString());
         final TestUtilities.EventListener publicEventWitnessAdded =
                 listenFor("public.hearing.events.witness-added-updated")
-                        .withFilter(isJson(withJsonPath("$.witnessId", is(witnessId.toString()))));
+                        .withFilter(isJson(withJsonPath("$.witnessId", is(witnessId))));
 
         assertAddWitnessSingleDefendant(hearingOne.it(), hearing,
                 hearingOne.getFirstDefendantId(),
@@ -198,13 +198,13 @@ public class AddWitnessIT extends AbstractIT {
                 UseCases.initiateHearing(requestSpec,
                         with(basicInitiateHearingTemplate(), command -> {
 
-                            command.getCases().add(caseTemplate(caseId));
+                            command.setCases(asList(caseTemplate(caseId)));
 
-                            with(command.getHearing().getDefendants(), list -> {
-                                list.add(defendantTemplate(caseId));
-                                list.add(defendantTemplate(caseId));
-                            });
-                        }).build()
+                            command.getHearing().setDefendants(asList(
+                                    defendantTemplate(caseId),
+                                    defendantTemplate(caseId)
+                            ));
+                        })
                 ));
 
         addDefenceWitnessTwoDefendants(
@@ -218,18 +218,19 @@ public class AddWitnessIT extends AbstractIT {
         InitiateHearingCommandHelper hearingTwo = new InitiateHearingCommandHelper(UseCases.initiateHearing(requestSpec,
                 with(basicInitiateHearingTemplate(), command -> {
 
-                    command.getCases().add(caseTemplate(caseId));
+                    command.setCases(asList(
+                            caseTemplate(caseId)
+                    ));
 
-                    with(command.getHearing().getDefendants(), list -> {
-                        list.add(with(defendantTemplate(caseId), d -> {
-                            d.withId(hearingOne.getFirstDefendantId());
-                        }));
-
-                        list.add(with(defendantTemplate(caseId), d -> {
-                            d.withId(hearingOne.getSecondDefendantId());
-                        }));
-                    });
-                }).build()
+                    command.getHearing().setDefendants(asList(
+                            with(defendantTemplate(caseId), d -> {
+                                d.setId(hearingOne.getFirstDefendantId());
+                            }),
+                            with(defendantTemplate(caseId), d -> {
+                                d.setId(hearingOne.getSecondDefendantId());
+                            })
+                    ));
+                })
         ));
 
         //I expect the new hearingTwo to have the witness information associated with each defendant.
@@ -258,15 +259,16 @@ public class AddWitnessIT extends AbstractIT {
         InitiateHearingCommandHelper hearingThree = new InitiateHearingCommandHelper(UseCases.initiateHearing(requestSpec,
                 with(basicInitiateHearingTemplate(), command -> {
 
-                    command.getCases().add(caseTemplate(caseId));
+                    command.setCases(asList(
+                            caseTemplate(caseId)
+                    ));
 
-                    with(command.getHearing().getDefendants(), list -> {
-
-                        list.add(with(defendantTemplate(caseId), d -> {
-                            d.withId(hearingOne.getSecondDefendantId());
-                        }));
-                    });
-                }).build()
+                    command.getHearing().setDefendants(asList(
+                            with(defendantTemplate(caseId), d -> {
+                                d.setId(hearingOne.getSecondDefendantId());
+                            })
+                    ));
+                })
         ));
 
         //I expect the new hearingThree to have the witness information associated with only the one defendant.
@@ -292,7 +294,7 @@ public class AddWitnessIT extends AbstractIT {
     @Test
     public void shouldEnrichHearingWithPastWitnessesOneDefendantTwoWitnesses() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate().build()));
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate()));
 
         final UUID witnessIdOne = randomUUID();
         final UUID witnessIdTwo = randomUUID();
@@ -304,13 +306,15 @@ public class AddWitnessIT extends AbstractIT {
                 UseCases.initiateHearing(requestSpec,
                         with(basicInitiateHearingTemplate(), command -> {
 
-                            command.getCases().add(caseTemplate(hearingOne.getFirstCaseId()));
+                            command.setCases(asList(caseTemplate(hearingOne.getFirstCaseId())));
 
-                            command.getHearing().getDefendants().add(with(defendantTemplate(hearingOne.getFirstCaseId()), d -> {
-                                d.withId(hearingOne.getFirstDefendantId());
-                            }));
+                            command.getHearing().setDefendants(asList(
+                                    with(defendantTemplate(hearingOne.getFirstCaseId()), d -> {
+                                        d.setId(hearingOne.getFirstDefendantId());
+                                    })
+                            ));
 
-                        }).build()
+                        })
                 ));
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingTwo.getHearingId()),

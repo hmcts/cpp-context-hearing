@@ -26,6 +26,7 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
@@ -37,9 +38,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_withOnlyMandatoryFields() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.it().getHearing();
 
@@ -85,9 +84,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_shouldInitiateHearing_whenInitiateHearingCommandIsMade() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.it().getHearing();
 
@@ -146,23 +143,23 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_withAPreviousPlea_Guilty_shouldHaveConvictionDate() throws Throwable {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        final UpdatePleaCommandHelper pleaOne = new UpdatePleaCommandHelper(
+        final UpdatePleaCommandHelper pleaOne = h(
                 UseCases.updatePlea(requestSpec, hearingOne.getHearingId(), hearingOne.getFirstOffenceIdForFirstDefendant(),
                         updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.GUILTY).build())
         );
 
         final InitiateHearingCommandHelper hearingTwo = new InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-                    i.getCases().get(0).withCaseId(hearingOne.getFirstCaseId());
-                    i.getHearing().getDefendants().get(0).withId(hearingOne.getFirstDefendantId());
-                    i.getHearing().getDefendants().get(0).getOffences().get(0).withId(hearingOne.getFirstOffenceIdForFirstDefendant());
-                    i.getHearing().getDefendants().get(0).getOffences().get(0).withCaseId(hearingOne.getFirstCaseId());
-                    i.getHearing().getDefendants().get(0).getDefendantCases().get(0).withCaseId(hearingOne.getFirstCaseId());
-                }).build())
+                    InitiateHearingCommandHelper h = h(i);
+
+                    h.getFirstCase().setCaseId(hearingOne.getFirstCaseId());
+                    h.getFirstDefendant().setId(hearingOne.getFirstDefendantId());
+                    h.getFirstOffenceForFirstDefendant().setId(hearingOne.getFirstOffenceIdForFirstDefendant());
+                    h.getFirstOffenceForFirstDefendant().setCaseId(hearingOne.getFirstCaseId());
+                    h.getFirstDefendantCaseForFirstDefendant().setCaseId(hearingOne.getFirstCaseId());
+                }))
         );
 
         poll(requestParameters(getURL("hearing.get.hearing.v2", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
@@ -183,7 +180,7 @@ public class InitiateHearingIT extends AbstractIT {
     public void initiateHearing_withAPreviousPlea_NotGuilty_shouldNotHaveConvictionDate() throws Throwable {
 
         final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
         );
 
         final UpdatePleaCommandHelper pleaOne = new UpdatePleaCommandHelper(
@@ -193,12 +190,14 @@ public class InitiateHearingIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingTwo = new InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-                    i.getCases().get(0).withCaseId(hearingOne.getFirstCaseId());
-                    i.getHearing().getDefendants().get(0).withId(hearingOne.getFirstDefendantId());
-                    i.getHearing().getDefendants().get(0).getOffences().get(0).withId(hearingOne.getFirstOffenceIdForFirstDefendant());
-                    i.getHearing().getDefendants().get(0).getOffences().get(0).withCaseId(hearingOne.getFirstCaseId());
-                    i.getHearing().getDefendants().get(0).getDefendantCases().get(0).withCaseId(hearingOne.getFirstCaseId());
-                }).build())
+                    InitiateHearingCommandHelper h = h(i);
+
+                    h.getFirstCase().setCaseId(hearingOne.getFirstCaseId());
+                    h.getFirstDefendant().setId(hearingOne.getFirstDefendantId());
+                    h.getFirstOffenceForFirstDefendant().setId(hearingOne.getFirstOffenceIdForFirstDefendant());
+                    h.getFirstOffenceForFirstDefendant().setCaseId(hearingOne.getFirstCaseId());
+                    h.getFirstDefendantCaseForFirstDefendant().setCaseId(hearingOne.getFirstCaseId());
+                }))
         );
 
         poll(requestParameters(getURL("hearing.get.hearing.v2", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))

@@ -21,7 +21,7 @@ public class Defendant implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
+    private UUID id;
     private UUID personId;
     private String firstName;
     private String lastName;
@@ -31,8 +31,11 @@ public class Defendant implements Serializable {
     private LocalDate dateOfBirth;
     private String defenceOrganisation;
     private Interpreter interpreter;
-    private final List<DefendantCase> defendantCases;
-    private final List<Offence> offences;
+    private List<DefendantCase> defendantCases;
+    private List<Offence> offences;
+
+    public Defendant() {
+    }
 
     @JsonCreator
     public Defendant(@JsonProperty("id") final UUID id,
@@ -69,54 +72,24 @@ public class Defendant implements Serializable {
         return personId;
     }
 
-    public Defendant setPersonId(UUID personId) {
-        this.personId = personId;
-        return this;
-    }
-
     public String getFirstName() {
         return firstName;
-    }
-
-    public Defendant setFirstName(final String firstName) {
-        this.firstName = firstName;
-        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
-    public Defendant setLastName(final String lastName) {
-        this.lastName = lastName;
-        return this;
-    }
-
     public String getNationality() {
         return nationality;
-    }
-
-    public Defendant setNationality(final String nationality) {
-        this.nationality = nationality;
-        return this;
     }
 
     public String getGender() {
         return gender;
     }
 
-    public Defendant setGender(final String gender) {
-        this.gender = gender;
-        return this;
-    }
-
     public Address getAddress() {
         return address;
-    }
-
-    public Defendant setAddress(final Address address) {
-        this.address = address;
-        return this;
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -124,27 +97,12 @@ public class Defendant implements Serializable {
         return dateOfBirth;
     }
 
-    public Defendant setDateOfBirth(final LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-        return this;
-    }
-
     public String getDefenceOrganisation() {
         return defenceOrganisation;
     }
 
-    public Defendant setDefenceOrganisation(final String defenceOrganisation) {
-        this.defenceOrganisation = defenceOrganisation;
-        return this;
-    }
-
     public Interpreter getInterpreter() {
         return interpreter;
-    }
-
-    public Defendant setInterpreter(final Interpreter interpreter) {
-        this.interpreter = interpreter;
-        return this;
     }
 
     public List<DefendantCase> getDefendantCases() {
@@ -155,165 +113,67 @@ public class Defendant implements Serializable {
         return offences;
     }
 
-    public static class Builder {
-
-        private UUID id;
-        private UUID personId;
-        private String firstName;
-        private String lastName;
-        private String nationality;
-        private String gender;
-        private Address.Builder address;
-        private LocalDate dateOfBirth;
-        private String defenceOrganisation;
-        private Interpreter.Builder interpreter;
-        private List<DefendantCase.Builder> defendantCases = new ArrayList<>();
-        private List<Offence.Builder> offences = new ArrayList<>();
-
-        private Builder() {
-
-        }
-
-        public UUID getId() {
-            return id;
-        }
-
-        public UUID getPersonId() {
-            return personId;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-
-        public String getNationality() {
-            return nationality;
-        }
-
-        public String getGender() {
-            return gender;
-        }
-
-        public Address.Builder getAddress() {
-            return address;
-        }
-
-        public LocalDate getDateOfBirth() {
-            return dateOfBirth;
-        }
-
-        public String getDefenceOrganisation() {
-            return defenceOrganisation;
-        }
-
-        public Interpreter.Builder getInterpreter() {
-            return interpreter;
-        }
-
-        public List<Offence.Builder> getOffences() {
-            return offences;
-        }
-
-        public List<DefendantCase.Builder> getDefendantCases() {
-            return defendantCases;
-        }
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withPersonId(UUID personId) {
-            this.personId = personId;
-            return this;
-        }
-
-        public Builder withFirstName(String firstName) {
-            this.firstName = firstName;
-            return this;
-        }
-
-        public Builder withLastName(String lastName) {
-            this.lastName = lastName;
-            return this;
-        }
-
-        public Builder withNationality(String nationality) {
-            this.nationality = nationality;
-            return this;
-        }
-
-        public Builder withGender(String gender) {
-            this.gender = gender;
-            return this;
-        }
-
-        public Builder withAddress(Address.Builder address) {
-            this.address = address;
-            return this;
-        }
-
-        public Builder withDateOfBirth(LocalDate dateOfBirth) {
-            this.dateOfBirth = dateOfBirth;
-            return this;
-        }
-
-        public Builder withDefenceOrganisation(String defenceOrganisation) {
-            this.defenceOrganisation = defenceOrganisation;
-            return this;
-        }
-
-        public Builder withInterpreter(Interpreter.Builder interpreter) {
-            this.interpreter = interpreter;
-            return this;
-        }
-
-        public Builder addDefendantCase(DefendantCase.Builder defendantCase) {
-            this.defendantCases.add(defendantCase);
-            return this;
-        }
-
-        public Builder addOffence(Offence.Builder offence) {
-            this.offences.add(offence);
-            return this;
-        }
-
-        public Defendant build() {
-            return new Defendant(id, personId, firstName, lastName, nationality, gender,
-                    ofNullable(address).map(Address.Builder::build).orElse(null),
-                    dateOfBirth, defenceOrganisation,
-                    ofNullable(interpreter).map(Interpreter.Builder::build).orElse(null),
-                    unmodifiableList(defendantCases.stream().map(DefendantCase.Builder::build).collect(Collectors.toList())),
-                    offences.stream().map(Offence.Builder::build).collect(Collectors.toList()));
-        }
+    public Defendant setId(UUID id) {
+        this.id = id;
+        return this;
     }
 
-    public static Defendant.Builder builder() {
-        return new Builder();
+    public Defendant setPersonId(UUID personId) {
+        this.personId = personId;
+        return this;
     }
 
-    public static Builder from(Defendant defendant) {
-        Builder builder = builder()
-                .withId(defendant.getId())
-                .withPersonId(defendant.getPersonId())
-                .withFirstName(defendant.getFirstName())
-                .withLastName(defendant.getLastName())
-                .withNationality(defendant.getNationality())
-                .withGender(defendant.getGender())
-                .withAddress(Address.from(defendant.getAddress()))
-                .withDateOfBirth(defendant.getDateOfBirth())
-                .withDefenceOrganisation(defendant.getDefenceOrganisation())
-                .withInterpreter(Interpreter.from(defendant.getInterpreter()));
+    public Defendant setFirstName(final String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
 
-        defendant.getDefendantCases().forEach(defendantCase -> builder.addDefendantCase(DefendantCase.from(defendantCase)));
+    public Defendant setLastName(final String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
 
-        defendant.getOffences().forEach(offence -> builder.addOffence(Offence.from(offence)));
+    public Defendant setInterpreter(final Interpreter interpreter) {
+        this.interpreter = interpreter;
+        return this;
+    }
 
+    public Defendant setDateOfBirth(final LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+        return this;
+    }
 
-        return builder;
+    public Defendant setNationality(final String nationality) {
+        this.nationality = nationality;
+        return this;
+    }
+
+    public Defendant setGender(final String gender) {
+        this.gender = gender;
+        return this;
+    }
+
+    public Defendant setAddress(final Address address) {
+        this.address = address;
+        return this;
+    }
+
+    public Defendant setDefenceOrganisation(final String defenceOrganisation) {
+        this.defenceOrganisation = defenceOrganisation;
+        return this;
+    }
+
+    public Defendant setDefendantCases(List<DefendantCase> defendantCases) {
+        this.defendantCases = new ArrayList<>(defendantCases);
+        return this;
+    }
+
+    public Defendant setOffences(List<Offence> offences) {
+        this.offences = new ArrayList<>(offences);
+        return this;
+    }
+
+    public static Defendant defendant() {
+        return new Defendant();
     }
 }

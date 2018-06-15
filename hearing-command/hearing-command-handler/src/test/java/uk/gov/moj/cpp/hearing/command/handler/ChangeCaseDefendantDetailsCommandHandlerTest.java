@@ -122,7 +122,7 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
     @Test
     public void testUpdateCaseDefendantDetails() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
 

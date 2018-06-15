@@ -6,17 +6,17 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonMetadata.CONTEXT;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
 import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
@@ -77,7 +77,8 @@ public class HearingDetailChangeEventProcessorTest {
     public void publishHearingDetailChangedPublicEvent() throws Exception {
         //Given
         final String userId = UUID.randomUUID().toString();
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(PUBLIC_PROGRESSION_EVENT_HEARING_DETAIL_CHANGED), publicHearingChangedEvent());
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(PUBLIC_PROGRESSION_EVENT_HEARING_DETAIL_CHANGED),
+                publicHearingChangedEvent());
 
         //when
         testObj.publishHearingDetailChangedPrivateEvent(event);

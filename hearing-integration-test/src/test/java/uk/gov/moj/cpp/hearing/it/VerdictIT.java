@@ -4,6 +4,7 @@ import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
@@ -23,6 +24,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -35,11 +37,9 @@ public class VerdictIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
-                    data.getHearing().getDefendants().get(0).getOffences().get(0).withConvictionDate(null);
-                }).build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
+            h(i).getFirstOffenceForFirstDefendant().setConvictionDate(null);
+        })));
 
         final EventListener publicEventConvictionDateChangedListener = listenFor(
                 "public.hearing.offence-conviction-date-changed")
@@ -47,16 +47,16 @@ public class VerdictIT extends AbstractIT {
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCaseId().toString())))));
 
-        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
                 updateVerdictTemplate(hearingOne.getFirstCaseId(),
                         hearingOne.getFirstDefendantId(),
                         hearingOne.getFirstOffenceIdForFirstDefendant(),
                         TestTemplates.VerdictCategoryType.GUILTY
-                ).build());
+                ).build()));
 
         publicEventConvictionDateChangedListener.waitFor();
 
-        Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
+        Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
@@ -85,11 +85,9 @@ public class VerdictIT extends AbstractIT {
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() throws Exception {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
-                    data.getHearing().getDefendants().get(0).getOffences().get(0).withConvictionDate(PAST_LOCAL_DATE.next());
-                }).build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
+            h(i).getFirstOffenceForFirstDefendant().setConvictionDate(PAST_LOCAL_DATE.next());
+        })));
 
         final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor(
                 "public.hearing.offence-conviction-date-removed")
@@ -98,16 +96,16 @@ public class VerdictIT extends AbstractIT {
                         withJsonPath("$.caseId", is(hearingOne.getFirstCaseId().toString()))
                 )));
 
-        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
                 updateVerdictTemplate(hearingOne.getFirstCaseId(),
                         hearingOne.getFirstDefendantId(),
                         hearingOne.getFirstOffenceIdForFirstDefendant(),
                         TestTemplates.VerdictCategoryType.NOT_GUILTY
-                ).build());
+                ).build()));
 
         publicEventOffenceConvictionDateRemovedListener.waitFor();
 
-        Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
+        Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
@@ -142,22 +140,20 @@ public class VerdictIT extends AbstractIT {
         LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
         LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
-                    data.getHearing().getDefendants().get(0).getOffences().get(0).withConvictionDate(previousConvictionDate);
-                }).build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
+            h(i).getFirstOffenceForFirstDefendant().setConvictionDate(previousConvictionDate);
+        })));
 
-        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(), with(
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(), with(
                 updateVerdictTemplate(hearingOne.getFirstCaseId(),
                         hearingOne.getFirstDefendantId(),
                         hearingOne.getFirstOffenceIdForFirstDefendant(),
                         TestTemplates.VerdictCategoryType.GUILTY
                 ), verdict -> {
                     verdict.getDefendants().get(0).getOffences().get(0).getVerdict().withVerdictDate(currentConvictionDate);
-                }).build());
+                }).build()));
 
-        Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
+        final Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
@@ -188,21 +184,21 @@ public class VerdictIT extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
         final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
-                    data.getHearing().getDefendants().get(0).getOffences().get(0).withConvictionDate(null);
-                }).build())
+                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
+                    h(i).getFirstOffenceForFirstDefendant().setConvictionDate(null);
+                }))
         );
 
-        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(), with(
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(), with(
                 updateVerdictTemplate(hearingOne.getFirstCaseId(),
                         hearingOne.getFirstDefendantId(),
                         hearingOne.getFirstOffenceIdForFirstDefendant(),
                         TestTemplates.VerdictCategoryType.NO_VERDICT
                 ), verdict -> {
                     verdict.getDefendants().get(0).getOffences().get(0).getVerdict().withVerdictDate(PAST_LOCAL_DATE.next());
-                }).build());
+                }).build()));
 
-        Verdict verdict = hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict();
+        final Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
 
         poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())

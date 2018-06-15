@@ -73,19 +73,19 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
         public Judge getJudge() {
             final JsonObject judge = hearingPayload.getJsonObject("judge");
 
-            return Judge.builder()
-                    .withId(UUID.fromString(judge.getString(FIELD_HEARING_JUDGE_ID)))
-                    .withTitle(judge.getString(FIELD_HEARING_JUDGE_TITLE))
-                    .withFirstName(judge.getString(FIELD_HEARING_JUDGE_FIRST_NAME))
-                    .withLastName(judge.getString(FIELD_HEARING_JUDGE_LAST_NAME))
-                    .build();
+            return Judge.judge()
+                    .setId(UUID.fromString(judge.getString(FIELD_HEARING_JUDGE_ID)))
+                    .setTitle(judge.getString(FIELD_HEARING_JUDGE_TITLE))
+                    .setFirstName(judge.getString(FIELD_HEARING_JUDGE_FIRST_NAME))
+                    .setLastName(judge.getString(FIELD_HEARING_JUDGE_LAST_NAME));
         }
 
         public List<ZonedDateTime> getHearingDays() {
             return hearingPayload
                     .getJsonArray(FIELD_HEARING_HEARING_DAYS).getValuesAs(JsonString.class)
-                    .stream().map(value -> ZonedDateTimes.fromString(value.getString())
-                    ).collect(toList());
+                    .stream()
+                    .map(value -> ZonedDateTimes.fromString(value.getString()))
+                    .collect(toList());
         }
     }
 }

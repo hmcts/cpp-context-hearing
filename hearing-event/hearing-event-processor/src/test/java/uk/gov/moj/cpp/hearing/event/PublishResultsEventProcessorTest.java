@@ -20,13 +20,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.command.initiate.Address;
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
-import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
@@ -42,8 +36,8 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -64,10 +58,10 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 public class PublishResultsEventProcessorTest {
 
@@ -120,22 +114,22 @@ public class PublishResultsEventProcessorTest {
         Plea plea = resultsShared.getPleas().values().iterator().next();
         VerdictUpsert verdict = resultsShared.getVerdicts().values().iterator().next();
 
-        final List<Nows> nows = Arrays.asList(
+        final List<Nows> nows = asList(
                 Nows.nows()
                         .setDefendantId(UUID.randomUUID().toString())
                         .setId(UUID.randomUUID())
                         .setMaterial(
-                                Arrays.asList(
+                                asList(
                                         Material.material()
                                                 .setId(UUID.randomUUID())
                                                 .setLanguage("Welsh")
                                                 .setNowResult(
-                                                        Arrays.asList(
+                                                        asList(
                                                                 NowResult.nowResult()
                                                                         .setSharedResultId(UUID.randomUUID())
                                                                         .setSequence(123)
                                                                         .setPromptRefs(
-                                                                                Arrays.asList(
+                                                                                asList(
                                                                                         PromptRefs.promptRefs()
                                                                                                 .setLabel("label1"))
                                                                         )
@@ -284,76 +278,16 @@ public class PublishResultsEventProcessorTest {
     }
 
     private ResultsShared resultsSharedTemplate() {
-        UUID caseId = randomUUID();
-        UUID hearingId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID defendantId = randomUUID();
+
+        InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(standardInitiateHearingTemplate());
 
         return ResultsShared.builder()
-                .withHearingId(hearingId)
+                .withHearingId(hearingOne.getHearingId())
                 .withSharedTime(PAST_ZONED_DATE_TIME.next())
-                .withHearing(Hearing.builder()
-                        .withId(hearingId)
-                        .withType(STRING.next())
-                        .withJudge(Judge.builder()
-                                .withId(randomUUID())
-                                .withTitle(STRING.next())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                        )
-                        .withCourtCentreId(randomUUID())
-                        .withCourtCentreName(STRING.next())
-                        .withHearingDays(Arrays.asList(ZonedDateTimes.fromString(ARBITRARY_HEARING_START_DATE)))
-                        .withCourtRoomId(randomUUID())
-                        .withCourtRoomName(STRING.next())
-                        .addDefendant(Defendant.builder()
-                                .withId(defendantId)
-                                .withDefenceOrganisation(STRING.next())
-                                .withGender(STRING.next())
-                                .withNationality(STRING.next())
-                                .withLastName(STRING.next())
-                                .withFirstName(STRING.next())
-                                .withPersonId(randomUUID())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next())
-                                .withInterpreter(Interpreter.builder()
-                                        .withLanguage(STRING.next())
-                                        .withNeeded(BOOLEAN.next())
-                                )
-                                .withAddress(Address.builder()
-                                        .withAddress1(STRING.next())
-                                        .withAddress2(STRING.next())
-                                        .withAddress3(STRING.next())
-                                        .withAddress4(STRING.next())
-                                        .withPostCode(STRING.next())
-                                )
-                                .addDefendantCase(DefendantCase.builder()
-                                        .withBailStatus(STRING.next())
-                                        .withCustodyTimeLimitDate(LocalDate.now())
-                                        .withCaseId(caseId)
-                                )
-                                .addOffence(Offence.builder()
-                                        .withId(offenceId)
-                                        .withTitle(STRING.next())
-                                        .withLegislation(STRING.next())
-                                        .withCaseId(caseId)
-                                        .withOffenceCode(STRING.next())
-                                        .withConvictionDate(PAST_LOCAL_DATE.next())
-                                        .withCount(INTEGER.next())
-                                        .withWording(STRING.next())
-                                        .withStartDate(PAST_LOCAL_DATE.next())
-                                        .withEndDate(PAST_LOCAL_DATE.next())
-                                        .withSection(STRING.next())
-                                )
-                        )
-                        .build())
-                .withCases(asList(
-                        Case.builder()
-                                .withCaseId(caseId)
-                                .withUrn(STRING.next())
-                                .build()
-                ))
+                .withHearing(hearingOne.it().getHearing())
+                .withCases(hearingOne.it().getCases())
                 .withDefenceCounsels(ImmutableMap.of(randomUUID(), DefenceCounselUpsert.builder()
-                        .withHearingId(hearingId)
+                        .withHearingId(hearingOne.getHearingId())
                         .withPersonId(randomUUID())
                         .withAttendeeId(randomUUID())
                         .withDefendantIds(asList(randomUUID()))
@@ -365,7 +299,7 @@ public class PublishResultsEventProcessorTest {
                 ))
                 .withProsecutionCounsels(ImmutableMap.of(randomUUID(), ProsecutionCounselUpsert.builder()
                         .withAttendeeId(randomUUID())
-                        .withHearingId(hearingId)
+                        .withHearingId(hearingOne.getHearingId())
                         .withPersonId(randomUUID())
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next())
@@ -374,8 +308,8 @@ public class PublishResultsEventProcessorTest {
                         .build()
                 ))
                 .withPleas(ImmutableMap.of(randomUUID(), Plea.plea()
-                        .setOffenceId(offenceId)
-                        .setOriginHearingId(hearingId)
+                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                        .setOriginHearingId(hearingOne.getHearingId())
                         .setPleaDate(PAST_LOCAL_DATE.next())
                         .setValue(STRING.next())
                 ))
@@ -388,9 +322,9 @@ public class PublishResultsEventProcessorTest {
                         .withNumberOfSplitJurors(RandomGenerator.integer(0, 3).next())
                         .withVerdictDate(PAST_LOCAL_DATE.next())
                         .withVerdictValueId(randomUUID())
-                        .withOffenceId(offenceId)
+                        .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
                         .withUnanimous(BOOLEAN.next())
-                        .withHearingId(hearingId)
+                        .withHearingId(hearingOne.getHearingId())
                         .build()))
                 .withCourtClerk(CourtClerk.builder()
                         .withId(randomUUID())
@@ -400,9 +334,9 @@ public class PublishResultsEventProcessorTest {
                 .withCompletedResultLines(asList(
                         CompletedResultLine.builder()
                                 .withId(randomUUID())
-                                .withCaseId(caseId)
-                                .withDefendantId(defendantId)
-                                .withOffenceId(offenceId)
+                                .withCaseId(hearingOne.getFirstCaseId())
+                                .withDefendantId(hearingOne.getFirstDefendantId())
+                                .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
                                 .withLevel(Level.CASE)
                                 .withResultDefinitionId(randomUUID())
                                 .withResultLabel(STRING.next())

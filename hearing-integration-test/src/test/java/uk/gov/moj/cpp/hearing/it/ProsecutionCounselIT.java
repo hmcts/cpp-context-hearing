@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddProsecutionCounselCommandTemplates.addProsecutionCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -25,9 +26,7 @@ public class ProsecutionCounselIT extends AbstractIT {
     @Test
     public void addProsecutionCounsel_shouldAdd() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         final AddProsecutionCounselCommand firstProsecutionCounsel = UseCases.addProsecutionCounsel(requestSpec, hearingOne.getHearingId(),
                 addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
@@ -72,9 +71,7 @@ public class ProsecutionCounselIT extends AbstractIT {
     @Test
     public void addProsecutionCounsel_shouldEdit() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         final AddProsecutionCounselCommand firstProsecutionCounsel = UseCases.addProsecutionCounsel(requestSpec, hearingOne.getHearingId(),
                 addProsecutionCounselCommandTemplate(hearingOne.getHearingId())

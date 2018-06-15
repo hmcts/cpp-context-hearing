@@ -112,6 +112,11 @@ public class NowsDataProcessor {
                                         .setId(defendant.getId())
                                         .setPerson(Person.person()
                                                 .setId(defendant.getPersonId())
+                                                .setFirstName(defendant.getFirstName())
+                                                .setLastName(defendant.getLastName())
+                                                .setDateOfBirth(defendant.getDateOfBirth().toString())
+                                                .setNationality(defendant.getNationality())
+                                                .setGender(defendant.getGender())
                                                 .setAddress(
                                                         Address.address()
                                                                 .setAddress1(defendant.getAddress().getAddress1())

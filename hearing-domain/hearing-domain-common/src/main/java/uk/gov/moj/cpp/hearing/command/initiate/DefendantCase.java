@@ -13,9 +13,11 @@ public class DefendantCase implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID caseId;
+    private UUID caseId;
     private String bailStatus;
     private LocalDate custodyTimeLimitDate;
+
+    public DefendantCase(){}
 
     @JsonCreator
     public DefendantCase(@JsonProperty("caseId") final UUID caseId,
@@ -32,6 +34,11 @@ public class DefendantCase implements Serializable {
         return caseId;
     }
 
+    public DefendantCase setCaseId(UUID caseId){
+        this.caseId = caseId;
+        return this;
+    }
+
     public String getBailStatus() {
         return bailStatus;
     }
@@ -40,64 +47,17 @@ public class DefendantCase implements Serializable {
         return custodyTimeLimitDate;
     }
 
-    public void setBailStatus(String bailStatus) {
+    public DefendantCase setBailStatus(String bailStatus) {
         this.bailStatus = bailStatus;
+        return this;
     }
 
-    public void setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
+    public DefendantCase setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
         this.custodyTimeLimitDate = custodyTimeLimitDate;
+        return this;
     }
 
-    public static class Builder {
-
-        private UUID caseId;
-        private String bailStatus;
-        private LocalDate custodyTimeLimitDate;
-
-        private Builder() {
-
-        }
-
-        public UUID getCaseId() {
-            return caseId;
-        }
-
-        public String getBailStatus() {
-            return bailStatus;
-        }
-
-        public LocalDate getCustodyTimeLimitDate() {
-            return custodyTimeLimitDate;
-        }
-
-        public Builder withCaseId(UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withBailStatus(String bailStatus) {
-            this.bailStatus = bailStatus;
-            return this;
-        }
-
-        public Builder withCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
-            this.custodyTimeLimitDate = custodyTimeLimitDate;
-            return this;
-        }
-
-        public DefendantCase build() {
-            return new DefendantCase(caseId, bailStatus, custodyTimeLimitDate);
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder from(DefendantCase defendantCase) {
-        return builder()
-                .withCaseId(defendantCase.getCaseId())
-                .withBailStatus(defendantCase.getBailStatus())
-                .withCustodyTimeLimitDate(defendantCase.getCustodyTimeLimitDate());
+    public static DefendantCase defendantCase(){
+        return new DefendantCase();
     }
 }

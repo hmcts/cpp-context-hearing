@@ -37,6 +37,7 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 @SuppressWarnings("unchecked")
@@ -48,9 +49,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEvent_givenStartOfHearing() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
@@ -86,9 +85,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEventWithWitness_givenStartOfHearing() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
@@ -142,9 +139,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEvent_givenIdentifyDefendantEvent() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
@@ -154,9 +149,7 @@ public class HearingEventsIT extends AbstractIT {
 
         assertThat(hearingEventDefinition.isAlterable(), is(true));
 
-        final LogEventCommand logEventCommand =
-                logEvent(requestSpec, asDefault(), hearingOne.it(),
-                        hearingEventDefinition.getId(), true, null, COUNSEL_ID);
+        final LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), hearingOne.it(), hearingEventDefinition.getId(), true, null, COUNSEL_ID);
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
                 hearingOne.getHearingId()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -182,9 +175,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEventCorrection_givenStartHearingEvent() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
@@ -225,9 +216,7 @@ public class HearingEventsIT extends AbstractIT {
 
         final ZonedDateTime zonedDateTime = PAST_ZONED_DATE_TIME.next();
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
@@ -269,9 +258,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEvent_hearingEventsUpdated() {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(userId);
 
@@ -281,12 +268,10 @@ public class HearingEventsIT extends AbstractIT {
 
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
-        final LogEventCommand logEventCommand =
-                logEvent(requestSpec, asDefault(), hearingOne.it(),
+        final LogEventCommand logEventCommand = logEvent(requestSpec, asDefault(), hearingOne.it(),
                         hearingEventDefinition.getId(), false, randomUUID(),
                         COUNSEL_ID);
-        final HearingEvent hearingEvent =
-                new HearingEvent(logEventCommand.getHearingEventId(), "RL1");
+        final HearingEvent hearingEvent = new HearingEvent(logEventCommand.getHearingEventId(), "RL1");
 
         final String commandAPIEndPoint = MessageFormat.format(
                 ENDPOINT_PROPERTIES.getProperty("hearing.update-hearing-events"),

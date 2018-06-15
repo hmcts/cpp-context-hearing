@@ -44,7 +44,7 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
     @Test
     public void updateCaseDefendantDetals_shouldUpdateDefendant_givenResultNotShared() throws Exception {
 
-        final InitiateHearingCommand initiateHearing = minimalInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearing = minimalInitiateHearingTemplate();
 
         final Hearing hearing = initiateHearing.getHearing();
 

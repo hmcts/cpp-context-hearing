@@ -173,7 +173,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testAddOffenceForExistingHearing() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final FoundHearingsForNewOffence foundHearingsForNewOffence = FoundHearingsForNewOffence.builder()
                 .withId(randomUUID())
@@ -205,7 +205,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testUpdateOffence() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final FoundHearingsForEditOffence foundHearingsForEditOffence = FoundHearingsForEditOffence.builder()
                 .withId(randomUUID())
@@ -233,7 +233,7 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testDeleteOffence() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final FoundHearingsForDeleteOffence foundHearingsForDeleteOffence = FoundHearingsForDeleteOffence.builder()
                 .withId(randomUUID())

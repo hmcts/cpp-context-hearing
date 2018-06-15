@@ -17,7 +17,10 @@ public class InitiateHearingCommand implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private List<Case> cases;
-    private final Hearing hearing;
+    private Hearing hearing;
+
+    public InitiateHearingCommand() {
+    }
 
     @JsonCreator
     public InitiateHearingCommand(@JsonProperty("cases") List<Case> cases,
@@ -34,51 +37,17 @@ public class InitiateHearingCommand implements Serializable {
         return hearing;
     }
 
-    public static class Builder {
-
-        private List<Case.Builder> cases = new ArrayList<>();
-
-        private Hearing.Builder hearing;
-
-        private Builder() {
-
-        }
-
-        public List<Case.Builder> getCases() {
-            return cases;
-        }
-
-        public Hearing.Builder getHearing() {
-            return hearing;
-        }
-
-        public Builder addCase(Case.Builder legalCase) {
-            cases.add(legalCase);
-            return this;
-        }
-
-        public Builder withHearing(Hearing.Builder hearing) {
-            this.hearing = hearing;
-            return this;
-        }
-
-        public InitiateHearingCommand build() {
-            return new InitiateHearingCommand(
-                    unmodifiableList(cases.stream().map(Case.Builder::build).collect(Collectors.toList())),
-                    ofNullable(hearing).map(Hearing.Builder::build).orElse(null));
-        }
+    public InitiateHearingCommand setCases(List<Case> cases) {
+        this.cases = new ArrayList<>(cases);
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public InitiateHearingCommand setHearing(Hearing hearing) {
+        this.hearing = hearing;
+        return this;
     }
 
-    public static Builder from(InitiateHearingCommand initiateHearingCommand) {
-        Builder builder = builder()
-                .withHearing(Hearing.from(initiateHearingCommand.getHearing()));
-
-        initiateHearingCommand.getCases().forEach(legalCase -> builder.addCase(Case.from(legalCase)));
-
-        return builder;
+    public static InitiateHearingCommand initiateHearingCommand() {
+        return new InitiateHearingCommand();
     }
 }

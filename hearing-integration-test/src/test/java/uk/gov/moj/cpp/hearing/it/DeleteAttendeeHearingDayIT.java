@@ -28,6 +28,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.standardAddDefenceCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -38,9 +39,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     @Test
     public void hearingSingleDay_shouldRemoveOnlyAttendeeAndHearingDayAssociationForAnEspecificAttendeeAndGivenDate() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.it().getHearing();
 
@@ -104,11 +103,11 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     @Test
     public void hearingMultipleeDays_shouldRemoveAllAttendeeAndHearingDayAssociationsGreaterOrEqualAGivenDate() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+        final InitiateHearingCommandHelper hearingOne = h(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
                     final ZonedDateTime startDateTime = ZonedDateTime.now();
-                    data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
-                }).build())
+                    data.getHearing().setHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
+                }))
         );
 
         final AddDefenceCounselCommand defenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
@@ -148,11 +147,11 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
     @Test
     public void hearingMultipleeDays_shouldRemoveOnlyAttendeeAndHearingDayAssociationsEqualAGivenDate() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+        final InitiateHearingCommandHelper hearingOne = h(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), data -> {
                     final ZonedDateTime startDateTime = ZonedDateTime.now();
-                    data.getHearing().withHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
-                }).build())
+                    data.getHearing().setHearingDays(Arrays.asList(startDateTime, startDateTime.plusDays(1)));
+                }))
         );
 
         final AddDefenceCounselCommand defenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),

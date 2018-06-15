@@ -25,7 +25,7 @@ public class DefenceCounselIT extends AbstractIT {
     public void addDefenceCounsel_shouldAdd() throws Exception {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
         );
 
         final AddDefenceCounselCommand firstDefenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),
@@ -77,7 +77,7 @@ public class DefenceCounselIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
                     i.getHearing().getDefendants().add(defendantTemplate(i.getCases().get(0).getCaseId()));
-                }).build())
+                }))
         );
 
         final AddDefenceCounselCommand firstDefenceCounsel = UseCases.addDefenceCounsel(requestSpec, hearingOne.getHearingId(),

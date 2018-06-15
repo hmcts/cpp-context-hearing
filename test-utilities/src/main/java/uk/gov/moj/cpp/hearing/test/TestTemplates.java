@@ -9,7 +9,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.Builder;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
@@ -40,6 +39,7 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
@@ -63,211 +63,228 @@ public class TestTemplates {
         private InitiateHearingCommandTemplates() {
         }
 
-        public static InitiateHearingCommand.Builder basicInitiateHearingTemplate() {
+        public static InitiateHearingCommand basicInitiateHearingTemplate() {
 
             final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
             final ZonedDateTime secondDateTime = startDateTime.plusDays(2);
 
-            return InitiateHearingCommand.builder()
-                    .withHearing(Hearing.builder()
-                            .withId(randomUUID())
-                            .withType(STRING.next())
-                            .withCourtCentreId(randomUUID())
-                            .withCourtCentreName(STRING.next())
-                            .withCourtRoomId(randomUUID())
-                            .withCourtRoomName(STRING.next())
-                            .withJudge(
-                                    Judge.builder()
-                                            .withId(randomUUID())
-                                            .withTitle(STRING.next())
-                                            .withFirstName(STRING.next())
-                                            .withLastName(STRING.next())
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(Hearing.hearing()
+                            .setId(randomUUID())
+                            .setType(STRING.next())
+                            .setCourtCentreId(randomUUID())
+                            .setCourtCentreName(STRING.next())
+                            .setCourtRoomId(randomUUID())
+                            .setCourtRoomName(STRING.next())
+                            .setJudge(
+                                    Judge.judge()
+                                            .setId(randomUUID())
+                                            .setTitle(STRING.next())
+                                            .setFirstName(STRING.next())
+                                            .setLastName(STRING.next())
                             )
-                            .withHearingDays(Arrays.asList(startDateTime, secondDateTime))
+                            .setHearingDays(asList(startDateTime, secondDateTime))
                     );
         }
 
-        public static InitiateHearingCommand.Builder minimalInitiateHearingTemplate() {
+        public static InitiateHearingCommand minimalInitiateHearingTemplate() {
 
             final UUID caseId = randomUUID();
             final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
             final ZonedDateTime secondDateTime = startDateTime.plusDays(2);
 
-            return InitiateHearingCommand.builder()
-                    .addCase(Case.builder()
-                            .withCaseId(caseId)
-                            .withUrn(STRING.next())
-                    )
-                    .withHearing(Hearing.builder()
-                            .withId(randomUUID())
-                            .withType(STRING.next())
-                            .withCourtCentreId(randomUUID())
-                            .withCourtCentreName(STRING.next())
-                            .withCourtRoomId(randomUUID())
-                            .withCourtRoomName(STRING.next())
-                            .withJudge(
-                                    Judge.builder()
-                                            .withId(randomUUID())
-                                            .withTitle(STRING.next())
-                                            .withFirstName(STRING.next())
-                                            .withLastName(STRING.next())
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setCases(asList(Case.legalCase()
+                                    .setCaseId(caseId)
+                                    .setUrn(STRING.next())
                             )
-                            .withHearingDays(Arrays.asList(startDateTime, secondDateTime))
-                            .addDefendant(Defendant.builder()
-                                    .withId(randomUUID())
-                                    .withPersonId(randomUUID())
-                                    .withFirstName(STRING.next())
-                                    .withLastName(STRING.next())
-                                    .addDefendantCase(
-                                            DefendantCase.builder()
-                                                    .withCaseId(caseId)
-                                    )
-                                    .addOffence(
-                                            offenceTemplate(caseId)
-                                                    .withSection(null)
-                                                    .withEndDate(null)
-                                                    .withOrderIndex(null)
-                                                    .withCount(null)
-                                                    .withConvictionDate(null)
-                                                    .withLegislation(null)
-                                                    .withTitle(null)
+                    )
+                    .setHearing(Hearing.hearing()
+                            .setId(randomUUID())
+                            .setType(STRING.next())
+                            .setCourtCentreId(randomUUID())
+                            .setCourtCentreName(STRING.next())
+                            .setCourtRoomId(randomUUID())
+                            .setCourtRoomName(STRING.next())
+                            .setJudge(
+                                    Judge.judge()
+                                            .setId(randomUUID())
+                                            .setTitle(STRING.next())
+                                            .setFirstName(STRING.next())
+                                            .setLastName(STRING.next())
+                            )
+                            .setHearingDays(asList(startDateTime, secondDateTime))
+                            .setDefendants(asList(
+                                    Defendant.defendant()
+                                            .setId(randomUUID())
+                                            .setPersonId(randomUUID())
+                                            .setFirstName(STRING.next())
+                                            .setLastName(STRING.next())
+                                            .setDefendantCases(asList(
+                                                    DefendantCase.defendantCase()
+                                                            .setCaseId(caseId))
+                                            )
+                                            .setOffences(asList(offenceTemplate(caseId)
+                                                            .setSection(null)
+                                                            .setEndDate(null)
+                                                            .setOrderIndex(null)
+                                                            .setCount(null)
+                                                            .setConvictionDate(null)
+                                                            .setLegislation(null)
+                                                            .setTitle(null)
+                                                    )
+                                            )
                                     )
                             )
                     );
         }
 
-        public static InitiateHearingCommand.Builder standardInitiateHearingTemplate() {
+        public static InitiateHearingCommand standardInitiateHearingTemplate() {
             final UUID caseId = randomUUID();
             final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
-            return InitiateHearingCommand.builder()
-                    .addCase(caseTemplate(caseId))
-                    .withHearing(Hearing.builder()
-                            .withId(randomUUID())
-                            .withType(STRING.next())
-                            .withCourtCentreId(randomUUID())
-                            .withCourtCentreName(STRING.next())
-                            .withCourtRoomId(randomUUID())
-                            .withCourtRoomName(STRING.next())
-                            .withJudge(
-                                    Judge.builder()
-                                            .withId(randomUUID())
-                                            .withTitle(STRING.next())
-                                            .withFirstName(STRING.next())
-                                            .withLastName(STRING.next())
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setCases(asList(caseTemplate(caseId)))
+                    .setHearing(Hearing.hearing()
+                            .setId(randomUUID())
+                            .setType(STRING.next())
+                            .setCourtCentreId(randomUUID())
+                            .setCourtCentreName(STRING.next())
+                            .setCourtRoomId(randomUUID())
+                            .setCourtRoomName(STRING.next())
+                            .setJudge(
+                                    Judge.judge()
+                                            .setId(randomUUID())
+                                            .setTitle(STRING.next())
+                                            .setFirstName(STRING.next())
+                                            .setLastName(STRING.next())
                             )
-                            .withHearingDays(Arrays.asList(startDateTime))
-                            .addDefendant(defendantTemplate(caseId))
-                            .addWitness(witnessTemplate(caseId))
+                            .setHearingDays(asList(startDateTime))
+                            .setDefendants(asList(defendantTemplate(caseId)))
+                            .setWitnesses(asList(witnessTemplate(caseId)))
                     );
         }
 
-        public static Case.Builder caseTemplate(UUID caseId) {
-            return Case.builder()
-                    .withCaseId(caseId)
-                    .withUrn(STRING.next());
+        public static Case caseTemplate(UUID caseId) {
+            return Case.legalCase()
+                    .setCaseId(caseId)
+                    .setUrn(STRING.next());
         }
 
-        public static Defendant.Builder defendantTemplate(UUID caseId) {
-            return Defendant.builder()
-                    .withId(randomUUID())
-                    .withPersonId(randomUUID())
-                    .withFirstName(STRING.next())
-                    .withLastName(STRING.next())
-                    .withNationality(STRING.next())
-                    .withGender(STRING.next())
-                    .withAddress(addressTemplate())
-                    .withDateOfBirth(PAST_LOCAL_DATE.next())
-                    .withDefenceOrganisation(STRING.next())
-                    .withInterpreter(
-                            Interpreter.builder()
-                                    .withNeeded(false)
-                                    .withLanguage(STRING.next())
+        public static Defendant defendantTemplate(UUID caseId) {
+            return Defendant.defendant()
+                    .setId(randomUUID())
+                    .setPersonId(randomUUID())
+                    .setFirstName(STRING.next())
+                    .setLastName(STRING.next())
+                    .setNationality(STRING.next())
+                    .setGender(STRING.next())
+                    .setAddress(addressTemplate())
+                    .setDateOfBirth(PAST_LOCAL_DATE.next())
+                    .setDefenceOrganisation(STRING.next())
+                    .setInterpreter(Interpreter.interpreter()
+                            .setNeeded(false)
+                            .setLanguage(STRING.next())
                     )
-                    .addDefendantCase(defendantCaseTemplate(caseId))
-                    .addOffence(offenceTemplate(caseId));
+                    .setDefendantCases(asList(
+                            defendantCaseTemplate(caseId)
+                    ))
+                    .setOffences(asList(
+                            offenceTemplate(caseId)
+                    ));
         }
 
-        public static Address.Builder addressTemplate() {
-            return Address.builder()
-                    .withAddress1(STRING.next())
-                    .withAddress2(STRING.next())
-                    .withAddress3(STRING.next())
-                    .withAddress4(STRING.next())
-                    .withPostCode(STRING.next());
+        public static Address addressTemplate() {
+            return Address.address()
+                    .setAddress1(STRING.next())
+                    .setAddress2(STRING.next())
+                    .setAddress3(STRING.next())
+                    .setAddress4(STRING.next())
+                    .setPostCode(STRING.next());
         }
 
-        public static DefendantCase.Builder defendantCaseTemplate(UUID caseId) {
-            return DefendantCase.builder()
-                    .withCaseId(caseId)
-                    .withBailStatus(STRING.next())
-                    .withCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next());
+        public static DefendantCase defendantCaseTemplate(UUID caseId) {
+            return DefendantCase.defendantCase()
+                    .setCaseId(caseId)
+                    .setBailStatus(STRING.next())
+                    .setCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next());
         }
 
-        public static Offence.Builder offenceTemplate(UUID caseId) {
-            return Offence.builder()
-                    .withId(randomUUID())
-                    .withCaseId(caseId)
-                    .withOffenceCode(STRING.next())
-                    .withWording(STRING.next())
-                    .withSection(STRING.next())
-                    .withStartDate(PAST_LOCAL_DATE.next())
-                    .withEndDate(PAST_LOCAL_DATE.next())
-                    .withOrderIndex(INTEGER.next())
-                    .withCount(INTEGER.next())
-                    .withConvictionDate(PAST_LOCAL_DATE.next())
-                    .withLegislation(STRING.next())
-                    .withTitle(STRING.next());
+        public static Offence offenceTemplate(UUID caseId) {
+            return Offence.offence()
+                    .setId(randomUUID())
+                    .setCaseId(caseId)
+                    .setOffenceCode(STRING.next())
+                    .setWording(STRING.next())
+                    .setSection(STRING.next())
+                    .setStartDate(PAST_LOCAL_DATE.next())
+                    .setEndDate(PAST_LOCAL_DATE.next())
+                    .setOrderIndex(INTEGER.next())
+                    .setCount(INTEGER.next())
+                    .setConvictionDate(PAST_LOCAL_DATE.next())
+                    .setLegislation(STRING.next())
+                    .setTitle(STRING.next());
         }
 
-        public static Witness.Builder witnessTemplate(UUID caseId) {
-            return Witness.builder()
-                    .withId(randomUUID())
-                    .withCaseId(caseId)
-                    .withType("Prosecution")
-                    .withClassification("Expert")
-                    .withPersonId(randomUUID())
-                    .withTitle(STRING.next())
-                    .withFirstName(STRING.next())
-                    .withLastName(STRING.next())
-                    .withGender(STRING.next())
-                    .withDateOfBirth(PAST_LOCAL_DATE.next())
-                    .withEmail(STRING.next())
-                    .withFax(STRING.next())
-                    .withHomeTelephone(STRING.next())
-                    .withWorkTelephone(STRING.next())
-                    .withMobile(STRING.next())
-                    .withNationality(STRING.next());
+        public static Witness witnessTemplate(UUID caseId) {
+            return Witness.witness()
+                    .setId(randomUUID())
+                    .setCaseId(caseId)
+                    .setType("Prosecution")
+                    .setClassification("Expert")
+                    .setPersonId(randomUUID())
+                    .setTitle(STRING.next())
+                    .setFirstName(STRING.next())
+                    .setLastName(STRING.next())
+                    .setGender(STRING.next())
+                    .setDateOfBirth(PAST_LOCAL_DATE.next())
+                    .setEmail(STRING.next())
+                    .setFax(STRING.next())
+                    .setHomeTelephone(STRING.next())
+                    .setWorkTelephone(STRING.next())
+                    .setMobile(STRING.next())
+                    .setNationality(STRING.next());
         }
 
-        public static InitiateHearingCommand.Builder minimalInitiateHearingTemplate(
+        public static InitiateHearingCommand minimalInitiateHearingTemplate(
                 final UUID caseId, final UUID hearingId, final UUID... defendantIds) {
 
-            final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
-            final Builder initiateHearingBuilder = InitiateHearingCommand.builder()
-                    .addCase(Case.builder().withCaseId(caseId).withUrn(STRING.next()))
-                    .withHearing(Hearing.builder().withId(hearingId).withType(STRING.next())
-                            .withCourtCentreId(randomUUID())
-                            .withCourtCentreName(STRING.next())
-                            .withCourtRoomId(randomUUID())
-                            .withCourtRoomName(STRING.next())
-                            .withJudge(Judge.builder().withId(randomUUID())
-                                    .withTitle(STRING.next())
-                                    .withFirstName(STRING.next())
-                                    .withLastName(STRING.next()))
-                            .withHearingDays(Arrays.asList(startDateTime))
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setCases(asList(Case.legalCase()
+                            .setCaseId(caseId)
+                            .setUrn(STRING.next())
+                    ))
+                    .setHearing(Hearing.hearing()
+                            .setId(hearingId)
+                            .setType(STRING.next())
+                            .setCourtCentreId(randomUUID())
+                            .setCourtCentreName(STRING.next())
+                            .setCourtRoomId(randomUUID())
+                            .setCourtRoomName(STRING.next())
+                            .setJudge(Judge.judge()
+                                    .setId(randomUUID())
+                                    .setTitle(STRING.next())
+                                    .setFirstName(STRING.next())
+                                    .setLastName(STRING.next()))
+                            .setHearingDays(asList(FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"))))
+                            .setDefendants(
+                                    Arrays.stream(defendantIds)
+                                            .map(id -> Defendant.defendant()
+                                                    .setId(id)
+                                                    .setPersonId(randomUUID())
+                                                    .setFirstName(STRING.next())
+                                                    .setLastName(STRING.next())
+                                                    .setDefendantCases(asList(
+                                                            DefendantCase.defendantCase().setCaseId(caseId)
+                                                    ))
+                                                    .setOffences(asList(
+                                                            Offence.offence().setId(randomUUID()).setCaseId(caseId)
+                                                                    .setOffenceCode(STRING.next())
+                                                                    .setWording(STRING.next())
+                                                                    .setStartDate(PAST_LOCAL_DATE.next())
+                                                    )))
+                                            .collect(toList())
+                            )
                     );
-            Arrays.stream(defendantIds).forEach(id ->
-
-                    initiateHearingBuilder.getHearing().addDefendant(Defendant.builder()
-                            .withId(id)
-                            .withPersonId(randomUUID())
-                            .withFirstName(STRING.next()).withLastName(STRING.next())
-                            .addDefendantCase(DefendantCase.builder().withCaseId(caseId))
-                            .addOffence(Offence.builder().withId(randomUUID()).withCaseId(caseId)
-                                    .withOffenceCode(STRING.next())
-                                    .withWording(STRING.next())
-                                    .withStartDate(PAST_LOCAL_DATE.next()))));
-            return initiateHearingBuilder;
         }
     }
 

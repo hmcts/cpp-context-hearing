@@ -16,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 
 import java.io.IOException;
@@ -51,8 +52,7 @@ public class GenerateNowsIT extends AbstractIT {
     @Test
     public void shouldAddUpdateNows() throws IOException {
 
-        final InitiateHearingCommandHelper hearing =
-                new InitiateHearingCommandHelper(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate().build()));
+        final InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate()));
 
         final String userId = randomUUID().toString();
         final String materialId = randomUUID().toString();
@@ -64,15 +64,15 @@ public class GenerateNowsIT extends AbstractIT {
                 .withFilter(isJson(withJsonPath("$.hearing.id", is(hearing.getHearingId().toString()))));
 
         makeCommand(requestSpec, "hearing.generate-nows")
-            .ofType("application/vnd.hearing.generate-nows+json")
-            .withPayload(getGenerateNowsCommand(
-                    hearing.getHearingId().toString(),
-                    hearing.getFirstDefendantId().toString(),
-                    materialId, nowsId, nowsTypeId, sharedResultId))
-            .executeSuccessfully();
+                .ofType("application/vnd.hearing.generate-nows+json")
+                .withPayload(getGenerateNowsCommand(
+                        hearing.getHearingId().toString(),
+                        hearing.getFirstDefendantId().toString(),
+                        materialId, nowsId, nowsTypeId, sharedResultId))
+                .executeSuccessfully();
         // ensure upload material and update status called
         Awaitility.await().atMost(30, TimeUnit.SECONDS)
-                        .until(this::uploadMaterialCalled);
+                .until(this::uploadMaterialCalled);
         sendMaterialFileUploadedPublicEvent(materialId, userId);
         Awaitility.await().atMost(30, TimeUnit.SECONDS).until(this::updateMaterialStatusHmpsCalled);
         sendHearingHmpsMaterialStatusUpdatedPublicMessage(materialId, userId, hearing.getHearingId().toString());
@@ -107,8 +107,7 @@ public class GenerateNowsIT extends AbstractIT {
     @Test
     public void shouldUpdateNowsMaterialStatusToGenerated() throws IOException {
 
-        final InitiateHearingCommandHelper hearing =
-                new InitiateHearingCommandHelper(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate().build()));
+        final InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate()));
 
         final String materialId = randomUUID().toString();
         final String nowsId = randomUUID().toString();
@@ -172,35 +171,35 @@ public class GenerateNowsIT extends AbstractIT {
 
     private boolean uploadMaterialCalled() {
         return (findAll(postRequestedFor(
-                        urlPathMatching(WireMockStubUtils.MATERIAL_UPLOAD_COMMAND)))
-                                        .size() == 1);
+                urlPathMatching(WireMockStubUtils.MATERIAL_UPLOAD_COMMAND)))
+                .size() == 1);
     }
 
     private boolean updateMaterialStatusHmpsCalled() {
         return (findAll(postRequestedFor(
-                        urlPathMatching(WireMockStubUtils.MATERIAL_STATUS_UPLOAD_COMMAND)))
-                                        .size() == 1);
+                urlPathMatching(WireMockStubUtils.MATERIAL_STATUS_UPLOAD_COMMAND)))
+                .size() == 1);
     }
 
     private void sendMaterialFileUploadedPublicEvent(final String materialId, final String userId) {
         final String commandName = "material.material-added";
         final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), commandName)
-                        .withUserId(userId).build();
+                .withUserId(userId).build();
         final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId).add(
-                        "fileDetails",
-                        Json.createObjectBuilder().add("alfrescoAssetId", "aGVsbG8=")
-                                        .add("mimeType", "text/plain").add("fileName", "file.txt"))
-                        .add("materialAddedDate", "2016-04-26T13:01:787.345").build();
+                "fileDetails",
+                Json.createObjectBuilder().add("alfrescoAssetId", "aGVsbG8=")
+                        .add("mimeType", "text/plain").add("fileName", "file.txt"))
+                .add("materialAddedDate", "2016-04-26T13:01:787.345").build();
         QueueUtil.sendMessage(messageProducerClientPublic, commandName, payload, metadata);
     }
 
     private void sendHearingHmpsMaterialStatusUpdatedPublicMessage(final String materialId,
-                    final String userId, final String hearingId) {
+                                                                   final String userId, final String hearingId) {
         final String commandName = "public.resultinghmps.event.nows-material-status-updated";
         final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), commandName)
-                        .withUserId(userId).build();
+                .withUserId(userId).build();
         final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId)
-                        .add("hearingId", hearingId).add("status", "generated").build();
+                .add("hearingId", hearingId).add("status", "generated").build();
         QueueUtil.sendMessage(messageProducerClientPublic, commandName, payload, metadata);
     }
 

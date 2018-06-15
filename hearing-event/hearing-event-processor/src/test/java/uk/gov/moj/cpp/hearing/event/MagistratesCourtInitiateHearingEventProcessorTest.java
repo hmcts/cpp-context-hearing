@@ -23,6 +23,7 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
+import uk.gov.moj.cpp.hearing.test.TestTemplates.PleaValueType;
 
 import java.util.List;
 
@@ -34,12 +35,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
@@ -158,7 +159,7 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
                                                         .withId(randomUUID())
                                                         .withCategory(STRING.next())
                                                         .withPlea(Plea.plea()
-                                                                .withPleaValue("GUILTY")
+                                                                .withPleaValue(PleaValueType.GUILTY.name())
                                                                 .withPleaDate(PAST_LOCAL_DATE.next())
                                                                 .build())
                                                         .build(),
@@ -166,7 +167,7 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
                                                         .withId(randomUUID())
                                                         .withCategory(STRING.next())
                                                         .withPlea(Plea.plea()
-                                                                .withPleaValue("NOT_GUILTY")
+                                                                .withPleaValue(PleaValueType.NOT_GUILTY.name())
                                                                 .withPleaDate(PAST_LOCAL_DATE.next())
                                                                 .build())
                                                         .build()

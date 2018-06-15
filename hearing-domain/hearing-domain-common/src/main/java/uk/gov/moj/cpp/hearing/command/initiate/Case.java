@@ -10,8 +10,10 @@ public class Case implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID caseId;
-    private final String urn;
+    private UUID caseId;
+    private String urn;
+
+    public Case(){}
 
     @JsonCreator
     public Case(@JsonProperty("caseId") UUID caseId, @JsonProperty("urn") String urn) {
@@ -27,46 +29,17 @@ public class Case implements Serializable {
         return urn;
     }
 
-    public static class Builder {
-
-        private UUID caseId;
-        private String urn;
-
-        private Builder() {
-
-        }
-
-        public UUID getCaseId() {
-            return caseId;
-        }
-
-        public String getUrn() {
-            return urn;
-        }
-
-        public Builder withCaseId(UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withUrn(String urn) {
-            this.urn = urn;
-            return this;
-        }
-
-        public Case build() {
-            return new Case(caseId, urn);
-        }
-
+    public Case setCaseId(UUID caseId) {
+        this.caseId = caseId;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Case setUrn(String urn) {
+        this.urn = urn;
+        return this;
     }
 
-    public static Builder from(Case legalCase) {
-        return builder()
-                .withCaseId(legalCase.getCaseId())
-                .withUrn(legalCase.getUrn());
+    public static Case legalCase(){
+        return new Case();
     }
 }

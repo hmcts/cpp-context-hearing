@@ -11,11 +11,14 @@ public class Address implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String address1;
-    private final String address2;
-    private final String address3;
-    private final String address4;
-    private final String postCode;
+    private String address1;
+    private String address2;
+    private String address3;
+    private String address4;
+    private String postCode;
+
+    public Address() {
+    }
 
     @JsonCreator
     public Address(@JsonProperty("address1") final String address1,
@@ -50,79 +53,32 @@ public class Address implements Serializable {
         return postCode;
     }
 
-    public static class Builder {
-
-        private String address1;
-        private String address2;
-        private String address3;
-        private String address4;
-        private String postCode;
-
-        private Builder() {
-
-        }
-
-        public String getAddress1() {
-            return address1;
-        }
-
-        public String getAddress2() {
-            return address2;
-        }
-
-        public String getAddress3() {
-            return address3;
-        }
-
-        public String getAddress4() {
-            return address4;
-        }
-
-        public String getPostCode() {
-            return postCode;
-        }
-
-        public Builder withAddress1(String address1) {
-            this.address1 = address1;
-            return this;
-        }
-
-        public Builder withAddress2(String address2) {
-            this.address2 = address2;
-            return this;
-        }
-
-        public Builder withAddress3(String address3) {
-            this.address3 = address3;
-            return this;
-        }
-
-        public Builder withAddress4(String address4) {
-            this.address4 = address4;
-            return this;
-        }
-
-        public Builder withPostCode(String postCode) {
-            this.postCode = postCode;
-            return this;
-        }
-
-        public Address build() {
-            return new Address(address1, address2, address3, address4, postCode);
-        }
-
+    public Address setAddress1(String address1) {
+        this.address1 = address1;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Address setAddress2(String address2) {
+        this.address2 = address2;
+        return this;
     }
 
-    public static Builder from(Address address) {
-        return builder()
-                .withAddress1(address.getAddress1())
-                .withAddress2(address.getAddress2())
-                .withAddress3(address.getAddress3())
-                .withAddress4(address.getAddress4())
-                .withPostCode(address.getPostCode());
+    public Address setAddress3(String address3) {
+        this.address3 = address3;
+        return this;
+    }
+
+    public Address setAddress4(String address4) {
+        this.address4 = address4;
+        return this;
+    }
+
+    public Address setPostCode(String postCode) {
+        this.postCode = postCode;
+        return this;
+    }
+
+    public static Address address() {
+        return new Address();
     }
 }

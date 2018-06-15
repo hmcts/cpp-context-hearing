@@ -17,6 +17,7 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
 
@@ -26,9 +27,7 @@ public class PleaIT extends AbstractIT {
     @Test
     public void updatePlea_toGuilty_shouldHaveConvictionDate() throws Throwable {
 
-        InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingOne.getHearingId());
 
@@ -73,9 +72,7 @@ public class PleaIT extends AbstractIT {
     @Test
     public void updatePlea_toNotGuilty_shouldNotHaveConvictionDate() throws Throwable {
 
-        InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         poll(requestParameters(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
                 .until(

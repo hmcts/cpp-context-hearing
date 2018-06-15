@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.util.concurrent.TimeUnit;
@@ -20,6 +21,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.it.UseCases.addOffence;
 import static uk.gov.moj.cpp.hearing.it.UseCases.deleteOffence;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updateOffence;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.offenceTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -29,8 +31,8 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_addOffenceToExistingHearing() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
         );
 
         final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = addOffence(hearingOne.getHearingId(), command -> {
@@ -61,8 +63,8 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_updateExistingOffence() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
+                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
         );
 
         final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = updateOffence(hearingOne.getHearingId(), command -> {
@@ -89,11 +91,12 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_deleteExistingOffence() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
+        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-                    i.getHearing().getDefendants().get(0)
-                            .addOffence(TestTemplates.InitiateHearingCommandTemplates.offenceTemplate(i.getCases().get(0).getCaseId()));
-                }).build())
+                    i.getHearing().getDefendants().get(0).getOffences().add(
+                            offenceTemplate(i.getCases().get(0).getCaseId())
+                    );
+                }))
         );
 
         deleteOffence(hearingOne.getHearingId(), command -> {

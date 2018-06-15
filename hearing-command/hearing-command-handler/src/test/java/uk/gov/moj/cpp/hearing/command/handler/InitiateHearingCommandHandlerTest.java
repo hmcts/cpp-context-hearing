@@ -95,7 +95,7 @@ public class InitiateHearingCommandHandlerTest {
     @Test
     public void initiateHearing() throws Throwable {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final UUID caseId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCaseId();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();

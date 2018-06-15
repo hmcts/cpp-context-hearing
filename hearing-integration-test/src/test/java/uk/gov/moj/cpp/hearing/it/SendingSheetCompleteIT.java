@@ -56,7 +56,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
     @Test
     public void processSendingSheetComplete_shouldProduceMagsPleaInformation_givenInitiatedHearing() throws IOException {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(standardInitiateHearingTemplate().build());
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(standardInitiateHearingTemplate());
 
         final String eventName = "public.progression.events.sending-sheet-completed";
 

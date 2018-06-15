@@ -94,7 +94,7 @@ public class UpdateVerdictCommandHandlerTest {
     @Test
     public void updateVerdict_toGuilty() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         initiateHearingCommand.getHearing().getDefendants().stream()
                 .flatMap(d -> d.getOffences().stream())
@@ -178,7 +178,7 @@ public class UpdateVerdictCommandHandlerTest {
     @Test
     public void updateVerdict_toNotGuilty() throws EventStreamException {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.builder()
                 .withCaseId(initiateHearingCommand.getCases().get(0).getCaseId())

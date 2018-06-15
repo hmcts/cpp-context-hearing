@@ -12,10 +12,13 @@ public class Judge implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
-    private final String title;
-    private final String firstName;
-    private final String lastName;
+    private UUID id;
+    private String title;
+    private String firstName;
+    private String lastName;
+
+    public Judge() {
+    }
 
     @JsonCreator
     public Judge(@JsonProperty("id") final UUID id,
@@ -44,69 +47,27 @@ public class Judge implements Serializable {
         return lastName;
     }
 
-    public static class Builder {
-
-        private UUID id;
-        private String title;
-        private String firstName;
-        private String lastName;
-
-        private Builder() {
-
-        }
-
-        public UUID getId() {
-            return id;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withTitle(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public Builder withFirstName(String firstName) {
-            this.firstName = firstName;
-            return this;
-        }
-
-        public Builder withLastName(String lastName) {
-            this.lastName = lastName;
-            return this;
-        }
-
-        public Judge build() {
-            return new Judge(id, title, firstName, lastName);
-        }
-
+    public Judge setId(UUID id) {
+        this.id = id;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Judge setTitle(String title) {
+        this.title = title;
+        return this;
     }
 
-    public static Builder from(Judge judge) {
-        return builder()
-                .withId(judge.getId())
-                .withFirstName(judge.getFirstName())
-                .withLastName(judge.getLastName())
-                .withTitle(judge.getTitle());
+    public Judge setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
+    }
 
+    public Judge setLastName(String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
+
+    public static Judge judge() {
+        return new Judge();
     }
 }

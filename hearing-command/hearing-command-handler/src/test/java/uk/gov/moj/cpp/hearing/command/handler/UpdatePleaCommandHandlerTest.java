@@ -95,7 +95,7 @@ public class UpdatePleaCommandHandlerTest {
 
     @BeforeClass
     public static void init() {
-        initiateHearingCommand = standardInitiateHearingTemplate().build();
+        initiateHearingCommand = standardInitiateHearingTemplate();
         caseId = initiateHearingCommand.getCases().get(0).getCaseId();
         hearingId = initiateHearingCommand.getHearing().getId();
         defendantId = initiateHearingCommand.getHearing().getDefendants().get(0).getId();

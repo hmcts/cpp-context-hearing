@@ -132,7 +132,7 @@ public class InitiateHearingEventListenerTest {
     @Test
     public void shouldInsertAhearingWhenInitiated() {
 
-        final InitiateHearingCommand command = standardInitiateHearingTemplate().build();
+        final InitiateHearingCommand command = standardInitiateHearingTemplate();
 
         final Case legalCase = command.getCases().get(0);
         final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearing = command.getHearing();

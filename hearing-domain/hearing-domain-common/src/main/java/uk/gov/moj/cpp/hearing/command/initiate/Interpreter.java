@@ -11,8 +11,11 @@ public class Interpreter implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final boolean needed;
-    private final String language;
+    private boolean needed;
+    private String language;
+
+    public Interpreter() {
+    }
 
     @JsonCreator
     public Interpreter(@JsonProperty("needed") final boolean needed,
@@ -29,46 +32,17 @@ public class Interpreter implements Serializable {
         return language;
     }
 
-    public static class Builder {
-
-        private boolean needed;
-        private String language;
-
-        private Builder() {
-
-        }
-
-        public boolean isNeeded() {
-            return needed;
-        }
-
-        public String getLanguage() {
-            return language;
-        }
-
-        public Builder withNeeded(boolean needed) {
-            this.needed = needed;
-            return this;
-        }
-
-        public Builder withLanguage(String language) {
-            this.language = language;
-            return this;
-        }
-
-        public Interpreter build() {
-            return new Interpreter(needed, language);
-        }
-
+    public Interpreter setNeeded(boolean needed) {
+        this.needed = needed;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Interpreter setLanguage(String language) {
+        this.language = language;
+        return this;
     }
 
-    public static Builder from(Interpreter interpreter) {
-        return builder()
-                .withNeeded(interpreter.isNeeded())
-                .withLanguage(interpreter.getLanguage());
+    public static Interpreter interpreter() {
+        return new Interpreter();
     }
 }

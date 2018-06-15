@@ -33,6 +33,7 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
@@ -46,9 +47,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shouldRaiseDraftResultSaved() {
 
-        InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
-        );
+        InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         final SaveDraftResultCommand saveDraftResultCommand = with(saveDraftResultCommandTemplate(hearingOne.it()),
                 template -> template.setHearingId(hearingOne.getHearingId()));
@@ -111,24 +110,20 @@ public class ShareResultsIT extends AbstractIT {
 
         ReferenceDataStub.stubGetAllResultDefinitions(allResultDefinitions);
 
-        InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate().build())
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+
+        final UpdatePleaCommandHelper pleaOne = h(UseCases.updatePlea(requestSpec, hearingOne.getHearingId(),
+                hearingOne.getFirstOffenceIdForFirstDefendant(),
+                updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.NOT_GUILTY).build())
         );
 
-        final UpdatePleaCommandHelper pleaOne = new UpdatePleaCommandHelper(
-                UseCases.updatePlea(requestSpec, hearingOne.getHearingId(), hearingOne.getFirstOffenceIdForFirstDefendant(),
-                        updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.NOT_GUILTY).build())
-        );
-
-        final UpdateVerdictCommandHelper verdictTwo = new UpdateVerdictCommandHelper(
-                UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
-                        updateVerdictTemplate(
-                                hearingOne.getFirstCaseId(),
-                                hearingOne.getFirstDefendantId(),
-                                hearingOne.getFirstOffenceIdForFirstDefendant(),
-                                VerdictCategoryType.GUILTY
-                        ).build())
-        );
+        final UpdateVerdictCommandHelper verdictTwo = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+                updateVerdictTemplate(
+                        hearingOne.getFirstCaseId(),
+                        hearingOne.getFirstDefendantId(),
+                        hearingOne.getFirstOffenceIdForFirstDefendant(),
+                        VerdictCategoryType.GUILTY
+                ).build()));
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 

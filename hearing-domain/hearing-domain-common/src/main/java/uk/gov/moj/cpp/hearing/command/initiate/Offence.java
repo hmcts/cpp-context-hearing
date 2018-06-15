@@ -17,19 +17,21 @@ public class Offence implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
-    private final UUID caseId;
+    private UUID id;
+    private UUID caseId;
     private String offenceCode;
     private String wording;
-    private final String section;
+    private String section;
     private LocalDate startDate;
     private LocalDate endDate;
-    private final Integer orderIndex;
+    private Integer orderIndex;
     private Integer count;
     private LocalDate convictionDate;
     private Plea plea;
-    private final String title;
-    private final String legislation;
+    private String title;
+    private String legislation;
+
+    public Offence(){}
 
     @JsonCreator
     public Offence(@JsonProperty("id") final UUID id,
@@ -77,6 +79,7 @@ public class Offence implements Serializable {
         this.offenceCode = offenceCode;
         return this;
     }
+
     public String getWording() {
         return wording;
     }
@@ -150,159 +153,37 @@ public class Offence implements Serializable {
         return legislation;
     }
 
-    public static class Builder {
-
-        private UUID id;
-        private String offenceCode;
-        private String wording;
-        private String section;
-        private LocalDate startDate;
-        private LocalDate endDate;
-        private Integer orderIndex;
-        private Integer count;
-        private LocalDate convictionDate;
-        private Plea.Builder plea;
-        private UUID caseId;
-        private String title;
-        private String legislation;
-
-        private Builder() {
-
-        }
-
-        public UUID getId() {
-            return id;
-        }
-
-        public UUID getCaseId() {
-            return caseId;
-        }
-
-        public String getOffenceCode() {
-            return offenceCode;
-        }
-
-        public String getWording() {
-            return wording;
-        }
-
-        public String getSection() {
-            return section;
-        }
-
-        public LocalDate getStartDate() {
-            return startDate;
-        }
-
-        public LocalDate getEndDate() {
-            return endDate;
-        }
-
-        public Integer getOrderIndex() {
-            return orderIndex;
-        }
-
-        public Integer getCount() {
-            return count;
-        }
-
-        public LocalDate getConvictionDate() {
-            return convictionDate;
-        }
-
-        public Plea.Builder getPlea() {
-            return plea;
-        }
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withCaseId(UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withOffenceCode(String offenceCode) {
-            this.offenceCode = offenceCode;
-            return this;
-        }
-
-        public Builder withWording(String wording) {
-            this.wording = wording;
-            return this;
-        }
-
-        public Builder withSection(String section) {
-            this.section = section;
-            return this;
-        }
-
-        public Builder withStartDate(LocalDate startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder withEndDate(LocalDate endDate) {
-            this.endDate = endDate;
-            return this;
-        }
-
-        public Builder withOrderIndex(Integer orderIndex) {
-            this.orderIndex = orderIndex;
-            return this;
-        }
-
-        public Builder withCount(Integer count) {
-            this.count = count;
-            return this;
-        }
-
-        public Builder withConvictionDate(LocalDate convictionDate) {
-            this.convictionDate = convictionDate;
-            return this;
-        }
-
-        public Builder withPlea(Plea.Builder plea) {
-            this.plea = plea;
-            return this;
-        }
-
-        public Builder withTitle(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public Builder withLegislation(String legislation) {
-            this.legislation = legislation;
-            return this;
-        }
-
-        public Offence build() {
-            return new Offence(id, caseId, offenceCode, wording, section, startDate, endDate, orderIndex, count, convictionDate,
-                    ofNullable(plea).map(Plea.Builder::build).orElse(null),
-                    title, legislation
-            );
-        }
+    public Offence setId(UUID id) {
+        this.id = id;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Offence setCaseId(UUID caseId) {
+        this.caseId = caseId;
+        return this;
     }
 
-    public static Builder from(Offence offence) {
+    public Offence setSection(String section) {
+        this.section = section;
+        return this;
+    }
 
-        return builder()
-                .withId(offence.getId())
-                .withCaseId(offence.getCaseId())
-                .withOffenceCode(offence.getOffenceCode())
-                .withWording(offence.getWording())
-                .withSection(offence.getSection())
-                .withStartDate(offence.getStartDate())
-                .withEndDate(offence.getEndDate())
-                .withOrderIndex(offence.getOrderIndex())
-                .withCount(offence.getCount())
-                .withConvictionDate(offence.getConvictionDate());
+    public Offence setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+        return this;
+    }
+
+    public Offence setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    public Offence setLegislation(String legislation) {
+        this.legislation = legislation;
+        return this;
+    }
+
+    public static Offence offence(){
+        return new Offence();
     }
 }

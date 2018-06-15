@@ -92,7 +92,7 @@ public class HearingDetailChangeCommandHandlerTest {
     public void eventHearingDetailChangedShouldCreated() throws Exception {
         //Given
         setupMockedEventStream(UUID.fromString(ARBITRARY_HEARING_ID), this.hearingEventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new HearingInitiated(null,Hearing.builder().withId(UUID.fromString(ARBITRARY_HEARING_ID)).build()));
+            a.apply(new HearingInitiated(null,Hearing.hearing().setId(UUID.fromString(ARBITRARY_HEARING_ID))));
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID(PRIVATE_HEARING_COMMAND_HEARING_DETAIL_CHANGE), commandHearingChangedEvent());
