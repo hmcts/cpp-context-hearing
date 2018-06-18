@@ -87,6 +87,12 @@
         "level": "DEFENDANT_CASE",
         "label": "Imprisonment",
         "rank": 1,
+        "lastSharedDateTime":"2018-04-30T18:32:04.238Z",
+        "courtClerk": {
+          "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
+          "firstName": "David",
+          "lastName": "Walliams"
+        },
         "prompts": [
           {
             "id": "7567766c-6fb9-11e8-adc0-fa7ae01bbebc",

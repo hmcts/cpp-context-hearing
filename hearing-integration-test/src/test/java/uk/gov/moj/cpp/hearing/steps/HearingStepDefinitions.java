@@ -66,7 +66,6 @@ public class HearingStepDefinitions extends AbstractIT {
     private static final String MEDIA_TYPE_SHARE_RESULTS = "application/vnd.hearing.share-results+json";
 
     private static final String FIELD_GENERIC_ID = "id";
-    private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_PERSON_ID = "personId";
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_LEVEL = "level";

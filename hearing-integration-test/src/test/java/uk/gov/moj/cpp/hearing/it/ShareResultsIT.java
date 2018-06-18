@@ -2,11 +2,8 @@ package uk.gov.moj.cpp.hearing.it;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
-import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
@@ -14,24 +11,33 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Al
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
-import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ShareResultsCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdateVerdictCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType;
+import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -76,7 +82,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldRaiseResultsSharedEvent() {
-        final UUID primaryResultDefinitionId = UUID.randomUUID();
+        final UUID primaryResultDefinitionId = UUID.fromString("87631590-bd78-49b2-bd6f-ad7030904e73");
         final UUID mandatoryPromptId = UUID.randomUUID();
         final String mandatoryPromptLabel = "label1";
         AllNows allNows = AllNows.allNows()
@@ -141,10 +147,11 @@ public class ShareResultsIT extends AbstractIT {
         // this will change when real reference data service is available and can be stubbed out
         // this matches DefaultNowsReferenceData
         final UUID defaultReferenceDataUUID = UUID.fromString("87631590-bd78-49b2-bd6f-ad7030904e73");
-
+        final UUID resultLineId1 = UUID.randomUUID();
+        final UUID resultLineId2 = UUID.randomUUID();
         final ShareResultsCommandHelper shareResultsOne = new ShareResultsCommandHelper(
                 UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
-                        standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId()),
+                        standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId(), resultLineId1, resultLineId2),
                         command -> {
                             command.getCompletedResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
                             command.getCompletedResultLines().get(0).setResultDefinitionId(primaryResultDefinitionId);
@@ -156,6 +163,44 @@ public class ShareResultsIT extends AbstractIT {
                 )
         );
 
+
         publicEventResulted.waitFor();
+
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                                withJsonPath("$.resultLines", hasSize(2))
+                        )));
+
+        final ShareResultsCommandHelper reShareResultsOne = new ShareResultsCommandHelper(
+                UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
+                        standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId(), resultLineId1, UUID.randomUUID()),
+                        command -> {
+                            command.getCompletedResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
+                            command.getCompletedResultLines().get(0).setResultDefinitionId(primaryResultDefinitionId);
+                            ResultPrompt original = command.getCompletedResultLines().get(0).getPrompts().get(0);
+                            command.getCompletedResultLines().get(0).getPrompts().set(0, ResultPrompt.builder().withId(mandatoryPromptId).withLabel(mandatoryPromptLabel).withValue(original.getLabel()).build());
+                            command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
+
+                        })
+                )
+        );
+        publicEventResulted.waitFor();
+
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing.v2+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                                withJsonPath("$.resultLines", hasSize(3))
+                        )));
     }
+
+
 }

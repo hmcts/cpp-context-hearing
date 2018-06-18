@@ -23,6 +23,7 @@ import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
@@ -38,10 +39,10 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -113,6 +114,7 @@ public class PublishResultsEventProcessorTest {
         ProsecutionCounselUpsert prosecutionCounselUpsert = resultsShared.getProsecutionCounsels().values().iterator().next();
         Plea plea = resultsShared.getPleas().values().iterator().next();
         VerdictUpsert verdict = resultsShared.getVerdicts().values().iterator().next();
+        CompletedResultLineStatus completedResultLineStatus = resultsShared.getCompletedResultLinesStatus().values().iterator().next();
 
         final List<Nows> nows = asList(
                 Nows.nows()
@@ -151,7 +153,7 @@ public class PublishResultsEventProcessorTest {
 
         publishResultsEventProcessor.resultsShared(event);
 
-        verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
         List<JsonEnvelope> outgoingMessages = envelopeArgumentCaptor.getAllValues();
 
@@ -160,6 +162,13 @@ public class PublishResultsEventProcessorTest {
                 metadata().withName("hearing.command.generate-nows.v2"),
                 payloadIsJson(allOf(
                         withJsonPath("$.hearing.id", is(hearing.getId().toString()))))
+        ));
+
+        JsonEnvelope updateResultLineStatusMessage = outgoingMessages.get(1);
+        assertThat(updateResultLineStatusMessage, jsonEnvelope(
+                metadata().withName("hearing.command.update-result-lines-status"),
+                payloadIsJson(allOf(
+                        withJsonPath("$.sharedResultLines", hasSize(0))))
         ));
 
         //deserialise
@@ -176,7 +185,9 @@ public class PublishResultsEventProcessorTest {
         assertThat(materialIn.getLanguage(), is(materialOut.getLanguage()));
         assertThat(materialIn.getNowResult().get(0).getSharedResultId(), is(materialOut.getNowResult().get(0).getSharedResultId()));
         assertThat(materialIn.getNowResult().get(0).getPromptRefs().get(0).getLabel(), is(materialOut.getNowResult().get(0).getPromptRefs().get(0).getLabel()));
-        final JsonEnvelope shareMessage = outgoingMessages.get(1);
+        final JsonEnvelope shareMessage = outgoingMessages.get(2);
+
+
 
         assertThat(
                 shareMessage, jsonEnvelope(
@@ -269,7 +280,10 @@ public class PublishResultsEventProcessorTest {
                                 withJsonPath("$.hearing.sharedResultLines[0].level", is(resultLine.getLevel().toString())),
                                 withJsonPath("$.hearing.sharedResultLines[0].label", is(resultLine.getResultLabel())),
                                 withJsonPath("$.hearing.sharedResultLines[0].prompts[0].label", is(resultLine.getPrompts().get(0).getLabel())),
-                                withJsonPath("$.hearing.sharedResultLines[0].prompts[0].value", is(resultLine.getPrompts().get(0).getValue()))
+                                withJsonPath("$.hearing.sharedResultLines[0].prompts[0].value", is(resultLine.getPrompts().get(0).getValue())),
+                                withJsonPath("$.hearing.sharedResultLines[0].courtClerk.id", is(completedResultLineStatus.getCourtClerk().getId().toString())),
+                                withJsonPath("$.hearing.sharedResultLines[0].courtClerk.firstName", is(completedResultLineStatus.getCourtClerk().getFirstName())),
+                                withJsonPath("$.hearing.sharedResultLines[0].courtClerk.lastName", is(completedResultLineStatus.getCourtClerk().getLastName()))
 
                                 )
                         )
@@ -280,7 +294,7 @@ public class PublishResultsEventProcessorTest {
     private ResultsShared resultsSharedTemplate() {
 
         InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(standardInitiateHearingTemplate());
-
+        UUID completedResultLineId = randomUUID();
         return ResultsShared.builder()
                 .withHearingId(hearingOne.getHearingId())
                 .withSharedTime(PAST_ZONED_DATE_TIME.next())
@@ -333,7 +347,7 @@ public class PublishResultsEventProcessorTest {
                         .build())
                 .withCompletedResultLines(asList(
                         CompletedResultLine.builder()
-                                .withId(randomUUID())
+                                .withId(completedResultLineId)
                                 .withCaseId(hearingOne.getFirstCaseId())
                                 .withDefendantId(hearingOne.getFirstDefendantId())
                                 .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
@@ -345,6 +359,16 @@ public class PublishResultsEventProcessorTest {
                                         .withValue(STRING.next())
                                         .build()))
                                 .build()
+                ))
+                .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
+                        .withCourtClerk(CourtClerk.builder()
+                                .withId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .withId(completedResultLineId)
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next())
+                        .build()
                 ))
                 .build();
     }

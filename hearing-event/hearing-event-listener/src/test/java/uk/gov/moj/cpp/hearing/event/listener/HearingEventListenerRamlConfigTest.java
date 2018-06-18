@@ -35,6 +35,7 @@ import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 
 public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";

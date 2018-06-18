@@ -6,6 +6,7 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.Plea;
@@ -51,6 +52,8 @@ public final class ResultsShared implements Serializable {
 
     private final Map<UUID, Plea> pleas;
 
+    private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus;
+
     @JsonCreator
     private ResultsShared(@JsonProperty("hearingId") final UUID hearingId,
                             @JsonProperty("sharedTime") final ZonedDateTime sharedTime,
@@ -62,7 +65,8 @@ public final class ResultsShared implements Serializable {
                             @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
                             @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
                             @JsonProperty("pleas") final Map<UUID, Plea> pleas,
-                            @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts) {
+                            @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts,
+                            @JsonProperty("completedResultLinesStatus") final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.courtClerk = courtClerk;
@@ -74,6 +78,7 @@ public final class ResultsShared implements Serializable {
         this.defenceCounsels = ofNullable(defenceCounsels).orElseGet(HashMap::new);
         this.pleas = ofNullable(pleas).orElseGet(HashMap::new);
         this.verdicts = ofNullable(verdicts).orElseGet(HashMap::new);
+        this.completedResultLinesStatus = ofNullable(completedResultLinesStatus).orElseGet(HashMap::new);
     }
 
     public UUID getHearingId() {
@@ -120,6 +125,10 @@ public final class ResultsShared implements Serializable {
         return completedResultLines;
     }
 
+    public Map<UUID, CompletedResultLineStatus> getCompletedResultLinesStatus() {
+        return completedResultLinesStatus;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -147,6 +156,8 @@ public final class ResultsShared implements Serializable {
         private Map<UUID, VerdictUpsert> verdicts;
 
         private Map<UUID, Plea> pleas;
+
+        private Map<UUID, CompletedResultLineStatus> completedResultLinesStatus;
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
@@ -198,6 +209,11 @@ public final class ResultsShared implements Serializable {
             return this;
         }
 
+        public Builder withCompletedResultLinesStatus(final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
+            this.completedResultLinesStatus = completedResultLinesStatus;
+            return this;
+        }
+
         public Builder withPleas(final Map<UUID, Plea> pleas) {
             this.pleas = pleas;
             return this;
@@ -215,7 +231,8 @@ public final class ResultsShared implements Serializable {
                     prosecutionCounsels,
                     defenceCounsels,
                     pleas,
-                    verdicts);
+                    verdicts,
+                    completedResultLinesStatus);
         }
     }
 }

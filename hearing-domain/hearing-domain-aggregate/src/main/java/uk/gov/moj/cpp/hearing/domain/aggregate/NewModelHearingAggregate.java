@@ -24,7 +24,10 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.AttendeeDeleted;
@@ -46,6 +49,7 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.WitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
@@ -68,7 +72,6 @@ import javax.json.JsonObject;
 public class NewModelHearingAggregate implements Aggregate {
 
     private static final String HEARING_EVENTS = "hearingEvents";
-
     private static final long serialVersionUID = 1L;
 
     private static final String GUILTY = "GUILTY";
@@ -86,6 +89,9 @@ public class NewModelHearingAggregate implements Aggregate {
     private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
     private List<Case> cases;
     private Hearing hearing;
+    private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
+    private final Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
+
     private boolean published = false;
 
     @Override
@@ -126,6 +132,14 @@ public class NewModelHearingAggregate implements Aggregate {
 
                 when(ResultsShared.class).apply(resultsShared -> {
                     published = true;
+                    resultsShared.getCompletedResultLines().forEach(completedResultLine -> {
+                        completedResultLines.put(completedResultLine.getId(), completedResultLine);
+                        completedResultLinesStatus.put(completedResultLine.getId(), CompletedResultLineStatus.builder().withId(completedResultLine.getId()).build());
+                    });
+                }),
+
+                when(ResultLinesStatusUpdated.class).apply(resultLinesStatusUpdated -> {
+                    computeCompletedResultLinesStatus(resultLinesStatusUpdated);
                 }),
 
                 when(PleaUpsert.class).apply(pleaUpsert -> {
@@ -228,6 +242,16 @@ public class NewModelHearingAggregate implements Aggregate {
                 }),
                 otherwiseDoNothing()
         );
+    }
+
+    private void computeCompletedResultLinesStatus(final ResultLinesStatusUpdated event) {
+        event.getSharedResultLines().forEach(sharedResultLineId -> {
+            completedResultLinesStatus.computeIfPresent(sharedResultLineId.getSharedResultLineId(), (k, sl) -> {
+                sl.setCourtClerk(event.getCourtClerk());
+                sl.setLastSharedDateTime(event.getLastSharedDateTime());
+                return sl;
+            });
+        });
     }
 
     public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
@@ -459,6 +483,15 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
+
+        Map copyResultLinesStatus = new HashMap(completedResultLinesStatus);
+        command.getCompletedResultLines().forEach(completedResultLine -> {
+            //only update result line status if result line is modified
+            if (completedResultLines.containsKey(completedResultLine.getId()) && !completedResultLine.equals(completedResultLines.get(completedResultLine.getId()))) {
+                copyResultLinesStatus.put(completedResultLine.getId(), CompletedResultLineStatus.builder().withId(completedResultLine.getId()).build());
+            }
+        });
+
         return apply(Stream.of(ResultsShared.builder()
                 .withHearingId(command.getHearingId())
                 .withSharedTime(sharedTime)
@@ -471,6 +504,16 @@ public class NewModelHearingAggregate implements Aggregate {
                 .withDefenceCounsels(this.defenceCounsels)
                 .withPleas(this.pleas)
                 .withVerdicts(this.verdicts)
+                .withCompletedResultLinesStatus(copyResultLinesStatus)
+                .build()));
+    }
+
+    public Stream<Object> updateResultLinesStatus(final UpdateResultLinesStatusCommand command) {
+        return apply(Stream.of(ResultLinesStatusUpdated.builder()
+                .withHearingId(command.getHearingId())
+                .withLastSharedDateTime(command.getLastSharedDateTime())
+                .withSharedResultLines(command.getSharedResultLines())
+                .withCourtClerk(command.getCourtClerk())
                 .build()));
     }
 

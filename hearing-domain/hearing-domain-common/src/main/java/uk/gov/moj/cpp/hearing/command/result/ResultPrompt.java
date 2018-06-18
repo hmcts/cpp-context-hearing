@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 
 public final class ResultPrompt implements Serializable {
@@ -67,5 +68,24 @@ public final class ResultPrompt implements Serializable {
         public ResultPrompt build() {
             return new ResultPrompt(id, label, value);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ResultPrompt resultPrompt = (ResultPrompt) o;
+        return Objects.equals(id, resultPrompt.id) &&
+                Objects.equals(label, resultPrompt.label) &&
+                Objects.equals(value, resultPrompt.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, label, value);
     }
 }

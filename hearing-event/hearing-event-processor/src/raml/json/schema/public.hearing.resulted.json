@@ -369,9 +369,6 @@
         "id": {
           "$ref": "#/definitions/uuid"
         },
-        "lastSharedResultId": {
-          "$ref": "#/definitions/uuid"
-        },
         "caseId": {
           "$ref": "#/definitions/uuid"
         },
@@ -389,6 +386,28 @@
         },
         "rank": {
           "type": "number"
+        },
+        "lastSharedDateTime": {
+          "type": "string"
+        },
+        "courtClerk": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/uuid"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "firstName",
+            "lastName"
+          ]
         },
         "prompts": {
           "type": "array",

@@ -9,6 +9,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 
@@ -50,5 +51,14 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final ShareResultsCommand command = convertToObject(envelope, ShareResultsCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope,
                 aggregate -> aggregate.shareResults(command, clock.now()));
+    }
+
+    @Handles("hearing.command.update-result-lines-status")
+    public void updateResultLinesStatus(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.debug("hearing.command.update-result-lines-status event received {}", envelope.payloadAsJsonObject());
+
+        final UpdateResultLinesStatusCommand command = convertToObject(envelope, UpdateResultLinesStatusCommand.class);
+        aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope,
+                aggregate -> aggregate.updateResultLinesStatus(command));
     }
 }

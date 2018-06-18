@@ -6,11 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
 
+@SuppressWarnings("squid:S1067")
 public final class CompletedResultLine implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,8 +20,6 @@ public final class CompletedResultLine implements Serializable {
     private final UUID id;
 
     private UUID resultDefinitionId;
-
-    private final UUID lastSharedResultId;
 
     private final UUID caseId;
 
@@ -36,7 +36,6 @@ public final class CompletedResultLine implements Serializable {
     @JsonCreator
     private CompletedResultLine(@JsonProperty("id") final UUID id,
                                 @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
-                                @JsonProperty("lastSharedResultId") final UUID lastSharedResultId,
                                 @JsonProperty("caseId") final UUID caseId,
                                 @JsonProperty("defendantId") final UUID defendantId,
                                 @JsonProperty("offenceId") final UUID offenceId,
@@ -45,7 +44,6 @@ public final class CompletedResultLine implements Serializable {
                                 @JsonProperty("prompts") final List<ResultPrompt> prompts) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
-        this.lastSharedResultId = lastSharedResultId;
         this.caseId = caseId;
         this.defendantId = defendantId;
         this.offenceId = offenceId;
@@ -60,10 +58,6 @@ public final class CompletedResultLine implements Serializable {
 
     public UUID getResultDefinitionId() {
         return resultDefinitionId;
-    }
-
-    public UUID getLastSharedResultId() {
-        return lastSharedResultId;
     }
 
     public UUID getCaseId() {
@@ -108,8 +102,6 @@ public final class CompletedResultLine implements Serializable {
 
         private UUID resultDefinitionId;
 
-        private UUID lastSharedResultId;
-
         private UUID caseId;
 
         private UUID defendantId;
@@ -129,11 +121,6 @@ public final class CompletedResultLine implements Serializable {
 
         public Builder withResultDefinitionId(final UUID resultDefinitionId) {
             this.resultDefinitionId = resultDefinitionId;
-            return this;
-        }
-
-        public Builder withLastSharedResultId(final UUID lastSharedResultId) {
-            this.lastSharedResultId = lastSharedResultId;
             return this;
         }
 
@@ -168,7 +155,32 @@ public final class CompletedResultLine implements Serializable {
         }
 
         public CompletedResultLine build() {
-            return new CompletedResultLine(id, resultDefinitionId, lastSharedResultId, caseId, defendantId, offenceId, level, resultLabel, prompts);
+            return new CompletedResultLine(id, resultDefinitionId, caseId, defendantId, offenceId, level, resultLabel, prompts);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final CompletedResultLine completedResultLine = (CompletedResultLine) o;
+        return Objects.equals(id, completedResultLine.id) &&
+                Objects.equals(resultDefinitionId, completedResultLine.resultDefinitionId) &&
+                Objects.equals(caseId, completedResultLine.caseId) &&
+                Objects.equals(defendantId, completedResultLine.defendantId) &&
+                Objects.equals(offenceId, completedResultLine.offenceId) &&
+                Objects.equals(level, completedResultLine.level) &&
+                Objects.equals(resultLabel, completedResultLine.resultLabel) &&
+                Objects.equals(prompts, completedResultLine.prompts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, resultDefinitionId, caseId, defendantId,
+                offenceId, level, resultLabel, prompts);
     }
 }

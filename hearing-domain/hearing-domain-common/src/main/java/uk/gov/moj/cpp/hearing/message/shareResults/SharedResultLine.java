@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -7,13 +10,14 @@ import java.util.UUID;
 public class SharedResultLine {
 
     private UUID id;
-    private UUID lastSharedResultId;
+    private ZonedDateTime lastSharedResultDateTime;
     private UUID caseId;
     private UUID defendantId;
     private UUID offenceId;
     private String level;
     private String label;
     private Integer rank;
+    private CourtClerk courtClerk;
 
     private List<Prompt> prompts = new ArrayList<>();
 
@@ -21,8 +25,8 @@ public class SharedResultLine {
         return id;
     }
 
-    public UUID getLastSharedResultId() {
-        return lastSharedResultId;
+    public ZonedDateTime getLastSharedResultDateTime() {
+        return lastSharedResultDateTime;
     }
 
     public UUID getCaseId() {
@@ -53,13 +57,17 @@ public class SharedResultLine {
         return prompts;
     }
 
+    public CourtClerk getCourtClerk() {
+        return courtClerk;
+    }
+
     public SharedResultLine setId(UUID id) {
         this.id = id;
         return this;
     }
 
-    public SharedResultLine setLastSharedResultId(UUID lastSharedResultId) {
-        this.lastSharedResultId = lastSharedResultId;
+    public SharedResultLine setLastSharedResultDateTime(ZonedDateTime lastSharedResultDateTime) {
+        this.lastSharedResultDateTime = lastSharedResultDateTime;
         return this;
     }
 
@@ -95,6 +103,11 @@ public class SharedResultLine {
 
     public SharedResultLine setPrompts(List<Prompt> prompts) {
         this.prompts = prompts;
+        return this;
+    }
+
+    public SharedResultLine setCourtClerk(final CourtClerk courtClerk) {
+        this.courtClerk = courtClerk;
         return this;
     }
 

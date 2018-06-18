@@ -40,6 +40,11 @@
            <scope>test</scope>
            <version>${project.version}</version>
        </dependency>
+       <dependency>
+           <groupId>org.slf4j</groupId>
+           <artifactId>slf4j-api</artifactId>
+           <version>1.7.24</version>
+       </dependency>
 
    </dependencies>
 </project>

@@ -19,7 +19,6 @@ public final class Result implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID id;
-    private final UUID lastSharedResultId;
     private final UUID resultLineId;
     private final String originalText;
     private final String resultLevel;
@@ -29,15 +28,13 @@ public final class Result implements Serializable {
 
     @JsonCreator
     protected Result(@JsonProperty("id") final UUID id,
-            @JsonProperty("lastSharedResultId") final UUID lastSharedResultId, 
-            @JsonProperty("resultLineId") final UUID resultLineId, 
+            @JsonProperty("resultLineId") final UUID resultLineId,
             @JsonProperty("originalText") final String originalText, 
             @JsonProperty("resultLevel") final String resultLevel, 
             @JsonProperty("isCompleted") final Boolean isCompleted, 
             @JsonProperty("parts") final List<Part> parts, 
             @JsonProperty("choices") final List<Choice> choices) {
         this.id = id;
-        this.lastSharedResultId = lastSharedResultId;
         this.resultLineId = resultLineId;
         this.originalText = originalText;
         this.resultLevel = resultLevel;
@@ -49,7 +46,6 @@ public final class Result implements Serializable {
     @JsonIgnore
     private Result(final Builder builder) {
         this.id = builder.id;
-        this.lastSharedResultId = builder.lastSharedResultId;
         this.resultLineId = builder.resultLineId;
         this.originalText = builder.originalText;
         this.resultLevel = builder.resultLevel;
@@ -64,10 +60,6 @@ public final class Result implements Serializable {
 
     public UUID getId() {
         return id;
-    }
-
-    public UUID getLastSharedResultId() {
-        return lastSharedResultId;
     }
 
     public UUID getResultLineId() {
@@ -103,8 +95,7 @@ public final class Result implements Serializable {
             return false;
         }
         final Result that = (Result) o;
-        return Objects.equals(this.lastSharedResultId, that.lastSharedResultId)
-                && Objects.equals(this.resultLineId, that.resultLineId)
+        return Objects.equals(this.resultLineId, that.resultLineId)
                 && Objects.equals(this.originalText, that.originalText)
                 && Objects.equals(this.id, that.id)
                 && Objects.equals(this.resultLevel, that.resultLevel)
@@ -114,7 +105,7 @@ public final class Result implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.lastSharedResultId, this.resultLineId, this.originalText, this.id,
+        return Objects.hash(this.resultLineId, this.originalText, this.id,
                 this.resultLevel, this.isCompleted, this.parts, this.choices);
     }
 
@@ -125,7 +116,6 @@ public final class Result implements Serializable {
     public static final class Builder {
 
         private UUID id;
-        private UUID lastSharedResultId;
         private UUID resultLineId;
         private String originalText;
         private String resultLevel;
@@ -135,11 +125,6 @@ public final class Result implements Serializable {
 
         public Builder withId(final UUID id) {
             this.id = id;
-            return this;
-        }
-
-        public Builder withLastSharedResultId(final UUID lastSharedResultId) {
-            this.lastSharedResultId = lastSharedResultId;
             return this;
         }
 

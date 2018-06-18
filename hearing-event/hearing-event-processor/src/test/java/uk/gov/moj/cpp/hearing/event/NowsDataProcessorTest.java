@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.event;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.TestTimedOutException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -12,8 +11,8 @@ import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
@@ -27,11 +26,11 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
-import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -590,6 +589,13 @@ public class NowsDataProcessorTest {
             uncompletedResultLines.addAll(oResultLines.stream().filter(l -> l instanceof UncompletedResultLine).map(cl -> (UncompletedResultLine) cl).collect(toList()));
         }
 
+        Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
+        completeResultLines.forEach(completedResultLine -> {
+            completedResultLinesStatus.put(completedResultLine.getId(), CompletedResultLineStatus.builder()
+                    .withId(completedResultLine.getId())
+                    .build() );
+        });
+
         return ResultsShared.builder()
                 .withHearing(initiateHearingCommand.getHearing())
                 .withCompletedResultLines(completeResultLines)
@@ -604,6 +610,8 @@ public class NowsDataProcessorTest {
                         Stream.of(ProsecutionCounselUpsert.builder()
                         .withAttendeeId(randomUUID()).build())
                         .collect(toMap(ProsecutionCounselUpsert::getAttendeeId, identity()))
-                );
+                )
+                .withCompletedResultLinesStatus(completedResultLinesStatus);
+
     }
 }

@@ -104,7 +104,6 @@ public class HearingEventProcessorTest {
     private static final String FIELD_GENERIC_TYPE = "type";
 
 
-    private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_LEVEL = "level";
     private static final String FIELD_RESULT_LINES = "resultLines";
     private static final String FIELD_RESULT_LABEL = "resultLabel";

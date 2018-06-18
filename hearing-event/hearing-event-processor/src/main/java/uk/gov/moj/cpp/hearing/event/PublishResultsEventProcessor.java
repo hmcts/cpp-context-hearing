@@ -9,7 +9,11 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
+import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowTypes;
@@ -35,6 +39,8 @@ import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -102,6 +108,16 @@ public class PublishResultsEventProcessor {
                         );
                 this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows.v2")
                         .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
+
+                final UpdateResultLinesStatusCommand updateResultLinesStatusCommand = UpdateResultLinesStatusCommand.builder()
+                        .withLastSharedDateTime(ZonedDateTime.now())
+                        .withHearingId(input.getHearingId())
+                        .withCourtClerk(input.getCourtClerk())
+                        .withSharedResultLines(mapSharedResultsLinesStatus(input.getCompletedResultLines(), input.getCompletedResultLinesStatus()))
+                        .build();
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-result-lines-status")
+                        .apply((this.objectToJsonObjectConverter.convert(updateResultLinesStatusCommand)))
+                );
             }
         } catch (Exception e) {
             LOGGER.error("NOWS processing generated exception", e);
@@ -278,7 +294,8 @@ public class PublishResultsEventProcessor {
         return input.getCompletedResultLines().stream()
                 .map(rl -> SharedResultLine.sharedResultLine()
                         .setId(rl.getId())
-                        .setLastSharedResultId(rl.getLastSharedResultId())
+                        .setLastSharedResultDateTime(getLastSharedResultDateTime(input.getSharedTime(), input.getCompletedResultLinesStatus().get(rl.getId())))
+                        .setCourtClerk(getCourtClerkDetails(input.getCourtClerk(), input.getCompletedResultLinesStatus().get(rl.getId())))
                         .setCaseId(rl.getCaseId())
                         .setDefendantId(rl.getDefendantId())
                         .setOffenceId(rl.getOffenceId())
@@ -292,5 +309,31 @@ public class PublishResultsEventProcessor {
                                 .collect(Collectors.toList())
                         ))
                 .collect(Collectors.toList());
+    }
+
+    private ZonedDateTime getLastSharedResultDateTime(final ZonedDateTime sharedTime, final CompletedResultLineStatus completedResultLineStatus) {
+        if (completedResultLineStatus.getLastSharedDateTime() == null) {
+            return sharedTime;
+        } else {
+            return completedResultLineStatus.getLastSharedDateTime();
+        }
+    }
+
+    private CourtClerk getCourtClerkDetails(final CourtClerk courtClerk, final CompletedResultLineStatus completedResultLineStatus) {
+        if (completedResultLineStatus.getCourtClerk() == null) {
+            return courtClerk;
+        } else {
+            return completedResultLineStatus.getCourtClerk();
+        }
+    }
+
+    private List<SharedResultLineId> mapSharedResultsLinesStatus(final List<CompletedResultLine> completedResultLines, final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
+        return completedResultLines.stream()
+                .filter(crl -> completedResultLinesStatus.get(crl.getId()).getLastSharedDateTime() == null)
+                .map(status -> SharedResultLineId.builder()
+                        .withSharedResultLineId(status.getId())
+                        .build()
+                )
+                .collect(toList());
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.convertor;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
@@ -23,6 +24,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Attendees;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Case;
@@ -74,6 +76,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                 .withAttendees(new AttendeesConverter().convert(source.getAttendees()))
                 .withCases(new CasesConverter().convert(source))
                 .withDefenceWiteness(new DefenceWitnessesConverter().convert(source))
+                .withResultLines(new ResultLinesConverter().convert(source))
                 .build();
     }
 
@@ -86,6 +89,9 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
         return ofNullable(source).map(ISO_LOCAL_TIME::format).orElse(null);
     }
 
+    private static String toDateTimeStringOrNull(final Temporal source) {
+        return ofNullable(source).map(ISO_LOCAL_DATE_TIME::format).orElse(null);
+    }
     private static String toDateStringOrNull(final Temporal source) {
         return ofNullable(source).map(ISO_LOCAL_DATE::format).orElse(null);
     }
@@ -508,6 +514,23 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                     .withCode(source.getVerdictCode())
                     .withDescription(source.getVerdictDescription())
                     .build();
+        }
+    }
+
+    // ResultLinesConverter
+    private static final class ResultLinesConverter implements Converter<Hearing, List<uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ResultLine>> {
+
+        @Override
+        public List<uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ResultLine> convert(Hearing source) {
+            if (null == source || null == source.getId() || isEmpty(source.getResultLines())) {
+                return emptyList();
+            }
+            return source.getResultLines().stream()
+                    .map( o -> uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ResultLine.builder()
+                            .withId(o.getId().toString())
+                            .withLastSharedDateTime(toDateTimeStringOrNull(o.getLastSharedDateTime()))
+                            .build())
+                    .collect(toList());
         }
     }
 }

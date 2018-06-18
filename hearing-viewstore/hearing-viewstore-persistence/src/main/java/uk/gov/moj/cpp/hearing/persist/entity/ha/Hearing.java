@@ -48,6 +48,9 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private List<Attendee> attendees = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private List<ResultLine> resultLines = new ArrayList<>();
+
     public Hearing() {
     }
 
@@ -66,6 +69,7 @@ public class Hearing {
         if (builder.judgeBuilder != null) {
             this.attendees.add(builder.judgeBuilder.build());
         }
+        this.resultLines = builder.resultLines;
     }
 
     public void setDefendants(List<Defendant> defendants) {
@@ -120,6 +124,10 @@ public class Hearing {
         return roomName;
     }
 
+    public List<ResultLine> getResultLines() {
+        return resultLines;
+    }
+
     public static class Builder {
         private UUID id;
         private List<Defendant> defendants = new ArrayList<>();
@@ -132,6 +140,7 @@ public class Hearing {
         private Judge.Builder judgeBuilder;
         private List<Witness> witnesses = new ArrayList<>();
         private List<Attendee> attendees = new ArrayList<>();
+        private List<ResultLine> resultLines = new ArrayList<>();
 
         protected Builder() {}
         public Builder withId(UUID id) {
@@ -186,6 +195,11 @@ public class Hearing {
 
         public Builder addAttendee(Attendee attendee){
             this.attendees.add(attendee);
+            return this;
+        }
+
+        public Builder withResultLines(List<ResultLine> resultLines) {
+            this.resultLines = resultLines;
             return this;
         }
 

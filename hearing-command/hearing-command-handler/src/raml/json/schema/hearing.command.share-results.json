@@ -42,9 +42,6 @@
           "id": {
             "$ref": "#/definitions/uuid"
           },
-          "lastSharedResultId": {
-            "$ref": "#/definitions/uuid"
-          },
           "resultDefinitionId": {
             "$ref": "#/definitions/uuid"
           },

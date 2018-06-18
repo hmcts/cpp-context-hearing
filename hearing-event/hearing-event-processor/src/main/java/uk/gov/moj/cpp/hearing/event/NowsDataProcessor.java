@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Address;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
@@ -67,7 +68,7 @@ public class NowsDataProcessor {
                             .filter(resultLine -> resultLine.getDefendantId().equals(defendant.getId()))
                             .collect(toList());
 
-                    nows.addAll(createNowsForDefendant(defendant, completedResultLines4Defendant));
+                    nows.addAll(createNowsForDefendant(defendant, completedResultLines4Defendant, resultsShared.getCompletedResultLinesStatus()));
                 }
         );
 
@@ -143,7 +144,7 @@ public class NowsDataProcessor {
                 .collect(toSet());
     }
 
-    private List<Nows> createNowsForDefendant(Defendant defendant, List<CompletedResultLine> resultLines) {
+    private List<Nows> createNowsForDefendant(Defendant defendant, List<CompletedResultLine> resultLines, Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
 
         final Set<UUID> completedResultDefinitionIds = resultLines.stream()
                 .map(CompletedResultLine::getResultDefinitionId)
@@ -165,7 +166,7 @@ public class NowsDataProcessor {
                     .filter(l -> resultDefinitionIds4Now.contains(l.getResultDefinitionId()))
                     .collect(toList());
 
-            if (!anyNewlyCompletedResultLines(resultLines4Now)) {
+            if (!anyNewlyCompletedResultLines(resultLines4Now, completedResultLinesStatus)) {
                 continue; //skip generation of the current NOW since there are no new result lines for it.
             }
 
@@ -273,8 +274,10 @@ public class NowsDataProcessor {
                 !completedResultDefinitionIds.contains(resultDefinitions.getId()));
     }
 
-    private static boolean anyNewlyCompletedResultLines(final List<CompletedResultLine> resultLines4Now) {
-        return resultLines4Now.stream().anyMatch(resultLine -> resultLine.getLastSharedResultId() == null);
+    private static boolean anyNewlyCompletedResultLines(final List<CompletedResultLine> resultLines4Now, Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
+        // this line tests if we have new result lines, if we don't we don't generate the NOW
+        // check if result line's last sharedDateTime is null then only generate NOW
+        return resultLines4Now.stream().anyMatch(resultLine ->  completedResultLinesStatus.get(resultLine.getId()).getLastSharedDateTime() == null);
     }
 
     private static class NowVariant {

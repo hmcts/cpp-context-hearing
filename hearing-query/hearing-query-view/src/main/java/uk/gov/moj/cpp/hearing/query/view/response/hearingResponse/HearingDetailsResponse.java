@@ -19,6 +19,7 @@ public final class HearingDetailsResponse {
     private final Attendees attendees;
     private final List<Case> cases;
     private final List<DefenceWitness> defenceWitnesses;
+    private final List<ResultLine> resultLines;
 
     public HearingDetailsResponse() {
         this.hearingId = null;
@@ -34,6 +35,7 @@ public final class HearingDetailsResponse {
         this.attendees = null;
         this.cases = null;
         this.defenceWitnesses = null;
+        this.resultLines = null;
     }
 
     private HearingDetailsResponse(final Builder builder) {
@@ -50,6 +52,7 @@ public final class HearingDetailsResponse {
         this.attendees = builder.attendees;
         this.cases = builder.cases;
         this.defenceWitnesses = builder.defenceWitnesses;
+        this.resultLines = builder.resultLines;
     }
 
     public String getHearingId() {
@@ -104,6 +107,10 @@ public final class HearingDetailsResponse {
         return defenceWitnesses;
     }
 
+    public List<ResultLine> getResultLines() {
+        return resultLines;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -122,6 +129,7 @@ public final class HearingDetailsResponse {
         private Attendees attendees;
         private List<Case> cases;
         private List<DefenceWitness> defenceWitnesses;
+        private List<ResultLine> resultLines;
         
         public Builder withHearingId(final String hearingId) {
             this.hearingId = hearingId;
@@ -187,7 +195,11 @@ public final class HearingDetailsResponse {
             this.defenceWitnesses = defenceWitnesses;
             return this;
         }
-        
+
+        public Builder withResultLines(final List<ResultLine> resultLines){
+            this.resultLines = resultLines;
+            return this;
+        }
         public HearingDetailsResponse build() {
             return new HearingDetailsResponse(this);
         }

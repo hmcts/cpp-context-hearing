@@ -51,6 +51,12 @@
       "items":{
         "$ref":"#/definitions/defenceWitnesse"
       }
+    },
+    "resultLines":{
+      "type":"array",
+      "items":{
+        "$ref":"#/definitions/resultLine"
+      }
     }
   },
   "required":[
@@ -398,6 +404,22 @@
         "firstName",
         "lastName",
         "defendants"
+      ]
+    },
+    "resultLine":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "lastSharedDateTime": {
+          "type": "string"
+        }
+      },
+      "required":[
+        "id",
+        "lastSharedDateTime"
       ]
     },
 

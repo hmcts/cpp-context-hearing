@@ -1,10 +1,17 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
 import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.ResultLineRepository;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
@@ -35,12 +42,20 @@ public class HearingEventListener {
     private static final String FIELD_DRAFT_RESULT = "draftResult";
     private static final String FIELD_COMPLETED_RESULT_LINES = "completedResultLines";
     private static final String FIELD_GENERIC_ID = "id";
-    private static final String FIELD_LAST_SHARED_RESULT_ID = "lastSharedResultId";
     private static final String FIELD_RESULTS = "results";
     private static final String FIELD_RESULT_LINE_ID = "resultLineId";
 
     @Inject
     private HearingOutcomeRepository hearingOutcomeRepository;
+
+    @Inject
+    private ResultLineRepository resultLineRepository;
+
+    @Inject
+    private HearingRepository hearingRepository;
+
+    @Inject
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Handles("hearing.draft-result-saved")
     public void draftResultSaved(final JsonEnvelope event) {
@@ -56,7 +71,7 @@ public class HearingEventListener {
     }
 
     @Handles("hearing.results-shared")
-    public void updateDraftResultWithLastSharedResultIdFromSharedResults(final JsonEnvelope event) {
+    public void updateDraftResultWithFromSharedResults(final JsonEnvelope event) {
 
         final JsonObject payload = event.payloadAsJsonObject();
 
@@ -75,13 +90,37 @@ public class HearingEventListener {
                 final List<String> resultLineIds = getResultLineIdsFromDraftResultJson(draftResultJson);
 
                 if (resultLineIds.contains(sharedResultLineId)) {
-                    final JsonObjectBuilder updatedDraftResultJson = updateDraftResultWithLastSharedResultId(draftResultJson, sharedResultLineId);
+                    final JsonObjectBuilder updatedDraftResultJson = updateDraftResult(draftResultJson);
                     hearingOutcomeToDraftResultMap.put(hearingOutcome.getId(), updatedDraftResultJson.build());
                 }
             });
         });
 
         persistModifiedHearingOutcomes(hearingOutcomes, hearingOutcomeToDraftResultMap);
+    }
+
+    @Handles("hearing.result-lines-status-updated")
+    public void updateSharedResultLineStatus(final JsonEnvelope event) {
+
+        final ResultLinesStatusUpdated resultLinesStatusUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultLinesStatusUpdated.class);
+
+        final Hearing hearing = hearingRepository.findById(resultLinesStatusUpdated.getHearingId());
+
+        if (hearing != null) {
+            resultLinesStatusUpdated.getSharedResultLines().forEach(sharedResultLineId -> {
+                final HearingSnapshotKey resultLineKey = new HearingSnapshotKey(sharedResultLineId.getSharedResultLineId(), resultLinesStatusUpdated.getHearingId());
+                ResultLine resultLine = this.resultLineRepository.findBy(resultLineKey);
+                if (resultLine != null) {
+                    resultLine.setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime());
+                } else {
+                    resultLine = ResultLine.builder()
+                            .withId(new HearingSnapshotKey(sharedResultLineId.getSharedResultLineId(), resultLinesStatusUpdated.getHearingId()))
+                            .withLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
+                            .build();
+                }
+                this.resultLineRepository.save(resultLine);
+            });
+        }
     }
 
     private void hydrateWithDraftResultJson(final Map<UUID, JsonObject> hearingOutcomeToDraftResultMap, final HearingOutcome hearingOutcome) {
@@ -99,7 +138,7 @@ public class HearingEventListener {
                 .map(result -> result.getString(FIELD_RESULT_LINE_ID)).collect(toList());
     }
 
-    private JsonObjectBuilder updateDraftResultWithLastSharedResultId(final JsonObject draftResultJson, final String sharedResultLineId) {
+    private JsonObjectBuilder updateDraftResult(final JsonObject draftResultJson) {
         final JsonObjectBuilder updatedDraftResultJson = createObjectBuilder();
         draftResultJson.forEach((key, value) -> {
             if (key.equals(FIELD_RESULTS)) {
@@ -109,9 +148,6 @@ public class HearingEventListener {
                 results.getValuesAs(JsonObject.class).forEach(result -> {
                     final JsonObjectBuilder updatedResultJson = createObjectBuilder();
                     result.forEach(updatedResultJson::add);
-                    if (result.getString(FIELD_RESULT_LINE_ID).equals(sharedResultLineId)) {
-                        updatedResultJson.add(FIELD_LAST_SHARED_RESULT_ID, sharedResultLineId);
-                    }
                     updatedResultsJson.add(updatedResultJson);
                 });
                 updatedDraftResultJson.add(key, updatedResultsJson);

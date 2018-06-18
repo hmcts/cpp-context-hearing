@@ -363,18 +363,17 @@ public class TestTemplates {
                     .build();
         }
 
-        public static ShareResultsCommand standardShareResultsCommandTemplate(UUID defendantId, UUID offenceId, UUID caseId) {
+        public static ShareResultsCommand standardShareResultsCommandTemplate(UUID defendantId, UUID offenceId, UUID caseId, UUID resultLineId1, UUID resultLineId2) {
             return with(basicShareResultsCommandTemplate(), command -> {
-                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId));
-                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId));
-                command.getUncompletedResultLines().add(uncompletedResultLineTemplate(defendantId));
+                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId1));
+                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2));
             });
         }
 
 
-        public static CompletedResultLine completedResultLineTemplate(UUID defendantId, UUID offenceId, UUID caseId) {
+        public static CompletedResultLine completedResultLineTemplate(UUID defendantId, UUID offenceId, UUID caseId, UUID resultLineId) {
             return CompletedResultLine.builder()
-                    .withId(UUID.randomUUID())
+                    .withId(resultLineId)
                     .withResultDefinitionId(UUID.randomUUID())
                     .withDefendantId(defendantId)
                     .withOffenceId(offenceId)

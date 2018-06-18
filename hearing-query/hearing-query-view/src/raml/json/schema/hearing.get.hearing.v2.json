@@ -52,6 +52,12 @@
       "items":{
         "$ref":"#/definitions/defenceWitnesse"
       }
+    },
+    "resultLines":{
+      "type":"array",
+      "items":{
+        "$ref":"#/definitions/resultLine"
+      }
     }
   },
   "required":[
@@ -226,11 +232,11 @@
         "title":{
           "type":"string"
         },
-        "legislation":{
-          "type":"string"
-        },
         "convictionDate":{
           "$ref":"#/definitions/datePattern"
+        },
+        "legislation":{
+          "type":"string"
         },
         "plea":{
           "$ref":"#/definitions/plea"
@@ -401,6 +407,22 @@
         "defendants"
       ]
     },
+    "resultLine":{
+      "type":"object",
+      "additionalProperties":false,
+      "properties":{
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "lastSharedDateTime": {
+          "type": "string"
+        }
+      },
+      "required":[
+        "id",
+        "lastSharedDateTime"
+      ]
+    },
 
     "case":{
       "type":"object",
@@ -458,8 +480,8 @@
         "categoryType":{
           "type":"string"
         },
-        "verdictTypeId": {
-          "$ref": "#/definitions/uuid"
+        "verdictTypeId":{
+          "$ref":"#/definitions/uuid"
         },
         "lesserOffence":{
           "type":"string"

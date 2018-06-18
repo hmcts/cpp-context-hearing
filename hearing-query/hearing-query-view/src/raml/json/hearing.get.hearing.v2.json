@@ -183,5 +183,15 @@
             }
          ]
       }
+   ],
+   "resultLines": [
+      {
+         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb491",
+         "lastSharedDateTime" : "2018-02-21 10:30:00"
+      },
+      {
+         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb492",
+         "lastSharedDateTime" : "2018-02-20 10:30:00"
+      }
    ]
 }
