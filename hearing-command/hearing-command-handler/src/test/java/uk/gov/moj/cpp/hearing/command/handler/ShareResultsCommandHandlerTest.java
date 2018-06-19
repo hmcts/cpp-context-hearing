@@ -1,5 +1,31 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
+import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -8,6 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -29,32 +56,6 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
-
-import java.time.ZonedDateTime;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
-import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 @SuppressWarnings({"serial", "unchecked"})
 @RunWith(MockitoJUnitRunner.class)
@@ -243,21 +244,6 @@ public class ShareResultsCommandHandlerTest {
                                 withJsonPath("$.hearing.defendants.[0].offences.[0].orderIndex", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getOrderIndex())),
                                 withJsonPath("$.hearing.defendants.[0].offences.[0].count", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCount())),
                                 withJsonPath("$.hearing.defendants.[0].offences.[0].convictionDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getConvictionDate().toString())),
-
-                                withJsonPath("$.hearing.witnesses.[0].type", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getType())),
-                                withJsonPath("$.hearing.witnesses.[0].classification", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getClassification())),
-                                withJsonPath("$.hearing.witnesses.[0].caseId", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getCaseId().toString())),
-                                withJsonPath("$.hearing.witnesses.[0].personId", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getPersonId().toString())),
-                                withJsonPath("$.hearing.witnesses.[0].title", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getTitle())),
-                                withJsonPath("$.hearing.witnesses.[0].firstName", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getFirstName())),
-                                withJsonPath("$.hearing.witnesses.[0].lastName", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getLastName())),
-                                withJsonPath("$.hearing.witnesses.[0].nationality", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getNationality())),
-                                withJsonPath("$.hearing.witnesses.[0].gender", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getGender())),
-                                withJsonPath("$.hearing.witnesses.[0].dateOfBirth", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getDateOfBirth().toString())),
-                                withJsonPath("$.hearing.witnesses.[0].homeTelephone", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getHomeTelephone())),
-                                withJsonPath("$.hearing.witnesses.[0].workTelephone", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getWorkTelephone())),
-                                withJsonPath("$.hearing.witnesses.[0].fax", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getFax())),
-                                withJsonPath("$.hearing.witnesses.[0].mobile", is(initiateHearingCommand.getHearing().getWitnesses().get(0).getMobile())),
 
                                 withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".hearingId", is(prosecutionCounselUpsert.getHearingId().toString())),
                                 withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".personId", is(prosecutionCounselUpsert.getPersonId().toString())),

@@ -162,12 +162,6 @@
           "items":{
             "$ref":"#/definitions/defendant"
           }
-        },
-        "witnesses":{
-          "type":"array",
-          "items":{
-            "$ref":"#/definitions/witness"
-          }
         }
       },
       "required":[
@@ -392,71 +386,6 @@
         "startDate",
         "title",
         "wording"
-      ]
-    },
-    "witness":{
-      "type":"object",
-      "additionalProperties":false,
-      "properties":{
-        "id":{
-          "$ref":"#/definitions/uuid"
-        },
-        "caseId":{
-          "$ref":"#/definitions/uuid"
-        },
-        "type":{
-          "type":"string"
-        },
-        "classification":{
-          "type":"string"
-        },
-        "personId":{
-          "$ref":"#/definitions/uuid"
-        },
-        "title":{
-          "type":"string"
-        },
-        "firstName":{
-          "type":"string"
-        },
-        "lastName":{
-          "type":"string"
-        },
-        "nationality":{
-          "type":"string"
-        },
-        "gender":{
-          "type":"string"
-        },
-        "dateOfBirth":{
-          "$ref":"#/definitions/datePattern"
-        },
-        "homeTelephone":{
-          "type":"string"
-        },
-        "workTelephone":{
-          "type":"string"
-        },
-        "mobile":{
-          "type":"string"
-        },
-        "fax":{
-          "type":"string"
-        },
-        "email":{
-          "type":"string"
-        }
-      },
-      "required":[
-        "caseId",
-        "classification",
-        "dateOfBirth",
-        "firstName",
-        "id",
-        "lastName",
-        "personId",
-        "title",
-        "type"
       ]
     },
     "case":{

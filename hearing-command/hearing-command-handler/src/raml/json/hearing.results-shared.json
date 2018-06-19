@@ -97,26 +97,6 @@
           }
         ]
       }
-    ],
-    "witnesses":[
-      {
-        "id":"f370fd93-48c4-4a23-8743-11104d254f7e",
-        "caseId":"61ef1976-44fe-4796-83c5-d78d44a8d9c7",
-        "type":"Prosecution",
-        "classification":"Expert",
-        "personId":"905e051d-d473-4e60-a75d-056fd7c56064",
-        "title":"JJmhI2I9vI",
-        "firstName":"yfCSkavYy4",
-        "lastName":"n0Nd4HnLaU",
-        "nationality":"ga7Hgvz8BN",
-        "gender":"KuYVpfw8g0",
-        "dateOfBirth":"2014-03-15",
-        "homeTelephone":"lNKzdq9rQj",
-        "workTelephone":"bRQ8eMefFb",
-        "mobile":"SEpljvcX6V",
-        "fax":"ECWTD04INe",
-        "email":"0yPcitj7F9"
-      }
     ]
   },
   "cases":[

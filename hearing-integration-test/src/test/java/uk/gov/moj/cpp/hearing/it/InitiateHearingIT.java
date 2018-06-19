@@ -121,22 +121,7 @@ public class InitiateHearingIT extends AbstractIT {
                                 withJsonPath("$.cases[0].defendants[0].offences[0].wording", equalStr(hearing, "defendants[0].offences[0].wording")),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].title", equalStr(hearing, "defendants[0].offences[0].title")),
                                 withJsonPath("$.cases[0].defendants[0].offences[0].legislation", equalStr(hearing, "defendants[0].offences[0].legislation")),
-                                withJsonPath("$.cases[0].defendants[0].bailStatus", is(hearing.getDefendants().get(0).getDefendantCases().get(0).getBailStatus())),
-
-                                withJsonPath("$.cases[0].witnesses[0].type", equalStr(hearing, "witnesses[0].type")),
-                                withJsonPath("$.cases[0].witnesses[0].classification", equalStr(hearing, "witnesses[0].classification")),
-                                withJsonPath("$.cases[0].witnesses[0].caseId", equalStr(hearing, "witnesses[0].caseId")),
-                                withJsonPath("$.cases[0].witnesses[0].title", equalStr(hearing, "witnesses[0].title")),
-                                withJsonPath("$.cases[0].witnesses[0].firstName", equalStr(hearing, "witnesses[0].firstName")),
-                                withJsonPath("$.cases[0].witnesses[0].lastName", equalStr(hearing, "witnesses[0].lastName")),
-                                withJsonPath("$.cases[0].witnesses[0].nationality", equalStr(hearing, "witnesses[0].nationality")),
-                                withJsonPath("$.cases[0].witnesses[0].dateOfBirth", equalStr(hearing, "witnesses[0].dateOfBirth", ISO_LOCAL_DATE)),
-                                withJsonPath("$.cases[0].witnesses[0].gender", equalStr(hearing, "witnesses[0].gender")),
-                                withJsonPath("$.cases[0].witnesses[0].homeTelephone", equalStr(hearing, "witnesses[0].homeTelephone")),
-                                withJsonPath("$.cases[0].witnesses[0].workTelephone", equalStr(hearing, "witnesses[0].workTelephone")),
-                                withJsonPath("$.cases[0].witnesses[0].fax", equalStr(hearing, "witnesses[0].fax")),
-                                withJsonPath("$.cases[0].witnesses[0].mobile", equalStr(hearing, "witnesses[0].mobile"))
-
+                                withJsonPath("$.cases[0].defendants[0].bailStatus", is(hearing.getDefendants().get(0).getDefendantCases().get(0).getBailStatus()))
                         )));
     }
 

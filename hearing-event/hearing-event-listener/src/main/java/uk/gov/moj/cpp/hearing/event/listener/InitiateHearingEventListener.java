@@ -125,26 +125,6 @@ public class InitiateHearingEventListener {
                 );
     }
 
-    private Witness.Builder translateWitness(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.initiate.Witness witnessIn, final LegalCase id2Case) {
-        return Witness.builder()
-                .withLegalCase(id2Case)
-                .withType(witnessIn.getType())
-                .withClassification(witnessIn.getClassification())
-                .withPersonId(witnessIn.getPersonId())
-                .withTitle(witnessIn.getTitle())
-                .withFirstName(witnessIn.getFirstName())
-                .withLastName(witnessIn.getLastName())
-                .withGender(witnessIn.getGender())
-                .withDateOfBirth(witnessIn.getDateOfBirth())
-                .withNationality(witnessIn.getNationality())
-                .withHomeTelephone(witnessIn.getHomeTelephone())
-                .withWorkTelephone(witnessIn.getWorkTelephone())
-                .withEmail(witnessIn.getEmail())
-                .withFax(witnessIn.getFax())
-                .withMobileTelephone(witnessIn.getMobile())
-                .withId(new HearingSnapshotKey(witnessIn.getId(), hearingId));
-    }
-
     @Transactional
     @Handles("hearing.events.initiated")
     public void newHearingInitiated(final JsonEnvelope event) {
@@ -193,9 +173,6 @@ public class InitiateHearingEventListener {
                             return defendant;
                         })
                         .collect(Collectors.toList()))
-                .withWitnesses((hearing.getWitnesses() == null ? new ArrayList<>() : hearing.getWitnesses().stream()
-                        .map(witnessIn -> translateWitness(hearing.getId(), witnessIn, id2Case.get(witnessIn.getCaseId())).build()
-                        ).collect((Collectors.toList()))))
                 .withJudge(Judge.builder()
                         .withId(new HearingSnapshotKey(hearing.getJudge().getId(), hearing.getId()))
                         .withFirstName(hearing.getJudge().getFirstName())
