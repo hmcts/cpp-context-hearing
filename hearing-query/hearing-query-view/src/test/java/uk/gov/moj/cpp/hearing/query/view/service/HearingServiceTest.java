@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AttendeeHearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -43,8 +42,6 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -273,8 +270,8 @@ public class HearingServiceTest {
         final NowsResult nowsResult = new NowsResult();
         nowsResult.setSequence(1);
         nowsResult.setSharedResultId(sharedResultId);
-        nowsResult.setNows(nows);
-        nows.getNowResult().add(nowsResult);
+        nowsResult.setNowsMaterial(nowsMaterial);
+        nowsMaterial.getNowResult().add(nowsResult);
 
         final List<Nows> nowsList = new ArrayList<>();
         nowsList.add(nows);
@@ -287,8 +284,8 @@ public class HearingServiceTest {
         assertThat(response.getNows().get(0).getMaterial().get(0).getId(), is(nowsMaterial.getId().toString()));
         assertThat(response.getNows().get(0).getMaterial().get(0).getStatus(), is(NowsMaterialStatus.GENERATED.getDescription()));
         assertThat(response.getNows().get(0).getMaterial().get(0).getLanguage(), is(language));
-        assertThat(response.getNows().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId.toString()));
-        assertThat(response.getNows().get(0).getNowResult().get(0).getSequence(), is(1));
+        assertThat(response.getNows().get(0).getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId.toString()));
+        assertThat(response.getNows().get(0).getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
 
     }
 

@@ -1,15 +1,18 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "definitions": {},
-  "additionalProperties": false,
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  },
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "properties": {
     "hearing": {
       "type": "object",
-      "additionalProperties": false,
       "properties": {
         "id": {
-          "type": "string"
+          "$ref": "#/definitions/uuid"
         },
         "hearingType": {
           "type": "string"
@@ -19,14 +22,12 @@
         },
         "hearingDates": {
           "type": "array",
-          "additionalItems": false,
           "items": {
             "type": "string"
           }
         },
         "courtCentre": {
           "type": "object",
-          "additionalProperties": false,
           "properties": {
             "courtCentreId": {
               "type": "string"
@@ -44,10 +45,8 @@
         },
         "attendees": {
           "type": "array",
-          "additionalItems": false,
           "items": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "firstName": {
                 "type": "string"
@@ -57,58 +56,23 @@
               },
               "type": {
                 "type": "string"
-              },
-              "status": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              },
-              "defendants": {
-                "type": "array",
-                "additionalItems": false,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "defendantId": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "cases": {
-                "type": "array",
-                "additionalItems": false,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "caseId": {
-                      "type": "string"
-                    }
-                  }
-                }
               }
             }
           }
         },
         "defendants": {
           "type": "array",
-          "additionalItems": false,
           "items": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "id": {
-                "type": "string"
+                "$ref": "#/definitions/uuid"
               },
               "person": {
                 "type": "object",
-                "additionalProperties": false,
                 "properties": {
                   "id": {
-                    "type": "string"
+                    "$ref": "#/definitions/uuid"
                   },
                   "title": {
                     "type": "string"
@@ -145,7 +109,6 @@
                   },
                   "address": {
                     "type": "object",
-                    "additionalProperties": false,
                     "properties": {
                       "addressId": {
                         "type": "string"
@@ -169,15 +132,11 @@
                   }
                 }
               },
-              "bailStatus": {
-                "type": "string"
-              },
               "defenceOrganisation": {
                 "type": "string"
               },
               "interpreter": {
                 "type": "object",
-                "additionalProperties": false,
                 "properties": {
                   "name": {
                     "type": "string"
@@ -189,10 +148,8 @@
               },
               "cases": {
                 "type": "array",
-                "additionalItems": false,
                 "items": {
                   "type": "object",
-                  "additionalProperties": false,
                   "properties": {
                     "id": {
                       "type": "string"
@@ -208,10 +165,8 @@
                     },
                     "offences": {
                       "type": "array",
-                      "additionalItems": false,
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
                         "properties": {
                           "id": {
                             "type": "string"
@@ -224,7 +179,6 @@
                           },
                           "plea": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                               "id": {
                                 "type": "string"
@@ -242,7 +196,6 @@
                           },
                           "verdict": {
                             "type": "object",
-                            "additionalProperties": false,
                             "properties": {
                               "typeId": {
                                 "type": "string"
@@ -255,7 +208,6 @@
                               },
                               "lesserOrAlternativeOffence": {
                                 "type": "object",
-                                "additionalProperties": false,
                                 "properties": {
                                   "offenceTypeId": {
                                     "type": "string"
@@ -308,21 +260,25 @@
         },
         "sharedResultLines": {
           "type": "array",
-          "additionalItems": false,
           "items": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "id": {
-                "type": "string"
-              },
-              "caseId": {
-                "type": "string"
+                "$ref": "#/definitions/uuid"
               },
               "defendantId": {
-                "type": "string"
+                "$ref": "#/definitions/uuid"
+              },
+              "caseId": {
+                "$ref": "#/definitions/uuid"
               },
               "offenceId": {
+                "$ref": "#/definitions/uuid"
+              },
+              "sharedDate": {
+                "type": "string"
+              },
+              "orderedDate": {
                 "type": "string"
               },
               "level": {
@@ -336,41 +292,13 @@
               },
               "prompts": {
                 "type": "array",
-                "additionalItems": false,
                 "items": {
                   "type": "object",
-                  "additionalProperties": false,
                   "properties": {
                     "label": {
                       "type": "string"
                     },
                     "value": {
-                      "type": "string"
-                    },
-                    "userGroups": {
-                      "type": "array",
-                      "additionalItems": false,
-                      "items": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "group": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "userGroups": {
-                "type": "array",
-                "additionalItems": false,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "group": {
                       "type": "string"
                     }
                   }
@@ -381,55 +309,58 @@
         },
         "nows": {
           "type": "array",
-          "additionalItems": false,
           "items": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "id": {
-                "type": "string"
+                "$ref": "#/definitions/uuid"
               },
               "nowsTypeId": {
+                "$ref": "#/definitions/uuid"
+              },
+              "nowsTemplateName": {
                 "type": "string"
               },
               "defendantId": {
-                "type": "string"
-              },
-              "nowResult": {
-                "type": "array",
-                "additionalItems": false,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "sharedResultId": {
-                      "type": "string"
-                    },
-                    "sequence": {
-                      "type": "integer"
-                    }
-                  }
-                }
+                "$ref": "#/definitions/uuid"
               },
               "material": {
                 "type": "array",
-                "additionalItems": false,
                 "items": {
                   "type": "object",
-                  "additionalProperties": false,
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "$ref": "#/definitions/uuid"
                     },
-                    "language": {
-                      "type": "string"
+                    "nowResult": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "sharedResultId": {
+                            "$ref": "#/definitions/uuid"
+                          },
+                          "sequence": {
+                            "type": "integer"
+                          },
+                          "prompts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "label": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
                     },
                     "userGroups": {
                       "type": "array",
-                      "additionalItems": false,
                       "items": {
                         "type": "object",
-                        "additionalProperties": false,
                         "properties": {
                           "group": {
                             "type": "string"
@@ -445,18 +376,16 @@
         },
         "nowTypes": {
           "type": "array",
-          "additionalItems": false,
           "items": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
               "id": {
+                "$ref": "#/definitions/uuid"
+              },
+              "templateName": {
                 "type": "string"
               },
               "description": {
-                "type": "string"
-              },
-              "templateName": {
                 "type": "string"
               },
               "rank": {

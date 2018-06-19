@@ -1,12 +1,12 @@
-package uk.gov.moj.cpp.hearing.event.nows.domain;
+package uk.gov.moj.cpp.hearing.event.nows.order;
 
 import java.io.Serializable;
 
-public class NowsOrderDefendant implements Serializable {
+public class OrderDefendant implements Serializable {
     private final static long serialVersionUID = 8453916860863213534L;
     private String name;
     private String dateOfBirth;
-    private DefendantAddress address;
+    private Address address;
 
     public String getName() {
         return name;
@@ -24,11 +24,11 @@ public class NowsOrderDefendant implements Serializable {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public DefendantAddress getAddress() {
+    public Address getAddress() {
         return address;
     }
 
-    public void setAddress(DefendantAddress address) {
+    public void setAddress(Address address) {
         this.address = address;
     }
 
@@ -39,7 +39,7 @@ public class NowsOrderDefendant implements Serializable {
         private String name;
         private String dateOfBirth;
 
-        private DefendantAddress address;
+        private Address address;
 
         private Builder() {
         }
@@ -54,17 +54,17 @@ public class NowsOrderDefendant implements Serializable {
             return this;
         }
 
-        public Builder withAddress(DefendantAddress address) {
+        public Builder withAddress(Address address) {
             this.address = address;
             return this;
         }
 
-        public NowsOrderDefendant build() {
-            NowsOrderDefendant nowsOrderDefendant = new NowsOrderDefendant();
-            nowsOrderDefendant.setName(name);
-            nowsOrderDefendant.setDateOfBirth(dateOfBirth);
-            nowsOrderDefendant.setAddress(address);
-            return nowsOrderDefendant;
+        public OrderDefendant build() {
+            OrderDefendant defendant = new OrderDefendant();
+            defendant.setName(name);
+            defendant.setDateOfBirth(dateOfBirth);
+            defendant.setAddress(address);
+            return defendant;
         }
     }
 }

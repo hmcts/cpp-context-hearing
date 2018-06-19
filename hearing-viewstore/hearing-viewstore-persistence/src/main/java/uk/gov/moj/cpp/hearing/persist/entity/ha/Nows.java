@@ -32,9 +32,6 @@ public class Nows {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nows", orphanRemoval = true)
     private List<NowsMaterial> material = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nows", orphanRemoval = true)
-    private List<NowsResult> nowResult = new ArrayList<>();
-
 
     public UUID getId() {
         return id;
@@ -76,13 +73,7 @@ public class Nows {
         this.material = material;
     }
 
-    public List<NowsResult> getNowResult() {
-        return nowResult;
-    }
 
-    public void setNowResult(List<NowsResult> nowResult) {
-        this.nowResult = nowResult;
-    }
 
     public static Builder builder() {
         return new Builder();
@@ -94,7 +85,6 @@ public class Nows {
         private UUID hearingId;
         private UUID nowsTypeId;
         List<NowsMaterial> material = new ArrayList<>();
-        List<NowsResult> nowResult = new ArrayList<>();
 
         private Builder() {
         }
@@ -124,10 +114,6 @@ public class Nows {
             return this;
         }
 
-        public Builder withNowResult(List<NowsResult> nowResult) {
-            this.nowResult = nowResult;
-            return this;
-        }
 
         public Nows build() {
             Nows nows = new Nows();
@@ -136,7 +122,6 @@ public class Nows {
             nows.setDefendantId(defendantId);
             nows.setHearingId(hearingId);
             nows.setMaterial(material);
-            nows.setNowResult(nowResult);
             return nows;
         }
     }

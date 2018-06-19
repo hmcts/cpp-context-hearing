@@ -21,17 +21,6 @@ public class Nows {
     @JsonProperty("material")
     private List<Material> material = new ArrayList<>();
 
-    @JsonProperty("nowResult")
-    private List<NowResult> nowResult = new ArrayList<>();
-
-    public List<Material> getMaterial() {
-        return material;
-    }
-
-    public void setMaterial(List<Material> material) {
-        this.material = material;
-    }
-
     public String getId() {
         return id;
     }
@@ -56,37 +45,27 @@ public class Nows {
         this.nowsTypeId = nowsTypeId;
     }
 
-    public List<NowResult> getNowResult() {
-        return nowResult;
+    public List<Material> getMaterial() {
+        return material;
     }
 
-    public void setNowResult(List<NowResult> nowResult) {
-        this.nowResult = nowResult;
+    public void setMaterial(List<Material> material) {
+        this.material = material;
     }
 
     public static Builder builder() {
         return new Builder();
     }
-
     public static final class Builder {
-
         private String id;
-
         private String defendantId;
-
         private String nowsTypeId;
-
-        private List<NowResult> nowResult = new ArrayList<>();
-
         private List<Material> material = new ArrayList<>();
 
         private Builder() {
         }
 
-        public Builder withMaterial(List<Material> material) {
-            this.material = material;
-            return this;
-        }
+
 
         public Builder withId(String id) {
             this.id = id;
@@ -103,8 +82,8 @@ public class Nows {
             return this;
         }
 
-        public Builder withNowResult(List<NowResult> nowResult) {
-            this.nowResult = nowResult;
+        public Builder withMaterial(List<Material> material) {
+            this.material = material;
             return this;
         }
 
@@ -113,7 +92,6 @@ public class Nows {
             nows.setId(id);
             nows.setDefendantId(defendantId);
             nows.setNowsTypeId(nowsTypeId);
-            nows.setNowResult(nowResult);
             nows.setMaterial(material);
             return nows;
         }

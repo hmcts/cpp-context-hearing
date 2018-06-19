@@ -64,8 +64,8 @@ public class NowsRepositoryTest {
         NowsResult nowsResult = new NowsResult();
         nowsResult.setSequence(1);
         nowsResult.setSharedResultId(sharedResultId);
-        nowsResult.setNows(nows);
-        nows.getNowResult().add(nowsResult);
+        nowsResult.setNowsMaterial(nowsMaterial);
+        nowsMaterial.getNowResult().add(nowsResult);
 
         this.nowsRepository.save(nows);
     }
@@ -83,8 +83,8 @@ public class NowsRepositoryTest {
         assertThat(nows.getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
         assertThat(nows.getMaterial().get(0).getLanguage(), is(language));
 
-        assertThat(nows.getNowResult().get(0).getSharedResultId(), is(sharedResultId));
-        assertThat(nows.getNowResult().get(0).getSequence(), is(1));
+        assertThat(nows.getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
+        assertThat(nows.getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
 
 
     }
@@ -102,8 +102,8 @@ public class NowsRepositoryTest {
         assertThat(nows.get(0).getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
         assertThat(nows.get(0).getMaterial().get(0).getLanguage(), is(language));
 
-        assertThat(nows.get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
-        assertThat(nows.get(0).getNowResult().get(0).getSequence(), is(1));
+        assertThat(nows.get(0).getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
+        assertThat(nows.get(0).getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
     }
 
 }

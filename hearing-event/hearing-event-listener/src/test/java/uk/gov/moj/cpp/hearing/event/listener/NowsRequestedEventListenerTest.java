@@ -73,8 +73,9 @@ public class NowsRequestedEventListenerTest {
         nowsRequested.getHearing().getNows().get(0).setDefendantId(defendantId.toString());
         nowsRequested.getHearing().getNows().get(0).setId(nowsId.toString());
         nowsRequested.getHearing().getNows().get(0).setNowsTypeId(nowsTypeId.toString());
-        nowsRequested.getHearing().getNows().get(0).getNowResult().get(0).setSharedResultId(sharedResultId.toString());
-        nowsRequested.getHearing().getNows().get(0).getNowResult().get(0).setSequence(1);
+        nowsRequested.getHearing().getNows().get(0).setNowsTemplateName(nowsTypeId.toString());
+        nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getNowResult().get(0).setSharedResultId(sharedResultId.toString());
+        nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getNowResult().get(0).setSequence(1);
         nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).setId(materialId.toString());
         nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).setLanguage(language);
 
@@ -84,9 +85,9 @@ public class NowsRequestedEventListenerTest {
 
         NowsMaterial nowsMaterial = NowsMaterial.builder().withUserGroups(Arrays.asList("LO", "CC"))
                 .withId(materialId).withLanguage(language).withNows(nows).build();
-        NowsResult nowResult = NowsResult.builder().withSharedResultId(sharedResultId).withSequence(1).withNows(nows).build();
+        NowsResult nowResult = NowsResult.builder().withSharedResultId(sharedResultId).withSequence(1).withNowsMaterial(nowsMaterial).build();
         nows.getMaterial().add(nowsMaterial);
-        nows.getNowResult().add(nowResult);
+        nowsMaterial.getNowResult().add(nowResult);
         nowsList.add(nows);
 
         when(nowsRepository.findByHearingId(hearingId)).thenReturn(nowsList);
@@ -103,8 +104,8 @@ public class NowsRequestedEventListenerTest {
         assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getId(), is(nowsMaterial.getId()));
         assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
         assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getLanguage(), is(language));
-        assertThat(nowsMaterialArgumentCaptor.getValue().getNowResult().get(0).getSharedResultId(), is(sharedResultId));
-        assertThat(nowsMaterialArgumentCaptor.getValue().getNowResult().get(0).getSequence(), is(1));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
 
     }
 }

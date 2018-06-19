@@ -21,8 +21,8 @@ public class NowsResult {
     private Integer sequence;
 
     @ManyToOne
-    @JoinColumn(name = "nows_id", nullable = false)
-    private Nows nows;
+    @JoinColumn(name = "nows_material_id", nullable = false)
+    private NowsMaterial nowsMaterial;
 
     public UUID getSharedResultId() {
         return sharedResultId;
@@ -40,22 +40,23 @@ public class NowsResult {
         this.sequence = sequence;
     }
 
-    public Nows getNows() {
-        return nows;
+    public NowsMaterial getNowsMaterial() {
+        return nowsMaterial;
     }
 
-    public void setNows(Nows nows) {
-        this.nows = nows;
+    public void setNowsMaterial(NowsMaterial nowsMaterial) {
+        this.nowsMaterial = nowsMaterial;
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
+
     public static final class Builder {
         private UUID sharedResultId;
         private Integer sequence;
-        private Nows nows;
+        private NowsMaterial nowsMaterial;
 
         private Builder() {
         }
@@ -70,18 +71,17 @@ public class NowsResult {
             return this;
         }
 
-
-        public Builder withNows(Nows nows) {
-            this.nows = nows;
+        public Builder withNowsMaterial(NowsMaterial nowsMaterial) {
+            this.nowsMaterial = nowsMaterial;
             return this;
         }
 
         public NowsResult build() {
-            NowsResult nowsMaterial = new NowsResult();
-            nowsMaterial.setNows(nows);
-            nowsMaterial.setSequence(sequence);
-            nowsMaterial.setSharedResultId(sharedResultId);
-            return nowsMaterial;
+            NowsResult nowsResult = new NowsResult();
+            nowsResult.setSharedResultId(sharedResultId);
+            nowsResult.setSequence(sequence);
+            nowsResult.setNowsMaterial(nowsMaterial);
+            return nowsResult;
         }
     }
 }

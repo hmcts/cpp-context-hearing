@@ -27,11 +27,6 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
         aggregate(NewModelHearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelope, a -> a.generateNows(nowsRequested));
     }
 
-    @Handles("hearing.command.generate-nows.v2")
-    public void genarateNowsV2(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.info("hearing.command.generate-nows.v2 event received {} (process N/A) ", envelope.payloadAsJsonObject());
-    }
-
 
     @Handles("hearing.command.update-nows-material-status")
     public void nowsGenerated(final JsonEnvelope envelope) throws EventStreamException {

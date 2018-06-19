@@ -159,7 +159,7 @@ public class PublishResultsEventProcessorTest {
 
         JsonEnvelope createNowsMessage = outgoingMessages.get(0);
         assertThat(createNowsMessage, jsonEnvelope(
-                metadata().withName("hearing.command.generate-nows.v2"),
+                metadata().withName("hearing.command.generate-nows"),
                 payloadIsJson(allOf(
                         withJsonPath("$.hearing.id", is(hearing.getId().toString()))))
         ));

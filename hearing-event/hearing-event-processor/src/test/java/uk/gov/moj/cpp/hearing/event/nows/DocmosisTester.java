@@ -33,7 +33,7 @@ public class DocmosisTester {
             System.exit(1);
         }
 
-        generateDocument("suspended-sentence-order");
+        generateDocument("update-nows-fine-order");
     }
 
     private static void generateDocument(final String resultType) throws Exception {

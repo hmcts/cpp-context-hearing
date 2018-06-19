@@ -50,15 +50,16 @@ public class NowsMaterialRepositoryTest {
                     .withStatus(NowsMaterialStatus.REQUESTED)
                     .withUserGroups(Arrays.asList("LO", "GA"))
                     .withLanguage(language)
+                    .withNowResult(Arrays.asList(NowsResult.builder()
+                            .withSequence(1)
+                            .withSharedResultId(sharedResultId)
+                            .build()))
                     .build()))
-            .withNowResult(Arrays.asList(NowsResult.builder()
-                    .withSequence(1)
-                    .withSharedResultId(sharedResultId)
-                    .build()))
+
             .build();
 
         nows.getMaterial().get(0).setNows(nows);
-        nows.getNowResult().get(0).setNows(nows);
+        nows.getMaterial().get(0).getNowResult().get(0).setNowsMaterial(nows.getMaterial().get(0));
 
         this.nowsRepository.save(nows);
     }

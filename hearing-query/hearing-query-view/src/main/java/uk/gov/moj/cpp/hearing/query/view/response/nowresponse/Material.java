@@ -18,6 +18,9 @@ public class Material {
     @JsonProperty("userGroups")
     private List<String> userGroups = new ArrayList<>();
 
+    @JsonProperty("nowResult")
+    private List<NowResult> nowResult = new ArrayList<>();
+
     public String getId() {
         return id;
     }
@@ -50,18 +53,29 @@ public class Material {
         this.userGroups = userGroups;
     }
 
+    public List<NowResult> getNowResult() {
+        return nowResult;
+    }
+
+    public void setNowResult(List<NowResult> nowResult) {
+        this.nowResult = nowResult;
+    }
+
+
     public static Builder builder() {
         return new Builder();
     }
-
     public static final class Builder {
         private String id;
         private String language;
         private String status;
         private List<String> userGroups = new ArrayList<>();
+        private List<NowResult> nowResult = new ArrayList<>();
 
         private Builder() {
         }
+
+
 
         public Builder withId(String id) {
             this.id = id;
@@ -83,12 +97,18 @@ public class Material {
             return this;
         }
 
+        public Builder withNowResult(List<NowResult> nowResult) {
+            this.nowResult = nowResult;
+            return this;
+        }
+
         public Material build() {
             Material material = new Material();
             material.setId(id);
             material.setLanguage(language);
             material.setStatus(status);
             material.setUserGroups(userGroups);
+            material.setNowResult(nowResult);
             return material;
         }
     }

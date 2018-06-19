@@ -48,7 +48,7 @@ public class NowsTemplateRegistrationService {
             final TemplateContext templateContext = new TemplateContext(TEMPLATE_CONTEXT);
             final TemplateStore store = TemplateStoreFactory.getStore();
             final TemplateIdentifier templateId = new TemplateIdentifier(TEMPLATE_IDENTIFIER, templateContext);
-            StoreHelper.storeTemplate(templateId, getClass().getClassLoader().getResourceAsStream("templates/NoticeOrderWarrantsTemplate.docx"), true, true, store);
+            StoreHelper.storeTemplate(templateId, getClass().getClassLoader().getResourceAsStream("templates/NoticeOrderWarrantsTemplate_archived.docx"), true, true, store);
         } catch (IOException | TemplateStoreException | ConversionException | NoConvertersRunningException e) {
             LOGGER.error("Error registering the Notice orders and warrants Results Template with Docmosis Service", e);
             throw new TemplateRegistrationException(e);

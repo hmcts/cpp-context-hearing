@@ -88,10 +88,9 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.nows[0].defendantId", is(hearing.getFirstDefendantId().toString())),
                                 withJsonPath("$.nows[0].nowsTypeId", is(nowsTypeId)),
                                 withJsonPath("$.nows[0].material[0].id", is(materialId)),
-                                withJsonPath("$.nows[0].material[0].language", is("welsh")),
                                 withJsonPath("$.nows[0].material[0].status", is("Generated")),
-                                withJsonPath("$.nows[0].nowResult[0].sharedResultId", is(sharedResultId)),
-                                withJsonPath("$.nows[0].nowResult[0].sequence", is(1))
+                                withJsonPath("$.nows[0].material[0].nowResult[0].sharedResultId", is(sharedResultId)),
+                                withJsonPath("$.nows[0].material[0].nowResult[0].sequence", is(1))
                         )));
 
         poll(requestParams(getURL("hearing.query.search-by-material-id", materialId), "application/vnd.hearing.query.search-by-material-id+json")

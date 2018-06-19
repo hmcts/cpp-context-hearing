@@ -1,15 +1,18 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,16 +42,13 @@ public class NowsMaterial {
     @JoinColumn(name = "nows_id", nullable = false)
     Nows nows;
 
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nowsMaterial", orphanRemoval = true)
+    private List<NowsResult> nowResult = new ArrayList<>();
+
+
     @Column(name = "language")
     private String language;
-
-    public NowsMaterialStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(NowsMaterialStatus status) {
-        this.status = status;
-    }
 
     public UUID getId() {
         return id;
@@ -58,12 +58,12 @@ public class NowsMaterial {
         this.id = id;
     }
 
-    public String getLanguage() {
-        return language;
+    public NowsMaterialStatus getStatus() {
+        return status;
     }
 
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setStatus(NowsMaterialStatus status) {
+        this.status = status;
     }
 
     public List<String> getUserGroups() {
@@ -74,10 +74,6 @@ public class NowsMaterial {
         this.userGroups = userGroups;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public Nows getNows() {
         return nows;
     }
@@ -86,28 +82,41 @@ public class NowsMaterial {
         this.nows = nows;
     }
 
+    public List<NowsResult> getNowResult() {
+        return nowResult;
+    }
+
+    public void setNowResult(List<NowsResult> nowResult) {
+        this.nowResult = nowResult;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+
+    public static Builder  builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
+        Nows nows;
         private UUID id;
         private NowsMaterialStatus status;
         private List<String> userGroups = new ArrayList<>();
+        private List<NowsResult> nowResult = new ArrayList<>();
         private String language;
-        private Nows nows;
 
         private Builder() {
         }
 
+
         public Builder withId(UUID id) {
             this.id = id;
-            return this;
-        }
-
-        public Builder withLanguage(String language) {
-            this.language = language;
-            return this;
-        }
-
-        public Builder withUserGroups(List<String> userGroups) {
-            this.userGroups = userGroups;
             return this;
         }
 
@@ -116,8 +125,23 @@ public class NowsMaterial {
             return this;
         }
 
+        public Builder withUserGroups(List<String> userGroups) {
+            this.userGroups = userGroups;
+            return this;
+        }
+
         public Builder withNows(Nows nows) {
             this.nows = nows;
+            return this;
+        }
+
+        public Builder withNowResult(List<NowsResult> nowResult) {
+            this.nowResult = nowResult;
+            return this;
+        }
+
+        public Builder withLanguage(String language) {
+            this.language = language;
             return this;
         }
 
@@ -125,9 +149,10 @@ public class NowsMaterial {
             NowsMaterial nowsMaterial = new NowsMaterial();
             nowsMaterial.setId(id);
             nowsMaterial.setStatus(status);
-            nowsMaterial.setLanguage(language);
             nowsMaterial.setUserGroups(userGroups);
             nowsMaterial.setNows(nows);
+            nowsMaterial.setNowResult(nowResult);
+            nowsMaterial.setLanguage(language);
             return nowsMaterial;
         }
     }

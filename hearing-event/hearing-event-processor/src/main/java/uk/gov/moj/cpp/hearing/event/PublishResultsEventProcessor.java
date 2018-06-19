@@ -106,7 +106,7 @@ public class PublishResultsEventProcessor {
                                         )
 
                         );
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows.v2")
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows")
                         .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
 
                 final UpdateResultLinesStatusCommand updateResultLinesStatusCommand = UpdateResultLinesStatusCommand.builder()

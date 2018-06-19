@@ -67,7 +67,7 @@ public class HearingCommandHandlerRamlConfigTest {
         List<String> filesThatArePresent =
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json/schema").listFiles()))
                         .map(File::getName)
-                        .filter(filename->!filename.equals("hearing.command.generate-nows.v2.json"))
+                        .filter(filename->!filename.equals("hearing.command.generate-nows.json"))
                         .map(name -> "json/schema/" + name)
                         .collect(Collectors.toList());
 

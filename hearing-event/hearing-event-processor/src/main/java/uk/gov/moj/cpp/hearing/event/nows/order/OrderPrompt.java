@@ -1,8 +1,8 @@
-package uk.gov.moj.cpp.hearing.event.nows.domain;
+package uk.gov.moj.cpp.hearing.event.nows.order;
 
 import java.io.Serializable;
 
-public class NowOrderPrompt implements Serializable {
+public class OrderPrompt implements Serializable {
 
     private final static long serialVersionUID = -2080535270112882879L;
     private String label;
@@ -16,7 +16,7 @@ public class NowOrderPrompt implements Serializable {
         return value;
     }
 
-    public NowOrderPrompt(String label, String value) {
+    public OrderPrompt(String label, String value) {
         this.label = label;
         this.value = value;
     }
@@ -43,8 +43,8 @@ public class NowOrderPrompt implements Serializable {
             return this;
         }
 
-        public NowOrderPrompt build() {
-            NowOrderPrompt prompt = new NowOrderPrompt(label, value);
+        public OrderPrompt build() {
+            OrderPrompt prompt = new OrderPrompt(label, value);
             return prompt;
         }
     }

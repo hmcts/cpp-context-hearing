@@ -10,7 +10,6 @@ public class Prompt implements Serializable {
     private final static long serialVersionUID = -7063185622725100131L;
     private String label;
     private String value;
-    private List<PromptsUserGroup> userGroups = new ArrayList<PromptsUserGroup>();
 
     public String getLabel() {
         return label;
@@ -28,11 +27,33 @@ public class Prompt implements Serializable {
         this.value = value;
     }
 
-    public List<PromptsUserGroup> getUserGroups() {
-        return userGroups;
+    public static Builder builder() {
+        return new Builder();
     }
+    public static final class Builder {
+        private String label;
+        private String value;
 
-    public void setUserGroups(List<PromptsUserGroup> userGroups) {
-        this.userGroups = userGroups;
+        private Builder() {
+        }
+
+
+
+        public Builder withLabel(String label) {
+            this.label = label;
+            return this;
+        }
+
+        public Builder withValue(String value) {
+            this.value = value;
+            return this;
+        }
+
+        public Prompt build() {
+            Prompt prompt = new Prompt();
+            prompt.setLabel(label);
+            prompt.setValue(value);
+            return prompt;
+        }
     }
 }

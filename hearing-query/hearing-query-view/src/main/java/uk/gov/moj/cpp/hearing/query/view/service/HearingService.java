@@ -103,7 +103,7 @@ public class HearingService {
                 .withId(now.getId().toString())
                 .withNowsTypeId(now.getNowsTypeId().toString())
                 .withMaterial(populateMaterial(now.getMaterial()))
-                .withNowResult(populateNowResult(now.getNowResult()))
+
                 .build()).collect(toList());
         return NowsResponse.builder().withNows(nowsList).build();
     }
@@ -134,6 +134,7 @@ public class HearingService {
                 .withId(nowsMaterial.getId().toString())
                 .withStatus(nowsMaterial.getStatus().getDescription())
                 .withLanguage(nowsMaterial.getLanguage())
+                .withNowResult(populateNowResult(nowsMaterial.getNowResult()))
                 .withUserGroups(nowsMaterial.getUserGroups()).build() ).collect(toList());
     }
 }

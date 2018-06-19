@@ -10,6 +10,7 @@ public class Material implements Serializable {
     private final static long serialVersionUID = 6679626275705377367L;
     private String id;
     private String language;
+    private List<NowResult> nowResult;
     private List<MaterialUserGroup> userGroups = new ArrayList<MaterialUserGroup>();
 
     public String getId() {
@@ -26,6 +27,14 @@ public class Material implements Serializable {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public List<NowResult> getNowResult() {
+        return nowResult;
+    }
+
+    public void setNowResult(List<NowResult> nowResult) {
+        this.nowResult = nowResult;
     }
 
     public List<MaterialUserGroup> getUserGroups() {

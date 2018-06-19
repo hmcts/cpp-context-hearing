@@ -133,35 +133,11 @@
         "prompts": [
           {
             "label": "Imprisonment duration",
-            "value": "1 year 6 months",
-            "userGroups": [
-              {
-                "group": "courtAdmin"
-              },
-              {
-                "group": "defence"
-              }
-            ]
+            "value": "1 year 6 months"
           },
           {
             "label": "Prison",
-            "value": "Wormwood Scrubs",
-            "userGroups": [
-              {
-                "group": "courtAdmin"
-              },
-              {
-                "group": "defence"
-              }
-            ]
-          }
-        ],
-        "userGroups": [
-          {
-            "group": "courtAdmin"
-          },
-          {
-            "group": "defence"
+            "value": "Wormwood Scrubs"
           }
         ]
       }
@@ -169,18 +145,25 @@
     "nows": [
       {
         "id": "45f4fb1e-ff6f-41c4-9f66-e88e01995c0d",
-        "nowsTypeId": "9d5cc1dd-f7e1-4093-b6a0-83a2e2206853",
+        "nowsTemplateName": "SingleTemplate",
         "defendantId": "2d1d2d8a-860c-479b-aa68-c4ad37850839",
-        "nowResult": [
-          {
-            "sharedResultId": "7879fde7-6dfc-4466-95df-36e584bbc3b0",
-            "sequence": 1
-          }
-        ],
         "material": [
           {
             "id": "5d5807c9-004c-4b75-9cfd-29757fd4fd78",
-            "language": "welsh",
+            "nowResult": [
+              {
+                "sharedResultId": "7879fde7-6dfc-4466-95df-36e584bbc3b0",
+                "sequence": 1,
+                "prompts": [
+                  {
+                    "label": "Imprisonment duration"
+                  },
+                  {
+                    "label": "Prison"
+                  }
+                ]
+              }
+            ],
             "userGroups": [
               {
                 "group": "courtAdmin"
@@ -195,7 +178,6 @@
     ],
     "nowTypes": [
       {
-        "id": "9d5cc1dd-f7e1-4093-b6a0-83a2e2206853",
         "description": "Imprisonment Order",
         "templateName": "SingleTemplate",
         "rank": 1,

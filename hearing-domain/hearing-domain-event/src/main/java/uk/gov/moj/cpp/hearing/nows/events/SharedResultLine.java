@@ -13,14 +13,32 @@ public class SharedResultLine implements Serializable
     private String caseId;
     private String defendantId;
     private String offenceId;
+    private String sharedDate;
+    private String orderedDate;
     private String level;
     private String label;
     private Integer rank;
     private List<Prompt> prompts = new ArrayList<Prompt>();
-    private List<ResultsUserGroup> userGroups = new ArrayList<ResultsUserGroup>();
 
     public String getId() {
         return id;
+    }
+
+    public String getSharedDate() {
+        return sharedDate;
+    }
+
+    public void setSharedDate(String sharedDate) {
+        this.sharedDate = sharedDate;
+    }
+
+    public String getOrderedDate() {
+
+        return orderedDate;
+    }
+
+    public void setOrderedDate(String orderedDate) {
+        this.orderedDate = orderedDate;
     }
 
     public void setId(String id) {
@@ -83,11 +101,4 @@ public class SharedResultLine implements Serializable
         this.prompts = prompts;
     }
 
-    public List<ResultsUserGroup> getUserGroups() {
-        return userGroups;
-    }
-
-    public void setUserGroups(List<ResultsUserGroup> userGroups) {
-        this.userGroups = userGroups;
-    }
 }

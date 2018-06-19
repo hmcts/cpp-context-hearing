@@ -155,7 +155,7 @@ public class NowsRequestedEventProcessorTest {
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
         final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsRequested));
 
         expectedException.expect(DocumentGenerationException.class);
@@ -173,7 +173,7 @@ public class NowsRequestedEventProcessorTest {
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
         final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsRequested));
 
         expectedException.expect(FileUploadException.class);
@@ -193,7 +193,7 @@ public class NowsRequestedEventProcessorTest {
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(),
                 UUID.randomUUID(), NowsMaterialStatusType.GENERATED);
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-material-status-updated"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-material-status-updated").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsMaterialStatusUpdated));
 
         this.nowsRequestedEventProcessor.propagateNowsMaterialStatusUpdated(event);

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="041" author="hearing"  >
+        <dropForeignKeyConstraint baseTableName="nows_result" constraintName="fk_nows_nows_result "></dropForeignKeyConstraint>
+        <dropColumn tableName="nows_result" columnName="nows_id"/>
+        <addColumn tableName="nows_result">
+            <column name="nows_material_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="nows_material_id" baseTableName="nows_result"
+                                 constraintName="fk_nows_result_nows_material" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+                                 referencedTableName="ha_nows_material"/>
+
+    </changeSet>
+
+
+</databaseChangeLog>
+
+

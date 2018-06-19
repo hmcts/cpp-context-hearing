@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.event.nows.domain;
+package uk.gov.moj.cpp.hearing.event.nows.order;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ public class DefendantCaseOffence implements Serializable {
     private String wording;
     private String startDate;
     private String convictionDate;
-    private List<NowsOrderResult> results = new ArrayList<NowsOrderResult>();
+    private List<OrderResult> results = new ArrayList<OrderResult>();
 
     public static Builder builder() {
         return new Builder();
@@ -40,11 +40,11 @@ public class DefendantCaseOffence implements Serializable {
         this.convictionDate = convictionDate;
     }
 
-    public List<NowsOrderResult> getResults() {
+    public List<OrderResult> getResults() {
         return results;
     }
 
-    public void setResults(List<NowsOrderResult> results) {
+    public void setResults(List<OrderResult> results) {
         this.results = results;
     }
 
@@ -52,7 +52,7 @@ public class DefendantCaseOffence implements Serializable {
         private String wording;
         private String startDate;
         private String convictionDate;
-        private List<NowsOrderResult> results = new ArrayList<NowsOrderResult>();
+        private List<OrderResult> results = new ArrayList<OrderResult>();
 
         private Builder() {
         }
@@ -73,7 +73,7 @@ public class DefendantCaseOffence implements Serializable {
             return this;
         }
 
-        public Builder withResults(List<NowsOrderResult> results) {
+        public Builder withResults(List<OrderResult> results) {
             this.results = results;
             return this;
         }
