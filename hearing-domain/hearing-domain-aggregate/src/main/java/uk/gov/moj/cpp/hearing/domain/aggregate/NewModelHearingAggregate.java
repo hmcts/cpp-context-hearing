@@ -133,8 +133,11 @@ public class NewModelHearingAggregate implements Aggregate {
                 when(ResultsShared.class).apply(resultsShared -> {
                     published = true;
                     resultsShared.getCompletedResultLines().forEach(completedResultLine -> {
+                        //only update result line status if resultline is modified or resultline is new
+                        if (!(completedResultLines.containsKey(completedResultLine.getId()) && completedResultLine.equals(completedResultLines.get(completedResultLine.getId())))) {
+                            completedResultLinesStatus.put(completedResultLine.getId(), CompletedResultLineStatus.builder().withId(completedResultLine.getId()).build());
+                        }
                         completedResultLines.put(completedResultLine.getId(), completedResultLine);
-                        completedResultLinesStatus.put(completedResultLine.getId(), CompletedResultLineStatus.builder().withId(completedResultLine.getId()).build());
                     });
                 }),
 
@@ -218,7 +221,7 @@ public class NewModelHearingAggregate implements Aggregate {
                                         .setEndDate(offenceAdded.getEndDate())
                                         .setCount(offenceAdded.getCount())
                                         .setConvictionDate(offenceAdded.getConvictionDate())
-                                        ))),
+                                ))),
 
                 when(OffenceUpdated.class).apply(offenceUpdated ->
                         this.hearing.getDefendants().stream()
@@ -484,14 +487,6 @@ public class NewModelHearingAggregate implements Aggregate {
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
 
-        Map copyResultLinesStatus = new HashMap(completedResultLinesStatus);
-        command.getCompletedResultLines().forEach(completedResultLine -> {
-            //only update result line status if result line is modified
-            if (completedResultLines.containsKey(completedResultLine.getId()) && !completedResultLine.equals(completedResultLines.get(completedResultLine.getId()))) {
-                copyResultLinesStatus.put(completedResultLine.getId(), CompletedResultLineStatus.builder().withId(completedResultLine.getId()).build());
-            }
-        });
-
         return apply(Stream.of(ResultsShared.builder()
                 .withHearingId(command.getHearingId())
                 .withSharedTime(sharedTime)
@@ -504,7 +499,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 .withDefenceCounsels(this.defenceCounsels)
                 .withPleas(this.pleas)
                 .withVerdicts(this.verdicts)
-                .withCompletedResultLinesStatus(copyResultLinesStatus)
+                .withCompletedResultLinesStatus(completedResultLinesStatus)
                 .build()));
     }
 
