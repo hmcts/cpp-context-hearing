@@ -21,11 +21,14 @@ import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
@@ -86,9 +89,9 @@ public class ShareResultsIT extends AbstractIT {
         final UUID mandatoryPromptId = UUID.randomUUID();
         final String mandatoryPromptLabel = "label1";
         AllNows allNows = AllNows.allNows()
-                .setNows(Arrays.asList(
+                .setNows(asList(
                         NowDefinition.now().setId(UUID.randomUUID())
-                                .setResultDefinitions(Arrays.asList(
+                                .setResultDefinitions(asList(
                                         ResultDefinitions.resultDefinitions()
                                                 .setId(primaryResultDefinitionId)
                                                 .setMandatory(true)
@@ -100,15 +103,15 @@ public class ShareResultsIT extends AbstractIT {
 
         final String userGroup1 = "DefenseCounsel";
         AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
-                Arrays.asList(ResultDefinition.resultDefinition()
+                asList(ResultDefinition.resultDefinition()
                         .setId(primaryResultDefinitionId)
-                        .setUserGroups(Arrays.asList(userGroup1))
+                        .setUserGroups(asList(userGroup1))
                         .setPrompts(
-                                Arrays.asList(
+                                asList(
                                         Prompt.prompt().setId(mandatoryPromptId)
                                                 .setMandatory(true)
                                                 .setLabel("label1")
-                                                .setUserGroups(Arrays.asList(userGroup1))
+                                                .setUserGroups(asList(userGroup1))
                                 )
                         )
                 )
@@ -166,8 +169,8 @@ public class ShareResultsIT extends AbstractIT {
 
         publicEventResulted.waitFor();
 
-        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
-                "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -191,8 +194,8 @@ public class ShareResultsIT extends AbstractIT {
         );
         publicEventResulted.waitFor();
 
-        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
-                "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),

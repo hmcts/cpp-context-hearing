@@ -43,7 +43,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
             });
         });
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
@@ -74,7 +74,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
         });
 
         //TODO - add more assertions on offence details here.
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
@@ -105,7 +105,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
             });
         });
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),

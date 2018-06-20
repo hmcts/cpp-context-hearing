@@ -32,7 +32,7 @@ public class ProsecutionCounselIT extends AbstractIT {
                 addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
         );
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
@@ -49,7 +49,7 @@ public class ProsecutionCounselIT extends AbstractIT {
                 addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
         );
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -77,7 +77,7 @@ public class ProsecutionCounselIT extends AbstractIT {
                 addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
         );
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -98,7 +98,7 @@ public class ProsecutionCounselIT extends AbstractIT {
                 })
         );
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),

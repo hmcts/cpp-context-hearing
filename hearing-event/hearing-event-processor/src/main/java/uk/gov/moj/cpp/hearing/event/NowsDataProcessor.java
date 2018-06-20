@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -277,7 +278,11 @@ public class NowsDataProcessor {
     private static boolean anyNewlyCompletedResultLines(final List<CompletedResultLine> resultLines4Now, Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
         // this line tests if we have new result lines, if we don't we don't generate the NOW
         // check if result line's last sharedDateTime is null then only generate NOW
-        return resultLines4Now.stream().anyMatch(resultLine ->  completedResultLinesStatus.get(resultLine.getId()).getLastSharedDateTime() == null);
+        return resultLines4Now.stream().anyMatch(resultLine ->
+                !ofNullable(completedResultLinesStatus.get(resultLine.getId()))
+                        .map(CompletedResultLineStatus::getLastSharedDateTime)
+                        .isPresent()
+        );
     }
 
     private static class NowVariant {

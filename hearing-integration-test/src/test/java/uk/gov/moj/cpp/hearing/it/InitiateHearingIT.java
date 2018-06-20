@@ -7,7 +7,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
-import java.text.MessageFormat;
 import java.time.ZoneId;
 import java.util.concurrent.TimeUnit;
 
@@ -21,7 +20,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -42,8 +40,8 @@ public class InitiateHearingIT extends AbstractIT {
 
         final Hearing hearing = hearingOne.it().getHearing();
 
-        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
-                "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -67,8 +65,8 @@ public class InitiateHearingIT extends AbstractIT {
                                 withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString()))
                         )));
 
-        poll(requestParams(getURL("hearing.get.hearings-by-date.v2", hearing.getHearingDays().get(0).withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString())
-                , "application/vnd.hearing.get.hearings-by-date.v2+json")
+        poll(requestParams(getURL("hearing.get.hearings-by-date", hearing.getHearingDays().get(0).withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString())
+                , "application/vnd.hearing.get.hearings-by-date+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -88,8 +86,8 @@ public class InitiateHearingIT extends AbstractIT {
 
         final Hearing hearing = hearingOne.it().getHearing();
 
-        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId()),
-                "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -147,7 +145,7 @@ public class InitiateHearingIT extends AbstractIT {
                 }))
         );
 
-        poll(requestParameters(getURL("hearing.get.hearing.v2", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(getURL("hearing.get.hearing", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing+json"))
                 .timeout(10, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
@@ -185,7 +183,7 @@ public class InitiateHearingIT extends AbstractIT {
                 }))
         );
 
-        poll(requestParameters(getURL("hearing.get.hearing.v2", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(getURL("hearing.get.hearing", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing+json"))
                 .timeout(10, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
