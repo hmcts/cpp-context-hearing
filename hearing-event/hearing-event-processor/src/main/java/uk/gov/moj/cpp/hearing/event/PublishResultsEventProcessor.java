@@ -294,7 +294,7 @@ public class PublishResultsEventProcessor {
         return input.getCompletedResultLines().stream()
                 .map(rl -> SharedResultLine.sharedResultLine()
                         .setId(rl.getId())
-                        .setLastSharedResultDateTime(getLastSharedResultDateTime(input.getSharedTime(), input.getCompletedResultLinesStatus().get(rl.getId())))
+                        .setLastSharedDateTime(getLastSharedResultDateTime(input.getSharedTime(), input.getCompletedResultLinesStatus().get(rl.getId())))
                         .setCourtClerk(getCourtClerkDetails(input.getCourtClerk(), input.getCompletedResultLinesStatus().get(rl.getId())))
                         .setCaseId(rl.getCaseId())
                         .setDefendantId(rl.getDefendantId())

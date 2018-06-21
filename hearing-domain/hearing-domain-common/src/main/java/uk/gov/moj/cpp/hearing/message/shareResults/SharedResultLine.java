@@ -10,7 +10,7 @@ import java.util.UUID;
 public class SharedResultLine {
 
     private UUID id;
-    private ZonedDateTime lastSharedResultDateTime;
+    private ZonedDateTime lastSharedDateTime;
     private UUID caseId;
     private UUID defendantId;
     private UUID offenceId;
@@ -25,8 +25,8 @@ public class SharedResultLine {
         return id;
     }
 
-    public ZonedDateTime getLastSharedResultDateTime() {
-        return lastSharedResultDateTime;
+    public ZonedDateTime getLastSharedDateTime() {
+        return lastSharedDateTime;
     }
 
     public UUID getCaseId() {
@@ -66,8 +66,8 @@ public class SharedResultLine {
         return this;
     }
 
-    public SharedResultLine setLastSharedResultDateTime(ZonedDateTime lastSharedResultDateTime) {
-        this.lastSharedResultDateTime = lastSharedResultDateTime;
+    public SharedResultLine setLastSharedDateTime(ZonedDateTime lastSharedDateTime) {
+        this.lastSharedDateTime = lastSharedDateTime;
         return this;
     }
 
