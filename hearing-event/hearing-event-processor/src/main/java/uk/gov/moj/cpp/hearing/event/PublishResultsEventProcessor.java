@@ -108,20 +108,20 @@ public class PublishResultsEventProcessor {
                         );
                 this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows")
                         .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
-
-                final UpdateResultLinesStatusCommand updateResultLinesStatusCommand = UpdateResultLinesStatusCommand.builder()
-                        .withLastSharedDateTime(ZonedDateTime.now())
-                        .withHearingId(input.getHearingId())
-                        .withCourtClerk(input.getCourtClerk())
-                        .withSharedResultLines(mapSharedResultsLinesStatus(input.getCompletedResultLines(), input.getCompletedResultLinesStatus()))
-                        .build();
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-result-lines-status")
-                        .apply((this.objectToJsonObjectConverter.convert(updateResultLinesStatusCommand)))
-                );
             }
         } catch (Exception e) {
             LOGGER.error("NOWS processing generated exception", e);
         }
+
+        final UpdateResultLinesStatusCommand updateResultLinesStatusCommand = UpdateResultLinesStatusCommand.builder()
+                .withLastSharedDateTime(ZonedDateTime.now())
+                .withHearingId(input.getHearingId())
+                .withCourtClerk(input.getCourtClerk())
+                .withSharedResultLines(mapSharedResultsLinesStatus(input.getCompletedResultLines(), input.getCompletedResultLinesStatus()))
+                .build();
+        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-result-lines-status")
+                .apply((this.objectToJsonObjectConverter.convert(updateResultLinesStatusCommand)))
+        );
 
         ShareResultsMessage shareResultsMessage = ShareResultsMessage.shareResultsMessage()
                 .setHearing(Hearing.hearing()
