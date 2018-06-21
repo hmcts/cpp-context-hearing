@@ -1,14 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Optional.ofNullable;
-
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,7 +24,7 @@ public class Hearing implements Serializable {
     private Judge judge;
     private List<ZonedDateTime> hearingDays;
     private List<Defendant> defendants;
-    private List<Witness> witnesses;
+
 
     public Hearing() {
     }
@@ -42,8 +38,7 @@ public class Hearing implements Serializable {
                    @JsonProperty("courtRoomName") final String courtRoomName,
                    @JsonProperty("judge") final Judge judge,
                    @JsonProperty("hearingDays") final List<ZonedDateTime> hearingDays,
-                   @JsonProperty("defendants") final List<Defendant> defendants,
-                   @JsonProperty("witnesses") final List<Witness> witnesses) {
+                    @JsonProperty("defendants") final List<Defendant> defendants) {
         this.id = id;
         this.type = type;
         this.courtCentreId = courtCentreId;
@@ -53,7 +48,6 @@ public class Hearing implements Serializable {
         this.judge = judge;
         this.hearingDays = hearingDays;
         this.defendants = defendants;
-        this.witnesses = witnesses;
     }
 
 
@@ -93,56 +87,47 @@ public class Hearing implements Serializable {
         return defendants;
     }
 
-    public List<Witness> getWitnesses() {
-        return witnesses;
-    }
-
-    public Hearing setId(UUID id) {
+    public Hearing setId(final UUID id) {
         this.id = id;
         return this;
     }
 
-    public Hearing setType(String type) {
+    public Hearing setType(final String type) {
         this.type = type;
         return this;
     }
 
-    public Hearing setCourtCentreId(UUID courtCentreId) {
+    public Hearing setCourtCentreId(final UUID courtCentreId) {
         this.courtCentreId = courtCentreId;
         return this;
     }
 
-    public Hearing setCourtCentreName(String courtCentreName) {
+    public Hearing setCourtCentreName(final String courtCentreName) {
         this.courtCentreName = courtCentreName;
         return this;
     }
 
-    public Hearing setCourtRoomId(UUID courtRoomId) {
+    public Hearing setCourtRoomId(final UUID courtRoomId) {
         this.courtRoomId = courtRoomId;
         return this;
     }
 
-    public Hearing setCourtRoomName(String courtRoomName) {
+    public Hearing setCourtRoomName(final String courtRoomName) {
         this.courtRoomName = courtRoomName;
         return this;
     }
 
-    public Hearing setJudge(Judge judge) {
+    public Hearing setJudge(final Judge judge) {
         this.judge = judge;
         return this;
     }
 
-    public Hearing setHearingDays(List<ZonedDateTime> hearingDays) {
+    public Hearing setHearingDays(final List<ZonedDateTime> hearingDays) {
         this.hearingDays = new ArrayList<>(hearingDays);
         return this;
     }
 
-    public Hearing setWitnesses(List<Witness> witnesses) {
-        this.witnesses = new ArrayList<>(witnesses);
-        return this;
-    }
-
-    public Hearing setDefendants(List<Defendant> defendants) {
+    public Hearing setDefendants(final List<Defendant> defendants) {
         this.defendants = new ArrayList<>(defendants);
         return this;
     }

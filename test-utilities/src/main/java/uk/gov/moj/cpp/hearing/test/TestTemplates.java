@@ -1,6 +1,25 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
@@ -12,7 +31,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
-import uk.gov.moj.cpp.hearing.command.initiate.Witness;
 import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
@@ -30,25 +48,6 @@ import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.UUID;
-
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 public class TestTemplates {
 
@@ -160,17 +159,16 @@ public class TestTemplates {
                             )
                             .setHearingDays(asList(startDateTime))
                             .setDefendants(asList(defendantTemplate(caseId)))
-                            .setWitnesses(asList(witnessTemplate(caseId)))
                     );
         }
 
-        public static Case caseTemplate(UUID caseId) {
+        public static Case caseTemplate(final UUID caseId) {
             return Case.legalCase()
                     .setCaseId(caseId)
                     .setUrn(STRING.next());
         }
 
-        public static Defendant defendantTemplate(UUID caseId) {
+        public static Defendant defendantTemplate(final UUID caseId) {
             return Defendant.defendant()
                     .setId(randomUUID())
                     .setPersonId(randomUUID())
@@ -202,14 +200,14 @@ public class TestTemplates {
                     .setPostCode(STRING.next());
         }
 
-        public static DefendantCase defendantCaseTemplate(UUID caseId) {
+        public static DefendantCase defendantCaseTemplate(final UUID caseId) {
             return DefendantCase.defendantCase()
                     .setCaseId(caseId)
                     .setBailStatus(STRING.next())
                     .setCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next());
         }
 
-        public static Offence offenceTemplate(UUID caseId) {
+        public static Offence offenceTemplate(final UUID caseId) {
             return Offence.offence()
                     .setId(randomUUID())
                     .setCaseId(caseId)
@@ -225,25 +223,6 @@ public class TestTemplates {
                     .setTitle(STRING.next());
         }
 
-        public static Witness witnessTemplate(UUID caseId) {
-            return Witness.witness()
-                    .setId(randomUUID())
-                    .setCaseId(caseId)
-                    .setType("Prosecution")
-                    .setClassification("Expert")
-                    .setPersonId(randomUUID())
-                    .setTitle(STRING.next())
-                    .setFirstName(STRING.next())
-                    .setLastName(STRING.next())
-                    .setGender(STRING.next())
-                    .setDateOfBirth(PAST_LOCAL_DATE.next())
-                    .setEmail(STRING.next())
-                    .setFax(STRING.next())
-                    .setHomeTelephone(STRING.next())
-                    .setWorkTelephone(STRING.next())
-                    .setMobile(STRING.next())
-                    .setNationality(STRING.next());
-        }
 
         public static InitiateHearingCommand minimalInitiateHearingTemplate(
                 final UUID caseId, final UUID hearingId, final UUID... defendantIds) {
@@ -292,7 +271,7 @@ public class TestTemplates {
         private UpdatePleaCommandTemplates() {
         }
 
-        public static HearingUpdatePleaCommand.Builder updatePleaTemplate(UUID offenceId, PleaValueType pleaValueType) {
+        public static HearingUpdatePleaCommand.Builder updatePleaTemplate(final UUID offenceId, final PleaValueType pleaValueType) {
             return HearingUpdatePleaCommand.builder()
                     .withCaseId(randomUUID())//not used
                     .addDefendant(uk.gov.moj.cpp.hearing.command.plea.Defendant.builder()
@@ -315,7 +294,7 @@ public class TestTemplates {
         private UpdateVerdictCommandTemplates() {
         }
 
-        public static HearingUpdateVerdictCommand.Builder updateVerdictTemplate(UUID caseId, UUID defendantId, UUID offenceId, VerdictCategoryType verdictCategoryType) {
+        public static HearingUpdateVerdictCommand.Builder updateVerdictTemplate(final UUID caseId, final UUID defendantId, final UUID offenceId, final VerdictCategoryType verdictCategoryType) {
             return HearingUpdateVerdictCommand.builder()
                     .withCaseId(caseId)
                     .addDefendant(
@@ -394,7 +373,7 @@ public class TestTemplates {
                     .build();
         }
 
-        public static UncompletedResultLine uncompletedResultLineTemplate(UUID defendantId) {
+        public static UncompletedResultLine uncompletedResultLineTemplate(final UUID defendantId) {
             return UncompletedResultLine.builder()
                     .withId(UUID.randomUUID())
                     .withResultDefinitionId(UUID.randomUUID())
@@ -455,7 +434,7 @@ public class TestTemplates {
         private AddDefenceCounselCommandTemplates() {
         }
 
-        public static AddDefenceCounselCommand standardAddDefenceCounselCommandTemplate(UUID hearingId, UUID defendantId) {
+        public static AddDefenceCounselCommand standardAddDefenceCounselCommandTemplate(final UUID hearingId, final UUID defendantId) {
             return AddDefenceCounselCommand.builder()
                     .withAttendeeId(randomUUID())
                     .withPersonId(randomUUID())
@@ -473,7 +452,7 @@ public class TestTemplates {
         private AddProsecutionCounselCommandTemplates() {
         }
 
-        public static AddProsecutionCounselCommand addProsecutionCounselCommandTemplate(UUID hearingId) {
+        public static AddProsecutionCounselCommand addProsecutionCounselCommandTemplate(final UUID hearingId) {
             return AddProsecutionCounselCommand.builder()
                     .withAttendeeId(randomUUID())
                     .withPersonId(randomUUID())

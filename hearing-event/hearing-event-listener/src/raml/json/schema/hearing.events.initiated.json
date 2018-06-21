@@ -159,12 +159,6 @@
             "$ref": "#/definitions/defendantCase"
           }
         },
-        "witnesses": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/witness"
-          }
-        },
         "offences": {
           "type": "array",
           "items": {
@@ -178,108 +172,6 @@
         "firstName",
         "lastName",
         "offences"
-      ]
-    },
-    "witness": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/uuid"
-        },
-        "caseId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "Prosecution",
-            "Defence"
-          ]
-        },
-        "classification": {
-          "type": "string",
-          "enum": [
-            "Expert",
-            "Professional",
-            "Unspecified"
-          ]
-        },
-        "personId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "title": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "firstName": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "lastName": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "dateOfBirth": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "nationality": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "gender": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "homeTelephone": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "workTelephone": {
-          "type": "string"
-        },
-        "mobile": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "fax": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "email": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "id",
-        "caseId",
-        "type",
-        "classification",
-        "personId"
       ]
     },
     "offence": {
