@@ -26,9 +26,9 @@ public class ResultingQueryServiceTest {
 
     private static final String REFERENCEDATA_GET_ALL_RESULT_DEFINITIONS = "referencedata.get-all-result-definitions";
 
-    private static final String REFERENCEDATA_RESULT_GET_ALL_DEFINITION_KEYWORD_SYNONYMS = "referencedata.result.get-all-definition-keyword-synonyms";
+    private static final String REFERENCEDATA_GET_ALL_RESULT_WORD_SYNONYMS = "referencedata.get-all-result-word-synonyms";
 
-    private static final String REFERENCEDATA_RESULT_GET_ALL_PROMPT_KEYWORD_SYNONYMS = "referencedata.result.get-all-prompt-keyword-synonyms";
+    private static final String REFERENCEDATA_RESULT_GET_ALL_PROMPT_KEYWORD_SYNONYMS = "referencedata.get-all-prompt-synonyms";
 
     @InjectMocks
     private ResultingQueryService resultingQueryService;
@@ -61,16 +61,16 @@ public class ResultingQueryServiceTest {
     public void shouldGetAllResultDefinitionSynonyms() {
         //Given
 
-        final JsonEnvelope command = createEnvelope(REFERENCEDATA_RESULT_GET_ALL_DEFINITION_KEYWORD_SYNONYMS,
+        final JsonEnvelope command = createEnvelope(REFERENCEDATA_GET_ALL_RESULT_WORD_SYNONYMS,
                 createObjectBuilder()
                         .build());
         when(requester.request(captor.capture())).thenReturn(null);
 
-        resultingQueryService.getAllDefinitionKeywordSynonyms(command);
+        resultingQueryService.getAllDefinitionWordSynonyms(command);
 
         final JsonEnvelope jsonEnvelope = captor.getValue();
 
-        assertThat(jsonEnvelope, new JsonEnvelopeMatcher().withMetadataOf(metadata().withName("referencedata.result.get-all-definition-keyword-synonyms")));
+        assertThat(jsonEnvelope, new JsonEnvelopeMatcher().withMetadataOf(metadata().withName("referencedata.get-all-result-word-synonyms")));
     }
 
     @Test

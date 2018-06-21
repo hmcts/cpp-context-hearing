@@ -40,7 +40,7 @@ public class ReadStoreResultLoaderTest {
     public void loadResultDefinition() throws Exception {
         given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
-                .willReturn(givenPayload("/referencedata.result.definitions.json"));
+                .willReturn(givenPayload("/referencedata.result-definitions.json"));
 
         final List<ResultDefinition> resultDefinitions = underTest.loadResultDefinition();
         assertThat(resultDefinitions, hasSize(4));
@@ -51,11 +51,11 @@ public class ReadStoreResultLoaderTest {
 
     @Test
     public void loadResultDefinitionSynonym() throws Exception {
-        given(resultingQueryService.getAllDefinitionKeywordSynonyms(jsonEnvelope)).willReturn(jsonEnvelope);
+        given(resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
-                .willReturn(givenPayload("/referencedata.result.definition-keyword-synonyms.json"));
+                .willReturn(givenPayload("/referencedata.result-word-synonyms.json"));
 
-        assertThat(underTest.loadResultDefinitionSynonym(), hasSize(1));
+        assertThat(underTest.loadResultDefinitionSynonym(), hasSize(3));
     }
 
 
@@ -63,7 +63,7 @@ public class ReadStoreResultLoaderTest {
     public void loadResultPromptSynonym() throws Exception {
         given(resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
-                .willReturn(givenPayload("/referencedata.result.prompt-keyword-synonyms.json"));
+                .willReturn(givenPayload("/referencedata.result-prompt-synonyms.json"));
 
         assertThat(underTest.loadResultPromptSynonym(), hasSize(2));
     }
@@ -74,8 +74,8 @@ public class ReadStoreResultLoaderTest {
         given(resultingQueryService.getAllFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
         given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
-                .willReturn(givenPayload("/referencedata.result.prompt-fixedlists.json"))
-                .willReturn(givenPayload("/referencedata.result.definitions.json"));
+                .willReturn(givenPayload("/referencedata.fixedlists.json"))
+                .willReturn(givenPayload("/referencedata.result-definitions.json"));
 
         //when
         final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt();
@@ -94,8 +94,8 @@ public class ReadStoreResultLoaderTest {
         given(resultingQueryService.getAllFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
         given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
-                .willReturn(givenPayload("/referencedata.result.prompt-fixedlists.json"))
-                .willReturn(givenPayload("/referencedata.result.definitions.json"));
+                .willReturn(givenPayload("/referencedata.fixedlists.json"))
+                .willReturn(givenPayload("/referencedata.result-definitions.json"));
 
         //when
         final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt();

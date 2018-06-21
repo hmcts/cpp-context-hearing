@@ -83,7 +83,7 @@ public class ReadStoreResultLoader implements ResultLoader {
     @Override
     public List<ResultDefinitionSynonym> loadResultDefinitionSynonym() {
         final List<ResultDefinitionSynonym> resultDefinitionSynonyms = newArrayList();
-        final JsonArray resultDefinitionSynonymsJson = resultingQueryService.getAllDefinitionKeywordSynonyms(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultDefinitionKeywordSynonyms");
+        final JsonArray resultDefinitionSynonymsJson = resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope).payloadAsJsonObject().getJsonArray("synonymCollection");
         resultDefinitionSynonymsJson.forEach(jsonValue -> {
             ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
             resultDefinitionSynonym.setWord(((JsonObject) jsonValue).getString("word").replaceAll(" ", "").trim().toLowerCase());

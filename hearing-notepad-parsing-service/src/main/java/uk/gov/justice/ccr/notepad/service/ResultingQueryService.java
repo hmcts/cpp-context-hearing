@@ -29,9 +29,9 @@ public class ResultingQueryService {
         return requester.request(requestEnvelope);
     }
 
-    public JsonEnvelope getAllDefinitionKeywordSynonyms(final JsonEnvelope envelope) {
+    public JsonEnvelope getAllDefinitionWordSynonyms(final JsonEnvelope envelope) {
 
-        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.result.get-all-definition-keyword-synonyms")
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-word-synonyms")
                 .apply(createObjectBuilder().build());
         return requester.request(requestEnvelope);
     }
