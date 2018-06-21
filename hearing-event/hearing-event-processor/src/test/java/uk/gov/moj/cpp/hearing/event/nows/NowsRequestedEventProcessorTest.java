@@ -7,6 +7,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -46,7 +47,6 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.fileservice.api.FileServiceException;
 import uk.gov.justice.services.fileservice.api.FileStorer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
 import uk.gov.moj.cpp.hearing.event.nows.service.DocmosisService;
 import uk.gov.moj.cpp.hearing.event.nows.service.UploadMaterialService;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.DocumentGenerationException;
@@ -158,12 +158,32 @@ public class NowsRequestedEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsRequested));
 
-        expectedException.expect(DocumentGenerationException.class);
         when(docmosisService.generateDocument(any(), any(), any())).thenThrow(new DocumentGenerationException());
         this.nowsRequestedEventProcessor.processNowsRequested(event);
 
-        verifyNoMoreInteractions(this.sender);
+        verify(this.sender,times(3)).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getAllValues().get(0), jsonEnvelope(
+                metadata().withName(NowsRequestedEventProcessor.HEARING_UPDATE_NOWS_MATERIAL_STATUS),
+                payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
+                        withJsonPath("$.materialId",
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+
+        assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
+                metadata().withName(NowsRequestedEventProcessor.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
+                payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
+                        withJsonPath("$.materialId",
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+
+        assertThat(envelopeArgumentCaptor.getAllValues().get(2), jsonEnvelope(
+                metadata().withName("public.hearing.events.nows-requested"),
+                payloadIsJson(allOf(withJsonPath("$.hearing.id", is(nowsRequested.getHearing().getId().toString())),
+                        withJsonPath("$.hearing.hearingType",
+                                is(nowsRequested.getHearing().getHearingType().toString()))))));
+
         verifyNoMoreInteractions(this.fileStorer);
+        verifyNoMoreInteractions(this.uploadMaterialService);
+
     }
 
     @Test
@@ -176,22 +196,43 @@ public class NowsRequestedEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsRequested));
 
-        expectedException.expect(FileUploadException.class);
         final byte[] bytesIn = new byte[2];
         when(docmosisService.generateDocument(any(), any(), any())).thenReturn(bytesIn);
         doThrow(new FileUploadException()).when(fileStorer).store(any(), any());
         this.nowsRequestedEventProcessor.processNowsRequested(event);
 
-        verifyNoMoreInteractions(this.sender);
         verify(this.fileStorer).store(jsonObjectArgumentCaptor.capture(), inputStreamArgumentCaptor.capture());
         assertThat(inputStreamArgumentCaptor.getValue().read(new byte[2]), is(bytesIn.length));
+
+
+        verify(this.sender,times(3)).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getAllValues().get(0), jsonEnvelope(
+                metadata().withName(NowsRequestedEventProcessor.HEARING_UPDATE_NOWS_MATERIAL_STATUS),
+                payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
+                        withJsonPath("$.materialId",
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+
+        assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
+                metadata().withName(NowsRequestedEventProcessor.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
+                payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
+                        withJsonPath("$.materialId",
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+
+        assertThat(envelopeArgumentCaptor.getAllValues().get(2), jsonEnvelope(
+                metadata().withName("public.hearing.events.nows-requested"),
+                payloadIsJson(allOf(withJsonPath("$.hearing.id", is(nowsRequested.getHearing().getId().toString())),
+                        withJsonPath("$.hearing.hearingType",
+                                is(nowsRequested.getHearing().getHearingType().toString()))))));
+
+        verifyNoMoreInteractions(this.uploadMaterialService);
     }
 
     @Test
     public void shouldRaiseAnPublicEventNowsMaterialStatusWasUpdated() {
 
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(),
-                UUID.randomUUID(), NowsMaterialStatusType.GENERATED);
+                UUID.randomUUID(), "generated");
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-material-status-updated").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsMaterialStatusUpdated));

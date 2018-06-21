@@ -26,7 +26,7 @@ import uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant;
 public class NowsMaterialStatusUpdateHearing implements JavaDelegate {
     public static final String HEARING_UPDATE_NOWS_MATERIAL_STATUS =
                     "hearing.command.update-nows-material-status";
-    public static final String GENERATED = "GENERATED";
+    public static final String generated = "generated";
     @Inject
     private Sender sender;
 
@@ -45,7 +45,7 @@ public class NowsMaterialStatusUpdateHearing implements JavaDelegate {
         final JsonObject payload= Json.createObjectBuilder()
                 .add(HEARING_ID,hearingId.toString())
                         .add(MATERIAL_ID, materialId)
-                .add("status", GENERATED).build();
+                .add("status", generated).build();
 
         final JsonEnvelope postRequestEnvelope = assembleEnvelopeWithPayloadAndMetaDetails(payload,
                         HEARING_UPDATE_NOWS_MATERIAL_STATUS, materialId, userId.toString());

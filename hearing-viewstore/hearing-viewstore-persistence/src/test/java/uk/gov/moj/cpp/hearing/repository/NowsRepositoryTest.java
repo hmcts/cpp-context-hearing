@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 
 import javax.inject.Inject;
@@ -56,7 +55,7 @@ public class NowsRepositoryTest {
         nowsMaterial = new NowsMaterial();
         nowsMaterial.setId(nowMaterialId);
         nowsMaterial.setNows(nows);
-        nowsMaterial.setStatus(NowsMaterialStatus.REQUESTED);
+        nowsMaterial.setStatus("requested");
         nowsMaterial.setUserGroups(Arrays.asList("LO", "GA"));
         nowsMaterial.setLanguage(language);
         nows.getMaterial().add(nowsMaterial);
@@ -79,7 +78,7 @@ public class NowsRepositoryTest {
         assertThat(nows.getNowsTypeId(), is(this.nowsTypeId));
 
         assertThat(nows.getMaterial().get(0).getId(), is(this.nowsMaterial.getId()));
-        assertThat(nows.getMaterial().get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
+        assertThat(nows.getMaterial().get(0).getStatus(), is("requested"));
         assertThat(nows.getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
         assertThat(nows.getMaterial().get(0).getLanguage(), is(language));
 
@@ -98,7 +97,7 @@ public class NowsRepositoryTest {
         assertThat(nows.get(0).getNowsTypeId(), is(this.nowsTypeId));
 
         assertThat(nows.get(0).getMaterial().get(0).getId(), is(this.nowsMaterial.getId()));
-        assertThat(nows.get(0).getMaterial().get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
+        assertThat(nows.get(0).getMaterial().get(0).getStatus(), is("requested"));
         assertThat(nows.get(0).getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
         assertThat(nows.get(0).getMaterial().get(0).getLanguage(), is(language));
 

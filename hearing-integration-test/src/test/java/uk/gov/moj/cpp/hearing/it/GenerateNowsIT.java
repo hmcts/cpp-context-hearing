@@ -35,11 +35,8 @@ import com.jayway.awaitility.Awaitility;
 
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 
-import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
 import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.utils.QueueUtil;
 import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
@@ -88,7 +85,7 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.nows[0].defendantId", is(hearing.getFirstDefendantId().toString())),
                                 withJsonPath("$.nows[0].nowsTypeId", is(nowsTypeId)),
                                 withJsonPath("$.nows[0].material[0].id", is(materialId)),
-                                withJsonPath("$.nows[0].material[0].status", is("Generated")),
+                                withJsonPath("$.nows[0].material[0].status", is("generated")),
                                 withJsonPath("$.nows[0].material[0].nowResult[0].sharedResultId", is(sharedResultId)),
                                 withJsonPath("$.nows[0].material[0].nowResult[0].sequence", is(1))
                         )));
@@ -131,7 +128,7 @@ public class GenerateNowsIT extends AbstractIT {
                         print(),
                         payload().isJson(allOf(withJsonPath("$.nows[0].id", is(nowsId)),
                                 withJsonPath("$.nows[0].material[0].id", is(materialId)),
-                                withJsonPath("$.nows[0].material[0].status", is("Requested")))));
+                                withJsonPath("$.nows[0].material[0].status", is("requested")))));
 
         final TestUtilities.EventListener nowsMaterialStatusUpdatedEventListener = listenFor("public.hearing.events.nows-material-status-updated")
                 .withFilter(isJson(withJsonPath("$.materialId", is(materialId))));
@@ -141,7 +138,7 @@ public class GenerateNowsIT extends AbstractIT {
                 .ofType("application/vnd.hearing.update-nows-material-status+json")
                 .withPayload(UpdateNowsMaterialStatusCommand.builder()
                         .withMaterialId(fromString(materialId))
-                        .withStatus(NowsMaterialStatusType.GENERATED)
+                        .withStatus("generated")
                         .build())
                 .executeSuccessfully();
 
@@ -151,7 +148,7 @@ public class GenerateNowsIT extends AbstractIT {
                         print(),
                         payload().isJson(allOf(withJsonPath("$.nows[0].id", is(nowsId)),
                                 withJsonPath("$.nows[0].material[0].id", is(materialId)),
-                                withJsonPath("$.nows[0].material[0].status", is("Generated")))));
+                                withJsonPath("$.nows[0].material[0].status", is("generated")))));
 
         nowsMaterialStatusUpdatedEventListener.waitFor();
     }

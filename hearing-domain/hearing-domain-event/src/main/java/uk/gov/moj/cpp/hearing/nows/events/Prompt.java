@@ -37,8 +37,6 @@ public class Prompt implements Serializable {
         private Builder() {
         }
 
-
-
         public Builder withLabel(String label) {
             this.label = label;
             return this;

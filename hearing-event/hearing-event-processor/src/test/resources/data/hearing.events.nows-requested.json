@@ -117,6 +117,152 @@
                 "endDate": "2017-08-01"
               }
             ]
+          },
+          {
+            "id": "af41dc35-6b80-4633-8c64-649fd1140630",
+            "urn": "URN678912",
+            "bailStatus": "in custody",
+            "custodyTimeLimitDate": "2018-01-30",
+            "offences": [
+              {
+                "id": "73bb9c02-b16b-46f1-b259-3cdd559a8b42",
+                "code": "OF61131",
+                "convictionDate": "2017-08-01",
+                "plea": {
+                  "id": "d83e6a66-d6e0-47b6-b98b-de297d8dc78d",
+                  "value": "NOT GUILTY",
+                  "date": "2017-02-02",
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "verdict": {
+                  "typeId": "a271dae9-6798-4eac-9e0e-af898014bcc8",
+                  "verdictDescription": "Not Guilty, guilty of a lesser or alternative offence",
+                  "verdictCategory": "GUILTY",
+                  "lesserOrAlternativeOffence": {
+                    "offenceTypeId": "694dad02-e03d-412e-98ff-2bd1b7b88f12",
+                    "code": "OF62222",
+                    "convictionDate": "2017-08-01",
+                    "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you did not have a ticket"
+                  },
+                  "numberOfSplitJurors": "9-1",
+                  "verdictDate": "2017-02-02",
+                  "numberOfJurors": 10,
+                  "unanimous": false,
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you were taking a ticket which had been issued for use by another person on terms that it is not transferable",
+                "startDate": "2016-06-21",
+                "endDate": "2017-08-01"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "405807c9-004c-4b75-9cfd-29757fd4fd78",
+        "person": {
+          "id": "ab546921-d839-4867-bcf9-b41db8ebc852",
+          "title": "Mr",
+          "firstName": "Sam",
+          "lastName": "Peter",
+          "dateOfBirth": "1980-07-15",
+          "nationality": "England",
+          "gender": "Male",
+          "homeTelephone": "02012345678",
+          "workTelephone": "02012345679",
+          "mobile": "07777777777",
+          "fax": "02011111111",
+          "email": "email@email.com",
+          "address": {
+            "addressId": "17c783c8-ff96-4c8c-9932-14c6280bc943",
+            "address1": "14 Tottenham Court Road",
+            "address2": "London",
+            "address3": "England",
+            "address4": "UK",
+            "postCode": "W1T 1JY"
+          }
+        },
+        "defenceOrganisation": "XYZ Solicitors",
+        "interpreter": {
+          "name": "Robert Carlyle",
+          "language": "English"
+        },
+        "cases": [
+          {
+            "id": "af52dc35-6b80-4633-8c64-649fd1140630",
+            "urn": "URN12345",
+            "bailStatus": "in custody",
+            "custodyTimeLimitDate": "2018-01-30",
+            "offences": [
+              {
+                "id": "73bb9c02-b16b-46f1-b259-3cdd559a8b42",
+                "code": "OF61131",
+                "convictionDate": "2017-08-01",
+                "plea": {
+                  "id": "d83e6a66-d6e0-47b6-b98b-de297d8dc78d",
+                  "value": "NOT GUILTY",
+                  "date": "2017-02-02",
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "verdict": {
+                  "typeId": "a271dae9-6798-4eac-9e0e-af898014bcc8",
+                  "verdictDescription": "Not Guilty, guilty of a lesser or alternative offence",
+                  "verdictCategory": "GUILTY",
+                  "lesserOrAlternativeOffence": {
+                    "offenceTypeId": "694dad02-e03d-412e-98ff-2bd1b7b88f12",
+                    "code": "OF62222",
+                    "convictionDate": "2017-08-01",
+                    "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you did not have a ticket"
+                  },
+                  "numberOfSplitJurors": "9-1",
+                  "verdictDate": "2017-02-02",
+                  "numberOfJurors": 10,
+                  "unanimous": false,
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you were taking a ticket which had been issued for use by another person on terms that it is not transferable",
+                "startDate": "2016-06-21",
+                "endDate": "2017-08-01"
+              }
+            ]
+          },
+          {
+            "id": "af41dc35-6b80-4633-8c64-649fd1140630",
+            "urn": "URN678912",
+            "bailStatus": "in custody",
+            "custodyTimeLimitDate": "2018-01-30",
+            "offences": [
+              {
+                "id": "73bb9c02-b16b-46f1-b259-3cdd559a8b42",
+                "code": "OF61131",
+                "convictionDate": "2017-08-01",
+                "plea": {
+                  "id": "d83e6a66-d6e0-47b6-b98b-de297d8dc78d",
+                  "value": "NOT GUILTY",
+                  "date": "2017-02-02",
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "verdict": {
+                  "typeId": "a271dae9-6798-4eac-9e0e-af898014bcc8",
+                  "verdictDescription": "Not Guilty, guilty of a lesser or alternative offence",
+                  "verdictCategory": "GUILTY",
+                  "lesserOrAlternativeOffence": {
+                    "offenceTypeId": "694dad02-e03d-412e-98ff-2bd1b7b88f12",
+                    "code": "OF62222",
+                    "convictionDate": "2017-08-01",
+                    "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you did not have a ticket"
+                  },
+                  "numberOfSplitJurors": "9-1",
+                  "verdictDate": "2017-02-02",
+                  "numberOfJurors": 10,
+                  "unanimous": false,
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you were taking a ticket which had been issued for use by another person on terms that it is not transferable",
+                "startDate": "2016-06-21",
+                "endDate": "2017-08-01"
+              }
+            ]
           }
         ]
       }
@@ -134,12 +280,12 @@
         "rank": 1,
         "prompts": [
           {
-            "label": "Imprisonment duration",
-            "value": "1 year 6 months"
+            "label": "Shared result CASE prompt 1 label",
+            "value": "Shared result CASE prompt 1 value"
           },
           {
-            "label": "Prison",
-            "value": "Wormwood Scrubs"
+            "label": "Shared result CASE prompt 2 label",
+            "value": "Shared result CASE prompt 2 value"
           }
         ]
       },
@@ -155,12 +301,12 @@
         "rank": 1,
         "prompts": [
           {
-            "label": "Imprisonment duration",
-            "value": "1 year 6 months"
+            "label": "Shared result DEFENDANT prompt 1 label",
+            "value": "Shared result DEFENDANT prompt 1 value"
           },
           {
-            "label": "Prison",
-            "value": "Wormwood Scrubs"
+            "label": "Shared result DEFENDANT prompt 2 label",
+            "value": "Shared result DEFENDANT prompt 2 value"
           }
         ]
       },
@@ -176,12 +322,12 @@
         "rank": 1,
         "prompts": [
           {
-            "label": "Imprisonment duration",
-            "value": "1 year 6 months"
+            "label": "Shared result OFFENCE prompt 1 label",
+            "value": "Shared result OFFENCE prompt 1 value"
           },
           {
-            "label": "Prison",
-            "value": "Wormwood Scrubs"
+            "label": "Shared result OFFENCE prompt 2 label",
+            "value": "Shared result OFFENCE prompt 2 value"
           }
         ]
       }
@@ -201,7 +347,7 @@
                 "sequence": 1,
                 "prompts": [
                   {
-                    "label": "Imprisonment duration"
+                    "label": "Shared result CASE prompt 1 label"
                   }
                 ]
 
@@ -211,7 +357,7 @@
                 "sequence": 2,
                 "prompts": [
                   {
-                    "label": "Imprisonment duration"
+                    "label": "Shared result DEFENDANT prompt 1 label"
                   }
                 ]
               },
@@ -220,7 +366,7 @@
                 "sequence": 3,
                 "prompts": [
                   {
-                    "label": "Imprisonment duration"
+                    "label": "Shared result OFFENCE prompt 1 label"
                   }
                 ]
               }

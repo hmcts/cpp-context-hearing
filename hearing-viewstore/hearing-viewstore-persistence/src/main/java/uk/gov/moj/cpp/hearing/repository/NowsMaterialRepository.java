@@ -10,7 +10,6 @@ import org.apache.deltaspike.data.api.QueryParam;
 import org.apache.deltaspike.data.api.Repository;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
 
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 @Repository
@@ -20,5 +19,5 @@ public abstract class NowsMaterialRepository extends AbstractEntityRepository<No
 
     @Modifying
     @Query("update NowsMaterial nm set nm.status = :status where nm.id = :materialId")
-    public abstract int updateStatus(@QueryParam("materialId") final UUID materialId, @QueryParam("status") final NowsMaterialStatus status);
+    public abstract int updateStatus(@QueryParam("materialId") final UUID materialId, @QueryParam("status") final String status);
 }

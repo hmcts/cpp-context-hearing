@@ -26,9 +26,8 @@ public class NowsMaterial {
     @Column(name = "id", nullable = false)
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private NowsMaterialStatus status;
+    private String status;
 
     @ElementCollection
     @CollectionTable(
@@ -58,11 +57,11 @@ public class NowsMaterial {
         this.id = id;
     }
 
-    public NowsMaterialStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(NowsMaterialStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
@@ -106,7 +105,7 @@ public class NowsMaterial {
     public static final class Builder {
         Nows nows;
         private UUID id;
-        private NowsMaterialStatus status;
+        private String status;
         private List<String> userGroups = new ArrayList<>();
         private List<NowsResult> nowResult = new ArrayList<>();
         private String language;
@@ -120,7 +119,7 @@ public class NowsMaterial {
             return this;
         }
 
-        public Builder withStatus(NowsMaterialStatus status) {
+        public Builder withStatus(String status) {
             this.status = status;
             return this;
         }

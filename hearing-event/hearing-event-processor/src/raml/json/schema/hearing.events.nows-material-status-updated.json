@@ -20,11 +20,7 @@
   ],
   "definitions":{
     "status":{
-      "type":"string",
-      "enum":[
-        "REQUESTED",
-        "GENERATED"
-      ]
+      "type":"string"
     },
     "uuidPattern":{
       "type":"string",

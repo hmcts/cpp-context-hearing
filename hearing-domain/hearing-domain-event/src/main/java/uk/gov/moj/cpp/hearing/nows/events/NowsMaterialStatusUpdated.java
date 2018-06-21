@@ -7,19 +7,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
 
 @Event("hearing.events.nows-material-status-updated")
 public final class NowsMaterialStatusUpdated {
 
     private final UUID hearingId;
     private final UUID materialId;
-    private final NowsMaterialStatusType status;
+    private final String status;
 
     @JsonCreator
     public NowsMaterialStatusUpdated(@JsonProperty(value = "hearingId", required = true) final UUID hearingId, 
             @JsonProperty(value = "materialId", required = true) final UUID materialId,
-            @JsonProperty(value = "status", required = true) final NowsMaterialStatusType status) {
+            @JsonProperty(value = "status", required = true) final String status) {
         this.hearingId = hearingId;
         this.materialId = materialId;
         this.status = status;
@@ -33,7 +32,7 @@ public final class NowsMaterialStatusUpdated {
         return materialId;
     }
 
-    public NowsMaterialStatusType getStatus() {
+    public String getStatus() {
         return status;
     }
 

@@ -40,7 +40,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
@@ -778,7 +777,7 @@ public class NewModelHearingAggregateTest {
     @Test
     public void should_raise_a_private_event_nows_generated() {
 
-        final NowsMaterialStatusUpdated expected = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), NowsMaterialStatusType.GENERATED);
+        final NowsMaterialStatusUpdated expected = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), "generated");
         final Stream<Object> stream = new NewModelHearingAggregate().nowsMaterialStatusUpdated(expected);
 
         assertThat(stream.findFirst().get(), is(expected));

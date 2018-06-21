@@ -132,7 +132,7 @@ public class HearingService {
     private List<Material> populateMaterial(List<NowsMaterial> nowsMaterials) {
         return nowsMaterials.stream().map(nowsMaterial -> Material.builder()
                 .withId(nowsMaterial.getId().toString())
-                .withStatus(nowsMaterial.getStatus().getDescription())
+                .withStatus(nowsMaterial.getStatus())
                 .withLanguage(nowsMaterial.getLanguage())
                 .withNowResult(populateNowResult(nowsMaterial.getNowResult()))
                 .withUserGroups(nowsMaterial.getUserGroups()).build() ).collect(toList());
