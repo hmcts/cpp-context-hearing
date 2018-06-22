@@ -1,9 +1,15 @@
 {
-  "resultDefinitionKeywordSynonyms":[
-	{
-	    "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
-	    "word": "xyz",
-		"synonym": "imp"
-	}
-  ]
+	"id": "3851776e-fd3d-46cf-bbd5-85d0a592457e",
+	"startDate": "2018-01-01",
+	"version": "2018-03-01T10:57:19.931Z",
+	"synonymCollection": [
+		{
+			"word": "Years",
+			"synonym": "y"
+		},
+		{
+			"word": "Months",
+			"synonym": "m"
+		}
+	]
 }
