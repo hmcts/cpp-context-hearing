@@ -527,7 +527,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
             }
             return source.getResultLines().stream()
                     .map( o -> uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ResultLine.builder()
-                            .withId(o.getId().toString())
+                            .withId(o.getId().getId().toString())
                             .withLastSharedDateTime(toDateTimeStringOrNull(o.getLastSharedDateTime()))
                             .build())
                     .collect(toList());
