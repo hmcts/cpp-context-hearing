@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
@@ -52,21 +53,24 @@ public final class ResultsShared implements Serializable {
 
     private final Map<UUID, Plea> pleas;
 
+    private final List<Variant> variantDirectory;
+
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus;
 
     @JsonCreator
     private ResultsShared(@JsonProperty("hearingId") final UUID hearingId,
-                            @JsonProperty("sharedTime") final ZonedDateTime sharedTime,
-                            @JsonProperty("courtClerk") final CourtClerk courtClerk,
-                            @JsonProperty("uncompletedResultLines") final List<UncompletedResultLine> uncompletedResultLines,
-                            @JsonProperty("completedResultLines") final List<CompletedResultLine> completedResultLines,
-                            @JsonProperty("hearing") final Hearing hearing,
-                            @JsonProperty("cases") final List<Case> cases,
-                            @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
-                            @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
-                            @JsonProperty("pleas") final Map<UUID, Plea> pleas,
-                            @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts,
-                            @JsonProperty("completedResultLinesStatus") final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
+                          @JsonProperty("sharedTime") final ZonedDateTime sharedTime,
+                          @JsonProperty("courtClerk") final CourtClerk courtClerk,
+                          @JsonProperty("uncompletedResultLines") final List<UncompletedResultLine> uncompletedResultLines,
+                          @JsonProperty("completedResultLines") final List<CompletedResultLine> completedResultLines,
+                          @JsonProperty("hearing") final Hearing hearing,
+                          @JsonProperty("cases") final List<Case> cases,
+                          @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
+                          @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
+                          @JsonProperty("pleas") final Map<UUID, Plea> pleas,
+                          @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts,
+                          @JsonProperty("variantDirectory") final List<Variant> variantDirectory,
+                          @JsonProperty("completedResultLinesStatus") final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.courtClerk = courtClerk;
@@ -78,6 +82,7 @@ public final class ResultsShared implements Serializable {
         this.defenceCounsels = ofNullable(defenceCounsels).orElseGet(HashMap::new);
         this.pleas = ofNullable(pleas).orElseGet(HashMap::new);
         this.verdicts = ofNullable(verdicts).orElseGet(HashMap::new);
+        this.variantDirectory = ofNullable(variantDirectory).orElseGet(ArrayList::new);
         this.completedResultLinesStatus = ofNullable(completedResultLinesStatus).orElseGet(HashMap::new);
     }
 
@@ -125,6 +130,10 @@ public final class ResultsShared implements Serializable {
         return completedResultLines;
     }
 
+    public List<Variant> getVariantDirectory() {
+        return variantDirectory;
+    }
+
     public Map<UUID, CompletedResultLineStatus> getCompletedResultLinesStatus() {
         return completedResultLinesStatus;
     }
@@ -133,6 +142,7 @@ public final class ResultsShared implements Serializable {
         return new Builder();
     }
 
+    @SuppressWarnings("pmd:BeanMembersShouldSerialize")
     public static final class Builder {
 
         private UUID hearingId;
@@ -156,6 +166,8 @@ public final class ResultsShared implements Serializable {
         private Map<UUID, VerdictUpsert> verdicts;
 
         private Map<UUID, Plea> pleas;
+
+        private List<Variant> variantDirectory;
 
         private Map<UUID, CompletedResultLineStatus> completedResultLinesStatus;
 
@@ -219,6 +231,11 @@ public final class ResultsShared implements Serializable {
             return this;
         }
 
+        public Builder withVariantDirectory(final List<Variant> variantDirectory) {
+            this.variantDirectory = variantDirectory;
+            return this;
+        }
+
         public ResultsShared build() {
             return new ResultsShared(
                     hearingId,
@@ -232,6 +249,7 @@ public final class ResultsShared implements Serializable {
                     defenceCounsels,
                     pleas,
                     verdicts,
+                    variantDirectory,
                     completedResultLinesStatus);
         }
     }

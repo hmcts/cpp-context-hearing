@@ -12,7 +12,7 @@ public class Now implements Serializable {
     private String nowsTypeId;
     private String nowsTemplateName;
     private String defendantId;
-    private List<Material> material = new ArrayList<Material>();
+    private List<Material> materials = new ArrayList<Material>();
 
     public String getNowsTypeId() {
         return nowsTypeId;
@@ -46,11 +46,11 @@ public class Now implements Serializable {
         this.defendantId = defendantId;
     }
 
-    public List<Material> getMaterial() {
-        return material;
+    public List<Material> getMaterials() {
+        return materials;
     }
 
-    public void setMaterial(List<Material> material) {
-        this.material = material;
+    public void setMaterials(List<Material> materials) {
+        this.materials = materials;
     }
 }

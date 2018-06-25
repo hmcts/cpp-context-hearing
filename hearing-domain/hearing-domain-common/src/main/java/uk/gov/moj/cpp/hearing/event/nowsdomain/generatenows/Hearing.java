@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,7 +63,7 @@ public class Hearing implements Serializable {
     }
 
     public Hearing setHearingDates(List<String> hearingDates) {
-        this.hearingDates = hearingDates;
+        this.hearingDates = new ArrayList<>(hearingDates);
         return this;
     }
 
@@ -80,7 +81,7 @@ public class Hearing implements Serializable {
     }
 
     public Hearing setAttendees(List<Attendees> attendees) {
-        this.attendees = attendees;
+        this.attendees = new ArrayList<>(attendees);
         return this;
     }
 
@@ -89,7 +90,7 @@ public class Hearing implements Serializable {
     }
 
     public Hearing setDefendants(List<Defendants> defendants) {
-        this.defendants = defendants;
+        this.defendants = new ArrayList<>(defendants);
         return this;
     }
 
@@ -98,7 +99,7 @@ public class Hearing implements Serializable {
     }
 
     public Hearing setSharedResultLines(List<SharedResultLines> sharedResultLines) {
-        this.sharedResultLines = sharedResultLines;
+        this.sharedResultLines = new ArrayList<>(sharedResultLines);
         return this;
     }
 
@@ -107,7 +108,7 @@ public class Hearing implements Serializable {
     }
 
     public Hearing setNows(List<Nows> nows) {
-        this.nows = nows;
+        this.nows = new ArrayList<>(nows);
         return this;
     }
 
@@ -116,7 +117,7 @@ public class Hearing implements Serializable {
     }
 
     public Hearing setNowTypes(List<NowTypes> nowTypes) {
-        this.nowTypes = nowTypes;
+        this.nowTypes = new ArrayList<>(nowTypes);
         return this;
     }
 }

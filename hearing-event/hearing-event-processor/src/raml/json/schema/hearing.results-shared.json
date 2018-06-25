@@ -43,6 +43,12 @@
     },
     "verdicts":{
       "$ref":"#/definitions/verdicts"
+    },
+    "variantDirectory":{
+      "type":"array",
+      "items":{
+        "$ref":"#/definitions/variant"
+      }
     }
   },
   "required":[
@@ -630,6 +636,70 @@
           "type": "string"
         }
       }
+    },
+    "variantKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "defendantId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "nowsTypeId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "usergroups": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resultLineReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resultLineId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "lastSharedTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "variantValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "materialId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "resultLines": {
+          "type": "array",
+          "additionalProperties": false,
+          "items": {
+            "$ref": "#/definitions/resultLineReference"
+          }
+        }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/definitions/variantKey"
+        },
+        "value": {
+          "$ref": "#/definitions/variantValue"
+        }
+      }
     }
+
   }
 }

@@ -46,15 +46,46 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
+
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
+import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 @SuppressWarnings({"serial", "unchecked"})
 @RunWith(MockitoJUnitRunner.class)
@@ -90,6 +121,7 @@ public class ShareResultsCommandHandlerTest {
     private static InitiateHearingCommand initiateHearingCommand;
     private static ProsecutionCounselUpsert prosecutionCounselUpsert;
     private static DefenceCounselUpsert defenceCounselUpsert;
+    private static uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent nowsVariantsSavedEvent;
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
 
@@ -117,6 +149,13 @@ public class ShareResultsCommandHandlerTest {
                 .withStatus(STRING.next())
                 .withDefendantIds(asList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
                 .build();
+        nowsVariantsSavedEvent = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
+                .setHearingId(initiateHearingCommand.getHearing().getId())
+                .setVariants(Arrays.asList(
+                        Variant.variant()
+                                .setKey(VariantKey.variantKey().setDefendantId(UUID.randomUUID()))
+                                .setValue(VariantValue.variantValue())
+                ));
     }
 
     @Before
@@ -167,6 +206,7 @@ public class ShareResultsCommandHandlerTest {
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
             apply(Stream.of(prosecutionCounselUpsert));
             apply(Stream.of(defenceCounselUpsert));
+            apply(Stream.of(nowsVariantsSavedEvent));
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, NewModelHearingAggregate.class)).thenReturn(aggregate);
@@ -259,7 +299,9 @@ public class ShareResultsCommandHandlerTest {
                                 withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".firstName", is(defenceCounselUpsert.getFirstName())),
                                 withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".lastName", is(defenceCounselUpsert.getLastName())),
                                 withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".status", is(defenceCounselUpsert.getStatus())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".defendantIds.[0]", is(defenceCounselUpsert.getDefendantIds().get(0).toString()))
+                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".defendantIds.[0]", is(defenceCounselUpsert.getDefendantIds().get(0).toString())),
+                                withJsonPath("$.variantDirectory[0].key.defendantId", is(nowsVariantsSavedEvent.getVariants().get(0).getKey().getDefendantId().toString()))
+
                         ))
                 )
         ));

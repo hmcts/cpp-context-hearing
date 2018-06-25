@@ -338,7 +338,7 @@
         "nowsTypeId" :"7005807c9-004c-4b75-9cfd-29757fd4fd78",
         "nowsTemplateName": "SingleTemplate",
         "defendantId": "3005807c9-004c-4b75-9cfd-29757fd4fd78",
-        "material": [
+        "materials": [
           {
             "id": "5d5807c9-004c-4b75-9cfd-29757fd4fd78",
             "nowResult": [

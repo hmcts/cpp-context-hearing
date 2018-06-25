@@ -192,7 +192,7 @@
         "nowsTypeId" :"NOWTYPE_ID",
         "nowsTemplateName": "SingleTemplate",
         "defendantId": "DEFENDANT_ID",
-        "material": [
+        "materials": [
           {
             "id": "MATERIAL_ID",
             "nowResult": [

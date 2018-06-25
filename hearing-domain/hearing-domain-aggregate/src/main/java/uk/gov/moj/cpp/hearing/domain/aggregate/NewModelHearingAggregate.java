@@ -15,6 +15,10 @@ import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.nows.NowVariantUtil;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
@@ -35,6 +39,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
+import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -67,7 +72,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "pmd:BeanMembersShouldSerialize"})
 public class NewModelHearingAggregate implements Aggregate {
 
     private static final String HEARING_EVENTS = "hearingEvents";
@@ -88,6 +93,8 @@ public class NewModelHearingAggregate implements Aggregate {
     private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
     private List<Case> cases;
     private Hearing hearing;
+    private final Map<VariantKeyHolder, Variant> variantDirectory = new HashMap<>();
+
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
     private final Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
 
@@ -140,7 +147,13 @@ public class NewModelHearingAggregate implements Aggregate {
                 }),
 
                 when(ResultLinesStatusUpdated.class).apply(resultLinesStatusUpdated -> {
-                    computeCompletedResultLinesStatus(resultLinesStatusUpdated);
+                    resultLinesStatusUpdated.getSharedResultLines().forEach(sharedResultLineId -> {
+                        completedResultLinesStatus.computeIfPresent(sharedResultLineId.getSharedResultLineId(), (k, sl) -> {
+                            sl.setCourtClerk(resultLinesStatusUpdated.getCourtClerk());
+                            sl.setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime());
+                            return sl;
+                        });
+                    });
                 }),
 
                 when(PleaUpsert.class).apply(pleaUpsert -> {
@@ -241,18 +254,13 @@ public class NewModelHearingAggregate implements Aggregate {
                 when(HearingDetailChanged.class).apply(hearingDetailChanged -> {
                     doNothing();
                 }),
+                when(NowsVariantsSavedEvent.class).apply(nowsVariantsSavedEvent -> {
+                    nowsVariantsSavedEvent.getVariants().forEach(
+                            variant -> variantDirectory.put(new VariantKeyHolder(variant.getKey()), variant)
+                    );
+                }),
                 otherwiseDoNothing()
         );
-    }
-
-    private void computeCompletedResultLinesStatus(final ResultLinesStatusUpdated event) {
-        event.getSharedResultLines().forEach(sharedResultLineId -> {
-            completedResultLinesStatus.computeIfPresent(sharedResultLineId.getSharedResultLineId(), (k, sl) -> {
-                sl.setCourtClerk(event.getCourtClerk());
-                sl.setLastSharedDateTime(event.getLastSharedDateTime());
-                return sl;
-            });
-        });
     }
 
     public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
@@ -484,7 +492,6 @@ public class NewModelHearingAggregate implements Aggregate {
     }
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
-
         return apply(Stream.of(ResultsShared.builder()
                 .withHearingId(command.getHearingId())
                 .withSharedTime(sharedTime)
@@ -497,6 +504,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 .withDefenceCounsels(this.defenceCounsels)
                 .withPleas(this.pleas)
                 .withVerdicts(this.verdicts)
+                .withVariantDirectory(new ArrayList(this.variantDirectory.values()))
                 .withCompletedResultLinesStatus(completedResultLinesStatus)
                 .build()));
     }
@@ -596,6 +604,14 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.of(nowsRequested));
     }
 
+
+    public Stream<Object> saveNowsVariants(final SaveNowsVariantsCommand command) {
+        final NowsVariantsSavedEvent event = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
+                .setHearingId(command.getHearingId())
+                .setVariants(command.getVariants());
+        return apply(Stream.of(event));
+    }
+
     public Stream<Object> nowsMaterialStatusUpdated(final NowsMaterialStatusUpdated nowsRequested) {
         return apply(Stream.of(nowsRequested));
     }
@@ -657,4 +673,27 @@ public class NewModelHearingAggregate implements Aggregate {
             return hearingEventLogged;
         }
     }
+
+    private static class VariantKeyHolder implements Serializable {
+        private final VariantKey variantKey;
+
+        VariantKeyHolder(final VariantKey variantKey) {
+            this.variantKey = variantKey;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof VariantKeyHolder) {
+                return NowVariantUtil.areEqual(((VariantKeyHolder) o).variantKey, this.variantKey);
+            } else {
+                return super.equals(o);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return variantKey.hashCode();
+        }
+    }
+
 }

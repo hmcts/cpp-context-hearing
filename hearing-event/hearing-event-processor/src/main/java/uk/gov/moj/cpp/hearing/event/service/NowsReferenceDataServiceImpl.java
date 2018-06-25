@@ -11,8 +11,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 
+@SuppressWarnings("squid:S00112")
 public class NowsReferenceDataServiceImpl implements ReferenceDataService {
-
 
     private final NowsReferenceCache nowsReferenceCache;
     private JsonEnvelope context;
@@ -38,6 +38,20 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
             throw new RuntimeException(ex);
         }
         final Predicate<NowDefinition> matchNow = n -> n.getResultDefinitions().stream().anyMatch(rd -> rd.getPrimary() && rd.getId().equals(resultDefinitionId));
+        final Optional<NowDefinition> result = allNows.getNows().stream().filter(matchNow).findAny();
+        return result.orElse(null);
+    }
+
+    @Override
+    public NowDefinition getNowDefinitionById(final UUID id) {
+        AllNows allNows = null;
+        try {
+            nowsReferenceCache.setContext(context);
+            allNows = nowsReferenceCache.getAllNows();
+        } catch (ExecutionException ex) {
+            throw new RuntimeException(ex);
+        }
+        final Predicate<NowDefinition> matchNow = n -> n.getId().equals(id);
         final Optional<NowDefinition> result = allNows.getNows().stream().filter(matchNow).findAny();
         return result.orElse(null);
     }

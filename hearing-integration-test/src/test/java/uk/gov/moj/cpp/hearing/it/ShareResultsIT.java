@@ -89,9 +89,11 @@ public class ShareResultsIT extends AbstractIT {
         final UUID mandatoryPromptId = UUID.randomUUID();
         final String mandatoryPromptLabel = "label1";
         AllNows allNows = AllNows.allNows()
-                .setNows(asList(
-                        NowDefinition.now().setId(UUID.randomUUID())
-                                .setResultDefinitions(asList(
+                .setNows(singletonList(
+                        NowDefinition.now()
+                                .setId(UUID.randomUUID())
+                                .setResultDefinitions(singletonList(
+
                                         ResultDefinitions.resultDefinitions()
                                                 .setId(primaryResultDefinitionId)
                                                 .setMandatory(true)
@@ -103,15 +105,15 @@ public class ShareResultsIT extends AbstractIT {
 
         final String userGroup1 = "DefenseCounsel";
         AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
-                asList(ResultDefinition.resultDefinition()
+                singletonList(ResultDefinition.resultDefinition()
                         .setId(primaryResultDefinitionId)
-                        .setUserGroups(asList(userGroup1))
+                        .setUserGroups(singletonList(userGroup1))
                         .setPrompts(
-                                asList(
+                                singletonList(
                                         Prompt.prompt().setId(mandatoryPromptId)
                                                 .setMandatory(true)
                                                 .setLabel("label1")
-                                                .setUserGroups(asList(userGroup1))
+                                                .setUserGroups(singletonList(userGroup1))
                                 )
                         )
                 )

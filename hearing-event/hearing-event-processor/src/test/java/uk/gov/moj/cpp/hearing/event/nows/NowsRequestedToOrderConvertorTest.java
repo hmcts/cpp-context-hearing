@@ -24,7 +24,7 @@ public class NowsRequestedToOrderConvertorTest {
         List<NowsDocumentOrder> nowsDocumentOrders = NowsRequestedToOrderConvertor.convert(nowsRequested);
 
         NowsDocumentOrder nowsDocumentOrder = nowsDocumentOrders.get(0);
-        assertThat(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId(), is(nowsDocumentOrder.getMaterialId()));
+        assertThat(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId(), is(nowsDocumentOrder.getMaterialId()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getStaticText(), is(nowsDocumentOrder.getNowText()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getPriority(), is(nowsDocumentOrder.getPriority()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getDescription(), is(nowsDocumentOrder.getOrderName()));

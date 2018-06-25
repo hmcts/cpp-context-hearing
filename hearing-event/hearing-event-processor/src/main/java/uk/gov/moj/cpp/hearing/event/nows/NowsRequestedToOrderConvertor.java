@@ -48,7 +48,7 @@ public class NowsRequestedToOrderConvertor {
         List<NowsDocumentOrder> nowsDocumentOrders = new ArrayList<>();
         nowsRequested.getHearing().getNows().forEach(selectedNow -> {
             Optional<NowType> matchingNowType = getMatchingNowType(nowsRequested, selectedNow);
-            selectedNow.getMaterial().forEach(selectedNowMaterial -> {
+            selectedNow.getMaterials().forEach(selectedNowMaterial -> {
 
                 NowsDocumentOrder nowsDocumentOrder = NowsDocumentOrder.builder()
                         .withMaterialId(selectedNowMaterial.getId())

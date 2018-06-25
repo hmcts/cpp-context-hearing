@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,7 +62,7 @@ public class Defendants implements Serializable {
     }
 
     public Defendants setCases(List<Cases> cases) {
-        this.cases = cases;
+        this.cases = new ArrayList<>(cases);
         return this;
     }
 }

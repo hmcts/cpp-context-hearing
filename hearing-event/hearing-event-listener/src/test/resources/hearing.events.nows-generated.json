@@ -191,7 +191,7 @@
         "id": "45f4fb1e-ff6f-41c4-9f66-e88e01995c0d",
         "nowsTypeId" :"125807c9-004c-4b75-9cfd-29757fd4fd78",
         "defendantId": "2d1d2d8a-860c-479b-aa68-c4ad37850839",
-        "material": [
+        "materials": [
           {
             "id": "5d5807c9-004c-4b75-9cfd-29757fd4fd78",
             "nowResult": [

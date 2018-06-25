@@ -16,7 +16,11 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.nows.NowVariantUtil;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
+
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
@@ -46,7 +50,8 @@ public class GenerateNowsCommandHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             NowsRequested.class,
-            NowsMaterialStatusUpdated.class
+            NowsMaterialStatusUpdated.class,
+            NowsVariantsSavedEvent.class
     );
     @Mock
     private EventStream hearingEventStream;
@@ -93,6 +98,30 @@ public class GenerateNowsCommandHandlerTest {
     }
 
     @Test
+    public void saveVariantsTest() throws Throwable {
+
+        final SaveNowsVariantsCommand command = (new NowVariantUtil()).createSampleNowsVariantsCommand();
+
+        setupMockedEventStream(command.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
+
+        final JsonEnvelope commandEnvelope = envelopeFrom(metadataWithRandomUUID("hearing.command.save-nows-variants"), objectToJsonObjectConverter.convert(command));
+
+        this.generateNowsCommandHandler.saveNowsVariants(commandEnvelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(commandEnvelope)
+                                .withName("hearing.nows-variants-saved"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", equalTo(command.getHearingId().toString())),
+                                withJsonPath("$.variants.[0].key.defendantId", is(command.getVariants().get(0).getKey().getDefendantId().toString()))
+                        )))
+        ));
+
+    }
+
+
+    @Test
     public void nowsGeneratedTest() throws Throwable {
 
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), "generated");
@@ -114,6 +143,7 @@ public class GenerateNowsCommandHandlerTest {
                         )))
         ));
     }
+
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
         Class<T> clz = (Class<T>) aggregate.getClass();

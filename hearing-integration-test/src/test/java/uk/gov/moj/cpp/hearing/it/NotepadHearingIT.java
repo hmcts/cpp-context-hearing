@@ -31,6 +31,7 @@ public class NotepadHearingIT extends AbstractIT {
         poll(requestParams(url, mediaType).withHeader(USER_ID, USER_ID_VALUE).build())
                 .until(
                         status().is(OK),
+                        print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.originalText", is("RESTRAOP")) ,
                                 withJsonPath("$.parts[0].value", is("Restraining order for period")),

@@ -144,7 +144,7 @@
       "id" : "821513e7-9782-46c8-a9c8-1c3ffd828e08",
       "nowsTypeId" : "f4ea953a-efbf-4ffd-9e12-713f6110883a",
       "defendantId" : "43e811c1-954d-4255-96c6-71886dee9daf",
-      "material" : [ {
+      "materials" : [ {
         "id" : "8a0c4f5b-e6e5-49c6-a142-b14821606510",
         "nowResult" : [ {
           "sharedResultId" : "54cae487-9a7f-4881-9874-f364b889c00c",

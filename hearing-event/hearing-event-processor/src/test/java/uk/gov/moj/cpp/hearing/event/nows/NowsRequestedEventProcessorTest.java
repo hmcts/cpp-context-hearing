@@ -144,7 +144,7 @@ public class NowsRequestedEventProcessorTest {
         assertThat(inputStreamArgumentCaptor.getValue().read(new byte[2]), is(bytesIn.length));
         assertThat(uuidArgumentCaptor.getAllValues().get(0).toString(), is(USER_ID));
         assertThat(uuidArgumentCaptor.getAllValues().get(1).toString(), is(nowsRequested.getHearing().getId().toString()));
-        assertThat(uuidArgumentCaptor.getAllValues().get(2).toString(), is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()));
+        assertThat(uuidArgumentCaptor.getAllValues().get(2).toString(), is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()));
         assertThat(uuidArgumentCaptor.getAllValues().get(3).toString(), is(fileId.toString()));
     }
 
@@ -167,13 +167,13 @@ public class NowsRequestedEventProcessorTest {
                 metadata().withName(NowsRequestedEventProcessor.HEARING_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
                 metadata().withName(NowsRequestedEventProcessor.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(2), jsonEnvelope(
                 metadata().withName("public.hearing.events.nows-requested"),
@@ -211,13 +211,13 @@ public class NowsRequestedEventProcessorTest {
                 metadata().withName(NowsRequestedEventProcessor.HEARING_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
                 metadata().withName(NowsRequestedEventProcessor.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getId()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(2), jsonEnvelope(
                 metadata().withName("public.hearing.events.nows-requested"),

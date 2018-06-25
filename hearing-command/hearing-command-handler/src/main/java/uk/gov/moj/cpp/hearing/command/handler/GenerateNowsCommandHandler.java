@@ -7,6 +7,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
@@ -25,6 +26,13 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
         LOGGER.debug("hearing.command.generate-nows event received {}", envelope.payloadAsJsonObject());
         final NowsRequested nowsRequested = convertToObject(envelope, NowsRequested.class);
         aggregate(NewModelHearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelope, a -> a.generateNows(nowsRequested));
+    }
+
+    @Handles("hearing.command.save-nows-variants")
+    public void saveNowsVariants(final JsonEnvelope envelope) throws EventStreamException {
+        LOGGER.info("hearing.command.save-nows-variants event received {}", envelope.payloadAsJsonObject());
+        final SaveNowsVariantsCommand saveNowsVariantsCommand = convertToObject(envelope, SaveNowsVariantsCommand.class);
+        aggregate(NewModelHearingAggregate.class, saveNowsVariantsCommand.getHearingId(), envelope, a -> a.saveNowsVariants(saveNowsVariantsCommand));
     }
 
     @Handles("hearing.command.update-nows-material-status")

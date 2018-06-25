@@ -10,11 +10,9 @@ public class Material implements Serializable {
 
     private List<NowResult> nowResult;
 
-    private List<UserGroups> userGroups;
+    private boolean amended;
 
-    public static Material material() {
-        return new Material();
-    }
+    private List<UserGroups> userGroups;
 
     public UUID getId() {
         return this.id;
@@ -41,5 +39,18 @@ public class Material implements Serializable {
     public Material setUserGroups(List<UserGroups> userGroups) {
         this.userGroups = userGroups;
         return this;
+    }
+
+    public boolean isAmended() {
+        return amended;
+    }
+
+    public Material setAmended(boolean amended) {
+        this.amended = amended;
+        return this;
+    }
+
+    public static Material material() {
+        return new Material();
     }
 }

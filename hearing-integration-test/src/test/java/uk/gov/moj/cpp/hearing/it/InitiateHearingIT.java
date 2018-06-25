@@ -162,16 +162,16 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_withAPreviousPlea_NotGuilty_shouldNotHaveConvictionDate() throws Throwable {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
-        );
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        final UpdatePleaCommandHelper pleaOne = new UpdatePleaCommandHelper(
-                UseCases.updatePlea(requestSpec, hearingOne.getHearingId(), hearingOne.getFirstOffenceIdForFirstDefendant(),
-                        updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.NOT_GUILTY).build())
-        );
+        final UpdatePleaCommandHelper pleaOne = h(UseCases.updatePlea(
+                requestSpec,
+                hearingOne.getHearingId(),
+                hearingOne.getFirstOffenceIdForFirstDefendant(),
+                updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.NOT_GUILTY).build()
+        ));
 
-        final InitiateHearingCommandHelper hearingTwo = new InitiateHearingCommandHelper(
+        final InitiateHearingCommandHelper hearingTwo = h(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
                     InitiateHearingCommandHelper h = h(i);
 

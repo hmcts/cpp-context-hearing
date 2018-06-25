@@ -12,6 +12,7 @@ public class Material implements Serializable {
     private String language;
     private List<NowResult> nowResult;
     private List<MaterialUserGroup> userGroups = new ArrayList<MaterialUserGroup>();
+    private boolean amended;
 
     public String getId() {
         return id;
@@ -43,5 +44,13 @@ public class Material implements Serializable {
 
     public void setUserGroups(List<MaterialUserGroup> userGroups) {
         this.userGroups = userGroups;
+    }
+
+    public boolean isAmended() {
+        return amended;
+    }
+
+    public void setAmended(boolean amended) {
+        this.amended = amended;
     }
 }

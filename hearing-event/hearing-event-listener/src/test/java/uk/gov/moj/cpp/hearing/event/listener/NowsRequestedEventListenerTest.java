@@ -73,10 +73,10 @@ public class NowsRequestedEventListenerTest {
         nowsRequested.getHearing().getNows().get(0).setId(nowsId.toString());
         nowsRequested.getHearing().getNows().get(0).setNowsTypeId(nowsTypeId.toString());
         nowsRequested.getHearing().getNows().get(0).setNowsTemplateName(nowsTypeId.toString());
-        nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getNowResult().get(0).setSharedResultId(sharedResultId.toString());
-        nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).getNowResult().get(0).setSequence(1);
-        nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).setId(materialId.toString());
-        nowsRequested.getHearing().getNows().get(0).getMaterial().get(0).setLanguage(language);
+        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getNowResult().get(0).setSharedResultId(sharedResultId.toString());
+        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getNowResult().get(0).setSequence(1);
+        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).setId(materialId.toString());
+        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).setLanguage(language);
 
 
         final List<Nows> nowsList = new ArrayList<>();

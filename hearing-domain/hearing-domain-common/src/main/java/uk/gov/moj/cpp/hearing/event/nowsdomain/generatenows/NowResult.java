@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("squid:S2384")
 public class NowResult implements Serializable {
 
     private UUID sharedResultId;

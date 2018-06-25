@@ -48,7 +48,7 @@ public class NowsRequestedEventListener {
             Nows nows = Nows.builder().withNowsTypeId(typeId).withDefendantId(fromString(now.getDefendantId()))
                     .withHearingId(hearingId).withId(fromString(now.getId())).build();
 
-            now.getMaterial().forEach(material -> {
+            now.getMaterials().forEach(material -> {
                 List<String> stringList = material.getUserGroups().stream().map(materialUserGroup -> materialUserGroup.getGroup()).collect(Collectors.toList());
                 NowsMaterial nowsMaterial = NowsMaterial.builder().withUserGroups(stringList).withStatus("requested")
                         .withId(fromString(material.getId())).withLanguage(material.getLanguage()).withNows(nows).build();

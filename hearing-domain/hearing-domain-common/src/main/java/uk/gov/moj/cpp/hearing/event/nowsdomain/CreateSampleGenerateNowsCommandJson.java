@@ -242,7 +242,7 @@ public class CreateSampleGenerateNowsCommandJson {
                                                 .setNowsTypeId(nowsTypeId)
                                                 .setDefendantId(defendantId)
                                                 //.setNowsTemplateName("SingleTemplate")
-                                                .setMaterial(Arrays.asList(
+                                                .setMaterials(Arrays.asList(
                                                         Material.material()
                                                                 .setId(materialId)
                                                                 .setUserGroups(Arrays.asList(

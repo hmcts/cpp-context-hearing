@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.nows.events;
 import java.io.Serializable;
 import java.util.List;
 
-
+@SuppressWarnings("squid:S2384")
 public class NowResult implements Serializable {
 
     private final static long serialVersionUID = 6146686845103889010L;
@@ -38,6 +38,7 @@ public class NowResult implements Serializable {
     public static Builder builder() {
         return new Builder();
     }
+
     public static final class Builder {
         private String sharedResultId;
         private Integer sequence;
@@ -45,9 +46,7 @@ public class NowResult implements Serializable {
 
         private Builder() {
         }
-
-
-
+        
         public Builder withSharedResultId(String sharedResultId) {
             this.sharedResultId = sharedResultId;
             return this;
@@ -64,7 +63,7 @@ public class NowResult implements Serializable {
         }
 
         public NowResult build() {
-            NowResult nowResult = new NowResult();
+            final NowResult nowResult = new NowResult();
             nowResult.setSharedResultId(sharedResultId);
             nowResult.setSequence(sequence);
             nowResult.setPrompts(prompts);

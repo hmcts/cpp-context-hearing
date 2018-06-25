@@ -39,6 +39,7 @@ import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
@@ -140,24 +141,10 @@ public class TestTemplates {
 
         public static InitiateHearingCommand standardInitiateHearingTemplate() {
             final UUID caseId = randomUUID();
-            final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
             return InitiateHearingCommand.initiateHearingCommand()
                     .setCases(asList(caseTemplate(caseId)))
-                    .setHearing(Hearing.hearing()
-                            .setId(randomUUID())
-                            .setType(STRING.next())
-                            .setCourtCentreId(randomUUID())
-                            .setCourtCentreName(STRING.next())
-                            .setCourtRoomId(randomUUID())
-                            .setCourtRoomName(STRING.next())
-                            .setJudge(
-                                    Judge.judge()
-                                            .setId(randomUUID())
-                                            .setTitle(STRING.next())
-                                            .setFirstName(STRING.next())
-                                            .setLastName(STRING.next())
-                            )
-                            .setHearingDays(asList(startDateTime))
+                    .setHearing(
+                            hearingTemplate()
                             .setDefendants(asList(defendantTemplate(caseId)))
                     );
         }
@@ -168,9 +155,32 @@ public class TestTemplates {
                     .setUrn(STRING.next());
         }
 
-        public static Defendant defendantTemplate(final UUID caseId) {
-            return Defendant.defendant()
+        public static Hearing hearingTemplate(){
+            final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
+            return Hearing.hearing()
                     .setId(randomUUID())
+                    .setType(STRING.next())
+                    .setCourtCentreId(randomUUID())
+                    .setCourtCentreName(STRING.next())
+                    .setCourtRoomId(randomUUID())
+                    .setCourtRoomName(STRING.next())
+                    .setJudge(
+                            Judge.judge()
+                                    .setId(randomUUID())
+                                    .setTitle(STRING.next())
+                                    .setFirstName(STRING.next())
+                                    .setLastName(STRING.next())
+                    )
+                    .setHearingDays(asList(startDateTime));
+        }
+
+        public static Defendant defendantTemplate(final UUID caseId) {
+            return defendantTemplate(caseId, randomUUID(), randomUUID());
+        }
+
+        public static Defendant defendantTemplate(final UUID caseId, final UUID defendantId, final UUID offenceId) {
+            return Defendant.defendant()
+                    .setId(defendantId)
                     .setPersonId(randomUUID())
                     .setFirstName(STRING.next())
                     .setLastName(STRING.next())
@@ -187,7 +197,7 @@ public class TestTemplates {
                             defendantCaseTemplate(caseId)
                     ))
                     .setOffences(asList(
-                            offenceTemplate(caseId)
+                            offenceTemplate(caseId, offenceId)
                     ));
         }
 
@@ -207,9 +217,9 @@ public class TestTemplates {
                     .setCustodyTimeLimitDate(FUTURE_LOCAL_DATE.next());
         }
 
-        public static Offence offenceTemplate(final UUID caseId) {
+        public static Offence offenceTemplate(final UUID caseId, final UUID offenceId) {
             return Offence.offence()
-                    .setId(randomUUID())
+                    .setId(offenceId)
                     .setCaseId(caseId)
                     .setOffenceCode(STRING.next())
                     .setWording(STRING.next())
@@ -223,6 +233,9 @@ public class TestTemplates {
                     .setTitle(STRING.next());
         }
 
+        public static Offence offenceTemplate(final UUID caseId) {
+            return offenceTemplate(caseId, randomUUID());
+        }
 
         public static InitiateHearingCommand minimalInitiateHearingTemplate(
                 final UUID caseId, final UUID hearingId, final UUID... defendantIds) {
@@ -322,7 +335,7 @@ public class TestTemplates {
         return SaveDraftResultCommand.builder()
                 .withDefendantId(initiateHearingCommand.getHearing().getDefendants().get(0).getId())
                 .withOffenceId(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId())
-                .withTargetId(UUID.randomUUID())
+                .withTargetId(randomUUID())
                 .withDraftResult(STRING.next())
                 .build();
     }
@@ -349,11 +362,14 @@ public class TestTemplates {
             });
         }
 
-
         public static CompletedResultLine completedResultLineTemplate(UUID defendantId, UUID offenceId, UUID caseId, UUID resultLineId) {
+            return completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID());
+        }
+
+        public static CompletedResultLine completedResultLineTemplate(UUID defendantId, UUID offenceId, UUID caseId, UUID resultLineId, UUID resultDefinitionId) {
             return CompletedResultLine.builder()
                     .withId(resultLineId)
-                    .withResultDefinitionId(UUID.randomUUID())
+                    .withResultDefinitionId(resultDefinitionId)
                     .withDefendantId(defendantId)
                     .withOffenceId(offenceId)
                     .withCaseId(caseId)
@@ -361,12 +377,12 @@ public class TestTemplates {
                     .withResultLabel(STRING.next())
                     .withResultPrompts(asList(
                             ResultPrompt.builder()
-                                    .withId(UUID.randomUUID())
+                                    .withId(randomUUID())
                                     .withLabel(STRING.next())
                                     .withValue(STRING.next())
                                     .build(),
                             ResultPrompt.builder()
-                                    .withId(UUID.randomUUID())
+                                    .withId(randomUUID())
                                     .withLabel(STRING.next())
                                     .withValue(STRING.next())
                                     .build()))
@@ -375,11 +391,30 @@ public class TestTemplates {
 
         public static UncompletedResultLine uncompletedResultLineTemplate(final UUID defendantId) {
             return UncompletedResultLine.builder()
-                    .withId(UUID.randomUUID())
-                    .withResultDefinitionId(UUID.randomUUID())
+                    .withId(randomUUID())
+                    .withResultDefinitionId(randomUUID())
                     .withDefendantId(defendantId)
                     .build();
         }
+    }
+
+    public static class CompletedResultLineStatusTemplates {
+
+        private CompletedResultLineStatusTemplates(){}
+
+        public static CompletedResultLineStatus completedResultLineStatus(UUID resultLineId){
+            final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
+            return CompletedResultLineStatus.builder()
+                    .withId(resultLineId)
+                    .withLastSharedDateTime(startDateTime)
+                    .withCourtClerk(CourtClerk.builder()
+                            .withId(randomUUID())
+                            .withFirstName(STRING.next())
+                            .withLastName(STRING.next())
+                            .build())
+                    .build();
+        }
+
     }
 
     public static class CaseDefendantDetailsChangedCommandTemplates {
