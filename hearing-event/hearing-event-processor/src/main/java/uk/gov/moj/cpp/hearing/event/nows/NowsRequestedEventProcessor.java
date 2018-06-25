@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -19,6 +18,7 @@ import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -26,21 +26,24 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.fromString;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.moj.cpp.hearing.activiti.common.JsonHelper.assembleEnvelopeWithPayloadAndMetaDetails;
+import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
+import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
 import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_CONTEXT;
 import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_IDENTIFIER;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class NowsRequestedEventProcessor {
 
+    public static final String FAILED = "FAILED";
+    public static final String HEARING_UPDATE_NOWS_MATERIAL_STATUS = "hearing.command.update-nows-material-status";
+    public static final String RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS = "resultinghmps.update-nows-material-status";
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedEventProcessor.class);
-
-
     private final Enveloper enveloper;
     private final Sender sender;
     private final DocmosisService docmosisService;
@@ -65,17 +68,24 @@ public class NowsRequestedEventProcessor {
     @Handles("hearing.events.nows-requested")
     public void processNowsRequested(final JsonEnvelope event) throws FileServiceException {
         final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        UUID userId=fromString(event.metadata().userId().orElseThrow(()->new RuntimeException("UserId missing from event.")));
+        UUID userId = fromString(event.metadata().userId().orElseThrow(() -> new RuntimeException("UserId missing from event.")));
 
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NowsRequested.class);
         final String hearingId = nowsRequested.getHearing().getId();
         LOGGER.info("Nows requested for hearing id {}", hearingId);
+
         final List<NowsDocumentOrder> nowsDocumentOrders = NowsRequestedToOrderConvertor.convert(nowsRequested);
         nowsDocumentOrders.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriority)).forEach(nowsDocumentOrder -> {
-            final byte[] resultOrderAsByteArray = docmosisService.generateDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), TEMPLATE_CONTEXT, TEMPLATE_IDENTIFIER);
-            final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));
-            addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
-                    userId, hearingId, fromString(nowsDocumentOrder.getMaterialId()));
+            try {
+                final byte[] resultOrderAsByteArray = docmosisService.generateDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), TEMPLATE_CONTEXT, TEMPLATE_IDENTIFIER);
+                final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));
+                addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
+                        userId, hearingId, fromString(nowsDocumentOrder.getMaterialId()));
+            } catch (RuntimeException e) {
+                LOGGER.error("Error while uploading document generation or upload ", e);
+                updateStatus(hearingId, nowsDocumentOrder.getMaterialId(), userId.toString(), FAILED, HEARING_UPDATE_NOWS_MATERIAL_STATUS);
+                updateStatus(hearingId, nowsDocumentOrder.getMaterialId(), userId.toString(), FAILED, RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS);
+            }
         });
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.events.nows-requested")
@@ -103,6 +113,19 @@ public class NowsRequestedEventProcessor {
             LOGGER.error("Error while uploading file {}", filename);
             throw new FileUploadException(e);
         }
+    }
+
+
+    private void updateStatus(String hearingId, String materialId, String userId, String status, String commandName) {
+        final JsonObject payload = Json.createObjectBuilder()
+                .add(HEARING_ID, hearingId)
+                .add(MATERIAL_ID, materialId)
+                .add("status", status).build();
+
+        final JsonEnvelope postRequestEnvelope = assembleEnvelopeWithPayloadAndMetaDetails(payload,
+                commandName, materialId, userId);
+
+        sender.send(postRequestEnvelope);
     }
 }
 

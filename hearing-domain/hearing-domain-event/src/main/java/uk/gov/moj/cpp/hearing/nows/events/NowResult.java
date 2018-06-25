@@ -34,4 +34,41 @@ public class NowResult implements Serializable {
     public void setSequence(Integer sequence) {
         this.sequence = sequence;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+    public static final class Builder {
+        private String sharedResultId;
+        private Integer sequence;
+        private List<Prompt> prompts;
+
+        private Builder() {
+        }
+
+
+
+        public Builder withSharedResultId(String sharedResultId) {
+            this.sharedResultId = sharedResultId;
+            return this;
+        }
+
+        public Builder withSequence(Integer sequence) {
+            this.sequence = sequence;
+            return this;
+        }
+
+        public Builder withPrompts(List<Prompt> prompts) {
+            this.prompts = prompts;
+            return this;
+        }
+
+        public NowResult build() {
+            NowResult nowResult = new NowResult();
+            nowResult.setSharedResultId(sharedResultId);
+            nowResult.setSequence(sequence);
+            nowResult.setPrompts(prompts);
+            return nowResult;
+        }
+    }
 }

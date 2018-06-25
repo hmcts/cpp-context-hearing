@@ -16,7 +16,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.nows.NowsMaterialStatusType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
@@ -96,7 +95,7 @@ public class GenerateNowsCommandHandlerTest {
     @Test
     public void nowsGeneratedTest() throws Throwable {
 
-        final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), NowsMaterialStatusType.GENERATED);
+        final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), "generated");
 
         setupMockedEventStream(nowsMaterialStatusUpdated.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
 
@@ -111,7 +110,7 @@ public class GenerateNowsCommandHandlerTest {
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearingId", equalTo(nowsMaterialStatusUpdated.getHearingId().toString())),
                                 withJsonPath("$.materialId", equalTo(nowsMaterialStatusUpdated.getMaterialId().toString())),
-                                withJsonPath("$.status", equalTo(nowsMaterialStatusUpdated.getStatus().name()))
+                                withJsonPath("$.status", equalTo(nowsMaterialStatusUpdated.getStatus()))
                         )))
         ));
     }

@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-import static uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus.valueOf;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -35,7 +34,7 @@ public class NowsGeneratedEventListener {
     @Handles("hearing.events.nows-material-status-updated")
     public void nowsGenerated(final JsonEnvelope event) {
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NowsMaterialStatusUpdated.class);
-        this.nowsMaterialRepository.updateStatus(nowsMaterialStatusUpdated.getMaterialId(), valueOf(nowsMaterialStatusUpdated.getStatus().name()));
+        this.nowsMaterialRepository.updateStatus(nowsMaterialStatusUpdated.getMaterialId(), nowsMaterialStatusUpdated.getStatus());
         LOGGER.info("{} event had updated the nows material viewstore successfully status", nowsMaterialStatusUpdated);
     }
 }

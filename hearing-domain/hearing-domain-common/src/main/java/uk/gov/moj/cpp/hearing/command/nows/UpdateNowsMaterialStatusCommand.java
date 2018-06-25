@@ -8,11 +8,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UpdateNowsMaterialStatusCommand {
 
     private final UUID materialId;
-    private final NowsMaterialStatusType status;
+    private final String status;
 
     @JsonCreator
     protected UpdateNowsMaterialStatusCommand(@JsonProperty(value = "materialId", required = true) final UUID materialId, 
-            @JsonProperty(value = "status", required = true) final NowsMaterialStatusType status) {
+            @JsonProperty(value = "status", required = true) final String status) {
         this.materialId = materialId;
         this.status = status;
     }
@@ -21,7 +21,7 @@ public class UpdateNowsMaterialStatusCommand {
         return materialId;
     }
 
-    public NowsMaterialStatusType getStatus() {
+    public String getStatus() {
         return status;
     }
 
@@ -32,14 +32,14 @@ public class UpdateNowsMaterialStatusCommand {
     public static final class Builder {
 
         private UUID materialId;
-        private NowsMaterialStatusType status;
+        private String status;
 
         public Builder withMaterialId(final UUID materialId) {
             this.materialId = materialId;
             return this;
         }
 
-        public Builder withStatus(final NowsMaterialStatusType status) {
+        public Builder withStatus(final String status) {
             this.status = status;
             return this;
         }

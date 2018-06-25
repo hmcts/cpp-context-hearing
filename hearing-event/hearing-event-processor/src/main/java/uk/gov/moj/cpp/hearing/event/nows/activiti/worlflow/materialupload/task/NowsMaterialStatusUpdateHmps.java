@@ -23,7 +23,7 @@ import uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant;
 @Named
 public class NowsMaterialStatusUpdateHmps implements JavaDelegate {
     public static final String RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS = "resultinghmps.update-nows-material-status";
-    public static final String GENERATED = "generated";
+    public static final String generated = "generated";
     @Inject
     private Sender sender;
 
@@ -43,7 +43,7 @@ public class NowsMaterialStatusUpdateHmps implements JavaDelegate {
         final JsonObject payload= Json.createObjectBuilder()
                 .add("hearingId",hearingId.toString())
                         .add("materialId", materialId)
-                .add("status", GENERATED).build();
+                .add("status", generated).build();
 
 
         final JsonEnvelope postRequestEnvelope = assembleEnvelopeWithPayloadAndMetaDetails(payload,

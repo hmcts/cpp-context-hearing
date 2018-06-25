@@ -27,7 +27,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
@@ -262,7 +261,7 @@ public class HearingServiceTest {
         final NowsMaterial nowsMaterial = new NowsMaterial();
         nowsMaterial.setId(nowMaterialId);
         nowsMaterial.setNows(nows);
-        nowsMaterial.setStatus(NowsMaterialStatus.GENERATED);
+        nowsMaterial.setStatus("generated");
         nowsMaterial.setUserGroups(Arrays.asList("LO", "GA"));
         nowsMaterial.setLanguage(language);
         nows.getMaterial().add(nowsMaterial);
@@ -282,7 +281,7 @@ public class HearingServiceTest {
         assertThat(response.getNows().get(0).getDefendantId(), is(defendantId.toString()));
         assertThat(response.getNows().get(0).getNowsTypeId(), is(nowsTypeId.toString()));
         assertThat(response.getNows().get(0).getMaterial().get(0).getId(), is(nowsMaterial.getId().toString()));
-        assertThat(response.getNows().get(0).getMaterial().get(0).getStatus(), is(NowsMaterialStatus.GENERATED.getDescription()));
+        assertThat(response.getNows().get(0).getMaterial().get(0).getStatus(), is("generated"));
         assertThat(response.getNows().get(0).getMaterial().get(0).getLanguage(), is(language));
         assertThat(response.getNows().get(0).getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId.toString()));
         assertThat(response.getNows().get(0).getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
@@ -310,7 +309,7 @@ public class HearingServiceTest {
         final NowsMaterial nowsMaterial = new NowsMaterial();
         nowsMaterial.setId(nowMaterialId);
         nowsMaterial.setNows(nows);
-        nowsMaterial.setStatus(NowsMaterialStatus.GENERATED);
+        nowsMaterial.setStatus("generated");
         nowsMaterial.setUserGroups(Arrays.asList("Lx", "GA"));
         nowsMaterial.setLanguage(language);
         nows.getMaterial().add(nowsMaterial);

@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.repository;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus.GENERATED;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -18,7 +17,6 @@ import org.junit.runner.RunWith;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 
 @SuppressWarnings("CdiInjectionPointsInspection")
@@ -47,7 +45,7 @@ public class NowsMaterialRepositoryTest {
             .withNowsTypeId(nowsTypeId)
             .withMaterial(Arrays.asList(NowsMaterial.builder()
                     .withId(materialId)
-                    .withStatus(NowsMaterialStatus.REQUESTED)
+                    .withStatus("requested")
                     .withUserGroups(Arrays.asList("LO", "GA"))
                     .withLanguage(language)
                     .withNowResult(Arrays.asList(NowsResult.builder()
@@ -66,13 +64,13 @@ public class NowsMaterialRepositoryTest {
 
     @Test
     public void shouldUpdateNowsMaterialStatusToGenerated() {
-        final int result = this.nowsMaterialRepository.updateStatus(materialId, GENERATED);
+        final int result = this.nowsMaterialRepository.updateStatus(materialId, "generated");
         assertThat(result, is(1));
     }
 
     @Test
     public void shouldNotUpdateNowsMaterialStatusToGenerated() {
-        final int result = this.nowsMaterialRepository.updateStatus(randomUUID(), GENERATED);
+        final int result = this.nowsMaterialRepository.updateStatus(randomUUID(), "generated");
         assertThat(result, is(0));
     }
 }

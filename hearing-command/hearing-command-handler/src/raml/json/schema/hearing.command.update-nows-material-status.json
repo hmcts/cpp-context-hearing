@@ -22,8 +22,9 @@
     "status":{
       "type":"string",
       "enum":[
-        "REQUESTED",
-        "GENERATED"
+        "requested",
+        "generated",
+        "failed"
       ]
     },
     "uuidPattern":{

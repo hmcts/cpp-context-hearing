@@ -8,7 +8,6 @@ import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 
 import javax.inject.Inject;
@@ -51,7 +50,7 @@ public class NowsRequestedEventListener {
 
             now.getMaterial().forEach(material -> {
                 List<String> stringList = material.getUserGroups().stream().map(materialUserGroup -> materialUserGroup.getGroup()).collect(Collectors.toList());
-                NowsMaterial nowsMaterial = NowsMaterial.builder().withUserGroups(stringList).withStatus(NowsMaterialStatus.REQUESTED)
+                NowsMaterial nowsMaterial = NowsMaterial.builder().withUserGroups(stringList).withStatus("requested")
                         .withId(fromString(material.getId())).withLanguage(material.getLanguage()).withNows(nows).build();
 
                 material.getNowResult().forEach(result -> {

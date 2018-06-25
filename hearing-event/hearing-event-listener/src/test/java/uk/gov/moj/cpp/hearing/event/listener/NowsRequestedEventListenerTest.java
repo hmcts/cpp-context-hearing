@@ -16,7 +16,6 @@ import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterialStatus;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -102,7 +101,7 @@ public class NowsRequestedEventListenerTest {
         assertThat(nowsMaterialArgumentCaptor.getValue().getDefendantId(), is(defendantId));
         assertThat(nowsMaterialArgumentCaptor.getValue().getNowsTypeId(), is(nowsTypeId));
         assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getId(), is(nowsMaterial.getId()));
-        assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getStatus(), is(NowsMaterialStatus.REQUESTED));
+        assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getStatus(), is("requested"));
         assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getLanguage(), is(language));
         assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
         assertThat(nowsMaterialArgumentCaptor.getValue().getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
