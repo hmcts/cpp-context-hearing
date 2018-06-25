@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
@@ -274,8 +275,8 @@ public class PublishResultsEventProcessor {
                                                 .setVerdictCategory(v.getCategory())
                                                 .setEnteredHearingId(v.getHearingId())
                                                 .setNumberOfJurors(v.getNumberOfJurors())
-                                                .setNumberOfSplitJurors(String.format("%s-%s",
-                                                        v.getNumberOfJurors() - v.getNumberOfSplitJurors(),
+                                                .setNumberOfSplitJurors(String.format("%s-%s", (nonNull(v.getNumberOfJurors()) && nonNull(v.getNumberOfSplitJurors())) ?
+                                                        v.getNumberOfJurors() - v.getNumberOfSplitJurors() : null,
                                                         v.getNumberOfSplitJurors()
                                                 ))
                                                 // guilty of lesser offence.
