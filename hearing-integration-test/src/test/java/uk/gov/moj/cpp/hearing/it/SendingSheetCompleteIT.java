@@ -81,9 +81,9 @@ public class SendingSheetCompleteIT extends AbstractIT {
 
         UseCases.initiateHearing(requestSpec, hearingOne.it());
 
-        final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingOne.getHearingId().toString());
+        final String hearingDetailsQueryURL = getURL("hearing.get.hearing", hearingOne.getHearingId().toString());
 
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing+json"))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),

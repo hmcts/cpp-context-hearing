@@ -25,7 +25,7 @@
           "caseAttributes": {
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "string"
             }
           },
           "alterable": {

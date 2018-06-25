@@ -78,7 +78,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
 
         publicEventTopic.waitFor();
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearing.getId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
@@ -129,7 +129,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
 
         publicEventTopic.waitFor();
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
@@ -175,7 +175,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
 
         publicEventTopic.waitFor();
 
-        poll(requestParams(getURL("hearing.get.hearing.v2", hearing.getId()), "application/vnd.hearing.get.hearing.v2+json")
+        poll(requestParams(getURL("hearing.get.hearing", hearing.getId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),

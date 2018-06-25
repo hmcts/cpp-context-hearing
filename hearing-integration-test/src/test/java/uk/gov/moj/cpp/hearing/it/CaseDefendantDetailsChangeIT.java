@@ -9,11 +9,8 @@ import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
-import uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates;
 
 import javax.json.JsonObject;
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -24,12 +21,11 @@ import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
@@ -74,13 +70,8 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                 jsonObject,
                 metadataOf(caseDefendantDetails.getDefendants().get(0).getId(), eventName).withUserId(randomUUID().toString()).build());
 
-        final String queryAPIEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearing.getId());
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-
-        final String responseType = "application/vnd.hearing.get.hearing.v2+json";
-
-        poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        poll(requestParams(getURL("hearing.get.hearing", hearing.getId()), "application/vnd.hearing.get.hearing+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

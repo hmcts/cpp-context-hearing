@@ -14,22 +14,17 @@ public class HearingQueryApi {
     @Inject
     private Requester requester;
 
-    @Handles("hearing.get.hearings-by-date.v2")
-    public JsonEnvelope findHearingsByDateV2(final JsonEnvelope query) {
+    @Handles("hearing.get.hearings-by-date")
+    public JsonEnvelope findHearingsByDate(final JsonEnvelope query) {
         return this.requester.request(query);
     }
 
-    @Handles("hearing.get.hearing.v2")
-    public JsonEnvelope findHearingV2(final JsonEnvelope query) {
+    @Handles("hearing.get.hearing")
+    public JsonEnvelope findHearing(final JsonEnvelope query) {
         return this.requester.request(query);
     }
 
     @Handles("hearing.get-hearing-event-definitions")
-    public JsonEnvelope getHearingEventDefinitions(final JsonEnvelope query) {
-        return this.requester.request(query);
-    }
-
-    @Handles("hearing.get-hearing-event-definitions.v2")
     public JsonEnvelope getHearingEventDefinitionsVersionTwo(final JsonEnvelope query) {
         return this.requester.request(query);
     }

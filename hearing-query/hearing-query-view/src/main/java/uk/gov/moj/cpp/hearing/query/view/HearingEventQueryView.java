@@ -32,7 +32,6 @@ public class HearingEventQueryView {
 
     private static final String FIELD_COUNSEL_ID = "counselId";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
-    private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO = "hearing.get-hearing-event-definitions.v2";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
 
@@ -71,26 +70,12 @@ public class HearingEventQueryView {
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
 
 
-    @Handles("hearing.get-hearing-event-definitions.v2")
+    @Handles("hearing.get-hearing-event-definitions")
     public JsonEnvelope getHearingEventDefinitionsVersionTwo(final JsonEnvelope query) {
         final List<HearingEventDefinition> hearingEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
         final JsonArrayBuilder eventDefinitionsJsonArrayBuilder = createArrayBuilder();
 
         hearingEventDefinitions.forEach(eventDefinition -> eventDefinitionsJsonArrayBuilder.add(prepareEventDefinitionJsonObjectVersionTwo(eventDefinition)));
-
-        return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_DEFINITIONS_VERSION_TWO)
-                .apply(createObjectBuilder()
-                        .add(FIELD_HEARING_EVENT_DEFINITIONS, eventDefinitionsJsonArrayBuilder)
-                        .build());
-    }
-
-    @Handles("hearing.get-hearing-event-definitions")
-    public JsonEnvelope getHearingEventDefinitions(final JsonEnvelope query) {
-        final UUID hearingId = fromString(query.payloadAsJsonObject().getString(FIELD_HEARING_ID));
-        final List<HearingEventDefinition> hearingEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
-        final JsonArrayBuilder eventDefinitionsJsonArrayBuilder = createArrayBuilder();
-
-        hearingEventDefinitions.forEach(eventDefinition -> eventDefinitionsJsonArrayBuilder.add(prepareEventDefinitionJsonObject(hearingId, eventDefinition)));
 
         return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_DEFINITIONS)
                 .apply(createObjectBuilder()

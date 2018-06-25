@@ -3,7 +3,7 @@ title: Hearing Query view
 baseUri: http://localhost:8080/hearing-query-view/query/view/rest/hearing
 protocols: [ HTTP, HTTPS ]
 
-/hearings/{hearingId}/event-definitions:
+/event-definitions:
     get:
       description: |
         ...
@@ -18,22 +18,6 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.hearing-event-definitions+json:
                     example:  !include json/hearing.hearing-event-definitions.json
                     schema:   !include json/schema/hearing.get-hearing-event-definitions.json
-
-/event-definitions:
-    get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.hearing-event-definitions.v2+json
-            name: hearing.get-hearing-event-definitions.v2
-        ...
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.hearing-event-definitions.v2+json:
-                    example:  !include json/hearing.hearing-event-definitions.v2.json
-                    schema:   !include json/schema/hearing.get-hearing-event-definitions.v2.json
 
 
 /hearings/{hearingId}/event-definitions/{hearingEventDefinitionId}:
@@ -101,7 +85,7 @@ protocols: [ HTTP, HTTPS ]
 
 
 
-/v2/hearings/{hearingId}:
+/hearings/{hearingId}:
   uriParameters:
         hearingId:
           description: ID of hearing to get
@@ -110,8 +94,8 @@ protocols: [ HTTP, HTTPS ]
       description: |
         ...
         (mapping):
-            responseType: application/vnd.hearing.get.hearing.v2+json
-            name: hearing.get.hearing.v2
+            responseType: application/vnd.hearing.get.hearing+json
+            name: hearing.get.hearing
         (mapping):
             responseType: application/vnd.hearing.get.nows+json
             name: hearing.get.nows
@@ -120,20 +104,20 @@ protocols: [ HTTP, HTTPS ]
             200:
                 description: OK
                 body:
-                  application/vnd.hearing.get.hearing.v2+json:
-                    example:  !include json/hearing.get.hearing.v2.json
-                    schema:  !include  json/schema/hearing.get.hearing.v2.json
+                  application/vnd.hearing.get.hearing+json:
+                    example:  !include json/hearing.get.hearing.json
+                    schema:  !include  json/schema/hearing.get.hearing.json
                   application/vnd.hearing.get.nows+json:
                     example:  !include json/hearing.get.nows.json
                     schema:  !include  json/schema/hearing.get.nows.json
 
-/v2/hearings:
+/hearings:
    get:
       description: |
         ...
         (mapping):
-            responseType: application/vnd.hearing.get.hearings-by-date.v2+json
-            name: hearing.get.hearings-by-date.v2
+            responseType: application/vnd.hearing.get.hearings-by-date+json
+            name: hearing.get.hearings-by-date
         ...
       queryParameters:
         date:
@@ -145,9 +129,9 @@ protocols: [ HTTP, HTTPS ]
             200:
                 description: OK
                 body:
-                  application/vnd.hearing.get.hearings-by-date.v2+json:
-                    example:  !include json/hearing.get.hearings.v2.json
-                    schema:  !include  json/schema/hearing.get.hearings.v2.json
+                  application/vnd.hearing.get.hearings-by-date+json:
+                    example:  !include json/hearing.get.hearings.json
+                    schema:  !include  json/schema/hearing.get.hearings.json
 
 /search:
    get:

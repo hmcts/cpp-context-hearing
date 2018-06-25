@@ -58,32 +58,75 @@ public class AddWitnessIT extends AbstractIT {
                         })
                 ));
 
-        Hearing hearing = hearingOne.it().getHearing();
-
-        final String queryAPIEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingOne.getHearingId());
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-
-        final String responseType = "application/vnd.hearing.get.hearing.v2+json";
         final String witnessId = UUID.randomUUID().toString();
-        final String commandAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearing.getId().toString());
-        final TestUtilities.EventListener publicEventWitnessAdded =
-                listenFor("public.hearing.events.witness-added-updated")
-                        .withFilter(isJson(withJsonPath("$.witnessId", is(witnessId))));
 
-        assertAddWitnessSingleDefendant(hearingOne.it(), hearing,
-                hearingOne.getFirstDefendantId(),
-                url, responseType,
-                witnessId, commandAPIEndPoint, publicEventWitnessAdded);
+        final TestUtilities.EventListener publicEventWitnessAdded = listenFor("public.hearing.events.witness-added-updated")
+                .withFilter(isJson(withJsonPath("$.witnessId", is(witnessId))));
 
-        assertUpdateWitnessSingleDefendant(hearingOne.it(), hearing, hearingOne.getSecondDefendantId(),
-                url,
-                responseType,
-                witnessId, commandAPIEndPoint, publicEventWitnessAdded);
+        final JsonObject addWitness = createObjectBuilder()
+                .add("id", witnessId)
+                .add("hearingId", hearingOne.getHearingId().toString())
+                .add("type", TYPE)
+                .add("classification", CLASSIFICATION_PROFESSIONAL)
+                .add("title", TITLE_MR)
+                .add("firstName", FIRSTNAME)
+                .add("lastName", LASTNAME)
+                .add("defendants", createArrayBuilder()
+                        .add(createObjectBuilder()
+                                .add("defendantId", hearingOne.getFirstDefendantId().toString())
+                                .build()
+                        ).build())
+                .build();
+
+        final Response writeResponse = given().spec(requestSpec).and()
+                .contentType("application/vnd.hearing.add-update-witness+json")
+                .body(addWitness.toString())
+                .header(CPP_UID_HEADER)
+                .when()
+                .post(getURL("hearing.update-hearing", hearingOne.getHearingId()))
+                .then().extract().response();
+        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
+
+        publicEventWitnessAdded.waitFor();
+
+
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                                withJsonPath("$.hearingType", equalStr(hearingOne.it().getHearing(), "type")),
+                                withJsonPath("$.courtCentreName", equalStr(hearingOne.it().getHearing(), "courtCentreName")),
+                                withJsonPath("$.roomName", equalStr(hearingOne.it().getHearing(), "courtRoomName")),
+                                withJsonPath("$.roomId", equalStr(hearingOne.it().getHearing(), "courtRoomId")),
+                                withJsonPath("$.courtCentreId", equalStr(hearingOne.it().getHearing(), "courtCentreId")),
+                                withJsonPath("$.judge.id", equalStr(hearingOne.it().getHearing(), "judge.id")),
+                                withJsonPath("$.judge.title", equalStr(hearingOne.it().getHearing(), "judge.title")),
+                                withJsonPath("$.judge.firstName", equalStr(hearingOne.it().getHearing(), "judge.firstName")),
+                                withJsonPath("$.judge.lastName", equalStr(hearingOne.it().getHearing(), "judge.lastName")),
+                                withJsonPath("$.cases[0].caseId", is(hearingOne.getFirstCaseId().toString())),
+                                withJsonPath("$.cases[0].caseUrn", is(hearingOne.getFirstCaseUrn())),
+                                withJsonPath("$.defenceWitnesses[0].id", is(witnessId)),
+                                withJsonPath("$.defenceWitnesses[0].type", is(TYPE)),
+                                withJsonPath("$.defenceWitnesses[0].classification", is(CLASSIFICATION_PROFESSIONAL)),
+                                withJsonPath("$.defenceWitnesses[0].title", is(TITLE_MR)),
+                                withJsonPath("$.defenceWitnesses[0].firstName", is(FIRSTNAME)),
+                                withJsonPath("$.defenceWitnesses[0].lastName", is(LASTNAME)),
+                                withJsonPath("$.defenceWitnesses[0].defendants[0].defendantId", is(hearingOne.getFirstDefendantId().toString()))
+                        )));
+
+        assertUpdateWitnessSingleDefendant(hearingOne.it(),
+                hearingOne.getSecondDefendantId(),
+                getURL("hearing.get.hearing", hearingOne.getHearingId()),
+                "application/vnd.hearing.get.hearing+json",
+                witnessId,
+                getURL("hearing.update-hearing", hearingOne.getHearingId()),
+                publicEventWitnessAdded);
     }
 
     private void assertUpdateWitnessSingleDefendant(final InitiateHearingCommand initiateHearing,
-                                                    final Hearing hearing, final UUID defendantId,
+                                                    final UUID defendantId,
                                                     final String url,
                                                     final String responseType, final String witnessId,
                                                     final String commandAPIEndPoint,
@@ -91,7 +134,7 @@ public class AddWitnessIT extends AbstractIT {
         final String firstName = "Jane";
         final String lastName = "Jones";
         final JsonObject updatedWitness = createObjectBuilder().add("id", witnessId)
-                .add("hearingId", hearing.getId().toString()).add("type", TYPE)
+                .add("hearingId", initiateHearing.getHearing().getId().toString()).add("type", TYPE)
                 .add("classification", CLASSIFICATION_EXPERT).add("title", TITLE_MISS)
                 .add("firstName", firstName).add("lastName", lastName)
                 .add("defendants", createArrayBuilder().add(createObjectBuilder()
@@ -111,15 +154,15 @@ public class AddWitnessIT extends AbstractIT {
                         print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString())),
-                                withJsonPath("$.hearingType", equalStr(hearing, "type")),
-                                withJsonPath("$.courtCentreName", equalStr(hearing, "courtCentreName")),
-                                withJsonPath("$.roomName", equalStr(hearing, "courtRoomName")),
-                                withJsonPath("$.roomId", equalStr(hearing, "courtRoomId")),
-                                withJsonPath("$.courtCentreId", equalStr(hearing, "courtCentreId")),
-                                withJsonPath("$.judge.id", equalStr(hearing, "judge.id")),
-                                withJsonPath("$.judge.title", equalStr(hearing, "judge.title")),
-                                withJsonPath("$.judge.firstName", equalStr(hearing, "judge.firstName")),
-                                withJsonPath("$.judge.lastName", equalStr(hearing, "judge.lastName")),
+                                withJsonPath("$.hearingType", equalStr(initiateHearing.getHearing(), "type")),
+                                withJsonPath("$.courtCentreName", equalStr(initiateHearing.getHearing(), "courtCentreName")),
+                                withJsonPath("$.roomName", equalStr(initiateHearing.getHearing(), "courtRoomName")),
+                                withJsonPath("$.roomId", equalStr(initiateHearing.getHearing(), "courtRoomId")),
+                                withJsonPath("$.courtCentreId", equalStr(initiateHearing.getHearing(), "courtCentreId")),
+                                withJsonPath("$.judge.id", equalStr(initiateHearing.getHearing(), "judge.id")),
+                                withJsonPath("$.judge.title", equalStr(initiateHearing.getHearing(), "judge.title")),
+                                withJsonPath("$.judge.firstName", equalStr(initiateHearing.getHearing(), "judge.firstName")),
+                                withJsonPath("$.judge.lastName", equalStr(initiateHearing.getHearing(), "judge.lastName")),
                                 withJsonPath("$.cases[0].caseId", equalStr(initiateHearing, "cases[0].caseId")),
                                 withJsonPath("$.cases[0].caseUrn", equalStr(initiateHearing, "cases[0].urn")),
                                 withJsonPath("$.defenceWitnesses[0].id", is(witnessId.toString())),
@@ -132,60 +175,6 @@ public class AddWitnessIT extends AbstractIT {
                         )));
     }
 
-    private void assertAddWitnessSingleDefendant(final InitiateHearingCommand initiateHearing,
-                                                 final Hearing hearing, final UUID defendantId,
-                                                 final String url,
-                                                 final String responseType, final String witnessId,
-                                                 final String commandAPIEndPoint,
-                                                 final TestUtilities.EventListener publicEventWitnessAdded) {
-        final JsonObject addWitness = createObjectBuilder().add("id", witnessId)
-                .add("hearingId", hearing.getId().toString()).add("type", TYPE)
-                .add("classification", CLASSIFICATION_PROFESSIONAL).add("title", TITLE_MR)
-                .add("firstName", FIRSTNAME).add("lastName", LASTNAME)
-                .add("defendants",
-                        createArrayBuilder().add(createObjectBuilder()
-                                .add("defendantId",
-                                        defendantId.toString())
-                                .build()).build())
-                .build();
-
-        final Response writeResponse = given().spec(requestSpec).and()
-                .contentType("application/vnd.hearing.add-update-witness+json")
-                .body(addWitness.toString()).header(CPP_UID_HEADER).when().post(commandAPIEndPoint)
-                .then().extract().response();
-        assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
-        publicEventWitnessAdded.waitFor();
-
-
-        poll(requestParams(url, responseType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString())),
-                                withJsonPath("$.hearingType", equalStr(hearing, "type")),
-                                withJsonPath("$.courtCentreName", equalStr(hearing, "courtCentreName")),
-                                withJsonPath("$.roomName", equalStr(hearing, "courtRoomName")),
-                                withJsonPath("$.roomId", equalStr(hearing, "courtRoomId")),
-                                withJsonPath("$.courtCentreId", equalStr(hearing, "courtCentreId")),
-                                withJsonPath("$.judge.id", equalStr(hearing, "judge.id")),
-                                withJsonPath("$.judge.title", equalStr(hearing, "judge.title")),
-                                withJsonPath("$.judge.firstName", equalStr(hearing, "judge.firstName")),
-                                withJsonPath("$.judge.lastName", equalStr(hearing, "judge.lastName")),
-                                withJsonPath("$.cases[0].caseId", equalStr(initiateHearing, "cases[0].caseId")),
-                                withJsonPath("$.cases[0].caseUrn", equalStr(initiateHearing, "cases[0].urn")),
-                                withJsonPath("$.defenceWitnesses[0].id", is(witnessId.toString())),
-                                withJsonPath("$.defenceWitnesses[0].type", is(TYPE)),
-                                withJsonPath("$.defenceWitnesses[0].classification",
-                                        is(CLASSIFICATION_PROFESSIONAL)),
-                                withJsonPath("$.defenceWitnesses[0].title",
-                                        is(TITLE_MR)),
-                                withJsonPath("$.defenceWitnesses[0].firstName", is(FIRSTNAME)),
-                                withJsonPath("$.defenceWitnesses[0].lastName", is(LASTNAME)),
-                                withJsonPath("$.defenceWitnesses[0].defendants[0].defendantId",
-                                        is(defendantId
-                                                .toString()))
-                        )));
-    }
 
     @Test
     public void shouldEnrichHearingWithPastWitnessesTwoDefendantsOneWitness() {
@@ -234,8 +223,8 @@ public class AddWitnessIT extends AbstractIT {
         ));
 
         //I expect the new hearingTwo to have the witness information associated with each defendant.
-        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingTwo.getHearingId()),
-                "application/vnd.hearing.get.hearing.v2+json").withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingTwo.getHearingId()),
+                "application/vnd.hearing.get.hearing+json").withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -272,8 +261,8 @@ public class AddWitnessIT extends AbstractIT {
         ));
 
         //I expect the new hearingThree to have the witness information associated with only the one defendant.
-        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingThree.getHearingId()),
-                "application/vnd.hearing.get.hearing.v2+json").withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingThree.getHearingId()),
+                "application/vnd.hearing.get.hearing+json").withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -317,9 +306,10 @@ public class AddWitnessIT extends AbstractIT {
                         })
                 ));
 
-        poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing.v2"), hearingTwo.getHearingId()),
-                "application/vnd.hearing.get.hearing.v2+json").withHeader(CPP_UID_HEADER.getName(),
-                CPP_UID_HEADER.getValue()).build()).timeout(30, TimeUnit.SECONDS).until(
+        poll(requestParams(getURL("hearing.get.hearing", hearingTwo.getHearingId()),
+                "application/vnd.hearing.get.hearing+json").withHeader(CPP_UID_HEADER.getName(),
+                CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS).until(
                 status().is(OK), print(),
                 payload().isJson(allOf(withJsonPath("$.hearingId",
                         is(hearingTwo.getHearingId().toString())),
@@ -362,7 +352,6 @@ public class AddWitnessIT extends AbstractIT {
 
     private void invokeAddDefenceWitnessCommand(final UUID witnessId, final UUID hearingId,
                                                 final JsonObject addWitness) {
-        final String commandAPIEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.initiate-hearing"), hearingId.toString());
 
         final TestUtilities.EventListener publicEventWitnessAdded =
                 listenFor("public.hearing.events.witness-added-updated").withFilter(isJson(
@@ -371,7 +360,7 @@ public class AddWitnessIT extends AbstractIT {
         final Response writeResponse = given().spec(requestSpec).and()
                 .contentType("application/vnd.hearing.add-update-witness+json")
                 .body(addWitness.toString()).header(CPP_UID_HEADER).when()
-                .post(commandAPIEndPoint).then().extract().response();
+                .post(getURL("hearing.update-hearing", hearingId)).then().extract().response();
         assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));
 
         publicEventWitnessAdded.waitFor();

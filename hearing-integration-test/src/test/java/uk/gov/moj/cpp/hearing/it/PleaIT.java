@@ -29,9 +29,9 @@ public class PleaIT extends AbstractIT {
 
         InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        final String hearingDetailsQueryURL = getURL("hearing.get.hearing.v2", hearingOne.getHearingId());
+        final String hearingDetailsQueryURL = getURL("hearing.get.hearing", hearingOne.getHearingId());
 
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing+json"))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
@@ -56,7 +56,7 @@ public class PleaIT extends AbstractIT {
 
         publicEventOffenceConvictionDateChangedListener.waitFor();
 
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing+json"))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
@@ -74,7 +74,7 @@ public class PleaIT extends AbstractIT {
 
         InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        poll(requestParameters(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json"))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
@@ -98,7 +98,7 @@ public class PleaIT extends AbstractIT {
 
         publicEventOffenceConvictionDateRemovedListener.waitFor();
 
-        poll(requestParameters(getURL("hearing.get.hearing.v2", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing.v2+json"))
+        poll(requestParameters(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json"))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),

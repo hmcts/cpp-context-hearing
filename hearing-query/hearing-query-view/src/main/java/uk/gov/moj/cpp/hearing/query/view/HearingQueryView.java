@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
-
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -16,16 +14,13 @@ import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
+import javax.inject.Inject;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})
@@ -48,19 +43,19 @@ public class HearingQueryView {
 
     static final String FIELD_QUERY = "q";
 
-    @Handles("hearing.get.hearings-by-date.v2")
+    @Handles("hearing.get.hearings-by-date")
     public JsonEnvelope findHearingsByDateV2(final JsonEnvelope envelope) {
         final LocalDate date = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_DATE));
         final HearingListResponse hearingListResponse = hearingService.getHearingByDateV2(date);
-        return enveloper.withMetadataFrom(envelope, "hearing.get.hearings.v2")
+        return enveloper.withMetadataFrom(envelope, "hearing.get.hearings")
                 .apply(hearingListResponse);
     }
 
-    @Handles("hearing.get.hearing.v2")
-    public JsonEnvelope findHearingV2(final JsonEnvelope envelope) {
+    @Handles("hearing.get.hearing")
+    public JsonEnvelope findHearing(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
         final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingByIdV2(hearingId.get());
-        return enveloper.withMetadataFrom(envelope, "hearing.get-hearing.v2")
+        return enveloper.withMetadataFrom(envelope, "hearing.get-hearing")
                 .apply(hearingDetailsResponse);
     }
 

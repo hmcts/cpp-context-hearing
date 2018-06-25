@@ -49,7 +49,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
     private static final String MEDIA_TYPE_CREATE_EVENT_LOG = "application/vnd.hearing.log-hearing-event+json";
     private static final String MEDIA_TYPE_CREATE_EVENT_DEFINITIONS = "application/vnd.hearing.create-hearing-event-definitions+json";
-    private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions.v2+json";
+    private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions+json";
 
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
@@ -89,21 +89,6 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 .and().body(hearingEventPayloadBuilder.build().toString())
                 .when().post(createEventLogEndPoint)
                 .then().extract().response();
-    }
-
-    public static void whenUserLogsMultipleEvents(final List<HearingEvent> hearingEvent) {
-        final Optional<Response> errors = hearingEvent.stream()
-                .map(HearingEventStepDefinitions::whenUserAttemptsToLogAHearingEvent)
-                .filter((Response response) -> response.getStatusCode() != SC_ACCEPTED)
-                .findAny();
-
-        assertThat(errors.isPresent(), is(false));
-    }
-
-    public static void whenUserLogsAnEvent(final HearingEvent hearingEvent) {
-        final Response response = whenUserAttemptsToLogAHearingEvent(hearingEvent);
-
-        assertThat(response.getStatusCode(), equalTo(SC_ACCEPTED));
     }
 
     public static HearingEventDefinitionData andHearingEventDefinitionsAreAvailable(final HearingEventDefinitionData hearingEventDefinitions) {
@@ -227,7 +212,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
 
     private static String getQueryEventDefinitionsUrl() {
-        final String queryEventDefinitionsEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-definitions.v2");
+        final String queryEventDefinitionsEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-definitions");
         return format("%s/%s", getBaseUri(), queryEventDefinitionsEndPoint);
     }
 
