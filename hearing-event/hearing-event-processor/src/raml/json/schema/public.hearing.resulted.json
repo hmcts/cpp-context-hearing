@@ -354,12 +354,6 @@
       },
       "additionalProperties": false,
       "required": [
-        "verdictDescription",
-        "verdictCategory",
-        "numberOfSplitJurors",
-        "verdictDate",
-        "numberOfJurors",
-        "unanimous",
         "enteredHearingId"
       ]
     },

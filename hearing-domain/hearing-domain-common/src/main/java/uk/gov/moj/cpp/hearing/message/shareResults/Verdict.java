@@ -10,7 +10,7 @@ public class Verdict {
     private String verdictCategory;
     private String numberOfSplitJurors;
     private LocalDate verdictDate;
-    private int numberOfJurors;
+    private Integer numberOfJurors;
     private boolean unanimous;
     private UUID enteredHearingId;
 
@@ -34,7 +34,7 @@ public class Verdict {
         return verdictDate;
     }
 
-    public int getNumberOfJurors() {
+    public Integer getNumberOfJurors() {
         return numberOfJurors;
     }
 
@@ -71,7 +71,7 @@ public class Verdict {
         return this;
     }
 
-    public Verdict setNumberOfJurors(int numberOfJurors) {
+    public Verdict setNumberOfJurors(Integer numberOfJurors) {
         this.numberOfJurors = numberOfJurors;
         return this;
     }
