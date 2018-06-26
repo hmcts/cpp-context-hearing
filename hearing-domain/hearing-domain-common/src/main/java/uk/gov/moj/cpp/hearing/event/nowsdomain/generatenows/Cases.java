@@ -1,8 +1,12 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Cases {
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
-    private java.util.UUID id;
+public class Cases implements Serializable {
+
+    private UUID id;
 
     private String urn;
 
@@ -10,17 +14,17 @@ public class Cases {
 
     private String custodyTimeLimitDate;
 
-    private java.util.List<Offences> offences;
+    private List<Offences> offences;
 
     public static Cases cases() {
         return new Cases();
     }
 
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Cases setId(java.util.UUID id) {
+    public Cases setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -52,11 +56,11 @@ public class Cases {
         return this;
     }
 
-    public java.util.List<Offences> getOffences() {
+    public List<Offences> getOffences() {
         return this.offences;
     }
 
-    public Cases setOffences(java.util.List<Offences> offences) {
+    public Cases setOffences(List<Offences> offences) {
         this.offences = offences;
         return this;
     }

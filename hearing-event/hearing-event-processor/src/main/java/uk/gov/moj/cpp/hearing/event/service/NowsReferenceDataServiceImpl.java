@@ -37,7 +37,7 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
         } catch (ExecutionException ex) {
             throw new RuntimeException(ex);
         }
-        final Predicate<NowDefinition> matchNow = n -> n.getResultDefinitions().stream().anyMatch(rd -> rd.getPrimaryResult() && rd.getId().equals(resultDefinitionId));
+        final Predicate<NowDefinition> matchNow = n -> n.getResultDefinitions().stream().anyMatch(rd -> rd.getPrimary() && rd.getId().equals(resultDefinitionId));
         final Optional<NowDefinition> result = allNows.getNows().stream().filter(matchNow).findAny();
         return result.orElse(null);
     }

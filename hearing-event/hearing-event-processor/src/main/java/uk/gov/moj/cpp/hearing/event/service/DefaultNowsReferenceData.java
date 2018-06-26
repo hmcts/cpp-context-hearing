@@ -24,7 +24,7 @@ public class DefaultNowsReferenceData {
                         new NowDefinition().setId(nowId1).setResultDefinitions(
                                 Arrays.asList(
                                         new ResultDefinitions().setId(resultDefinitionId1)
-                                                .setPrimaryResult(true)
+                                                .setPrimary(true)
                                                 .setMandatory(true)
                                 )
                         )

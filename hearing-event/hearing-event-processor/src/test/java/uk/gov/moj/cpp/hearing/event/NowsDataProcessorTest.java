@@ -13,6 +13,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
@@ -24,7 +25,8 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Defendants;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
@@ -69,7 +71,7 @@ public class NowsDataProcessorTest {
 
         Nows nows = testDescription.outputNows.get(0);
         Assert.assertEquals(1, nows.getMaterial().size());
-        Assert.assertEquals(testDescription.dataIn.getHearing().getDefendants().get(0).getId().toString(), nows.getDefendantId());
+        Assert.assertEquals(testDescription.dataIn.getHearing().getDefendants().get(0).getId(), nows.getDefendantId());
         Assert.assertNotNull(nows.getNowsTypeId());
         Material material = nows.getMaterial().get(0);
         Assert.assertEquals(1, material.getUserGroups().size());
@@ -78,10 +80,11 @@ public class NowsDataProcessorTest {
         NowResult nowResult = material.getNowResult().get(0);
         CompletedResultLine inputResultLine = testDescription.dataIn.getCompletedResultLines().get(0);
         Assert.assertEquals(nowResult.getSharedResultId(), inputResultLine.getId());
-        Assert.assertEquals(1, nowResult.getPromptRefs().size());
+        Assert.assertEquals(1, nowResult.getPrompts().size());
         ResultPrompt resultPrompt = inputResultLine.getPrompts().get(0);
-        PromptRefs promptRef = nowResult.getPromptRefs().get(0);
+        PromptRef promptRef = nowResult.getPrompts().get(0);
         Assert.assertEquals(resultPrompt.getLabel(), promptRef.getLabel());
+        Assert.assertEquals(resultPrompt.getId(), promptRef.getId());
     }
 
     @Test
@@ -100,7 +103,10 @@ public class NowsDataProcessorTest {
         Assert.assertEquals(1, testDescription.outputNows.size());
         resultLineFilter = (rl, index) -> {
             // replace result line with an unmapped (to now)
-            rl = CompletedResultLine.builder().withId(randomUUID()).withDefendantId(rl.getDefendantId()).withResultDefinitionId(randomUUID()).build();
+            rl = CompletedResultLine.builder()
+                    .withLevel(Level.CASE)
+                    .withId(randomUUID()).withDefendantId(rl.getDefendantId())
+                    .withResultDefinitionId(randomUUID()).build();
             return asList(rl);
         };
 
@@ -120,13 +126,20 @@ public class NowsDataProcessorTest {
                 .setId(randomUUID())
                 .setResultDefinitions(
                 asList(
-                        ResultDefinitions.resultDefinitions().setPrimaryResult(true).setMandatory(true).setId(primaryResultDefinition.getId()),
-                        ResultDefinitions.resultDefinitions().setPrimaryResult(false).setMandatory(true).setId(mandatoryNonPrimaryResultDefinition.getId())
+                        ResultDefinitions.resultDefinitions().setPrimary(true).setMandatory(true).setId(primaryResultDefinition.getId()),
+                        ResultDefinitions.resultDefinitions().setPrimary(false).setMandatory(true).setId(mandatoryNonPrimaryResultDefinition.getId())
                 )
         );
         Mockito.when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(primaryResultDefinition.getId())).thenReturn(referenceNow);
         BiFunction<CompletedResultLine, Integer, List<Object>> resultLineFilter = (rl, defendantIndex) -> {
-            CompletedResultLine primaryResultLine = CompletedResultLine.builder().withResultDefinitionId(primaryResultDefinition.getId()).withDefendantId(rl.getDefendantId()).build();
+            CompletedResultLine primaryResultLine = CompletedResultLine.builder()
+                    .withLevel(rl.getLevel())
+                    .withId(UUID.randomUUID())
+                    .withResultDefinitionId(primaryResultDefinition.getId())
+                    .withDefendantId(rl.getDefendantId())
+                    .withCaseId(rl.getCaseId())
+                    .withResultPrompts(rl.getPrompts())
+                    .build();
             return asList(primaryResultLine);
         };
         TestDescription testDescription;
@@ -144,6 +157,7 @@ public class NowsDataProcessorTest {
                     if (rl.getResultDefinitionId() == primaryResultDefinition.getId()) {
                         results.add(
                                 CompletedResultLine.builder().withId(randomUUID())
+                                        .withLevel(Level.CASE)
                                         .withDefendantId(rl.getDefendantId())
                                         .withResultDefinitionId(mandatoryNonPrimaryResultDefinition.getId())
                                         .build());
@@ -164,6 +178,7 @@ public class NowsDataProcessorTest {
             Object resultLine;
             if (isComplete) {
                 resultLine = CompletedResultLine.builder().withId(rl.getId())
+                        .withLevel(Level.CASE)
                         .withResultPrompts(rl.getPrompts())
                         .withDefendantId(rl.getDefendantId())
                         .withResultDefinitionId(rl.getResultDefinitionId())
@@ -224,7 +239,7 @@ public class NowsDataProcessorTest {
                         ResultDefinitions.resultDefinitions()
                                 .setId(resultDefinitionId)
                                 .setMandatory(true)
-                                .setPrimaryResult(true)
+                                .setPrimary(true)
                         //NOTYET test property sequence
                 )
         );
@@ -262,7 +277,7 @@ public class NowsDataProcessorTest {
         // inject a now that has 2 mandatories one primary, 1 non primary
         NowDefinition referenceNow = NowDefinition.now().setId(randomUUID()).setResultDefinitions(
                 asList(
-                        ResultDefinitions.resultDefinitions().setPrimaryResult(true)
+                        ResultDefinitions.resultDefinitions().setPrimary(true)
                                 .setMandatory(true)
                                 .setId(primaryResultDefinition.getId())
                 )
@@ -289,7 +304,7 @@ public class NowsDataProcessorTest {
         NowDefinition referenceNow = NowDefinition.now().setId(randomUUID()).setResultDefinitions(
                 asList(
                         ResultDefinitions.resultDefinitions()
-                                .setPrimaryResult(true)
+                                .setPrimary(true)
                                 .setMandatory(true)
                                 .setId(primaryResultDefinition.getId())
                 )
@@ -335,9 +350,9 @@ public class NowsDataProcessorTest {
 
         NowDefinition referenceNow = NowDefinition.now().setId(randomUUID()).setResultDefinitions(
                 asList(
-                        ResultDefinitions.resultDefinitions().setPrimaryResult(true)
+                        ResultDefinitions.resultDefinitions().setPrimary(true)
                                 .setMandatory(true).setId(resultDefinitions.get(0).getId()),
-                        ResultDefinitions.resultDefinitions().setPrimaryResult(false)
+                        ResultDefinitions.resultDefinitions().setPrimary(false)
                                 .setMandatory(true).setId(resultDefinitions.get(1).getId())
                 )
         );
@@ -376,7 +391,7 @@ public class NowsDataProcessorTest {
                 boolean mandatory = resultDefinitionsDone < 2;
                 UUID resultDefinitionId = randomUUID();
                 ResultDefinitions resultDefinitionRef = ResultDefinitions.resultDefinitions()
-                        .setPrimaryResult(primary).setMandatory(mandatory)
+                        .setPrimary(primary).setMandatory(mandatory)
                         .setId(resultDefinitionId);
                 resultDefinitionRefs.add(resultDefinitionRef);
                 if (primary) {
@@ -432,6 +447,7 @@ public class NowsDataProcessorTest {
                                 ).collect(toList());
 
                         CompletedResultLine resultLine = CompletedResultLine.builder()
+                                .withLevel(Level.CASE)
                                 .withId(randomUUID())
                                 .withResultDefinitionId(primaryResultDefinition.getId())
                                 .withDefendantId(rlIn.getDefendantId())
@@ -460,6 +476,7 @@ public class NowsDataProcessorTest {
 
             CompletedResultLine resultLine = CompletedResultLine.builder()
                     .withId(randomUUID())
+                    .withLevel(Level.CASE)
                     .withResultDefinitionId(primaryResultDefinition.getId())
                     .withDefendantId(rl.getDefendantId())
                     .withResultPrompts(resultPrompts).build();
@@ -472,6 +489,7 @@ public class NowsDataProcessorTest {
     private void checkReferenceData(ResultsShared resultsShared, uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing hearingOut) {
         Hearing hearingIn = resultsShared.getHearing();
         Assert.assertEquals(hearingIn.getId(), hearingOut.getId());
+        Assert.assertNotNull(hearingOut.getCourtCentre());
 
         Assert.assertEquals(hearingIn.getDefendants().size(), hearingOut.getDefendants().size());
         for (int defdone = 0; defdone < hearingIn.getDefendants().size(); defdone++) {
@@ -508,38 +526,66 @@ public class NowsDataProcessorTest {
                 }
         );
 
-        Map<UUID, Attendees> attendeeId2DefenceCounsel = new HashMap<>();
+        Map<Integer, Attendees> attendeeId2DefenceCounsel = new HashMap<>();
         hearingOut.getAttendees().forEach(
                 att -> {
                     if (att.getType().equalsIgnoreCase(NowsDataProcessor.DEFENCE_COUNSEL_ATTENDEE_TYPE)) {
-                        attendeeId2DefenceCounsel.put(att.getAttendeeId(), att);
+                        attendeeId2DefenceCounsel.put(att.hashCode(), att);
                     }
                 }
         );
 
-        Assert.assertEquals(attendeeId2defenceCounselsUpsertsIn.keySet(), attendeeId2DefenceCounsel.keySet());
+        Assert.assertEquals(attendeeId2defenceCounselsUpsertsIn.keySet().size(), attendeeId2DefenceCounsel.keySet().size());
         //NOTYET comprehensive field level checks
 
         // assume defenceCounselUpserts dont have an order and dont assume anything about the id
-        Map<UUID, ProsecutionCounselUpsert> attendeeId2prosecutionCounselsUpsertsIn = new HashMap<>();
+   /*     Map<UUID, ProsecutionCounselUpsert> attendeeId2prosecutionCounselsUpsertsIn = new HashMap<>();
         resultsShared.getProsecutionCounsels().values().forEach(
                 (prosecutionCounselUpsertIn) -> {
                     attendeeId2prosecutionCounselsUpsertsIn.put(prosecutionCounselUpsertIn.getAttendeeId(), prosecutionCounselUpsertIn);
                 }
         );
 
-        Map<UUID, Attendees> attendeeId2ProsecutionCounsel = new HashMap<>();
+        Map<Integer, Attendees> attendeeId2ProsecutionCounsel = new HashMap<>();
         hearingOut.getAttendees().forEach(
                 att -> {
                     //TODO this type field doesnt appear to be used !
                     if (att.getType().equalsIgnoreCase(NowsDataProcessor.PROSECUTION_COUNSEL_ATTENDEE_TYPE)) {
-                        attendeeId2ProsecutionCounsel.put(att.getAttendeeId(), att);
+                        attendeeId2ProsecutionCounsel.put(att.hashCode(), att);
                     }
                 }
         );
 
+
         Assert.assertEquals(attendeeId2prosecutionCounselsUpsertsIn.keySet(), attendeeId2ProsecutionCounsel.keySet());
-        //TODO field level check
+        */
+
+        Assert.assertNotNull(hearingOut.getSharedResultLines());
+        Assert.assertEquals(hearingOut.getSharedResultLines().size(), resultsShared.getCompletedResultLines().size());
+        // go through each result line and check its got everything
+        resultsShared.getCompletedResultLines().forEach(
+                rsCompletedLine -> {
+                    final SharedResultLines sharedResultLine = hearingOut.getSharedResultLines().stream().filter(
+                            srl->rsCompletedLine.getId().equals(srl.getId())
+                    ).findAny().orElse(null);
+                    Assert.assertNotNull(sharedResultLine);
+                    Assert.assertEquals(rsCompletedLine.getCaseId(), sharedResultLine.getCaseId());
+                    Assert.assertEquals(rsCompletedLine.getDefendantId(), sharedResultLine.getDefendantId());
+                    Assert.assertEquals(rsCompletedLine.getLevel().name(), sharedResultLine.getLevel());
+                    Assert.assertEquals(rsCompletedLine.getPrompts().size(), sharedResultLine.getPrompts().size());
+                    rsCompletedLine.getPrompts().forEach(
+                            promptIn-> {
+                                //Prompts promptOut = sharedResultLine.getPrompts().stream().filter(p->promptIn.getId().equals(p.))
+                            }
+                    );
+
+                }
+
+        );
+
+
+
+
     }
 
 
@@ -574,6 +620,7 @@ public class NowsDataProcessorTest {
             List<Object> oResultLines = resultLineFilterByDefendantIndex.apply(
                     CompletedResultLine.builder()
                             .withId(randomUUID())
+                            .withLevel(Level.CASE)
                             .withResultDefinitionId(resultDefinition.getId())
                             .withDefendantId(defendant.getId())
                             .withResultPrompts(

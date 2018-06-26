@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Address {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private String addressId;
+public class Address implements Serializable {
+
+    private UUID addressId;
 
     private String address1;
 
@@ -18,11 +21,11 @@ public class Address {
         return new Address();
     }
 
-    public String getAddressId() {
+    public UUID getAddressId() {
         return this.addressId;
     }
 
-    public Address setAddressId(String addressId) {
+    public Address setAddressId(UUID addressId) {
         this.addressId = addressId;
         return this;
     }

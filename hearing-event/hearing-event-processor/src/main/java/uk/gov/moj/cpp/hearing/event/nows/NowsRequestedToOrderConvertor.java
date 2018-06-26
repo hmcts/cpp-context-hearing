@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -51,9 +52,9 @@ public class NowsRequestedToOrderConvertor {
 
                 NowsDocumentOrder nowsDocumentOrder = NowsDocumentOrder.builder()
                         .withMaterialId(selectedNowMaterial.getId())
-                        .withOrderName(matchingNowType.map(nowType -> nowType.getDescription()).orElse(EMPTY))
-                        .withNowText(matchingNowType.map(nowType -> nowType.getStaticText()).orElse(EMPTY))
-                        .withPriority(matchingNowType.map(nowType -> nowType.getPriority()).orElse(EMPTY))
+                        .withOrderName(matchingNowType.map(NowType::getDescription).orElse(EMPTY))
+                        .withNowText(matchingNowType.map(NowType::getStaticText).orElse(EMPTY))
+                        .withPriority(matchingNowType.map(NowType::getPriority).orElse(EMPTY))
                         .withCourtCentreName(getCourtCentreName(nowsRequested))
                         .withCourtClerkName(getCourtClerkName(nowsRequested))
                         .withOrderDate(getOrderDate(nowsRequested, selectedNowMaterial))
@@ -74,9 +75,9 @@ public class NowsRequestedToOrderConvertor {
     @SuppressWarnings({"squid:S1188", "squid:S3776"})
     private static List<OrderCase> getNowsMaterialOrderCases(NowsRequested nowsRequested, Material selectedMaterial) {
 
-        List<OrderResult> defendantCaseResults = new ArrayList<OrderResult>();
-        List<DefendantCaseOffence> defendantCaseOffences = new ArrayList<DefendantCaseOffence>();
-        List<OrderResult> caseResults = new ArrayList<OrderResult>();
+        List<OrderResult> defendantCaseResults = new ArrayList<>();
+        List<DefendantCaseOffence> defendantCaseOffences = new ArrayList<>();
+        List<OrderResult> caseResults = new ArrayList<>();
 
         Map<String, SharedResultLine> sharedResultLineIdMap = prepareSharedResultLineIdMap(nowsRequested);
         selectedMaterial.getNowResult().stream().forEach(selectedNowResult -> {
@@ -123,12 +124,13 @@ public class NowsRequestedToOrderConvertor {
 
     private static List<String> getCaseUrns(NowsRequested nowsRequested, Now now) {
         return getMatchingDefendant(nowsRequested, now.getDefendantId())
-                .map(defendant -> defendant.getCases())
+                .map(Defendant::getCases)
                 .orElse(new ArrayList<>()).stream()
-                .map(aCase -> aCase.getUrn())
+                .map(Case::getUrn)
                 .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("squid:S1192")
     private static OrderDefendant getNowsOrderDefendant(NowsRequested nowsRequested, Now now) {
         Optional<Defendant> matchingDefendantForNows = getMatchingDefendant(nowsRequested, now.getDefendantId());
         if (matchingDefendantForNows.isPresent()) {
@@ -151,11 +153,9 @@ public class NowsRequestedToOrderConvertor {
         return OrderDefendant.builder().build();
     }
 
-
     private static Optional<NowType> getMatchingNowType(NowsRequested nowsRequested, Now now) {
         List<NowType> nowTypes = nowsRequested.getHearing().getNowTypes();
-        //TODO: Matching of nows type needs to be done on Nows typeId
-        return nowTypes.stream().filter(nowType -> nowType.getTemplateName().equals(now.getNowsTemplateName())).findFirst();
+        return nowTypes.stream().filter(nowType -> nowType.getId().equals(now.getNowsTypeId())).findFirst();
     }
 
     private static String getCourtClerkName(NowsRequested nowsRequested) {
@@ -186,7 +186,7 @@ public class NowsRequestedToOrderConvertor {
 
     private static Optional<Offence> getMatchingOffence(NowsRequested nowsRequested, SharedResultLine sharedResultLine) {
         return getMatchingCase(nowsRequested, sharedResultLine)
-                .map(aCase -> aCase.getOffences())
+                .map(Case::getOffences)
                 .orElse(new ArrayList<>())
                 .stream()
                 .filter(o -> o.getId().equals(sharedResultLine.getOffenceId()))
@@ -195,7 +195,7 @@ public class NowsRequestedToOrderConvertor {
 
     private static Optional<Case> getMatchingCase(NowsRequested nowsRequested, SharedResultLine sharedResultLine) {
         return getMatchingDefendant(nowsRequested, sharedResultLine.getDefendantId())
-                .map(defendant -> defendant.getCases())
+                .map(Defendant::getCases)
                 .orElse(new ArrayList<>())
                 .stream()
                 .filter(aCase -> aCase.getId().equals(sharedResultLine.getCaseId()))
@@ -204,8 +204,8 @@ public class NowsRequestedToOrderConvertor {
     }
 
     private static List<Prompt> getMatchingPrompts(NowResult selectedNowResult, SharedResultLine sharedResultLine) {
-        List<String> nowResultPromptLabels = selectedNowResult.getPrompts().stream().map(prompt -> prompt.getLabel()).collect(Collectors.toList());
-        return sharedResultLine.getPrompts().stream().filter(prompt -> nowResultPromptLabels.contains(prompt.getLabel())).collect(Collectors.toList());
+        List<UUID> nowResultPromptLabels = selectedNowResult.getPrompts().stream().map(Prompt::getId).collect(Collectors.toList());
+        return sharedResultLine.getPrompts().stream().filter(prompt -> nowResultPromptLabels.contains(prompt.getId())).collect(Collectors.toList());
     }
 
 

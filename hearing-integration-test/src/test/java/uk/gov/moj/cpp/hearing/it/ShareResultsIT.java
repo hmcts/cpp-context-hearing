@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.core.Is;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
@@ -33,7 +34,6 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
@@ -95,7 +95,7 @@ public class ShareResultsIT extends AbstractIT {
                                         ResultDefinitions.resultDefinitions()
                                                 .setId(primaryResultDefinitionId)
                                                 .setMandatory(true)
-                                                .setPrimaryResult(true)
+                                                .setPrimary(true)
                                 ))
                 ));
 
@@ -203,6 +203,17 @@ public class ShareResultsIT extends AbstractIT {
                                 withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
                                 withJsonPath("$.resultLines", hasSize(3))
                         )));
+
+        //check the nows was ordered
+        poll(requestParams(getURL("hearing.get.nows", hearingOne.getHearingId().toString()), "application/vnd.hearing.get.nows+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.nows[0].defendantId", Is.is(hearingOne.getFirstDefendant().getId().toString()))
+                        )));
+
+
     }
 
 

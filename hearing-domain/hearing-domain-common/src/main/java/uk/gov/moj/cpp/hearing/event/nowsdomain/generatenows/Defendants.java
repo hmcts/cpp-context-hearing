@@ -1,28 +1,30 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Defendants {
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
-    private java.util.UUID id;
+public class Defendants implements Serializable {
+
+    private UUID id;
 
     private Person person;
-
-    private String bailStatus;
 
     private String defenceOrganisation;
 
     private Interpreter interpreter;
 
-    private java.util.List<Cases> cases;
+    private List<Cases> cases;
 
     public static Defendants defendants() {
         return new Defendants();
     }
 
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Defendants setId(java.util.UUID id) {
+    public Defendants setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -33,15 +35,6 @@ public class Defendants {
 
     public Defendants setPerson(Person person) {
         this.person = person;
-        return this;
-    }
-
-    public String getBailStatus() {
-        return this.bailStatus;
-    }
-
-    public Defendants setBailStatus(String bailStatus) {
-        this.bailStatus = bailStatus;
         return this;
     }
 
@@ -63,11 +56,11 @@ public class Defendants {
         return this;
     }
 
-    public java.util.List<Cases> getCases() {
+    public List<Cases> getCases() {
         return this.cases;
     }
 
-    public Defendants setCases(java.util.List<Cases> cases) {
+    public Defendants setCases(List<Cases> cases) {
         this.cases = cases;
         return this;
     }

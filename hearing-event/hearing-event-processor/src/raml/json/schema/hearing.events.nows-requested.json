@@ -4,6 +4,18 @@
     "uuid": {
       "type": "string",
       "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "promptRef": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "label": {
+          "type": "string"
+        }
+      }
     }
   },
   "$schema": "http://json-schema.org/draft-04/schema#",
@@ -30,13 +42,13 @@
           "type": "object",
           "properties": {
             "courtCentreId": {
-              "type": "string"
+              "$ref": "#/definitions/uuid"
             },
             "courtCentreName": {
               "type": "string"
             },
             "courtRoomId": {
-              "type": "string"
+              "$ref": "#/definitions/uuid"
             },
             "courtRoomName": {
               "type": "string"
@@ -111,7 +123,7 @@
                     "type": "object",
                     "properties": {
                       "addressId": {
-                        "type": "string"
+                        "$ref": "#/definitions/uuid"
                       },
                       "address1": {
                         "type": "string"
@@ -152,7 +164,7 @@
                   "type": "object",
                   "properties": {
                     "id": {
-                      "type": "string"
+                      "$ref": "#/definitions/uuid"
                     },
                     "urn": {
                       "type": "string"
@@ -169,7 +181,7 @@
                         "type": "object",
                         "properties": {
                           "id": {
-                            "type": "string"
+                            "$ref": "#/definitions/uuid"
                           },
                           "code": {
                             "type": "string"
@@ -181,7 +193,7 @@
                             "type": "object",
                             "properties": {
                               "id": {
-                                "type": "string"
+                                "$ref": "#/definitions/uuid"
                               },
                               "value": {
                                 "type": "string"
@@ -190,7 +202,7 @@
                                 "type": "string"
                               },
                               "enteredHearingId": {
-                                "type": "string"
+                                "$ref": "#/definitions/uuid"
                               }
                             }
                           },
@@ -198,7 +210,7 @@
                             "type": "object",
                             "properties": {
                               "typeId": {
-                                "type": "string"
+                                "$ref": "#/definitions/uuid"
                               },
                               "verdictDescription": {
                                 "type": "string"
@@ -210,7 +222,7 @@
                                 "type": "object",
                                 "properties": {
                                   "offenceTypeId": {
-                                    "type": "string"
+                                    "$ref": "#/definitions/uuid"
                                   },
                                   "code": {
                                     "type": "string"
@@ -236,7 +248,7 @@
                                 "type": "boolean"
                               },
                               "enteredHearingId": {
-                                "type": "string"
+                                "$ref": "#/definitions/uuid"
                               }
                             }
                           },
@@ -295,6 +307,9 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "id": {
+                      "$ref": "#/definitions/uuid"
+                    },
                     "label": {
                       "type": "string"
                     },
@@ -346,12 +361,7 @@
                           "prompts": {
                             "type": "array",
                             "items": {
-                              "type": "object",
-                              "properties": {
-                                "label": {
-                                  "type": "string"
-                                }
-                              }
+                              "$ref": "#/definitions/promptRef"
                             }
                           }
                         }

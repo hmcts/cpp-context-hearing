@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class UserGroups {
+import java.io.Serializable;
+
+public class UserGroups implements Serializable {
 
     private String group;
 

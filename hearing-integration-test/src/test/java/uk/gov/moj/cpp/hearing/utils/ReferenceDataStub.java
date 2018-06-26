@@ -66,7 +66,7 @@ public class ReferenceDataStub {
 
         waitForStubToBeReady(queryUrl, mediaType);
     }
-    
+
     private static void stubGetReferenceDataResultDefinitions() {
         InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
