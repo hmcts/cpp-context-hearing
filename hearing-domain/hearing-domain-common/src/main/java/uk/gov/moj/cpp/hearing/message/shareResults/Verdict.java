@@ -11,7 +11,7 @@ public class Verdict {
     private String numberOfSplitJurors;
     private LocalDate verdictDate;
     private Integer numberOfJurors;
-    private boolean unanimous;
+    private Boolean unanimous;
     private UUID enteredHearingId;
 
     public UUID getTypeId() {
@@ -38,7 +38,7 @@ public class Verdict {
         return numberOfJurors;
     }
 
-    public boolean isUnanimous() {
+    public Boolean getUnanimous() {
         return unanimous;
     }
 
@@ -76,7 +76,7 @@ public class Verdict {
         return this;
     }
 
-    public Verdict setUnanimous(boolean unanimous) {
+    public Verdict setUnanimous(Boolean unanimous) {
         this.unanimous = unanimous;
         return this;
     }
