@@ -45,7 +45,7 @@ public class AttendeeDeletedEventListener {
         final Hearing hearing = hearingRepository.findById(attendeeDeleted.getHearingId());
         if (null != hearing) {
             final List<HearingDate> hearingDays = hearing.getHearingDays().stream()
-                    .filter(hearingDay -> hearingDay.getDate().compareTo(attendeeDeleted.getHearingDate()) >= 0)
+                    .filter(hearingDay -> hearingDay.getDate().atStartOfDay().compareTo(attendeeDeleted.getHearingDate().atStartOfDay()) >= 0)
                     .collect(toList());
             hearingDays.forEach(hearingDay -> {
                 final int result = this.attendeeHearingDateRespository.delete(attendeeDeleted.getHearingId(), attendeeDeleted.getAttendeeId(), hearingDay.getId().getId());
