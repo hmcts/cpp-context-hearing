@@ -36,7 +36,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.util.List;
@@ -118,28 +118,27 @@ public class PublishResultsEventProcessorTest {
 
         final List<Nows> nows = asList(
                 Nows.nows()
-                        .setDefendantId(UUID.randomUUID().toString())
+                        .setDefendantId(UUID.randomUUID())
                         .setId(UUID.randomUUID())
                         .setMaterial(
                                 asList(
                                         Material.material()
                                                 .setId(UUID.randomUUID())
-                                                .setLanguage("Welsh")
                                                 .setNowResult(
                                                         asList(
                                                                 NowResult.nowResult()
                                                                         .setSharedResultId(UUID.randomUUID())
                                                                         .setSequence(123)
-                                                                        .setPromptRefs(
+                                                                        .setPrompts(
                                                                                 asList(
-                                                                                        PromptRefs.promptRefs()
+                                                                                        PromptRef.promptRef()
                                                                                                 .setLabel("label1"))
                                                                         )
                                                         )
                                                 )
                                 )
                         )
-                        .setNowsTypeId(UUID.randomUUID().toString())
+                        .setNowsTypeId(UUID.randomUUID())
         );
         uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing hearing = new uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing().setId(UUID.randomUUID());
         Mockito.when(nowsDataProcessor.createNows(Mockito.any())).thenReturn(nows);
@@ -182,12 +181,9 @@ public class PublishResultsEventProcessorTest {
         final Material materialIn = nowsIn.getMaterial().get(0);
         final Material materialOut = nowsOut.getMaterial().get(0);
         assertThat(materialIn.getId(), is(materialOut.getId()));
-        assertThat(materialIn.getLanguage(), is(materialOut.getLanguage()));
         assertThat(materialIn.getNowResult().get(0).getSharedResultId(), is(materialOut.getNowResult().get(0).getSharedResultId()));
-        assertThat(materialIn.getNowResult().get(0).getPromptRefs().get(0).getLabel(), is(materialOut.getNowResult().get(0).getPromptRefs().get(0).getLabel()));
+        assertThat(materialIn.getNowResult().get(0).getPrompts().get(0).getLabel(), is(materialOut.getNowResult().get(0).getPrompts().get(0).getLabel()));
         final JsonEnvelope shareMessage = outgoingMessages.get(2);
-
-
 
         assertThat(
                 shareMessage, jsonEnvelope(

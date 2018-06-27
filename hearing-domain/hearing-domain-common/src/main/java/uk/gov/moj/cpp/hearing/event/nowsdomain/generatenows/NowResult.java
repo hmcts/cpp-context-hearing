@@ -1,22 +1,26 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class NowResult {
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
-    private java.util.UUID sharedResultId;
+public class NowResult implements Serializable {
+
+    private UUID sharedResultId;
 
     private Integer sequence;
 
-    private java.util.List<PromptRefs> promptRefs;
+    private List<PromptRef> prompts;
 
     public static NowResult nowResult() {
         return new NowResult();
     }
 
-    public java.util.UUID getSharedResultId() {
+    public UUID getSharedResultId() {
         return this.sharedResultId;
     }
 
-    public NowResult setSharedResultId(java.util.UUID sharedResultId) {
+    public NowResult setSharedResultId(UUID sharedResultId) {
         this.sharedResultId = sharedResultId;
         return this;
     }
@@ -30,12 +34,12 @@ public class NowResult {
         return this;
     }
 
-    public java.util.List<PromptRefs> getPromptRefs() {
-        return this.promptRefs;
+    public List<PromptRef> getPrompts() {
+        return this.prompts;
     }
 
-    public NowResult setPromptRefs(java.util.List<PromptRefs> promptRefs) {
-        this.promptRefs = promptRefs;
+    public NowResult setPrompts(List<PromptRef> prompts) {
+        this.prompts = prompts;
         return this;
     }
 }

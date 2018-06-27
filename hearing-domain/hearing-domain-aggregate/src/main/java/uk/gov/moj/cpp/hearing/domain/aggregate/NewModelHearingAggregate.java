@@ -1,12 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.fromString;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.doNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -54,6 +47,8 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -65,8 +60,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.doNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
 public class NewModelHearingAggregate implements Aggregate {
@@ -127,7 +126,6 @@ public class NewModelHearingAggregate implements Aggregate {
                 ),
 
                 when(WitnessAdded.class).apply(witnessAdded -> {
-
                 }),
 
                 when(ResultsShared.class).apply(resultsShared -> {
@@ -367,7 +365,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 this.hearing.getCourtRoomId(),
                 this.hearing.getCourtRoomName(),
                 this.hearing.getType(),
-                this.cases.get(0).getUrn(), //TODO - doesn't support multiple cases yet.
+                this.cases.get(0).getUrn(),
                 this.cases.get(0).getCaseId(),
                 logEventCommand.getWitnessId(), logEventCommand.getCounselId())));
     }

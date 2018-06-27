@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Person {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private java.util.UUID id;
+public class Person implements Serializable {
+
+    private UUID id;
 
     private String title;
 
@@ -32,11 +35,11 @@ public class Person {
         return new Person();
     }
 
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Person setId(java.util.UUID id) {
+    public Person setId(UUID id) {
         this.id = id;
         return this;
     }

@@ -8,7 +8,7 @@ public class ResultDefinitions {
 
     private Boolean mandatory;
 
-    private Boolean primaryResult;
+    private Boolean primary;
 
     private Integer sequence;
 
@@ -34,12 +34,12 @@ public class ResultDefinitions {
         return this;
     }
 
-    public Boolean getPrimaryResult() {
-        return this.primaryResult;
+    public Boolean getPrimary() {
+        return this.primary;
     }
 
-    public ResultDefinitions setPrimaryResult(Boolean primaryResult) {
-        this.primaryResult = primaryResult;
+    public ResultDefinitions setPrimary(Boolean primary) {
+        this.primary = primary;
         return this;
     }
 

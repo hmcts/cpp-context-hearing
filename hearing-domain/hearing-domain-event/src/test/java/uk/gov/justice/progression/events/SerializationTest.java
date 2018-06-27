@@ -35,10 +35,10 @@ public class SerializationTest {
    @Test
    public void deserializeTestNows() throws Exception {
 
-      final InputStream is = SerializationTest.class.getResourceAsStream("/hearing.events.nowsrequested.json");
+      final InputStream is = SerializationTest.class.getResourceAsStream("/hearing.events.nows-requested.json");
       final ObjectMapper objectMapper =  new ObjectMapperProducer().objectMapper();
       final NowsRequested nowsRequested = (NowsRequested) objectMapper.readValue(is, NowsRequested.class);
-      Assert.assertEquals(nowsRequested.getHearing().getId().toString(),"91ee6bc2-c5ea-45cc-9743-90c50b1aa821");
+      Assert.assertEquals("91ee6bc2-c5ea-45cc-9743-90c50b1aa821", nowsRequested.getHearing().getId().toString());
 
    }
 }

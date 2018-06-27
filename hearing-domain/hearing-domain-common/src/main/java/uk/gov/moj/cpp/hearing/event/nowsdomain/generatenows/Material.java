@@ -1,17 +1,20 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-public class Material {
+public class Material implements Serializable {
 
     private UUID id;
 
     private List<NowResult> nowResult;
 
-    private String language;
-
     private List<UserGroups> userGroups;
+
+    public static Material material() {
+        return new Material();
+    }
 
     public UUID getId() {
         return this.id;
@@ -31,15 +34,6 @@ public class Material {
         return this;
     }
 
-    public String getLanguage() {
-        return this.language;
-    }
-
-    public Material setLanguage(String language) {
-        this.language = language;
-        return this;
-    }
-
     public List<UserGroups> getUserGroups() {
         return this.userGroups;
     }
@@ -47,9 +41,5 @@ public class Material {
     public Material setUserGroups(List<UserGroups> userGroups) {
         this.userGroups = userGroups;
         return this;
-    }
-
-    public static Material material() {
-        return new Material();
     }
 }

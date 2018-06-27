@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Offences {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private java.util.UUID id;
+public class Offences implements Serializable {
+
+    private UUID id;
 
     private String code;
 
@@ -22,11 +25,11 @@ public class Offences {
         return new Offences();
     }
 
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Offences setId(java.util.UUID id) {
+    public Offences setId(UUID id) {
         this.id = id;
         return this;
     }

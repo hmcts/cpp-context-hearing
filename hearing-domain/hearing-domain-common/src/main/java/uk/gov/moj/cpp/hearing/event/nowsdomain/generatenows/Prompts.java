@@ -1,6 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Prompts {
+import java.io.Serializable;
+import java.util.UUID;
+
+public class Prompts implements Serializable {
+
+    private UUID id;
 
     private String label;
 
@@ -8,6 +13,15 @@ public class Prompts {
 
     public static Prompts prompts() {
         return new Prompts();
+    }
+
+    public UUID getId() {
+        return this.id;
+    }
+
+    public Prompts setId(UUID id) {
+        this.id = id;
+        return this;
     }
 
     public String getLabel() {

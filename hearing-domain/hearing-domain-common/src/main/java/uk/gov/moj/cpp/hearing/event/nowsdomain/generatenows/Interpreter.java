@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Interpreter {
+import java.io.Serializable;
+
+public class Interpreter implements Serializable {
 
     private String name;
 

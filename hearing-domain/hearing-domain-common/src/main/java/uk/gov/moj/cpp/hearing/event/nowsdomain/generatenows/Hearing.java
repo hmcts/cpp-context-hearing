@@ -1,9 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-public class Hearing {
+public class Hearing implements Serializable {
 
     private UUID id;
 
@@ -24,6 +25,10 @@ public class Hearing {
     private List<Nows> nows;
 
     private List<NowTypes> nowTypes;
+
+    public static Hearing hearing() {
+        return new Hearing();
+    }
 
     public UUID getId() {
         return this.id;
@@ -113,9 +118,5 @@ public class Hearing {
     public Hearing setNowTypes(List<NowTypes> nowTypes) {
         this.nowTypes = nowTypes;
         return this;
-    }
-
-    public static Hearing hearing() {
-        return new Hearing();
     }
 }

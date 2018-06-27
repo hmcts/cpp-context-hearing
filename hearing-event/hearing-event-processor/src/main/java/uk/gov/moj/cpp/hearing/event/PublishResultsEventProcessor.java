@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -94,15 +95,17 @@ public class PublishResultsEventProcessor {
                                         .setNowTypes(
                                                 nowsDataProcessor.findNowDefinitions(input.getCompletedResultLines())
                                                         .stream()
-                                                        .map(resultDefinition -> NowTypes.nowTypes()
-                                                                .setId(resultDefinition.getId())
-                                                                .setDescription(resultDefinition.getName())
-                                                                .setJurisdiction(resultDefinition.getJurisdiction())
-                                                                .setPriority(ofNullable(resultDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
-                                                                .setRank(resultDefinition.getRank())
-                                                                .setStaticText(resultDefinition.getText())
-                                                                .setStaticTextWelsh(resultDefinition.getWelshText())
-                                                                .setTemplateName(resultDefinition.getTemplateName()))
+                                                        .map(nowDefinition -> NowTypes.nowTypes()
+                                                                .setId(nowDefinition.getId())
+                                                                .setDescription(nowDefinition.getName())
+                                                                .setJurisdiction(nowDefinition.getJurisdiction())
+                                                                .setPriority(ofNullable(nowDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
+                                                                .setRank(nowDefinition.getRank())
+                                                                //staticText N/A
+                                                                .setStaticText(EMPTY)
+                                                                //static welshText N/A
+                                                                .setStaticTextWelsh(EMPTY)
+                                                                .setTemplateName(nowDefinition.getTemplateName()))
                                                         .collect(toList())
                                         )
 

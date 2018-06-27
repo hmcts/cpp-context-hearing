@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Verdict {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private String typeId;
+public class Verdict implements Serializable {
+
+    private UUID typeId;
 
     private String verdictDescription;
 
@@ -18,17 +21,17 @@ public class Verdict {
 
     private Boolean unanimous;
 
-    private java.util.UUID enteredHearingId;
+    private UUID enteredHearingId;
 
     public static Verdict verdict() {
         return new Verdict();
     }
 
-    public String getTypeId() {
+    public UUID getTypeId() {
         return this.typeId;
     }
 
-    public Verdict setTypeId(String typeId) {
+    public Verdict setTypeId(UUID typeId) {
         this.typeId = typeId;
         return this;
     }
@@ -96,11 +99,11 @@ public class Verdict {
         return this;
     }
 
-    public java.util.UUID getEnteredHearingId() {
+    public UUID getEnteredHearingId() {
         return this.enteredHearingId;
     }
 
-    public Verdict setEnteredHearingId(java.util.UUID enteredHearingId) {
+    public Verdict setEnteredHearingId(UUID enteredHearingId) {
         this.enteredHearingId = enteredHearingId;
         return this;
     }

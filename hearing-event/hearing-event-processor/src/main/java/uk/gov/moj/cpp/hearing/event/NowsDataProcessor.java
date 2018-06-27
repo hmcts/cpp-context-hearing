@@ -8,6 +8,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Address;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Cases;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.CourtCentre;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Defendants;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Interpreter;
@@ -15,7 +16,9 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Person;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRefs;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
@@ -33,6 +36,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -78,36 +82,50 @@ public class NowsDataProcessor {
 
     public Hearing translateReferenceData(ResultsShared resultsShared) {
 
-        List<Attendees> attendees = new ArrayList<>();
+        final List<Attendees> attendees = new ArrayList<>();
 
         resultsShared.getDefenceCounsels().forEach((id, defenseCounsel) ->
                 attendees.add(
                         Attendees.attendees()
-                                .setAttendeeId(defenseCounsel.getAttendeeId())
                                 .setType(DEFENCE_COUNSEL_ATTENDEE_TYPE)
                                 .setFirstName(defenseCounsel.getFirstName())
-                                .setStatus(defenseCounsel.getStatus())
-                                .setTitle(defenseCounsel.getTitle())
+                                .setLastName(defenseCounsel.getLastName())
                 )
 
         );
+
+        final List<SharedResultLines> sharedResultLines = resultsShared.getCompletedResultLines().stream().map(
+                completedRl -> SharedResultLines.sharedResultLines()
+                        .setId(completedRl.getId())
+                        .setLevel(completedRl.getLevel().name())
+                        .setCaseId(completedRl.getCaseId())
+                        .setDefendantId(completedRl.getDefendantId())
+                        .setLabel(completedRl.getResultLabel())
+                        .setOffenceId(completedRl.getOffenceId())
+                        .setPrompts(
+                                completedRl.getPrompts().stream().map(
+                                        pIn -> Prompts.prompts()
+                                ).collect(Collectors.toList())
+                        )
+        ).collect(Collectors.toList());
 
         resultsShared.getProsecutionCounsels().forEach((id, prosecutionCounsel) ->
                 attendees.add(
                         Attendees.attendees()
-                                .setAttendeeId(prosecutionCounsel.getAttendeeId())
                                 .setType(PROSECUTION_COUNSEL_ATTENDEE_TYPE)
-                                .setCases(resultsShared.getCases().stream()
-                                        .map(caseIn -> Cases.cases().setId(caseIn.getCaseId())).collect(toList())
-                                )
                                 .setFirstName(prosecutionCounsel.getFirstName())
-                                .setStatus(prosecutionCounsel.getStatus())
-                                .setTitle(prosecutionCounsel.getTitle())
+                                .setLastName(prosecutionCounsel.getLastName())
                 )
         );
 
+        final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearingIn = resultsShared.getHearing();
         return Hearing.hearing()
-                .setId(resultsShared.getHearing().getId())
+                .setId(hearingIn.getId())
+                .setCourtCentre(CourtCentre.courtCentre()
+                        .setCourtRoomName(hearingIn.getCourtRoomName())
+                        .setCourtRoomId(hearingIn.getCourtRoomId())
+                        .setCourtCentreName(hearingIn.getCourtCentreName())
+                        .setCourtCentreId(hearingIn.getCourtCentreId()))
                 .setDefendants(
                         resultsShared.getHearing().getDefendants().stream()
                                 .map(defendant -> Defendants.defendants()
@@ -135,7 +153,8 @@ public class NowsDataProcessor {
                                 )
                                 .collect(toList())
                 )
-                .setAttendees(attendees);
+                .setAttendees(attendees)
+                .setSharedResultLines(sharedResultLines);
     }
 
     public Set<NowDefinition> findNowDefinitions(final List<CompletedResultLine> resultLines) {
@@ -199,15 +218,15 @@ public class NowsDataProcessor {
                     .map(resultLine -> {
                         final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId());
 
-                        final List<PromptRefs> promptRefs = resultDefinition.getPrompts().stream()
+                        final List<PromptRef> promptRefs = resultDefinition.getPrompts().stream()
                                 .filter(prompt -> variant.getResultPromptIds().contains(prompt.getId())) //filter out prompts that this variant should not have.
-                                .map(prompt -> PromptRefs.promptRefs().setLabel(prompt.getLabel()))
+                                .map(prompt -> PromptRef.promptRef().setLabel(prompt.getLabel()).setId(prompt.getId()))
                                 .collect(toList());
 
                         return NowResult.nowResult()
                                 .setSharedResultId(resultLine.getId())
                                 .setSequence(resultDefinition.getRank())
-                                .setPromptRefs(promptRefs);
+                                .setPrompts(promptRefs);
                     })
                     .collect(toList());
 
@@ -222,8 +241,8 @@ public class NowsDataProcessor {
 
         return Nows.nows()
                 .setId(UUID.randomUUID())
-                .setDefendantId(defendantId.toString())
-                .setNowsTypeId(nowDefinition.getId().toString())
+                .setDefendantId(defendantId)
+                .setNowsTypeId(nowDefinition.getId())
                 .setMaterial(materials);
     }
 

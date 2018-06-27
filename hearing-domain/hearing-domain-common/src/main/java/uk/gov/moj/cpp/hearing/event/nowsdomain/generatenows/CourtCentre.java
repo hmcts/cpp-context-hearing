@@ -1,12 +1,15 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class CourtCentre {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private String courtCentreId;
+public class CourtCentre implements Serializable {
+
+    private UUID courtCentreId;
 
     private String courtCentreName;
 
-    private String courtRoomId;
+    private UUID courtRoomId;
 
     private String courtRoomName;
 
@@ -14,11 +17,11 @@ public class CourtCentre {
         return new CourtCentre();
     }
 
-    public String getCourtCentreId() {
+    public UUID getCourtCentreId() {
         return this.courtCentreId;
     }
 
-    public CourtCentre setCourtCentreId(String courtCentreId) {
+    public CourtCentre setCourtCentreId(UUID courtCentreId) {
         this.courtCentreId = courtCentreId;
         return this;
     }
@@ -32,11 +35,11 @@ public class CourtCentre {
         return this;
     }
 
-    public String getCourtRoomId() {
+    public UUID getCourtRoomId() {
         return this.courtRoomId;
     }
 
-    public CourtCentre setCourtRoomId(String courtRoomId) {
+    public CourtCentre setCourtRoomId(UUID courtRoomId) {
         this.courtRoomId = courtRoomId;
         return this;
     }

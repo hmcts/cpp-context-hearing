@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows;
 
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -7,30 +9,62 @@ public class NowDefinition {
 
     private UUID id;
 
-    private String version;
-
     private String name;
 
     private String templateName;
 
-    private String jurisdiction;
-
     private Integer rank;
 
-    private String text;
+    private String jurisdiction;
 
-    private String welshText;
+    private ZonedDateTime version;
 
-    private Integer urgentTimeLimitInMinutes;
+    private Date startDate;
+
+    private Date endDate;
 
     private List<ResultDefinitions> resultDefinitions;
 
-    public static NowDefinition now() {
-        return new NowDefinition();
-    }
+    private Integer urgentTimeLimitInMinutes;
 
     public UUID getId() {
         return this.id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getTemplateName() {
+        return this.templateName;
+    }
+
+    public Integer getRank() {
+        return this.rank;
+    }
+
+    public String getJurisdiction() {
+        return this.jurisdiction;
+    }
+
+    public ZonedDateTime getVersion() {
+        return this.version;
+    }
+
+    public Date getStartDate() {
+        return this.startDate;
+    }
+
+    public Date getEndDate() {
+        return this.endDate;
+    }
+
+    public List<ResultDefinitions> getResultDefinitions() {
+        return this.resultDefinitions;
+    }
+
+    public Number getUrgentTimeLimitInMinutes() {
+        return this.urgentTimeLimitInMinutes;
     }
 
     public NowDefinition setId(UUID id) {
@@ -38,26 +72,9 @@ public class NowDefinition {
         return this;
     }
 
-    public String getVersion() {
-        return this.version;
-    }
-
-    public NowDefinition setVersion(String version) {
-        this.version = version;
-        return this;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
     public NowDefinition setName(String name) {
         this.name = name;
         return this;
-    }
-
-    public String getTemplateName() {
-        return this.templateName;
     }
 
     public NowDefinition setTemplateName(String templateName) {
@@ -65,8 +82,9 @@ public class NowDefinition {
         return this;
     }
 
-    public String getJurisdiction() {
-        return this.jurisdiction;
+    public NowDefinition setRank(Integer rank) {
+        this.rank = rank;
+        return this;
     }
 
     public NowDefinition setJurisdiction(String jurisdiction) {
@@ -74,35 +92,24 @@ public class NowDefinition {
         return this;
     }
 
-    public Integer getRank() {
-        return this.rank;
-    }
-
-    public NowDefinition setRank(Integer rank) {
-        this.rank = rank;
+    public NowDefinition setVersion(ZonedDateTime version) {
+        this.version = version;
         return this;
     }
 
-    public String getText() {
-        return this.text;
-    }
-
-    public NowDefinition setText(String text) {
-        this.text = text;
+    public NowDefinition setStartDate(Date startDate) {
+        this.startDate = startDate;
         return this;
     }
 
-    public String getWelshText() {
-        return this.welshText;
-    }
-
-    public NowDefinition setWelshText(String welshText) {
-        this.welshText = welshText;
+    public NowDefinition setEndDate(Date endDate) {
+        this.endDate = endDate;
         return this;
     }
 
-    public Integer getUrgentTimeLimitInMinutes() {
-        return this.urgentTimeLimitInMinutes;
+    public NowDefinition setResultDefinitions(List<ResultDefinitions> resultDefinitions) {
+        this.resultDefinitions = resultDefinitions;
+        return this;
     }
 
     public NowDefinition setUrgentTimeLimitInMinutes(Integer urgentTimeLimitInMinutes) {
@@ -110,12 +117,7 @@ public class NowDefinition {
         return this;
     }
 
-    public List<ResultDefinitions> getResultDefinitions() {
-        return this.resultDefinitions;
-    }
-
-    public NowDefinition setResultDefinitions(List<ResultDefinitions> resultDefinitions) {
-        this.resultDefinitions = resultDefinitions;
-        return this;
+    public static NowDefinition now() {
+        return new NowDefinition();
     }
 }

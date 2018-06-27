@@ -1,24 +1,27 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class Plea {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private java.util.UUID id;
+public class Plea implements Serializable {
+
+    private UUID id;
 
     private String value;
 
     private String date;
 
-    private java.util.UUID enteredHearingId;
+    private UUID enteredHearingId;
 
     public static Plea plea() {
         return new Plea();
     }
 
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public Plea setId(java.util.UUID id) {
+    public Plea setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -41,11 +44,11 @@ public class Plea {
         return this;
     }
 
-    public java.util.UUID getEnteredHearingId() {
+    public UUID getEnteredHearingId() {
         return this.enteredHearingId;
     }
 
-    public Plea setEnteredHearingId(java.util.UUID enteredHearingId) {
+    public Plea setEnteredHearingId(UUID enteredHearingId) {
         this.enteredHearingId = enteredHearingId;
         return this;
     }

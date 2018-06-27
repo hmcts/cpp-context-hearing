@@ -1,6 +1,9 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class GenerateNowsCommand {
+import java.io.Serializable;
+
+
+public class GenerateNowsCommand implements Serializable {
 
     private Hearing hearing;
 

@@ -1,12 +1,15 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class NowTypes {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private java.util.UUID id;
+public class NowTypes implements Serializable {
 
-    private String description;
+    private UUID id;
 
     private String templateName;
+
+    private String description;
 
     private Integer rank;
 
@@ -22,21 +25,12 @@ public class NowTypes {
         return new NowTypes();
     }
 
-    public java.util.UUID getId() {
+    public UUID getId() {
         return this.id;
     }
 
-    public NowTypes setId(java.util.UUID id) {
+    public NowTypes setId(UUID id) {
         this.id = id;
-        return this;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    public NowTypes setDescription(String description) {
-        this.description = description;
         return this;
     }
 
@@ -46,6 +40,15 @@ public class NowTypes {
 
     public NowTypes setTemplateName(String templateName) {
         this.templateName = templateName;
+        return this;
+    }
+
+    public String getDescription() {
+        return this.description;
+    }
+
+    public NowTypes setDescription(String description) {
+        this.description = description;
         return this;
     }
 

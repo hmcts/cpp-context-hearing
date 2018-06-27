@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-public class LesserOrAlternativeOffence {
+import java.io.Serializable;
+import java.util.UUID;
 
-    private String offenceTypeId;
+public class LesserOrAlternativeOffence implements Serializable {
+
+    private UUID offenceTypeId;
 
     private String code;
 
@@ -14,11 +17,11 @@ public class LesserOrAlternativeOffence {
         return new LesserOrAlternativeOffence();
     }
 
-    public String getOffenceTypeId() {
+    public UUID getOffenceTypeId() {
         return this.offenceTypeId;
     }
 
-    public LesserOrAlternativeOffence setOffenceTypeId(String offenceTypeId) {
+    public LesserOrAlternativeOffence setOffenceTypeId(UUID offenceTypeId) {
         this.offenceTypeId = offenceTypeId;
         return this;
     }
