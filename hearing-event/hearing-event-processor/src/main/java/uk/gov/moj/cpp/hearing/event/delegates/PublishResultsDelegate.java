@@ -60,7 +60,7 @@ public class PublishResultsDelegate {
 
         Set<Variant> variantSet = new HashSet<>(resultsShared.getVariantDirectory());
 
-        if(nonNull(newVariants)) {
+        if (nonNull(newVariants)) {
             variantSet.removeAll(newVariants);
             variantSet.addAll(newVariants);
         }
@@ -227,18 +227,23 @@ public class PublishResultsDelegate {
                         .setVerdict(
                                 input.getVerdicts().values().stream()
                                         .filter(v -> v.getOffenceId().equals(o.getId()))
-                                        .map(v -> Verdict.verdict()
-                                                .setVerdictCategory(v.getCategory())
-                                                .setEnteredHearingId(v.getHearingId())
-                                                .setNumberOfJurors(v.getNumberOfJurors())
-                                                .setNumberOfSplitJurors(String.format("%s-%s",
-                                                        v.getNumberOfJurors() - v.getNumberOfSplitJurors(),
-                                                        v.getNumberOfSplitJurors()
-                                                ))
-                                                // guilty of lesser offence.
-                                                .setUnanimous(v.getUnanimous())
-                                                .setVerdictDate(v.getVerdictDate())
-                                                .setVerdictDescription(v.getDescription())
+                                        .map(v -> {
+
+                                                    final String numberOfSplitJurors = v.getNumberOfJurors() != null && v.getNumberOfSplitJurors() != null ?
+                                                            String.format("%s-%s",
+                                                                    v.getNumberOfJurors() - v.getNumberOfSplitJurors(),
+                                                                    v.getNumberOfSplitJurors()
+                                                            ) : null;
+
+                                                    return Verdict.verdict()
+                                                            .setVerdictCategory(v.getCategory())
+                                                            .setEnteredHearingId(v.getHearingId())
+                                                            .setNumberOfJurors(v.getNumberOfJurors())
+                                                            .setNumberOfSplitJurors(numberOfSplitJurors)
+                                                            .setUnanimous(v.getUnanimous())
+                                                            .setVerdictDate(v.getVerdictDate())
+                                                            .setVerdictDescription(v.getDescription());
+                                                }
                                         )
                                         .findFirst()
                                         .orElse(null)
