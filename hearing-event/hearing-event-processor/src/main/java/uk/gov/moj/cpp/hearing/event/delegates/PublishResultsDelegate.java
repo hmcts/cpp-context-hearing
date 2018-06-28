@@ -4,9 +4,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.nows.NowVariantUtil;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -34,11 +32,10 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.moj.cpp.hearing.message.shareResults.Variant.variant;
 
@@ -62,8 +59,11 @@ public class PublishResultsDelegate {
     public void shareResults(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, List<Variant> newVariants) {
 
         Set<Variant> variantSet = new HashSet<>(resultsShared.getVariantDirectory());
-        variantSet.removeAll(newVariants);
-        variantSet.addAll(newVariants);
+
+        if(nonNull(newVariants)) {
+            variantSet.removeAll(newVariants);
+            variantSet.addAll(newVariants);
+        }
 
         final ShareResultsMessage shareResultsMessage = ShareResultsMessage.shareResultsMessage()
                 .setHearing(Hearing.hearing()
