@@ -75,7 +75,7 @@ public class PublishResultsDelegate {
                         .setSharedResultLines(mapSharedResultsLines(resultsShared))
                         .setStartDateTime(resultsShared.getHearing().getHearingDays().get(0))
                 )
-                .setVariantDirectory(mapVariantDirectory(new ArrayList<>(variantSet)))
+                .setVariants(mapVariantDirectory(new ArrayList<>(variantSet)))
                 .setSharedTime(ZonedDateTime.now());
 
         sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
