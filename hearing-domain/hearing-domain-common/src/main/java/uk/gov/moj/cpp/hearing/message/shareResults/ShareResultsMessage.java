@@ -11,10 +11,10 @@ public class ShareResultsMessage {
 
     private ZonedDateTime sharedTime;
 
-    private List<Variant> variantDirectory;
+    private List<Variant> variants;
 
-    public List<Variant> getVariantDirectory() {
-        return variantDirectory;
+    public List<Variant> getVariants() {
+        return variants;
     }
 
     public Hearing getHearing() {
@@ -35,8 +35,8 @@ public class ShareResultsMessage {
         return this;
     }
 
-    public ShareResultsMessage setVariantDirectory(final List<Variant> variantDirectory) {
-        this.variantDirectory = new ArrayList<>(variantDirectory);
+    public ShareResultsMessage setVariants(final List<Variant> variants) {
+        this.variants = new ArrayList<>(variants);
         return this;
     }
 
