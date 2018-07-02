@@ -40,6 +40,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CompletedResultLineStatusTemplates.completedResultLineStatus;
@@ -91,9 +93,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -143,9 +145,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId_1, completedResultLineStatus(resultLineId_1)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -201,9 +203,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -226,9 +228,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -263,9 +265,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -298,9 +300,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -342,9 +344,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -394,9 +396,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -438,9 +440,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -490,9 +492,9 @@ public class NowsGeneratorTest {
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -552,9 +554,9 @@ public class NowsGeneratorTest {
                 ))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 
@@ -591,9 +593,9 @@ public class NowsGeneratorTest {
                 ))
                 .build();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
-        when(referenceDataService.getResultDefinitionById(resultDefinition.getId())).thenReturn(resultDefinition);
+        when(referenceDataService.getResultDefinitionById(any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
         List<Nows> nows = target.createNows(resultsShared);
 

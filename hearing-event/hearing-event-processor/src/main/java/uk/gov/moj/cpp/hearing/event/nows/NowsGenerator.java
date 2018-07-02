@@ -16,8 +16,11 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +50,11 @@ public class NowsGenerator {
 
     public List<Nows> createNows(ResultsShared resultsShared) {
 
+        final LocalDate referenceDate = resultsShared.getHearing().getHearingDays().stream()
+                .map(ZonedDateTime::toLocalDate)
+                .min(Comparator.comparing(LocalDate::toEpochDay))
+                .orElse(null);
+
         final GenerateVariantDecisionMakerFactory generateVariantDecisionMakerFactory = new GenerateVariantDecisionMakerFactory()
                 .setVariantDirectory(resultsShared.getVariantDirectory())
                 .setCompletedResultLineStatuses(resultsShared.getCompletedResultLinesStatus())
@@ -64,14 +72,14 @@ public class NowsGenerator {
                             .filter(resultLine -> resultLine.getDefendantId().equals(defendant.getId()))
                             .collect(toList());
 
-                    nows.addAll(createNowsForDefendant(defendant, completedResultLines4Defendant, generateVariantDecisionMakerFactory));
+                    nows.addAll(createNowsForDefendant(referenceDate, defendant, completedResultLines4Defendant, generateVariantDecisionMakerFactory));
                 }
         );
 
         return nows;
     }
 
-    private List<Nows> createNowsForDefendant(Defendant defendant, List<CompletedResultLine> resultLines,
+    private List<Nows> createNowsForDefendant(LocalDate referenceDate, Defendant defendant, List<CompletedResultLine> resultLines,
                                               GenerateVariantDecisionMakerFactory generateVariantDecisionMakerFactory) {
 
         final Set<UUID> completedResultDefinitionIds = resultLines.stream()
@@ -80,7 +88,7 @@ public class NowsGenerator {
 
         final List<Nows> results = new ArrayList<>();
 
-        for (final NowDefinition nowDefinition : findNowDefinitions(resultLines)) {
+        for (final NowDefinition nowDefinition : findNowDefinitions(referenceDate, resultLines)) {
 
             if (anyMandatoryResultLineNotPresent(completedResultDefinitionIds, nowDefinition)) {
                 return Collections.emptyList(); //This will suspend any now generation for the defendant.
@@ -93,7 +101,7 @@ public class NowsGenerator {
             final List<CompletedResultLine> resultLines4Now = resultLines.stream()
                     .filter(l -> resultDefinitionIds4Now.contains(l.getResultDefinitionId()))
                     .collect(toList());
-            final Nows nows = createNow(nowDefinition, resultLines4Now, defendant.getId(), generateVariantDecisionMakerFactory.buildFor(defendant.getId(), nowDefinition));
+            final Nows nows = createNow(referenceDate, nowDefinition, resultLines4Now, defendant.getId(), generateVariantDecisionMakerFactory.buildFor(defendant.getId(), nowDefinition));
             if (!nows.getMaterials().isEmpty()) {
                 results.add(nows);
             }
@@ -101,13 +109,13 @@ public class NowsGenerator {
         return results;
     }
 
-    private Nows createNow(final NowDefinition nowDefinition, final List<CompletedResultLine> resultLines4Now, final UUID defendantId,
+    private Nows createNow(LocalDate referenceDate, final NowDefinition nowDefinition, final List<CompletedResultLine> resultLines4Now, final UUID defendantId,
                            final GenerateVariantDecisionMaker generateVariantDecisionMaker) {
 
         //The userGroups of the prompts are not bounded by the userGroups of the resultDefinition.  I'm told that the userGroups
         //of the resultDefinition is more of a default for when no prompts are present.
 
-        final Map<NowVariant, List<String>> variantToUserGroupsMappings = calculateVariants(resultLines4Now);
+        final Map<NowVariant, List<String>> variantToUserGroupsMappings = calculateVariants(referenceDate, resultLines4Now);
 
         final List<Material> materials = new ArrayList<>();
 
@@ -124,7 +132,7 @@ public class NowsGenerator {
 
             final List<NowResult> nowResults = resultLines4Variant.stream()
                     .map(resultLine -> {
-                        final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId());
+                        final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(referenceDate, resultLine.getResultDefinitionId());
 
                         final List<PromptRef> promptRefs = resultDefinition.getPrompts().stream()
                                 .filter(prompt -> variant.getResultPromptIds().contains(prompt.getId())) //filter out prompts that this variant should not have.
@@ -163,13 +171,13 @@ public class NowsGenerator {
                 .setMaterials(materials);
     }
 
-    private Map<NowVariant, List<String>> calculateVariants(final List<CompletedResultLine> resultLines4Now) {
+    private Map<NowVariant, List<String>> calculateVariants(final LocalDate referenceDate, final List<CompletedResultLine> resultLines4Now) {
         final Map<NowVariant, List<String>> variantToUserGroupsMappings = new HashMap<>();
 
-        for (final String userGroup : extractUserGroupsFromResultLinesAndPrompts(resultLines4Now)) {
+        for (final String userGroup : extractUserGroupsFromResultLinesAndPrompts(referenceDate, resultLines4Now)) {
 
             final Set<UUID> resultDefinitionsIds4UserGroup = resultLines4Now.stream()
-                    .map(resultLine -> referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId()))
+                    .map(resultLine -> referenceDataService.getResultDefinitionById(referenceDate, resultLine.getResultDefinitionId()))
                     .filter(resultDefinition ->
                             resultDefinition.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)) ||
                                     resultDefinition.getPrompts().stream().anyMatch(p -> p.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
@@ -178,7 +186,7 @@ public class NowsGenerator {
                     .collect(toSet());
 
             final Set<UUID> resultPromptIds4UserGroup = resultLines4Now.stream()
-                    .map(resultLine -> referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId()))
+                    .map(resultLine -> referenceDataService.getResultDefinitionById(referenceDate, resultLine.getResultDefinitionId()))
                     .flatMap(resultDefinition -> resultDefinition.getPrompts().stream())
                     .filter(resultPrompt -> resultPrompt.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
                     .map(Prompt::getId)
@@ -190,11 +198,11 @@ public class NowsGenerator {
         return variantToUserGroupsMappings;
     }
 
-    private Set<String> extractUserGroupsFromResultLinesAndPrompts(final List<CompletedResultLine> resultLines) {
+    private Set<String> extractUserGroupsFromResultLinesAndPrompts(final LocalDate referenceDate, final List<CompletedResultLine> resultLines) {
 
         return resultLines.stream()
                 .flatMap(resultLine -> {
-                            final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getResultDefinitionId());
+                            final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(referenceDate, resultLine.getResultDefinitionId());
 
                             return Stream.concat(
                                     resultDefinition.getUserGroups().stream(),
@@ -205,9 +213,9 @@ public class NowsGenerator {
                 ).collect(toSet());
     }
 
-    private Set<NowDefinition> findNowDefinitions(final List<CompletedResultLine> resultLines) {
+    private Set<NowDefinition> findNowDefinitions(final LocalDate referenceDate, final List<CompletedResultLine> resultLines) {
         return resultLines.stream()
-                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultLine.getResultDefinitionId()))
+                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(referenceDate, resultLine.getResultDefinitionId()))
                 .filter(Objects::nonNull)
                 .collect(toSet());
     }

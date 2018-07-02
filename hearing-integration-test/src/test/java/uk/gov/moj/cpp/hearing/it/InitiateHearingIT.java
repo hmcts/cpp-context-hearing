@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import com.jayway.jsonpath.JsonPath;
 import org.junit.Test;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
@@ -133,7 +134,7 @@ public class InitiateHearingIT extends AbstractIT {
                         updatePleaTemplate(hearingOne.getFirstOffenceIdForFirstDefendant(), TestTemplates.PleaValueType.GUILTY).build())
         );
 
-        final InitiateHearingCommandHelper hearingTwo = new InitiateHearingCommandHelper(
+        final InitiateHearingCommandHelper hearingTwo = h(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
                     InitiateHearingCommandHelper h = h(i);
 
@@ -145,7 +146,7 @@ public class InitiateHearingIT extends AbstractIT {
                 }))
         );
 
-        poll(requestParameters(getURL("hearing.get.hearing", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing+json"))
+        ResponseData until = poll(requestParameters(getURL("hearing.get.hearing", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing+json"))
                 .timeout(10, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),

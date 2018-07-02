@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AllResultDefinitions {
 
-    private List<ResultDefinition> resultDefinitions;
+    private List<ResultDefinition> resultDefinitions = new ArrayList<>();
 
     public static AllResultDefinitions allResultDefinitions() {
         return new AllResultDefinitions();

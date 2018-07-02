@@ -1,22 +1,23 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
-import java.util.Arrays;
+import java.time.LocalDate;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,42 +29,47 @@ public class NowsReferenceCacheTest {
     @InjectMocks
     NowsReferenceCache target;
 
-    final AllNows allNows = new AllNows();
-    final ResultDefinition resultDefinition = ResultDefinition.resultDefinition().setId(UUID.randomUUID());
-    final AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
-            Arrays.asList(resultDefinition)
-    );
-
-    @Before
-    public void before() {
-        Mockito.when(nowsReferenceDataLoader.loadAllNowsReference(Mockito.any())).
-                thenReturn(allNows);
-        Mockito.when(nowsReferenceDataLoader.loadAllResultDefinitions(Mockito.any())).
-                thenReturn(allResultDefinitions);
-    }
-
-
     @Test
-    public void testNowsDataLoad() throws Exception {
-        target.reload();
-        assertThat(target.getAllNows(), is(allNows));
+    public void loadAllNowsReference_shouldReturnValue() throws Exception {
+
+        final AllNows allNows = new AllNows();
+
+        final LocalDate referenceDate = LocalDate.now();
+
+        when(nowsReferenceDataLoader.loadAllNowsReference(referenceDate)).thenReturn(allNows);
+
+        final AllNows results = target.getAllNows(referenceDate);
+
+        assertThat(results, is(allNows));
     }
 
     @Test
-    public void testResultDefinitionLoad() throws Exception {
-        ResultDefinition result = target.getResultDefinitionById(resultDefinition.getId());
-        assertThat(result, is(resultDefinition));
-    }
+    public void getResultDefinitionById_shouldReturnValue() {
+        final AllResultDefinitions allResultDefinitions = new AllResultDefinitions()
+                .setResultDefinitions(asList(
+                        ResultDefinition.resultDefinition()
+                                .setId(randomUUID())
+                ));
 
+        final LocalDate referenceDate = LocalDate.now();
+
+        when(nowsReferenceDataLoader.loadAllResultDefinitions(referenceDate)).thenReturn(allResultDefinitions);
+
+        final ResultDefinition results = target.getResultDefinitionById(referenceDate, allResultDefinitions.getResultDefinitions().get(0).getId());
+
+        assertThat(results, is(allResultDefinitions.getResultDefinitions().get(0)));
+    }
 
     @Test
-    public void testNowsDataLoadSucceed() throws Exception {
-        AllNows allNowsIn = new AllNows();
-        Mockito.when(nowsReferenceDataLoader.loadAllNowsReference(Mockito.any())).thenReturn(allNowsIn);
-        target.reload();
-        AllNows allNowsOut = target.getAllNows();
-        Assert.assertTrue(allNowsIn == allNowsOut);
+    public void getResultDefinitionById_whenResultIdIsInvalid_thenReturnNull() {
+        final AllResultDefinitions allResultDefinitions = new AllResultDefinitions();
+
+        final LocalDate referenceDate = LocalDate.now();
+
+        when(nowsReferenceDataLoader.loadAllResultDefinitions(referenceDate)).thenReturn(allResultDefinitions);
+
+        final ResultDefinition results = target.getResultDefinitionById(referenceDate, randomUUID());
+
+        assertThat(results, nullValue());
     }
-
-
 }

@@ -23,7 +23,10 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,12 +59,18 @@ public class GenerateNowsDelegate {
     }
 
     public void generateNows(Sender sender, JsonEnvelope event, List<Nows> nows, ResultsShared resultsShared) {
+
+        final LocalDate referenceDate = resultsShared.getHearing().getHearingDays().stream()
+                .map(ZonedDateTime::toLocalDate)
+                .min(Comparator.comparing(LocalDate::toEpochDay))
+                .orElse(null);
+
         final GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
                 .setHearing(
                         translateReferenceData(resultsShared)
                                 .setNows(nows)
                                 .setNowTypes(
-                                        findNowDefinitions(resultsShared.getCompletedResultLines())
+                                        findNowDefinitions(referenceDate, resultsShared.getCompletedResultLines())
                                                 .stream()
                                                 .map(resultDefinition -> NowTypes.nowTypes()
                                                         .setId(resultDefinition.getId())
@@ -150,9 +159,9 @@ public class GenerateNowsDelegate {
                 .setSharedResultLines(sharedResultLines);
     }
 
-    private Set<NowDefinition> findNowDefinitions(final List<CompletedResultLine> resultLines) {
+    private Set<NowDefinition> findNowDefinitions(final LocalDate referenceDate, final List<CompletedResultLine> resultLines) {
         return resultLines.stream()
-                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(resultLine.getResultDefinitionId()))
+                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(referenceDate, resultLine.getResultDefinitionId()))
                 .filter(Objects::nonNull)
                 .collect(toSet());
     }

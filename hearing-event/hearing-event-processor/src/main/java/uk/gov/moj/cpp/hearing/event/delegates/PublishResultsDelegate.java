@@ -28,8 +28,10 @@ import uk.gov.moj.cpp.hearing.message.shareResults.SharedResultLine;
 import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
 
 import javax.inject.Inject;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,6 +60,11 @@ public class PublishResultsDelegate {
 
     public void shareResults(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, List<Variant> newVariants) {
 
+        final LocalDate referenceDate = resultsShared.getHearing().getHearingDays().stream()
+                .map(ZonedDateTime::toLocalDate)
+                .min(Comparator.comparing(LocalDate::toEpochDay))
+                .orElse(null);
+
         Set<Variant> variantSet = new HashSet<>(resultsShared.getVariantDirectory());
 
         if (nonNull(newVariants)) {
@@ -75,17 +82,17 @@ public class PublishResultsDelegate {
                         .setSharedResultLines(mapSharedResultsLines(resultsShared))
                         .setStartDateTime(resultsShared.getHearing().getHearingDays().get(0))
                 )
-                .setVariants(mapVariantDirectory(new ArrayList<>(variantSet)))
+                .setVariants(mapVariantDirectory(referenceDate, new ArrayList<>(variantSet)))
                 .setSharedTime(ZonedDateTime.now());
 
         sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
                 .apply(this.objectToJsonObjectConverter.convert(shareResultsMessage)));
     }
 
-    private List<uk.gov.moj.cpp.hearing.message.shareResults.Variant> mapVariantDirectory(final List<Variant> updatedVariantDirectory) {
+    private List<uk.gov.moj.cpp.hearing.message.shareResults.Variant> mapVariantDirectory(final LocalDate referenceDate, final List<Variant> updatedVariantDirectory) {
         return updatedVariantDirectory.stream()
                 .map(variant -> {
-                            final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(variant.getKey().getNowsTypeId());
+                            final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(referenceDate, variant.getKey().getNowsTypeId());
                             return variant()
                                     .setKey(variant.getKey())
                                     .setMaterialId(variant.getValue().getMaterialId())
