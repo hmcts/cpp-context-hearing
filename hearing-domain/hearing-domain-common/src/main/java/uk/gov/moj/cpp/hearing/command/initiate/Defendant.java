@@ -34,6 +34,7 @@ public class Defendant implements Serializable {
     private List<DefendantCase> defendantCases;
     private List<Offence> offences;
 
+
     public Defendant() {
     }
 

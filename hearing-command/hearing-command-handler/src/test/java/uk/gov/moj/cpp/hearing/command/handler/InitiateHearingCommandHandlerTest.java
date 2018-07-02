@@ -17,7 +17,13 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Address;
+import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
+import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
+import uk.gov.moj.cpp.hearing.command.initiate.Judge;
+import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
@@ -31,6 +37,7 @@ import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,11 +48,11 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
@@ -53,9 +60,13 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitiateHearingCommandHandlerTest {
@@ -95,72 +106,77 @@ public class InitiateHearingCommandHandlerTest {
     @Test
     public void initiateHearing() throws Throwable {
 
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
 
-        final UUID caseId = initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCaseId();
-        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
 
-        setupMockedEventStream(hearingId, this.hearingEventStream, new NewModelHearingAggregate());
-
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(initiateHearingCommand));
+        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
 
         this.hearingCommandHandler.initiate(command);
 
-        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName("hearing.events.initiated"),
+        JsonEnvelope jsonEnvelope = verifyAppendAndGetArgumentFrom(this.hearingEventStream).findAny().get();
 
-                        payloadIsJson(allOf(
-
-                                withJsonPath("$.cases.[0].caseId", equalTo(caseId.toString())),
-                                withJsonPath("$.cases.[0].urn", is(initiateHearingCommand.getCases().get(0).getUrn())),
-                                withJsonPath("$.hearing.id", is(hearingId.toString())),
-                                withJsonPath("$.hearing.type", is(initiateHearingCommand.getHearing().getType())),
-
-                                withJsonPath("$.hearing.courtCentreId", is(initiateHearingCommand.getHearing().getCourtCentreId().toString())),
-                                withJsonPath("$.hearing.courtCentreName", is(initiateHearingCommand.getHearing().getCourtCentreName())),
-
-                                withJsonPath("$.hearing.courtRoomId", is(initiateHearingCommand.getHearing().getCourtRoomId().toString())),
-                                withJsonPath("$.hearing.courtRoomName", is(initiateHearingCommand.getHearing().getCourtRoomName())),
-
-                                withJsonPath("$.hearing.judge.id", is(initiateHearingCommand.getHearing().getJudge().getId().toString())),
-                                withJsonPath("$.hearing.judge.title", is(initiateHearingCommand.getHearing().getJudge().getTitle())),
-                                withJsonPath("$.hearing.judge.firstName", is(initiateHearingCommand.getHearing().getJudge().getFirstName())),
-                                withJsonPath("$.hearing.judge.lastName", is(initiateHearingCommand.getHearing().getJudge().getLastName())),
-
-                                withJsonPath("$.hearing.defendants.[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].personId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].firstName", is(initiateHearingCommand.getHearing().getDefendants().get(0).getFirstName())),
-                                withJsonPath("$.hearing.defendants.[0].lastName", is(initiateHearingCommand.getHearing().getDefendants().get(0).getLastName())),
-                                withJsonPath("$.hearing.defendants.[0].nationality", is(initiateHearingCommand.getHearing().getDefendants().get(0).getNationality())),
-                                withJsonPath("$.hearing.defendants.[0].gender", is(initiateHearingCommand.getHearing().getDefendants().get(0).getGender())),
-
-                                withJsonPath("$.hearing.defendants.[0].address.address1", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress1())),
-                                withJsonPath("$.hearing.defendants.[0].address.address2", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress2())),
-                                withJsonPath("$.hearing.defendants.[0].address.address3", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress3())),
-                                withJsonPath("$.hearing.defendants.[0].address.address4", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress4())),
-                                withJsonPath("$.hearing.defendants.[0].address.postCode", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getPostCode())),
-                                withJsonPath("$.hearing.defendants.[0].dateOfBirth", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDateOfBirth().toString())),
-                                withJsonPath("$.hearing.defendants.[0].defenceOrganisation", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefenceOrganisation())),
-                                withJsonPath("$.hearing.defendants.[0].interpreter.needed", is(initiateHearingCommand.getHearing().getDefendants().get(0).getInterpreter().isNeeded())),
-                                withJsonPath("$.hearing.defendants.[0].interpreter.language", is(initiateHearingCommand.getHearing().getDefendants().get(0).getInterpreter().getLanguage())),
-
-                                withJsonPath("$.hearing.defendants.[0].defendantCases.[0].caseId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getCaseId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].defendantCases.[0].bailStatus", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getBailStatus())),
-                                withJsonPath("$.hearing.defendants.[0].defendantCases.[0].custodyTimeLimitDate", is(
-                                        initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getCustodyTimeLimitDate().toString()
-                                )),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].offenceCode", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getOffenceCode())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].wording", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getWording())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].section", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getSection())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].startDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getStartDate().toString())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].orderIndex", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getOrderIndex())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].count", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCount())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].convictionDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getConvictionDate().toString()))
-
-                        ))).thatMatchesSchema()
+        assertThat(jsonEnvelope, convertTo(HearingInitiated.class, isBean(HearingInitiated.class)
+                .with(HearingInitiated::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getType, is(hearingOne.it().getHearing().getType()))
+                        .with(Hearing::getCourtCentreId, is(hearingOne.it().getHearing().getCourtCentreId()))
+                        .with(Hearing::getCourtCentreName, is(hearingOne.it().getHearing().getCourtCentreName()))
+                        .with(Hearing::getCourtRoomId, is(hearingOne.it().getHearing().getCourtRoomId()))
+                        .with(Hearing::getCourtRoomName, is(hearingOne.it().getHearing().getCourtRoomName()))
+                        .with(Hearing::getJudge, isBean(Judge.class)
+                                .with(Judge::getId, is(hearingOne.getJudge().getId()))
+                                .with(Judge::getTitle, is(hearingOne.getJudge().getTitle()))
+                                .with(Judge::getFirstName, is(hearingOne.getJudge().getFirstName()))
+                                .with(Judge::getLastName, is(hearingOne.getJudge().getLastName()))
+                        )
+                        .with(Hearing::getDefendants, first(
+                                isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantId()))
+                                        .with(Defendant::getPersonId, is(hearingOne.getFirstDefendant().getPersonId()))
+                                        .with(Defendant::getFirstName, is(hearingOne.getFirstDefendant().getFirstName()))
+                                        .with(Defendant::getLastName, is(hearingOne.getFirstDefendant().getLastName()))
+                                        .with(Defendant::getNationality, is(hearingOne.getFirstDefendant().getNationality()))
+                                        .with(Defendant::getGender, is(hearingOne.getFirstDefendant().getGender()))
+                                        .with(Defendant::getDateOfBirth, is(hearingOne.getFirstDefendant().getDateOfBirth()))
+                                        .with(Defendant::getDefenceOrganisation, is(hearingOne.getFirstDefendant().getDefenceOrganisation()))
+                                        .with(Defendant::getAddress, isBean(Address.class)
+                                                .with(Address::getAddress1, is(hearingOne.getFirstDefendant().getAddress().getAddress1()))
+                                                .with(Address::getAddress2, is(hearingOne.getFirstDefendant().getAddress().getAddress2()))
+                                                .with(Address::getAddress3, is(hearingOne.getFirstDefendant().getAddress().getAddress3()))
+                                                .with(Address::getAddress4, is(hearingOne.getFirstDefendant().getAddress().getAddress4()))
+                                                .with(Address::getPostCode, is(hearingOne.getFirstDefendant().getAddress().getPostCode()))
+                                        )
+                                        .with(Defendant::getInterpreter, isBean(Interpreter.class)
+                                                .with(Interpreter::getLanguage, is(hearingOne.getFirstDefendant().getInterpreter().getLanguage()))
+                                                .with(Interpreter::isNeeded, is(hearingOne.getFirstDefendant().getInterpreter().isNeeded()))
+                                        )
+                                        .with(Defendant::getDefendantCases, first(
+                                                isBean(DefendantCase.class)
+                                                        .with(DefendantCase::getCaseId, is(hearingOne.getFirstCaseForFirstDefendant().getCaseId()))
+                                                        .with(DefendantCase::getBailStatus, is(hearingOne.getFirstCaseForFirstDefendant().getBailStatus()))
+                                                        .with(DefendantCase::getCustodyTimeLimitDate, is(hearingOne.getFirstCaseForFirstDefendant().getCustodyTimeLimitDate()))
+                                                )
+                                        )
+                                        .with(Defendant::getOffences, first(
+                                                isBean(Offence.class)
+                                                        .with(Offence::getId, is(hearingOne.getFirstOffenceIdForFirstDefendant()))
+                                                        .with(Offence::getCaseId, is(hearingOne.getFirstCaseId()))
+                                                        .with(Offence::getTitle, is(hearingOne.getFirstOffence().getTitle()))
+                                                        .with(Offence::getOffenceCode, is(hearingOne.getFirstOffence().getOffenceCode()))
+                                                        .with(Offence::getWording, is(hearingOne.getFirstOffence().getWording()))
+                                                        .with(Offence::getLegislation, is(hearingOne.getFirstOffence().getLegislation()))
+                                                        .with(Offence::getOrderIndex, is(hearingOne.getFirstOffence().getOrderIndex()))
+                                                        .with(Offence::getCount, is(hearingOne.getFirstOffence().getCount()))
+                                                        .with(Offence::getSection, is(hearingOne.getFirstOffence().getSection()))
+                                                        .with(Offence::getStartDate, is(hearingOne.getFirstOffence().getStartDate()))
+                                                        .with(Offence::getEndDate, is(hearingOne.getFirstOffence().getEndDate()))
+                                                        .with(Offence::getConvictionDate, is(hearingOne.getFirstOffence().getConvictionDate()))
+                                                        .with(Offence::getPlea, is(nullValue()))
+                                        ))
+                                )
+                        )
+                )
         ));
     }
 

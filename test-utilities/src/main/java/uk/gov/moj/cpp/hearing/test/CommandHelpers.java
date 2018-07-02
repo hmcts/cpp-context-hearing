@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.test;
 
+
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
@@ -14,23 +16,23 @@ import java.util.UUID;
 
 public class CommandHelpers {
 
-    private CommandHelpers(){}
+    private CommandHelpers() {
+    }
 
-    public static InitiateHearingCommandHelper h(InitiateHearingCommand initiateHearingCommand){
+    public static InitiateHearingCommandHelper h(InitiateHearingCommand initiateHearingCommand) {
         return new InitiateHearingCommandHelper(initiateHearingCommand);
     }
 
-    public static UpdatePleaCommandHelper h(HearingUpdatePleaCommand hearingUpdatePleaCommand){
+    public static UpdatePleaCommandHelper h(HearingUpdatePleaCommand hearingUpdatePleaCommand) {
         return new UpdatePleaCommandHelper(hearingUpdatePleaCommand);
     }
 
-    public static UpdateVerdictCommandHelper h(HearingUpdateVerdictCommand hearingUpdateVerdictCommand){
+    public static UpdateVerdictCommandHelper h(HearingUpdateVerdictCommand hearingUpdateVerdictCommand) {
         return new UpdateVerdictCommandHelper(hearingUpdateVerdictCommand);
     }
 
     public static class InitiateHearingCommandHelper {
         private InitiateHearingCommand initiateHearingCommand;
-
 
         public InitiateHearingCommandHelper(InitiateHearingCommand initiateHearingCommand) {
             this.initiateHearingCommand = initiateHearingCommand;
@@ -38,6 +40,10 @@ public class CommandHelpers {
 
         public UUID getHearingId() {
             return initiateHearingCommand.getHearing().getId();
+        }
+
+        public Judge getJudge() {
+            return initiateHearingCommand.getHearing().getJudge();
         }
 
         public UUID getFirstCaseId() {
@@ -52,8 +58,16 @@ public class CommandHelpers {
             return initiateHearingCommand.getHearing().getDefendants().get(0).getId();
         }
 
+        public DefendantCase getFirstCaseForFirstDefendant() {
+            return initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0);
+        }
+
         public UUID getSecondDefendantId() {
             return initiateHearingCommand.getHearing().getDefendants().get(1).getId();
+        }
+
+        public Defendant getSecondDefendant() {
+            return initiateHearingCommand.getHearing().getDefendants().get(0);
         }
 
         public UUID getFirstOffenceIdForFirstDefendant() {
@@ -87,6 +101,10 @@ public class CommandHelpers {
 
         public DefendantCase getFirstDefendantCaseForFirstDefendant() {
             return this.initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0);
+        }
+
+        public Offence getFirstOffence() {
+            return this.initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0);
         }
     }
 
