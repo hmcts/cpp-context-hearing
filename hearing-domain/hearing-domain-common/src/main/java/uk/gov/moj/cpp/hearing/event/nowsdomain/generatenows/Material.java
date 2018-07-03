@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,11 +9,11 @@ public class Material implements Serializable {
 
     private UUID id;
 
-    private List<NowResult> nowResult;
+    private List<NowResult> nowResult = new ArrayList<>();
 
     private boolean amended;
 
-    private List<UserGroups> userGroups;
+    private List<UserGroups> userGroups = new ArrayList<>();
 
     public UUID getId() {
         return this.id;

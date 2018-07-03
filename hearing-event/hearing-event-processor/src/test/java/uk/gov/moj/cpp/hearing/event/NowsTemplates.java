@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.util.List;
@@ -38,21 +39,25 @@ public class NowsTemplates {
     public static List<Nows> basicNowsTemplate() {
         return singletonList(
                 Nows.nows()
-                        .setDefendantId(UUID.randomUUID())
-                        .setId(UUID.randomUUID())
+                        .setDefendantId(randomUUID())
+                        .setId(randomUUID())
+                        .setNowsTemplateName(STRING.next())
                         .setMaterials(singletonList(Material.material()
-                                        .setId(UUID.randomUUID())
+                                        .setId(randomUUID())
                                         .setNowResult(singletonList(NowResult.nowResult()
-                                                        .setSharedResultId(UUID.randomUUID())
+                                                        .setSharedResultId(randomUUID())
                                                         .setSequence(123)
                                                         .setPrompts(singletonList(PromptRef.promptRef()
+                                                                .setId(randomUUID())
                                                                 .setLabel("label1"))
                                                         )
                                                 )
                                         )
+                                        .setUserGroups(singletonList(UserGroups.userGroups().setGroup("Listing Officer")))
                                 )
                         )
-                        .setNowsTypeId(UUID.randomUUID())
+                        .setNowsTypeId(randomUUID())
+
         );
     }
 
@@ -120,6 +125,7 @@ public class NowsTemplates {
                                 .withResultDefinitionId(randomUUID())
                                 .withResultLabel(STRING.next())
                                 .withResultPrompts(singletonList(ResultPrompt.builder()
+                                        .withId(randomUUID())
                                         .withLabel(STRING.next())
                                         .withValue(STRING.next())
                                         .build()))

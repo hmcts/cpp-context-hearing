@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -30,7 +31,7 @@ public class NowsRequestedToOrderConvertorTest {
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getDescription(), is(nowsDocumentOrder.getOrderName()));
         assertThat(nowsRequested.getHearing().getCourtCentre().getCourtCentreName(), is(nowsDocumentOrder.getCourtCentreName()));
         assertThat("Cherie Blair", is(nowsDocumentOrder.getCourtClerkName()));
-        assertThat(getSharedResultLines(nowsRequested).get(0).getOrderedDate(), is(nowsDocumentOrder.getOrderDate()));
+        assertThat(ofNullable(getSharedResultLines(nowsRequested).get(0).getOrderedDate()).orElse(""), is(nowsDocumentOrder.getOrderDate()));
 
         assertThat(getDefendants(nowsRequested).get(0).getCases().get(0).getUrn(), is(nowsDocumentOrder.getCaseUrns().get(0)));
         assertThat(getDefendants(nowsRequested).get(0).getCases().get(1).getUrn(), is(nowsDocumentOrder.getCaseUrns().get(1)));

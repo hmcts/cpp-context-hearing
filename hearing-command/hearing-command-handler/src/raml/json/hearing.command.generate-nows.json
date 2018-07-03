@@ -177,6 +177,7 @@
             "label" : "Prison"
           } ]
         } ],
+        "amended" : false,
         "userGroups" : [ {
           "group" : "COURTCLERK"
         }, {

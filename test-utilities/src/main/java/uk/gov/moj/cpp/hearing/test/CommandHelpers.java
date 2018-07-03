@@ -9,6 +9,8 @@ import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
@@ -16,6 +18,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 public class CommandHelpers {
@@ -171,6 +174,10 @@ public class CommandHelpers {
             this.resultsShared = resultsShared;
         }
 
+        public ZonedDateTime getFirstHearingDay(){
+            return this.resultsShared.getHearing().getHearingDays().get(0);
+        }
+
         public UUID getHearingId(){
             return this.resultsShared.getHearing().getId();
         }
@@ -191,12 +198,28 @@ public class CommandHelpers {
             return resultsShared.getHearing().getDefendants().get(0);
         }
 
+        public Offence getFirstDefendantFirstOffence() {
+            return resultsShared.getHearing().getDefendants().get(0).getOffences().get(0);
+        }
+
         public DefendantCase getFirstDefendantCase() {
             return resultsShared.getHearing().getDefendants().get(0).getDefendantCases().get(0);
         }
 
         public CompletedResultLine getFirstCompletedResultLine(){
             return resultsShared.getCompletedResultLines().get(0);
+        }
+
+        public ResultPrompt getFirstCompletedResultLineFirstPrompt(){
+            return resultsShared.getCompletedResultLines().get(0).getPrompts().get(0);
+        }
+
+        public uk.gov.moj.cpp.hearing.command.initiate.Hearing getHearing() {
+            return this.resultsShared.getHearing();
+        }
+
+        public CourtClerk getCourtClerk(){
+            return this.resultsShared.getCourtClerk();
         }
     }
 }

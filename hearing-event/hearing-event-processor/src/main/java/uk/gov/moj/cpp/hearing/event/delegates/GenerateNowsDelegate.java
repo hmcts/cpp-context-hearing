@@ -6,19 +6,24 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Address;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Cases;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.CourtCentre;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Defendants;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Interpreter;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Offences;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Person;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Plea;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Verdict;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
@@ -29,10 +34,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -42,6 +47,7 @@ public class GenerateNowsDelegate {
 
     private static final String DEFENCE_COUNSEL_ATTENDEE_TYPE = "DefenseCounsel";
     private static final String PROSECUTION_COUNSEL_ATTENDEE_TYPE = "ProsecutionCounsel";
+    private static final String COURTCLERK_ATTENDEE_TYPE = "CourtClerk";
 
     private final Enveloper enveloper;
 
@@ -69,17 +75,18 @@ public class GenerateNowsDelegate {
                 .setHearing(
                         translateReferenceData(resultsShared)
                                 .setNows(nows)
-                                .setNowTypes(
-                                        findNowDefinitions(referenceDate, resultsShared.getCompletedResultLines())
-                                                .stream()
-                                                .map(resultDefinition -> NowTypes.nowTypes()
-                                                        .setId(resultDefinition.getId())
-                                                        .setDescription(resultDefinition.getName())
-                                                        .setJurisdiction(resultDefinition.getJurisdiction())
-                                                        .setPriority(ofNullable(resultDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
-                                                        .setRank(resultDefinition.getRank())
-                                                        .setTemplateName(resultDefinition.getTemplateName()))
-                                                .collect(toList())
+                                .setNowTypes(findNowDefinitions(referenceDate, resultsShared.getCompletedResultLines())
+                                        .stream()
+                                        .map(resultDefinition -> NowTypes.nowTypes()
+                                                .setId(resultDefinition.getId())
+                                                .setStaticText("Static Text N/A")
+                                                .setStaticTextWelsh("Welsh Static Text N/A")
+                                                .setDescription(resultDefinition.getName())
+                                                .setJurisdiction(resultDefinition.getJurisdiction())
+                                                .setPriority(ofNullable(resultDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
+                                                .setRank(resultDefinition.getRank())
+                                                .setTemplateName(resultDefinition.getTemplateName()))
+                                        .collect(toList())
                                 )
 
                 );
@@ -111,6 +118,13 @@ public class GenerateNowsDelegate {
                 )
         );
 
+        attendees.add(
+                Attendees.attendees()
+                        .setType(COURTCLERK_ATTENDEE_TYPE)
+                        .setFirstName(resultsShared.getCourtClerk().getFirstName())
+                        .setLastName(resultsShared.getCourtClerk().getLastName())
+        );
+
         final List<SharedResultLines> sharedResultLines = resultsShared.getCompletedResultLines().stream().map(
                 completedRl -> SharedResultLines.sharedResultLines()
                         .setId(completedRl.getId())
@@ -122,41 +136,89 @@ public class GenerateNowsDelegate {
                         .setPrompts(
                                 completedRl.getPrompts().stream().map(
                                         pIn -> Prompts.prompts()
+                                                .setId(pIn.getId())
+                                                .setLabel(pIn.getLabel())
+                                                .setValue(pIn.getValue())
                                 ).collect(Collectors.toList())
                         )
         ).collect(Collectors.toList());
 
+        final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearingIn = resultsShared.getHearing();
+
         return Hearing.hearing()
                 .setId(resultsShared.getHearing().getId())
-                .setDefendants(
-                        resultsShared.getHearing().getDefendants().stream()
-                                .map(defendant -> Defendants.defendants()
-                                        .setId(defendant.getId())
-                                        .setPerson(Person.person()
-                                                .setId(defendant.getPersonId())
-                                                .setFirstName(defendant.getFirstName())
-                                                .setLastName(defendant.getLastName())
-                                                .setDateOfBirth(defendant.getDateOfBirth().toString())
-                                                .setNationality(defendant.getNationality())
-                                                .setGender(defendant.getGender())
-                                                .setAddress(
-                                                        Address.address()
-                                                                .setAddress1(defendant.getAddress().getAddress1())
-                                                                .setPostCode(defendant.getAddress().getPostCode())))
-                                        .setCases(
-                                                defendant.getDefendantCases().stream().map(
-                                                        caseIn -> Cases.cases()
-                                                                .setId(caseIn.getCaseId()))
-                                                        .collect(toList()))
-                                        .setInterpreter(
-                                                Optional.of(defendant).map(Defendant::getInterpreter).map(
-                                                        i -> Interpreter.interpreter().setLanguage(i.getLanguage())).orElse(null))
-
-                                )
-                                .collect(toList())
+                .setHearingDates(hearingIn.getHearingDays())
+                .setCourtCentre(CourtCentre.courtCentre()
+                        .setCourtCentreId(hearingIn.getCourtCentreId())
+                        .setCourtCentreName(hearingIn.getCourtCentreName())
+                        .setCourtRoomId(hearingIn.getCourtRoomId())
+                        .setCourtRoomName(hearingIn.getCourtRoomName()))
+                .setDefendants(resultsShared.getHearing().getDefendants().stream()
+                        .map(defendant -> Defendants.defendants()
+                                .setId(defendant.getId())
+                                .setPerson(Person.person()
+                                        .setId(defendant.getPersonId())
+                                        .setFirstName(defendant.getFirstName())
+                                        .setLastName(defendant.getLastName())
+                                        .setDateOfBirth(defendant.getDateOfBirth().toString())
+                                        .setNationality(defendant.getNationality())
+                                        .setGender(defendant.getGender())
+                                        .setAddress(Address.address()
+                                                .setAddress1(defendant.getAddress().getAddress1())
+                                                .setPostCode(defendant.getAddress().getPostCode())))
+                                .setCases(defendant.getDefendantCases().stream()
+                                        .map(caseIn -> Cases.cases()
+                                                .setId(caseIn.getCaseId())
+                                                .setOffences(defendant.getOffences().stream()
+                                                        .filter(offence -> offence.getCaseId().equals(caseIn.getCaseId()))
+                                                        .map(offIn -> Offences.offences()
+                                                                .setId(offIn.getId())
+                                                                .setCode(offIn.getOffenceCode())
+                                                                .setStartDate(offIn.getStartDate())
+                                                                .setEndDate(offIn.getEndDate())
+                                                                .setConvictionDate(offIn.getConvictionDate())
+                                                                .setWording(offIn.getWording())
+                                                                .setPlea(ofNullable(offIn.getPlea())
+                                                                        .map(p -> Plea.plea()
+                                                                                .setId(p.getId())
+                                                                                .setDate(p.getPleaDate())
+                                                                                .setValue(p.getValue())
+                                                                        )
+                                                                        .orElse(null)
+                                                                )
+                                                                .setVerdict(resultsShared.getVerdicts().values().stream()
+                                                                        .filter(v -> v.getOffenceId().equals(offIn.getId()))
+                                                                        .map(v -> Verdict.verdict()
+                                                                                .setTypeId(v.getVerdictTypeId())
+                                                                                .setEnteredHearingId(v.getHearingId())
+                                                                                .setNumberOfJurors(v.getNumberOfJurors())
+                                                                                .setNumberOfSplitJurors(formatSplitJurors(v))
+                                                                                .setUnanimous(v.getUnanimous())
+                                                                                .setVerdictCategory(v.getCategory())
+                                                                                .setVerdictDate(v.getVerdictDate())
+                                                                                .setVerdictDescription(v.getDescription())
+                                                                        )
+                                                                        .findFirst()
+                                                                        .orElse(null)
+                                                                )
+                                                        )
+                                                        .collect(toList())
+                                                ))
+                                        .collect(toList()))
+                                .setInterpreter(of(defendant)
+                                        .map(Defendant::getInterpreter)
+                                        .map(i -> Interpreter.interpreter().setLanguage(i.getLanguage()))
+                                        .orElse(null))
+                        )
+                        .collect(toList())
                 )
                 .setAttendees(attendees)
                 .setSharedResultLines(sharedResultLines);
+    }
+
+    private String formatSplitJurors(VerdictUpsert v) {
+        return v.getNumberOfJurors() == null || v.getNumberOfSplitJurors() == null ? "" :
+                String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors());
     }
 
     private Set<NowDefinition> findNowDefinitions(final LocalDate referenceDate, final List<CompletedResultLine> resultLines) {

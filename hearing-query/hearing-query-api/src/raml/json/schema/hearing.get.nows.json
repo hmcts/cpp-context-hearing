@@ -4,7 +4,7 @@
   "definitions": {},
   "$schema": "http://json-schema.org/draft-04/schema#",
   "properties": {
-    "material": {
+    "materials": {
       "type": "array",
       "items": {
         "type": "object",

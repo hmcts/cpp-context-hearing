@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,7 +14,7 @@ public class Hearing implements Serializable {
 
     private String startDateTime;
 
-    private List<String> hearingDates;
+    private List<ZonedDateTime> hearingDates;
 
     private CourtCentre courtCentre;
 
@@ -58,11 +59,11 @@ public class Hearing implements Serializable {
         return this;
     }
 
-    public List<String> getHearingDates() {
+    public List<ZonedDateTime> getHearingDates() {
         return this.hearingDates;
     }
 
-    public Hearing setHearingDates(List<String> hearingDates) {
+    public Hearing setHearingDates(List<ZonedDateTime> hearingDates) {
         this.hearingDates = new ArrayList<>(hearingDates);
         return this;
     }

@@ -46,14 +46,18 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
@@ -165,7 +169,7 @@ public class TestTemplates {
                     .setCases(asList(caseTemplate(caseId)))
                     .setHearing(
                             hearingTemplate()
-                            .setDefendants(asList(defendantTemplate(caseId)))
+                                    .setDefendants(asList(defendantTemplate(caseId)))
                     );
         }
 
@@ -175,7 +179,7 @@ public class TestTemplates {
                     .setUrn(STRING.next());
         }
 
-        public static Hearing hearingTemplate(){
+        public static Hearing hearingTemplate() {
             final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
             return Hearing.hearing()
                     .setId(randomUUID())
@@ -420,9 +424,10 @@ public class TestTemplates {
 
     public static class CompletedResultLineStatusTemplates {
 
-        private CompletedResultLineStatusTemplates(){}
+        private CompletedResultLineStatusTemplates() {
+        }
 
-        public static CompletedResultLineStatus completedResultLineStatus(UUID resultLineId){
+        public static CompletedResultLineStatus completedResultLineStatus(UUID resultLineId) {
             final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
             return CompletedResultLineStatus.builder()
                     .withId(resultLineId)
@@ -540,7 +545,7 @@ public class TestTemplates {
                 uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing.hearing()
                         .setId(hearingId)
                         .setStartDateTime("2016-06-01T10:00:00Z")
-                        .setHearingDates(Arrays.asList("2016-06-01T10:00:00Z"))
+                        .setHearingDates(singletonList(ZonedDateTime.parse("2016-06-01T10:00:00Z")))
                         .setCourtCentre(CourtCentre.courtCentre()
                                 .setCourtCentreName("Liverpool Crown Court")
                                 .setCourtRoomId(UUID.randomUUID())
@@ -610,12 +615,12 @@ public class TestTemplates {
                                                                 Offences.offences()
                                                                         .setId(offenceId)
                                                                         .setCode("OF61131")
-                                                                        .setConvictionDate("2017-08-02")
+                                                                        .setConvictionDate(LocalDate.parse("2017-08-02"))
                                                                         .setPlea(
                                                                                 uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Plea.plea()
                                                                                         .setId(UUID.randomUUID())
                                                                                         .setValue("NOT GUILTY")
-                                                                                        .setDate("2017-02-02")
+                                                                                        .setDate(LocalDate.parse("2017-02-02"))
                                                                                         .setEnteredHearingId(UUID.randomUUID())
                                                                         )
                                                                         .setVerdict(
@@ -631,19 +636,16 @@ public class TestTemplates {
                                                                                                         .setWording("On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you did not have a ticket")
                                                                                         )
                                                                                         .setNumberOfSplitJurors("9-1")
-                                                                                        .setVerdictDate("2017-02-02")
+                                                                                        .setVerdictDate(LocalDate.parse("2017-02-02"))
                                                                                         .setNumberOfJurors(10)
                                                                                         .setUnanimous(false)
                                                                                         .setEnteredHearingId(UUID.randomUUID())
                                                                         )
                                                                         .setWording("On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you were taking a ticket which had been issued for use by another person on terms that it is not transferable")
-                                                                        .setStartDate("2016-06-21")
-                                                                        .setEndDate("2017-08-01")
-
+                                                                        .setStartDate(LocalDate.parse("2016-06-21"))
+                                                                        .setEndDate(LocalDate.parse("2017-08-01"))
                                                         ))
                                         ))
-
-
                         ))
                         .setSharedResultLines(Arrays.asList(
                                 SharedResultLines.sharedResultLines()
@@ -709,7 +711,7 @@ public class TestTemplates {
 
                         ))
                         .setNows(
-                                Arrays.asList(
+                                Collections.singletonList(
                                         Nows.nows()
                                                 .setId(UUID.randomUUID())
                                                 .setNowsTypeId(nowsTypeId)
@@ -776,5 +778,26 @@ public class TestTemplates {
         );
     }
 
+    public static class NowDefinitionTemplates {
+        private NowDefinitionTemplates() {
+        }
+
+        public static NowDefinition standardNowDefinition() {
+            return NowDefinition.now()
+                    .setId(UUID.randomUUID())
+                    .setJurisdiction(STRING.next())
+                    .setName(STRING.next())
+                    .setRank(INTEGER.next())
+                    .setJurisdiction(STRING.next())
+                    .setTemplateName(STRING.next())
+                    .setUrgentTimeLimitInMinutes(INTEGER.next())
+                    .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions()
+                            .setId(randomUUID())
+                            .setMandatory(true)
+                            .setPrimary(true)
+                            .setSequence(1)
+                    ));
+        }
+    }
 
 }

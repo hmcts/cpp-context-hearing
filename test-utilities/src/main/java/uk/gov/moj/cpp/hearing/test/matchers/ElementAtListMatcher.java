@@ -74,11 +74,11 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List> {
     }
 
     public static ElementAtListMatcher fourth(Matcher<?> matcher) {
-        return new ElementAtListMatcher(2, matcher);
+        return new ElementAtListMatcher(3, matcher);
     }
 
     public static ElementAtListMatcher fifth(Matcher<?> matcher) {
-        return new ElementAtListMatcher(2, matcher);
+        return new ElementAtListMatcher(4, matcher);
     }
 
     public static ElementAtListMatcher elementAt(int index, Matcher<?> matcher) {

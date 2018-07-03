@@ -89,94 +89,95 @@
       } ]
     } ],
     "sharedResultLines" : [ {
-      "id" : "54cae487-9a7f-4881-9874-f364b889c00c",
-      "defendantId" : "43e811c1-954d-4255-96c6-71886dee9daf",
-      "caseId" : "a2ce22f3-c87f-4038-bab3-21b675db4736",
-      "offenceId" : "c44330f4-2b6c-4472-8f70-7084d1f53a26",
+      "id" : "9f128b26-81d5-4743-a8c5-15ebb8413627",
+      "defendantId" : "f3c65ffb-f6e9-49b0-9b53-8bf2cafaf7d4",
+      "caseId" : "dab6964b-335b-4732-abb5-ca59c7cbdd07",
+      "offenceId" : "96ae8f82-3d98-4852-9f21-72f027f9ea52",
       "level" : "CASE",
       "label" : "Imprisonment",
       "rank" : 1,
       "prompts" : [ {
-        "id" : "c61684eb-1a01-4ad1-9d30-076538dd43b2",
+        "id" : "64e87b42-76be-4633-8f9f-e2318c8ab374",
         "label" : "Imprisonment Duration",
         "value" : "Imprisonment duration"
       }, {
-        "id" : "0803282d-91ad-49c3-9af7-b1d0ab40d77d",
+        "id" : "8c4d0afb-b049-44bb-8287-a7bb8ad8ba97",
         "label" : "Prison",
         "value" : "Wormwood Scrubs"
       } ]
     }, {
-      "id" : "20f6b4be-622f-4a9f-af4f-8fc9c0e9ba85",
-      "defendantId" : "43e811c1-954d-4255-96c6-71886dee9daf",
-      "caseId" : "a2ce22f3-c87f-4038-bab3-21b675db4736",
-      "offenceId" : "c44330f4-2b6c-4472-8f70-7084d1f53a26",
+      "id" : "67f0eb2f-ca84-414e-9e16-1f585e716e56",
+      "defendantId" : "f3c65ffb-f6e9-49b0-9b53-8bf2cafaf7d4",
+      "caseId" : "dab6964b-335b-4732-abb5-ca59c7cbdd07",
+      "offenceId" : "96ae8f82-3d98-4852-9f21-72f027f9ea52",
       "level" : "DEFENDANT",
       "label" : "Imprisonment",
       "rank" : 2,
       "prompts" : [ {
-        "id" : "49dadb6a-1ee1-4193-8805-eb647aca2cc3",
+        "id" : "32dc1bc3-3a37-4f98-b6da-c3dff6ac0d39",
         "label" : "Imprisonment Duration",
         "value" : "Imprisonment duration"
       }, {
-        "id" : "f86d60d4-8c91-42e3-8d52-d893a311ee8c",
+        "id" : "f9c8a94e-6e32-429b-9c44-43b50fb3ff0e",
         "label" : "Prison",
         "value" : "Wormwood Scrubs"
       } ]
     }, {
-      "id" : "6688538e-3d86-432e-ae08-f080db71588e",
-      "defendantId" : "43e811c1-954d-4255-96c6-71886dee9daf",
-      "caseId" : "a2ce22f3-c87f-4038-bab3-21b675db4736",
-      "offenceId" : "c44330f4-2b6c-4472-8f70-7084d1f53a26",
+      "id" : "cd465983-5f72-4c3f-a0b9-2e7110b79a31",
+      "defendantId" : "f3c65ffb-f6e9-49b0-9b53-8bf2cafaf7d4",
+      "caseId" : "dab6964b-335b-4732-abb5-ca59c7cbdd07",
+      "offenceId" : "96ae8f82-3d98-4852-9f21-72f027f9ea52",
       "level" : "OFFENCE",
       "label" : "Imprisonment",
       "rank" : 3,
       "prompts" : [ {
-        "id" : "bdcd9dc4-ef8e-440a-a1df-c8619315b794",
+        "id" : "c1e10b2a-dc35-4d33-af69-21f2911f0868",
         "label" : "Imprisonment Duration",
         "value" : "Imprisonment duration"
       }, {
-        "id" : "ad232f54-a899-457c-8300-2c0146ce8866",
+        "id" : "37d88edd-567d-4b54-aa49-17eead217926",
         "label" : "Prison",
         "value" : "Wormwood Scrubs"
       } ]
     } ],
     "nows" : [ {
-      "id" : "821513e7-9782-46c8-a9c8-1c3ffd828e08",
-      "nowsTypeId" : "f4ea953a-efbf-4ffd-9e12-713f6110883a",
-      "defendantId" : "43e811c1-954d-4255-96c6-71886dee9daf",
-      "material" : [ {
-        "id" : "8a0c4f5b-e6e5-49c6-a142-b14821606510",
+      "id" : "a44b1c29-16ac-49ec-8ab4-5208ca703b7b",
+      "nowsTypeId" : "67717a32-1550-4f96-8b04-b5d1824681f7",
+      "defendantId" : "f3c65ffb-f6e9-49b0-9b53-8bf2cafaf7d4",
+      "materials" : [ {
+        "id" : "7d9942ca-74e5-48f2-92f3-41b13f3fd20c",
         "nowResult" : [ {
-          "sharedResultId" : "54cae487-9a7f-4881-9874-f364b889c00c",
+          "sharedResultId" : "9f128b26-81d5-4743-a8c5-15ebb8413627",
           "sequence" : 1,
           "prompts" : [ {
-            "id" : "c61684eb-1a01-4ad1-9d30-076538dd43b2",
+            "id" : "64e87b42-76be-4633-8f9f-e2318c8ab374",
             "label" : "Imprisonment Duration"
           }, {
-            "id" : "0803282d-91ad-49c3-9af7-b1d0ab40d77d",
+            "id" : "8c4d0afb-b049-44bb-8287-a7bb8ad8ba97",
             "label" : "Prison"
           } ]
         }, {
-          "sharedResultId" : "20f6b4be-622f-4a9f-af4f-8fc9c0e9ba85",
+          "sharedResultId" : "67f0eb2f-ca84-414e-9e16-1f585e716e56",
           "sequence" : 2,
           "prompts" : [ {
-            "id" : "49dadb6a-1ee1-4193-8805-eb647aca2cc3",
+            "id" : "32dc1bc3-3a37-4f98-b6da-c3dff6ac0d39",
             "label" : "Imprisonment Duration"
           }, {
-            "id" : "f86d60d4-8c91-42e3-8d52-d893a311ee8c",
+            "id" : "f9c8a94e-6e32-429b-9c44-43b50fb3ff0e",
             "label" : "Prison"
           } ]
         }, {
-          "sharedResultId" : "6688538e-3d86-432e-ae08-f080db71588e",
+          "sharedResultId" : "cd465983-5f72-4c3f-a0b9-2e7110b79a31",
           "sequence" : 3,
           "prompts" : [ {
-            "id" : "bdcd9dc4-ef8e-440a-a1df-c8619315b794",
+            "id" : "c1e10b2a-dc35-4d33-af69-21f2911f0868",
             "label" : "Imprisonment Duration"
           }, {
-            "id" : "ad232f54-a899-457c-8300-2c0146ce8866",
+            "id" : "37d88edd-567d-4b54-aa49-17eead217926",
             "label" : "Prison"
           } ]
         } ],
+        "amended" : false,
         "userGroups" : [ {
           "group" : "COURTCLERK"
         }, {

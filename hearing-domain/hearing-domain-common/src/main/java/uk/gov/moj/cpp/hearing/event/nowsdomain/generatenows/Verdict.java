@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public class Verdict implements Serializable {
@@ -15,7 +16,7 @@ public class Verdict implements Serializable {
 
     private String numberOfSplitJurors;
 
-    private String verdictDate;
+    private LocalDate verdictDate;
 
     private Integer numberOfJurors;
 
@@ -72,11 +73,11 @@ public class Verdict implements Serializable {
         return this;
     }
 
-    public String getVerdictDate() {
+    public LocalDate getVerdictDate() {
         return this.verdictDate;
     }
 
-    public Verdict setVerdictDate(String verdictDate) {
+    public Verdict setVerdictDate(LocalDate verdictDate) {
         this.verdictDate = verdictDate;
         return this;
     }

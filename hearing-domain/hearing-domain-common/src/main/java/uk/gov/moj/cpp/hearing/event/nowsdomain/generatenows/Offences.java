@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public class Offences implements Serializable {
@@ -9,7 +10,7 @@ public class Offences implements Serializable {
 
     private String code;
 
-    private String convictionDate;
+    private LocalDate convictionDate;
 
     private Plea plea;
 
@@ -17,9 +18,9 @@ public class Offences implements Serializable {
 
     private String wording;
 
-    private String startDate;
+    private LocalDate startDate;
 
-    private String endDate;
+    private LocalDate endDate;
 
     public static Offences offences() {
         return new Offences();
@@ -43,11 +44,11 @@ public class Offences implements Serializable {
         return this;
     }
 
-    public String getConvictionDate() {
+    public LocalDate getConvictionDate() {
         return this.convictionDate;
     }
 
-    public Offences setConvictionDate(String convictionDate) {
+    public Offences setConvictionDate(LocalDate convictionDate) {
         this.convictionDate = convictionDate;
         return this;
     }
@@ -79,20 +80,20 @@ public class Offences implements Serializable {
         return this;
     }
 
-    public String getStartDate() {
+    public LocalDate getStartDate() {
         return this.startDate;
     }
 
-    public Offences setStartDate(String startDate) {
+    public Offences setStartDate(LocalDate startDate) {
         this.startDate = startDate;
         return this;
     }
 
-    public String getEndDate() {
+    public LocalDate getEndDate() {
         return this.endDate;
     }
 
-    public Offences setEndDate(String endDate) {
+    public Offences setEndDate(LocalDate endDate) {
         this.endDate = endDate;
         return this;
     }

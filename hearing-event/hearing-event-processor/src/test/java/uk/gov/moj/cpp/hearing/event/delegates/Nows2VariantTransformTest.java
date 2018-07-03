@@ -9,8 +9,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -20,7 +18,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 
 public class Nows2VariantTransformTest {

@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public class Plea implements Serializable {
@@ -9,7 +10,7 @@ public class Plea implements Serializable {
 
     private String value;
 
-    private String date;
+    private LocalDate date;
 
     private UUID enteredHearingId;
 
@@ -35,11 +36,11 @@ public class Plea implements Serializable {
         return this;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return this.date;
     }
 
-    public Plea setDate(String date) {
+    public Plea setDate(LocalDate date) {
         this.date = date;
         return this;
     }

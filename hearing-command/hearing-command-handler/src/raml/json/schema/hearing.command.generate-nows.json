@@ -339,7 +339,7 @@
               "defendantId": {
                 "$ref": "#/definitions/uuid"
               },
-              "material": {
+              "materials": {
                 "type": "array",
                 "items": {
                   "type": "object",

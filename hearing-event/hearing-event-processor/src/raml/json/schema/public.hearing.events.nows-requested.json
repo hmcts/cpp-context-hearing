@@ -415,7 +415,7 @@
                 "$id": "/properties/hearing/properties/nows/items/properties/defendantId",
                 "type": "string"
               },
-              "material": {
+              "materials": {
                 "$id": "/properties/hearing/properties/nows/items/properties/material",
                 "type": "array",
                 "items": {
