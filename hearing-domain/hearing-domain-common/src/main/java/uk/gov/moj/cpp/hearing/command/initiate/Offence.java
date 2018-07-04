@@ -27,7 +27,6 @@ public class Offence implements Serializable {
     private Integer orderIndex;
     private Integer count;
     private LocalDate convictionDate;
-    private Plea plea;
     private String title;
     private String legislation;
 
@@ -44,7 +43,6 @@ public class Offence implements Serializable {
                    @JsonProperty("orderIndex") final Integer orderIndex,
                    @JsonProperty("count") final Integer count,
                    @JsonProperty("convictionDate") final LocalDate convictionDate,
-                   @JsonProperty("plea") final Plea plea,
                    @JsonProperty("title") final String title,
                    @JsonProperty("legislation") final String legislation
     ) {
@@ -58,7 +56,6 @@ public class Offence implements Serializable {
         this.orderIndex = orderIndex;
         this.count = count;
         this.convictionDate = convictionDate;
-        this.plea = plea;
         this.title = title;
         this.legislation = legislation;
     }
@@ -133,15 +130,6 @@ public class Offence implements Serializable {
 
     public Offence setConvictionDate(LocalDate convictionDate) {
         this.convictionDate = convictionDate;
-        return this;
-    }
-
-    public Plea getPlea() {
-        return plea;
-    }
-
-    public Offence setPlea(Plea plea) {
-        this.plea = plea;
         return this;
     }
 

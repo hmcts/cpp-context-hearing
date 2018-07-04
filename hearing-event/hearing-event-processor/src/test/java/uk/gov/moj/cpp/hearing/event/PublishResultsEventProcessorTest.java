@@ -24,6 +24,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import java.util.List;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
@@ -75,12 +76,14 @@ public class PublishResultsEventProcessorTest {
 
         final List<Nows> nows = basicNowsTemplate();
 
-        Mockito.when(nowsGenerator.createNows(Mockito.any())).thenReturn(nows);
-
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        Mockito.when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
+        when(nowsGenerator.createNows(Mockito.any())).thenReturn(nows);
+
+        when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
+
+        when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
         publishResultsEventProcessor.resultsShared(event);
 

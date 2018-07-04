@@ -12,6 +12,10 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
@@ -65,6 +69,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
@@ -797,6 +802,28 @@ public class TestTemplates {
                             .setPrimary(true)
                             .setSequence(1)
                     ));
+        }
+    }
+
+    public static class VariantDirectoryTemplates {
+        private VariantDirectoryTemplates() {
+        }
+
+        public static Variant standardVariantTemplate(final UUID nowTypeId, final UUID hearingId, final UUID defendantId) {
+            return Variant.variant()
+                    .setKey(VariantKey.variantKey()
+                            .setNowsTypeId(nowTypeId)
+                            .setUsergroups(asList(STRING.next(), STRING.next()))
+                            .setDefendantId(defendantId)
+                            .setHearingId(hearingId)
+                    )
+                    .setValue(VariantValue.variantValue()
+                            .setMaterialId(randomUUID())
+                            .setResultLines(singletonList(ResultLineReference.resultLineReference()
+                                    .setResultLineId(randomUUID())
+                                    .setLastSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                            ))
+                    );
         }
     }
 

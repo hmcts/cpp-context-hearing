@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
 public class NowsTemplates {
 
@@ -67,7 +69,7 @@ public class NowsTemplates {
         UUID completedResultLineId = randomUUID();
         return ResultsShared.builder()
                 .withHearingId(hearingOne.getHearingId())
-                .withSharedTime(PAST_ZONED_DATE_TIME.next())
+                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                 .withHearing(hearingOne.it().getHearing())
                 .withCases(hearingOne.it().getCases())
                 .withDefenceCounsels(ImmutableMap.of(randomUUID(), DefenceCounselUpsert.builder()
@@ -138,8 +140,11 @@ public class NowsTemplates {
                                 .withLastName(STRING.next())
                                 .build())
                         .withId(completedResultLineId)
-                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next())
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                         .build()
+                ))
+                .withVariantDirectory(singletonList(
+                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
                 ))
                 .build();
     }

@@ -6,15 +6,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.UUID;
 
-public final class CourtClerk implements Serializable {
+public class CourtClerk implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
+    private UUID id;
 
-    private final String firstName;
+    private String firstName;
 
-    private final String lastName;
+    private String lastName;
+
+    public CourtClerk() {
+    }
 
     @JsonCreator
     private CourtClerk(@JsonProperty("id") final UUID id,

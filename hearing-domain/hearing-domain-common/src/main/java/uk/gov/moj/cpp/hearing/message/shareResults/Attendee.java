@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-public class Attendee<T extends Attendee> {
+public class Attendee {
 
     private UUID personId;
 
@@ -13,6 +15,12 @@ public class Attendee<T extends Attendee> {
     private String type;
 
     private String title;
+
+    private List<UUID> defendantIds;
+
+    private String status;
+
+    private List<UUID> caseIds;
 
     public UUID getPersonId() {
         return personId;
@@ -34,32 +42,59 @@ public class Attendee<T extends Attendee> {
         return title;
     }
 
-    public T setPersonId(UUID personId) {
+    public List<UUID> getDefendantIds() {
+        return defendantIds;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public List<UUID> getCaseIds() {
+        return caseIds;
+    }
+
+    public Attendee setPersonId(UUID personId) {
         this.personId = personId;
-        return (T) this;
+        return this;
     }
 
-    public T setFirstName(String firstName) {
+    public Attendee setFirstName(String firstName) {
         this.firstName = firstName;
-        return (T) this;
+        return this;
     }
 
-    public T setLastName(String lastName) {
+    public Attendee setLastName(String lastName) {
         this.lastName = lastName;
-        return (T) this;
+        return this;
     }
 
-    public T setType(String type) {
+    public Attendee setType(String type) {
         this.type = type;
-        return (T) this;
+        return this;
     }
 
-    public T setTitle(String title) {
+    public Attendee setTitle(String title) {
         this.title = title;
-        return (T) this;
+        return this;
     }
 
-    public static <T extends Attendee> Attendee<T> attendee() {
-        return new Attendee<>();
+    public Attendee setDefendantIds(List<UUID> defendantIds) {
+        this.defendantIds = new ArrayList<>(defendantIds);
+        return this;
+    }
+
+    public Attendee setStatus(String status) {
+        this.status = status;
+        return this;
+    }
+
+    public Attendee setCaseIds(List<UUID> caseIds) {
+        this.caseIds = new ArrayList<>(caseIds);
+        return this;
+    }
+
+    public static Attendee attendee() {
+        return new Attendee();
     }
 }

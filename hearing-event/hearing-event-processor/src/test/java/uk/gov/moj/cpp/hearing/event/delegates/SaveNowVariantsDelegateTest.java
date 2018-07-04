@@ -14,19 +14,22 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.AllOf.allOf;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -35,8 +38,13 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaveNowVariantsDelegateTest {
@@ -66,30 +74,44 @@ public class SaveNowVariantsDelegateTest {
     @Test
     public void saveNowsVariants() {
 
-        final ResultsShared resultsShared = resultsSharedTemplate();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(resultsSharedTemplate());
 
-        final List<Nows> nows = basicNowsTemplate();
+        final List<Nows> nows = emptyList();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        final List<Variant> variants = Arrays.asList(
-                Variant.variant().setKey(VariantKey.variantKey().setNowsTypeId(UUID.randomUUID())));
+        final List<Variant> variants = singletonList(
+                standardVariantTemplate(randomUUID(), resultsShared.getHearingId(), resultsShared.getFirstDefendant().getId())
+        );
 
-        when(nows2VariantTransform.toVariants(resultsShared.getHearingId(), nows, resultsShared.getSharedTime())).thenReturn(variants);
+        when(nows2VariantTransform.toVariants(resultsShared.getHearingId(), nows, resultsShared.it().getSharedTime())).thenReturn(variants);
 
-        saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared);
+        saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared.it());
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 
-        final List<JsonEnvelope> outgoingMessages = envelopeArgumentCaptor.getAllValues();
+        final JsonEnvelope updatedResultLinesMessage = envelopeArgumentCaptor.getValue();
 
-        final JsonEnvelope updatedResultLinesMessage = outgoingMessages.get(0);
+        assertThat(updatedResultLinesMessage, jsonEnvelope(metadata().withName("hearing.command.save-nows-variants"), payloadIsJson(print())));
 
-        assertThat(updatedResultLinesMessage, jsonEnvelope(
-                metadata().withName("hearing.command.save-nows-variants"),
-                payloadIsJson(allOf(
-                        withJsonPath("$.hearingId", is(resultsShared.getHearing().getId().toString()))))
+        assertThat(updatedResultLinesMessage, convertTo(SaveNowsVariantsCommand.class, isBean(SaveNowsVariantsCommand.class)
+                .with(SaveNowsVariantsCommand::getHearingId, is(resultsShared.getHearingId()))
+                .with(SaveNowsVariantsCommand::getVariants, first(isBean(Variant.class)
+                        .with(Variant::getKey, isBean(VariantKey.class)
+                                .with(VariantKey::getHearingId, is(resultsShared.getHearingId()))
+                                .with(VariantKey::getDefendantId, is(resultsShared.getFirstDefendant().getId()))
+                                .with(VariantKey::getNowsTypeId, is(variants.get(0).getKey().getNowsTypeId()))
+                                .with(VariantKey::getUsergroups, containsInAnyOrder(variants.get(0).getKey().getUsergroups().toArray()))
+                        )
+                        .with(Variant::getValue, isBean(VariantValue.class)
+                                .with(VariantValue::getMaterialId, is(variants.get(0).getValue().getMaterialId()))
+                                .with(VariantValue::getResultLines, first(isBean(ResultLineReference.class)
+                                        .with(ResultLineReference::getResultLineId, is(variants.get(0).getValue().getResultLines().get(0).getResultLineId()))
+                                        .with(ResultLineReference::getLastSharedTime, is(variants.get(0).getValue().getResultLines().get(0).getLastSharedTime()))
+                                ))
+                        )
+                ))
         ));
     }
 }

@@ -7,19 +7,25 @@ import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
+
+import static java.util.stream.Collectors.toList;
 
 public class CommandHelpers {
 
@@ -38,7 +44,7 @@ public class CommandHelpers {
         return new UpdateVerdictCommandHelper(hearingUpdateVerdictCommand);
     }
 
-    public static ResultsSharedEventHelper h(ResultsShared resultsShared){
+    public static ResultsSharedEventHelper h(ResultsShared resultsShared) {
         return new ResultsSharedEventHelper(resultsShared);
     }
 
@@ -170,19 +176,31 @@ public class CommandHelpers {
     public static class ResultsSharedEventHelper {
         private ResultsShared resultsShared;
 
-        public ResultsSharedEventHelper(ResultsShared resultsShared){
+        public ResultsSharedEventHelper(ResultsShared resultsShared) {
             this.resultsShared = resultsShared;
         }
 
-        public ZonedDateTime getFirstHearingDay(){
+        public ZonedDateTime getFirstHearingDay() {
             return this.resultsShared.getHearing().getHearingDays().get(0);
         }
 
-        public UUID getHearingId(){
+        public UUID getHearingId() {
             return this.resultsShared.getHearing().getId();
         }
 
-        public ResultsShared it(){
+        public List<Case> getCases() {
+            return this.resultsShared.getCases();
+        }
+
+        public Case getFirstCase(){
+            return this.resultsShared.getCases().get(0);
+        }
+
+        public List<UUID> getCaseIds() {
+            return this.resultsShared.getCases().stream().map(Case::getCaseId).collect(toList());
+        }
+
+        public ResultsShared it() {
             return this.resultsShared;
         }
 
@@ -202,15 +220,27 @@ public class CommandHelpers {
             return resultsShared.getHearing().getDefendants().get(0).getOffences().get(0);
         }
 
+        public uk.gov.moj.cpp.hearing.domain.Plea getFirstPlea() {
+            return resultsShared.getPleas().values().stream().findFirst().orElse(null);
+        }
+
+        public VerdictUpsert getFirstVerdict(){
+            return resultsShared.getVerdicts().values().stream().findFirst().orElse(null);
+        }
+
         public DefendantCase getFirstDefendantCase() {
             return resultsShared.getHearing().getDefendants().get(0).getDefendantCases().get(0);
         }
 
-        public CompletedResultLine getFirstCompletedResultLine(){
+        public CompletedResultLine getFirstCompletedResultLine() {
             return resultsShared.getCompletedResultLines().get(0);
         }
 
-        public ResultPrompt getFirstCompletedResultLineFirstPrompt(){
+        public CompletedResultLineStatus getFirstCompletedResultLineStatus() {
+            return resultsShared.getCompletedResultLinesStatus().values().stream().findFirst().orElse(null);
+        }
+
+        public ResultPrompt getFirstCompletedResultLineFirstPrompt() {
             return resultsShared.getCompletedResultLines().get(0).getPrompts().get(0);
         }
 
@@ -218,8 +248,12 @@ public class CommandHelpers {
             return this.resultsShared.getHearing();
         }
 
-        public CourtClerk getCourtClerk(){
+        public CourtClerk getCourtClerk() {
             return this.resultsShared.getCourtClerk();
+        }
+
+        public Variant getFirstVariant(){
+            return this.resultsShared.getVariantDirectory().get(0);
         }
     }
 }

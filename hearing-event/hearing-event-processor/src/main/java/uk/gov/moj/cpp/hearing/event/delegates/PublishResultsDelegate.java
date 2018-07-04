@@ -7,6 +7,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
@@ -14,7 +15,6 @@ import uk.gov.moj.cpp.hearing.message.shareResults.Address;
 import uk.gov.moj.cpp.hearing.message.shareResults.Attendee;
 import uk.gov.moj.cpp.hearing.message.shareResults.Case;
 import uk.gov.moj.cpp.hearing.message.shareResults.CourtCentre;
-import uk.gov.moj.cpp.hearing.message.shareResults.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.message.shareResults.Defendant;
 import uk.gov.moj.cpp.hearing.message.shareResults.Hearing;
 import uk.gov.moj.cpp.hearing.message.shareResults.Interpreter;
@@ -22,7 +22,6 @@ import uk.gov.moj.cpp.hearing.message.shareResults.Offence;
 import uk.gov.moj.cpp.hearing.message.shareResults.Person;
 import uk.gov.moj.cpp.hearing.message.shareResults.Plea;
 import uk.gov.moj.cpp.hearing.message.shareResults.Prompt;
-import uk.gov.moj.cpp.hearing.message.shareResults.ProsecutionAdvocate;
 import uk.gov.moj.cpp.hearing.message.shareResults.ShareResultsMessage;
 import uk.gov.moj.cpp.hearing.message.shareResults.SharedResultLine;
 import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
@@ -31,13 +30,14 @@ import javax.inject.Inject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.moj.cpp.hearing.message.shareResults.Variant.variant;
 
@@ -58,6 +58,8 @@ public class PublishResultsDelegate {
         this.referenceDataService = referenceDataService;
     }
 
+
+
     public void shareResults(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, List<Variant> newVariants) {
 
         final LocalDate referenceDate = resultsShared.getHearing().getHearingDays().stream()
@@ -65,12 +67,10 @@ public class PublishResultsDelegate {
                 .min(Comparator.comparing(LocalDate::toEpochDay))
                 .orElse(null);
 
-        Set<Variant> variantSet = new HashSet<>(resultsShared.getVariantDirectory());
-
-        if (nonNull(newVariants)) {
-            variantSet.removeAll(newVariants);
-            variantSet.addAll(newVariants);
-        }
+        final List<Variant> variants = Stream.concat(
+                resultsShared.getVariantDirectory().stream().map(replaceWithInputs(newVariants)),
+                newVariants.stream().filter(isNotInSet(resultsShared.getVariantDirectory()))
+        ).collect(toList());
 
         final ShareResultsMessage shareResultsMessage = ShareResultsMessage.shareResultsMessage()
                 .setHearing(Hearing.hearing()
@@ -80,10 +80,11 @@ public class PublishResultsDelegate {
                         .setAttendees(mapAttendees(resultsShared))
                         .setDefendants(mapDefendants(resultsShared))
                         .setSharedResultLines(mapSharedResultsLines(resultsShared))
+                        .setHearingDates(resultsShared.getHearing().getHearingDays())
                         .setStartDateTime(resultsShared.getHearing().getHearingDays().get(0))
                 )
-                .setVariants(mapVariantDirectory(referenceDate, new ArrayList<>(variantSet)))
-                .setSharedTime(ZonedDateTime.now());
+                .setVariants(mapVariantDirectory(referenceDate, variants))
+                .setSharedTime(resultsShared.getSharedTime());
 
         sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
                 .apply(this.objectToJsonObjectConverter.convert(shareResultsMessage)));
@@ -133,7 +134,8 @@ public class PublishResultsDelegate {
 
         attendees.addAll(
                 input.getDefenceCounsels().values().stream()
-                        .map(defenceCounselUpsert -> DefenceAdvocate.defenceAdvocate()
+                        .map(defenceCounselUpsert -> Attendee.attendee()
+                                .setPersonId(defenceCounselUpsert.getPersonId())
                                 .setFirstName(defenceCounselUpsert.getFirstName())
                                 .setLastName(defenceCounselUpsert.getLastName())
                                 .setTitle(defenceCounselUpsert.getTitle())
@@ -146,9 +148,8 @@ public class PublishResultsDelegate {
 
         attendees.addAll(
                 input.getProsecutionCounsels().values().stream()
-                        .map(prosecutionCounselUpsert -> ProsecutionAdvocate.prosecutionAdvocate()
+                        .map(prosecutionCounselUpsert -> Attendee.attendee()
                                 .setPersonId(prosecutionCounselUpsert.getPersonId())
-                                //NOTYET - which cases do the prosecution counsellors handle?
                                 .setCaseIds(input.getCases().stream().map(c -> c.getCaseId()).collect(toList()))
                                 .setFirstName(prosecutionCounselUpsert.getFirstName())
                                 .setLastName(prosecutionCounselUpsert.getLastName())
@@ -234,29 +235,28 @@ public class PublishResultsDelegate {
                         .setVerdict(
                                 input.getVerdicts().values().stream()
                                         .filter(v -> v.getOffenceId().equals(o.getId()))
-                                        .map(v -> {
-
-                                                    final String numberOfSplitJurors = v.getNumberOfJurors() != null && v.getNumberOfSplitJurors() != null ?
-                                                            String.format("%s-%s",
-                                                                    v.getNumberOfJurors() - v.getNumberOfSplitJurors(),
-                                                                    v.getNumberOfSplitJurors()
-                                                            ) : null;
-
-                                                    return Verdict.verdict()
-                                                            .setVerdictCategory(v.getCategory())
-                                                            .setEnteredHearingId(v.getHearingId())
-                                                            .setNumberOfJurors(v.getNumberOfJurors())
-                                                            .setNumberOfSplitJurors(numberOfSplitJurors)
-                                                            .setUnanimous(v.getUnanimous())
-                                                            .setVerdictDate(v.getVerdictDate())
-                                                            .setVerdictDescription(v.getDescription());
-                                                }
+                                        .map(v -> Verdict.verdict()
+                                                .setVerdictCategory(v.getCategory())
+                                                .setEnteredHearingId(v.getHearingId())
+                                                .setNumberOfJurors(v.getNumberOfJurors())
+                                                .setNumberOfSplitJurors(formatNumberOfSplitJurors(v))
+                                                .setUnanimous(v.getUnanimous())
+                                                .setVerdictDate(v.getVerdictDate())
+                                                .setVerdictDescription(v.getDescription())
                                         )
                                         .findFirst()
                                         .orElse(null)
                         )
                 )
                 .collect(Collectors.toList());
+    }
+
+    private static String formatNumberOfSplitJurors(VerdictUpsert v) {
+        return v.getNumberOfJurors() != null && v.getNumberOfSplitJurors() != null ?
+                String.format("%s-%s",
+                        v.getNumberOfJurors() - v.getNumberOfSplitJurors(),
+                        v.getNumberOfSplitJurors()
+                ) : null;
     }
 
     private List<SharedResultLine> mapSharedResultsLines(ResultsShared input) {
@@ -294,5 +294,13 @@ public class PublishResultsDelegate {
         } else {
             return completedResultLineStatus.getCourtClerk();
         }
+    }
+
+    private static <T> Function<T, T> replaceWithInputs(Collection<T> input) {
+        return v -> input.stream().filter(p -> p.equals(v)).findFirst().orElse(v);
+    }
+
+    private static <T> Predicate<T> isNotInSet(Collection<T> input) {
+        return v -> input.stream().noneMatch(p -> p.equals(v));
     }
 }

@@ -172,7 +172,6 @@ public class InitiateHearingCommandHandlerTest {
                                                         .with(Offence::getStartDate, is(hearingOne.getFirstOffence().getStartDate()))
                                                         .with(Offence::getEndDate, is(hearingOne.getFirstOffence().getEndDate()))
                                                         .with(Offence::getConvictionDate, is(hearingOne.getFirstOffence().getConvictionDate()))
-                                                        .with(Offence::getPlea, is(nullValue()))
                                         ))
                                 )
                         )
