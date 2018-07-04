@@ -21,6 +21,7 @@ import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,9 +31,11 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 public class NowsRequestedToOrderConvertor {
-    private static final String COURTCLERK = "COURTCLERK";
+    private static final String COURTCLERK = "CourtClerk";
 
     private NowsRequestedToOrderConvertor() {
 
@@ -74,47 +77,43 @@ public class NowsRequestedToOrderConvertor {
 
     @SuppressWarnings({"squid:S1188", "squid:S3776"})
     private static List<OrderCase> getNowsMaterialOrderCases(NowsRequested nowsRequested, Material selectedMaterial) {
-
-        List<OrderResult> defendantCaseResults = new ArrayList<>();
-        List<DefendantCaseOffence> defendantCaseOffences = new ArrayList<>();
-        List<OrderResult> caseResults = new ArrayList<>();
-
+        Map<String, OrderCase> orderCaseMap = new HashMap<>();
         Map<String, SharedResultLine> sharedResultLineIdMap = prepareSharedResultLineIdMap(nowsRequested);
         selectedMaterial.getNowResult().stream().forEach(selectedNowResult -> {
             if (sharedResultLineIdMap.containsKey(selectedNowResult.getSharedResultId())) {
                 SharedResultLine sharedResultLine = sharedResultLineIdMap.get(selectedNowResult.getSharedResultId());
                 List<OrderPrompt> orderPrompts = prepareOrderPrompts(selectedNowResult, sharedResultLine);
+                getMatchingCase(nowsRequested, sharedResultLine).ifPresent(defendantCase -> {
+                            OrderCase orderCase = new OrderCase();
+                            orderCase.setUrn(defendantCase.getUrn());
+                            if (orderCaseMap.containsKey(defendantCase.getUrn())) {
+                                orderCase = orderCaseMap.get(defendantCase.getUrn());
+                            } else {
+                                orderCaseMap.put(defendantCase.getUrn(), orderCase);
+                            }
+                            if (sharedResultLine.getLevel().equals(Level.CASE.toString())) {
+                                orderCase.getDefendantCaseResults().add(OrderResult.builder().withLabel(sharedResultLine.getLabel()).withPrompts(orderPrompts).build());
 
-                if (sharedResultLine.getLevel().equals(Level.CASE.toString())) {
-                    getMatchingCase(nowsRequested, sharedResultLine).ifPresent(defendantCase ->
-                            defendantCaseResults.add(OrderResult.builder().withUrn(defendantCase.getUrn()).withLabel(sharedResultLine.getLabel()).withPrompts(orderPrompts).build())
-                    );
-                }
-                if (sharedResultLine.getLevel().equals(Level.OFFENCE.toString())) {
-                    getMatchingOffence(nowsRequested, sharedResultLine).ifPresent(offence -> {
-                        DefendantCaseOffence defendantCaseOffence = DefendantCaseOffence.builder().withConvictionDate(offence.getConvictionDate())
-                                .withStartDate(offence.getStartDate())
-                                .withWording(offence.getWording())
-                                .withResults(Arrays.asList(OrderResult.builder().withLabel(sharedResultLine.getLabel()).withPrompts(orderPrompts).build())).build();
-                        defendantCaseOffences.add(defendantCaseOffence);
-                    });
+                            }
+                            if (sharedResultLine.getLevel().equals(Level.OFFENCE.toString())) {
+                                Offence offence = getMatchingOffence(nowsRequested, sharedResultLine).orElse(new Offence());
+                                DefendantCaseOffence defendantCaseOffence = DefendantCaseOffence.builder().withConvictionDate(offence.getConvictionDate())
+                                        .withStartDate(offence.getStartDate())
+                                        .withConvictionDate(offence.getConvictionDate())
+                                        .withWording(offence.getWording())
+                                        .withResults(Arrays.asList(OrderResult.builder().withLabel(sharedResultLine.getLabel()).withPrompts(orderPrompts).build())).build();
+                                orderCase.getDefendantCaseOffences().add(defendantCaseOffence);
 
-                }
-                if (sharedResultLine.getLevel().equals(Level.DEFENDANT.toString())) {
-                    caseResults.add(OrderResult.builder().withLabel(sharedResultLine.getLabel()).withPrompts(orderPrompts).build());
-                }
+                            }
+                            if (sharedResultLine.getLevel().equals(Level.DEFENDANT.toString())) {
+                                orderCase.getCaseResults().add(OrderResult.builder().withLabel(sharedResultLine.getLabel()).withPrompts(orderPrompts).build());
+                            }
+                        }
+                );
             }
-
         });
 
-
-        List<OrderCase> nowsMaterialOrderCases = new ArrayList<>();
-        nowsMaterialOrderCases.add(OrderCase.builder()
-                .withDefendantCaseResults(defendantCaseResults)
-                .withDefendantCaseOffences(defendantCaseOffences)
-                .withCaseResults(caseResults)
-                .build());
-        return nowsMaterialOrderCases;
+        return orderCaseMap.values().stream().collect(Collectors.toList());
     }
 
     private static List<OrderPrompt> prepareOrderPrompts(NowResult selectedNowResult, SharedResultLine sharedResultLine) {
@@ -135,9 +134,9 @@ public class NowsRequestedToOrderConvertor {
         Optional<Defendant> matchingDefendantForNows = getMatchingDefendant(nowsRequested, now.getDefendantId());
         if (matchingDefendantForNows.isPresent()) {
             Defendant defendant = matchingDefendantForNows.get();
-            String defendantName = format("%s %s  %s", defendant.getPerson().getTitle(), defendant.getPerson().getFirstName(), defendant.getPerson().getLastName());
-            String line1 = format("%s %s", defendant.getPerson().getAddress().getAddress1(), defendant.getPerson().getAddress().getAddress2());
-            String line2 = format("%s %s", defendant.getPerson().getAddress().getAddress3(), defendant.getPerson().getAddress().getAddress4());
+            String defendantName = format("%s %s  %s", trimToEmpty(defendant.getPerson().getTitle()), trimToEmpty(defendant.getPerson().getFirstName()), trimToEmpty(defendant.getPerson().getLastName()));
+            String line1 = format("%s %s", trimToEmpty(defendant.getPerson().getAddress().getAddress1()), trimToEmpty(defendant.getPerson().getAddress().getAddress2()));
+            String line2 = format("%s %s", trimToEmpty(defendant.getPerson().getAddress().getAddress3()), trimToEmpty(defendant.getPerson().getAddress().getAddress4()));
 
             Address address = Address.builder()
                     .withLine1(line1)
@@ -160,7 +159,7 @@ public class NowsRequestedToOrderConvertor {
 
     private static String getCourtClerkName(NowsRequested nowsRequested) {
         return nowsRequested.getHearing().getAttendees().stream()
-                .filter(attende -> attende.getType().equals(COURTCLERK))
+                .filter(attende -> attende.getType().equalsIgnoreCase(COURTCLERK))
                 .findFirst()
                 .map(attendee -> format("%s %s", attendee.getFirstName(), attendee.getLastName()))
                 .orElse(EMPTY);
