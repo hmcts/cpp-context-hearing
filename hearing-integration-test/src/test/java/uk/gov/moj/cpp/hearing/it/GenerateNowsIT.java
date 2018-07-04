@@ -68,10 +68,10 @@ public class GenerateNowsIT extends AbstractIT {
                         materialId, nowsId, nowsTypeId, sharedResultId))
                 .executeSuccessfully();
         // ensure upload material and update status called
-        Awaitility.await().atMost(30, TimeUnit.SECONDS)
+        Awaitility.await().atMost(60, TimeUnit.SECONDS)
                 .until(this::uploadMaterialCalled);
         sendMaterialFileUploadedPublicEvent(materialId, userId);
-        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(this::updateMaterialStatusHmpsCalled);
+        Awaitility.await().atMost(60, TimeUnit.SECONDS).until(this::updateMaterialStatusHmpsCalled);
         sendHearingHmpsMaterialStatusUpdatedPublicMessage(materialId, userId, hearing.getHearingId().toString());
 
         nowsRequestedEventListener.waitFor();
