@@ -147,7 +147,7 @@ public class InitiateHearingIT extends AbstractIT {
         );
 
         ResponseData until = poll(requestParameters(getURL("hearing.get.hearing", hearingTwo.getHearingId()), "application/vnd.hearing.get.hearing+json"))
-                .timeout(10, TimeUnit.SECONDS)
+                .timeout(30, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingTwo.getHearingId().toString())),
