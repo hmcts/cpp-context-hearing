@@ -615,7 +615,7 @@ public class TestTemplates {
                                                         .setId(caseId)
                                                         .setUrn("URN123452")
                                                         .setBailStatus("in custody")
-                                                        .setCustodyTimeLimitDate("2018-01-30")
+                                                        .setCustodyTimeLimitDate(LocalDate.parse("2018-01-30"))
                                                         .setOffences(Arrays.asList(
                                                                 Offences.offences()
                                                                         .setId(offenceId)
@@ -795,11 +795,13 @@ public class TestTemplates {
                     .setRank(INTEGER.next())
                     .setJurisdiction(STRING.next())
                     .setTemplateName(STRING.next())
+                    .setNowText(STRING.next())
                     .setUrgentTimeLimitInMinutes(INTEGER.next())
                     .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions()
                             .setId(randomUUID())
                             .setMandatory(true)
                             .setPrimary(true)
+                            .setNowText(STRING.next())
                             .setSequence(1)
                     ));
         }

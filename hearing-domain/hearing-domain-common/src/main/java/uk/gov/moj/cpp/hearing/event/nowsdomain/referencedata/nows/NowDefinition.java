@@ -26,6 +26,8 @@ public class NowDefinition {
     private List<ResultDefinitions> resultDefinitions;
 
     private Integer urgentTimeLimitInMinutes;
+    
+    private String nowText;
 
     public UUID getId() {
         return this.id;
@@ -117,7 +119,17 @@ public class NowDefinition {
         return this;
     }
 
+    public NowDefinition setNowText(String nowText) {
+        this.nowText = nowText;
+        return this;
+    }
+
+    public String getNowText() {
+        return nowText;
+    }
+
     public static NowDefinition now() {
         return new NowDefinition();
     }
+
 }

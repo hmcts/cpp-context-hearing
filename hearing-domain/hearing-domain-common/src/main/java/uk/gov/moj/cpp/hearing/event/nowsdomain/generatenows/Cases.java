@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ public class Cases implements Serializable {
 
     private String bailStatus;
 
-    private String custodyTimeLimitDate;
+    private LocalDate custodyTimeLimitDate;
 
     private List<Offences> offences;
 
@@ -47,11 +48,11 @@ public class Cases implements Serializable {
         return this;
     }
 
-    public String getCustodyTimeLimitDate() {
+    public LocalDate getCustodyTimeLimitDate() {
         return this.custodyTimeLimitDate;
     }
 
-    public Cases setCustodyTimeLimitDate(String custodyTimeLimitDate) {
+    public Cases setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
         this.custodyTimeLimitDate = custodyTimeLimitDate;
         return this;
     }

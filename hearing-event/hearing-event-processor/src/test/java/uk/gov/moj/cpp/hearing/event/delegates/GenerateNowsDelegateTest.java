@@ -34,6 +34,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.nows.events.NowType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ResultsSharedEventHelper;
 
 import java.util.List;
@@ -162,13 +163,15 @@ public class GenerateNowsDelegateTest {
                                 )
                                 .with(Defendants::getCases, first(isBean(Cases.class)
                                         .with(Cases::getId, is(resultsShared.getFirstDefendantCase().getCaseId()))
+                                        .with(Cases::getUrn, is(resultsShared.getFirstCase().getUrn()))
+                                        .with(Cases::getBailStatus, is(resultsShared.getFirstDefendantCase().getBailStatus()))
+                                        .with(Cases::getCustodyTimeLimitDate, is(resultsShared.getFirstDefendantCase().getCustodyTimeLimitDate()))
                                         .with(Cases::getOffences, first(isBean(Offences.class)
                                                 .with(Offences::getId, is(resultsShared.getFirstDefendantFirstOffence().getId()))
                                                 .with(Offences::getCode, is(resultsShared.getFirstDefendantFirstOffence().getOffenceCode()))
                                                 .with(Offences::getStartDate, is(resultsShared.getFirstDefendantFirstOffence().getStartDate()))
                                         ))
                                 ))
-
                         ))
                         .with(Hearing::getSharedResultLines, first(isBean(SharedResultLines.class)
                                 .with(SharedResultLines::getId, is(resultsShared.getFirstCompletedResultLine().getId()))
@@ -182,6 +185,8 @@ public class GenerateNowsDelegateTest {
                                         .with(Prompts::getLabel, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getLabel()))
                                         .with(Prompts::getValue, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getValue()))
                                 ))
+                                .with(SharedResultLines::getSharedDate, is(resultsShared.getFirstCompletedResultLineStatus().getLastSharedDateTime()))
+                                .with(SharedResultLines::getOrderedDate, is(resultsShared.getFirstCompletedResultLineStatus().getLastSharedDateTime()))//TODO - to change at some point
                         ))
                         .with(Hearing::getNows, first(isBean(Nows.class)
                                 .with(Nows::getId, is(nows.get(0).getId()))
@@ -211,6 +216,7 @@ public class GenerateNowsDelegateTest {
                                 .with(NowTypes::getPriority, is(nowDefinition.getUrgentTimeLimitInMinutes().toString()))
                                 .with(NowTypes::getTemplateName, is(nowDefinition.getTemplateName()))
                                 .with(NowTypes::getRank, is(nowDefinition.getRank()))
+                                .with(NowTypes::getStaticText, is(nowDefinition.getNowText() + "\n" + nowDefinition.getResultDefinitions().get(0).getNowText()))
                         ))
                 )
         ));

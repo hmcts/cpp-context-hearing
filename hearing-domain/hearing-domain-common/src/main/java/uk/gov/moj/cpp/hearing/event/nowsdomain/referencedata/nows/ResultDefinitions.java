@@ -12,6 +12,8 @@ public class ResultDefinitions {
 
     private Integer sequence;
 
+    private String nowText;
+
     public static ResultDefinitions resultDefinitions() {
         return new ResultDefinitions();
     }
@@ -49,6 +51,15 @@ public class ResultDefinitions {
 
     public ResultDefinitions setSequence(Integer sequence) {
         this.sequence = sequence;
+        return this;
+    }
+
+    public String getNowText() {
+        return nowText;
+    }
+
+    public ResultDefinitions setNowText(String nowText) {
+        this.nowText = nowText;
         return this;
     }
 }

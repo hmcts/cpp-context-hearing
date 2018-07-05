@@ -4,6 +4,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
@@ -25,6 +26,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Verdict;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import javax.inject.Inject;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -77,13 +80,27 @@ public class GenerateNowsDelegate {
                                 .setNows(nows)
                                 .setNowTypes(findNowDefinitions(referenceDate, resultsShared.getCompletedResultLines())
                                         .stream()
-                                        .map(resultDefinition -> NowTypes.nowTypes()
-                                                .setId(resultDefinition.getId())
-                                                .setDescription(resultDefinition.getName())
-                                                .setJurisdiction(resultDefinition.getJurisdiction())
-                                                .setPriority(ofNullable(resultDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
-                                                .setRank(resultDefinition.getRank())
-                                                .setTemplateName(resultDefinition.getTemplateName()))
+                                        .map(nowDefinition -> {
+
+                                            String nowText = Stream.concat(
+                                                    Stream.of(nowDefinition.getNowText()),
+                                                    nowDefinition.getResultDefinitions().stream()
+                                                            .map(ResultDefinitions::getNowText)
+                                                            .filter(Objects::nonNull)
+                                                            .filter(s -> !s.isEmpty())
+                                            )
+                                                    .collect(Collectors.joining("\n"));
+
+                                            return NowTypes.nowTypes()
+                                                    .setId(nowDefinition.getId())
+                                                    .setStaticText(nowText)
+                                                    //.setStaticTextWelsh("Welsh Static Text N/A")
+                                                    .setDescription(nowDefinition.getName())
+                                                    .setJurisdiction(nowDefinition.getJurisdiction())
+                                                    .setPriority(ofNullable(nowDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
+                                                    .setRank(nowDefinition.getRank())
+                                                    .setTemplateName(nowDefinition.getTemplateName());
+                                        })
                                         .collect(toList())
                                 )
 
@@ -123,23 +140,25 @@ public class GenerateNowsDelegate {
                         .setLastName(resultsShared.getCourtClerk().getLastName())
         );
 
-        final List<SharedResultLines> sharedResultLines = resultsShared.getCompletedResultLines().stream().map(
-                completedRl -> SharedResultLines.sharedResultLines()
-                        .setId(completedRl.getId())
-                        .setLevel(completedRl.getLevel().name())
-                        .setCaseId(completedRl.getCaseId())
-                        .setDefendantId(completedRl.getDefendantId())
-                        .setLabel(completedRl.getResultLabel())
-                        .setOffenceId(completedRl.getOffenceId())
+        final List<SharedResultLines> sharedResultLines = resultsShared.getCompletedResultLines().stream()
+                .map(line -> SharedResultLines.sharedResultLines()
+                        .setId(line.getId())
+                        .setSharedDate(resultsShared.getCompletedResultLinesStatus().get(line.getId()).getLastSharedDateTime())
+                        .setOrderedDate(resultsShared.getCompletedResultLinesStatus().get(line.getId()).getLastSharedDateTime())
+                        .setLevel(line.getLevel().name())
+                        .setCaseId(line.getCaseId())
+                        .setDefendantId(line.getDefendantId())
+                        .setLabel(line.getResultLabel())
+                        .setOffenceId(line.getOffenceId())
                         .setPrompts(
-                                completedRl.getPrompts().stream().map(
-                                        pIn -> Prompts.prompts()
+                                line.getPrompts().stream()
+                                        .map(pIn -> Prompts.prompts()
                                                 .setId(pIn.getId())
                                                 .setLabel(pIn.getLabel())
                                                 .setValue(pIn.getValue())
-                                ).collect(Collectors.toList())
+                                        ).collect(Collectors.toList())
                         )
-        ).collect(Collectors.toList());
+                ).collect(Collectors.toList());
 
         final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearingIn = resultsShared.getHearing();
 
@@ -170,6 +189,13 @@ public class GenerateNowsDelegate {
                                 .setCases(defendant.getDefendantCases().stream()
                                         .map(caseIn -> Cases.cases()
                                                 .setId(caseIn.getCaseId())
+                                                .setUrn(resultsShared.getCases().stream()
+                                                        .filter(c -> c.getCaseId().equals(caseIn.getCaseId()))
+                                                        .map(Case::getUrn)
+                                                        .findFirst()
+                                                        .orElse(null))
+                                                .setBailStatus(caseIn.getBailStatus())
+                                                .setCustodyTimeLimitDate(caseIn.getCustodyTimeLimitDate())
                                                 .setOffences(defendant.getOffences().stream()
                                                         .filter(offence -> offence.getCaseId().equals(caseIn.getCaseId()))
                                                         .map(offIn -> Offences.offences()

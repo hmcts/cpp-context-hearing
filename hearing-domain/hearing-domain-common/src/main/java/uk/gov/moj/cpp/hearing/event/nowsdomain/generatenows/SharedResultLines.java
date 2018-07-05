@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,9 +15,9 @@ public class SharedResultLines implements Serializable {
 
     private UUID offenceId;
 
-    private String sharedDate;
+    private ZonedDateTime sharedDate;
 
-    private String orderedDate;
+    private ZonedDateTime orderedDate;
 
     private String level;
 
@@ -66,20 +67,20 @@ public class SharedResultLines implements Serializable {
         return this;
     }
 
-    public String getSharedDate() {
+    public ZonedDateTime getSharedDate() {
         return this.sharedDate;
     }
 
-    public SharedResultLines setSharedDate(String sharedDate) {
+    public SharedResultLines setSharedDate(ZonedDateTime sharedDate) {
         this.sharedDate = sharedDate;
         return this;
     }
 
-    public String getOrderedDate() {
+    public ZonedDateTime getOrderedDate() {
         return this.orderedDate;
     }
 
-    public SharedResultLines setOrderedDate(String orderedDate) {
+    public SharedResultLines setOrderedDate(ZonedDateTime orderedDate) {
         this.orderedDate = orderedDate;
         return this;
     }
