@@ -1,23 +1,23 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
-import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
-import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
-import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 public class OffenceAggregate implements Aggregate {
 
@@ -73,7 +73,7 @@ public class OffenceAggregate implements Aggregate {
         return plea;
     }
 
-    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final UpdatedOffence offence) {
+    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final BaseDefendantOffence offence) {
 
         return apply(Stream.of(FoundHearingsForEditOffence.builder()
                 .withId(offence.getId())

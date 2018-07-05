@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
-import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -52,8 +52,7 @@ public class OffenceDelegate {
     }
 
 
-    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final UpdatedOffence offence) {
-
+    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final BaseDefendantOffence offence) {
         if (!this.momento.isPublished()) {
             return Stream.of(OffenceAdded.builder()
                     .withId(offence.getId())
@@ -72,8 +71,7 @@ public class OffenceDelegate {
         return Stream.empty();
     }
 
-    public Stream<Object> updateOffence(final UUID hearingId, final UpdatedOffence offence) {
-
+    public Stream<Object> updateOffence(final UUID hearingId, final BaseDefendantOffence offence) {
         if (!this.momento.isPublished()) {
             return Stream.of(OffenceUpdated.builder()
                     .withHearingId(hearingId)

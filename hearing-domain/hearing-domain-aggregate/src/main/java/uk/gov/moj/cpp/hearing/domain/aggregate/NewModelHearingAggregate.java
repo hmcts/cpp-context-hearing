@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -12,7 +16,7 @@ import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.nows.NowVariantUtil;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
-import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
@@ -62,6 +66,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.json.JsonObject;
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
@@ -172,11 +177,11 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(this.defendantDelegate.updateDefendantDetails(command));
     }
 
-    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final UpdatedOffence offence) {
+    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final BaseDefendantOffence offence) {
         return apply(this.offenceDelegate.addOffence(hearingId, defendantId, caseId, offence));
     }
 
-    public Stream<Object> updateOffence(final UUID hearingId, final UpdatedOffence offence) {
+    public Stream<Object> updateOffence(final UUID hearingId, final BaseDefendantOffence offence) {
         return apply(this.offenceDelegate.updateOffence(hearingId, offence));
     }
 

@@ -7,6 +7,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
@@ -28,7 +29,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
         final CaseDefendantOffencesChangedCommand command = convertToObject(envelope, CaseDefendantOffencesChangedCommand.class);
 
         for (AddedOffence addedOffence : command.getAddedOffences()) {
-            for (UpdatedOffence offence : addedOffence.getOffences()) {
+            for (BaseDefendantOffence offence : addedOffence.getOffences()) {
                 aggregate(DefendantAggregate.class,
                         addedOffence.getDefendantId(),
                         envelope,
@@ -36,18 +37,22 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
             }
         }
 
-        for (UpdatedOffence offence : command.getUpdatedOffences()) {
-            aggregate(OffenceAggregate.class,
-                    offence.getId(),
-                    envelope,
-                    offenceAggregate -> offenceAggregate.lookupHearingsForEditOffenceOnOffence(offence));
+        for (UpdatedOffence updateOffence : command.getUpdatedOffences()) {
+            for (BaseDefendantOffence offence : updateOffence.getOffences()) {
+                aggregate(OffenceAggregate.class,
+                        offence.getId(),
+                        envelope,
+                        offenceAggregate -> offenceAggregate.lookupHearingsForEditOffenceOnOffence(offence));
+            }
         }
 
-        for (DeletedOffence offence : command.getDeletedOffences()) {
-            aggregate(OffenceAggregate.class,
-                    offence.getId(),
-                    envelope,
-                    offenceAggregate -> offenceAggregate.lookupHearingsForDeleteOffenceOnOffence(offence.getId()));
+        for (DeletedOffence deletedOffence : command.getDeletedOffences()) {
+            for (UUID offenceId : deletedOffence.getOffences()) {
+                aggregate(OffenceAggregate.class,
+                        offenceId,
+                        envelope,
+                        offenceAggregate -> offenceAggregate.lookupHearingsForDeleteOffenceOnOffence(offenceId));
+            }
         }
     }
 
@@ -62,7 +67,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
                             hearingId,
                             foundHearingsForNewOffence.getDefendantId(),
                             foundHearingsForNewOffence.getCaseId(),
-                            UpdatedOffence.builder()
+                            BaseDefendantOffence.builder()
                                     .withId(foundHearingsForNewOffence.getId())
                                     .withOffenceCode(foundHearingsForNewOffence.getOffenceCode())
                                     .withWording(foundHearingsForNewOffence.getWording())
@@ -82,7 +87,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
 
         for (UUID hearingId : foundHearingsForEditOffence.getHearingIds()) {
             aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->
-                    hearingAggregate.updateOffence(hearingId, UpdatedOffence.builder()
+                    hearingAggregate.updateOffence(hearingId, BaseDefendantOffence.builder()
                             .withId(foundHearingsForEditOffence.getId())
                             .withOffenceCode(foundHearingsForEditOffence.getOffenceCode())
                             .withWording(foundHearingsForEditOffence.getWording())

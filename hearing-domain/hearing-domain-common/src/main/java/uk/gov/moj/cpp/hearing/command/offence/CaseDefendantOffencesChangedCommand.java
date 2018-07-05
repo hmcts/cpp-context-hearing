@@ -1,14 +1,14 @@
 package uk.gov.moj.cpp.hearing.command.offence;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CaseDefendantOffencesChangedCommand {
 

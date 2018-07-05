@@ -1,164 +1,82 @@
 package uk.gov.moj.cpp.hearing.command.offence;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDate;
-import java.util.UUID;
+public class UpdatedOffence {
+    private UUID defendantId;
 
-public final class UpdatedOffence {
+    private UUID caseId;
 
-    private UUID id;
-
-    private String offenceCode;
-
-    private String wording;
-
-    private LocalDate startDate;
-
-    private LocalDate endDate;
-
-    private Integer count;
-
-    private LocalDate convictionDate;
+    private final List<BaseDefendantOffence> offences;
 
     @JsonCreator
-    public UpdatedOffence(@JsonProperty("id") final UUID id,
-                          @JsonProperty("offenceCode") final String offenceCode,
-                          @JsonProperty("wording") final String wording,
-                          @JsonProperty("startDate") final LocalDate startDate,
-                          @JsonProperty("endDate") final LocalDate endDate,
-                          @JsonProperty("count") final Integer count,
-                          @JsonProperty("convictionDate") final LocalDate convictionDate) {
-        this.id = id;
-        this.offenceCode = offenceCode;
-        this.wording = wording;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.count = count;
-        this.convictionDate = convictionDate;
+    public UpdatedOffence(@JsonProperty("defendantId") final UUID defendantId,
+                        @JsonProperty("caseId") final UUID caseId,
+                        @JsonProperty("offences") final List<BaseDefendantOffence> offences) {
+        this.defendantId = defendantId;
+        this.caseId = caseId;
+        this.offences = offences;
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getDefendantId() {
+        return defendantId;
     }
 
-    public String getOffenceCode() {
-        return offenceCode;
+    public UUID getCaseId() {
+        return caseId;
     }
 
-    public String getWording() {
-        return wording;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public LocalDate getConvictionDate() {
-        return convictionDate;
-    }
-
-    public UpdatedOffence setId(UUID id) {
-        this.id = id;
+    public UpdatedOffence setDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
         return this;
     }
 
-    public UpdatedOffence setOffenceCode(String offenceCode) {
-        this.offenceCode = offenceCode;
+    public UpdatedOffence setCaseId(UUID caseId) {
+        this.caseId = caseId;
         return this;
     }
 
-    public UpdatedOffence setWording(String wording) {
-        this.wording = wording;
-        return this;
+    public List<BaseDefendantOffence> getOffences() {
+        return offences;
     }
 
-    public UpdatedOffence setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-        return this;
-    }
-
-    public UpdatedOffence setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-        return this;
-    }
-
-    public UpdatedOffence setCount(Integer count) {
-        this.count = count;
-        return this;
-    }
-
-    public UpdatedOffence setConvictionDate(LocalDate convictionDate) {
-        this.convictionDate = convictionDate;
-        return this;
-    }
-
-    public static Builder builder() {
-        return new Builder();
+    public static UpdatedOffence.Builder builder() {
+        return new UpdatedOffence.Builder();
     }
 
     public static class Builder {
 
-        private UUID id;
+        private UUID defendantId;
 
-        private String offenceCode;
+        private UUID caseId;
 
-        private String wording;
+        private List<BaseDefendantOffence> updatedOffences;
 
-        private LocalDate startDate;
-
-        private LocalDate endDate;
-
-        private Integer count;
-
-        private LocalDate convictionDate;
-
-        public Builder withId(final UUID id) {
-            this.id = id;
+        public UpdatedOffence.Builder withDefendantId(final UUID defendantId) {
+            this.defendantId = defendantId;
             return this;
         }
 
-        public Builder withOffenceCode(final String offenceCode) {
-            this.offenceCode = offenceCode;
+        public UpdatedOffence.Builder withCaseId(final UUID caseId) {
+            this.caseId = caseId;
             return this;
         }
 
-        public Builder withWording(final String wording) {
-            this.wording = wording;
-            return this;
-        }
-
-        public Builder withStartDate(final LocalDate startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder withEndDate(final LocalDate endDate) {
-            this.endDate = endDate;
-            return this;
-        }
-
-        public Builder withCount(final Integer count) {
-            this.count = count;
-            return this;
-        }
-
-        public Builder withConvictionDate(final LocalDate convictionDate) {
-            this.convictionDate = convictionDate;
+        public UpdatedOffence.Builder withUpdatedOffences(final List<BaseDefendantOffence> offences) {
+            this.updatedOffences = offences;
             return this;
         }
 
         public UpdatedOffence build() {
-            return new UpdatedOffence(id, offenceCode, wording, startDate, endDate, count, convictionDate);
+            return new UpdatedOffence(defendantId, caseId, ofNullable(updatedOffences).orElse(new ArrayList<>()));
         }
     }
 }
+

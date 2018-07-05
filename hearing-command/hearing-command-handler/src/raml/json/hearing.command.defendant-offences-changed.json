@@ -2,29 +2,37 @@
   "modifiedDate": "2018-03-01",
   "updatedOffences": [
     {
-      "id": "7e2f843e-d639-40b3-8611-8015f3a18958",
-      "offenceCode": "H8189",
-      "wording": "on 01/08/2009 at the county public house, unlawfully and maliciously wounded, John Smith",
-      "startDate": "2010-08-01",
-      "endDate": "2011-08-01",
-      "count": 1,
-      "convictionDate": "2017-08-01"
-    },
-    {
-      "id": "d5e03eb8-3274-457c-9db3-e67638c0e8b0",
-      "offenceCode": "H8189",
-      "wording": "on 01/08/2009 at the county public house, unlawfully and maliciously wounded, Fred Smith",
-      "startDate": "2010-08-01",
-      "endDate": "2011-08-01",
-      "count": 1
+      "caseId": "41a6443f-4906-42ce-8ace-a189b7f2f1b9",
+      "defendantId": "0dc09439-b798-4125-88b4-612a16f6a3fc",
+      "offences": [
+        {
+          "id": "7e2f843e-d639-40b3-8611-8015f3a18958",
+          "offenceCode": "H8189",
+          "wording": "on 01/08/2009 at the county public house, unlawfully and maliciously wounded, John Smith",
+          "startDate": "2010-08-01",
+          "endDate": "2011-08-01",
+          "count": 1,
+          "convictionDate": "2017-08-01"
+        },
+        {
+          "id": "d5e03eb8-3274-457c-9db3-e67638c0e8b0",
+          "offenceCode": "H8189",
+          "wording": "on 01/08/2009 at the county public house, unlawfully and maliciously wounded, Fred Smith",
+          "startDate": "2010-08-01",
+          "endDate": "2011-08-01",
+          "count": 1,
+          "convictionDate": "2017-08-01"
+        }
+      ]
     }
   ],
   "deletedOffences": [
     {
-      "id": "c399ab70-b5f8-44c1-8d22-e4598fb9b666"
-    },
-    {
-      "id": "922ee13b-aace-47dd-bbd9-7b51ab93e206"
+      "caseId": "9e7b3014-2e9f-4c14-8f51-b471f64d52cf",
+      "defendantId": "6711d373-c416-426c-92f7-3cd37115f70b",
+      "offences": [
+        "7e2f843e-d639-40b3-8611-8015f3a18958"
+      ]
     }
   ],
   "addedOffences": [
@@ -39,7 +47,11 @@
           "startDate": "2010-08-01",
           "endDate": "2011-08-01",
           "count": 1,
-          "convictionDate": "2017-08-01"
+          "convictionDate": "2017-08-01",
+          "statementOfOffence": {
+            "title": "Wounding with intent",
+            "legislation": "legislation"
+          }
         }
       ]
     },
@@ -54,7 +66,11 @@
           "startDate": "2010-08-01",
           "endDate": "2011-08-01",
           "count": 1,
-          "convictionDate": "2017-08-01"
+          "convictionDate": "2017-08-01",
+          "statementOfOffence": {
+            "title": "Wounding with intent",
+            "legislation": "legislation"
+          }
         }
       ]
     }

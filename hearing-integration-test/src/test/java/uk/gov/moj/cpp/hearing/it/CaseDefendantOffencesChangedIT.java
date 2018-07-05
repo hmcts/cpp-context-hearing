@@ -1,13 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
-
-import java.util.concurrent.TimeUnit;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -24,6 +16,14 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.updateOffence;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.offenceTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class CaseDefendantOffencesChangedIT extends AbstractIT {
@@ -69,7 +69,8 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
 
         final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = updateOffence(hearingOne.getHearingId(), command -> {
             command.getUpdatedOffences().forEach(updatedOffence -> {
-                updatedOffence.setId(hearingOne.getFirstOffenceIdForFirstDefendant());
+                updatedOffence.getOffences()
+                        .forEach(bdo -> bdo.setId(hearingOne.getFirstOffenceIdForFirstDefendant()));
             });
         });
 
@@ -84,7 +85,8 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
                                 withJsonPath("$.cases[0].caseId", is(hearingOne.getFirstCaseId().toString())),
                                 withJsonPath("$.cases[0].caseUrn", is(hearingOne.getFirstCaseUrn())),
                                 withJsonPath("$.cases[0].defendants[0].defendantId", is(hearingOne.getFirstDefendantId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(caseDefendantOffencesChanged.getUpdatedOffences().get(0).getId().toString()))
+                                withJsonPath("$.cases[0].defendants[0].offences[0].id",
+                                        is(caseDefendantOffencesChanged.getUpdatedOffences().get(0).getOffences().get(0).getId().toString()))
                         )));
     }
 
@@ -101,7 +103,7 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
 
         deleteOffence(hearingOne.getHearingId(), command -> {
             command.getDeletedOffences().forEach(deletedOffence -> {
-                deletedOffence.setId(hearingOne.getFirstOffenceIdForFirstDefendant());
+                deletedOffence.setOffences(Arrays.asList(hearingOne.getFirstOffenceIdForFirstDefendant()));
             });
         });
 

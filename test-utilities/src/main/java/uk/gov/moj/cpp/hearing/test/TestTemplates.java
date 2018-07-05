@@ -1,6 +1,22 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
@@ -17,7 +33,9 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
@@ -59,21 +77,6 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 public class TestTemplates {
 
@@ -463,22 +466,15 @@ public class TestTemplates {
                     .withDefendantId(randomUUID())
                     .withCaseId(randomUUID())
                     .withAddedOffences(asList(
-                            UpdatedOffence.builder()
-                                    .withId(randomUUID())
-                                    .withOffenceCode(STRING.next())
-                                    .withWording(STRING.next())
-                                    .withStartDate(PAST_LOCAL_DATE.next())
-                                    .withEndDate(PAST_LOCAL_DATE.next())
-                                    .withCount(INTEGER.next())
-                                    .withConvictionDate(PAST_LOCAL_DATE.next())
-                                    .build()
-                            )
-                    )
+                            DefendantOffence.builder(randomUUID(), STRING.next(), STRING.next(), PAST_LOCAL_DATE.next(), PAST_LOCAL_DATE.next(), INTEGER.next(), PAST_LOCAL_DATE.next())
+                                    .withStatementOfOffence(new StatementOfOffence(STRING.next(), STRING.next()))
+                                    .build()))
                     .build();
         }
 
         public static UpdatedOffence updatedOffence() {
-            return UpdatedOffence.builder()
+
+            final BaseDefendantOffence offences = BaseDefendantOffence.builder()
                     .withId(randomUUID())
                     .withOffenceCode(STRING.next())
                     .withWording(STRING.next())
@@ -487,10 +483,17 @@ public class TestTemplates {
                     .withCount(INTEGER.next())
                     .withConvictionDate(PAST_LOCAL_DATE.next())
                     .build();
+
+
+            return UpdatedOffence.builder()
+                    .withUpdatedOffences(Arrays.asList(offences))
+                    .withCaseId(randomUUID())
+                    .withDefendantId(randomUUID())
+                    .build();
         }
 
         public static DeletedOffence deletedOffence() {
-            return DeletedOffence.builder().withId(randomUUID()).build();
+            return DeletedOffence.builder().withCaseId(randomUUID()).withDefendantId(randomUUID()).build();
         }
 
     }

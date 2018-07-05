@@ -1,24 +1,50 @@
 package uk.gov.moj.cpp.hearing.command.offence;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.UUID;
-
 public class DeletedOffence {
-    private UUID id;
+    private  UUID defendantId;
+    private  UUID caseId;
+    private  List<UUID> offences;
+
 
     @JsonCreator
-    public DeletedOffence(@JsonProperty("id") UUID id) {
-        this.id = id;
+    public DeletedOffence(@JsonProperty("defendantId") final UUID defendantId,
+                          @JsonProperty("caseId") final UUID caseId,
+                          @JsonProperty("offences") final List<UUID> offences) {
+        this.defendantId = defendantId;
+        this.caseId = caseId;
+        this.offences = offences;
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getDefendantId() {
+        return defendantId;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public UUID getCaseId() {
+        return caseId;
+    }
+
+    public List<UUID> getOffences() {
+        return offences;
+    }
+
+    public void setCaseId(UUID caseId) {
+        this.caseId = caseId;
+    }
+
+    public void setOffences(List<UUID> offences) {
+        this.offences = offences;
+    }
+
+    public void setDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
+
+
     }
 
     public static DeletedOffence.Builder builder() {
@@ -26,15 +52,28 @@ public class DeletedOffence {
     }
 
     public static class Builder {
-        private UUID id;
+        private List<UUID> offences;
+        private UUID defendantId;
+        private UUID caseId;
 
-        public Builder withId(UUID id) {
-            this.id = id;
+        public Builder withCaseId(UUID caseId) {
+            this.caseId = caseId;
             return this;
         }
 
+        public Builder withDefendantId(UUID defendantId) {
+            this.defendantId = defendantId;
+            return this;
+        }
+
+        public Builder withOffences(List<UUID> offences) {
+            this.offences = offences;
+            return this;
+        }
+
+
         public DeletedOffence build() {
-            return new DeletedOffence(this.id);
+            return new DeletedOffence(this.defendantId, this.caseId, this.offences);
         }
     }
 }

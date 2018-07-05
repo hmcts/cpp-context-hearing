@@ -1,14 +1,18 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.LookupWitnessesOnDefendantForHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
-import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundWitnessesForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 
@@ -16,10 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 @SuppressWarnings({"squid:S00107", "squid:S1948"})
 public class DefendantAggregate implements Aggregate {
@@ -82,7 +82,7 @@ public class DefendantAggregate implements Aggregate {
         return apply(Stream.of(caseDefendantDetailsWithHearings));
     }
 
-    public Stream<Object> lookupHearingsForNewOffenceOnDefendant(UUID defendantId, UUID caseId, UpdatedOffence offence) {
+    public Stream<Object> lookupHearingsForNewOffenceOnDefendant(UUID defendantId, UUID caseId, BaseDefendantOffence offence) {
         return apply(Stream.of(FoundHearingsForNewOffence.builder()
                 .withId(offence.getId())
                 .withDefendantId(defendantId)
