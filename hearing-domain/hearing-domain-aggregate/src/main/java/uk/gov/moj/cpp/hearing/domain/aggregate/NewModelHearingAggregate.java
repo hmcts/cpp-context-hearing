@@ -4,39 +4,38 @@ import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
-import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.Address;
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.command.initiate.Judge;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.nows.NowVariantUtil;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
-import uk.gov.moj.cpp.hearing.domain.Plea;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ConvictionDateDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefenceCounselDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingEventDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.OffenceDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.PleaDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ProsecutionCounselDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ResultsSharedDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VariantDirectoryDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VerdictDelegate;
 import uk.gov.moj.cpp.hearing.domain.event.AttendeeDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
@@ -52,22 +51,15 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.fromString;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.doNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
@@ -75,514 +67,118 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "pmd:BeanMembersShouldSerialize"})
 public class NewModelHearingAggregate implements Aggregate {
 
-    private static final String HEARING_EVENTS = "hearingEvents";
     private static final long serialVersionUID = 1L;
 
-    private static final String GUILTY = "GUILTY";
-    private static final String REASON_ALREADY_LOGGED = "Already logged";
-    private static final String REASON_ALREADY_DELETED = "Already deleted";
-    private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
-    private static final String REASON_HEARING_NOT_FOUND = "Hearing not found";
-    private static final String HEARING_EVENT_ID = "hearingEventId";
-    private static final String RECORDED_LABEL = "recordedLabel";
-    private static final String HEARING_ID = "hearingId";
-    private final Map<UUID, HearingEvent> hearingHevents = new HashMap<>();
-    private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels = new HashMap<>();
-    private final Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
-    private final Map<UUID, Plea> pleas = new HashMap<>();
-    private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
-    private List<Case> cases;
-    private Hearing hearing;
-    private final Map<VariantKeyHolder, Variant> variantDirectory = new HashMap<>();
+    private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
-    private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
-    private final Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
+    private final transient HearingDelegate hearingDelegate = new HearingDelegate(momento);
 
-    private boolean published = false;
+    private final transient PleaDelegate pleaDelegate = new PleaDelegate(momento);
+
+    private final transient ProsecutionCounselDelegate prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
+
+    private final transient DefenceCounselDelegate defenceCounselDelegate = new DefenceCounselDelegate(momento);
+
+    private final transient HearingEventDelegate hearingEventDelegate = new HearingEventDelegate(momento);
+
+    private final transient VerdictDelegate verdictDelegate = new VerdictDelegate(momento);
+
+    private final transient ResultsSharedDelegate resultsSharedDelegate = new ResultsSharedDelegate(momento);
+
+    private final transient ConvictionDateDelegate convictionDateDelegate = new ConvictionDateDelegate(momento);
+
+    private final transient DefendantDelegate defendantDelegate = new DefendantDelegate(momento);
+
+    private final transient OffenceDelegate offenceDelegate = new OffenceDelegate(momento);
+
+    private final transient VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
 
     @Override
     public Object apply(final Object event) {
         return match(event).with(
-                when(HearingInitiated.class).apply(initiated -> {
-                    this.cases = initiated.getCases();
-                    this.hearing = initiated.getHearing();
-                }),
-
-                when(InheritedPlea.class).apply(inheritedPlea -> {
-                    pleas.computeIfAbsent(inheritedPlea.getOffenceId(), offenceId -> Plea.plea()
-                            .setOriginHearingId(inheritedPlea.getHearingId())
-                            .setOffenceId(offenceId)
-                            .setValue(inheritedPlea.getValue())
-                            .setPleaDate(inheritedPlea.getPleaDate()));
-                }),
-
-                when(ProsecutionCounselUpsert.class).apply(prosecutionCounselUpsert ->
-                        prosecutionCounsels.put(prosecutionCounselUpsert.getAttendeeId(), prosecutionCounselUpsert)
-                ),
-
-                when(DefenceCounselUpsert.class).apply(defenceCounselUpsert ->
-                        defenceCounsels.put(defenceCounselUpsert.getAttendeeId(), defenceCounselUpsert)
-                ),
-
-                when(HearingEventLogged.class).apply(hearingEventLogged ->
-                        this.hearingHevents.put(hearingEventLogged.getHearingEventId(), new HearingEvent(hearingEventLogged))
-                ),
-
-                when(HearingEventDeleted.class).apply(hearingEventDeleted ->
-                        this.hearingHevents.get(hearingEventDeleted.getHearingEventId()).setDeleted(true)
-                ),
-
-                when(WitnessAdded.class).apply(witnessAdded -> {
-                }),
-
-                when(ResultsShared.class).apply(resultsShared -> {
-                    published = true;
-                    resultsShared.getCompletedResultLines().forEach(completedResultLine -> {
-                        //only update result line status if resultline is modified or resultline is new
-                        if (!(completedResultLines.containsKey(completedResultLine.getId()) && completedResultLine.equals(completedResultLines.get(completedResultLine.getId())))) {
-                            completedResultLinesStatus.put(completedResultLine.getId(), CompletedResultLineStatus.builder().withId(completedResultLine.getId()).build());
-                        }
-                        completedResultLines.put(completedResultLine.getId(), completedResultLine);
-                    });
-                }),
-
-                when(ResultLinesStatusUpdated.class).apply(resultLinesStatusUpdated -> {
-                    resultLinesStatusUpdated.getSharedResultLines().forEach(sharedResultLineId -> {
-                        completedResultLinesStatus.computeIfPresent(sharedResultLineId.getSharedResultLineId(), (k, sl) -> {
-                            sl.setCourtClerk(resultLinesStatusUpdated.getCourtClerk());
-                            sl.setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime());
-                            return sl;
-                        });
-                    });
-                }),
-
-                when(PleaUpsert.class).apply(pleaUpsert -> {
-                    pleas.put(pleaUpsert.getOffenceId(),
-                            Plea.plea()
-                                    .setOriginHearingId(pleaUpsert.getHearingId())
-                                    .setOffenceId(pleaUpsert.getOffenceId())
-                                    .setValue(pleaUpsert.getValue())
-                                    .setPleaDate(pleaUpsert.getPleaDate())
-                    );
-                }),
-
-                when(VerdictUpsert.class).apply(verdictUpsert -> {
-                    verdicts.put(verdictUpsert.getOffenceId(), verdictUpsert);
-                }),
-
-                when(ConvictionDateAdded.class).apply(convictionDateAdded -> {
-                    this.hearing.getDefendants().stream()
-                            .flatMap(d -> d.getOffences().stream())
-                            .filter(o -> o.getId().equals(convictionDateAdded.getOffenceId()))
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Invalid offence id on conviction date message"))
-                            .setConvictionDate(convictionDateAdded.getConvictionDate());
-                }),
-
-                when(ConvictionDateRemoved.class).apply(convictionDateRemoved -> {
-                    this.hearing.getDefendants().stream()
-                            .flatMap(d -> d.getOffences().stream())
-                            .filter(o -> o.getId().equals(convictionDateRemoved.getOffenceId()))
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Invalid offence id on conviction date message"))
-                            .setConvictionDate(null);
-                }),
-
-                when(DefendantDetailsUpdated.class).apply(defendantDetailsUpdated -> this.hearing.getDefendants().stream()
-                        .filter(d -> d.getId().equals(defendantDetailsUpdated.getDefendant().getId()))
-                        .forEach(d -> {
-                            d.setDefenceOrganisation(defendantDetailsUpdated.getDefendant().getDefenceOrganisation())
-                                    .setPersonId(defendantDetailsUpdated.getDefendant().getPerson().getId())
-                                    .setFirstName(defendantDetailsUpdated.getDefendant().getPerson().getFirstName())
-                                    .setLastName(defendantDetailsUpdated.getDefendant().getPerson().getLastName())
-                                    .setGender(defendantDetailsUpdated.getDefendant().getPerson().getGender())
-                                    .setNationality(defendantDetailsUpdated.getDefendant().getPerson().getNationality())
-                                    .setDateOfBirth(defendantDetailsUpdated.getDefendant().getPerson().getDateOfBirth())
-                                    .setAddress(ofNullable(defendantDetailsUpdated.getDefendant().getPerson().getAddress())
-                                            .map(a -> Address.address()
-                                                    .setAddress1(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress1())
-                                                    .setAddress2(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress2())
-                                                    .setAddress3(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress3())
-                                                    .setAddress4(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getAddress4())
-                                                    .setPostCode(defendantDetailsUpdated.getDefendant().getPerson().getAddress().getPostCode())
-                                            )
-                                            .orElse(null))
-                                    .setInterpreter(ofNullable(defendantDetailsUpdated.getDefendant().getInterpreter())
-                                            .map(i -> Interpreter.interpreter()
-                                                    .setLanguage(defendantDetailsUpdated.getDefendant().getInterpreter().getLanguage())
-                                            )
-                                            .orElse(null))
-                                    .getDefendantCases().stream()
-                                    .filter(dc -> dc.getCaseId().equals(defendantDetailsUpdated.getCaseId()))
-                                    .forEach(dc -> {
-                                        dc.setBailStatus(defendantDetailsUpdated.getDefendant().getBailStatus());
-                                        dc.setCustodyTimeLimitDate(defendantDetailsUpdated.getDefendant().getCustodyTimeLimitDate());
-                                    });
-                        })),
-
-                when(OffenceAdded.class).apply(offenceAdded ->
-                        this.hearing.getDefendants().stream()
-                                .filter(d -> d.getId().equals(offenceAdded.getDefendantId()))
-                                .forEach(d -> d.getOffences().add(Offence.offence()
-                                        .setId(offenceAdded.getId())
-                                        .setCaseId(offenceAdded.getCaseId())
-                                        .setOffenceCode(offenceAdded.getOffenceCode())
-                                        .setWording(offenceAdded.getWording())
-                                        .setStartDate(offenceAdded.getStartDate())
-                                        .setEndDate(offenceAdded.getEndDate())
-                                        .setCount(offenceAdded.getCount())
-                                        .setConvictionDate(offenceAdded.getConvictionDate())
-                                ))),
-
-                when(OffenceUpdated.class).apply(offenceUpdated ->
-                        this.hearing.getDefendants().stream()
-                                .forEach(d -> d.getOffences().stream()
-                                        .filter(o -> o.getId().equals(offenceUpdated.getId()))
-                                        .forEach(o -> {
-                                            o.setOffenceCode(offenceUpdated.getOffenceCode());
-                                            o.setWording(offenceUpdated.getWording());
-                                            o.setStartDate(offenceUpdated.getStartDate());
-                                            o.setEndDate(offenceUpdated.getEndDate());
-                                            o.setCount(offenceUpdated.getCount());
-                                            o.setConvictionDate(offenceUpdated.getConvictionDate());
-                                        }))),
-
-                when(OffenceDeleted.class).apply(offenceDeleted ->
-                        this.hearing.getDefendants().stream()
-                                .forEach(d -> d.getOffences().removeIf(o -> o.getId().equals(offenceDeleted.getId())))
-                ),
-                when(HearingDetailChanged.class).apply(hearingDetailChanged -> {
-                    doNothing();
-                }),
-                when(NowsVariantsSavedEvent.class).apply(nowsVariantsSavedEvent -> {
-                    nowsVariantsSavedEvent.getVariants().forEach(
-                            variant -> variantDirectory.put(new VariantKeyHolder(variant.getKey()), variant)
-                    );
-                }),
+                when(HearingInitiated.class).apply(hearingDelegate::handleHearingInitiated),
+                when(InheritedPlea.class).apply(pleaDelegate::handleInheritedPlea),
+                when(PleaUpsert.class).apply(pleaDelegate::handlePleaUpsert),
+                when(ProsecutionCounselUpsert.class).apply(prosecutionCounselDelegate::handleProsecutionCounselUpsert),
+                when(DefenceCounselUpsert.class).apply(defenceCounselDelegate::handleDefenceCounselUpsert),
+                when(HearingEventLogged.class).apply(hearingEventDelegate::handleHearingEventLogged),
+                when(HearingEventDeleted.class).apply(hearingEventDelegate::handleHearingEventDeleted),
+                when(ResultsShared.class).apply(resultsSharedDelegate::handleResultsShared),
+                when(ResultLinesStatusUpdated.class).apply(resultsSharedDelegate::handleResultLinesStatusUpdated),
+                when(VerdictUpsert.class).apply(verdictDelegate::handleVerdictUpsert),
+                when(ConvictionDateAdded.class).apply(convictionDateDelegate::handleConvictionDateAdded),
+                when(ConvictionDateRemoved.class).apply(convictionDateDelegate::handleConvictionDateRemoved),
+                when(DefendantDetailsUpdated.class).apply(defendantDelegate::handleDefendantDetailsUpdated),
+                when(OffenceAdded.class).apply(offenceDelegate::handleOffenceAdded),
+                when(OffenceUpdated.class).apply(offenceDelegate::handleOffenceUpdated),
+                when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),
+                when(NowsVariantsSavedEvent.class).apply(variantDirectoryDelegate::handleNowsVariantsSavedEvent),
                 otherwiseDoNothing()
         );
     }
 
     public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
-        return apply(Stream.of(
-                ProsecutionCounselUpsert.builder()
-                        .withHearingId(prosecutionCounselCommand.getHearingId())
-                        .withAttendeeId(prosecutionCounselCommand.getAttendeeId())
-                        .withPersonId(prosecutionCounselCommand.getPersonId())
-                        .withFirstName(prosecutionCounselCommand.getFirstName())
-                        .withLastName(prosecutionCounselCommand.getLastName())
-                        .withStatus(prosecutionCounselCommand.getStatus())
-                        .withTitle(prosecutionCounselCommand.getTitle())
-                        .build()
-        ));
+        return apply(prosecutionCounselDelegate.addProsecutionCounsel(prosecutionCounselCommand));
     }
 
     public Stream<Object> addDefenceCounsel(final AddDefenceCounselCommand defenceCounselCommand) {
-        return apply(Stream.of(
-                DefenceCounselUpsert.builder()
-                        .withHearingId(defenceCounselCommand.getHearingId())
-                        .withDefendantIds(
-                                defenceCounselCommand.getDefendantIds().stream()
-                                        .map(DefendantId::getDefendantId)
-                                        .collect(Collectors.toList())
-                        )
-                        .withAttendeeId(defenceCounselCommand.getAttendeeId())
-                        .withPersonId(defenceCounselCommand.getPersonId())
-                        .withFirstName(defenceCounselCommand.getFirstName())
-                        .withLastName(defenceCounselCommand.getLastName())
-                        .withStatus(defenceCounselCommand.getStatus())
-                        .withTitle(defenceCounselCommand.getTitle())
-                        .build()
-        ));
-    }
-
-    public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
-                                     final String pleaValue) {
-
-        final UUID caseId = this.hearing.getDefendants().stream()
-                .flatMap(d -> d.getOffences().stream())
-                .filter(o -> offenceId.equals(o.getId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("case id is not present"))
-                .getCaseId();
-
-        final List<Object> events = new ArrayList<>();
-        events.add(PleaUpsert.builder()
-                .withHearingId(hearingId)
-                .withOffenceId(offenceId)
-                .withPleaDate(pleaDate)
-                .withValue(pleaValue)
-                .build());
-        events.add(GUILTY.equalsIgnoreCase(pleaValue) ?
-                ConvictionDateAdded.builder()
-                        .withCaseId(caseId)
-                        .withHearingId(hearingId)
-                        .withOffenceId(offenceId)
-                        .withConvictionDate(pleaDate)
-                        .build() :
-                ConvictionDateRemoved.builder()
-                        .withCaseId(caseId)
-                        .withHearingId(hearingId)
-                        .withOffenceId(offenceId)
-                        .build());
-        return apply(events.stream());
+        return apply(defenceCounselDelegate.addDefenceCounsel(defenceCounselCommand));
     }
 
     public Stream<Object> initiate(final InitiateHearingCommand initiateHearingCommand) {
-        return apply(Stream.of(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing())));
+        return apply(this.hearingDelegate.initiate(initiateHearingCommand));
+    }
+
+    public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate, final String pleaValue) {
+        return apply(pleaDelegate.updatePlea(hearingId, offenceId, pleaDate, pleaValue));
     }
 
     public Stream<Object> inheritPlea(final UpdateHearingWithInheritedPleaCommand command) {
-        return apply(Stream.of(InheritedPlea.builder()
-                .withOffenceId(command.getOffenceId())
-                .withCaseId(command.getCaseId())
-                .withDefendantId(command.getDefendantId())
-                .withHearingId(command.getHearingId())
-                .withOriginHearingId(command.getOriginHearingId())
-                .withPleaDate(command.getPleaDate())
-                .withValue(command.getValue())
-                .build()
-        ));
+        return apply(this.pleaDelegate.inheritPlea(command));
     }
 
     public Stream<Object> logHearingEvent(final LogEventCommand logEventCommand) {
-
-        if (hearing == null) {
-            return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand)));
-        }
-
-        if (hearingHevents.containsKey(logEventCommand.getHearingEventId())) {
-            if (hearingHevents.get(logEventCommand.getHearingEventId()).isDeleted()) {
-                return apply(Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_DELETED, logEventCommand)));
-            }
-
-            return apply(Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_LOGGED, logEventCommand)));
-        }
-
-        return apply(Stream.of(new HearingEventLogged(
-                logEventCommand.getHearingEventId(),
-                null,
-                logEventCommand.getHearingId(),
-                logEventCommand.getHearingEventDefinitionId(),
-                logEventCommand.getRecordedLabel(),
-                logEventCommand.getEventTime(),
-                logEventCommand.getLastModifiedTime(),
-                logEventCommand.getAlterable(),
-                this.hearing.getCourtCentreId(),
-                this.hearing.getCourtCentreName(),
-                this.hearing.getCourtRoomId(),
-                this.hearing.getCourtRoomName(),
-                this.hearing.getType(),
-                this.cases.get(0).getUrn(),
-                this.cases.get(0).getCaseId(),
-                logEventCommand.getWitnessId(), logEventCommand.getCounselId())));
+        return apply(this.hearingEventDelegate.logHearingEvent(logEventCommand));
     }
 
     public Stream<Object> updateHearingEvents(final JsonObject payload) {
-        final UUID hearingId = fromString(payload.getString(HEARING_ID));
-        if (hearing == null) {
-            return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND,
-                    hearingId)));
-        }
-
-        final List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents =
-                new ArrayList<>();
-        final JsonArray hearingEventsArray = payload.getJsonArray(HEARING_EVENTS);
-        hearingEventsArray.getValuesAs(JsonObject.class).stream().forEach(hearingEvent -> {
-
-            hearingEvents.add(new uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent(
-                    fromString(hearingEvent.getString(HEARING_EVENT_ID)),
-                    hearingEvent.getString(RECORDED_LABEL)));
-        });
-        return hearingEvents.isEmpty() ? Stream.empty()
-                : Stream.of(new HearingEventsUpdated(hearingId, hearingEvents));
+        return this.apply(this.hearingEventDelegate.updateHearingEvents(payload));
     }
 
     public Stream<Object> correctHearingEvent(final CorrectLogEventCommand logEventCommand) {
-
-        if (hearing == null) {
-            return apply(Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand)));
-        }
-
-        if (!hearingHevents.containsKey(logEventCommand.getHearingEventId())) {
-
-            return apply(Stream.of(generateHearingIgnoredMessage(REASON_EVENT_NOT_FOUND, logEventCommand)));
-        }
-
-        if (hearingHevents.get(logEventCommand.getHearingEventId()).isDeleted()) {
-            return apply(Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_DELETED, logEventCommand)));
-        }
-
-        return apply(Stream.of(
-                new HearingEventDeleted(logEventCommand.getHearingEventId()),
-                new HearingEventLogged(
-                        logEventCommand.getLatestHearingEventId(),
-                        logEventCommand.getHearingEventId(),
-                        logEventCommand.getHearingId(),
-                        logEventCommand.getHearingEventDefinitionId(),
-                        logEventCommand.getRecordedLabel(),
-                        logEventCommand.getEventTime(),
-                        logEventCommand.getLastModifiedTime(),
-                        logEventCommand.getAlterable(),
-                        this.hearing.getCourtCentreId(),
-                        this.hearing.getCourtCentreName(),
-                        this.hearing.getCourtRoomId(),
-                        this.hearing.getCourtRoomName(),
-                        this.hearing.getType(),
-                        this.cases.get(0).getUrn(),
-                        this.cases.get(0).getCaseId(),
-                        logEventCommand.getWitnessId(),
-                        logEventCommand.getCounselId())
-        ));
+        return apply(this.hearingEventDelegate.correctHearingEvent(logEventCommand));
     }
 
     public Stream<Object> updateHearingDetails(final UUID id, final String type, final UUID courtRoomId, final String courtRoomName, final Judge judge, final List<ZonedDateTime> hearingDays) {
-
-        if (hearing == null) {
-            return apply(Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.change-hearing-detail' event as hearing not found", id)));
-        }
-
-        return apply(Stream.of(
-                new HearingDetailChanged(id, type, courtRoomId, courtRoomName, judge, hearingDays)
-        ));
+        return apply(this.hearingDelegate.updateHearingDetails(id, type, courtRoomId, courtRoomName, judge, hearingDays));
     }
 
     public Stream<Object> updateVerdict(final UUID hearingId, final UUID caseId, final UUID offenceId, final Verdict verdict) {
-
-        final List<Object> events = new ArrayList<>();
-
-        events.add(VerdictUpsert.builder()
-                .withCaseId(caseId)
-                .withHearingId(hearingId)
-                .withOffenceId(offenceId)
-                .withVerdictId(verdict.getId())
-                .withVerdictValueId(verdict.getValue().getId())
-                .withVerdictTypeId(verdict.getValue().getVerdictTypeId())
-                .withCategory(verdict.getValue().getCategory())
-                .withCategoryType(verdict.getValue().getCategoryType())
-                .withLesserOffence(verdict.getValue().getLesserOffence())
-                .withCode(verdict.getValue().getCode())
-                .withDescription(verdict.getValue().getDescription())
-                .withNumberOfJurors(verdict.getNumberOfJurors())
-                .withNumberOfSplitJurors(verdict.getNumberOfSplitJurors())
-                .withUnanimous(verdict.getUnanimous())
-                .withVerdictDate(verdict.getVerdictDate())
-                .build()
-        );
-
-        final String categoryType = ofNullable(verdict.getValue().getCategoryType()).orElse("");
-
-        final LocalDate offenceConvictionDate = this.hearing.getDefendants().stream()
-                .flatMap(d -> d.getOffences().stream())
-                .filter(o -> offenceId.equals(o.getId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Offence id is not present"))
-                .getConvictionDate();
-
-        if (categoryType.startsWith(GUILTY)) {
-            if (offenceConvictionDate == null) {
-                events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
-            }
-        } else {
-            if (offenceConvictionDate != null) {
-                events.add(new ConvictionDateRemoved(caseId, hearingId, offenceId));
-            }
-        }
-        return apply(events.stream());
+        return apply(this.verdictDelegate.updateVerdict(hearingId, caseId, offenceId, verdict));
     }
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
-        return apply(Stream.of(ResultsShared.builder()
-                .withHearingId(command.getHearingId())
-                .withSharedTime(sharedTime)
-                .withCourtClerk(command.getCourtClerk())
-                .withUncompletedResultLines(command.getUncompletedResultLines())
-                .withCompletedResultLines(command.getCompletedResultLines())
-                .withHearing(this.hearing)
-                .withCases(this.cases)
-                .withProsecutionCounsels(this.prosecutionCounsels)
-                .withDefenceCounsels(this.defenceCounsels)
-                .withPleas(this.pleas)
-                .withVerdicts(this.verdicts)
-                .withVariantDirectory(new ArrayList(this.variantDirectory.values()))
-                .withCompletedResultLinesStatus(completedResultLinesStatus)
-                .build()));
+        return apply(resultsSharedDelegate.shareResults(command, sharedTime));
     }
 
     public Stream<Object> updateResultLinesStatus(final UpdateResultLinesStatusCommand command) {
-        return apply(Stream.of(ResultLinesStatusUpdated.builder()
-                .withHearingId(command.getHearingId())
-                .withLastSharedDateTime(command.getLastSharedDateTime())
-                .withSharedResultLines(command.getSharedResultLines())
-                .withCourtClerk(command.getCourtClerk())
-                .build()));
+        return apply(resultsSharedDelegate.updateResultLinesStatus(command));
     }
 
     public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {
-
-        if (!isPublished()) {
-            return apply(Stream.of(DefendantDetailsUpdated.builder()
-                    .withCaseId(command.getCaseId())
-                    .withHearingId(command.getHearingIds().get(0))
-                    .withDefendant(Defendant.builder(command.getDefendant()))
-                    .build()));
-        }
-
-        return Stream.empty();
-    }
-
-    public boolean isPublished() {
-        return published;
+        return apply(this.defendantDelegate.updateDefendantDetails(command));
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final UpdatedOffence offence) {
-
-        if (!published) {
-            return apply(Stream.of(OffenceAdded.builder()
-                    .withId(offence.getId())
-                    .withHearingId(hearingId)
-                    .withDefendantId(defendantId)
-                    .withCaseId(caseId)
-                    .withOffenceCode(offence.getOffenceCode())
-                    .withWording(offence.getWording())
-                    .withStartDate(offence.getStartDate())
-                    .withEndDate(offence.getEndDate())
-                    .withCount(offence.getCount())
-                    .withConvictionDate(offence.getConvictionDate())
-                    .build()));
-        }
-
-        return apply(Stream.empty());
+        return apply(this.offenceDelegate.addOffence(hearingId, defendantId, caseId, offence));
     }
 
     public Stream<Object> updateOffence(final UUID hearingId, final UpdatedOffence offence) {
-
-        if (!published) {
-            return apply(Stream.of(OffenceUpdated.builder()
-                    .withHearingId(hearingId)
-                    .withId(offence.getId())
-                    .withOffenceCode(offence.getOffenceCode())
-                    .withWording(offence.getWording())
-                    .withStartDate(offence.getStartDate())
-                    .withEndDate(offence.getEndDate())
-                    .withCount(offence.getCount())
-                    .withConvictionDate(offence.getConvictionDate())
-                    .build()));
-        }
-
-        return apply(Stream.empty());
+        return apply(this.offenceDelegate.updateOffence(hearingId, offence));
     }
 
     public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
-
-        if (!published) {
-            return apply(Stream.of(OffenceDeleted.builder()
-                    .withId(offenceId)
-                    .withHearingId(hearingId)
-                    .build()));
-        }
-
-        return apply(Stream.empty());
+        return apply(this.offenceDelegate.deleteOffence(offenceId, hearingId));
     }
 
     public Stream<Object> addWitness(final UUID hearingId, final UUID witnessId, final String type, final String classification, final String title, final String firstName, final String lastName, final List<DefendantId> defendantIdList) {
@@ -620,36 +216,6 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.of(attendeeDeleted));
     }
 
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final CorrectLogEventCommand logEventCommand) {
-        return new HearingEventIgnored(
-                logEventCommand.getHearingEventId(),
-                logEventCommand.getHearingId(),
-                logEventCommand.getHearingEventDefinitionId(),
-                logEventCommand.getRecordedLabel(),
-                logEventCommand.getEventTime(),
-                reason,
-                logEventCommand.getAlterable()
-        );
-    }
-
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final LogEventCommand logEventCommand) {
-        return new HearingEventIgnored(
-                logEventCommand.getHearingEventId(),
-                logEventCommand.getHearingId(),
-                logEventCommand.getHearingEventDefinitionId(),
-                logEventCommand.getRecordedLabel(),
-                logEventCommand.getEventTime(),
-                reason,
-                logEventCommand.getAlterable()
-        );
-    }
-
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {
-        return new HearingEventIgnored(
-                hearingId,
-                reason
-        );
-    }
 
     public static final class HearingEvent implements Serializable {
 
@@ -674,10 +240,10 @@ public class NewModelHearingAggregate implements Aggregate {
         }
     }
 
-    private static class VariantKeyHolder implements Serializable {
+    public static class VariantKeyHolder implements Serializable {
         private final VariantKey variantKey;
 
-        VariantKeyHolder(final VariantKey variantKey) {
+        public VariantKeyHolder(final VariantKey variantKey) {
             this.variantKey = variantKey;
         }
 

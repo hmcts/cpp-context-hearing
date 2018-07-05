@@ -79,8 +79,6 @@ public class GenerateNowsDelegate {
                                         .stream()
                                         .map(resultDefinition -> NowTypes.nowTypes()
                                                 .setId(resultDefinition.getId())
-                                                .setStaticText("Static Text N/A")
-                                                .setStaticTextWelsh("Welsh Static Text N/A")
                                                 .setDescription(resultDefinition.getName())
                                                 .setJurisdiction(resultDefinition.getJurisdiction())
                                                 .setPriority(ofNullable(resultDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
