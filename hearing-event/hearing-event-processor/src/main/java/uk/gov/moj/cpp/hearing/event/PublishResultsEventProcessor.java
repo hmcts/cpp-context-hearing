@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import org.apache.commons.validator.Var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -21,9 +19,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import javax.inject.Inject;
 import java.util.List;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
+import static java.util.Collections.emptyList;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
 @ServiceComponent(EVENT_PROCESSOR)
@@ -73,7 +69,7 @@ public class PublishResultsEventProcessor {
 
         final List<Nows> nows = nowsGenerator.createNows(resultsShared);
 
-        List<Variant> newVariants = null;
+        List<Variant> newVariants = emptyList();
 
         if (!nows.isEmpty()) {
 

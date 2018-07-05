@@ -21,9 +21,11 @@ import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
 import uk.gov.moj.cpp.hearing.event.nows.NowsGenerator;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -92,6 +94,31 @@ public class PublishResultsEventProcessorTest {
         verify(saveNowVariantsDelegate).saveNowsVariants(sender, event, nows, resultsShared);
 
         verify(publishResultsDelegate).shareResults(sender, event, resultsShared, resultsShared.getVariantDirectory());
+
+        verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
+    }
+
+    @Test
+    public void resultsShared_withNoNewNows() {
+
+        final ResultsShared resultsShared = resultsSharedTemplate();
+
+        final List<Nows> nows = Collections.emptyList();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared));
+
+        when(nowsGenerator.createNows(Mockito.any())).thenReturn(nows);
+
+        when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
+
+        when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
+
+        publishResultsEventProcessor.resultsShared(event);
+
+        verifyNoMoreInteractions(generateNowsDelegate, saveNowVariantsDelegate);
+
+        verify(publishResultsDelegate).shareResults(sender, event, resultsShared, Collections.emptyList());
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
     }
