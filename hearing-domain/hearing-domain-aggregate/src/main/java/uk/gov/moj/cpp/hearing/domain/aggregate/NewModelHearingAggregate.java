@@ -52,6 +52,8 @@ import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import javax.json.JsonObject;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -60,6 +62,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
@@ -71,27 +74,27 @@ public class NewModelHearingAggregate implements Aggregate {
 
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
-    private final transient HearingDelegate hearingDelegate = new HearingDelegate(momento);
+    private transient HearingDelegate hearingDelegate = new HearingDelegate(momento);
 
-    private final transient PleaDelegate pleaDelegate = new PleaDelegate(momento);
+    private transient PleaDelegate pleaDelegate = new PleaDelegate(momento);
 
-    private final transient ProsecutionCounselDelegate prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
+    private transient ProsecutionCounselDelegate prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
 
-    private final transient DefenceCounselDelegate defenceCounselDelegate = new DefenceCounselDelegate(momento);
+    private transient DefenceCounselDelegate defenceCounselDelegate = new DefenceCounselDelegate(momento);
 
-    private final transient HearingEventDelegate hearingEventDelegate = new HearingEventDelegate(momento);
+    private transient HearingEventDelegate hearingEventDelegate = new HearingEventDelegate(momento);
 
-    private final transient VerdictDelegate verdictDelegate = new VerdictDelegate(momento);
+    private transient VerdictDelegate verdictDelegate = new VerdictDelegate(momento);
 
-    private final transient ResultsSharedDelegate resultsSharedDelegate = new ResultsSharedDelegate(momento);
+    private transient ResultsSharedDelegate resultsSharedDelegate = new ResultsSharedDelegate(momento);
 
-    private final transient ConvictionDateDelegate convictionDateDelegate = new ConvictionDateDelegate(momento);
+    private transient ConvictionDateDelegate convictionDateDelegate = new ConvictionDateDelegate(momento);
 
-    private final transient DefendantDelegate defendantDelegate = new DefendantDelegate(momento);
+    private transient DefendantDelegate defendantDelegate = new DefendantDelegate(momento);
 
-    private final transient OffenceDelegate offenceDelegate = new OffenceDelegate(momento);
+    private transient OffenceDelegate offenceDelegate = new OffenceDelegate(momento);
 
-    private final transient VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
+    private transient VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
 
     @Override
     public Object apply(final Object event) {
@@ -260,6 +263,36 @@ public class NewModelHearingAggregate implements Aggregate {
         public int hashCode() {
             return variantKey.hashCode();
         }
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        setDelegates();
+    }
+
+    private void setDelegates() {
+
+        hearingDelegate = new HearingDelegate(momento);
+
+        pleaDelegate = new PleaDelegate(momento);
+
+        prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
+
+        defenceCounselDelegate = new DefenceCounselDelegate(momento);
+
+        hearingEventDelegate = new HearingEventDelegate(momento);
+
+        verdictDelegate = new VerdictDelegate(momento);
+
+        resultsSharedDelegate = new ResultsSharedDelegate(momento);
+
+        convictionDateDelegate = new ConvictionDateDelegate(momento);
+
+        defendantDelegate = new DefendantDelegate(momento);
+
+        offenceDelegate = new OffenceDelegate(momento);
+
+        variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
     }
 
 }
