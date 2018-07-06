@@ -8,6 +8,8 @@ import java.util.List;
 public class OrderCase implements Serializable {
     private final static long serialVersionUID = 8018789124132562641L;
 
+    private String urn;
+
     private List<OrderResult> defendantCaseResults = new ArrayList<OrderResult>();
     private List<DefendantCaseOffence> defendantCaseOffences = new ArrayList<DefendantCaseOffence>();
     private List<OrderResult> caseResults = new ArrayList<OrderResult>();
@@ -28,6 +30,14 @@ public class OrderCase implements Serializable {
         this.defendantCaseOffences = defendantCaseOffences;
     }
 
+    public String getUrn() {
+        return urn;
+    }
+
+    public void setUrn(String urn) {
+        this.urn = urn;
+    }
+
     public List<OrderResult> getCaseResults() {
         return caseResults;
     }
@@ -41,11 +51,17 @@ public class OrderCase implements Serializable {
     }
 
     public static final class Builder {
+        private String urn;
         private List<OrderResult> defendantCaseResults = new ArrayList<OrderResult>();
         private List<DefendantCaseOffence> defendantCaseOffences = new ArrayList<DefendantCaseOffence>();
         private List<OrderResult> caseResults = new ArrayList<OrderResult>();
 
         private Builder() {
+        }
+
+        public Builder withUrn(String urn) {
+            this.urn = urn;
+            return this;
         }
 
         public Builder withDefendantCaseResults(List<OrderResult> defendantCaseResults) {
@@ -64,11 +80,12 @@ public class OrderCase implements Serializable {
         }
 
         public OrderCase build() {
-            OrderCase aCase = new OrderCase();
-            aCase.setDefendantCaseResults(defendantCaseResults);
-            aCase.setDefendantCaseOffences(defendantCaseOffences);
-            aCase.setCaseResults(caseResults);
-            return aCase;
+            OrderCase orderCase = new OrderCase();
+            orderCase.setUrn(urn);
+            orderCase.setDefendantCaseResults(defendantCaseResults);
+            orderCase.setDefendantCaseOffences(defendantCaseOffences);
+            orderCase.setCaseResults(caseResults);
+            return orderCase;
         }
     }
 }

@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import uk.gov.justice.services.common.converter.exception.ConverterException;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.event.nows.order.NowsDocumentOrder;
 import uk.gov.moj.cpp.hearing.event.nows.order.OrderCase;
@@ -8,6 +10,7 @@ import uk.gov.moj.cpp.hearing.nows.events.Defendant;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
 
+import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -34,11 +37,10 @@ public class NowsRequestedToOrderConvertorTest {
         assertThat(ofNullable(getSharedResultLines(nowsRequested).get(0).getOrderedDate()).orElse(""), is(nowsDocumentOrder.getOrderDate()));
 
         assertThat(getDefendants(nowsRequested).get(0).getCases().get(0).getUrn(), is(nowsDocumentOrder.getCaseUrns().get(0)));
-        assertThat(getDefendants(nowsRequested).get(0).getCases().get(1).getUrn(), is(nowsDocumentOrder.getCaseUrns().get(1)));
         assertThat("Mr David  LLOYD", is(nowsDocumentOrder.getDefendant().getName()));
         assertThat(getDefendants(nowsRequested).get(0).getPerson().getAddress().getPostCode(), is(nowsDocumentOrder.getDefendant().getAddress().getPostCode()));
 //defendantCaseResults
-        assertThat(getDefendants(nowsRequested).get(0).getCases().get(0).getUrn(), is(getOrderCase(nowsDocumentOrder).getDefendantCaseResults().get(0).getUrn()));
+        assertThat(getDefendants(nowsRequested).get(0).getCases().get(0).getUrn(), is(getOrderCase(nowsDocumentOrder).getUrn()));
         assertThat(getSharedResultLines(nowsRequested).get(0).getPrompts().get(0).getLabel(), is(getOrderCase(nowsDocumentOrder).getDefendantCaseResults().get(0).getPrompts().get(0).getLabel()));
         assertThat(getSharedResultLines(nowsRequested).get(0).getPrompts().get(0).getValue(), is(getOrderCase(nowsDocumentOrder).getDefendantCaseResults().get(0).getPrompts().get(0).getValue()));
 
