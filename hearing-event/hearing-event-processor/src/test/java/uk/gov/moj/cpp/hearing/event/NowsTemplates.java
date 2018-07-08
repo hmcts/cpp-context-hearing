@@ -1,6 +1,15 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import com.google.common.collect.ImmutableMap;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
+
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -20,18 +29,11 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Collections.singletonList;
-import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
+import com.google.common.collect.ImmutableMap;
 
 public class NowsTemplates {
 
@@ -117,7 +119,7 @@ public class NowsTemplates {
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next())
                         .build())
-                .withCompletedResultLines(singletonList(
+                .withCompletedResultLines(new ArrayList<>(singletonList(
                         CompletedResultLine.builder()
                                 .withId(completedResultLineId)
                                 .withCaseId(hearingOne.getFirstCaseId())
@@ -132,7 +134,7 @@ public class NowsTemplates {
                                         .withValue(STRING.next())
                                         .build()))
                                 .build()
-                ))
+                )))
                 .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
                         .withCourtClerk(CourtClerk.builder()
                                 .withId(randomUUID())

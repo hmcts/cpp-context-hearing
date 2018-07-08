@@ -12,6 +12,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<NewModelHearingAggregate.VariantKeyHolder, Variant> variantDirectory = new HashMap<>();
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
     private final Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
+    private List<UUID> adjournedHearingIds = new ArrayList<>();
 
     private boolean published = false;
 
@@ -88,5 +90,13 @@ public class HearingAggregateMomento implements Serializable {
 
     public void setPublished(boolean published) {
         this.published = published;
+    }
+
+    public List<UUID> getAdjournedHearingIds() {
+        return adjournedHearingIds;
+    }
+
+    public void setAdjournedHearingIds(final List<UUID> adjournedHearingIds) {
+        this.adjournedHearingIds = adjournedHearingIds;
     }
 }

@@ -20,6 +20,8 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_SERVICE_NAME = "referencedata-service";
 
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions";
+    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/withdrawn";
+    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/next-hearing";
     private static final String REFERENCE_DATA_RESULT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-word-synonyms";
     private static final String REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/fixed-list";
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-prompt-word-synonyms";
@@ -27,6 +29,8 @@ public class ReferenceDataStub {
 
 
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-definitions+json";
+    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_MEDIA_TYPE = "application/vnd.referencedata.get-result-definition-withdrawn+json";
+    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_MEDIA_TYPE = "application/vnd.referencedata.get-result-definition-next-hearing+json";
     private static final String REFERENCE_DATA_RESULT_WORD_SYNONYMS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-word-synonyms+json";
     private static final String REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_MEDIA_TYPE = "application/vnd.referencedata.get-all-fixed-list+json";
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-prompt-word-synonyms+json";
@@ -38,6 +42,35 @@ public class ReferenceDataStub {
         stubGetReferenceDataResultWordSynonyms();
         stubGetReferenceDataResultPromptWordSynonyms();
         stubGetReferenceDataResultPromptFixedLists();
+    }
+
+    public static void stubRelistReferenceDataResults() {
+        stubGetReferenceDataResultDefinitionsWithdrawn();
+        stubGetReferenceDataResultDefinitionsNextHearing();
+    }
+
+    private static void stubGetReferenceDataResultDefinitionsWithdrawn() {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
+
+        stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_MEDIA_TYPE)
+                        .withBody(getPayload("referencedata.result-definitions-withdrawn.json"))));
+
+        waitForStubToBeReady(REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL, REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_MEDIA_TYPE);
+    }
+
+    private static void stubGetReferenceDataResultDefinitionsNextHearing() {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
+
+        stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_MEDIA_TYPE)
+                        .withBody(getPayload("referencedata.result-definitions-next-hearing.json"))));
+
+        waitForStubToBeReady(REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL, REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_MEDIA_TYPE);
     }
 
     public static void stubGetAllNowsMetaData(AllNows allNows) {

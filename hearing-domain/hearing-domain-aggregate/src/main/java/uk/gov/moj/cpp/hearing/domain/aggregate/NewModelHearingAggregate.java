@@ -5,6 +5,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
@@ -21,6 +22,7 @@ import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCo
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ConvictionDateDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefenceCounselDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantDelegate;
@@ -38,6 +40,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -55,7 +58,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -67,10 +69,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.json.JsonObject;
-import static java.util.Objects.nonNull;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "pmd:BeanMembersShouldSerialize"})
 public class NewModelHearingAggregate implements Aggregate {
@@ -101,6 +99,8 @@ public class NewModelHearingAggregate implements Aggregate {
 
     private transient VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
 
+    private transient AdjournHearingDelegate adjournHearingDelegate = new AdjournHearingDelegate(momento);
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(
@@ -121,6 +121,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 when(OffenceUpdated.class).apply(offenceDelegate::handleOffenceUpdated),
                 when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),
                 when(NowsVariantsSavedEvent.class).apply(variantDirectoryDelegate::handleNowsVariantsSavedEvent),
+                when(HearingAdjourned.class).apply(adjournHearingDelegate::handleHearingAdjournedEvent),
                 otherwiseDoNothing()
         );
     }
@@ -189,6 +190,10 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(this.offenceDelegate.deleteOffence(offenceId, hearingId));
     }
 
+    public Stream<Object> adjournHearing(final AdjournHearing adjournHearing) {
+        return apply(this.adjournHearingDelegate.adjournHearing(adjournHearing));
+    }
+
     public Stream<Object> addWitness(final UUID hearingId, final UUID witnessId, final String type, final String classification, final String title, final String firstName, final String lastName, final List<DefendantId> defendantIdList) {
         return apply(Stream.of(new WitnessAdded(
                 witnessId,
@@ -224,6 +229,37 @@ public class NewModelHearingAggregate implements Aggregate {
         return apply(Stream.of(attendeeDeleted));
     }
 
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        setDelegates();
+    }
+
+    private void setDelegates() {
+
+        hearingDelegate = new HearingDelegate(momento);
+
+        pleaDelegate = new PleaDelegate(momento);
+
+        prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
+
+        defenceCounselDelegate = new DefenceCounselDelegate(momento);
+
+        hearingEventDelegate = new HearingEventDelegate(momento);
+
+        verdictDelegate = new VerdictDelegate(momento);
+
+        resultsSharedDelegate = new ResultsSharedDelegate(momento);
+
+        convictionDateDelegate = new ConvictionDateDelegate(momento);
+
+        defendantDelegate = new DefendantDelegate(momento);
+
+        offenceDelegate = new OffenceDelegate(momento);
+
+        variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
+
+        adjournHearingDelegate = new AdjournHearingDelegate((momento));
+    }
 
     public static final class HearingEvent implements Serializable {
 
@@ -268,36 +304,6 @@ public class NewModelHearingAggregate implements Aggregate {
         public int hashCode() {
             return variantKey.hashCode();
         }
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        setDelegates();
-    }
-
-    private void setDelegates() {
-
-        hearingDelegate = new HearingDelegate(momento);
-
-        pleaDelegate = new PleaDelegate(momento);
-
-        prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
-
-        defenceCounselDelegate = new DefenceCounselDelegate(momento);
-
-        hearingEventDelegate = new HearingEventDelegate(momento);
-
-        verdictDelegate = new VerdictDelegate(momento);
-
-        resultsSharedDelegate = new ResultsSharedDelegate(momento);
-
-        convictionDateDelegate = new ConvictionDateDelegate(momento);
-
-        defendantDelegate = new DefendantDelegate(momento);
-
-        offenceDelegate = new OffenceDelegate(momento);
-
-        variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
     }
 
 }

@@ -46,7 +46,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 ChangeCaseDefendantDetailsCommandHandler.class,
                 ChangeCaseDefendantOffencesCommandHandler.class,
                 DeleteAtendeeCommandHandler.class,
-                HearingDetailChangeCommandHandler.class
+                HearingDetailChangeCommandHandler.class,
+                AdjournHearingCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

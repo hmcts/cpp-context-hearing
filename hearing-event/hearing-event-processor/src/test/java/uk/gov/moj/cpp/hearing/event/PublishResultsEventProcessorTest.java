@@ -1,19 +1,20 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
+import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.delegates.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.GenerateNowsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.SaveNowVariantsDelegate;
@@ -24,13 +25,14 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
-import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class PublishResultsEventProcessorTest {
 
@@ -53,6 +55,9 @@ public class PublishResultsEventProcessorTest {
 
     @Mock
     private GenerateNowsDelegate generateNowsDelegate;
+
+    @Mock
+    private AdjournHearingDelegate adjournHearingDelegate;
 
     @Mock
     private SaveNowVariantsDelegate saveNowVariantsDelegate;
@@ -121,5 +126,7 @@ public class PublishResultsEventProcessorTest {
         verify(publishResultsDelegate).shareResults(sender, event, resultsShared, Collections.emptyList());
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
+
+        verify(adjournHearingDelegate).execute(resultsShared, event);
     }
 }
