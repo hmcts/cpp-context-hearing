@@ -26,6 +26,12 @@
         "startDateTime": {
           "type": "string"
         },
+        "hearingDates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "hearingType": {
           "type": "string"
         },
