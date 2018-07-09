@@ -475,13 +475,17 @@
           },
           "description": {
             "type": "string"
+          },
+          "status": {
+            "type": "string"
           }
         },
         "required": [
           "key",
           "materialId",
           "templateName",
-          "description"
+          "description",
+          "status"
         ]
       }
     },

@@ -121,6 +121,7 @@ public class NewModelHearingAggregate implements Aggregate {
                 when(OffenceUpdated.class).apply(offenceDelegate::handleOffenceUpdated),
                 when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),
                 when(NowsVariantsSavedEvent.class).apply(variantDirectoryDelegate::handleNowsVariantsSavedEvent),
+                when(NowsMaterialStatusUpdated.class).apply(variantDirectoryDelegate::handleNowsMaterialStatusUpdatedEvent),
                 when(HearingAdjourned.class).apply(adjournHearingDelegate::handleHearingAdjournedEvent),
                 otherwiseDoNothing()
         );

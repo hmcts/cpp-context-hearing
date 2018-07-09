@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.nowsdomain.variants;
 
+import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +12,8 @@ public class VariantValue implements Serializable {
     private UUID materialId;
 
     private List<ResultLineReference> resultLines;
+
+    private VariantStatus status;
 
     public static VariantValue variantValue() {
         return new VariantValue();
@@ -30,6 +34,15 @@ public class VariantValue implements Serializable {
 
     public VariantValue setResultLines(List<ResultLineReference> resultLines) {
         this.resultLines = resultLines;
+        return this;
+    }
+
+    public VariantStatus getStatus() {
+        return status;
+    }
+
+    public VariantValue setStatus(final VariantStatus status) {
+        this.status = status;
         return this;
     }
 }

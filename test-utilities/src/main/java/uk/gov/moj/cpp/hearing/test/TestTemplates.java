@@ -70,6 +70,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
+import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -824,6 +825,7 @@ public class TestTemplates {
                     )
                     .setValue(VariantValue.variantValue()
                             .setMaterialId(randomUUID())
+                            .setStatus(VariantStatus.BUILDING)
                             .setResultLines(singletonList(ResultLineReference.resultLineReference()
                                     .setResultLineId(randomUUID())
                                     .setLastSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))

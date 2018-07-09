@@ -47,6 +47,9 @@
         "materialId": {
           "$ref": "#/definitions/uuid"
         },
+        "status": {
+          "type": "string"
+        },
         "resultLines": {
           "type": "array",
           "additionalProperties": false,

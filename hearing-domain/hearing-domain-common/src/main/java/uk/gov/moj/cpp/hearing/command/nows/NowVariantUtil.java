@@ -5,6 +5,7 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsComman
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
+import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ public class NowVariantUtil {
                                         .setValue(
                                                 VariantValue.variantValue()
                                                 .setMaterialId(UUID.randomUUID())
+                                                .setStatus(VariantStatus.BUILDING)
                                                 .setResultLines(
                                                         Arrays.asList(
                                                                 ResultLineReference.resultLineReference()
@@ -57,6 +59,7 @@ public class NowVariantUtil {
                                         .setValue(
                                                 VariantValue.variantValue()
                                                         .setMaterialId(UUID.randomUUID())
+                                                        .setStatus(VariantStatus.BUILDING)
                                                         .setResultLines(
                                                                 Arrays.asList(
                                                                         ResultLineReference.resultLineReference()

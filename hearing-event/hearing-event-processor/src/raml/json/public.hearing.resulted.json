@@ -117,7 +117,8 @@
     },
       "materialId" : "f79bf106-84e0-4bd9-911a-fc28cd6a8c9c",
       "description": "Imprisonment Order",
-      "templateName": "SingleTemplate"
+      "templateName": "SingleTemplate",
+      "status" : "GENERATED"
   }, {
     "key" : {
       "hearingId" : "7a3f466e-6f12-4915-acde-b2f3cf229b3f",
@@ -127,7 +128,8 @@
     },
       "materialId" : "a7757369-8382-4a4b-9640-ace82d5222f6",
       "description": "Imprisonment Order",
-      "templateName": "SingleTemplate"
+      "templateName": "SingleTemplate",
+      "status" : "BUILDING"
 
   } ],
   "sharedTime": "2016-06-01T10:00:00Z"

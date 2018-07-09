@@ -96,6 +96,7 @@ public class PublishResultsDelegate {
                             final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(referenceDate, variant.getKey().getNowsTypeId());
                             return variant()
                                     .setKey(variant.getKey())
+                                    .setStatus(variant.getValue().getStatus().toString())
                                     .setMaterialId(variant.getValue().getMaterialId())
                                     .setDescription(nowDefinition.getName())
                                     .setTemplateName(nowDefinition.getTemplateName());

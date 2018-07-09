@@ -685,6 +685,9 @@
           "items": {
             "$ref": "#/definitions/resultLineReference"
           }
+        },
+        "status": {
+          "type": "string"
         }
       }
     },

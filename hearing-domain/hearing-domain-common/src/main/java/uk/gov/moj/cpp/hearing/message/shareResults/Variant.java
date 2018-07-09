@@ -14,6 +14,8 @@ public class Variant {
 
     private String description;
 
+    private String status;
+
     public static Variant variant() {
         return new Variant();
     }
@@ -51,6 +53,15 @@ public class Variant {
 
     public Variant setDescription(final String description) {
         this.description = description;
+        return this;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public Variant setStatus(final String status) {
+        this.status = status;
         return this;
     }
 }

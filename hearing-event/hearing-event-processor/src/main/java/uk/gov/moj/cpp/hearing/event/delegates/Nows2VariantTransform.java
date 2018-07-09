@@ -7,6 +7,7 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
+import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -35,6 +36,7 @@ public class Nows2VariantTransform {
                 )
                 .setValue(VariantValue.variantValue()
                         .setMaterialId(material.getId())
+                        .setStatus(VariantStatus.BUILDING)
                         .setResultLines(material.getNowResult().stream()
                                 .map(nr -> ResultLineReference.resultLineReference()
                                         .setLastSharedTime(sharedTime)
