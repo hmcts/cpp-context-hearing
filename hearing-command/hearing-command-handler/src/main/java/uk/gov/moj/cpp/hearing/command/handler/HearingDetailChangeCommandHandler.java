@@ -31,7 +31,9 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.change-hearing-detail")
     public void changeHearingDetail(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.change-hearing-detail event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.change-hearing-detail event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final HearingJsonPayloadReader hr = new HearingJsonPayloadReader(envelope.payloadAsJsonObject().getJsonObject(FIELD_HEARING));
         aggregate(NewModelHearingAggregate.class, hr.getId(), envelope, a -> a.updateHearingDetails(hr.getId(), hr.getType(), hr.getCourtRoomId(), hr.getCourtRoomName(), hr.getJudge(), hr.getHearingDays()));

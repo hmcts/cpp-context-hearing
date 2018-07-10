@@ -24,8 +24,9 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.hearing-offence-plea-update")
     public void updatePlea(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.hearing-offence-plea-update event received {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-offence-plea-update event received {}", envelope.toObfuscatedDebugString());
+        }
         final HearingUpdatePleaCommand command = convertToObject(envelope, HearingUpdatePleaCommand.class);
         for (final Defendant defendant : command.getDefendants()) {
             for (final Offence offence : defendant.getOffences()) {
@@ -38,8 +39,9 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.offence-plea-updated")
     public void updateOffencePlea(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.offence-plea-updated event received {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.offence-plea-updated event received {}", envelope.toObfuscatedDebugString());
+        }
         final OffencePleaUpdated event = convertToObject(envelope, OffencePleaUpdated.class);
         aggregate(OffenceAggregate.class, event.getOffenceId(), envelope,
                 (offenceAggregate) -> offenceAggregate.updatePlea(event.getHearingId(), event.getOffenceId(), event.getPleaDate(), event.getValue()));

@@ -21,7 +21,9 @@ public class AdjournHearingCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.adjourn-hearing")
     public void adjournHearing(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.adjourn-hearing event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.adjourn-hearing event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final AdjournHearing adjournHearing = convertToObject(envelope, AdjournHearing.class);
         aggregate(NewModelHearingAggregate.class, adjournHearing.getRequestedByHearingId(), envelope, a -> a.adjournHearing(adjournHearing));

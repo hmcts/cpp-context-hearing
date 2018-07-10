@@ -20,7 +20,9 @@ public class AddDefenceCounselCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.add-defence-counsel")
     public void addDefenceCounsel(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.add-defence-counsel event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.add-defence-counsel event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final AddDefenceCounselCommand addDefenceCounselCommand = convertToObject(envelope, AddDefenceCounselCommand.class);
 

@@ -29,8 +29,9 @@ public class VerdictUpdateEventProcessor {
 
     @Handles("hearing.offence-verdict-updated")
     public void verdictUpdate(final JsonEnvelope envelop) {
-        LOGGER.debug("hearing.offence-verdict-updated event received {}", envelop.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.offence-verdict-updated event received {}", envelop.toObfuscatedDebugString());
+        }
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.verdict-updated")
                 .apply(createObjectBuilder()
                         .add("hearingId", envelop.payloadAsJsonObject().getJsonString("hearingId"))

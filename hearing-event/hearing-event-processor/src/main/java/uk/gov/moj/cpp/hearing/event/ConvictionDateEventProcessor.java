@@ -41,7 +41,9 @@ public class ConvictionDateEventProcessor {
 
     @Handles("hearing.conviction-date-added")
     public void publishOffenceConvictionDateChangedPublicEvent(final JsonEnvelope event) {
-        LOGGER.debug("hearing.conviction-date-added event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.conviction-date-added event received {}", event.toObfuscatedDebugString());
+        }
 
         ConvictionDateAdded convictionDateAdded = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(),
                 ConvictionDateAdded.class);
@@ -54,7 +56,9 @@ public class ConvictionDateEventProcessor {
 
     @Handles("hearing.conviction-date-removed")
     public void publishOffenceConvictionDateRemovedPublicEvent(final JsonEnvelope event) {
-        LOGGER.debug("hearing.conviction-date-removed event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.conviction-date-removed event received {}", event.toObfuscatedDebugString());
+        }
 
         ConvictionDateRemoved convictionDateRemoved = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);

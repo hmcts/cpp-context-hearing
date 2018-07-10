@@ -64,6 +64,7 @@ public class NowsRequestedToOrderConvertor {
                         .withCaseUrns(getCaseUrns(nowsRequested, selectedNow))
                         .withDefendant(getNowsOrderDefendant(nowsRequested, selectedNow))
                         .withCases(getNowsMaterialOrderCases(nowsRequested, selectedNowMaterial))
+                        .withAmended(selectedNowMaterial.isAmended())
                         .build();
                 nowsDocumentOrders.add(nowsDocumentOrder);
             });

@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.event.nows;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
@@ -18,6 +20,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Pr
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,10 +33,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 @SuppressWarnings({"squid:S1188", "squid:S2384"})
 public class NowsGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NowsGenerator.class.getName());
 
     private final ReferenceDataService referenceDataService;
 
@@ -58,6 +61,7 @@ public class NowsGenerator {
         resultsShared.getHearing().getDefendants().forEach(defendant -> {
 
                     if (anyUncompletedResultLinesForDefendant(resultsShared, defendant)) {
+                        LOGGER.info("aborting NOWs generation for defendant {} as there are uncompleted result lines", defendant.getId());
                         return; //we don't generate any NOW for the defendant if they have any uncompleted result lines.
                     }
 
@@ -85,6 +89,7 @@ public class NowsGenerator {
         for (final NowDefinition nowDefinition : findNowDefinitions(resultLines)) {
 
             if (anyMandatoryResultLineNotPresent(completedResultDefinitionIds, nowDefinition)) {
+                LOGGER.info("aborting NOW generation {} for defendant {} as not all mandatory results are present", defendant.getId(), nowDefinition.getId());
                 return Collections.emptyList(); //This will suspend any now generation for the defendant.
             }
 
@@ -119,7 +124,9 @@ public class NowsGenerator {
         variantToUserGroupsMappings.forEach((variant, userGroups) -> {
 
             final GenerateVariantDecisionMaker.Decision decision = generateVariantDecisionMaker.decide(userGroups);
+
             if (!decision.isShouldGenerate()) {
+                LOGGER.info("NOW variant is not generated on direction of decision maker");
                 return;
             }
 
@@ -183,10 +190,12 @@ public class NowsGenerator {
                     .map(ResultDefinition::getId)
                     .collect(toSet());
 
-            final Set<UUID> resultPromptIds4UserGroup = resultLines4Now.stream().map(resultLine -> referenceDataService.getResultDefinitionById(
-                    resultLine.getOrderedDate(), resultLine.getResultDefinitionId())).flatMap(resultDefinition -> resultDefinition.getPrompts()
-                    .stream()).filter(resultPrompt -> resultPrompt.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
-                    .map(Prompt::getId).collect(toSet());
+            final Set<UUID> resultPromptIds4UserGroup = resultLines4Now.stream()
+                    .map(resultLine -> referenceDataService.getResultDefinitionById(resultLine.getOrderedDate(), resultLine.getResultDefinitionId()))
+                    .flatMap(resultDefinition -> resultDefinition.getPrompts().stream())
+                    .filter(resultPrompt -> resultPrompt.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
+                    .map(Prompt::getId)
+                    .collect(toSet());
 
             variantToUserGroupsMappings.computeIfAbsent(new NowVariant(resultDefinitionsIds4UserGroup, resultPromptIds4UserGroup), v -> new ArrayList<>())
                     .add(userGroup);

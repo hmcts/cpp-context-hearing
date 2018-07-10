@@ -41,15 +41,18 @@ public class MagistratesCourtInitiateHearingEventProcessor {
 
     @Handles("public.progression.events.sending-sheet-completed")
     public void recordSendSheetCompleted(final JsonEnvelope event) {
-        LOGGER.debug("public.progression.events.sending-sheet-completed event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("public.progression.events.sending-sheet-completed event received {}", event.toObfuscatedDebugString());
+        }
         sender.send(enveloper.withMetadataFrom(event, "hearing.record-sending-sheet-complete")
                 .apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.sending-sheet-recorded")
     public void processSendingSheetRecordedRecordMags(final JsonEnvelope event) {
-        LOGGER.debug("hearing.sending-sheet-recorded event received {}", event.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.sending-sheet-recorded event received {}", event.toObfuscatedDebugString());
+        }
         final SendingSheetCompletedRecorded sendingSheetCompletedRecorded = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), SendingSheetCompletedRecorded.class);
 
@@ -59,8 +62,9 @@ public class MagistratesCourtInitiateHearingEventProcessor {
 
     @Handles("hearing.mags-court-hearing-recorded")
     public void processMagistratesCourtHearing(final JsonEnvelope event) {
-        LOGGER.debug("hearing.mags-court-hearing-recorded event received {}", event.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.mags-court-hearing-recorded event received {}", event.toObfuscatedDebugString());
+        }
         final MagsCourtHearingRecorded magsCourtHearingRecorded = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), MagsCourtHearingRecorded.class);
 

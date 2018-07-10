@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.nows;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.justice.services.common.converter.JSONObjectValueObfuscator;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -76,6 +77,7 @@ public class NowsRequestedEventProcessor {
 
         final List<NowsDocumentOrder> nowsDocumentOrders = NowsRequestedToOrderConvertor.convert(nowsRequested);
         nowsDocumentOrders.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriority)).forEach(nowsDocumentOrder -> {
+            LOGGER.info("Input for docmosis order {}", JSONObjectValueObfuscator.obfuscated(objectToJsonObjectConverter.convert(nowsDocumentOrder)));
             try {
                 final byte[] resultOrderAsByteArray = docmosisService.generateDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), TEMPLATE_CONTEXT, TEMPLATE_IDENTIFIER);
                 final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));

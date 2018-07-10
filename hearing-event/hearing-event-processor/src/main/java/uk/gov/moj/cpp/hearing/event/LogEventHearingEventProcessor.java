@@ -43,7 +43,9 @@ public class LogEventHearingEventProcessor {
 
     @Handles("hearing.hearing-event-logged")
     public void publishHearingEventLoggedPublicEvent(final JsonEnvelope event) {
-        LOGGER.debug("hearing.hearing-event-logged event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-event-logged event received {}", event.toObfuscatedDebugString());
+        }
 
         final HearingEventLogged hearingEventLogged = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventLogged.class);
@@ -89,7 +91,9 @@ public class LogEventHearingEventProcessor {
     }
     @Handles("hearing.hearing-event-ignored")
     public void publishHearingEventIgnoredPublicEvent(final JsonEnvelope event) {
-        LOGGER.debug("hearing.hearing-event-ignored event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-event-ignored event received {}", event.toObfuscatedDebugString());
+        }
 
         final HearingEventIgnored hearingEventIgnored = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventIgnored.class);

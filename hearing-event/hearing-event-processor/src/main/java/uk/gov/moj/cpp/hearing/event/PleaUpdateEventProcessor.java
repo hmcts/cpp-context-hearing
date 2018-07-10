@@ -29,9 +29,9 @@ public class PleaUpdateEventProcessor {
 
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdate(final JsonEnvelope envelop) {
-
-        LOGGER.debug("hearing.hearing-offence-plea-updated event received {}", envelop.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-offence-plea-updated event received {}", envelop.toObfuscatedDebugString());
+        }
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "hearing.offence-plea-updated").apply(envelop.payloadAsJsonObject()));
 
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.plea-updated")

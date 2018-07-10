@@ -28,7 +28,9 @@ public class HearingEventProcessor {
 
     @Handles("hearing.draft-result-saved")
     public void publicDraftResultSavedPublicEvent(final JsonEnvelope event) {
-        LOGGER.debug("hearing.draft-result-saved event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.draft-result-saved event received {}", event.toObfuscatedDebugString());
+        }
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.draft-result-saved").apply(event.payloadAsJsonObject()));
     }

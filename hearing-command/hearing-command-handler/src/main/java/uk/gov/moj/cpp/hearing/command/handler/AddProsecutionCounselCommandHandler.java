@@ -20,8 +20,9 @@ public class AddProsecutionCounselCommandHandler extends AbstractCommandHandler 
 
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) throws EventStreamException {
-
-        LOGGER.debug("hearing.add-prosecution-counsel event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.add-prosecution-counsel event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final AddProsecutionCounselCommand addProsecutionCounselCommand = convertToObject(envelope, AddProsecutionCounselCommand.class);
 

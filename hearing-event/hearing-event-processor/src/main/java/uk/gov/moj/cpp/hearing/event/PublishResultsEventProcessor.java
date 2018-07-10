@@ -49,8 +49,9 @@ public class PublishResultsEventProcessor {
 
     @Handles("hearing.results-shared")
     public void resultsShared(final JsonEnvelope event) {
-        LOGGER.info("hearing.results-shared event received {}", event.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.results-shared event received {}", event.toObfuscatedDebugString());
+        }
         final ResultsShared resultsShared = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
 

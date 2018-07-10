@@ -42,7 +42,9 @@ public class InitiateHearingEventProcessor {
 
     @Handles("hearing.events.initiated")
     public void hearingInitiated(final JsonEnvelope event) {
-        LOGGER.debug("hearing.events.initiated event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.initiated event received {}", event.toObfuscatedDebugString());
+        }
 
         final InitiateHearingCommand initiateHearingCommand = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), InitiateHearingCommand.class);
 
@@ -96,7 +98,9 @@ public class InitiateHearingEventProcessor {
 
     @Handles("hearing.events.found-plea-for-hearing-to-inherit")
     public void hearingInitiateOffencePlea(final JsonEnvelope event) {
-        LOGGER.debug("hearing.events.found-plea-for-hearing-to-inherit event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.found-plea-for-hearing-to-inherit event received {}", event.toObfuscatedDebugString());
+        }
         this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-plea").apply(event.payloadAsJsonObject()));
     }
 }

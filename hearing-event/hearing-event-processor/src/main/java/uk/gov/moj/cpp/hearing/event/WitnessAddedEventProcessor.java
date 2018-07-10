@@ -41,8 +41,9 @@ public class WitnessAddedEventProcessor {
 
     @Handles("hearing.events.witness-added")
     public void publishWitnessAddedPublicEvent(final JsonEnvelope event) {
-        LOGGER.debug("hearing.events.witness-added event received {}", event.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.witness-added event received {}", event.toObfuscatedDebugString());
+        }
         final JsonObject payload = event.payloadAsJsonObject();
         final UUID witnessId = fromString(payload.getString(ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
@@ -70,7 +71,7 @@ public class WitnessAddedEventProcessor {
 
 
         this.sender.send(this.enveloper
-                        .withMetadataFrom(event, "public.hearing.events.witness-added-updated")
+                .withMetadataFrom(event, "public.hearing.events.witness-added-updated")
                 .apply(createObjectBuilder().add("witnessId", witnessId.toString()).build()));
     }
 

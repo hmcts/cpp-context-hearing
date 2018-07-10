@@ -45,7 +45,9 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.create-hearing-event-definitions event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.create-hearing-event-definitions event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID hearingEventDefinitionsId = fromString(payload.getString(FIELD_GENERIC_ID));
@@ -71,8 +73,9 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.log-hearing-event")
     public void logHearingEvent(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.debug("hearing.command.log-hearing-event event received {}", command.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.log-hearing-event event received {}", command.toObfuscatedDebugString());
+        }
         final LogEventCommand logEventCommand = convertToObject(command, LogEventCommand.class);
 
         aggregate(NewModelHearingAggregate.class, logEventCommand.getHearingId(), command, a -> a.logHearingEvent(logEventCommand));
@@ -88,7 +91,9 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.correct-hearing-event")
     public void correctEvent(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.debug("hearing.command.correct-hearing-event event received {}", command.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.correct-hearing-event event received {}", command.toObfuscatedDebugString());
+        }
 
         final CorrectLogEventCommand logEventCommand = convertToObject(command, CorrectLogEventCommand.class);
 

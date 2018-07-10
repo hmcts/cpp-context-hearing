@@ -25,13 +25,17 @@ public class CaseDefendantDetailsChangeEventProcessor {
 
     @Handles("public.progression.case-defendant-changed")
     public void processPublicCaseDefendantChanged(final JsonEnvelope event) {
-        LOGGER.debug("public.progression.case-defendant-changed event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("public.progression.case-defendant-changed event received {}", event.toObfuscatedDebugString());
+        }
         sender.send(enveloper.withMetadataFrom(event, "hearing.update-case-defendant-details").apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.update-case-defendant-details-enriched-with-hearing-ids")
     public void enrichDefendantDetails(final JsonEnvelope event) {
-        LOGGER.debug("hearing.update-case-defendant-details-enriched-with-hearing-ids event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.update-case-defendant-details-enriched-with-hearing-ids event received {}", event.toObfuscatedDebugString());
+        }
         sender.send(enveloper.withMetadataFrom(event, "hearing.update-case-defendant-details-against-hearing-aggregate").apply(event.payloadAsJsonObject()));
     }
 }

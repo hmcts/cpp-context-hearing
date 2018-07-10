@@ -31,8 +31,9 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.save-draft-result event received {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.save-draft-result event received {}", envelope.toObfuscatedDebugString());
+        }
         final SaveDraftResultCommand command = convertToObject(envelope, SaveDraftResultCommand.class);
         final Stream<Object> events = Stream.of(DraftResultSaved.builder()
                 .withHearingId(command.getHearingId())
@@ -46,8 +47,9 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.share-results")
     public void shareResult(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.share-results event received {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.share-results event received {}", envelope.toObfuscatedDebugString());
+        }
         final ShareResultsCommand command = convertToObject(envelope, ShareResultsCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope,
                 aggregate -> aggregate.shareResults(command, clock.now()));
@@ -55,8 +57,9 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.update-result-lines-status")
     public void updateResultLinesStatus(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.update-result-lines-status event received {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-result-lines-status event received {}", envelope.toObfuscatedDebugString());
+        }
         final UpdateResultLinesStatusCommand command = convertToObject(envelope, UpdateResultLinesStatusCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope,
                 aggregate -> aggregate.updateResultLinesStatus(command));

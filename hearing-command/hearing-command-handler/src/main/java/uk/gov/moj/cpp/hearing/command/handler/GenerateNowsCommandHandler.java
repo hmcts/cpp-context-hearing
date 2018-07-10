@@ -23,22 +23,27 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.generate-nows")
     public void genarateNows(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.generate-nows event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.generate-nows event received {}", envelope.toObfuscatedDebugString());
+        }
         final NowsRequested nowsRequested = convertToObject(envelope, NowsRequested.class);
         aggregate(NewModelHearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelope, a -> a.generateNows(nowsRequested));
     }
 
     @Handles("hearing.command.save-nows-variants")
     public void saveNowsVariants(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.info("hearing.command.save-nows-variants event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.save-nows-variants event received {}", envelope.toObfuscatedDebugString());
+        }
         final SaveNowsVariantsCommand saveNowsVariantsCommand = convertToObject(envelope, SaveNowsVariantsCommand.class);
         aggregate(NewModelHearingAggregate.class, saveNowsVariantsCommand.getHearingId(), envelope, a -> a.saveNowsVariants(saveNowsVariantsCommand));
     }
 
     @Handles("hearing.command.update-nows-material-status")
     public void nowsGenerated(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.update-nows-material-status {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-nows-material-status {}", envelope.toObfuscatedDebugString());
+        }
         final NowsMaterialStatusUpdated nowsRequested = convertToObject(envelope, NowsMaterialStatusUpdated.class);
         aggregate(NewModelHearingAggregate.class, nowsRequested.getHearingId(), envelope, a -> a.nowsMaterialStatusUpdated(nowsRequested));
     }

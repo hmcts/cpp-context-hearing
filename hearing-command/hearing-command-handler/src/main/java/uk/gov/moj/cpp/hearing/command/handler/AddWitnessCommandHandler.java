@@ -28,7 +28,9 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.add-update-witness")
     public void addWitness(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.add-witness event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.add-witness event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID witnessId = fromString(payload.getString("id"));
@@ -48,7 +50,9 @@ public class AddWitnessCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.defence-witness-added")
     public void defenceWitnessAdded(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.defence-witness-added event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.defence-witness-added event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID witnessId = fromString(payload.getString("witnessId"));

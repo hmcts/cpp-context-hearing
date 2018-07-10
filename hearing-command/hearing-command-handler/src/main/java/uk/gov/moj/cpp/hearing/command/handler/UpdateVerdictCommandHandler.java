@@ -22,8 +22,9 @@ public class UpdateVerdictCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.update-verdict")
     public void updateVerdict(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.debug("hearing.command.update-verdict event received {}", command.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-verdict event received {}", command.toObfuscatedDebugString());
+        }
         final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = convertToObject(command, HearingUpdateVerdictCommand.class);
 
         for (Defendant defendant : hearingUpdateVerdictCommand.getDefendants()) {

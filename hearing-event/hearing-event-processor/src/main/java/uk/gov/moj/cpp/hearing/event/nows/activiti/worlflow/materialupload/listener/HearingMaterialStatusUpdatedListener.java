@@ -15,25 +15,26 @@ import uk.gov.moj.cpp.hearing.activiti.service.ActivitiService;
 
 @ServiceComponent(Component.EVENT_PROCESSOR)
 public class HearingMaterialStatusUpdatedListener {
+
     public static final String PUBLIC_HEARING_EVENTS_NOWS_MATERIAL_STATUS_UPDATED = "public.hearing.events.nows-material-status-updated";
-    public static final String RECEIVE_STATUS_UPDATE_CONFIRMATION_HEARING =
-                    "receiveStatusUpdateConfirmationHearing";
-    private static final Logger LOGGER =
-                    LoggerFactory.getLogger(HearingMaterialStatusUpdatedListener.class.getName());
+    public static final String RECEIVE_STATUS_UPDATE_CONFIRMATION_HEARING = "receiveStatusUpdateConfirmationHearing";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingMaterialStatusUpdatedListener.class.getName());
 
     @Inject
     private ActivitiService activitiService;
 
-
     @Handles(PUBLIC_HEARING_EVENTS_NOWS_MATERIAL_STATUS_UPDATED)
     public void processEvent(final JsonEnvelope jsonEnvelope) {
         LOGGER.info("Received public.hearing.events.nows-material-status-updated {}",
-                        jsonEnvelope.payloadAsJsonObject());
+                jsonEnvelope.payloadAsJsonObject());
         if (jsonEnvelope.payloadAsJsonObject().containsKey(MATERIAL_ID)) {
             final String materialId = jsonEnvelope.payloadAsJsonObject().getString(MATERIAL_ID);
             activitiService.signalProcessByActivitiIdAndFieldName(RECEIVE_STATUS_UPDATE_CONFIRMATION_HEARING, MATERIAL_ID, materialId);
         } else {
-            LOGGER.error("Event Received without materialId : metadata {} payload {}", jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("Event Received without materialId : metadata {} payload {}", jsonEnvelope.metadata(), jsonEnvelope.toObfuscatedDebugString());
+            }
         }
     }
 }

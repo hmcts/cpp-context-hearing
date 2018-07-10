@@ -185,7 +185,9 @@ public class InitiateHearingEventListener {
     @Transactional
     @Handles("hearing.conviction-date-added")
     public void convictionDateUpdated(final JsonEnvelope event) {
-        LOGGER.debug("hearing.conviction-date-added event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.conviction-date-added event received {}", event.toObfuscatedDebugString());
+        }
         final ConvictionDateAdded convictionDateAdded = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateAdded.class);
         save(convictionDateAdded.getOffenceId(), convictionDateAdded.getHearingId(), (o) -> o.setConvictionDate(convictionDateAdded.getConvictionDate()));
     }
@@ -193,7 +195,9 @@ public class InitiateHearingEventListener {
     @Transactional
     @Handles("hearing.conviction-date-removed")
     public void convictionDateRemoved(final JsonEnvelope event) {
-        LOGGER.debug("hearing.conviction-date-removed event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.conviction-date-removed event received {}", event.toObfuscatedDebugString());
+        }
         final ConvictionDateRemoved convictionDateRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);
         save(convictionDateRemoved.getOffenceId(), convictionDateRemoved.getHearingId(), (o) -> o.setConvictionDate(null));
     }
@@ -201,7 +205,9 @@ public class InitiateHearingEventListener {
     @Transactional
     @Handles("hearing.events.inherited-plea")
     public void hearingInitiatedPleaData(final JsonEnvelope envelop) {
-        LOGGER.debug("hearing.events.inherited-plea event received {}", envelop.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.inherited-plea event received {}", envelop.toObfuscatedDebugString());
+        }
         final InheritedPlea event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InheritedPlea.class);
         save(event.getOffenceId(), event.getHearingId(), (o) -> {
             o.setOriginHearingId(event.getOriginHearingId());
@@ -217,8 +223,9 @@ public class InitiateHearingEventListener {
     @Handles("hearing.events.found-witnesses-for-hearing-to-inherit")
     public void initiateHearingWitnessEnriched(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.debug("hearing.initiate-hearing-defence-witness-enriched listener payload {} ",
-                payload);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.initiate-hearing-defence-witness-enriched listener payload {} ", event.toObfuscatedDebugString());
+        }
         final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final String type = payload.getString(FIELD_TYPE);
@@ -283,15 +290,17 @@ public class InitiateHearingEventListener {
     @Handles("hearing.events.witness-added")
     public void witnessAdded(final JsonEnvelope event) {
         final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.debug("hearing.events.witness-added listener payload {} ", payload);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.witness-added listener payload {} ", event.toObfuscatedDebugString());
+        }
         final UUID id = fromString(payload.getString(FIELD_GENERIC_ID));
         final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
         final Hearing hearing = hearingRepository.findById(hearingId);
         if (hearing != null) {
             final Witness hearingWitness = hearing.getDefendants().stream()
-                            .map(d -> d.getDefendantWitnesses()).flatMap(w -> w.stream())
-                            .filter(w -> w.getId().equals(new HearingSnapshotKey(id, hearingId)))
-                            .findFirst().orElse(null);
+                    .map(d -> d.getDefendantWitnesses()).flatMap(w -> w.stream())
+                    .filter(w -> w.getId().equals(new HearingSnapshotKey(id, hearingId)))
+                    .findFirst().orElse(null);
             if (hearingWitness == null) {
                 addWitness(event, hearing);
             } else {
@@ -302,22 +311,22 @@ public class InitiateHearingEventListener {
     }
 
     private void updateWitness(final JsonEnvelope event, final Hearing hearing,
-                    final Witness witness) {
+                               final Witness witness) {
         final JsonObject payload = event.payloadAsJsonObject();
         final String type = payload.getString(FIELD_TYPE);
         final String classification = payload.getString(FIELD_CLASSIFICATION);
         final String title =
-                        payload.containsKey(FIELD_TITLE) ? payload.getString(FIELD_TITLE) : null;
+                payload.containsKey(FIELD_TITLE) ? payload.getString(FIELD_TITLE) : null;
         final String firstName = payload.getString(FIELD_FIRST_NAME);
         final String lastName = payload.getString(FIELD_LAST_NAME);
         final Set<String> commandWitnessDefendantIds = payload.getJsonArray("defendantIds").stream()
-                        .map(d -> ((JsonString) d).getString()).collect(Collectors.toSet());
+                .map(d -> ((JsonString) d).getString()).collect(Collectors.toSet());
         final Set<String> hearingWitnessDefendantId = witness.getDefendants().stream()
-                        .map(d -> d.getId().getId().toString()).collect(Collectors.toSet());
+                .map(d -> d.getId().getId().toString()).collect(Collectors.toSet());
         final Set<String> addedDefendants =
-                        Sets.difference(commandWitnessDefendantIds, hearingWitnessDefendantId);
+                Sets.difference(commandWitnessDefendantIds, hearingWitnessDefendantId);
         final Set<String> removedDefendants =
-                        Sets.difference(hearingWitnessDefendantId, commandWitnessDefendantIds);
+                Sets.difference(hearingWitnessDefendantId, commandWitnessDefendantIds);
 
 
         witness.setType(type);
@@ -330,20 +339,20 @@ public class InitiateHearingEventListener {
 
         addedDefendants.forEach(defendantId -> {
             final Defendant defendant = hearing.getDefendants().stream()
-                            .filter(d -> d.getId().getId().toString()
-                                            .equals(defendantId))
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException(String.format(
-                                            "hearingId %s witness added for unkown defendantId %s ",
-                                            hearing.getId(), defendantId)));
+                    .filter(d -> d.getId().getId().toString()
+                            .equals(defendantId))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException(String.format(
+                            "hearingId %s witness added for unkown defendantId %s ",
+                            hearing.getId(), defendantId)));
             witness.getDefendants().add(defendant);
             defendant.getDefendantWitnesses().add(witness);
         });
         removedDefendants.forEach(defendantId -> {
             final Defendant defendant = hearing.getDefendants().stream()
-                            .filter(d -> d.getId().getId().toString().equals(defendantId))
-                            .findFirst()
-                            .orElse(null);
+                    .filter(d -> d.getId().getId().toString().equals(defendantId))
+                    .findFirst()
+                    .orElse(null);
             if (defendant != null) {
                 witness.getDefendants().remove(defendant);
                 defendant.getDefendantWitnesses().remove(witness);
@@ -366,7 +375,7 @@ public class InitiateHearingEventListener {
         final String lastName = payload.getString(FIELD_LAST_NAME);
         final JsonArray defendantIds = payload.getJsonArray("defendantIds");
 
-       if (hearing != null) {
+        if (hearing != null) {
             final Witness witness = Witness.builder()
                     .withId(new HearingSnapshotKey(id, hearingId))
                     .withHearing(hearing)
@@ -389,7 +398,7 @@ public class InitiateHearingEventListener {
                 witness.getDefendants().add(defendant);
                 defendant.getDefendantWitnesses().add(witness);
             });
-            
+
             hearingRepository.save(hearing);
         }
 

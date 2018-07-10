@@ -28,43 +28,54 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.initiate")
     public void initiate(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.initiate event received {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.initiate event received {}", envelope.toObfuscatedDebugString());
+        }
         final InitiateHearingCommand command = convertToObject(envelope, InitiateHearingCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command));
     }
 
     @Handles("hearing.command.lookup-plea-on-offence-for-hearing")
     public void initiateHearingOffence(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.lookup-plea-on-offence-for-hearing event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.lookup-plea-on-offence-for-hearing event received {}", envelope.toObfuscatedDebugString());
+        }
         final LookupPleaOnOffenceForHearingCommand command = convertToObject(envelope, LookupPleaOnOffenceForHearingCommand.class);
         aggregate(OffenceAggregate.class, command.getOffenceId(), envelope, a -> a.lookupPleaForHearing(command));
     }
 
     @Handles("hearing.command.update-hearing-with-inherited-plea")
     public void initiateHearingOffencePlea(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.update-hearing-with-inherited-plea event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-hearing-with-inherited-plea event received {}", envelope.toObfuscatedDebugString());
+        }
         final UpdateHearingWithInheritedPleaCommand command = convertToObject(envelope, UpdateHearingWithInheritedPleaCommand.class);
         aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope, a -> a.inheritPlea(command));
     }
 
     @Handles("hearing.command.lookup-witnesses-on-defendant-for-hearing")
     public void initiateHearingDefenceWitness(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.lookup-witnesses-on-defendant-for-hearing event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.lookup-witnesses-on-defendant-for-hearing event received {}", envelope.toObfuscatedDebugString());
+        }
         final LookupWitnessesOnDefendantForHearingCommand command = convertToObject(envelope, LookupWitnessesOnDefendantForHearingCommand.class);
         aggregate(DefendantAggregate.class, command.getDefendantId(), envelope, a -> a.lookupWitnessesForHearing(command));
     }
 
     @Handles("hearing.command.register-hearing-against-defendant")
     public void recordHearingDefendant(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.register-hearing-against-defendant event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.register-hearing-against-defendant event received {}", envelope.toObfuscatedDebugString());
+        }
         final RegisterHearingAgainstDefendantCommand command = convertToObject(envelope, RegisterHearingAgainstDefendantCommand.class);
         aggregate(DefendantAggregate.class, command.getDefendantId(), envelope, defendantAggregate -> defendantAggregate.registerHearing(command));
     }
 
     @Handles("hearing.command.register-hearing-against-case")
     public void registerHearingAgainstCase(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.command.register-hearing-against-case event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.register-hearing-against-case event received {}", envelope.toObfuscatedDebugString());
+        }
         final RegisterHearingAgainstCaseCommand command = convertToObject(envelope, RegisterHearingAgainstCaseCommand.class);
         aggregate(CaseAggregate.class, command.getCaseId(), envelope, caseAggregate -> caseAggregate.registerHearingId(command));
     }

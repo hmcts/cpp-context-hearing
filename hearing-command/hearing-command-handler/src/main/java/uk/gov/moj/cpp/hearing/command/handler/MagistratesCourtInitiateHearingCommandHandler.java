@@ -26,8 +26,9 @@ public class MagistratesCourtInitiateHearingCommandHandler extends AbstractComma
 
     @Handles("hearing.record-sending-sheet-complete")
     public void recordSendingSheetComplete(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.debug("hearing.record-sending-sheet-complete event received {}", command.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.record-sending-sheet-complete event received {}", command.toObfuscatedDebugString());
+        }
         final SendingSheetCompleted sendingSheetCompleted = convertToObject(command, SendingSheetCompleted.class);
 
         aggregate(CaseAggregate.class, sendingSheetCompleted.getHearing().getCaseId(), command,
@@ -36,7 +37,9 @@ public class MagistratesCourtInitiateHearingCommandHandler extends AbstractComma
 
     @Handles("hearing.record-mags-court-hearing")
     public void recordMagsCourtHearing(final JsonEnvelope command) throws EventStreamException {
-        LOGGER.debug("hearing.record-mags-court-hearing event received {}", command.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.record-mags-court-hearing event received {}", command.toObfuscatedDebugString());
+        }
 
         final List<MagsCourtHearingRecorded> hearings2Initiate = new HearingTransformer()
                 .transform(convertToObject(command, RecordMagsCourtHearingCommand.class).getHearing());

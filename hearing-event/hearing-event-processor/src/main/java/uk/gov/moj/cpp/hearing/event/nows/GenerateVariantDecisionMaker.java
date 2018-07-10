@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
@@ -16,6 +18,9 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toSet;
 
 public class GenerateVariantDecisionMaker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenerateVariantDecisionMaker.class.getName());
+
     private List<Variant> variantDirectory;
     private Map<UUID, CompletedResultLineStatus> completedResultLineStatuses;
     private List<CompletedResultLine> completedResultLines;
@@ -51,11 +56,14 @@ public class GenerateVariantDecisionMaker {
                     .collect(toSet());
 
             if (newResultLinesReferences.equals(oldResultLinesReferences)) {
+                LOGGER.info("NOW variant is skipped for usergroups {} for no new data", userGroups);
                 return new Decision(false, false);
             } else {
+                LOGGER.info("NOW variant is generated for usergroups {} as an amendment", userGroups);
                 return new Decision(true, true);
             }
         }
+        LOGGER.info("NOW variant is generated for the first time for usergroups {}", userGroups);
         return new Decision(true, false);
     }
 

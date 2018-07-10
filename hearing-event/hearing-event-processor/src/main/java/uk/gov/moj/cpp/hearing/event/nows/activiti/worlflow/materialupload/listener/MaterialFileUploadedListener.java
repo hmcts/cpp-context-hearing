@@ -15,23 +15,27 @@ import uk.gov.moj.cpp.hearing.activiti.service.ActivitiService;
 
 @ServiceComponent(Component.EVENT_PROCESSOR)
 public class MaterialFileUploadedListener {
-    public static final String RECEIVE_MATERIAL_UPLOADED_CONFIRMATION =
-            "receiveMaterialUploadedConfirmation";
+
+    public static final String RECEIVE_MATERIAL_UPLOADED_CONFIRMATION = "receiveMaterialUploadedConfirmation";
     public static final String MATERIAL_EVENTS_FILE_UPLOADED = "material.material-added";
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(MaterialFileUploadedListener.class.getName());
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MaterialFileUploadedListener.class.getName());
 
     @Inject
     private ActivitiService activitiService;
 
     @Handles(MATERIAL_EVENTS_FILE_UPLOADED)
     public void processEvent(final JsonEnvelope jsonEnvelope) {
-        LOGGER.info("Received material.material-added {}", jsonEnvelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Received material.material-added {}", jsonEnvelope.toObfuscatedDebugString());
+        }
         if (jsonEnvelope.payloadAsJsonObject().containsKey(MATERIAL_ID)) {
             final String materialId = jsonEnvelope.payloadAsJsonObject().getString(MATERIAL_ID);
             activitiService.signalProcessByActivitiIdAndFieldName(RECEIVE_MATERIAL_UPLOADED_CONFIRMATION, MATERIAL_ID, materialId);
         } else {
-            LOGGER.error("Event Received without materialId : metadata {} payload {}", jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("Event Received without materialId : metadata {} payload {}", jsonEnvelope.metadata(), jsonEnvelope.toObfuscatedDebugString());
+            }
         }
     }
 

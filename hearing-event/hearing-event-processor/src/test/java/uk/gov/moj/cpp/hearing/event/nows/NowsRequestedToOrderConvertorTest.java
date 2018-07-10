@@ -29,6 +29,7 @@ public class NowsRequestedToOrderConvertorTest {
 
         NowsDocumentOrder nowsDocumentOrder = nowsDocumentOrders.get(0);
         assertThat(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId(), is(nowsDocumentOrder.getMaterialId()));
+        assertThat(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).isAmended(), is(nowsDocumentOrder.isAmended()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getStaticText(), is(nowsDocumentOrder.getNowText()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getPriority(), is(nowsDocumentOrder.getPriority()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getDescription(), is(nowsDocumentOrder.getOrderName()));
@@ -52,6 +53,7 @@ public class NowsRequestedToOrderConvertorTest {
         assertThat(getSharedResultLines(nowsRequested).get(1).getLabel(), is(getOrderCase(nowsDocumentOrder).getDefendantCaseOffences().get(0).getResults().get(0).getLabel()));
         assertThat(getSharedResultLines(nowsRequested).get(1).getPrompts().get(0).getLabel(), is(getOrderCase(nowsDocumentOrder).getCaseResults().get(0).getPrompts().get(0).getLabel()));
         assertThat(getSharedResultLines(nowsRequested).get(1).getPrompts().get(0).getValue(), is(getOrderCase(nowsDocumentOrder).getCaseResults().get(0).getPrompts().get(0).getValue()));
+
 
     }
 

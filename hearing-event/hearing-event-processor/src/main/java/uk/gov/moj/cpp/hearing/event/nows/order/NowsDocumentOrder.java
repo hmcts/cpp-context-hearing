@@ -9,7 +9,7 @@ public class NowsDocumentOrder implements Serializable {
     private final static long serialVersionUID = -781257956072320445L;
     private String materialId;
     private String priority;
-    private String amended;
+    private boolean amended;
     private String orderName;
     private String courtCentreName;
     private String courtClerkName;
@@ -35,11 +35,11 @@ public class NowsDocumentOrder implements Serializable {
         this.priority = priority;
     }
 
-    public String getAmended() {
+    public boolean isAmended() {
         return amended;
     }
 
-    public void setAmended(String amended) {
+    public void setAmended(boolean amended) {
         this.amended = amended;
     }
 
@@ -114,7 +114,7 @@ public class NowsDocumentOrder implements Serializable {
     public static final class Builder {
         private String materialId;
         private String priority;
-        private String amended;
+        private boolean amended;
         private String orderName;
         private String courtCentreName;
         private String courtClerkName;
@@ -139,7 +139,7 @@ public class NowsDocumentOrder implements Serializable {
             return this;
         }
 
-        public Builder withAmended(String amended) {
+        public Builder withAmended(boolean amended) {
             this.amended = amended;
             return this;
         }

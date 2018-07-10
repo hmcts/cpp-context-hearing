@@ -28,8 +28,9 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
     @Handles("hearing.update-case-defendant-details")
     public void initiateCaseDefendantDetailsChange(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.update-case-defendant-details event received {}", envelope.payloadAsJsonObject());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.update-case-defendant-details event received {}", envelope.toObfuscatedDebugString());
+        }
         final CaseDefendantDetails caseDefendantDetails = convertToObject(envelope, CaseDefendantDetails.class);
 
         for (final Defendant defendant : caseDefendantDetails.getDefendants()) {
@@ -48,7 +49,9 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
     @Handles("hearing.update-case-defendant-details-against-hearing-aggregate")
     public void updateCaseDefendantDetails(final JsonEnvelope envelope) throws EventStreamException {
-        LOGGER.debug("hearing.update-case-defendant-details-against-hearing-aggregate event received {}", envelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.update-case-defendant-details-against-hearing-aggregate event received {}", envelope.toObfuscatedDebugString());
+        }
 
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings = convertToObject(envelope, CaseDefendantDetailsWithHearings.class);
 

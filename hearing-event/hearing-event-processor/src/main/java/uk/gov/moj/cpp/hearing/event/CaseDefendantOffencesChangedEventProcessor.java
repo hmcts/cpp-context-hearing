@@ -25,7 +25,9 @@ public class CaseDefendantOffencesChangedEventProcessor {
 
     @Handles("public.progression.defendant-offences-changed")
     public void processPublicCaseDefendantOffencesChanged(final JsonEnvelope event) {
-        LOGGER.debug("public.progression.defendant-offences-changed event received {}", event.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("public.progression.defendant-offences-changed event received {}", event.toObfuscatedDebugString());
+        }
         sender.send(enveloper.withMetadataFrom(event, "hearing.command.defendant-offences-changed").apply(event.payloadAsJsonObject()));
     }
 
