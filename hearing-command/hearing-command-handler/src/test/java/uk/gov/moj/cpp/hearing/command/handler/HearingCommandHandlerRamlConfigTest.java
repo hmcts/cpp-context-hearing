@@ -28,7 +28,7 @@ public class HearingCommandHandlerRamlConfigTest {
 
         final Object[] ramlActionNames = FileUtils.readLines(new File(PATH_TO_RAML)).stream()
                 .filter(action -> !action.isEmpty())
-                .filter(line -> line.contains(CONTENT_TYPE_PREFIX) && line.contains(COMMAND_NAME))
+                .filter(line -> line.contains(CONTENT_TYPE_PREFIX) && (line.contains(COMMAND_NAME) || (line.contains("notification"))))
                 .map(line -> line.replaceAll("(application/vnd\\.)|(\\+json:)", "").trim())
                 .toArray();
 
@@ -47,6 +47,7 @@ public class HearingCommandHandlerRamlConfigTest {
                 ChangeCaseDefendantOffencesCommandHandler.class,
                 DeleteAtendeeCommandHandler.class,
                 HearingDetailChangeCommandHandler.class,
+                UploadSubscriptionsCommandHandler.class,
                 AdjournHearingCommandHandler.class
         );
 
@@ -68,7 +69,7 @@ public class HearingCommandHandlerRamlConfigTest {
         List<String> filesThatArePresent =
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json/schema").listFiles()))
                         .map(File::getName)
-                        .filter(filename->!filename.equals("hearing.command.generate-nows.json"))
+                        .filter(filename -> !filename.equals("hearing.command.generate-nows.json"))
                         .map(name -> "json/schema/" + name)
                         .collect(Collectors.toList());
 

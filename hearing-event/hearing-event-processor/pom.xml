@@ -3,7 +3,7 @@
     <parent>
         <artifactId>hearing-event</artifactId>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
-        <version>2.0.120-R2-SNAPSHOT</version>
+        <version>2.0.121-R2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>war</packaging>
@@ -16,6 +16,7 @@
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
         <material.version>2.0.105-R2-SNAPSHOT</material.version>
         <resultinghmps.version>1.0.26-R2-SNAPSHOT</resultinghmps.version>
+        <notification.notify.version>0.0.16</notification.notify.version>
     </properties>
 
     <build>
@@ -28,6 +29,12 @@
                 <groupId>uk.gov.justice.maven</groupId>
                 <artifactId>raml-maven-plugin</artifactId>
                 <dependencies>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.notification.notify</groupId>
+                        <artifactId>notificationnotify-command-api</artifactId>
+                        <version>${notification.notify.version}</version>
+                        <classifier>raml</classifier>
+                    </dependency>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
                         <artifactId>hearing-query-api</artifactId>

@@ -1,10 +1,29 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import org.apache.commons.io.FileUtils;
+import org.junit.Before;
+import org.junit.Test;
+import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
+import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,31 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import uk.gov.justice.domain.annotation.Event;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
-import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
-import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
-import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
-import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 
 public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";
@@ -77,12 +75,13 @@ public class HearingEventListenerRamlConfigTest {
                 DefenceCounselAddedEventListener.class,
                 ProsecutionCounselAddedEventListener.class,
                 NowsRequestedEventListener.class,
-                NowsGeneratedEventListener.class, 
+                NowsGeneratedEventListener.class,
                 CaseDefendantDetailsChangedEventListener.class,
                 CaseDefendantOffencesChangedEventListener.class,
                 AttendeeDeletedEventListener.class,
                 ChangeHearingDetailCommandHandler.class,
-                CaseDefendantOffencesChangedEventListener.class));
+                CaseDefendantOffencesChangedEventListener.class,
+                SubscriptionsUploadEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 
@@ -100,7 +99,10 @@ public class HearingEventListenerRamlConfigTest {
 
     @Test
     public void testEventsHandledProperly() {
-        List<String> eventHandlerNames = new FastClasspathScanner("uk.gov.moj.cpp.hearing.domain.event", "uk.gov.moj.cpp.hearing.nows.events")
+        List<String> eventHandlerNames = new FastClasspathScanner(
+                "uk.gov.moj.cpp.hearing.domain.event",
+                "uk.gov.moj.cpp.hearing.nows.events",
+                "uk.gov.moj.cpp.hearing.subscription.events")
                 .scan().getNamesOfClassesWithAnnotation(Event.class)
                 .stream().map(className -> {
                     try {

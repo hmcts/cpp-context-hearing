@@ -6,7 +6,7 @@ import java.util.List;
 
 public class NowsDocumentOrder implements Serializable {
 
-    private final static long serialVersionUID = -781257956072320445L;
+    private static final long serialVersionUID = -781257956072320445L;
     private String materialId;
     private String priority;
     private boolean amended;
@@ -15,8 +15,8 @@ public class NowsDocumentOrder implements Serializable {
     private String courtClerkName;
     private String orderDate;
     private OrderDefendant defendant;
-    private List<String> caseUrns = new ArrayList<String>();
-    private List<OrderCase> cases = new ArrayList<OrderCase>();
+    private List<String> caseUrns = new ArrayList<>();
+    private List<OrderCase> cases = new ArrayList<>();
     private String nowText;
 
     public String getMaterialId() {
@@ -120,13 +120,12 @@ public class NowsDocumentOrder implements Serializable {
         private String courtClerkName;
         private String orderDate;
         private OrderDefendant defendant;
-        private List<String> caseUrns = new ArrayList<String>();
-        private List<OrderCase> cases = new ArrayList<OrderCase>();
+        private List<String> caseUrns = new ArrayList<>();
+        private List<OrderCase> cases = new ArrayList<>();
         private String nowText;
 
         private Builder() {
         }
-
 
 
         public Builder withMaterialId(String materialId) {

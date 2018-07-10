@@ -16,13 +16,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.int
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
-
 import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -56,6 +49,8 @@ import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
@@ -78,6 +73,16 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class TestTemplates {
 
@@ -836,4 +841,45 @@ public class TestTemplates {
         }
     }
 
+    public static class UploadSubscriptionsCommandTemplates {
+
+        private UploadSubscriptionsCommandTemplates() {
+        }
+
+        public static UploadSubscriptionsCommand buildUploadSubscriptionsCommand() {
+
+            final UploadSubscriptionsCommand uploadSubscriptionsCommand = new UploadSubscriptionsCommand();
+
+            uploadSubscriptionsCommand.setSubscriptions(
+                    asList(
+                            buildUploadSubscriptionCommand(),
+                            buildUploadSubscriptionCommand()));
+
+            return uploadSubscriptionsCommand;
+        }
+
+        private static UploadSubscriptionCommand buildUploadSubscriptionCommand() {
+
+            final Map<String, String> properties = new HashMap<>();
+            properties.putIfAbsent(STRING.next(), STRING.next());
+            properties.putIfAbsent(STRING.next(), STRING.next());
+            properties.putIfAbsent(STRING.next(), STRING.next());
+            properties.putIfAbsent("template", UUID.randomUUID().toString());
+            properties.putIfAbsent("fromAddress", "noreply@test.com");
+
+            final List<UUID> courtCentreIds = asList(randomUUID(), randomUUID());
+
+            final List<UUID> nowTypeIds = asList(randomUUID(), randomUUID());
+
+            final UploadSubscriptionCommand command = new UploadSubscriptionCommand();
+            command.setChannel("email");
+            command.setChannelProperties(properties);
+            command.setDestination(STRING.next());
+            command.setUserGroups(asList(STRING.next(), STRING.next()));
+            command.setCourtCentreIds(courtCentreIds);
+            command.setNowTypeIds(nowTypeIds);
+
+            return command;
+        }
+    }
 }

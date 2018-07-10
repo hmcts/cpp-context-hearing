@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="42" author="hearing" logicalFilePath="042-create-subscriptions-tables.xml">
+
+        <createTable tableName="not_document">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="DATE"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="document_pkey" tableName="not_document"/>
+
+        <createTable tableName="not_subscription">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="channel" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="destination" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="document_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="subscription_pkey" tableName="not_subscription"/>
+
+        <createTable tableName="not_subscription_courtcentre">
+            <column name="subscription_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="court_centre_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="not_subscription_nowtype">
+            <column name="subscription_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="now_type_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="not_subscription_property">
+            <column name="subscription_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="TEXT"/>
+            <column name="key" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="subscription_id, key" constraintName="subscription_property_pkey" tableName="not_subscription_property"/>
+
+        <createTable tableName="not_subscription_usergroup">
+            <column name="subscription_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_group" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="document_id" baseTableName="not_subscription"
+                                 constraintName="fk_document_id" referencedColumnNames="id"
+                                 referencedTableName="not_document"/>
+
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="not_subscription_courtcentre"
+                                 constraintName="fk_subscription_courtcentre_id" referencedColumnNames="id"
+                                 referencedTableName="not_subscription"/>
+
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="not_subscription_nowtype"
+                                 constraintName="fk_subscription_nowtype_id" referencedColumnNames="id"
+                                 referencedTableName="not_subscription"/>
+
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="not_subscription_property"
+                                 constraintName="fk_subscription_property_id" referencedColumnNames="id"
+                                 referencedTableName="not_subscription"/>
+
+        <addForeignKeyConstraint baseColumnNames="subscription_id" baseTableName="not_subscription_usergroup"
+                                 constraintName="fk_subscription_usergroup_id" referencedColumnNames="id"
+                                 referencedTableName="not_subscription"/>
+
+    </changeSet>
+
+</databaseChangeLog>

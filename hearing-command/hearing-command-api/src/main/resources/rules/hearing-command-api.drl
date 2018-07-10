@@ -140,3 +140,12 @@ rule "Command - API - Action - hearing.delete-attendee"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.upload-subscriptions"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.upload-subscriptions");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "System Users"));
+  then
+    $outcome.setSuccess(true);
+end

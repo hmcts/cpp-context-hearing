@@ -9,7 +9,7 @@
       "2016-06-03T10:00:00Z"
     ],
     "courtCentre": {
-      "courtCentreId": "30d4be46-8695-47c6-8532-a19725101879",
+      "courtCentreId": "COURTCENTRE_ID",
       "courtCentreName": "Liverpool Crown Court",
       "courtRoomId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
       "courtRoomName": "3"
@@ -82,7 +82,7 @@
         "cases": [
           {
             "id": "af52dc35-6b80-4633-8c64-649fd1140630",
-            "urn": "URN12345",
+            "urn": "CASEURN",
             "bailStatus": "in custody",
             "custodyTimeLimitDate": "2018-01-30",
             "offences": [
@@ -228,10 +228,10 @@
             ],
             "userGroups": [
               {
-                "group": "courtAdmin"
+                "group": "USERGROUP1"
               },
               {
-                "group": "defence"
+                "group": "USERGROUP2"
               }
             ]
           }

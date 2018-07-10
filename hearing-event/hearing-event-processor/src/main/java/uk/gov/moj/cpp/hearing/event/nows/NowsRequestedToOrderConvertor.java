@@ -11,6 +11,7 @@ import uk.gov.moj.cpp.hearing.event.nows.order.OrderResult;
 import uk.gov.moj.cpp.hearing.nows.events.Case;
 import uk.gov.moj.cpp.hearing.nows.events.Defendant;
 import uk.gov.moj.cpp.hearing.nows.events.Material;
+import uk.gov.moj.cpp.hearing.nows.events.MaterialUserGroup;
 import uk.gov.moj.cpp.hearing.nows.events.Now;
 import uk.gov.moj.cpp.hearing.nows.events.NowResult;
 import uk.gov.moj.cpp.hearing.nows.events.NowType;
@@ -31,9 +32,9 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.stripToNull;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
+@SuppressWarnings({"squid:S1188"})
 public class NowsRequestedToOrderConvertor {
     private static final String COURTCLERK = "CourtClerk";
 
@@ -42,17 +43,16 @@ public class NowsRequestedToOrderConvertor {
     }
 
     /**
-     * Converts NowsRequested to List<NowsDocumentOrder>
+     * Converts NowsRequested to Map<NowsDocumentOrder, NowsNotificationDocumentState>
      *
      * @param nowsRequested
-     * @return listNowsDocumentOrder
+     * @return mapNowsDocumentOrder
      */
-    public static List<NowsDocumentOrder> convert(NowsRequested nowsRequested) {
-        List<NowsDocumentOrder> nowsDocumentOrders = new ArrayList<>();
+    public static Map<NowsDocumentOrder, NowsNotificationDocumentState> convert(NowsRequested nowsRequested) {
+        final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrders = new HashMap<>();
         nowsRequested.getHearing().getNows().forEach(selectedNow -> {
             Optional<NowType> matchingNowType = getMatchingNowType(nowsRequested, selectedNow);
             selectedNow.getMaterials().forEach(selectedNowMaterial -> {
-
                 NowsDocumentOrder nowsDocumentOrder = NowsDocumentOrder.builder()
                         .withMaterialId(selectedNowMaterial.getId())
                         .withOrderName(matchingNowType.map(NowType::getDescription).orElse(EMPTY))
@@ -66,10 +66,16 @@ public class NowsRequestedToOrderConvertor {
                         .withCases(getNowsMaterialOrderCases(nowsRequested, selectedNowMaterial))
                         .withAmended(selectedNowMaterial.isAmended())
                         .build();
-                nowsDocumentOrders.add(nowsDocumentOrder);
+                final NowsNotificationDocumentState nowsNotificationDocumentState = new NowsNotificationDocumentState()
+                        .setUsergroups(selectedNowMaterial.getUserGroups().stream().map(MaterialUserGroup::getGroup).collect(Collectors.toList()))
+                        .setOriginatingCourtCentreId(UUID.fromString(nowsRequested.getHearing().getCourtCentre().getCourtCentreId()))
+                        .setDefendantName(nowsDocumentOrder.getDefendant().getName())
+                        .setCourtClerkName(nowsDocumentOrder.getCourtClerkName())
+                        .setCaseUrns(nowsDocumentOrder.getCaseUrns())
+                        .setNowsTypeId(UUID.fromString(matchingNowType.get().getId()))
+                        .setJurisdiction(matchingNowType.get().getJurisdiction());
+                nowsDocumentOrders.put(nowsDocumentOrder, nowsNotificationDocumentState);
             });
-
-
         });
 
         return nowsDocumentOrders;

@@ -18,54 +18,83 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 
-import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import com.jayway.awaitility.Awaitility;
+import org.junit.After;
+import org.junit.Test;
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.utils.NotifyStub;
+import uk.gov.moj.cpp.hearing.utils.QueueUtil;
+import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
 
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.json.Json;
 import javax.json.JsonObject;
-
-import org.junit.After;
-import org.junit.Test;
-
-import com.jayway.awaitility.Awaitility;
-
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
-
-import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.utils.QueueUtil;
-import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unchecked")
 public class GenerateNowsIT extends AbstractIT {
 
     private static final MessageProducer messageProducerClientPublic = QueueUtil.publicEvents.createProducer();
+    private static final String USERGROUP1 = "courtAdmin";
+    private static final String USERGROUP2 = "defence";
+    private static final String CASEURN = "CASE12345";
 
     @Test
     public void shouldAddUpdateNows() throws IOException {
 
-        final InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, minimalInitiateHearingTemplate()));
+        final String strToday = LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy"));
+
+        final UploadSubscriptionsCommand uploadSubscriptionsCommand = buildUploadSubscriptionsCommand();
+        final UploadSubscriptionCommand subscription0 = uploadSubscriptionsCommand.getSubscriptions().get(0);
+        subscription0.setChannel("email");
+        subscription0.setDestination("generatenows@test.com");
+        subscription0.setUserGroups(Arrays.asList(USERGROUP1));
+
+
+        makeCommand(requestSpec, "hearing.upload-subscriptions")
+                .ofType("application/vnd.hearing.upload-subscriptions+json")
+                .withPayload(uploadSubscriptionsCommand)
+                .withArgs(strToday)
+                .executeSuccessfully();
+
+        final InitiateHearingCommand initiateHearingCommand = minimalInitiateHearingTemplate();
+        initiateHearingCommand.getHearing().setCourtCentreId(uploadSubscriptionsCommand.getSubscriptions().get(0).getCourtCentreIds().get(0));
+        System.out.println("setting courtCentreId:" + initiateHearingCommand.getHearing().getCourtCentreId());
+
+        final InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingCommand));
 
         final String userId = randomUUID().toString();
         final String materialId = randomUUID().toString();
         final String nowsId = randomUUID().toString();
-        final String nowsTypeId = randomUUID().toString();
         final String sharedResultId = randomUUID().toString();
 
         final TestUtilities.EventListener nowsRequestedEventListener = listenFor("public.hearing.events.nows-requested")
                 .withFilter(isJson(withJsonPath("$.hearing.id", is(hearing.getHearingId().toString()))));
 
+        NotifyStub.stubNotifications();
+
+        final String nowsTypeId = subscription0.getNowTypeIds().get(0).toString();
         makeCommand(requestSpec, "hearing.generate-nows")
                 .ofType("application/vnd.hearing.generate-nows+json")
                 .withPayload(getGenerateNowsCommand(
                         hearing.getHearingId().toString(),
                         hearing.getFirstDefendantId().toString(),
-                        materialId, nowsId, nowsTypeId, sharedResultId))
+                        materialId, nowsId, nowsTypeId, sharedResultId, USERGROUP1,
+                        USERGROUP2, initiateHearingCommand.getHearing().getCourtCentreId().toString(), CASEURN))
                 .executeSuccessfully();
         // ensure upload material and update status called
         Awaitility.await().atMost(60, TimeUnit.SECONDS)
@@ -98,6 +127,9 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.allowedUserGroups[0]", is("courtAdmin")),
                                 withJsonPath("$.allowedUserGroups[1]", is("defence"))
                         )));
+
+        NotifyStub.verifyNotification(subscription0, Arrays.asList(CASEURN));
+
     }
 
     @Test
@@ -117,7 +149,8 @@ public class GenerateNowsIT extends AbstractIT {
                 .ofType("application/vnd.hearing.generate-nows+json")
                 .withPayload(getGenerateNowsCommand(hearing.getHearingId().toString(),
                         hearing.getFirstDefendantId().toString(),
-                        materialId, nowsId, nowsTypeId, sharedResultId))
+                        materialId, nowsId, nowsTypeId, sharedResultId, USERGROUP1, USERGROUP2, UUID.randomUUID().toString(),
+                        CASEURN))
                 .executeSuccessfully();
 
         nowsRequestedEventListener.waitFor();
@@ -155,14 +188,19 @@ public class GenerateNowsIT extends AbstractIT {
 
 
     private static String getGenerateNowsCommand(final String hearingId, final String defendantId, final String materialId,
-                                                 final String nowsId, final String nowsTypeId, final String sharedResultId) throws IOException {
+                                                 final String nowsId, final String nowsTypeId, final String sharedResultId,
+                                                 final String usergroup1, final String usergroup2, final String courtCentreId, String caseURN) throws IOException {
         return getStringFromResource("hearing.generate-nows.json")
                 .replace("HEARING_ID", hearingId)
                 .replace("DEFENDANT_ID", defendantId)
                 .replace("NOW_ID", nowsId)
                 .replace("MATERIAL_ID", materialId)
                 .replace("NOWTYPE_ID", nowsTypeId)
-                .replace("RESULT_ID", sharedResultId);
+                .replace("USERGROUP1", usergroup1)
+                .replace("USERGROUP2", usergroup2)
+                .replace("RESULT_ID", sharedResultId)
+                .replace("COURTCENTRE_ID", courtCentreId)
+                .replace("CASEURN", caseURN);
     }
 
     private boolean uploadMaterialCalled() {
@@ -203,4 +241,5 @@ public class GenerateNowsIT extends AbstractIT {
     public void tearDown() throws JMSException {
         messageProducerClientPublic.close();
     }
+
 }

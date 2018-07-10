@@ -1,24 +1,15 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
-import static java.util.UUID.randomUUID;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.when;
-
-import uk.gov.moj.cpp.hearing.persist.NowsRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AttendeeHearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
@@ -26,8 +17,11 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
@@ -36,24 +30,35 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.repository.AttendeeHearingDateRespository;
+import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingServiceTest {
@@ -70,8 +75,19 @@ public class HearingServiceTest {
     @Mock
     private AttendeeHearingDateRespository attendeeHearingDateRespository;
 
+    @Mock
+    private DocumentRepository documentRepository;
+
     @InjectMocks
     private HearingService caseHearingService;
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Before
+    public void setup() {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+    }
 
     @Test
     public void shouldFindHearingListByStartDate() throws Exception {
@@ -102,21 +118,21 @@ public class HearingServiceTest {
         final List<UUID> defenceAdvocateIds = hearing.getAttendees().stream().filter(a -> a instanceof DefenceAdvocate).map(a -> a.getId().getId()).collect(Collectors.toList());
         final UUID hearingDateId = hearing.getHearingDays().get(0).getId().getId();
 
-        final List<AttendeeHearingDate> prosecutionAdvocateDates = Arrays.asList(AttendeeHearingDate
+        final List<AttendeeHearingDate> prosecutionAdvocateDates = asList(AttendeeHearingDate
                 .builder()
                 .withId(new HearingSnapshotKey(UUID.randomUUID(), HearingTestUtils.HEARING_ID_1))
                 .withAttendeeId(prosecutionAdvocateId)
                 .withHearingDateId(hearingDateId)
                 .build());
 
-        final List<AttendeeHearingDate> defenceAdvocateDates_1 = Arrays.asList(AttendeeHearingDate
+        final List<AttendeeHearingDate> defenceAdvocateDates_1 = asList(AttendeeHearingDate
                 .builder()
                 .withId(new HearingSnapshotKey(UUID.randomUUID(), HearingTestUtils.HEARING_ID_1))
                 .withAttendeeId(defenceAdvocateIds.get(0))
                 .withHearingDateId(hearingDateId)
                 .build());
 
-        final List<AttendeeHearingDate> defenceAdvocateDates_2 = Arrays.asList(AttendeeHearingDate
+        final List<AttendeeHearingDate> defenceAdvocateDates_2 = asList(AttendeeHearingDate
                 .builder()
                 .withId(new HearingSnapshotKey(UUID.randomUUID(), HearingTestUtils.HEARING_ID_1))
                 .withAttendeeId(defenceAdvocateIds.get(1))
@@ -262,7 +278,7 @@ public class HearingServiceTest {
         nowsMaterial.setId(nowMaterialId);
         nowsMaterial.setNows(nows);
         nowsMaterial.setStatus("generated");
-        nowsMaterial.setUserGroups(Arrays.asList("LO", "GA"));
+        nowsMaterial.setUserGroups(asList("LO", "GA"));
         nowsMaterial.setLanguage(language);
         nows.getMaterial().add(nowsMaterial);
 
@@ -289,7 +305,6 @@ public class HearingServiceTest {
     }
 
 
-
     @Test
     public void shouldFindUserGroupsByMaterialId() throws Exception {
         final UUID hearingId = randomUUID();
@@ -310,7 +325,7 @@ public class HearingServiceTest {
         nowsMaterial.setId(nowMaterialId);
         nowsMaterial.setNows(nows);
         nowsMaterial.setStatus("generated");
-        nowsMaterial.setUserGroups(Arrays.asList("Lx", "GA"));
+        nowsMaterial.setUserGroups(asList("Lx", "GA"));
         nowsMaterial.setLanguage(language);
         nows.getMaterial().add(nowsMaterial);
 
@@ -318,7 +333,7 @@ public class HearingServiceTest {
         when(nowsMaterialRepository.findBy(nowMaterialId)).thenReturn(nowsMaterial);
 
         final JsonObject response = caseHearingService.getNowsRepository(nowMaterialId.toString());
-        assertThat(response.getJsonArray("allowedUserGroups").getValuesAs(JsonString.class).stream().map(jsonString -> jsonString.getString() ).collect(Collectors.toList()), is(nowsMaterial.getUserGroups()));
+        assertThat(response.getJsonArray("allowedUserGroups").getValuesAs(JsonString.class).stream().map(jsonString -> jsonString.getString()).collect(Collectors.toList()), is(nowsMaterial.getUserGroups()));
     }
 
     @Test
@@ -327,6 +342,89 @@ public class HearingServiceTest {
         when(nowsMaterialRepository.findBy(nowMaterialId)).thenReturn(null);
         final JsonObject response = caseHearingService.getNowsRepository(nowMaterialId.toString());
         assertThat(response.getJsonArray("allowedUserGroups").size(), is(0));
+    }
+
+    @Test
+    public void shouldFindSubscriptionByNowTypeId() {
+
+        final String referenceDate = "15012018";
+
+        final Document document = buildDocument();
+
+        final String nowTypeId = document.getSubscriptions().get(0).getNowTypeIds().get(0).toString();
+
+        when(documentRepository.findAllByOrderByStartDateAsc()).thenReturn(asList(document));
+
+        final JsonObject response = caseHearingService.getSubscriptions(referenceDate, nowTypeId);
+
+        assertThat(response.getJsonArray("subscriptions").size(), is(1));
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenReferenceDateIsInvalid() {
+
+        final String referenceDate = "15132018";
+
+        final Document document = buildDocument();
+
+        final String nowTypeId = document.getSubscriptions().get(0).getNowTypeIds().get(0).toString();
+
+        when(documentRepository.findAllByOrderByStartDateAsc()).thenReturn(asList(document));
+
+        final JsonObject response = caseHearingService.getSubscriptions(referenceDate, nowTypeId);
+
+        System.out.println(response.toString());
+
+        assertThat(response.toString(), is("{}"));
+    }
+
+    @Test
+    public void shouldReturnEmptyResponseWhenNowTypeIdNotFound() {
+
+        final String referenceDate = "15012018";
+
+        final Document document = buildDocument();
+
+        final String nowTypeId = randomUUID().toString();
+
+        when(documentRepository.findAllByOrderByStartDateAsc()).thenReturn(asList(document));
+
+        final JsonObject response = caseHearingService.getSubscriptions(referenceDate, nowTypeId);
+
+        System.out.println(response.toString());
+
+        assertThat(response.toString(), is("{\"subscriptions\":[]}"));
+    }
+
+
+    private Document buildDocument() {
+
+        final Document document = new Document();
+        document.setStartDate(LocalDate.of(2018, Month.JANUARY, 1));
+        document.setId(randomUUID());
+        document.setSubscriptions(asList(buildSubscription(), buildSubscription()));
+
+        return document;
+    }
+
+    private uk.gov.moj.cpp.hearing.persist.entity.not.Subscription buildSubscription() {
+
+        uk.gov.moj.cpp.hearing.persist.entity.not.Subscription subscription = new uk.gov.moj.cpp.hearing.persist.entity.not.Subscription();
+        subscription.setId(randomUUID());
+        subscription.setChannel(STRING.next());
+        subscription.setDestination(STRING.next());
+
+        final Map<String, String> properties = new HashMap<>();
+        properties.put(STRING.next(), STRING.next());
+        properties.put(STRING.next(), STRING.next());
+        properties.put(STRING.next(), STRING.next());
+        subscription.setChannelProperties(properties);
+
+        subscription.setUserGroups(asList(STRING.next(), STRING.next()));
+        subscription.setNowTypeIds(asList(randomUUID(), randomUUID()));
+        subscription.setCourtCentreIds(asList(randomUUID(), randomUUID()));
+
+        return subscription;
     }
 
     private static String format(final String... vals) {

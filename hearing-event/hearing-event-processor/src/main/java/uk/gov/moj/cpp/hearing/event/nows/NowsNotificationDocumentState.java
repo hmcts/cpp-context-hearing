@@ -1,0 +1,79 @@
+package uk.gov.moj.cpp.hearing.event.nows;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
+
+public class NowsNotificationDocumentState implements Serializable {
+
+    private UUID originatingCourtCentreId;
+    private List<String> usergroups;
+    private UUID nowsTypeId;
+    private List<String> caseUrns;
+    private String courtClerkName;
+    private String defendantName;
+    private String jurisdiction;
+
+    public UUID getOriginatingCourtCentreId() {
+        return originatingCourtCentreId;
+    }
+
+    public NowsNotificationDocumentState setOriginatingCourtCentreId(UUID originatingCourtCentreId) {
+        this.originatingCourtCentreId = originatingCourtCentreId;
+        return this;
+    }
+
+    public List<String> getUsergroups() {
+        return usergroups;
+    }
+
+    public NowsNotificationDocumentState setUsergroups(List<String> usergroups) {
+        this.usergroups = usergroups;
+        return this;
+    }
+
+    public UUID getNowsTypeId() {
+        return nowsTypeId;
+    }
+
+    public NowsNotificationDocumentState setNowsTypeId(UUID nowsTypeId) {
+        this.nowsTypeId = nowsTypeId;
+        return this;
+    }
+
+    public List<String> getCaseUrns() {
+        return caseUrns;
+    }
+
+    public NowsNotificationDocumentState setCaseUrns(List<String> caseUrns) {
+        this.caseUrns = caseUrns;
+        return this;
+    }
+
+    public String getCourtClerkName() {
+        return courtClerkName;
+    }
+
+    public NowsNotificationDocumentState setCourtClerkName(String courtClerkName) {
+        this.courtClerkName = courtClerkName;
+        return this;
+    }
+
+    public String getDefendantName() {
+        return defendantName;
+    }
+
+    public NowsNotificationDocumentState setDefendantName(String defendantName) {
+        this.defendantName = defendantName;
+        return this;
+    }
+
+    public String getJurisdiction() {
+        return jurisdiction;
+    }
+
+    public NowsNotificationDocumentState setJurisdiction(String jurisdiction) {
+        this.jurisdiction = jurisdiction;
+        return this;
+    }
+}

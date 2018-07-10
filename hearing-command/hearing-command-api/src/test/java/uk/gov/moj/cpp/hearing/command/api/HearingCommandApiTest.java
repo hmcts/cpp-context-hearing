@@ -1,44 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.lang.String.format;
-import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Stream.concat;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.verify;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
-import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,13 +10,50 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
+
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+import static java.util.UUID.randomUUID;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
+import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandApiTest {
@@ -93,13 +91,15 @@ public class HearingCommandApiTest {
     private static final String VALUE = STRING.next();
 
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
+
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
-                                    "addProsecutionCounsel", "initiateHearing", "saveDraftResult",
-                                    "updateHearingEvents", "generateNowsV2", "saveNowsVariants", "deleteAttendee");
+            "addProsecutionCounsel", "initiateHearing", "saveDraftResult",
+            "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants");
 
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
+    private Map<String, String> notificationApiMethodsToHandlerNames;
 
     @Mock
     private Sender sender;
@@ -120,6 +120,7 @@ public class HearingCommandApiTest {
     public void setup() {
         apiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingCommandApi.class);
         eventApiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingEventCommandApi.class);
+        notificationApiMethodsToHandlerNames = apiMethodsToHandlerNames(NotificationCommandApi.class);
     }
 
     @Test
@@ -131,7 +132,13 @@ public class HearingCommandApiTest {
                 .map(line -> line.replaceAll(NAME, "").trim())
                 .collect(toList());
 
-        final List<String> allHandlerNames = concat(apiMethodsToHandlerNames.values().stream(), eventApiMethodsToHandlerNames.values().stream()).collect(toList());
+        final List<String> allHandlerNames = Stream.of(
+                apiMethodsToHandlerNames.values().stream(),
+                eventApiMethodsToHandlerNames.values().stream(),
+                notificationApiMethodsToHandlerNames.values().stream())
+                .reduce(Stream::concat)
+                .orElseGet(Stream::empty)
+                .collect(toList());
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames.toArray()));
     }
@@ -144,6 +151,9 @@ public class HearingCommandApiTest {
         assertHandlerMethodsArePassThrough(HearingEventCommandApi.class, eventApiMethodsToHandlerNames.keySet().stream()
                 .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
                 .collect(toMap(identity(), eventApiMethodsToHandlerNames::get)));
+        assertHandlerMethodsArePassThrough(NotificationCommandApi.class, notificationApiMethodsToHandlerNames.keySet().stream()
+                .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
+                .collect(toMap(identity(), notificationApiMethodsToHandlerNames::get)));
     }
 
     @Test

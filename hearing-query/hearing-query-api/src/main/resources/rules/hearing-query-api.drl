@@ -77,3 +77,12 @@ rule "Query - API - hearing.query.search-by-material-id"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.retrieve-subscriptions"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.retrieve-subscriptions");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users"));
+  then
+    $outcome.setSuccess(true);
+end

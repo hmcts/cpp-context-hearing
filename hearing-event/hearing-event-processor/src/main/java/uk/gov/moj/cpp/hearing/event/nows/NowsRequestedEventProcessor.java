@@ -1,5 +1,14 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import static java.util.UUID.fromString;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.moj.cpp.hearing.activiti.common.JsonHelper.assembleEnvelopeWithPayloadAndMetaDetails;
+import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
+import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
+import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_CONTEXT;
+import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_IDENTIFIER;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JSONObjectValueObfuscator;
@@ -25,18 +34,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-
-import static java.util.UUID.fromString;
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.moj.cpp.hearing.activiti.common.JsonHelper.assembleEnvelopeWithPayloadAndMetaDetails;
-import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
-import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
-import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_CONTEXT;
-import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_IDENTIFIER;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class NowsRequestedEventProcessor {
@@ -44,6 +46,7 @@ public class NowsRequestedEventProcessor {
     public static final String FAILED = "FAILED";
     public static final String HEARING_UPDATE_NOWS_MATERIAL_STATUS = "hearing.command.update-nows-material-status";
     public static final String RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS = "resultinghmps.update-nows-material-status";
+    static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedEventProcessor.class);
     private final Enveloper enveloper;
     private final Sender sender;
@@ -68,21 +71,23 @@ public class NowsRequestedEventProcessor {
 
     @Handles("hearing.events.nows-requested")
     public void processNowsRequested(final JsonEnvelope event) throws FileServiceException {
-        final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         UUID userId = fromString(event.metadata().userId().orElseThrow(() -> new RuntimeException("UserId missing from event.")));
 
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NowsRequested.class);
         final String hearingId = nowsRequested.getHearing().getId();
         LOGGER.info("Nows requested for hearing id {}", hearingId);
 
-        final List<NowsDocumentOrder> nowsDocumentOrders = NowsRequestedToOrderConvertor.convert(nowsRequested);
-        nowsDocumentOrders.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriority)).forEach(nowsDocumentOrder -> {
+        final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrderToNotificationState = NowsRequestedToOrderConvertor.convert(nowsRequested);
+        final List<NowsDocumentOrder> nowsDocumentOrdersList = new ArrayList<>(nowsDocumentOrderToNotificationState.keySet());
+        nowsDocumentOrdersList.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriority)).forEach(nowsDocumentOrder -> {
             LOGGER.info("Input for docmosis order {}", JSONObjectValueObfuscator.obfuscated(objectToJsonObjectConverter.convert(nowsDocumentOrder)));
+
             try {
                 final byte[] resultOrderAsByteArray = docmosisService.generateDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), TEMPLATE_CONTEXT, TEMPLATE_IDENTIFIER);
                 final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));
+                final NowsNotificationDocumentState nowsNotificationDocumentState = nowsDocumentOrderToNotificationState.get(nowsDocumentOrder);
                 addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
-                        userId, hearingId, fromString(nowsDocumentOrder.getMaterialId()));
+                        userId, hearingId, fromString(nowsDocumentOrder.getMaterialId()), nowsNotificationDocumentState);
             } catch (RuntimeException e) {
                 LOGGER.error("Error while uploading document generation or upload ", e);
                 updateStatus(hearingId, nowsDocumentOrder.getMaterialId(), userId.toString(), FAILED, HEARING_UPDATE_NOWS_MATERIAL_STATUS);
@@ -105,11 +110,11 @@ public class NowsRequestedEventProcessor {
 
     private void addDocumentToMaterial(final String filename, final InputStream fileContent,
                                        final UUID userId, final String hearingId,
-                                       final UUID materialId) {
+                                       final UUID materialId, final NowsNotificationDocumentState nowsDocumentOrder) {
         final JsonObject metadata = createObjectBuilder().add("fileName", filename).build();
         try {
             final UUID fileId = fileStorer.store(metadata, fileContent);
-            uploadMaterialService.uploadFile(userId, fromString(hearingId), materialId, fileId);
+            uploadMaterialService.uploadFile(userId, fromString(hearingId), materialId, fileId, nowsDocumentOrder);
 
         } catch (final FileServiceException e) {
             LOGGER.error("Error while uploading file {}", filename);

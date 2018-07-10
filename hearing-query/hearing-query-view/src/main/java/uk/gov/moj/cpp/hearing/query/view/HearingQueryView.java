@@ -41,7 +41,7 @@ public class HearingQueryView {
     @Inject
     private HearingOutcomesConverter hearingOutcomesConverter;
 
-    static final String FIELD_QUERY = "q";
+    private static final String FIELD_QUERY = "q";
 
     @Handles("hearing.get.hearings-by-date")
     public JsonEnvelope findHearingsByDateV2(final JsonEnvelope envelope) {
@@ -81,5 +81,16 @@ public class HearingQueryView {
     public JsonEnvelope searchByMaterialId(final JsonEnvelope envelope) {
         return enveloper.withMetadataFrom(envelope, "hearing.query.search-by-material-id")
                 .apply(hearingService.getNowsRepository(envelope.payloadAsJsonObject().getString(FIELD_QUERY)));
+    }
+
+    @Handles("hearing.retrieve-subscriptions")
+    public JsonEnvelope retrieveSubscriptions(final JsonEnvelope envelope) {
+
+        final String referenceDate = envelope.payloadAsJsonObject().getString("referenceDate");
+
+        final String nowTypeId = envelope.payloadAsJsonObject().getString("nowTypeId");
+
+        return enveloper.withMetadataFrom(envelope, "hearing.retrieve-subscriptions")
+                .apply(hearingService.getSubscriptions(referenceDate, nowTypeId));
     }
 }

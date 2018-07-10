@@ -54,4 +54,8 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.retrieve-subscriptions")
+    public JsonEnvelope retrieveSubscriptions(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
 }

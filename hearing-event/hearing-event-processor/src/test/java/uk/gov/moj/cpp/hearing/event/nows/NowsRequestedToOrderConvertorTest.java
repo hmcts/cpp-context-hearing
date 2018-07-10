@@ -1,19 +1,21 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import uk.gov.justice.services.common.converter.exception.ConverterException;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.event.nows.order.NowsDocumentOrder;
 import uk.gov.moj.cpp.hearing.event.nows.order.OrderCase;
 import uk.gov.moj.cpp.hearing.nows.events.Defendant;
+import uk.gov.moj.cpp.hearing.nows.events.Material;
+import uk.gov.moj.cpp.hearing.nows.events.Now;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
 
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.CoreMatchers.is;
@@ -22,14 +24,16 @@ import static org.junit.Assert.assertThat;
 public class NowsRequestedToOrderConvertorTest {
 
     @Test
-    public void testConvertion() throws IOException {
+    public void testConversion() throws IOException {
         final InputStream is = NowsRequestedToOrderConvertorTest.class.getResourceAsStream("/data/hearing.events.nows-requested.json");
-        NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
-        List<NowsDocumentOrder> nowsDocumentOrders = NowsRequestedToOrderConvertor.convert(nowsRequested);
+        final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
+        final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrders = NowsRequestedToOrderConvertor.convert(nowsRequested);
 
-        NowsDocumentOrder nowsDocumentOrder = nowsDocumentOrders.get(0);
-        assertThat(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId(), is(nowsDocumentOrder.getMaterialId()));
-        assertThat(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).isAmended(), is(nowsDocumentOrder.isAmended()));
+        final NowsDocumentOrder nowsDocumentOrder = nowsDocumentOrders.keySet().iterator().next();
+        final Now nowIn0 = nowsRequested.getHearing().getNows().get(0);
+        final Material materialIn0 = nowIn0.getMaterials().get(0);
+        assertThat(materialIn0.getId(), is(nowsDocumentOrder.getMaterialId()));
+        assertThat(materialIn0.isAmended(), is(nowsDocumentOrder.isAmended()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getStaticText(), is(nowsDocumentOrder.getNowText()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getPriority(), is(nowsDocumentOrder.getPriority()));
         assertThat(nowsRequested.getHearing().getNowTypes().get(0).getDescription(), is(nowsDocumentOrder.getOrderName()));
@@ -54,6 +58,14 @@ public class NowsRequestedToOrderConvertorTest {
         assertThat(getSharedResultLines(nowsRequested).get(1).getPrompts().get(0).getLabel(), is(getOrderCase(nowsDocumentOrder).getCaseResults().get(0).getPrompts().get(0).getLabel()));
         assertThat(getSharedResultLines(nowsRequested).get(1).getPrompts().get(0).getValue(), is(getOrderCase(nowsDocumentOrder).getCaseResults().get(0).getPrompts().get(0).getValue()));
 
+        final NowsNotificationDocumentState nowsNotificationDocumentState = nowsDocumentOrders.get(nowsDocumentOrder);
+
+        assertThat(nowsNotificationDocumentState.getUsergroups().stream().collect(Collectors.toSet()),
+                is(materialIn0.getUserGroups().stream().map(groupIn -> groupIn.getGroup()).collect(Collectors.toSet())));
+        assertThat(nowsNotificationDocumentState.getOriginatingCourtCentreId(),
+                is(UUID.fromString(nowsRequested.getHearing().getCourtCentre().getCourtCentreId())));
+        assertThat(nowsNotificationDocumentState.getNowsTypeId(), is(UUID.fromString(nowIn0.getNowsTypeId())));
+        assertThat(nowsNotificationDocumentState.getJurisdiction(), is(nowsRequested.getHearing().getNowTypes().get(0).getJurisdiction()));
 
     }
 
