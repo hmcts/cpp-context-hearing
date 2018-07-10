@@ -56,6 +56,7 @@ import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
@@ -110,9 +111,7 @@ public class GenerateNowsDelegateTest {
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 
-        final List<JsonEnvelope> outgoingMessages = envelopeArgumentCaptor.getAllValues();
-
-        final JsonEnvelope createNowsMessage = outgoingMessages.get(0);
+        final JsonEnvelope createNowsMessage = envelopeArgumentCaptor.getValue();
 
         assertThat(createNowsMessage, jsonEnvelope(metadata().withName("hearing.command.generate-nows"), payloadIsJson(print())));
 
@@ -217,6 +216,61 @@ public class GenerateNowsDelegateTest {
                                 .with(NowTypes::getTemplateName, is(nowDefinition.getTemplateName()))
                                 .with(NowTypes::getRank, is(nowDefinition.getRank()))
                                 .with(NowTypes::getStaticText, is(nowDefinition.getNowText() + "\n" + nowDefinition.getResultDefinitions().get(0).getNowText()))
+                        ))
+                )
+        ));
+    }
+
+    @Test
+    public void testGenerateNows_withNullNowText() {
+        final ResultsSharedEventHelper resultsShared = h(resultsSharedTemplate());
+
+        final List<Nows> nows = basicNowsTemplate();
+
+        final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
+            d.setNowText(null);
+        });
+
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
+                .thenReturn(nowDefinition);
+
+        target.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared)), nows, resultsShared.it());
+
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        assertThat( envelopeArgumentCaptor.getValue(), convertTo(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
+                .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
+                                .with(NowTypes::getStaticText, is(nowDefinition.getResultDefinitions().get(0).getNowText()))
+                        ))
+                )
+        ));
+    }
+
+    @Test
+    public void testGenerateNows_withNullNowText_AndNullResultDefinitionNowText() {
+        final ResultsSharedEventHelper resultsShared = h(resultsSharedTemplate());
+
+        final List<Nows> nows = basicNowsTemplate();
+
+        final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
+            d.setNowText(null);
+            d.getResultDefinitions().forEach(l -> l.setNowText(null));
+        });
+
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
+                .thenReturn(nowDefinition);
+
+        target.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared)), nows, resultsShared.it());
+
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        assertThat( envelopeArgumentCaptor.getValue(), convertTo(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
+                .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
+                                .with(NowTypes::getStaticText, is(""))
                         ))
                 )
         ));

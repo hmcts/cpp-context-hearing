@@ -86,9 +86,9 @@ public class GenerateNowsDelegate {
                                                     Stream.of(nowDefinition.getNowText()),
                                                     nowDefinition.getResultDefinitions().stream()
                                                             .map(ResultDefinitions::getNowText)
-                                                            .filter(Objects::nonNull)
-                                                            .filter(s -> !s.isEmpty())
                                             )
+                                                    .filter(Objects::nonNull)
+                                                    .filter(s -> !s.isEmpty())
                                                     .collect(Collectors.joining("\n"));
 
                                             return NowTypes.nowTypes()
