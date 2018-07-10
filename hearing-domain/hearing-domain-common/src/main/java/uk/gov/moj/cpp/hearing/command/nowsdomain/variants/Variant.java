@@ -1,7 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.nowsdomain.variants;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 public class Variant implements Serializable {
@@ -9,6 +12,8 @@ public class Variant implements Serializable {
     private VariantKey key;
 
     private VariantValue value;
+    @JsonIgnore
+    private LocalDate referenceDate;
 
     public static Variant variant() {
         return new Variant();
@@ -18,7 +23,11 @@ public class Variant implements Serializable {
         return this.key;
     }
 
-    public Variant setKey(VariantKey key) {
+    public LocalDate getReferenceDate() {
+        return referenceDate;
+    }
+
+    public Variant setKey(final VariantKey key) {
         this.key = key;
         return this;
     }
@@ -27,20 +36,24 @@ public class Variant implements Serializable {
         return this.value;
     }
 
-    public Variant setValue(VariantValue value) {
+    public Variant setValue(final VariantValue value) {
         this.value = value;
         return this;
     }
 
+    public Variant setReferenceDate(final LocalDate referenceDate) {
+        this.referenceDate = referenceDate;
+        return this;
+    }
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Variant variant = (Variant) o;
+        final Variant variant = (Variant) o;
         return Objects.equals(key, variant.key);
     }
 

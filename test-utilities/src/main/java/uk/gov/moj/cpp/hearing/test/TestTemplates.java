@@ -16,6 +16,13 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.int
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+
 import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -71,13 +78,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
 
 public class TestTemplates {
 
@@ -388,23 +388,24 @@ public class TestTemplates {
                     .build();
         }
 
-        public static ShareResultsCommand standardShareResultsCommandTemplate(UUID defendantId, UUID offenceId, UUID caseId, UUID resultLineId1, UUID resultLineId2) {
+        public static ShareResultsCommand standardShareResultsCommandTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId1, final UUID resultLineId2) {
             return with(basicShareResultsCommandTemplate(), command -> {
                 command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId1));
-                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2));
+                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2));                
             });
         }
 
-        public static CompletedResultLine completedResultLineTemplate(UUID defendantId, UUID offenceId, UUID caseId, UUID resultLineId) {
+        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId) {
             return completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID());
         }
 
-        public static CompletedResultLine completedResultLineTemplate(UUID defendantId, UUID offenceId, UUID caseId, UUID resultLineId, UUID resultDefinitionId) {
+        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId, final UUID resultDefinitionId) {
             return CompletedResultLine.builder()
                     .withId(resultLineId)
                     .withResultDefinitionId(resultDefinitionId)
                     .withDefendantId(defendantId)
                     .withOffenceId(offenceId)
+                    .withOrderedDate(LocalDate.now())
                     .withCaseId(caseId)
                     .withLevel(values(Level.values()).next())
                     .withResultLabel(STRING.next())
@@ -427,6 +428,7 @@ public class TestTemplates {
                     .withId(randomUUID())
                     .withResultDefinitionId(randomUUID())
                     .withDefendantId(defendantId)
+                    .withOrderedDate(LocalDate.now())
                     .build();
         }
     }
@@ -436,7 +438,7 @@ public class TestTemplates {
         private CompletedResultLineStatusTemplates() {
         }
 
-        public static CompletedResultLineStatus completedResultLineStatus(UUID resultLineId) {
+        public static CompletedResultLineStatus completedResultLineStatus(final UUID resultLineId) {
             final ZonedDateTime startDateTime = FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC"));
             return CompletedResultLineStatus.builder()
                     .withId(resultLineId)
@@ -830,7 +832,7 @@ public class TestTemplates {
                                     .setResultLineId(randomUUID())
                                     .setLastSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                             ))
-                    );
+                            ).setReferenceDate(LocalDate.now());
         }
     }
 

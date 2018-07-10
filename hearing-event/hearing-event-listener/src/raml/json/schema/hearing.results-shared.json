@@ -74,6 +74,9 @@
         "offenceId":{
           "$ref":"#/definitions/uuid"
         },
+        "orderedDate":{
+          "$ref":"#/definitions/datePattern"
+       },
         "level":{
           "type":"string",
           "enum":[
@@ -123,12 +126,16 @@
         },
         "defendantId": {
           "$ref": "#/definitions/uuid"
+        },
+        "orderedDate":{
+          "$ref":"#/definitions/datePattern"
         }
       },
       "required":[
         "id",
         "resultDefinitionId",
-        "defendantId"
+        "defendantId",
+		"orderedDate"
       ]
     },
     "hearing":{

@@ -1,16 +1,18 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
-
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+
 public class SharedResultLine {
 
     private UUID id;
     private ZonedDateTime lastSharedDateTime;
+    private LocalDate orderedDate;
     private UUID caseId;
     private UUID defendantId;
     private UUID offenceId;
@@ -61,47 +63,55 @@ public class SharedResultLine {
         return courtClerk;
     }
 
-    public SharedResultLine setId(UUID id) {
+    public LocalDate getOrderedDate() {
+        return orderedDate;
+    }
+
+    public SharedResultLine setOrderedDate(final LocalDate orderedDate) {
+        this.orderedDate = orderedDate;
+        return this;
+    }
+    public SharedResultLine setId(final UUID id) {
         this.id = id;
         return this;
     }
 
-    public SharedResultLine setLastSharedDateTime(ZonedDateTime lastSharedDateTime) {
+    public SharedResultLine setLastSharedDateTime(final ZonedDateTime lastSharedDateTime) {
         this.lastSharedDateTime = lastSharedDateTime;
         return this;
     }
 
-    public SharedResultLine setCaseId(UUID caseId) {
+    public SharedResultLine setCaseId(final UUID caseId) {
         this.caseId = caseId;
         return this;
     }
 
-    public SharedResultLine setDefendantId(UUID defendantId) {
+    public SharedResultLine setDefendantId(final UUID defendantId) {
         this.defendantId = defendantId;
         return this;
     }
 
-    public SharedResultLine setOffenceId(UUID offenceId) {
+    public SharedResultLine setOffenceId(final UUID offenceId) {
         this.offenceId = offenceId;
         return this;
     }
 
-    public SharedResultLine setLevel(String level) {
+    public SharedResultLine setLevel(final String level) {
         this.level = level;
         return this;
     }
 
-    public SharedResultLine setLabel(String label) {
+    public SharedResultLine setLabel(final String label) {
         this.label = label;
         return this;
     }
 
-    public SharedResultLine setRank(Integer rank) {
+    public SharedResultLine setRank(final Integer rank) {
         this.rank = rank;
         return this;
     }
 
-    public SharedResultLine setPrompts(List<Prompt> prompts) {
+    public SharedResultLine setPrompts(final List<Prompt> prompts) {
         this.prompts = prompts;
         return this;
     }

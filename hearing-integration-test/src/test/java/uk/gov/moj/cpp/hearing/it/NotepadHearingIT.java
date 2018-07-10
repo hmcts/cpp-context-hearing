@@ -24,7 +24,7 @@ public class NotepadHearingIT extends AbstractIT {
         stubForReferenceDataResults();
 
         String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "RESTRAOP");
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "RESTRAOP", "2017-12-21");
         String url =  getBaseUri() + "/"  + queryAPIEndPoint;
         String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
@@ -34,6 +34,7 @@ public class NotepadHearingIT extends AbstractIT {
                         print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.originalText", is("RESTRAOP")) ,
+                                withJsonPath("$.orderedDate", is("2017-12-21")) ,
                                 withJsonPath("$.parts[0].value", is("Restraining order for period")),
                                 withJsonPath("$.parts[0].state", is("RESOLVED"))
                         )));

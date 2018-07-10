@@ -1,5 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static java.util.stream.Collectors.toList;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
@@ -9,15 +15,9 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import static java.util.stream.Collectors.toList;
-
 public class Nows2VariantTransform {
 
-    public List<Variant> toVariants(final UUID hearingId, List<Nows> nows, ZonedDateTime sharedTime) {
+    public List<Variant> toVariants(final UUID hearingId, final List<Nows> nows, final ZonedDateTime sharedTime) {
         return nows.stream()
                 .flatMap(now -> now.getMaterials().stream()
                         .map(m -> toVariant(hearingId, now, m, sharedTime))
@@ -44,6 +44,7 @@ public class Nows2VariantTransform {
                                 )
                                 .collect(toList())
                         )
-                );
+                )
+                .setReferenceDate(nows.getReferenceDate());
     }
 }

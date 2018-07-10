@@ -1,8 +1,37 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Collections.singletonList;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isOneOf;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.core.Is;
 import org.junit.Test;
+
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
@@ -20,43 +49,13 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.UUID;
-
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.time.format.DateTimeFormatter.ISO_INSTANT;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
-import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldRaiseDraftResultSaved() {
 
-        InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         final SaveDraftResultCommand saveDraftResultCommand = with(saveDraftResultCommandTemplate(hearingOne.it()),
                 template -> template.setHearingId(hearingOne.getHearingId()));
@@ -88,7 +87,7 @@ public class ShareResultsIT extends AbstractIT {
         final UUID primaryResultDefinitionId = UUID.fromString("87631590-bd78-49b2-bd6f-ad7030904e73");
         final UUID mandatoryPromptId = UUID.randomUUID();
         final String mandatoryPromptLabel = "label1";
-        AllNows allNows = AllNows.allNows()
+        final AllNows allNows = AllNows.allNows()
                 .setNows(singletonList(
                         NowDefinition.now()
                                 .setId(UUID.randomUUID())
@@ -99,12 +98,13 @@ public class ShareResultsIT extends AbstractIT {
                                                 .setMandatory(true)
                                                 .setPrimary(true)
                                 ))
+                                .setReferenceDate(LocalDate.now())
                 ));
 
         ReferenceDataStub.stubGetAllNowsMetaData(allNows);
 
         final String userGroup1 = "DefenseCounsel";
-        AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
+        final AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
                 singletonList(ResultDefinition.resultDefinition()
                         .setId(primaryResultDefinitionId)
                         .setUserGroups(singletonList(userGroup1))
@@ -138,16 +138,6 @@ public class ShareResultsIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final EventListener publicEventResulted = listenFor("public.hearing.resulted")
-                .withFilter(isJson(CoreMatchers.allOf(
-                        withJsonPath("$.hearing.id", is(hearingOne.getHearingId().toString())),
-                        withJsonPath("$.hearing.defendants[0].id", is(hearingOne.getFirstDefendantId().toString())),
-                        withJsonPath("$.hearing.defendants[0].cases[0].id", is(hearingOne.getFirstCaseId().toString())),
-                        withJsonPath("$.hearing.defendants[0].cases[0].bailStatus", is(hearingOne.it().getHearing().getDefendants().get(0).getDefendantCases().get(0).getBailStatus())),
-                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
-                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].verdict.verdictCategory", is(verdictTwo.getFirstVerdictCategory())),
-                        withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is(pleaOne.getFirstPleaValue().name()))
-                )));
 
         // this will change when real reference data service is available and can be stubbed out
         // this matches DefaultNowsReferenceData
@@ -160,7 +150,7 @@ public class ShareResultsIT extends AbstractIT {
                         command -> {
                             command.getCompletedResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
                             command.getCompletedResultLines().get(0).setResultDefinitionId(primaryResultDefinitionId);
-                            ResultPrompt original = command.getCompletedResultLines().get(0).getPrompts().get(0);
+                            final ResultPrompt original = command.getCompletedResultLines().get(0).getPrompts().get(0);
                             command.getCompletedResultLines().get(0).getPrompts().set(0, ResultPrompt.builder().withId(mandatoryPromptId).withLabel(mandatoryPromptLabel).withValue(original.getLabel()).build());
                             command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
 
@@ -168,6 +158,20 @@ public class ShareResultsIT extends AbstractIT {
                 )
         );
 
+        final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                        .withFilter(isJson(CoreMatchers.allOf(
+                                withJsonPath("$.hearing.id", is(hearingOne.getHearingId().toString())),
+                                withJsonPath("$.hearing.defendants[0].id", is(hearingOne.getFirstDefendantId().toString())),
+                                withJsonPath("$.hearing.defendants[0].cases[0].id", is(hearingOne.getFirstCaseId().toString())),
+                                withJsonPath("$.hearing.defendants[0].cases[0].bailStatus", is(hearingOne.it().getHearing().getDefendants().get(0).getDefendantCases().get(0).getBailStatus())),
+                                withJsonPath("$.hearing.defendants[0].cases[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
+                                withJsonPath("$.hearing.defendants[0].cases[0].offences[0].verdict.verdictCategory", is(verdictTwo.getFirstVerdictCategory())),
+                                withJsonPath("$.hearing.defendants[0].cases[0].offences[0].plea.value", is(pleaOne.getFirstPleaValue().name())),
+                                withJsonPath("$.hearing.sharedResultLines[0].orderedDate", isOneOf(shareResultsOne.it().getCompletedResultLines().get(0).getOrderedDate().toString(),
+                                                shareResultsOne.it().getCompletedResultLines().get(1).getOrderedDate().toString())),
+                                withJsonPath("$.hearing.sharedResultLines[1].orderedDate", isOneOf(shareResultsOne.it().getCompletedResultLines().get(0).getOrderedDate().toString(),
+                                                shareResultsOne.it().getCompletedResultLines().get(1).getOrderedDate().toString()))                                
+                        )));
 
         publicEventResulted.waitFor();
 
@@ -187,7 +191,7 @@ public class ShareResultsIT extends AbstractIT {
                         command -> {
                             command.getCompletedResultLines().get(0).setResultDefinitionId(defaultReferenceDataUUID);
                             command.getCompletedResultLines().get(0).setResultDefinitionId(primaryResultDefinitionId);
-                            ResultPrompt original = command.getCompletedResultLines().get(0).getPrompts().get(0);
+                            final ResultPrompt original = command.getCompletedResultLines().get(0).getPrompts().get(0);
                             command.getCompletedResultLines().get(0).getPrompts().set(0, ResultPrompt.builder().withId(mandatoryPromptId).withLabel(mandatoryPromptLabel).withValue(original.getLabel()).build());
                             command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
 

@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static java.util.stream.Collectors.toList;
+import static uk.gov.moj.cpp.hearing.message.shareResults.Variant.variant;
+
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
@@ -26,20 +29,16 @@ import uk.gov.moj.cpp.hearing.message.shareResults.ShareResultsMessage;
 import uk.gov.moj.cpp.hearing.message.shareResults.SharedResultLine;
 import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
 
-import javax.inject.Inject;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-import static uk.gov.moj.cpp.hearing.message.shareResults.Variant.variant;
+import javax.inject.Inject;
 
 @SuppressWarnings({"squid:S1188", "squid:S1612"})
 public class PublishResultsDelegate {
@@ -60,12 +59,7 @@ public class PublishResultsDelegate {
 
 
 
-    public void shareResults(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, List<Variant> newVariants) {
-
-        final LocalDate referenceDate = resultsShared.getHearing().getHearingDays().stream()
-                .map(ZonedDateTime::toLocalDate)
-                .min(Comparator.comparing(LocalDate::toEpochDay))
-                .orElse(null);
+    public void shareResults(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, final List<Variant> newVariants) {
 
         final List<Variant> variants = Stream.concat(
                 resultsShared.getVariantDirectory().stream().map(replaceWithInputs(newVariants)),
@@ -83,17 +77,17 @@ public class PublishResultsDelegate {
                         .setHearingDates(resultsShared.getHearing().getHearingDays())
                         .setStartDateTime(resultsShared.getHearing().getHearingDays().get(0))
                 )
-                .setVariants(mapVariantDirectory(referenceDate, variants))
+                .setVariants(mapVariantDirectory(variants))
                 .setSharedTime(resultsShared.getSharedTime());
 
         sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
                 .apply(this.objectToJsonObjectConverter.convert(shareResultsMessage)));
     }
 
-    private List<uk.gov.moj.cpp.hearing.message.shareResults.Variant> mapVariantDirectory(final LocalDate referenceDate, final List<Variant> updatedVariantDirectory) {
+    private List<uk.gov.moj.cpp.hearing.message.shareResults.Variant> mapVariantDirectory(final List<Variant> updatedVariantDirectory) {
         return updatedVariantDirectory.stream()
                 .map(variant -> {
-                            final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(referenceDate, variant.getKey().getNowsTypeId());
+                            final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(variant.getReferenceDate(), variant.getKey().getNowsTypeId());
                             return variant()
                                     .setKey(variant.getKey())
                                     .setStatus(variant.getValue().getStatus().toString())
@@ -105,7 +99,7 @@ public class PublishResultsDelegate {
                 .collect(toList());
     }
 
-    private static CourtCentre mapCourtCentre(ResultsShared input) {
+    private static CourtCentre mapCourtCentre(final ResultsShared input) {
         return CourtCentre.courtCentre()
                 .setCourtCentreId(input.getHearing().getCourtCentreId())
                 .setCourtCentreName(input.getHearing().getCourtCentreName())
@@ -113,7 +107,7 @@ public class PublishResultsDelegate {
                 .setCourtRoomName(input.getHearing().getCourtRoomName());
     }
 
-    private static List<Attendee> mapAttendees(ResultsShared input) {
+    private static List<Attendee> mapAttendees(final ResultsShared input) {
 
         final List<Attendee> attendees = new ArrayList<>();
 
@@ -165,7 +159,7 @@ public class PublishResultsDelegate {
         return attendees;
     }
 
-    private static List<Defendant> mapDefendants(ResultsShared input) {
+    private static List<Defendant> mapDefendants(final ResultsShared input) {
         return input.getHearing().getDefendants().stream()
                 .map(defendant -> Defendant.defendant()
                         .setId(defendant.getId())
@@ -198,7 +192,7 @@ public class PublishResultsDelegate {
                 .collect(Collectors.toList());
     }
 
-    private static List<Case> mapCases(ResultsShared input, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant) {
+    private static List<Case> mapCases(final ResultsShared input, final uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant) {
         return defendant.getDefendantCases().stream()
                 .map(defendantCase -> Case.legalCase()
                         .setId(defendantCase.getCaseId())
@@ -213,7 +207,7 @@ public class PublishResultsDelegate {
                 .collect(Collectors.toList());
     }
 
-    private static List<Offence> mapOffences(ResultsShared input, uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant) {
+    private static List<Offence> mapOffences(final ResultsShared input, final uk.gov.moj.cpp.hearing.command.initiate.Defendant defendant) {
         return defendant.getOffences().stream()
                 .map(o -> Offence.offence()
                         .setId(o.getId())
@@ -252,7 +246,7 @@ public class PublishResultsDelegate {
                 .collect(Collectors.toList());
     }
 
-    private static String formatNumberOfSplitJurors(VerdictUpsert v) {
+    private static String formatNumberOfSplitJurors(final VerdictUpsert v) {
         return v.getNumberOfJurors() != null && v.getNumberOfSplitJurors() != null ?
                 String.format("%s-%s",
                         v.getNumberOfJurors() - v.getNumberOfSplitJurors(),
@@ -260,11 +254,12 @@ public class PublishResultsDelegate {
                 ) : null;
     }
 
-    private List<SharedResultLine> mapSharedResultsLines(ResultsShared input) {
+    private List<SharedResultLine> mapSharedResultsLines(final ResultsShared input) {
         return input.getCompletedResultLines().stream()
                 .map(rl -> SharedResultLine.sharedResultLine()
                         .setId(rl.getId())
                         .setLastSharedDateTime(getLastSharedResultDateTime(input.getSharedTime(), input.getCompletedResultLinesStatus().get(rl.getId())))
+                        .setOrderedDate(rl.getOrderedDate())
                         .setCourtClerk(getCourtClerkDetails(input.getCourtClerk(), input.getCompletedResultLinesStatus().get(rl.getId())))
                         .setCaseId(rl.getCaseId())
                         .setDefendantId(rl.getDefendantId())
@@ -297,11 +292,11 @@ public class PublishResultsDelegate {
         }
     }
 
-    private static <T> Function<T, T> replaceWithInputs(Collection<T> input) {
+    private static <T> Function<T, T> replaceWithInputs(final Collection<T> input) {
         return v -> input.stream().filter(p -> p.equals(v)).findFirst().orElse(v);
     }
 
-    private static <T> Predicate<T> isNotInSet(Collection<T> input) {
+    private static <T> Predicate<T> isNotInSet(final Collection<T> input) {
         return v -> input.stream().noneMatch(p -> p.equals(v));
     }
 }

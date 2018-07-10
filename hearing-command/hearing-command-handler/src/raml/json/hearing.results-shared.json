@@ -10,7 +10,8 @@
     {
       "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
       "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
-      "defendantId":"ed24255c-1665-4fbe-ad7a-968a9b4f11c3"
+      "defendantId":"ed24255c-1665-4fbe-ad7a-968a9b4f11c3",
+      "orderedDate": "2017-12-21"
     }
   ],
   "completedResultLines": [
@@ -22,6 +23,7 @@
       "offenceId":"6c3e1949-56b6-455e-b71d-561b9098e581",
       "level":"DEFENDANT",
       "resultLabel":"BYplqrmzDe",
+      "orderedDate": "2017-12-21",
       "prompts":[
         {
           "id":"e01df1c0-acde-4b60-a184-66948911ac4b",

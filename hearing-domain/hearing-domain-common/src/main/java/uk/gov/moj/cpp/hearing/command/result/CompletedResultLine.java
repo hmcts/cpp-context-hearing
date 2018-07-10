@@ -1,16 +1,17 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.ofNullable;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Optional.ofNullable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings("squid:S1067")
 public final class CompletedResultLine implements Serializable {
@@ -33,6 +34,8 @@ public final class CompletedResultLine implements Serializable {
 
     private final List<ResultPrompt> prompts;
 
+    private final LocalDate orderedDate;
+
     @JsonCreator
     private CompletedResultLine(@JsonProperty("id") final UUID id,
                                 @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
@@ -41,7 +44,8 @@ public final class CompletedResultLine implements Serializable {
                                 @JsonProperty("offenceId") final UUID offenceId,
                                 @JsonProperty("level") final Level level,
                                 @JsonProperty("resultLabel") final String resultLabel,
-                                @JsonProperty("prompts") final List<ResultPrompt> prompts) {
+                    @JsonProperty("prompts") final List<ResultPrompt> prompts,
+                    @JsonProperty("orderedDate") final LocalDate orderedDate) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.caseId = caseId;
@@ -50,6 +54,7 @@ public final class CompletedResultLine implements Serializable {
         this.level = level;
         this.resultLabel = resultLabel;
         this.prompts = unmodifiableList(ofNullable(prompts).orElseGet(ArrayList::new));
+        this.orderedDate = orderedDate;
     }
 
     public UUID getId() {
@@ -84,15 +89,18 @@ public final class CompletedResultLine implements Serializable {
         return new ArrayList<>(prompts);
     }
 
+    public LocalDate getOrderedDate() {
+        return orderedDate;
+    }
     public static Builder builder() {
         return new Builder();
     }
 
-    public void setResultDefinitionId(UUID resultDefinitionId) {
+    public void setResultDefinitionId(final UUID resultDefinitionId) {
         this.resultDefinitionId = resultDefinitionId;
     }
 
-    public void setDefendantId(UUID defendantId) {
+    public void setDefendantId(final UUID defendantId) {
         this.defendantId = defendantId;
     }
 
@@ -113,6 +121,8 @@ public final class CompletedResultLine implements Serializable {
         private String resultLabel;
 
         private List<ResultPrompt> prompts;
+
+        private LocalDate orderedDate;
 
         public Builder withId(final UUID id) {
             this.id = id;
@@ -154,13 +164,18 @@ public final class CompletedResultLine implements Serializable {
             return this;
         }
 
+        public Builder withOrderedDate(final LocalDate orderedDate) {
+            this.orderedDate = orderedDate;
+            return this;
+        }
         public CompletedResultLine build() {
-            return new CompletedResultLine(id, resultDefinitionId, caseId, defendantId, offenceId, level, resultLabel, prompts);
+            return new CompletedResultLine(id, resultDefinitionId, caseId, defendantId, offenceId,
+                            level, resultLabel, prompts, orderedDate);
         }
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -175,12 +190,13 @@ public final class CompletedResultLine implements Serializable {
                 Objects.equals(offenceId, completedResultLine.offenceId) &&
                 Objects.equals(level, completedResultLine.level) &&
                 Objects.equals(resultLabel, completedResultLine.resultLabel) &&
-                Objects.equals(prompts, completedResultLine.prompts);
+                Objects.equals(prompts, completedResultLine.prompts) &&
+                Objects.equals(orderedDate, completedResultLine.orderedDate);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, resultDefinitionId, caseId, defendantId,
-                offenceId, level, resultLabel, prompts);
+                offenceId, level, resultLabel, prompts, orderedDate);
     }
 }
