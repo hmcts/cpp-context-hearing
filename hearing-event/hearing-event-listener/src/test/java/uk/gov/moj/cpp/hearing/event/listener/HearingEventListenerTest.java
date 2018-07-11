@@ -1,29 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
-
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
@@ -41,9 +17,36 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
+import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
+
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
 
+    private static final String FIELD_ORDERED_DATE = "orderedDate";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_NUMBER_OF_JURORS = "numberOfJurors";
     private static final String FIELD_NUMBER_OF_SPLIT_JURORS = "numberOfSplitJurors";
@@ -78,6 +81,8 @@ public class HearingEventListenerTest {
     private static final UUID DEFENDANT_ID = randomUUID();
     private static final UUID TARGET_ID = randomUUID();
     private static final UUID OFFENCE_ID = randomUUID();
+
+    private static final LocalDate ORDERED_DATE = LocalDate.now();
 
     private static final UUID OFFENCE_ID_2 = randomUUID();
     private static final UUID OFFENCE_ID_3 = randomUUID();
@@ -221,6 +226,7 @@ public class HearingEventListenerTest {
                         .add(FIELD_PERSON_ID, PERSON_ID.toString())
                         .add(FIELD_CASE_ID, CASE_ID.toString())
                         .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
+                        .add(FIELD_ORDERED_DATE, ORDERED_DATE.toString())
                         .add(FIELD_LEVEL, LEVEL)
                         .add(FIELD_RESULT_LABEL, RESULT_LABEL)
                         .add(FIELD_PROMPTS, createArrayBuilder()

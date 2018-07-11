@@ -1,5 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
@@ -29,21 +34,14 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
-import javax.inject.Inject;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import javax.inject.Inject;
 
 @SuppressWarnings("squid:S1188")
 public class GenerateNowsDelegate {
@@ -67,18 +65,14 @@ public class GenerateNowsDelegate {
         this.referenceDataService = referenceDataService;
     }
 
-    public void generateNows(Sender sender, JsonEnvelope event, List<Nows> nows, ResultsShared resultsShared) {
-
-        final LocalDate referenceDate = resultsShared.getHearing().getHearingDays().stream()
-                .map(ZonedDateTime::toLocalDate)
-                .min(Comparator.comparing(LocalDate::toEpochDay))
-                .orElse(null);
+    public void generateNows(final Sender sender, final JsonEnvelope event, final List<Nows> nows, final ResultsShared resultsShared) {
 
         final GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
                 .setHearing(
                         translateReferenceData(resultsShared)
                                 .setNows(nows)
-                                .setNowTypes(findNowDefinitions(referenceDate, resultsShared.getCompletedResultLines())
+                                .setNowTypes(findNowDefinitions(
+                                        resultsShared.getCompletedResultLines())
                                         .stream()
                                         .map(nowDefinition -> {
 
@@ -110,7 +104,7 @@ public class GenerateNowsDelegate {
                 .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
     }
 
-    private Hearing translateReferenceData(ResultsShared resultsShared) {
+    private Hearing translateReferenceData(final ResultsShared resultsShared) {
 
         final List<Attendees> attendees = new ArrayList<>();
 
@@ -244,14 +238,16 @@ public class GenerateNowsDelegate {
                 .setSharedResultLines(sharedResultLines);
     }
 
-    private String formatSplitJurors(VerdictUpsert v) {
+    private String formatSplitJurors(final VerdictUpsert v) {
         return v.getNumberOfJurors() == null || v.getNumberOfSplitJurors() == null ? "" :
                 String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors());
     }
 
-    private Set<NowDefinition> findNowDefinitions(final LocalDate referenceDate, final List<CompletedResultLine> resultLines) {
+    private Set<NowDefinition> findNowDefinitions(final List<CompletedResultLine> resultLines) {
         return resultLines.stream()
-                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(referenceDate, resultLine.getResultDefinitionId()))
+                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(
+                        resultLine.getOrderedDate(),
+                        resultLine.getResultDefinitionId()))
                 .filter(Objects::nonNull)
                 .collect(toSet());
     }

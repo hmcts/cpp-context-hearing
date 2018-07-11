@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
-import java.util.UUID;
 
 public final class UncompletedResultLine implements Serializable {
 
@@ -16,13 +17,17 @@ public final class UncompletedResultLine implements Serializable {
 
     private final UUID defendantId;
 
+    private final LocalDate orderedDate;
+
     @JsonCreator
     private UncompletedResultLine(@JsonProperty("id") final UUID id,
                                   @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
-                                  @JsonProperty("defendantId") final UUID defendantId) {
+                                  @JsonProperty("defendantId") final UUID defendantId,
+                                  @JsonProperty("orderedDate") final LocalDate orderedDate) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.defendantId = defendantId;
+        this.orderedDate = orderedDate;
     }
 
     public UUID getId() {
@@ -37,6 +42,9 @@ public final class UncompletedResultLine implements Serializable {
         return defendantId;
     }
 
+    public LocalDate getOrderedDate() {
+        return orderedDate;
+    }
     public static Builder builder() {
         return new Builder();
     }
@@ -48,6 +56,8 @@ public final class UncompletedResultLine implements Serializable {
         private UUID resultDefinitionId;
 
         private UUID defendantId;
+
+        private LocalDate dateOrdered;
 
         public Builder withId(final UUID id) {
             this.id = id;
@@ -64,8 +74,12 @@ public final class UncompletedResultLine implements Serializable {
             return this;
         }
 
+        public Builder withOrderedDate(final LocalDate dateOrdered) {
+            this.dateOrdered = dateOrdered;
+            return this;
+        }
         public UncompletedResultLine build() {
-            return new UncompletedResultLine(id, resultDefinitionId, defendantId);
+            return new UncompletedResultLine(id, resultDefinitionId, defendantId, dateOrdered);
         }
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
@@ -26,8 +27,9 @@ public class NowDefinition {
     private List<ResultDefinitions> resultDefinitions;
 
     private Integer urgentTimeLimitInMinutes;
-    
     private String nowText;
+
+    private LocalDate referenceDate;
 
     public UUID getId() {
         return this.id;
@@ -69,52 +71,55 @@ public class NowDefinition {
         return this.urgentTimeLimitInMinutes;
     }
 
-    public NowDefinition setId(UUID id) {
+    public LocalDate getReferenceDate() {
+        return referenceDate;
+    }
+    public NowDefinition setId(final UUID id) {
         this.id = id;
         return this;
     }
 
-    public NowDefinition setName(String name) {
+    public NowDefinition setName(final String name) {
         this.name = name;
         return this;
     }
 
-    public NowDefinition setTemplateName(String templateName) {
+    public NowDefinition setTemplateName(final String templateName) {
         this.templateName = templateName;
         return this;
     }
 
-    public NowDefinition setRank(Integer rank) {
+    public NowDefinition setRank(final Integer rank) {
         this.rank = rank;
         return this;
     }
 
-    public NowDefinition setJurisdiction(String jurisdiction) {
+    public NowDefinition setJurisdiction(final String jurisdiction) {
         this.jurisdiction = jurisdiction;
         return this;
     }
 
-    public NowDefinition setVersion(ZonedDateTime version) {
+    public NowDefinition setVersion(final ZonedDateTime version) {
         this.version = version;
         return this;
     }
 
-    public NowDefinition setStartDate(Date startDate) {
+    public NowDefinition setStartDate(final Date startDate) {
         this.startDate = startDate;
         return this;
     }
 
-    public NowDefinition setEndDate(Date endDate) {
+    public NowDefinition setEndDate(final Date endDate) {
         this.endDate = endDate;
         return this;
     }
 
-    public NowDefinition setResultDefinitions(List<ResultDefinitions> resultDefinitions) {
+    public NowDefinition setResultDefinitions(final List<ResultDefinitions> resultDefinitions) {
         this.resultDefinitions = resultDefinitions;
         return this;
     }
 
-    public NowDefinition setUrgentTimeLimitInMinutes(Integer urgentTimeLimitInMinutes) {
+    public NowDefinition setUrgentTimeLimitInMinutes(final Integer urgentTimeLimitInMinutes) {
         this.urgentTimeLimitInMinutes = urgentTimeLimitInMinutes;
         return this;
     }
@@ -126,6 +131,11 @@ public class NowDefinition {
 
     public String getNowText() {
         return nowText;
+    }
+
+    public NowDefinition setReferenceDate(final LocalDate referenceDate) {
+        this.referenceDate = referenceDate;
+        return this;
     }
 
     public static NowDefinition now() {

@@ -109,6 +109,7 @@ public class HearingAdjournIT extends AbstractIT {
                 .withResultLabel("Next Hearing")
                 .withResultPrompts(Arrays.asList(dateOfHearing, hearingType, estimatedDuration, remandStatus, startTime))
                 .withOffenceId(firstRecord.getOffenceId())
+                .withOrderedDate(firstRecord.getOrderedDate())
                 .build();
     }
 

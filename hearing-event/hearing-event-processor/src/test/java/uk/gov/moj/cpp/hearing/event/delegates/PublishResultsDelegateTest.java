@@ -1,14 +1,30 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.fourth;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
+import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
+
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -36,32 +52,18 @@ import uk.gov.moj.cpp.hearing.message.shareResults.Variant;
 import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import java.time.LocalDate;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.fourth;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
-import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class PublishResultsDelegateTest {
 
@@ -69,10 +71,10 @@ public class PublishResultsDelegateTest {
     private ReferenceDataService referenceDataService;
 
     @Spy
-    private Enveloper enveloper = createEnveloper();
+    private final Enveloper enveloper = createEnveloper();
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @Spy
     @InjectMocks
@@ -102,10 +104,12 @@ public class PublishResultsDelegateTest {
         }));
 
         final List<uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant> newVariants = singletonList(
-                standardVariantTemplate(nowDefinition.getId(), resultsShared.getHearingId(), resultsShared.getFirstDefendant().getId())
+                standardVariantTemplate(nowDefinition.getId(), resultsShared.getHearingId(), resultsShared.getFirstDefendant().getId()).setReferenceDate(LocalDate.now())
         );
 
-        when(referenceDataService.getNowDefinitionById(resultsShared.getHearing().getHearingDays().get(0).toLocalDate(), nowDefinition.getId())).thenReturn(nowDefinition);
+        when(referenceDataService.getNowDefinitionById(
+                newVariants.get(0).getReferenceDate(),
+                nowDefinition.getId())).thenReturn(nowDefinition);
 
         publishResultsDelegate.shareResults(sender,
                 envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared)),
@@ -258,7 +262,7 @@ public class PublishResultsDelegateTest {
         ));
     }
 
-    private static String formatNumberOfSplitJurors(VerdictUpsert v) {
+    private static String formatNumberOfSplitJurors(final VerdictUpsert v) {
         return v.getNumberOfJurors() != null && v.getNumberOfSplitJurors() != null ?
                 String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors())
                 : null;

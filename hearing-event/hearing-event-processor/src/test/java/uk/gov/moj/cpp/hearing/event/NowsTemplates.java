@@ -28,6 +28,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +129,7 @@ public class NowsTemplates {
                                 .withLevel(Level.CASE)
                                 .withResultDefinitionId(randomUUID())
                                 .withResultLabel(STRING.next())
+                                .withOrderedDate(LocalDate.now())
                                 .withResultPrompts(singletonList(ResultPrompt.builder()
                                         .withId(randomUUID())
                                         .withLabel(STRING.next())

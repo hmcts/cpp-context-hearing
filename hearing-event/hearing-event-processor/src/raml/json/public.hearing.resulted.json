@@ -87,6 +87,7 @@
         "level": "DEFENDANT_CASE",
         "label": "Imprisonment",
         "rank": 1,
+        "orderedDate": "2017-12-21",
         "lastSharedDateTime":"2018-04-30T18:32:04.238Z",
         "courtClerk": {
           "id": "ab746921-d839-4867-bcf9-b41db8ebc852",

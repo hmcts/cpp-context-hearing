@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Nows implements Serializable {
 
@@ -16,6 +19,8 @@ public class Nows implements Serializable {
     private UUID defendantId;
 
     private List<Material> materials;
+    @JsonIgnore
+    private LocalDate referenceDate;
 
     public static Nows nows() {
         return new Nows();
@@ -25,7 +30,7 @@ public class Nows implements Serializable {
         return this.id;
     }
 
-    public Nows setId(UUID id) {
+    public Nows setId(final UUID id) {
         this.id = id;
         return this;
     }
@@ -34,7 +39,11 @@ public class Nows implements Serializable {
         return this.nowsTypeId;
     }
 
-    public Nows setNowsTypeId(UUID nowsTypeId) {
+    public LocalDate getReferenceDate() {
+        return referenceDate;
+    }
+
+    public Nows setNowsTypeId(final UUID nowsTypeId) {
         this.nowsTypeId = nowsTypeId;
         return this;
     }
@@ -43,7 +52,7 @@ public class Nows implements Serializable {
         return this.nowsTemplateName;
     }
 
-    public Nows setNowsTemplateName(String nowsTemplateName) {
+    public Nows setNowsTemplateName(final String nowsTemplateName) {
         this.nowsTemplateName = nowsTemplateName;
         return this;
     }
@@ -52,7 +61,7 @@ public class Nows implements Serializable {
         return this.defendantId;
     }
 
-    public Nows setDefendantId(UUID defendantId) {
+    public Nows setDefendantId(final UUID defendantId) {
         this.defendantId = defendantId;
         return this;
     }
@@ -61,8 +70,14 @@ public class Nows implements Serializable {
         return this.materials;
     }
 
-    public Nows setMaterials(List<Material> materials) {
+    public Nows setMaterials(final List<Material> materials) {
         this.materials = new ArrayList<>(materials);
         return this;
     }
+
+    public Nows setReferenceDate(final LocalDate referenceDate) {
+        this.referenceDate = referenceDate;
+        return this;
+    }
+
 }

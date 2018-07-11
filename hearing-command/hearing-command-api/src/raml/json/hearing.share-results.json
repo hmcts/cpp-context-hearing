@@ -8,7 +8,8 @@
     {
       "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
       "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
-      "defendantId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391"
+      "defendantId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
+      "orderedDate": "2017-12-21"
     }
   ],
   "completedResultLines": [
@@ -18,6 +19,7 @@
       "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
       "defendantId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
       "offenceId": "bae56ae5-de09-479f-b48f-d9aae3c6aadd",
+      "orderedDate": "2017-12-21",
       "level": "CASE",
       "resultLabel": "Victim Surchange",
       "prompts": [

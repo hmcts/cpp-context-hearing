@@ -22,7 +22,6 @@ import java.util.function.Function;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -67,7 +66,8 @@ public class NotepadResultServiceApiTest {
 
     @Test
     public void getResultDefinition() throws Exception {
-        JsonObject payload = Json.createObjectBuilder().add("originalText", "imp sus").build();
+        final JsonObject payload = Json.createObjectBuilder().add("originalText", "imp sus")
+                        .add("orderedDate", "2014-06-04").build();
         when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
         when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any())).thenReturn(resultDefinitionView);
         when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_DEFINITION_RESPONSE)).thenReturn(function);
@@ -77,6 +77,7 @@ public class NotepadResultServiceApiTest {
 
         verify(parsingFacade, times(1)).processParts(any());
         verify(resultDefinitionView, times(1)).setOriginalText("imp sus");
+        verify(resultDefinitionView, times(1)).setOrderedDate("2014-06-04");
         verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(any(),any());
         verify(objectToJsonObjectConverter, times(1)).convert(any());
         verify(enveloper, times(1)).withMetadataFrom(any(),any());
@@ -85,7 +86,7 @@ public class NotepadResultServiceApiTest {
 
     @Test
     public void getResultPrompt() throws Exception {
-        JsonObject payload = Json.createObjectBuilder().add("resultCode", "123").build();
+        final JsonObject payload = Json.createObjectBuilder().add("resultCode", "123").build();
         when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
         when(resultPromptViewBuilder.buildFromKnowledge(any())).thenReturn(new ResultPromptView());
         when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_PROMPT_RESPONSE)).thenReturn(function);
@@ -102,12 +103,13 @@ public class NotepadResultServiceApiTest {
     public void buildResultDefinitionView() throws Exception {
         when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any())).thenReturn(new ResultDefinitionView());
 
-        ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView("imp sus", newArrayList(),new Knowledge());
+        final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
+                "imp sus", "2014-06-04", newArrayList(), new Knowledge());
 
         assertThat(resultDefinitionView.getOriginalText()
                 , is("imp sus")
         );
-
+        assertThat(resultDefinitionView.getOrderedDate(), is("2014-06-04"));
         assertThat(resultDefinitionView.getResultLineId().length()
                 , is(36)
         );
