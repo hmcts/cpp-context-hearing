@@ -16,15 +16,21 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.nows.NowVariantUtil;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
 
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
+import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import java.io.InputStream;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -100,7 +106,7 @@ public class GenerateNowsCommandHandlerTest {
     @Test
     public void saveVariantsTest() throws Throwable {
 
-        final SaveNowsVariantsCommand command = (new NowVariantUtil()).createSampleNowsVariantsCommand();
+        final SaveNowsVariantsCommand command = createSampleNowsVariantsCommand();
 
         setupMockedEventStream(command.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
 
@@ -148,5 +154,64 @@ public class GenerateNowsCommandHandlerTest {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
         Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
+    }
+
+    public SaveNowsVariantsCommand createSampleNowsVariantsCommand() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final UUID nowsTypeId = UUID.randomUUID();
+        return SaveNowsVariantsCommand.saveNowsVariantsCommand()
+                .setHearingId(hearingId)
+                .setVariants(
+                        Arrays.asList(
+                                Variant.variant()
+                                        .setKey(
+                                                VariantKey.variantKey()
+                                                        .setHearingId(hearingId)
+                                                        .setDefendantId(defendantId)
+                                                        .setNowsTypeId(nowsTypeId)
+                                                        .setUsergroups(Arrays.asList("Listings Officers", "Court Clerks"))
+                                        )
+                                        .setValue(
+                                                VariantValue.variantValue()
+                                                        .setMaterialId(UUID.randomUUID())
+                                                        .setStatus(VariantStatus.BUILDING)
+                                                        .setResultLines(
+                                                                Arrays.asList(
+                                                                        ResultLineReference.resultLineReference()
+                                                                                .setLastSharedTime(ZonedDateTime.now())
+                                                                                .setResultLineId(UUID.randomUUID()),
+                                                                        ResultLineReference.resultLineReference()
+                                                                                .setLastSharedTime(ZonedDateTime.now())
+                                                                                .setResultLineId(UUID.randomUUID())
+                                                                )
+                                                        )
+                                        ),
+                                Variant.variant()
+                                        .setKey(
+                                                VariantKey.variantKey()
+                                                        .setHearingId(hearingId)
+                                                        .setDefendantId(defendantId)
+                                                        .setNowsTypeId(nowsTypeId)
+                                                        .setUsergroups(Arrays.asList("System Users"))
+                                        )
+                                        .setValue(
+                                                VariantValue.variantValue()
+                                                        .setMaterialId(UUID.randomUUID())
+                                                        .setStatus(VariantStatus.BUILDING)
+                                                        .setResultLines(
+                                                                Arrays.asList(
+                                                                        ResultLineReference.resultLineReference()
+                                                                                .setLastSharedTime(null)
+                                                                                .setResultLineId(UUID.randomUUID()),
+                                                                        ResultLineReference.resultLineReference()
+                                                                                .setLastSharedTime(ZonedDateTime.now())
+                                                                                .setResultLineId(UUID.randomUUID())
+                                                                )
+                                                        )
+                                        )
+
+                        )
+                );
     }
 }

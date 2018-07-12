@@ -53,7 +53,7 @@ public class ResultsSharedDelegate {
                 .withDefenceCounsels(this.momento.getDefenceCounsels())
                 .withPleas(this.momento.getPleas())
                 .withVerdicts(this.momento.getVerdicts())
-                .withVariantDirectory(new ArrayList<>(this.momento.getVariantDirectory().values()))
+                .withVariantDirectory(this.momento.getVariantDirectory())
                 .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus())
                 .build());
     }

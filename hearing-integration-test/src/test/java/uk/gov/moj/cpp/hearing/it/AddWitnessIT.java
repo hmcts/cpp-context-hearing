@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.it;
 
 import com.jayway.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.junit.Ignore;
 import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 

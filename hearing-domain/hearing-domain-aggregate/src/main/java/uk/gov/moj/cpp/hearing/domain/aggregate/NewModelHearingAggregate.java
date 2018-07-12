@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
@@ -10,9 +14,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.nows.NowVariantUtil;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
@@ -64,10 +66,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "pmd:BeanMembersShouldSerialize"})
 public class NewModelHearingAggregate implements Aggregate {
@@ -261,49 +259,6 @@ public class NewModelHearingAggregate implements Aggregate {
         adjournHearingDelegate = new AdjournHearingDelegate((momento));
     }
 
-    public static final class HearingEvent implements Serializable {
 
-        private static final long serialVersionUID = 1L;
-        private final HearingEventLogged hearingEventLogged;
-        private boolean deleted;
-
-        public HearingEvent(final HearingEventLogged hearingEventLogged) {
-            this.hearingEventLogged = hearingEventLogged;
-        }
-
-        public boolean isDeleted() {
-            return deleted;
-        }
-
-        public void setDeleted(final boolean deleted) {
-            this.deleted = deleted;
-        }
-
-        public HearingEventLogged getHearingEventLogged() {
-            return hearingEventLogged;
-        }
-    }
-
-    public static class VariantKeyHolder implements Serializable {
-        private final VariantKey variantKey;
-
-        public VariantKeyHolder(final VariantKey variantKey) {
-            this.variantKey = variantKey;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof VariantKeyHolder) {
-                return NowVariantUtil.areEqual(((VariantKeyHolder) o).variantKey, this.variantKey);
-            } else {
-                return super.equals(o);
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return variantKey.hashCode();
-        }
-    }
 
 }

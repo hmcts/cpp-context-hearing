@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class VariantDirectoryDelegate {
@@ -14,19 +17,18 @@ public class VariantDirectoryDelegate {
         this.momento = momento;
     }
 
-    public void handleNowsVariantsSavedEvent(NowsVariantsSavedEvent nowsVariantsSavedEvent){
-        nowsVariantsSavedEvent.getVariants().forEach(
-                variant -> this.momento.getVariantDirectory().put(new NewModelHearingAggregate.VariantKeyHolder(variant.getKey()), variant)
-        );
+    public void handleNowsVariantsSavedEvent(NowsVariantsSavedEvent nowsVariantsSavedEvent) {
+        Set<Variant> variants = new HashSet<>(  this.momento.getVariantDirectory());
+        variants.addAll(nowsVariantsSavedEvent.getVariants());
+        this.momento.setVariantDirectory(variants);
     }
 
 
     public void handleNowsMaterialStatusUpdatedEvent(final NowsMaterialStatusUpdated nowsMaterialStatusUpdated) {
-        this.momento.getVariantDirectory().forEach((variantKeyHolder, variant) -> {
-            if (variant.getValue().getMaterialId().equals(nowsMaterialStatusUpdated.getMaterialId())) {
-                variant.getValue().setStatus(VariantStatus.GENERATED);
-            }
-        });
+        this.momento.getVariantDirectory().stream()
+                .filter(variant -> variant.getValue().getMaterialId().equals(nowsMaterialStatusUpdated.getMaterialId()))
+                .findFirst()
+                .ifPresent(variant -> variant.getValue().setStatus(VariantStatus.GENERATED));
     }
 
 }

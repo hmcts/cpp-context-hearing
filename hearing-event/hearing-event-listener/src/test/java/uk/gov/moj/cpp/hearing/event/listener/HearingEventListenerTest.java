@@ -155,7 +155,7 @@ public class HearingEventListenerTest {
                 new ObjectMapperProducer().objectMapper());
     }
 
-    @Test @Deprecated //TODO: GPE-3390 Cleanup
+    @Test
     public void shouldPersistHearingDraftResult() {
         final JsonEnvelope event = getSaveDraftResultJsonEnvelope();
 
@@ -169,7 +169,7 @@ public class HearingEventListenerTest {
         assertThat(this.hearingOutcomeArgumentCaptor.getValue().getOffenceId(), is(OFFENCE_ID));
     }
 
-    @Test @Deprecated //TODO: GPE-3390 Cleanup
+    @Test
     public void shouldUpdateDraftResultWithLastSharedResultIdsWhenResultsAreShared() {
         final JsonEnvelope event = getResultsSharedJsonEnvelope();
         when(this.hearingOutcomeRepository.findByHearingId(HEARING_ID)).thenReturn(getHearingOutcomesForSharedResults());

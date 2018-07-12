@@ -27,6 +27,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.core.Is;
@@ -213,6 +214,7 @@ public class ShareResultsIT extends AbstractIT {
         //check the nows was ordered
         poll(requestParams(getURL("hearing.get.nows", hearingOne.getHearingId().toString()), "application/vnd.hearing.get.nows+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

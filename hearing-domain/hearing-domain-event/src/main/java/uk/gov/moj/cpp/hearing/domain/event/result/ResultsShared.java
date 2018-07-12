@@ -232,7 +232,7 @@ public final class ResultsShared implements Serializable {
         }
 
         public Builder withVariantDirectory(final List<Variant> variantDirectory) {
-            this.variantDirectory = variantDirectory;
+            this.variantDirectory = new ArrayList<>(variantDirectory);
             return this;
         }
 

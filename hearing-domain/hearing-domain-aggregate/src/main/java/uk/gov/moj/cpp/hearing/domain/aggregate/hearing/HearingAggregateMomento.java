@@ -6,13 +6,13 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.Plea;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,21 +22,21 @@ public class HearingAggregateMomento implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final Map<UUID, NewModelHearingAggregate.HearingEvent> hearingEvents = new HashMap<>();
+    private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels = new HashMap<>();
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
     private final Map<UUID, Plea> pleas = new HashMap<>();
     private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
     private List<Case> cases;
     private Hearing hearing;
-    private final Map<NewModelHearingAggregate.VariantKeyHolder, Variant> variantDirectory = new HashMap<>();
+    private List<Variant> variantDirectory = new ArrayList<>();
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
     private final Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
     private List<UUID> adjournedHearingIds = new ArrayList<>();
 
     private boolean published = false;
 
-    public Map<UUID, NewModelHearingAggregate.HearingEvent> getHearingEvents() {
+    public Map<UUID, HearingEventDelegate.HearingEvent> getHearingEvents() {
         return hearingEvents;
     }
 
@@ -72,7 +72,11 @@ public class HearingAggregateMomento implements Serializable {
         this.hearing = hearing;
     }
 
-    public Map<NewModelHearingAggregate.VariantKeyHolder, Variant> getVariantDirectory() {
+    public void setVariantDirectory(Collection<Variant> variantDirectory) {
+        this.variantDirectory = new ArrayList<>(variantDirectory);
+    }
+
+    public List<Variant> getVariantDirectory() {
         return variantDirectory;
     }
 

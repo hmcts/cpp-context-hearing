@@ -186,7 +186,7 @@ public class GenerateNowsDelegateTest {
                                         .with(Prompts::getValue, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getValue()))
                                 ))
                                 .with(SharedResultLines::getSharedDate, is(resultsShared.getFirstCompletedResultLineStatus().getLastSharedDateTime()))
-                                .with(SharedResultLines::getOrderedDate, is(resultsShared.getFirstCompletedResultLineStatus().getLastSharedDateTime()))//TODO - to change at some point
+                                .with(SharedResultLines::getOrderedDate, is(resultsShared.getFirstCompletedResultLine().getOrderedDate()))
                         ))
                         .with(Hearing::getNows, first(isBean(Nows.class)
                                 .with(Nows::getId, is(nows.get(0).getId()))

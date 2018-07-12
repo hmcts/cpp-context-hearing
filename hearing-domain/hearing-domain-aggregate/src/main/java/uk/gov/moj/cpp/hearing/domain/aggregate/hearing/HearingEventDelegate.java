@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.UUID.fromString;
+
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
@@ -11,12 +11,11 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static java.util.UUID.fromString;
 
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class HearingEventDelegate {
@@ -37,7 +36,7 @@ public class HearingEventDelegate {
     }
 
     public void handleHearingEventLogged(HearingEventLogged hearingEventLogged) {
-        this.momento.getHearingEvents().put(hearingEventLogged.getHearingEventId(), new NewModelHearingAggregate.HearingEvent(hearingEventLogged));
+        this.momento.getHearingEvents().put(hearingEventLogged.getHearingEventId(), new HearingEvent(hearingEventLogged));
     }
 
     public void handleHearingEventDeleted(HearingEventDeleted hearingEventDeleted) {
@@ -84,10 +83,9 @@ public class HearingEventDelegate {
                     hearingId));
         }
 
-        final List<HearingEvent> hearingEvents =
-                new ArrayList<>();
+        final List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents = new ArrayList<>();
         final JsonArray hearingEventsArray = payload.getJsonArray(HEARING_EVENTS);
-        hearingEventsArray.getValuesAs(JsonObject.class).stream().forEach(hearingEvent ->
+        hearingEventsArray.getValuesAs(JsonObject.class).forEach(hearingEvent ->
 
                 hearingEvents.add(new uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent(
                         fromString(hearingEvent.getString(HEARING_EVENT_ID)),
@@ -164,5 +162,28 @@ public class HearingEventDelegate {
                 hearingId,
                 reason
         );
+    }
+
+    public static final class HearingEvent implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+        private final HearingEventLogged hearingEventLogged;
+        private boolean deleted;
+
+        public HearingEvent(final HearingEventLogged hearingEventLogged) {
+            this.hearingEventLogged = hearingEventLogged;
+        }
+
+        public boolean isDeleted() {
+            return deleted;
+        }
+
+        public void setDeleted(final boolean deleted) {
+            this.deleted = deleted;
+        }
+
+        public HearingEventLogged getHearingEventLogged() {
+            return hearingEventLogged;
+        }
     }
 }

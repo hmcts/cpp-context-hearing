@@ -138,7 +138,7 @@ public class GenerateNowsDelegate {
                 .map(line -> SharedResultLines.sharedResultLines()
                         .setId(line.getId())
                         .setSharedDate(resultsShared.getCompletedResultLinesStatus().get(line.getId()).getLastSharedDateTime())
-                        .setOrderedDate(resultsShared.getCompletedResultLinesStatus().get(line.getId()).getLastSharedDateTime())
+                        .setOrderedDate(line.getOrderedDate())
                         .setLevel(line.getLevel().name())
                         .setCaseId(line.getCaseId())
                         .setDefendantId(line.getDefendantId())
