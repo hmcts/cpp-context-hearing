@@ -806,13 +806,15 @@ public class TestTemplates {
                     .setRank(INTEGER.next())
                     .setJurisdiction(STRING.next())
                     .setTemplateName(STRING.next())
-                    .setNowText(STRING.next())
+                    .setText(STRING.next())
+                    .setWelshText(STRING.next())
                     .setUrgentTimeLimitInMinutes(INTEGER.next())
                     .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions()
                             .setId(randomUUID())
                             .setMandatory(true)
                             .setPrimary(true)
-                            .setNowText(STRING.next())
+                            .setText(STRING.next())
+                            .setWelshText(STRING.next())
                             .setSequence(1)
                     ));
         }

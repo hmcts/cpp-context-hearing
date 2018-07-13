@@ -77,18 +77,28 @@ public class GenerateNowsDelegate {
                                         .map(nowDefinition -> {
 
                                             String nowText = Stream.concat(
-                                                    Stream.of(nowDefinition.getNowText()),
+                                                    Stream.of(nowDefinition.getText()),
                                                     nowDefinition.getResultDefinitions().stream()
-                                                            .map(ResultDefinitions::getNowText)
+                                                            .map(ResultDefinitions::getText)
                                             )
                                                     .filter(Objects::nonNull)
                                                     .filter(s -> !s.isEmpty())
                                                     .collect(Collectors.joining("\n"));
 
+                                            String welshText = Stream.concat(
+                                                    Stream.of(nowDefinition.getWelshText()),
+                                                    nowDefinition.getResultDefinitions().stream()
+                                                            .map(ResultDefinitions::getWelshText)
+                                            )
+                                                    .filter(Objects::nonNull)
+                                                    .filter(s -> !s.isEmpty())
+                                                    .collect(Collectors.joining("\n"));
+
+
                                             return NowTypes.nowTypes()
                                                     .setId(nowDefinition.getId())
                                                     .setStaticText(nowText)
-                                                    //.setStaticTextWelsh("Welsh Static Text N/A")
+                                                    .setStaticTextWelsh(welshText)
                                                     .setDescription(nowDefinition.getName())
                                                     .setJurisdiction(nowDefinition.getJurisdiction())
                                                     .setPriority(ofNullable(nowDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))

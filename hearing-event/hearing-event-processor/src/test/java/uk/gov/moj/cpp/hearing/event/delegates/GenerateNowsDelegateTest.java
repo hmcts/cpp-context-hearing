@@ -34,7 +34,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
-import uk.gov.moj.cpp.hearing.nows.events.NowType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ResultsSharedEventHelper;
 
 import java.util.List;
@@ -216,7 +215,8 @@ public class GenerateNowsDelegateTest {
                                 .with(NowTypes::getPriority, is(nowDefinition.getUrgentTimeLimitInMinutes().toString()))
                                 .with(NowTypes::getTemplateName, is(nowDefinition.getTemplateName()))
                                 .with(NowTypes::getRank, is(nowDefinition.getRank()))
-                                .with(NowTypes::getStaticText, is(nowDefinition.getNowText() + "\n" + nowDefinition.getResultDefinitions().get(0).getNowText()))
+                                .with(NowTypes::getStaticText, is(nowDefinition.getText() + "\n" + nowDefinition.getResultDefinitions().get(0).getText()))
+                                .with(NowTypes::getStaticTextWelsh, is(nowDefinition.getWelshText() + "\n" + nowDefinition.getResultDefinitions().get(0).getWelshText()))
                         ))
                 )
         ));
@@ -229,7 +229,7 @@ public class GenerateNowsDelegateTest {
         final List<Nows> nows = basicNowsTemplate();
 
         final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
-            d.setNowText(null);
+            d.setText(null);
         });
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
@@ -243,7 +243,7 @@ public class GenerateNowsDelegateTest {
         assertThat( envelopeArgumentCaptor.getValue(), convertTo(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
                 .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
                         .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
-                                .with(NowTypes::getStaticText, is(nowDefinition.getResultDefinitions().get(0).getNowText()))
+                                .with(NowTypes::getStaticText, is(nowDefinition.getResultDefinitions().get(0).getText()))
                         ))
                 )
         ));
@@ -256,8 +256,8 @@ public class GenerateNowsDelegateTest {
         final List<Nows> nows = basicNowsTemplate();
 
         final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
-            d.setNowText(null);
-            d.getResultDefinitions().forEach(l -> l.setNowText(null));
+            d.setText(null);
+            d.getResultDefinitions().forEach(l -> l.setText(null));
         });
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))

@@ -27,7 +27,10 @@ public class NowDefinition {
     private List<ResultDefinitions> resultDefinitions;
 
     private Integer urgentTimeLimitInMinutes;
-    private String nowText;
+
+    private String text;
+
+    private String welshText;
 
     private LocalDate referenceDate;
 
@@ -124,13 +127,22 @@ public class NowDefinition {
         return this;
     }
 
-    public NowDefinition setNowText(String nowText) {
-        this.nowText = nowText;
+    public NowDefinition setText(String text) {
+        this.text = text;
         return this;
     }
 
-    public String getNowText() {
-        return nowText;
+    public NowDefinition setWelshText(String welshText) {
+        this.welshText = welshText;
+        return this;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public String getWelshText() {
+        return welshText;
     }
 
     public NowDefinition setReferenceDate(final LocalDate referenceDate) {

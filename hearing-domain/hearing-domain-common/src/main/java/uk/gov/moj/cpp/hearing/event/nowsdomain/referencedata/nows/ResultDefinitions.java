@@ -12,7 +12,9 @@ public class ResultDefinitions {
 
     private Integer sequence;
 
-    private String nowText;
+    private String text;
+
+    private String welshText;
 
     public static ResultDefinitions resultDefinitions() {
         return new ResultDefinitions();
@@ -54,12 +56,21 @@ public class ResultDefinitions {
         return this;
     }
 
-    public String getNowText() {
-        return nowText;
+    public String getText() {
+        return text;
     }
 
-    public ResultDefinitions setNowText(String nowText) {
-        this.nowText = nowText;
+    public ResultDefinitions setText(String text) {
+        this.text = text;
+        return this;
+    }
+
+    public String getWelshText() {
+        return welshText;
+    }
+
+    public ResultDefinitions setWelshText(String welshText) {
+        this.welshText = welshText;
         return this;
     }
 }
