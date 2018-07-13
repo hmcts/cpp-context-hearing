@@ -11,21 +11,15 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
-import java.io.StringReader;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,15 +29,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
@@ -61,6 +51,13 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.WitnessRepository;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.io.StringReader;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitiateHearingEventListenerTest {
@@ -126,7 +123,8 @@ public class InitiateHearingEventListenerTest {
             throw new RuntimeException("failed ot serialise " + document, jpe);
         }
         final JsonObject jsonObject = Json.createReader(new StringReader(strJsonDocument)).readObject();
-        return new DefaultJsonEnvelope(null, jsonObject);
+
+        return envelopeFrom((Metadata) null, jsonObject);
     }
 
     @Test

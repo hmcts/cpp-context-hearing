@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(value = Include.NON_NULL)
 public class Hearing implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private UUID id;
     private String caseId;
     private String courtCentreId;
@@ -86,7 +87,7 @@ public class Hearing implements Serializable {
     }
 
     public List<Defendant> getDefendants() {
-        return new ArrayList(defendants);
+        return new ArrayList<>(defendants);
     }
 
     public void setDefendants(List<Defendant> defendants) {

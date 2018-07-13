@@ -1,32 +1,27 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.io.IOException;
-import java.util.UUID;
-import java.util.stream.IntStream;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddProsecutionCounselCommandTemplates.addProsecutionCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+
+import org.junit.Test;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.io.IOException;
+import java.util.UUID;
+import java.util.stream.IntStream;
 
 public class SendingSheetCompleteIT extends AbstractIT {
 
@@ -125,8 +120,6 @@ public class SendingSheetCompleteIT extends AbstractIT {
                         .build()
         );
 
-        IntStream.range(0, 3).forEach((i) -> {
-            publicEventTopic.waitFor();
-        });
+        IntStream.range(0, 3).forEach((i) -> publicEventTopic.waitFor());
     }
 }

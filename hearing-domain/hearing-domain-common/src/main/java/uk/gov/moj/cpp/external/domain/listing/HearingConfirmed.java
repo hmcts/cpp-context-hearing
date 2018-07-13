@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(value = Include.NON_NULL)
 public class HearingConfirmed implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final UUID caseId;
     private final String urn;
     private final Hearing hearing;

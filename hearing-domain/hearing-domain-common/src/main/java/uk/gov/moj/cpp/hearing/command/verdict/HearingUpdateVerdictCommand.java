@@ -14,6 +14,7 @@ import static java.util.Collections.unmodifiableList;
 
 public class HearingUpdateVerdictCommand implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final UUID hearingId;
     private final UUID caseId;
     private final List<Defendant> defendants;

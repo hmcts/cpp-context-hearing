@@ -10,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Nows implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID id;
 
     private UUID nowsTypeId;

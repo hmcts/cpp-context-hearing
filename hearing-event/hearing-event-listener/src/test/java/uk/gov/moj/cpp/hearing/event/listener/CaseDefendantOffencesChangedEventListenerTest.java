@@ -1,5 +1,14 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,8 +20,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -25,14 +34,6 @@ import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.util.Collections;
-
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDefendantOffencesChangedEventListenerTest {
@@ -70,7 +71,7 @@ public class CaseDefendantOffencesChangedEventListenerTest {
                 .withDefendantId(randomUUID())
                 .withCaseId(randomUUID()).build();
 
-        final JsonEnvelope envelope = new DefaultJsonEnvelope(null, objectToJsonObjectConverter.convert(offenceToBeAdded));
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceToBeAdded));
 
         final Defendant defendant = Defendant.builder()
                 .withId(new HearingSnapshotKey(offenceToBeAdded.getDefendantId(), offenceToBeAdded.getHearingId()))
@@ -110,7 +111,7 @@ public class CaseDefendantOffencesChangedEventListenerTest {
                 .withHearingId(randomUUID())
                 .build();
 
-        final JsonEnvelope envelope = new DefaultJsonEnvelope(null, objectToJsonObjectConverter.convert(offenceUpdated));
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
 
         final Offence offence = Offence.builder()
                 .withId(new HearingSnapshotKey(offenceUpdated.getId(), offenceUpdated.getHearingId()))
@@ -136,7 +137,7 @@ public class CaseDefendantOffencesChangedEventListenerTest {
 
         final OffenceDeleted offenceDeleted = OffenceDeleted.builder().withId(randomUUID()).withHearingId(randomUUID()).build();
 
-        final JsonEnvelope envelope = new DefaultJsonEnvelope(null, objectToJsonObjectConverter.convert(offenceDeleted));
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceDeleted));
 
         final Defendant defendant = Defendant.builder()
                 .withId(new HearingSnapshotKey(randomUUID(), offenceDeleted.getHearingId()))

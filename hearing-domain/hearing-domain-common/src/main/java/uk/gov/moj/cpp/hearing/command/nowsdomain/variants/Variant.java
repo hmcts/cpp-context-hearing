@@ -6,6 +6,8 @@ import java.util.Objects;
 
 public class Variant implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private VariantKey key;
 
     private VariantValue value;

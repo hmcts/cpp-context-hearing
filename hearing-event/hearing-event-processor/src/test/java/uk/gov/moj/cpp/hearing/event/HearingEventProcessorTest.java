@@ -1,40 +1,5 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-
 import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.String.format;
@@ -60,6 +25,40 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
@@ -236,7 +235,7 @@ public class HearingEventProcessorTest {
     private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class<?> commandClass, int sendCount) {
         final JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
         final Metadata metadata = metadataWithDefaults().build();
-        final JsonEnvelope event = new DefaultJsonEnvelope(metadata, payload);
+        final JsonEnvelope event = envelopeFrom(metadata, payload);
         methodUnderTest.accept(event);
         verify(this.sender, times(sendCount)).send(this.envelopeArgumentCaptor.capture());
         List<JsonEnvelope> messages = this.envelopeArgumentCaptor.getAllValues();
@@ -374,14 +373,14 @@ public class HearingEventProcessorTest {
                 .add("hearing", hearing).build();
 
         final Metadata metadata = metadataWithDefaults().build();
-        return new DefaultJsonEnvelope(metadata, jsonObject);
+        return envelopeFrom(metadata, jsonObject);
 
     }
 
     private JsonEnvelope getJsonPublicHearingPleaUpdate() {
         final JsonObject jsonObject = createObjectBuilder().add(FIELD_CASE_ID, CASE_ID.toString()).build();
         final Metadata metadata = metadataWithDefaults().build();
-        return new DefaultJsonEnvelope(metadata, jsonObject);
+        return envelopeFrom(metadata, jsonObject);
 
     }
 
@@ -389,7 +388,7 @@ public class HearingEventProcessorTest {
     private JsonEnvelope getJsonPublicHearingVerdictUpdate() {
         final JsonObject jsonObject = createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString()).build();
         final Metadata metadata = metadataWithDefaults().build();
-        return new DefaultJsonEnvelope(metadata, jsonObject);
+        return JsonEnvelope.envelopeFrom(metadata, jsonObject);
 
     }
 
@@ -404,7 +403,7 @@ public class HearingEventProcessorTest {
                 .replace("RANDOM_PLEA_DATE", START_DATE);
 
         final Metadata metadata = metadataWithDefaults().build();
-        return new DefaultJsonEnvelope(metadata, new StringToJsonObjectConverter().convert(hearingCasePleaAddOrUpdate));
+        return JsonEnvelope.envelopeFrom(metadata, new StringToJsonObjectConverter().convert(hearingCasePleaAddOrUpdate));
     }
 
     private String getStringFromResource(final String path) throws IOException {

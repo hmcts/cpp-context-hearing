@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public class NowsNotificationDocumentState implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID originatingCourtCentreId;
     private List<String> usergroups;
     private UUID nowsTypeId;

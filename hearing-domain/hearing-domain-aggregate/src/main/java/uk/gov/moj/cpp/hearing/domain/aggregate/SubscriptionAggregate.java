@@ -14,6 +14,8 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 
 public class SubscriptionAggregate implements Aggregate {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(

@@ -2,9 +2,10 @@ package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
 import java.io.Serializable;
 import java.util.UUID;
-import java.lang.String;
 
 public class NowTypes  implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private UUID id;
 

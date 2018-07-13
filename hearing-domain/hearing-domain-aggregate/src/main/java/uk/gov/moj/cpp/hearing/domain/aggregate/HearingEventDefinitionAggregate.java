@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 
 public class HearingEventDefinitionAggregate implements Aggregate {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(

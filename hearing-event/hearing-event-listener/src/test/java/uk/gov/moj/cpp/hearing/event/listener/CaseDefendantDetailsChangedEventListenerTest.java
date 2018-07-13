@@ -1,5 +1,15 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,8 +21,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.messaging.DefaultJsonEnvelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.defendant.Person;
@@ -23,15 +33,6 @@ import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import javax.json.JsonObject;
 import java.util.UUID;
-
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDefendantDetailsChangedEventListenerTest {
@@ -111,7 +112,7 @@ public class CaseDefendantDetailsChangedEventListenerTest {
 
         JsonObject jsonObject = objectToJsonObjectConverter.convert(document);
 
-        return new DefaultJsonEnvelope(null, jsonObject);
+        return envelopeFrom((Metadata) null, jsonObject);
     }
 
     private Address.Builder generateAddress() {

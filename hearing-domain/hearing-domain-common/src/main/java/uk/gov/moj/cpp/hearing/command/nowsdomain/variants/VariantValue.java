@@ -9,6 +9,8 @@ import java.util.UUID;
 @SuppressWarnings("squid:S2384")
 public class VariantValue implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID materialId;
 
     private List<ResultLineReference> resultLines;

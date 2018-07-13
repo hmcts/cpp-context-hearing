@@ -7,6 +7,8 @@ import java.util.UUID;
 @SuppressWarnings("squid:S2384")
 public class SaveNowsVariantsCommand implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID hearingId;
 
     private List<Variant> variants;

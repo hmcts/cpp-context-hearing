@@ -7,27 +7,16 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.justice.services.messaging.JsonMetadata.CONTEXT;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.NAME;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.USER_ID;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-
-import java.util.UUID;
-
-import javax.json.Json;
-import javax.json.JsonObject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +26,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingDetailChangeEventProcessorTest {
@@ -65,12 +63,14 @@ public class HearingDetailChangeEventProcessorTest {
     private HearingDetailChangeEventProcessor testObj;
 
     public static Metadata createMetadataWithUserId(final String id, final String name, final String userId) {
-        return metadataFrom(Json.createObjectBuilder()
+        JsonObject jsonObject = Json.createObjectBuilder()
                 .add(ID, id)
                 .add(NAME, name)
                 .add(CONTEXT, Json.createObjectBuilder()
                         .add(USER_ID, userId).build())
-                .build());
+                .build();
+
+        return metadataFrom(jsonObject).build();
     }
 
     @Test

@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public class ResultLineReference implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID resultLineId;
 
     private ZonedDateTime lastSharedTime;

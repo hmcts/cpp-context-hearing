@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public class Material implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID id;
 
     private List<NowResult> nowResult = new ArrayList<>();

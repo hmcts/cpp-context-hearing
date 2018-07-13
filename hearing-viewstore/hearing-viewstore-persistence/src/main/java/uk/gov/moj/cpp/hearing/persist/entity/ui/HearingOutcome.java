@@ -12,6 +12,8 @@ import javax.persistence.Table;
 @Table(name = "ui_store")
 public class HearingOutcome implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     @Column(name = "offence_id")
     private UUID offenceId;
 

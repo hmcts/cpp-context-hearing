@@ -5,6 +5,8 @@ import java.io.Serializable;
 
 public class GenerateNowsCommand implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private Hearing hearing;
 
     public static GenerateNowsCommand generateNowsCommand() {

@@ -127,7 +127,7 @@ class ResultDefinitionMatcher {
                 }
             }
         }
-        Map<Long, Set<Set<String>>> descendingOrder = new TreeMap(Collections.reverseOrder());
+        Map<Long, Set<Set<String>>> descendingOrder = new TreeMap<>(Collections.reverseOrder());
         descendingOrder.putAll(orderedMatchedAsPerCount);
         return descendingOrder;
     }

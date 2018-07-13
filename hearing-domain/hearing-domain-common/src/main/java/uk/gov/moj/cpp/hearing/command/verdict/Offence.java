@@ -10,6 +10,7 @@ import java.util.UUID;
 import static java.util.Optional.ofNullable;
 
 public class Offence implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final UUID id;
     private final Verdict verdict;
 

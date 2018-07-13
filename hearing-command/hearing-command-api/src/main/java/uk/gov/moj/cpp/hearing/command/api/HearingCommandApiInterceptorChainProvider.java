@@ -3,18 +3,15 @@ package uk.gov.moj.cpp.hearing.command.api;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
-import uk.gov.justice.services.core.interceptor.Interceptor;
-import uk.gov.justice.services.core.interceptor.InterceptorChainProvider;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntry;
+import uk.gov.justice.services.core.interceptor.InterceptorChainEntryProvider;
 import uk.gov.moj.cpp.authorisation.interceptor.SynchronousFeatureControlInterceptor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 @SuppressWarnings("unused")
-public class HearingCommandApiInterceptorChainProvider implements InterceptorChainProvider {
+public class HearingCommandApiInterceptorChainProvider implements InterceptorChainEntryProvider {
 
     @Override
     public String component() {
@@ -22,9 +19,9 @@ public class HearingCommandApiInterceptorChainProvider implements InterceptorCha
     }
 
     @Override
-    public List<Pair<Integer, Class<? extends Interceptor>>> interceptorChainTypes() {
-        final ArrayList<Pair<Integer, Class<? extends Interceptor>>> pairs = new ArrayList<>();
-        pairs.add(new ImmutablePair<>(5900, SynchronousFeatureControlInterceptor.class));
+    public List<InterceptorChainEntry> interceptorChainTypes() {
+        final List<InterceptorChainEntry> pairs = new ArrayList<>();
+        pairs.add(new InterceptorChainEntry(5900, SynchronousFeatureControlInterceptor.class));
         return pairs;
     }
 }

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Verdict implements Serializable {
+    private static final long serialVersionUID = 1L;
     final private UUID id;
     final private VerdictValue value;
     final private LocalDate verdictDate;

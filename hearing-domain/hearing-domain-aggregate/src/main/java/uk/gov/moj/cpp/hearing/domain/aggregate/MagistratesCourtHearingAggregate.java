@@ -11,6 +11,8 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 public class MagistratesCourtHearingAggregate implements Aggregate {
 
+    private static final long serialVersionUID = 1L;
+
     private MagsCourtHearingRecorded magsCourtHearingRecorded;
 
     @Override

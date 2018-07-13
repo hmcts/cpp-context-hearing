@@ -10,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings("squid:S1067")
 public class VerdictValue implements Serializable {
-    
+
+    private static final long serialVersionUID = 1L;
+
     final private UUID id;
     final private UUID verdictTypeId;
     final private String category;

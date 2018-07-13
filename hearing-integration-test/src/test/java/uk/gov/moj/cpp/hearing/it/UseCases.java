@@ -1,5 +1,27 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static com.jayway.restassured.RestAssured.given;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.minimalCaseDefendantDetailsChangedTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.ReadContext;
 import com.jayway.jsonpath.internal.JsonContext;
@@ -8,12 +30,10 @@ import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
 import org.hamcrest.BaseMatcher;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
@@ -28,8 +48,6 @@ import uk.gov.moj.cpp.hearing.command.verdict.Offence;
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.ShareResultsCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import javax.json.Json;
@@ -38,29 +56,6 @@ import javax.json.JsonObject;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static com.jayway.restassured.RestAssured.given;
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.minimalCaseDefendantDetailsChangedTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 public class UseCases {
 

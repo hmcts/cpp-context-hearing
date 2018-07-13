@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import static java.util.Collections.unmodifiableList;
 
 public class Defendant implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     private final UUID id;
     private final UUID personId;
     private final List<Offence> offences;

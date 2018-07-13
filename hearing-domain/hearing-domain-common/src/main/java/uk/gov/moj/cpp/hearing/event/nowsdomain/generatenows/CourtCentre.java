@@ -5,6 +5,8 @@ import java.util.UUID;
 
 public class CourtCentre implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID courtCentreId;
 
     private String courtCentreName;

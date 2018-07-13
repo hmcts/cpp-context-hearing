@@ -1,32 +1,31 @@
 package uk.gov.moj.cpp.hearing.it;
 
 
-import org.junit.Test;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+
+import org.junit.Test;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class ChangeHearingDetailIT extends AbstractIT {

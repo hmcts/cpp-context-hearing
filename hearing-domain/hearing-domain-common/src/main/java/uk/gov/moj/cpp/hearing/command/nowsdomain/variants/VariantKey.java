@@ -10,6 +10,8 @@ import java.util.UUID;
 @SuppressWarnings("squid:S2384")
 public class VariantKey implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID hearingId;
 
     private UUID defendantId;
