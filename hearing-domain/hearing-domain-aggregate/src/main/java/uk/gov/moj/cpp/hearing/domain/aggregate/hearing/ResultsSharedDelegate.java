@@ -6,20 +6,21 @@ import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.stream.Stream;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class ResultsSharedDelegate {
+public class ResultsSharedDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final HearingAggregateMomento momento;
 
-    public ResultsSharedDelegate(final HearingAggregateMomento momento){
+    public ResultsSharedDelegate(final HearingAggregateMomento momento) {
         this.momento = momento;
     }
 
-    public void handleResultsShared(ResultsShared resultsShared){
+    public void handleResultsShared(ResultsShared resultsShared) {
         this.momento.setPublished(true);
         resultsShared.getCompletedResultLines().forEach(completedResultLine -> {
             //only update result line status if resultline is modified or resultline is new
@@ -30,13 +31,13 @@ public class ResultsSharedDelegate {
         });
     }
 
-    public void handleResultLinesStatusUpdated(ResultLinesStatusUpdated resultLinesStatusUpdated){
+    public void handleResultLinesStatusUpdated(ResultLinesStatusUpdated resultLinesStatusUpdated) {
         resultLinesStatusUpdated.getSharedResultLines().forEach(sharedResultLineId ->
-            this.momento.getCompletedResultLinesStatus().computeIfPresent(sharedResultLineId.getSharedResultLineId(), (k, sl) -> {
-                sl.setCourtClerk(resultLinesStatusUpdated.getCourtClerk());
-                sl.setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime());
-                return sl;
-            })
+                this.momento.getCompletedResultLinesStatus().computeIfPresent(sharedResultLineId.getSharedResultLineId(), (k, sl) -> {
+                    sl.setCourtClerk(resultLinesStatusUpdated.getCourtClerk());
+                    sl.setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime());
+                    return sl;
+                })
         );
     }
 

@@ -50,8 +50,8 @@ public class AdjournHearingDelegate {
                 .map(ZonedDateTime::toLocalDate)
                 .min(Comparator.comparing(LocalDate::toEpochDay))
                 .orElse(LocalDate.now());
-        final List<UUID> withdrawnResultDefinitionUuid = relistReferenceDataService.getWithdrawnResultDefinitionUuids(jsonEnvelope,hearingStartDate);
-        final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions = relistReferenceDataService.getNextHearingResultDefinitions(jsonEnvelope,hearingStartDate);
+        final List<UUID> withdrawnResultDefinitionUuid = relistReferenceDataService.getWithdrawnResultDefinitionUuids(jsonEnvelope, hearingStartDate);
+        final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions = relistReferenceDataService.getNextHearingResultDefinitions(jsonEnvelope, hearingStartDate);
 
         if (hearingAdjournValidator.validate(resultsShared, withdrawnResultDefinitionUuid, nextHearingResultDefinitions)) {
             final JsonObject adjournHearingRequestPayload = hearingAdjournTransformer.transform(resultsShared, nextHearingResultDefinitions);

@@ -6,11 +6,13 @@ import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 
+import java.io.Serializable;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class OffenceDelegate {
+public class OffenceDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final HearingAggregateMomento momento;
 

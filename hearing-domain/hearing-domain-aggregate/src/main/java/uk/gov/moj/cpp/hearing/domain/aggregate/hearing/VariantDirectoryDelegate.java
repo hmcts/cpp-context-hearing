@@ -5,11 +5,13 @@ import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class VariantDirectoryDelegate {
+public class VariantDirectoryDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final HearingAggregateMomento momento;
 
@@ -18,7 +20,7 @@ public class VariantDirectoryDelegate {
     }
 
     public void handleNowsVariantsSavedEvent(NowsVariantsSavedEvent nowsVariantsSavedEvent) {
-        Set<Variant> variants = new HashSet<>(  this.momento.getVariantDirectory());
+        Set<Variant> variants = new HashSet<>(this.momento.getVariantDirectory());
         variants.addAll(nowsVariantsSavedEvent.getVariants());
         this.momento.setVariantDirectory(variants);
     }

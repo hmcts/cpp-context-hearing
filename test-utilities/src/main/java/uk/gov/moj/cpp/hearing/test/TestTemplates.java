@@ -393,38 +393,39 @@ public class TestTemplates {
                     .build();
         }
 
-        public static ShareResultsCommand standardShareResultsCommandTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId1, final UUID resultLineId2) {
+        public static ShareResultsCommand standardShareResultsCommandTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId1, final UUID resultLineId2, LocalDate orderedDate) {
             return with(basicShareResultsCommandTemplate(), command -> {
-                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId1));
-                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2));                
+                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId1, orderedDate));
+                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2, orderedDate));
             });
         }
 
-        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId) {
-            return completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID());
+        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId, LocalDate orderedDate) {
+            return completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID(), orderedDate);
         }
 
-        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId, final UUID resultDefinitionId) {
+        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId, final UUID resultDefinitionId, LocalDate orderedDate) {
             return CompletedResultLine.builder()
                     .withId(resultLineId)
                     .withResultDefinitionId(resultDefinitionId)
                     .withDefendantId(defendantId)
                     .withOffenceId(offenceId)
-                    .withOrderedDate(LocalDate.now())
+                    .withOrderedDate(orderedDate)
                     .withCaseId(caseId)
                     .withLevel(values(Level.values()).next())
                     .withResultLabel(STRING.next())
                     .withResultPrompts(asList(
-                            ResultPrompt.builder()
-                                    .withId(randomUUID())
-                                    .withLabel(STRING.next())
-                                    .withValue(STRING.next())
-                                    .build(),
-                            ResultPrompt.builder()
-                                    .withId(randomUUID())
-                                    .withLabel(STRING.next())
-                                    .withValue(STRING.next())
-                                    .build()))
+                            resultPromptTemplate(randomUUID(), STRING.next(), STRING.next()),
+                            resultPromptTemplate(randomUUID(), STRING.next(), STRING.next())
+                    ))
+                    .build();
+        }
+
+        public static ResultPrompt resultPromptTemplate(UUID id, String label, String value) {
+            return ResultPrompt.builder()
+                    .withId(id)
+                    .withLabel(label)
+                    .withValue(value)
                     .build();
         }
 
@@ -839,7 +840,7 @@ public class TestTemplates {
                                     .setResultLineId(randomUUID())
                                     .setLastSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                             ))
-                            ).setReferenceDate(LocalDate.now());
+                    ).setReferenceDate(LocalDate.now());
         }
     }
 

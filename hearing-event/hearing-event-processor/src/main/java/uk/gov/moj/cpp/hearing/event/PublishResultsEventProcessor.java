@@ -72,6 +72,8 @@ public class PublishResultsEventProcessor {
 
         updateResultLineStatusDelegate.updateResultLineStatus(sender, event, resultsShared);
 
+        publishResultsDelegate.setContext(event);
+
         publishResultsDelegate.shareResults(sender, event, resultsShared, newVariants);
     }
 }

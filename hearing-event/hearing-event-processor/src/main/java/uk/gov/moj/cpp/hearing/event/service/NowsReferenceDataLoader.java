@@ -18,7 +18,7 @@ public class NowsReferenceDataLoader {
     private static final String GET_ALL_NOWS_REQUEST_ID = "referencedata.get-all-now-metadata";
     private static final String GET_ALL_RESULT_DEFINITIONS_REQUEST_ID = "referencedata.get-all-result-definitions";
 
-    private static final String AS_OF_DATE_QUERY_PARAMETER = "asOfDate";
+    private static final String ON_QUERY_PARAMETER = "on";
 
     private JsonEnvelope context;
 
@@ -38,20 +38,24 @@ public class NowsReferenceDataLoader {
 
     public AllNows loadAllNowsReference(LocalDate localDate) {
 
-        String strLocalDate = localDate.toString();
+        final String strLocalDate = localDate.toString();
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_NOWS_REQUEST_ID)
-                .apply(createObjectBuilder().add(AS_OF_DATE_QUERY_PARAMETER, strLocalDate).build());
+                .apply(createObjectBuilder().add(ON_QUERY_PARAMETER, strLocalDate).build());
 
-        JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
+        final JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
 
-        return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), AllNows.class);
+        final AllNows allNows = jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), AllNows.class);
+
+        allNows.getNows().forEach(now -> now.setReferenceDate(localDate));
+
+        return allNows;
     }
 
     public AllResultDefinitions loadAllResultDefinitions(LocalDate localDate) {
 
         final String strLocalDate = localDate.toString();
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_RESULT_DEFINITIONS_REQUEST_ID)
-                .apply(createObjectBuilder().add(AS_OF_DATE_QUERY_PARAMETER, strLocalDate).build());
+                .apply(createObjectBuilder().add(ON_QUERY_PARAMETER, strLocalDate).build());
 
         JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
 

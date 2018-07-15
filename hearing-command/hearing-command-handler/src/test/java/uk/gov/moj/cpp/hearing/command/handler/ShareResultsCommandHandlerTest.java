@@ -16,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -188,8 +189,9 @@ public class ShareResultsCommandHandlerTest {
         final ShareResultsCommand shareResultsCommand = TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate(
                 initiateHearingCommand.getHearing().getDefendants().get(0).getId(),
                 initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
-                initiateHearingCommand.getCases().get(0).getCaseId(), UUID.randomUUID(), UUID.randomUUID()
-        ).setHearingId(initiateHearingCommand.getHearing().getId());
+                initiateHearingCommand.getCases().get(0).getCaseId(), randomUUID(), randomUUID(), PAST_LOCAL_DATE.next()
+        )
+                .setHearingId(initiateHearingCommand.getHearing().getId());
 
         final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
 
@@ -205,7 +207,7 @@ public class ShareResultsCommandHandlerTest {
                                 withJsonPath("$.completedResultLines[0].id", is(shareResultsCommand.getCompletedResultLines().get(0).getId().toString())),
                                 withJsonPath("$.completedResultLines[0].defendantId", is(shareResultsCommand.getCompletedResultLines().get(0).getDefendantId().toString())),
                                 withJsonPath("$.completedResultLines[0].offenceId", is(shareResultsCommand.getCompletedResultLines().get(0).getOffenceId().toString())),
-                                withJsonPath("$.completedResultLines[0].orderedDate",is(shareResultsCommand.getCompletedResultLines().get(0).getOrderedDate().toString())),
+                                withJsonPath("$.completedResultLines[0].orderedDate", is(shareResultsCommand.getCompletedResultLines().get(0).getOrderedDate().toString())),
                                 withJsonPath("$.completedResultLines[0].caseId", is(shareResultsCommand.getCompletedResultLines().get(0).getCaseId().toString())),
                                 withJsonPath("$.completedResultLines[0].level", is(shareResultsCommand.getCompletedResultLines().get(0).getLevel().name())),
                                 withJsonPath("$.completedResultLines[0].resultLabel", is(shareResultsCommand.getCompletedResultLines().get(0).getResultLabel())),

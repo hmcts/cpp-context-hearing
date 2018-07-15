@@ -68,6 +68,9 @@
         },
         "value": {
           "$ref": "#/definitions/variantValue"
+        },
+        "referenceDate": {
+          "type": "string"
         }
       }
     }

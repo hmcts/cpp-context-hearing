@@ -5,6 +5,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +14,9 @@ import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class VerdictDelegate {
+public class VerdictDelegate  implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String GUILTY = "GUILTY";
 

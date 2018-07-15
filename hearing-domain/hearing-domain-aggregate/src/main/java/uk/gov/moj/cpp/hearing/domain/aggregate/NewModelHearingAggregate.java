@@ -57,9 +57,6 @@ import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import javax.json.JsonObject;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -67,36 +64,36 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "pmd:BeanMembersShouldSerialize"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
 public class NewModelHearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
-    private transient HearingDelegate hearingDelegate = new HearingDelegate(momento);
+    private final HearingDelegate hearingDelegate = new HearingDelegate(momento);
 
-    private transient PleaDelegate pleaDelegate = new PleaDelegate(momento);
+    private final PleaDelegate pleaDelegate = new PleaDelegate(momento);
 
-    private transient ProsecutionCounselDelegate prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
+    private final ProsecutionCounselDelegate prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
 
-    private transient DefenceCounselDelegate defenceCounselDelegate = new DefenceCounselDelegate(momento);
+    private final DefenceCounselDelegate defenceCounselDelegate = new DefenceCounselDelegate(momento);
 
-    private transient HearingEventDelegate hearingEventDelegate = new HearingEventDelegate(momento);
+    private final HearingEventDelegate hearingEventDelegate = new HearingEventDelegate(momento);
 
-    private transient VerdictDelegate verdictDelegate = new VerdictDelegate(momento);
+    private final VerdictDelegate verdictDelegate = new VerdictDelegate(momento);
 
-    private transient ResultsSharedDelegate resultsSharedDelegate = new ResultsSharedDelegate(momento);
+    private final ResultsSharedDelegate resultsSharedDelegate = new ResultsSharedDelegate(momento);
 
-    private transient ConvictionDateDelegate convictionDateDelegate = new ConvictionDateDelegate(momento);
+    private final ConvictionDateDelegate convictionDateDelegate = new ConvictionDateDelegate(momento);
 
-    private transient DefendantDelegate defendantDelegate = new DefendantDelegate(momento);
+    private final DefendantDelegate defendantDelegate = new DefendantDelegate(momento);
 
-    private transient OffenceDelegate offenceDelegate = new OffenceDelegate(momento);
+    private final OffenceDelegate offenceDelegate = new OffenceDelegate(momento);
 
-    private transient VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
+    private final VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
 
-    private transient AdjournHearingDelegate adjournHearingDelegate = new AdjournHearingDelegate(momento);
+    private final AdjournHearingDelegate adjournHearingDelegate = new AdjournHearingDelegate(momento);
 
     @Override
     public Object apply(final Object event) {
@@ -226,39 +223,4 @@ public class NewModelHearingAggregate implements Aggregate {
     public Stream<Object> deleteAtendee(final AttendeeDeleted attendeeDeleted) {
         return apply(Stream.of(attendeeDeleted));
     }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        setDelegates();
-    }
-
-    private void setDelegates() {
-
-        hearingDelegate = new HearingDelegate(momento);
-
-        pleaDelegate = new PleaDelegate(momento);
-
-        prosecutionCounselDelegate = new ProsecutionCounselDelegate(momento);
-
-        defenceCounselDelegate = new DefenceCounselDelegate(momento);
-
-        hearingEventDelegate = new HearingEventDelegate(momento);
-
-        verdictDelegate = new VerdictDelegate(momento);
-
-        resultsSharedDelegate = new ResultsSharedDelegate(momento);
-
-        convictionDateDelegate = new ConvictionDateDelegate(momento);
-
-        defendantDelegate = new DefendantDelegate(momento);
-
-        offenceDelegate = new OffenceDelegate(momento);
-
-        variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
-
-        adjournHearingDelegate = new AdjournHearingDelegate((momento));
-    }
-
-
-
 }

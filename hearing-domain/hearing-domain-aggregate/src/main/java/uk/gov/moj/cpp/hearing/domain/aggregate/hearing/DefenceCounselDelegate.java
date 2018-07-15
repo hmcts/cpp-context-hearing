@@ -4,11 +4,13 @@ import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 
+import java.io.Serializable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class DefenceCounselDelegate {
+public class DefenceCounselDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final HearingAggregateMomento momento;
 

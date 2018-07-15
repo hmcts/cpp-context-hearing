@@ -44,7 +44,7 @@ public class NowsRequestedEventListener {
             nowsList.forEach(nows -> nowsRepository.remove(nows));
         }
         nowsRequested.getHearing().getNows().forEach(now -> {
-            UUID typeId=now.getNowsTypeId()==null?randomUUID():fromString(now.getNowsTypeId());
+            UUID typeId = now.getNowsTypeId() == null ? randomUUID() : fromString(now.getNowsTypeId());
             Nows nows = Nows.builder().withNowsTypeId(typeId).withDefendantId(fromString(now.getDefendantId()))
                     .withHearingId(hearingId).withId(fromString(now.getId())).build();
 
@@ -59,7 +59,6 @@ public class NowsRequestedEventListener {
                 });
                 nows.getMaterial().add(nowsMaterial);
             });
-
 
 
             nowsRepository.save(nows);

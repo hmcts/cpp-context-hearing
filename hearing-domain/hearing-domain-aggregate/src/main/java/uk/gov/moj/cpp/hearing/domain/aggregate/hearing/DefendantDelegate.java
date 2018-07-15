@@ -6,12 +6,15 @@ import uk.gov.moj.cpp.hearing.command.initiate.Address;
 import uk.gov.moj.cpp.hearing.command.initiate.Interpreter;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 
+import java.io.Serializable;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 
-@SuppressWarnings({"squid:S1188", "pmd:BeanMembersShouldSerialize"})
-public class DefendantDelegate {
+@SuppressWarnings({"squid:S1188"})
+public class DefendantDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final HearingAggregateMomento momento;
 

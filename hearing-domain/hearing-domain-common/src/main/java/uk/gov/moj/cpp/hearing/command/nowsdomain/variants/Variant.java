@@ -4,15 +4,12 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-
 public class Variant implements Serializable {
 
     private VariantKey key;
 
     private VariantValue value;
-    @JsonIgnore
+
     private LocalDate referenceDate;
 
     public static Variant variant() {

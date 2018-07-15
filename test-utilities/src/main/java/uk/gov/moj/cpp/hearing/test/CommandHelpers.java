@@ -19,6 +19,10 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -46,6 +50,59 @@ public class CommandHelpers {
 
     public static ResultsSharedEventHelper h(ResultsShared resultsShared) {
         return new ResultsSharedEventHelper(resultsShared);
+    }
+
+    public static ShareResultsCommandHelper h(ShareResultsCommand shareResultsCommand) {
+        return new ShareResultsCommandHelper(shareResultsCommand);
+    }
+
+    public static AllNowsReferenceDataHelper h(AllNows allNows){
+        return new AllNowsReferenceDataHelper(allNows);
+    }
+
+    public static AllResultDefinitionsReferenceDataHelper h(AllResultDefinitions allResultDefinitions){
+        return new AllResultDefinitionsReferenceDataHelper(allResultDefinitions);
+    }
+
+    public static class AllNowsReferenceDataHelper {
+        private AllNows allNows;
+
+        public AllNowsReferenceDataHelper(AllNows allNows){
+            this.allNows = allNows;
+        }
+
+        public NowDefinition getFirstNowDefinition(){
+            return this.allNows.getNows().get(0);
+        }
+
+        public UUID getFirstNowDefinitionId(){
+            return this.allNows.getNows().get(0).getId();
+        }
+
+        public UUID getFirstNowDefinitionFirstResultDefinitionId(){
+            return this.allNows.getNows().get(0).getResultDefinitions().get(0).getId();
+        }
+
+
+        public AllNows it(){
+            return this.allNows;
+        }
+    }
+
+    public static class AllResultDefinitionsReferenceDataHelper {
+        private AllResultDefinitions allResultDefinitions;
+
+        public AllResultDefinitionsReferenceDataHelper(AllResultDefinitions allResultDefinitions){
+            this.allResultDefinitions = allResultDefinitions;
+        }
+
+        public Prompt getFirstResultDefinitionFirstResultPrompt(){
+            return allResultDefinitions.getResultDefinitions().get(0).getPrompts().get(0);
+        }
+
+        public AllResultDefinitions it(){
+            return this.allResultDefinitions;
+        }
     }
 
     public static class InitiateHearingCommandHelper {
@@ -168,6 +225,14 @@ public class CommandHelpers {
             this.shareResultsCommand = shareResultsCommand;
         }
 
+        public CompletedResultLine getFirstCompletedResultLine(){
+            return shareResultsCommand.getCompletedResultLines().get(0);
+        }
+
+        public CompletedResultLine getSecondCompletedResultLine(){
+            return shareResultsCommand.getCompletedResultLines().get(1);
+        }
+
         public ShareResultsCommand it() {
             return shareResultsCommand;
         }
@@ -192,7 +257,7 @@ public class CommandHelpers {
             return this.resultsShared.getCases();
         }
 
-        public Case getFirstCase(){
+        public Case getFirstCase() {
             return this.resultsShared.getCases().get(0);
         }
 
@@ -224,7 +289,7 @@ public class CommandHelpers {
             return resultsShared.getPleas().values().stream().findFirst().orElse(null);
         }
 
-        public VerdictUpsert getFirstVerdict(){
+        public VerdictUpsert getFirstVerdict() {
             return resultsShared.getVerdicts().values().stream().findFirst().orElse(null);
         }
 
@@ -252,7 +317,7 @@ public class CommandHelpers {
             return this.resultsShared.getCourtClerk();
         }
 
-        public Variant getFirstVariant(){
+        public Variant getFirstVariant() {
             return this.resultsShared.getVariantDirectory().get(0);
         }
     }

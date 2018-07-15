@@ -7,24 +7,24 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class PleaDelegate {
+public class PleaDelegate implements Serializable {
 
     private static final String GUILTY = "GUILTY";
 
     private final HearingAggregateMomento momento;
 
-    public PleaDelegate(final HearingAggregateMomento momento){
+    public PleaDelegate(final HearingAggregateMomento momento) {
         this.momento = momento;
     }
 
-    public void handleInheritedPlea(InheritedPlea inheritedPlea){
+    public void handleInheritedPlea(InheritedPlea inheritedPlea) {
         this.momento.getPleas().computeIfAbsent(inheritedPlea.getOffenceId(), offenceId -> Plea.plea()
                 .setOriginHearingId(inheritedPlea.getHearingId())
                 .setOffenceId(offenceId)

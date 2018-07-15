@@ -4,11 +4,15 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 
+import java.io.Serializable;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AdjournHearingDelegate {
+public class AdjournHearingDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final HearingAggregateMomento momento;
 
     public AdjournHearingDelegate(final HearingAggregateMomento momento) {
@@ -19,6 +23,7 @@ public class AdjournHearingDelegate {
     public void handleHearingAdjournedEvent(final HearingAdjourned hearingAdjourned) {
         momento.setAdjournedHearingIds(hearingAdjourned.getHearings().stream().map(uk.gov.moj.cpp.external.domain.progression.relist.Hearing::getId).collect(Collectors.toList()));
     }
+
     public Stream<Object> adjournHearing(final AdjournHearing adjournHearing) {
 
         return Stream.of(

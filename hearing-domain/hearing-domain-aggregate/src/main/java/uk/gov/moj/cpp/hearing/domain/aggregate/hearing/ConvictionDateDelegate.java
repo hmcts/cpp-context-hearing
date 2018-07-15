@@ -3,8 +3,11 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class ConvictionDateDelegate {
+import java.io.Serializable;
+
+public class ConvictionDateDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final HearingAggregateMomento momento;
 
@@ -12,7 +15,7 @@ public class ConvictionDateDelegate {
         this.momento = momento;
     }
 
-    public void handleConvictionDateAdded(ConvictionDateAdded convictionDateAdded){
+    public void handleConvictionDateAdded(ConvictionDateAdded convictionDateAdded) {
         this.momento.getHearing().getDefendants().stream()
                 .flatMap(d -> d.getOffences().stream())
                 .filter(o -> o.getId().equals(convictionDateAdded.getOffenceId()))
@@ -21,7 +24,7 @@ public class ConvictionDateDelegate {
                 .setConvictionDate(convictionDateAdded.getConvictionDate());
     }
 
-    public void handleConvictionDateRemoved(ConvictionDateRemoved convictionDateRemoved){
+    public void handleConvictionDateRemoved(ConvictionDateRemoved convictionDateRemoved) {
         this.momento.getHearing().getDefendants().stream()
                 .flatMap(d -> d.getOffences().stream())
                 .filter(o -> o.getId().equals(convictionDateRemoved.getOffenceId()))

@@ -57,7 +57,9 @@ public class PublishResultsDelegate {
         this.referenceDataService = referenceDataService;
     }
 
-
+    public void setContext(final JsonEnvelope context) {
+        referenceDataService.setContext(context);
+    }
 
     public void shareResults(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, final List<Variant> newVariants) {
 

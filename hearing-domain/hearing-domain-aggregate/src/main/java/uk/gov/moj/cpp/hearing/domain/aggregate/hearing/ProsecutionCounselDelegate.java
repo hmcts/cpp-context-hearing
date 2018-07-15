@@ -3,10 +3,10 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 
+import java.io.Serializable;
 import java.util.stream.Stream;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class ProsecutionCounselDelegate {
+public class ProsecutionCounselDelegate implements Serializable {
 
     private final HearingAggregateMomento momento;
 

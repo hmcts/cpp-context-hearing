@@ -5,6 +5,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -38,7 +39,9 @@ public class HearingAdjournIT extends AbstractIT {
     @Test
     public void shouldRaiseHearingAdjournedEvent() {
 
-        stubReferenceData(UUID.randomUUID(), UUID.randomUUID());
+        LocalDate orderedDate = PAST_LOCAL_DATE.next();
+
+        stubReferenceData(orderedDate, UUID.randomUUID(), UUID.randomUUID());
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
@@ -49,16 +52,14 @@ public class HearingAdjournIT extends AbstractIT {
         TestUtilities.EventListener publicHearingAdjourned = getPublicHearingAdjournedEventListener(hearingOne, arbitraryNextHearingPromptValues);
 
         // share result with addition result next hearing completed result
-        new CommandHelpers.ShareResultsCommandHelper(
-                UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
-                        standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId(), UUID.randomUUID(), UUID.randomUUID()),
-                        command -> {
-                            CompletedResultLine firstRecord = command.getCompletedResultLines().get(0);
-                            CompletedResultLine nextHearing = getNextHearingCompletedResultLine(firstRecord, arbitraryNextHearingPromptValues, "59 Minutes");
-                            command.getCompletedResultLines().add(1, nextHearing);
-                            command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
-                        })
-                )
+        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
+                standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId(), UUID.randomUUID(), UUID.randomUUID(), orderedDate),
+                command -> {
+                    CompletedResultLine firstRecord = command.getCompletedResultLines().get(0);
+                    CompletedResultLine nextHearing = getNextHearingCompletedResultLine(firstRecord, arbitraryNextHearingPromptValues, "59 Minutes");
+                    command.getCompletedResultLines().add(1, nextHearing);
+                    command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
+                })
         );
         publicHearingAdjourned.waitFor();
 
@@ -67,16 +68,14 @@ public class HearingAdjournIT extends AbstractIT {
         publicHearingAdjourned = getPublicHearingAdjournedEventListener(hearingOne, arbitraryNextHearingPromptUpdatedValues);
 
         // update same next hearing  result
-        new CommandHelpers.ShareResultsCommandHelper(
-                UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
-                        standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId(), UUID.randomUUID(), UUID.randomUUID()),
-                        command -> {
-                            CompletedResultLine firstRecord = command.getCompletedResultLines().get(0);
-                            CompletedResultLine nextHearing = getNextHearingCompletedResultLine(firstRecord, arbitraryNextHearingPromptUpdatedValues, "30 Minutes");
-                            command.getCompletedResultLines().add(1, nextHearing);
-                            command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
-                        })
-                )
+        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
+                standardShareResultsCommandTemplate(hearingOne.getFirstDefendantId(), hearingOne.getFirstOffenceIdForFirstDefendant(), hearingOne.getFirstCaseId(), UUID.randomUUID(), UUID.randomUUID(), orderedDate),
+                command -> {
+                    CompletedResultLine firstRecord = command.getCompletedResultLines().get(0);
+                    CompletedResultLine nextHearing = getNextHearingCompletedResultLine(firstRecord, arbitraryNextHearingPromptUpdatedValues, "30 Minutes");
+                    command.getCompletedResultLines().add(1, nextHearing);
+                    command.getCompletedResultLines().forEach(rl -> rl.setDefendantId(hearingOne.getFirstDefendantId()));
+                })
         );
         publicHearingAdjourned.waitFor();
 
@@ -86,7 +85,7 @@ public class HearingAdjournIT extends AbstractIT {
         return listenFor("public.hearing.adjourned")
                 .withFilter(isJson(CoreMatchers.allOf(
                         withJsonPath("$.caseId", is(hearingOne.getFirstCaseId().toString())),
-                        withJsonPath("$.urn", is(hearingOne.getFirstCaseUrn().toString())),
+                        withJsonPath("$.urn", is(hearingOne.getFirstCaseUrn())),
                         withJsonPath("$.hearings[0].type", is(arbitraryNextHearingPromptValues.hearingType)),
                         withJsonPath("$.hearings[0].startDate", is(convertDate(arbitraryNextHearingPromptValues.getStartDate()))),
                         withJsonPath("$.hearings[0].startTime", is(arbitraryNextHearingPromptValues.getStartTime())),
@@ -113,7 +112,7 @@ public class HearingAdjournIT extends AbstractIT {
                 .build();
     }
 
-    private void stubReferenceData(final UUID primaryResultDefinitionId, final UUID mandatoryPromptId) {
+    private void stubReferenceData(final LocalDate referenceDate, final UUID primaryResultDefinitionId, final UUID mandatoryPromptId) {
         AllNows allNows = AllNows.allNows()
                 .setNows(singletonList(
                         NowDefinition.now()
@@ -127,7 +126,7 @@ public class HearingAdjournIT extends AbstractIT {
                                 ))
                 ));
 
-        ReferenceDataStub.stubGetAllNowsMetaData(allNows);
+        ReferenceDataStub.stubGetAllNowsMetaData(referenceDate, allNows);
         final String userGroup1 = "DefenseCounsel";
         AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
                 singletonList(ResultDefinition.resultDefinition()
@@ -144,7 +143,7 @@ public class HearingAdjournIT extends AbstractIT {
                 )
         );
 
-        ReferenceDataStub.stubGetAllResultDefinitions(allResultDefinitions);
+        ReferenceDataStub.stubGetAllResultDefinitions(referenceDate, allResultDefinitions);
         ReferenceDataStub.stubRelistReferenceDataResults();
     }
 

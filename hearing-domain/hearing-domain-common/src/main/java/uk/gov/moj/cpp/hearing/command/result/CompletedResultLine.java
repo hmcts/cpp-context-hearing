@@ -32,9 +32,9 @@ public final class CompletedResultLine implements Serializable {
 
     private final String resultLabel;
 
-    private final List<ResultPrompt> prompts;
+    private List<ResultPrompt> prompts;
 
-    private final LocalDate orderedDate;
+    private LocalDate orderedDate;
 
     @JsonCreator
     private CompletedResultLine(@JsonProperty("id") final UUID id,
@@ -92,6 +92,7 @@ public final class CompletedResultLine implements Serializable {
     public LocalDate getOrderedDate() {
         return orderedDate;
     }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -102,6 +103,14 @@ public final class CompletedResultLine implements Serializable {
 
     public void setDefendantId(final UUID defendantId) {
         this.defendantId = defendantId;
+    }
+
+    public void setOrderedDate(final LocalDate orderedDate){
+        this.orderedDate = orderedDate;
+    }
+
+    public void setPrompts(List<ResultPrompt> prompts) {
+        this.prompts = new ArrayList<>(prompts);
     }
 
     public static final class Builder {

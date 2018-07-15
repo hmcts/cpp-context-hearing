@@ -77,6 +77,7 @@ public class NowDefinition {
     public LocalDate getReferenceDate() {
         return referenceDate;
     }
+
     public NowDefinition setId(final UUID id) {
         this.id = id;
         return this;

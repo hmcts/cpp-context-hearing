@@ -17,8 +17,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class HearingEventDelegate {
+public class HearingEventDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String HEARING_EVENTS = "hearingEvents";
     private static final String REASON_ALREADY_LOGGED = "Already logged";

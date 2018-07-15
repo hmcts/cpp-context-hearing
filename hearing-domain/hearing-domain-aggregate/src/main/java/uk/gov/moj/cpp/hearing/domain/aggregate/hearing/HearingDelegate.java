@@ -7,21 +7,23 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
-public class HearingDelegate {
+public class HearingDelegate implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final HearingAggregateMomento momento;
 
-    public HearingDelegate(HearingAggregateMomento momento){
+    public HearingDelegate(HearingAggregateMomento momento) {
         this.momento = momento;
     }
 
-    public void handleHearingInitiated(HearingInitiated hearingInitiated){
+    public void handleHearingInitiated(HearingInitiated hearingInitiated) {
         this.momento.setCases(hearingInitiated.getCases());
         this.momento.setHearing(hearingInitiated.getHearing());
     }
