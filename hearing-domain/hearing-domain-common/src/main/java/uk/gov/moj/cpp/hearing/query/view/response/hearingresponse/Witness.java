@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
+package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
 public class Witness {
     private String id;
@@ -33,6 +33,10 @@ public class Witness {
         this.mobile = builder.mobile;
         this.fax = builder.fax;
         this.email = builder.email;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public String getId() {
@@ -94,11 +98,6 @@ public class Witness {
     public String getWorkTelephone() {
         return workTelephone;
     }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
 
     public static class Builder {
         private String id;

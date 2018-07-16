@@ -9,7 +9,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
 import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;

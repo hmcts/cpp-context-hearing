@@ -66,7 +66,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertToEnvelopeMatcher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitiateHearingCommandHandlerTest {
@@ -116,7 +116,7 @@ public class InitiateHearingCommandHandlerTest {
 
         JsonEnvelope jsonEnvelope = verifyAppendAndGetArgumentFrom(this.hearingEventStream).findAny().get();
 
-        assertThat(jsonEnvelope, convertTo(HearingInitiated.class, isBean(HearingInitiated.class)
+        assertThat(jsonEnvelope, convertToEnvelopeMatcher(HearingInitiated.class, isBean(HearingInitiated.class)
                 .with(HearingInitiated::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getType, is(hearingOne.it().getHearing().getType()))

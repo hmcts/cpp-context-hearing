@@ -1,5 +1,28 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
+import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertToEnvelopeMatcher;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,31 +60,6 @@ import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ResultsSharedEventHelper;
 
 import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
-import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
-import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
 
 public class GenerateNowsDelegateTest {
 
@@ -115,7 +113,7 @@ public class GenerateNowsDelegateTest {
 
         assertThat(createNowsMessage, jsonEnvelope(metadata().withName("hearing.command.generate-nows"), payloadIsJson(print())));
 
-        assertThat(createNowsMessage, convertTo(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
+        assertThat(createNowsMessage, convertToEnvelopeMatcher(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
                 .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(resultsShared.getHearingId()))
                         .with(Hearing::getHearingDates, first(is(resultsShared.getFirstHearingDay())))
@@ -240,7 +238,7 @@ public class GenerateNowsDelegateTest {
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 
-        assertThat( envelopeArgumentCaptor.getValue(), convertTo(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
+        assertThat(envelopeArgumentCaptor.getValue(), convertToEnvelopeMatcher(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
                 .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
                         .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
                                 .with(NowTypes::getStaticText, is(nowDefinition.getResultDefinitions().get(0).getText()))
@@ -268,7 +266,7 @@ public class GenerateNowsDelegateTest {
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 
-        assertThat( envelopeArgumentCaptor.getValue(), convertTo(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
+        assertThat(envelopeArgumentCaptor.getValue(), convertToEnvelopeMatcher(GenerateNowsCommand.class, isBean(GenerateNowsCommand.class)
                 .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
                         .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
                                 .with(NowTypes::getStaticText, is(""))

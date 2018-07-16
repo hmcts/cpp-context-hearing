@@ -1,10 +1,12 @@
-package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
+package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
 
 import java.util.List;
 
-public final class HearingDetailsResponse {
+public class HearingDetailsResponse {
 
     private final String hearingId;
     private final String startDate;
@@ -38,6 +40,37 @@ public final class HearingDetailsResponse {
         this.resultLines = null;
     }
 
+    @JsonCreator
+    private HearingDetailsResponse(@JsonProperty("hearingId") final String hearingId,
+                                   @JsonProperty("startDate") final String startDate,
+                                   @JsonProperty("startTime") final String startTime,
+                                   @JsonProperty("hearingDays") final List<String> hearingDays,
+                                   @JsonProperty("roomName") final String roomName,
+                                   @JsonProperty("hearingType") final String hearingType,
+                                   @JsonProperty("courtCentreName") final String courtCentreName,
+                                   @JsonProperty("judge") final Judge judge,
+                                   @JsonProperty("roomId") final String roomId,
+                                   @JsonProperty("courtCentreId") final String courtCentreId,
+                                   @JsonProperty("attendees") final Attendees attendees,
+                                   @JsonProperty("cases") final List<Case> cases,
+                                   @JsonProperty("defenceWitnesses") final List<DefenceWitness> defenceWitnesses,
+                                   @JsonProperty("resultLines") final List<ResultLine> resultLines) {
+        this.hearingId = hearingId;
+        this.startDate = startDate;
+        this.startTime = startTime;
+        this.hearingDays = hearingDays;
+        this.roomName = roomName;
+        this.hearingType = hearingType;
+        this.courtCentreName = courtCentreName;
+        this.judge = judge;
+        this.roomId = roomId;
+        this.courtCentreId = courtCentreId;
+        this.attendees = attendees;
+        this.cases = cases;
+        this.defenceWitnesses = defenceWitnesses;
+        this.resultLines = resultLines;
+    }
+
     private HearingDetailsResponse(final Builder builder) {
         this.hearingId = builder.hearingId;
         this.startDate = builder.startDate;
@@ -53,6 +86,10 @@ public final class HearingDetailsResponse {
         this.cases = builder.cases;
         this.defenceWitnesses = builder.defenceWitnesses;
         this.resultLines = builder.resultLines;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public String getHearingId() {
@@ -111,9 +148,6 @@ public final class HearingDetailsResponse {
         return resultLines;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
     public static final class Builder {
 
         private String hearingId;
@@ -130,17 +164,17 @@ public final class HearingDetailsResponse {
         private List<Case> cases;
         private List<DefenceWitness> defenceWitnesses;
         private List<ResultLine> resultLines;
-        
+
         public Builder withHearingId(final String hearingId) {
             this.hearingId = hearingId;
             return this;
         }
-        
+
         public Builder withStartDate(final String startDate) {
             this.startDate = startDate;
             return this;
         }
-        
+
         public Builder withStartTime(final String startTime) {
             this.startTime = startTime;
             return this;
@@ -155,51 +189,52 @@ public final class HearingDetailsResponse {
             this.roomName = roomName;
             return this;
         }
-        
+
         public Builder withHearingType(final String hearingType) {
             this.hearingType = hearingType;
             return this;
         }
-        
+
         public Builder withCourtCentreName(final String courtCentreName) {
             this.courtCentreName = courtCentreName;
             return this;
         }
-        
+
         public Builder withJudge(final Judge judge) {
             this.judge = judge;
             return this;
         }
-        
+
         public Builder withRoomId(final String roomId) {
             this.roomId = roomId;
             return this;
         }
-        
+
         public Builder withCourtCentreId(final String courtCentreId) {
             this.courtCentreId = courtCentreId;
             return this;
         }
-        
+
         public Builder withAttendees(final Attendees attendees) {
             this.attendees = attendees;
             return this;
         }
-        
+
         public Builder withCases(final List<Case> cases) {
             this.cases = cases;
             return this;
         }
 
-        public Builder withDefenceWiteness(final List<DefenceWitness> defenceWitnesses){
+        public Builder withDefenceWiteness(final List<DefenceWitness> defenceWitnesses) {
             this.defenceWitnesses = defenceWitnesses;
             return this;
         }
 
-        public Builder withResultLines(final List<ResultLine> resultLines){
+        public Builder withResultLines(final List<ResultLine> resultLines) {
             this.resultLines = resultLines;
             return this;
         }
+
         public HearingDetailsResponse build() {
             return new HearingDetailsResponse(this);
         }

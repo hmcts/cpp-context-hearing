@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
+package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
 public final class ResultLine {
 
@@ -10,16 +10,16 @@ public final class ResultLine {
         this.lastSharedDateTime = builder.lastSharedDateTime;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public String getId() {
         return id;
     }
 
     public String getLastSharedDateTime() {
         return lastSharedDateTime;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {
