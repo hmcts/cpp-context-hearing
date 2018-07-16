@@ -23,7 +23,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.fourth;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
-import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertToEnvelopeMatcher;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -121,7 +121,7 @@ public class PublishResultsDelegateTest {
 
         assertThat(sharedResultsMessage, jsonEnvelope(metadata().withName("public.hearing.resulted"), payloadIsJson(print())));
 
-        assertThat(sharedResultsMessage, convertTo(ShareResultsMessage.class, isBean(ShareResultsMessage.class)
+        assertThat(sharedResultsMessage, convertToEnvelopeMatcher(ShareResultsMessage.class, isBean(ShareResultsMessage.class)
                 .with(ShareResultsMessage::getSharedTime, is(resultsShared.it().getSharedTime()))
                 .with(ShareResultsMessage::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(resultsShared.getHearing().getId()))

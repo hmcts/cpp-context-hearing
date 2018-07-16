@@ -15,25 +15,16 @@ import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBa
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockUpdateHmpsMaterialStatus;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.Temporal;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-
+import com.google.common.io.Resources;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.response.Header;
+import com.jayway.restassured.specification.RequestSpecification;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.BaseMatcher;
@@ -43,15 +34,25 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.io.Resources;
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.specification.RequestSpecification;
-
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
+import java.util.Properties;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 public class AbstractIT {
 
@@ -207,7 +208,28 @@ public class AbstractIT {
             public void describeTo(final Description description) {
             }
         };
+    }
 
+    public static <T> Matcher<ResponseData> jsonPayloadMatchesBean(Class<T> theClass, BeanMatcher<T> beanMatcher) {
+        final BaseMatcher<JsonObject> jsonObjectMatcher = convertTo(theClass, beanMatcher);
+        return new BaseMatcher<ResponseData>() {
+            @Override
+            public boolean matches(final Object o) {
+                if (o instanceof ResponseData) {
+                    final ResponseData responseData = (ResponseData) o;
+                    if (responseData.getPayload() != null) {
+                        JsonObject jsonObject = Json.createReader(new StringReader(responseData.getPayload())).readObject();
+                        return jsonObjectMatcher.matches(jsonObject);
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public void describeTo(final Description description) {
+                jsonObjectMatcher.describeTo(description);
+            }
+        };
     }
 
     protected static RequestParams requestParameters(final String url, final String contentType) {

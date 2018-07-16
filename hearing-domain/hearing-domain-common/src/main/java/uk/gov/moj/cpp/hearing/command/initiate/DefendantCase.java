@@ -17,7 +17,8 @@ public class DefendantCase implements Serializable {
     private String bailStatus;
     private LocalDate custodyTimeLimitDate;
 
-    public DefendantCase(){}
+    public DefendantCase() {
+    }
 
     @JsonCreator
     public DefendantCase(@JsonProperty("caseId") final UUID caseId,
@@ -34,7 +35,7 @@ public class DefendantCase implements Serializable {
         return caseId;
     }
 
-    public DefendantCase setCaseId(UUID caseId){
+    public DefendantCase setCaseId(UUID caseId) {
         this.caseId = caseId;
         return this;
     }
@@ -57,7 +58,7 @@ public class DefendantCase implements Serializable {
         return this;
     }
 
-    public static DefendantCase defendantCase(){
+    public static DefendantCase defendantCase() {
         return new DefendantCase();
     }
 }

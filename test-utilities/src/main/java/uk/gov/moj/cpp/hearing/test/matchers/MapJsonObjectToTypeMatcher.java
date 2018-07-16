@@ -12,19 +12,19 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import javax.json.JsonObject;
 import java.io.IOException;
 
-public class MappedToBeanMatcher<T> extends BaseMatcher<JsonEnvelope> {
+public class MapJsonObjectToTypeMatcher<T> extends BaseMatcher<JsonObject> {
     private Class<T> clz;
     private final Matcher<T> matcher;
 
-    public MappedToBeanMatcher(Class<T> clz, Matcher<T> matcher) {
+    public MapJsonObjectToTypeMatcher(Class<T> clz, Matcher<T> matcher) {
         this.clz = clz;
         this.matcher = matcher;
     }
 
     @Override
     public boolean matches(Object item) {
-        JsonEnvelope jsonEnvelope = (JsonEnvelope) item;
-        T subject = convert(clz, jsonEnvelope.payloadAsJsonObject());
+        JsonObject jsonObject = (JsonObject) item;
+        T subject = convert(clz, jsonObject);
         return this.matcher.matches(subject);
     }
 
@@ -54,7 +54,30 @@ public class MappedToBeanMatcher<T> extends BaseMatcher<JsonEnvelope> {
         }
     }
 
-    public static <T> MappedToBeanMatcher<T> convertTo(Class<T> clazz, Matcher<T> matcher) {
-        return new MappedToBeanMatcher<T>(clazz, matcher);
+    public static <T> MapJsonObjectToTypeMatcher<T> convertTo(Class<T> clazz, Matcher<T> matcher) {
+        return new MapJsonObjectToTypeMatcher<>(clazz, matcher);
     }
+
+    public static <T> Matcher<JsonEnvelope> convertToEnvelopeMatcher(Class<T> clazz, Matcher<T> matcher) {
+        final MapJsonObjectToTypeMatcher<T> underlyingMatcher = convertTo(clazz, matcher);
+        return new BaseMatcher<JsonEnvelope>() {
+
+            @Override
+            public void describeTo(Description description) {
+                underlyingMatcher.describeTo(description);
+            }
+
+            @Override
+            public boolean matches(Object o) {
+                if (o == null || !(o instanceof JsonEnvelope)) {
+                    return false;
+                }
+                final JsonObject payload = ((JsonEnvelope) o).payloadAsJsonObject();
+                return underlyingMatcher.matches(payload);
+            }
+        };
+    }
+
+
+
 }

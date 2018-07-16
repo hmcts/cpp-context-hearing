@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.query.view.response.hearingResponse;
+package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -20,9 +20,13 @@ public final class DefenceCounsel {
         this.title = builder.title;
         this.firstName = builder.firstName;
         this.lastName = builder.lastName;
-        this.hearingDates  = builder.hearingDates;
+        this.hearingDates = builder.hearingDates;
     }
-    
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public String getAttendeeId() {
         return attendeeId;
     }
@@ -51,12 +55,8 @@ public final class DefenceCounsel {
         return hearingDates;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-    
     public static final class Builder {
-        
+
         private String attendeeId;
         private String status;
         private String defendantId;
@@ -64,32 +64,32 @@ public final class DefenceCounsel {
         private String firstName;
         private String lastName;
         private Set<LocalDate> hearingDates;
-        
+
         public Builder withAttendeeId(final String attendeeId) {
             this.attendeeId = attendeeId;
             return this;
         }
-        
+
         public Builder withStatus(final String status) {
             this.status = status;
             return this;
         }
-        
+
         public Builder withDefendantId(final String defendantId) {
             this.defendantId = defendantId;
             return this;
         }
-        
+
         public Builder withTitle(final String title) {
             this.title = title;
             return this;
         }
-        
+
         public Builder withFirstName(final String firstName) {
             this.firstName = firstName;
             return this;
         }
-        
+
         public Builder withLastName(final String lastName) {
             this.lastName = lastName;
             return this;
@@ -99,6 +99,7 @@ public final class DefenceCounsel {
             this.hearingDates = hearingDates;
             return this;
         }
+
         public DefenceCounsel build() {
             return new DefenceCounsel(this);
         }

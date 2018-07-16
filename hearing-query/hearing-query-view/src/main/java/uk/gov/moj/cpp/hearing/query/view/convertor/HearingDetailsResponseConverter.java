@@ -24,16 +24,15 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Attendees;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Case;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.DefenceCounsel;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Plea;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ProsecutionCounsel;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Value;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Verdict;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Attendees;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Case;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DefenceCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Plea;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Value;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Verdict;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -110,10 +109,10 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
 
     // JudgeConverter
     //-----------------------------------------------------------------------
-    private static final class JudgeConverter implements Converter<List<Attendee>, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge> {
+    private static final class JudgeConverter implements Converter<List<Attendee>, uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Judge> {
 
         @Override
-        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge convert(final List<Attendee> source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Judge convert(final List<Attendee> source) {
             if (isEmpty(source)) {
                 return null;
             }
@@ -123,7 +122,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                 return null;
             }
 
-            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Judge.builder()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Judge.builder()
                     .withId(judge.get().getId().getId().toString())
                     .withTitle(judge.get().getTitle())
                     .withFirstName(judge.get().getFirstName())
@@ -347,14 +346,14 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
 
     // WitnessConverter
     //-----------------------------------------------------------------------
-    private static final class WitnessConverter implements Converter<Witness, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness> {
+    private static final class WitnessConverter implements Converter<Witness, uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Witness> {
 
         @Override
-        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness convert(final Witness source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Witness convert(final Witness source) {
             if (null == source || null == source.getId()) {
                 return null;
             }
-            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Witness.builder()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Witness.builder()
                             .withId(toStringOrNull(source.getId().getId()))
                     .withCaseId(toStringOrNull(source.getLegalCase().getId()))
                     .withtType(source.getType())
@@ -379,7 +378,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
     //-----------------------------------------------------------------------
     private static final class DefendantConverter {
 
-        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant convertDefendant(final UUID caseId, final Entry<Defendant, List<Offence>> source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Defendant convertDefendant(final UUID caseId, final Entry<Defendant, List<Offence>> source) {
 
             final Defendant defendant = source.getKey();
 
@@ -391,7 +390,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
                     .findFirst()
                     .orElse(null);
 
-            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Defendant.builder()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Defendant.builder()
                     .withDefendantId(defendant.getId().getId().toString())
                     .withPersonId(toStringOrNull(defendant.getPersonId()))
                     .withFirstName(defendant.getFirstName())
@@ -412,10 +411,10 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
 
     // AddressConverter
     //-----------------------------------------------------------------------
-    private static final class AddressConverter implements Converter<Address, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address> {
+    private static final class AddressConverter implements Converter<Address, uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Address> {
 
         @Override
-        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address convert(final Address source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Address convert(final Address source) {
             if (null == source) {
                 return null;
             }
@@ -426,7 +425,7 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
             final String address4 = source.getAddress4();
             final String postCode = source.getPostCode();
 
-            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Address.builder()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Address.builder()
                     .withAddress1(address1)
                     .withAddress2(address2)
                     .withAddress3(address3)
@@ -441,14 +440,14 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
 
     // OffenceConverter
     //-----------------------------------------------------------------------
-    private static final class OffenceConverter implements Converter<Offence, uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence> {
+    private static final class OffenceConverter implements Converter<Offence, uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Offence> {
 
         @Override
-        public uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence convert(final Offence source) {
+        public uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Offence convert(final Offence source) {
             if (null == source || null == source.getId() || null == source.getId().getId()) {
                 return null;
             }
-            return uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.Offence.builder()
+            return uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Offence.builder()
                     .withId(source.getId().getId().toString())
                     .withWording(source.getWording())
                     .withCount(source.getCount())
@@ -518,15 +517,15 @@ public final class HearingDetailsResponseConverter implements Converter<Hearing,
     }
 
     // ResultLinesConverter
-    private static final class ResultLinesConverter implements Converter<Hearing, List<uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ResultLine>> {
+    private static final class ResultLinesConverter implements Converter<Hearing, List<uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine>> {
 
         @Override
-        public List<uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ResultLine> convert(Hearing source) {
+        public List<uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine> convert(Hearing source) {
             if (null == source || null == source.getId() || isEmpty(source.getResultLines())) {
                 return emptyList();
             }
             return source.getResultLines().stream()
-                    .map( o -> uk.gov.moj.cpp.hearing.query.view.response.hearingResponse.ResultLine.builder()
+                    .map( o -> uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine.builder()
                             .withId(o.getId().getId().toString())
                             .withLastSharedDateTime(toDateTimeStringOrNull(o.getLastSharedDateTime()))
                             .build())

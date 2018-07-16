@@ -44,7 +44,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplate
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.MappedToBeanMatcher.convertTo;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertToEnvelopeMatcher;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaveNowVariantsDelegateTest {
@@ -95,7 +95,7 @@ public class SaveNowVariantsDelegateTest {
 
         assertThat(updatedResultLinesMessage, jsonEnvelope(metadata().withName("hearing.command.save-nows-variants"), payloadIsJson(print())));
 
-        assertThat(updatedResultLinesMessage, convertTo(SaveNowsVariantsCommand.class, isBean(SaveNowsVariantsCommand.class)
+        assertThat(updatedResultLinesMessage, convertToEnvelopeMatcher(SaveNowsVariantsCommand.class, isBean(SaveNowsVariantsCommand.class)
                 .with(SaveNowsVariantsCommand::getHearingId, is(resultsShared.getHearingId()))
                 .with(SaveNowsVariantsCommand::getVariants, first(isBean(Variant.class)
                         .with(Variant::getKey, isBean(VariantKey.class)
