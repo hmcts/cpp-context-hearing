@@ -11,5 +11,6 @@
         <module>hearing-domain-event</module>
         <module>hearing-domain-aggregate</module>
         <module>hearing-domain-common</module>
+        <module>hearing-domain-transformation</module>
     </modules>
 </project>
