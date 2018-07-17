@@ -1,15 +1,17 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscription;
 
-import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VariantSubscriptionProcessor {
 

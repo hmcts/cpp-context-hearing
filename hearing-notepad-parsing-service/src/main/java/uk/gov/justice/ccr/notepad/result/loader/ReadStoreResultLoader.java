@@ -20,6 +20,7 @@ import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import uk.gov.justice.ccr.notepad.service.ResultingQueryService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,9 +48,9 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     @Override
-    public List<ResultDefinition> loadResultDefinition() {
+    public List<ResultDefinition> loadResultDefinition(final LocalDate orderedDate) {
         final List<ResultDefinition> resultDefinitions = newArrayList();
-        resultingQueryService.getAllDefinitions(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultDefinitions").getValuesAs(JsonObject.class)
+        resultingQueryService.getAllDefinitions(jsonEnvelope, orderedDate).payloadAsJsonObject().getJsonArray("resultDefinitions").getValuesAs(JsonObject.class)
                 .forEach(jsonObjectResultDefinition ->
                         getKeywordsGroups(jsonObjectResultDefinition).forEach(keywords -> {
                                     final ResultDefinition resultDefinition = new ResultDefinition();
@@ -81,9 +82,9 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     @Override
-    public List<ResultDefinitionSynonym> loadResultDefinitionSynonym() {
+    public List<ResultDefinitionSynonym> loadResultDefinitionSynonym(final LocalDate orderedDate) {
         final List<ResultDefinitionSynonym> resultDefinitionSynonyms = newArrayList();
-        final JsonArray resultDefinitionSynonymsJson = resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope).payloadAsJsonObject().getJsonArray("synonymCollection");
+        final JsonArray resultDefinitionSynonymsJson = resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope, orderedDate).payloadAsJsonObject().getJsonArray("synonymCollection");
         resultDefinitionSynonymsJson.forEach(jsonValue -> {
             ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
             resultDefinitionSynonym.setWord(((JsonObject) jsonValue).getString("word").replaceAll(" ", "").trim().toLowerCase());
@@ -94,10 +95,10 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     @Override
-    public List<ResultPrompt> loadResultPrompt() {
+    public List<ResultPrompt> loadResultPrompt(final LocalDate orderedDate) {
         final List<ResultPrompt> resultPrompts = newArrayList();
-        final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList();
-        final JsonObject resultDefinitionsJson = resultingQueryService.getAllDefinitions(jsonEnvelope).payloadAsJsonObject();
+        final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList(orderedDate);
+        final JsonObject resultDefinitionsJson = resultingQueryService.getAllDefinitions(jsonEnvelope, orderedDate).payloadAsJsonObject();
         final Map<UUID, List<JsonObject>> resultPromptsByIdMap = resultDefinitionsJson.getJsonArray("resultDefinitions").getValuesAs(JsonObject.class)
                 .stream()
                 .filter(jsonObject -> jsonObject.containsKey("prompts"))
@@ -142,8 +143,8 @@ public class ReadStoreResultLoader implements ResultLoader {
                 .collect(toList());
     }
 
-    private Map<String, Set<String>> loadResultPromptFixedList() {
-        return resultingQueryService.getAllFixedLists(this.jsonEnvelope).payloadAsJsonObject()
+    private Map<String, Set<String>> loadResultPromptFixedList(final LocalDate orderedDate) {
+        return resultingQueryService.getAllFixedLists(this.jsonEnvelope, orderedDate).payloadAsJsonObject()
                 .getJsonArray("fixedListCollection").getValuesAs(JsonObject.class)
                 .stream()
                 .flatMap(fixedList -> fixedList.getJsonArray("elements").getValuesAs(JsonObject.class)
@@ -158,8 +159,8 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     @Override
-    public List<ResultPromptSynonym> loadResultPromptSynonym() {
-        return resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope).payloadAsJsonObject()
+    public List<ResultPromptSynonym> loadResultPromptSynonym(final LocalDate orderedDate) {
+        return resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope, orderedDate).payloadAsJsonObject()
                 .getJsonArray("synonymCollection").getValuesAs(JsonObject.class)
                 .stream()
                 .map(wordSynonymJson -> {

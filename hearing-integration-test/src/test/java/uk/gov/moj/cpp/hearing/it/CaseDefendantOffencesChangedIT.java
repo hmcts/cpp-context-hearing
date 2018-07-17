@@ -11,7 +11,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import org.junit.Test;
+
 import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Case;
@@ -23,6 +23,8 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class CaseDefendantOffencesChangedIT extends AbstractIT {

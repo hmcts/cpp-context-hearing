@@ -22,15 +22,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.ReadContext;
-import com.jayway.jsonpath.internal.JsonContext;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.Response;
-import com.jayway.restassured.specification.RequestSpecification;
-import org.apache.http.HttpStatus;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -50,12 +41,23 @@ import uk.gov.moj.cpp.hearing.command.verdict.VerdictValue;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.ReadContext;
+import com.jayway.jsonpath.internal.JsonContext;
+import com.jayway.restassured.response.Header;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
+import org.apache.http.HttpStatus;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 
 public class UseCases {
 

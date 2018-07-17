@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
+
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.event.nows.order.Address;
 import uk.gov.moj.cpp.hearing.event.nows.order.DefendantCaseOffence;
@@ -29,10 +33,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 @SuppressWarnings({"squid:S1188"})
 public class NowsRequestedToOrderConvertor {

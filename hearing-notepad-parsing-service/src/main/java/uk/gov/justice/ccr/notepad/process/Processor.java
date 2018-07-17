@@ -23,6 +23,7 @@ import uk.gov.justice.ccr.notepad.view.PromptChoice;
 import uk.gov.justice.ccr.notepad.view.ResultChoice;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +32,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -73,16 +73,16 @@ public class Processor {
     private CurrencyMatcher currencyMatcher = new CurrencyMatcher();
 
 
-    public void lazyLoad(final JsonEnvelope envelope) throws ExecutionException {
-        resultCache.lazyLoad(envelope);
+    public void lazyLoad(final JsonEnvelope envelope, final LocalDate referenceDate) {
+        resultCache.lazyLoad(envelope, referenceDate);
     }
 
-    public Knowledge processParts(final List<String> partsValues) throws ExecutionException {
+    public Knowledge processParts(final List<String> partsValues, final LocalDate referenceDate) {
         List<String> values = partsValues.stream().map(String::toLowerCase).collect(Collectors.toList());
 
-        Knowledge knowledge = getKnowledge(values);
+        final Knowledge knowledge = getKnowledge(values, referenceDate);
 
-        if (checkKnowledgeHavingResultDefintion(knowledge).get()) {
+        if (checkKnowledgeHavingResultDefinition(knowledge).get()) {
             //remove all result definition parts from the list and only process parse for prompt
             values.removeAll(knowledge.getResultDefinitionParts().keySet());
         } else {
@@ -90,17 +90,16 @@ public class Processor {
             addAllPartsAsTxt(knowledge,values);
         }
 
-        knowledge = processPrompts(knowledge, values);
-        return knowledge;
+        return processPrompts(knowledge, values, referenceDate);
     }
 
-    private Optional<Boolean> checkKnowledgeHavingResultDefintion(Knowledge knowledge) {
+    private Optional<Boolean> checkKnowledgeHavingResultDefinition(Knowledge knowledge) {
         return Optional.of(knowledge.getResultDefinitionParts().size() > 0);
     }
 
-    public Knowledge processResultPrompt(final String resultDefinitionId) throws ExecutionException {
+    public Knowledge processResultPrompt(final String resultDefinitionId, final LocalDate referenceDate) {
         Knowledge knowledge = new Knowledge();
-        List<ResultPrompt> resultPrompts = resultCache.getResultPromptByResultDefinitionId(resultDefinitionId);
+        List<ResultPrompt> resultPrompts = resultCache.getResultPromptByResultDefinitionId(resultDefinitionId, referenceDate);
         LOGGER.debug("resultPrompts unordered:" + resultPrompts);
         resultPrompts = new ResultPromptsOrder().process(resultPrompts);
         LOGGER.debug("resultPrompts ordered:" + resultPrompts);
@@ -118,39 +117,39 @@ public class Processor {
         return knowledge;
     }
 
-    private Knowledge getKnowledge(final List<String> values) throws ExecutionException {
+    private Knowledge getKnowledge(final List<String> values, final LocalDate referenceDate) {
         Knowledge knowledge = new Knowledge();
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = match(values);
+        final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = match(values, referenceDate);
         if (MatchingType.UNKNOWN.equals(resultDefinitionMatchingOutput.getMatchingType())) {
-            getAmbiguousResultDefinition(knowledge, values);
+            getAmbiguousResultDefinition(knowledge, values, referenceDate);
         } else {
             knowledge.setThisPerfectMatch(true);
             if (MatchingType.EQUALS.equals(resultDefinitionMatchingOutput.getMatchingType())) {
-                knowledge = getEqualsPartsKnowledge(resultDefinitionMatchingOutput, knowledge, resultDefinitionMatcher.findDefinitionExactMatchSynonyms.run(values));
+                knowledge = getEqualsPartsKnowledge(resultDefinitionMatchingOutput, knowledge, resultDefinitionMatcher.findDefinitionExactMatchSynonyms.run(values, referenceDate));
             } else if (MatchingType.SHORT_CODE.equals(resultDefinitionMatchingOutput.getMatchingType())) {
                 knowledge = getShortCodePartsKnowledge(resultDefinitionMatchingOutput, knowledge);
             } else if (MatchingType.CONTAINS.equals(resultDefinitionMatchingOutput.getMatchingType())) {
-                knowledge = getContainsPartsKnowledge(resultDefinitionMatchingOutput, knowledge, resultDefinitionMatcher.findDefinitionPartialMatchSynonyms.run(values));
+                knowledge = getContainsPartsKnowledge(resultDefinitionMatchingOutput, knowledge, resultDefinitionMatcher.findDefinitionPartialMatchSynonyms.run(values, referenceDate));
             }
         }
         return knowledge;
     }
 
-    private Knowledge processPrompts(final Knowledge knowledge, final List<String> values) throws ExecutionException {
-        getResultPromptType(knowledge, values);
+    private Knowledge processPrompts(final Knowledge knowledge, final List<String> values, final LocalDate referenceDate) {
+        getResultPromptType(knowledge, values, referenceDate);
         getRemainingPromptTypes(knowledge, values);
-        reprocessPromptTypeTXT(knowledge.getResultPromptParts().entrySet().stream().filter(e -> TXT == e.getValue().getType()).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+        reprocessPromptTypeTXT(knowledge.getResultPromptParts().entrySet().stream().filter(e -> TXT == e.getValue().getType()).collect(Collectors.toMap(Entry::getKey, Entry::getValue)), referenceDate);
         return knowledge;
     }
 
-    private void getAmbiguousResultDefinition(final Knowledge knowledge, final List<String> values) throws ExecutionException {
+    private void getAmbiguousResultDefinition(final Knowledge knowledge, final List<String> values, final LocalDate referenceDate) {
 
-        Map<String, Set<String>> matchedSynonymWords = resultDefinitionMatcher.findDefinitionExactMatchSynonyms.run(values);
-        List<ResultDefinition> resultDefinitions = resultCache.getResultDefinitions();
+        final Map<String, Set<String>> matchedSynonymWords = resultDefinitionMatcher.findDefinitionExactMatchSynonyms.run(values, referenceDate);
+        final List<ResultDefinition> resultDefinitions = resultCache.getResultDefinitions(referenceDate);
         for (Entry<String, Set<String>> entry : matchedSynonymWords.entrySet()) {
             Set<ResultChoice> resultChoices = newHashSet();
             for (String word : entry.getValue()) {
-                List<Long> resultDefinitionIndexes = getIndexes(word);
+                final List<Long> resultDefinitionIndexes = getIndexes(word, referenceDate);
                 for (Long index : resultDefinitionIndexes) {
                     ResultDefinition resultDefinition = resultDefinitions.get(index.intValue());
                     ResultChoice resultChoice = getResultChoice(resultDefinition);
@@ -160,7 +159,7 @@ public class Processor {
             addToKnowledge(knowledge, entry.getKey(), resultChoices);
 
         }
-        Set<ResultDefinition> resultDefinitionsByShortCode = resultDefinitionMatcher.findDefinitionsByShortCodes.run(values);
+        final Set<ResultDefinition> resultDefinitionsByShortCode = resultDefinitionMatcher.findDefinitionsByShortCodes.run(values, referenceDate);
         resultDefinitionsByShortCode.forEach(resultDefinition -> {
             Set<ResultChoice> resultChoices = newHashSet();
             String partValue = resultDefinition.getShortCode().toLowerCase();
@@ -185,11 +184,11 @@ public class Processor {
      * Reprocessing TXT types for parts type duration with no gaps
      * e.g 2y is 2 years
      */
-    void reprocessPromptTypeTXT(final Map<String, Part> txtParts) throws ExecutionException {
+    void reprocessPromptTypeTXT(final Map<String, Part> txtParts, final LocalDate referenceDate) {
         for (Entry<String, Part> part : txtParts.entrySet()) {
             String onlyStringValue = StringUtils.isAlphanumeric(part.getKey()) ? parse(part.getKey()) : null;
             if (onlyStringValue != null) {
-                ResultPrompt resultPrompt = resultPromptMatcher.match(Arrays.asList(onlyStringValue)).getResultPrompt();
+                final ResultPrompt resultPrompt = resultPromptMatcher.match(Arrays.asList(onlyStringValue), referenceDate).getResultPrompt();
                 if (resultPrompt != null && DURATION == resultPrompt.getType()) {
                     changePartFromTxtToDuration(part, resultPrompt);
                 }
@@ -249,12 +248,12 @@ public class Processor {
         values.removeAll(knowledge.getResultPromptParts().keySet());
     }
 
-    private void getResultPromptType(final Knowledge knowledge, final List<String> values) throws ExecutionException {
-        ResultPromptMatchingOutput resultPromptMatchingOutput = resultPromptMatcher.match(values);
+    private void getResultPromptType(final Knowledge knowledge, final List<String> values, final LocalDate referenceDate) {
+        ResultPromptMatchingOutput resultPromptMatchingOutput = resultPromptMatcher.match(values, referenceDate);
         while (resultPromptMatchingOutput != null && resultPromptMatchingOutput.getResultPrompt() != null) {
-            getPromptParts(resultPromptMatchingOutput, knowledge, resultPromptMatcher.findPromptSynonyms.run(values));
+            getPromptParts(resultPromptMatchingOutput, knowledge, resultPromptMatcher.findPromptSynonyms.run(values, referenceDate));
             values.removeAll(knowledge.getResultPromptParts().keySet());
-            resultPromptMatchingOutput = resultPromptMatcher.match(values);
+            resultPromptMatchingOutput = resultPromptMatcher.match(values, referenceDate);
         }
 
     }
@@ -325,12 +324,12 @@ public class Processor {
         return part;
     }
 
-    private ResultDefinitionMatchingOutput match(final List<String> partsValues) throws ExecutionException {
-        return resultDefinitionMatcher.match(partsValues);
+    private ResultDefinitionMatchingOutput match(final List<String> partsValues, final LocalDate referenceDate) {
+        return resultDefinitionMatcher.match(partsValues, referenceDate);
     }
 
-    private List<Long> getIndexes(final String word) throws ExecutionException {
-        return resultCache.getResultDefinitionsIndexGroupByKeyword().entrySet()
+    private List<Long> getIndexes(final String word, final LocalDate referenceDate) {
+        return resultCache.getResultDefinitionsIndexGroupByKeyword(referenceDate).entrySet()
                 .stream()
                 .filter(entry -> word.equals(entry.getKey()))
                 .map(Entry::getValue)

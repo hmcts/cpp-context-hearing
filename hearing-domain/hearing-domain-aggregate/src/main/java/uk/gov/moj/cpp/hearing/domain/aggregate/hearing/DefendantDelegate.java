@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Optional.ofNullable;
+
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.Address;
@@ -8,8 +10,6 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 
 import java.io.Serializable;
 import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
 
 @SuppressWarnings({"squid:S1188"})
 public class DefendantDelegate implements Serializable {

@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
+import static java.util.stream.Collectors.toList;
+
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
@@ -28,8 +30,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import static java.util.stream.Collectors.toList;
 
 public class CommandHelpers {
 

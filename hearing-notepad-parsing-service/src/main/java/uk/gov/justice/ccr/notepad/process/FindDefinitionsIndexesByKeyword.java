@@ -5,11 +5,11 @@ import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -19,8 +19,8 @@ class FindDefinitionsIndexesByKeyword implements ResultFilter<List<Long>, Set<St
     ResultCache resultCache;
 
     @Override
-    public List<Long> run(final Set<String> words) throws ExecutionException {
-        return resultCache.getResultDefinitionsIndexGroupByKeyword().entrySet()
+    public List<Long> run(final Set<String> words, final LocalDate orderedDate) {
+        return resultCache.getResultDefinitionsIndexGroupByKeyword(orderedDate).entrySet()
                 .stream()
                 .filter(entry -> words.contains(entry.getKey()))
                 .map(Map.Entry::getValue)

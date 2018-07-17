@@ -9,8 +9,6 @@ import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL
 import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_CONTEXT;
 import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_IDENTIFIER;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JSONObjectValueObfuscator;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -27,9 +25,6 @@ import uk.gov.moj.cpp.hearing.event.nows.service.UploadMaterialService;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
@@ -39,6 +34,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class NowsRequestedEventProcessor {

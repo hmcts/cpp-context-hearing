@@ -2,10 +2,6 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.stream.Collectors.toList;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
@@ -14,6 +10,10 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
 
 public class Nows2VariantTransform {
 

@@ -1,13 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.verdict;
 
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Optional.ofNullable;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Offence implements Serializable {
     private static final long serialVersionUID = 1L;

@@ -1,6 +1,9 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import org.junit.Test;
+import static java.util.Optional.ofNullable;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.event.nows.order.NowsDocumentOrder;
 import uk.gov.moj.cpp.hearing.event.nows.order.OrderCase;
@@ -17,9 +20,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
 
 public class NowsRequestedToOrderConvertorTest {
 

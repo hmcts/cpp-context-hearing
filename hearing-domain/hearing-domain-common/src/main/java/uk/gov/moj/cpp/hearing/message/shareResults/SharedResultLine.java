@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.hearing.message.shareResults;
 
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 
 public class SharedResultLine {
 

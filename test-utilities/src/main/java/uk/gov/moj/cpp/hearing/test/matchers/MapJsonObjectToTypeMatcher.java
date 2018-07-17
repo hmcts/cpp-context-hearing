@@ -1,16 +1,18 @@
 package uk.gov.moj.cpp.hearing.test.matchers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import uk.gov.justice.services.common.converter.JSONObjectValueObfuscator;
 import uk.gov.justice.services.common.converter.exception.ConverterException;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.json.JsonObject;
 import java.io.IOException;
+
+import javax.json.JsonObject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 
 public class MapJsonObjectToTypeMatcher<T> extends BaseMatcher<JsonObject> {
     private Class<T> clz;

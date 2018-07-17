@@ -9,13 +9,14 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
 public class HearingEventDelegate implements Serializable {
 

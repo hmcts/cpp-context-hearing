@@ -15,13 +15,14 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
-import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.IntStream;
+
+import org.junit.Test;
 
 public class SendingSheetCompleteIT extends AbstractIT {
 

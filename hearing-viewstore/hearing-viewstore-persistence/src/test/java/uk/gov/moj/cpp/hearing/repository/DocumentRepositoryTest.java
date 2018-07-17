@@ -1,24 +1,26 @@
 package uk.gov.moj.cpp.hearing.repository;
 
-import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static org.junit.Assert.assertEquals;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 
-import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertEquals;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import javax.inject.Inject;
+
+import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
 public class DocumentRepositoryTest {

@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
+import static javax.json.Json.createObjectBuilder;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -9,10 +11,9 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 
-import javax.inject.Inject;
 import java.time.LocalDate;
 
-import static javax.json.Json.createObjectBuilder;
+import javax.inject.Inject;
 
 public class NowsReferenceDataLoader {
     private static final String GET_ALL_NOWS_REQUEST_ID = "referencedata.get-all-now-metadata";

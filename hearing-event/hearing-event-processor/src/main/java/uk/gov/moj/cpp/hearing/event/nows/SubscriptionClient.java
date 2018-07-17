@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import static javax.json.Json.createObjectBuilder;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -8,12 +10,11 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 
-import javax.inject.Inject;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import static javax.json.Json.createObjectBuilder;
+import javax.inject.Inject;
 
 public class SubscriptionClient {
 

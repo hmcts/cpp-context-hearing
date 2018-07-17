@@ -106,7 +106,7 @@ public class WireMockStubUtils {
     }
 
     private static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
-        poll(requestParams(format("{0}/{1}?on=", getBaseUri(), resource), mediaType).build())
+        poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType).build())
                         .until(status().is(expectedStatus));
     }
 

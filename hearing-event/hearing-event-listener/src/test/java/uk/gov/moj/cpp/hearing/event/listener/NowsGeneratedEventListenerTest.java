@@ -8,6 +8,12 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
+import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+
 import java.util.UUID;
 
 import org.junit.Before;
@@ -18,12 +24,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
-import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NowsGeneratedEventListenerTest {

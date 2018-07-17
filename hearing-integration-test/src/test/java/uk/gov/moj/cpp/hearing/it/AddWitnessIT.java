@@ -1,17 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.jayway.restassured.response.Response;
-import org.apache.http.HttpStatus;
-import org.junit.Ignore;
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import javax.json.JsonObject;
-import java.text.MessageFormat;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
@@ -37,6 +25,19 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.text.MessageFormat;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.json.JsonObject;
+
+import com.jayway.restassured.response.Response;
+import org.apache.http.HttpStatus;
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class AddWitnessIT extends AbstractIT {

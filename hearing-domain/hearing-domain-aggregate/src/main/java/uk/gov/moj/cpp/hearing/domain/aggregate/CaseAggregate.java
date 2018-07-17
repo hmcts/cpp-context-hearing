@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
@@ -11,10 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 @SuppressWarnings({"squid:S1068", "squid:S1948"})
 public class CaseAggregate implements Aggregate {

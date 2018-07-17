@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.notification;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Subscription {
 

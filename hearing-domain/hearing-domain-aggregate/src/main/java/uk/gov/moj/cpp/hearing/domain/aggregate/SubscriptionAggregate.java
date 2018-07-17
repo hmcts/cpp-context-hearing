@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
@@ -8,9 +11,6 @@ import uk.gov.moj.cpp.hearing.subscription.events.SubscriptionsUploaded;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 
 public class SubscriptionAggregate implements Aggregate {
 

@@ -1,8 +1,9 @@
 package uk.gov.moj.cpp.hearing.event;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -19,8 +20,8 @@ import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import javax.inject.Inject;
 
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class MagistratesCourtInitiateHearingEventProcessor {

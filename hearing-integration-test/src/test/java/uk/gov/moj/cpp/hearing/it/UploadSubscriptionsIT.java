@@ -13,11 +13,12 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 
-import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
+import org.junit.Test;
 
 public class UploadSubscriptionsIT extends AbstractIT {
 

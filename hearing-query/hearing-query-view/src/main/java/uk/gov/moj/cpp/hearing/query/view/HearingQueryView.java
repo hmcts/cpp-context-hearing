@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -14,13 +16,12 @@ import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
-import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+import javax.inject.Inject;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})

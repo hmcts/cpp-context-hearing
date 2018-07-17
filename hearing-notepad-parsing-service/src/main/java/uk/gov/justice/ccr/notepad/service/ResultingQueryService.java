@@ -2,11 +2,14 @@ package uk.gov.justice.ccr.notepad.service;
 
 import static javax.json.Json.createObjectBuilder;
 
+import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.time.LocalDate;
 
 import javax.inject.Inject;
 
@@ -22,30 +25,38 @@ public class ResultingQueryService {
     @Inject
     private Enveloper enveloper;
 
-    public JsonEnvelope getAllDefinitions(final JsonEnvelope envelope) {
+    public JsonEnvelope getAllDefinitions(final JsonEnvelope envelope, final LocalDate orderedDate) {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-definitions")
-                .apply(createObjectBuilder().build());
+                .apply(createObjectBuilder()
+                        .add("on", LocalDates.to(orderedDate))
+                        .build());
         return requester.request(requestEnvelope);
     }
 
-    public JsonEnvelope getAllDefinitionWordSynonyms(final JsonEnvelope envelope) {
+    public JsonEnvelope getAllDefinitionWordSynonyms(final JsonEnvelope envelope, final LocalDate orderedDate) {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-word-synonyms")
-                .apply(createObjectBuilder().build());
+                .apply(createObjectBuilder()
+                        .add("on", LocalDates.to(orderedDate))
+                        .build());
         return requester.request(requestEnvelope);
     }
 
-    public JsonEnvelope getAllFixedLists(final JsonEnvelope envelope) {
+    public JsonEnvelope getAllFixedLists(final JsonEnvelope envelope, final LocalDate orderedDate) {
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-fixed-list")
-                .apply(createObjectBuilder().build());
+                .apply(createObjectBuilder()
+                        .add("on", LocalDates.to(orderedDate))
+                        .build());
         return requester.request(requestEnvelope);
     }
 
-    public JsonEnvelope getAllResultPromptWordSynonyms(final JsonEnvelope envelope) {
+    public JsonEnvelope getAllResultPromptWordSynonyms(final JsonEnvelope envelope, final LocalDate orderedDate) {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-prompt-word-synonyms")
-                .apply(createObjectBuilder().build());
+                .apply(createObjectBuilder()
+                        .add("on", LocalDates.to(orderedDate))
+                        .build());
         return requester.request(requestEnvelope);
     }
 }

@@ -22,7 +22,7 @@ public class FileResultLoaderTest {
         final FileResultLoader testObject = new FileResultLoader();
 
         //when
-        final List<ResultPrompt> actualPrompts = testObject.loadResultPrompt();
+        final List<ResultPrompt> actualPrompts = testObject.loadResultPrompt(null);
 
         //then
         assertThat(actualPrompts.isEmpty(), is(false));

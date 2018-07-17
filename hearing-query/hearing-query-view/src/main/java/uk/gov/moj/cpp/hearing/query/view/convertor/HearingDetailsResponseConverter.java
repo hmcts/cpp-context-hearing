@@ -11,14 +11,14 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import uk.gov.justice.services.common.converter.Converter;
-import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
+import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Attendee;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Judge;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;

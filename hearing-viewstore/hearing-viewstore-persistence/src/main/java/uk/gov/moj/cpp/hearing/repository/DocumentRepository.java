@@ -1,12 +1,13 @@
 package uk.gov.moj.cpp.hearing.repository;
 
-import org.apache.deltaspike.data.api.EntityRepository;
-import org.apache.deltaspike.data.api.Query;
-import org.apache.deltaspike.data.api.Repository;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 
 import java.util.List;
 import java.util.UUID;
+
+import org.apache.deltaspike.data.api.EntityRepository;
+import org.apache.deltaspike.data.api.Query;
+import org.apache.deltaspike.data.api.Repository;
 
 @Repository
 public interface DocumentRepository extends EntityRepository<Document, UUID> {

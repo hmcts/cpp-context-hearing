@@ -21,6 +21,28 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockUpdateHmpsMaterialStatus;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
+
+import uk.gov.justice.services.test.utils.core.http.RequestParams;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.justice.services.test.utils.core.rest.RestClient;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.Temporal;
+import java.util.Properties;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
 import com.google.common.io.Resources;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.response.Header;
@@ -34,25 +56,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.justice.services.test.utils.core.http.RequestParams;
-import uk.gov.justice.services.test.utils.core.http.ResponseData;
-import uk.gov.justice.services.test.utils.core.rest.RestClient;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.Temporal;
-import java.util.Properties;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 public class AbstractIT {
 

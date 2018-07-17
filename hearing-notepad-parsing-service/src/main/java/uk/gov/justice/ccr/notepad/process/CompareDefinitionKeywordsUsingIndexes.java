@@ -6,11 +6,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -20,10 +20,10 @@ class CompareDefinitionKeywordsUsingIndexes implements ResultFilter<List<ResultD
     ResultCache resultCache;
 
     @Override
-    public List<ResultDefinition> run(final Map<Set<String>, Set<Long>> indexes) throws ExecutionException {
+    public List<ResultDefinition> run(final Map<Set<String>, Set<Long>> indexes, final LocalDate orderedDate) {
 
         List<ResultDefinition> matchedResultDefinition = newArrayList();
-        List<ResultDefinition> resultDefinitions = resultCache.getResultDefinitions();
+        final List<ResultDefinition> resultDefinitions = resultCache.getResultDefinitions(orderedDate);
         long[] resultsFound = indexes.entrySet()
                 .stream()
                 .mapToLong(value -> {

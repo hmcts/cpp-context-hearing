@@ -30,7 +30,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 import java.util.UUID;

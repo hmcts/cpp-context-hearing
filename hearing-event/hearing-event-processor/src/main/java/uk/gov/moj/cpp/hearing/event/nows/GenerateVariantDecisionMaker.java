@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toSet;
+
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
@@ -15,7 +15,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GenerateVariantDecisionMaker {
 

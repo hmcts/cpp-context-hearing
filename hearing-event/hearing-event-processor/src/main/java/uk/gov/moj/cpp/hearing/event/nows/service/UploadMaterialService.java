@@ -4,10 +4,11 @@ import uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant;
 import uk.gov.moj.cpp.hearing.activiti.service.ActivitiService;
 import uk.gov.moj.cpp.hearing.event.nows.NowsNotificationDocumentState;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.inject.Inject;
 
 public class UploadMaterialService {
 

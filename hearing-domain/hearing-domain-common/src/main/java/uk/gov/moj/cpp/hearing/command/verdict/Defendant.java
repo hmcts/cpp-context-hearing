@@ -1,8 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.verdict;
 
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Collections.unmodifiableList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,7 +9,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.unmodifiableList;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Defendant implements Serializable {
 

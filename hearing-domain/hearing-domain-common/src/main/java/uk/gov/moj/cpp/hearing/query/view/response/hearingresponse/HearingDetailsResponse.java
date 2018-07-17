@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.moj.cpp.hearing.command.witness.DefenceWitness;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class HearingDetailsResponse {
 

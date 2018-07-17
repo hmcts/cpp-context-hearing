@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
@@ -32,10 +33,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import org.apache.commons.io.FileUtils;
+import org.junit.Before;
+import org.junit.Test;
 
 public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";

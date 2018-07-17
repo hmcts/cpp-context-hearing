@@ -23,15 +23,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertToEnvelopeMatcher;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -60,6 +52,16 @@ import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ResultsSharedEventHelper;
 
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class GenerateNowsDelegateTest {
 

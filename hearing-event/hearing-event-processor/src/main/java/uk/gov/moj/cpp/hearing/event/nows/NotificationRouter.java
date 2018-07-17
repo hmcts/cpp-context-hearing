@@ -3,8 +3,9 @@ package uk.gov.moj.cpp.hearing.event.nows;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.inject.Inject;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 
 public class NotificationRouter {

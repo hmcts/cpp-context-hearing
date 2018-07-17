@@ -3,30 +3,50 @@ package uk.gov.justice.ccr.notepad.process;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.CONTAINS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.EQUALS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.SHORT_CODE;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.UNKNOWN;
 
+import uk.gov.justice.ccr.notepad.result.cache.CacheFactory;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 import uk.gov.justice.ccr.notepad.view.Part;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+import com.google.common.cache.LoadingCache;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class ResultDefinitionMatcherTest {
-    
+    @Spy
+    @InjectMocks
     ResultCache resultCache = new ResultCache();
+    @Spy
     FileResultLoader fileResultLoader = new FileResultLoader();
+
+    @Mock
+    private CacheFactory cacheFactory;
+
+    @Mock
+    private LoadingCache<String, Object> cache;
+
+    @InjectMocks
     ResultDefinitionMatcher testObj = new ResultDefinitionMatcher();
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
     CompareDefinitionKeywordsUsingIndexes compareDefinitionKeywordsUsingIndexes = new CompareDefinitionKeywordsUsingIndexes();
@@ -37,8 +57,11 @@ public class ResultDefinitionMatcherTest {
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.setResultLoader(fileResultLoader);
-        resultCache.lazyLoad(null);
+        when(cacheFactory.build()).thenReturn(cache);
+        final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
+        when(cache.asMap()).thenReturn(cacheValue);
+
+        resultCache.lazyLoad(null, LocalDate.now());
         findDefinitionsIndexesByKeyword.resultCache = resultCache;
         compareDefinitionKeywordsUsingIndexes.resultCache = resultCache;
         findDefinitionExactMatchSynonyms.resultCache = resultCache;
@@ -57,7 +80,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("rest ord prd imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -74,7 +97,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("mand life imp release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -90,7 +113,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("rest ord prd pard");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -106,7 +129,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("restr ord pred pard");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -122,7 +145,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("restr ord prd fur");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -135,7 +158,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("tes");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -148,7 +171,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("timp");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -160,7 +183,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("stimp");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -172,7 +195,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("community ord em curfew");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -185,7 +208,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("community order em curfew");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -197,7 +220,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("imp");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -209,7 +232,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("iquash pard");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition() == null
@@ -222,7 +245,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("iquash hello hi 2 5");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -241,7 +264,7 @@ public class ResultDefinitionMatcherTest {
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -258,7 +281,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("f f f f f f f f f f f f f f f f f f f f f");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
         
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values);
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -275,7 +298,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("rest ord prd imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -288,7 +311,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("com");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
 
         assertThat(resultDefinition.isPresent(), is(false));
     }
@@ -298,7 +321,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("upw");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -311,7 +334,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("rest ord prdr further imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -324,7 +347,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("mand life imp release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -337,7 +360,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("mandi life impi release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.isPresent()
@@ -350,7 +373,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("res ord pr su");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -363,7 +386,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("rest ord prdr further imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -376,7 +399,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("mand life imp release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -389,7 +412,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("mandi life impi release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.isPresent()
@@ -402,7 +425,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("pard 123 $123");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -416,7 +439,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("pard pr");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.isPresent()
@@ -430,7 +453,7 @@ public class ResultDefinitionMatcherTest {
         List<Part> parts = new PartsResolver().getParts("f f f f f f f f f f f f f f f f f");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values);
+        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()

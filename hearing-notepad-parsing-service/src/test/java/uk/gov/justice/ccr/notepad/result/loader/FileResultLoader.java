@@ -18,6 +18,7 @@ import uk.gov.justice.ccr.notepad.result.loader.converter.StringToResultPromptCo
 import uk.gov.justice.ccr.notepad.result.loader.converter.StringToResultPromptFixedListConverter;
 import uk.gov.justice.ccr.notepad.result.loader.converter.StringToResultPromptSynonymConverter;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,21 +33,21 @@ public class FileResultLoader implements ResultLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileResultLoader.class);
 
     @Override
-    public List<ResultDefinition> loadResultDefinition() {
+    public List<ResultDefinition> loadResultDefinition(final LocalDate hearingDate) {
         final StringToResultDefinitionConverter converter = new StringToResultDefinitionConverter();
         return unmodifiableList(new ResourceFileReader().getLines("/file-store/result-definitions.tdf", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()));
     }
 
     @Override
-    public List<ResultDefinitionSynonym> loadResultDefinitionSynonym() {
+    public List<ResultDefinitionSynonym> loadResultDefinitionSynonym(final LocalDate hearingDate) {
         final StringToResultDefinitionSynonymConverter converter = new StringToResultDefinitionSynonymConverter();
         return unmodifiableList(new ResourceFileReader().getLines("/file-store/result-definition-synonyms.tdf", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()));
     }
 
     @Override
-    public List<ResultPrompt> loadResultPrompt() {
+    public List<ResultPrompt> loadResultPrompt(final LocalDate hearingDate) {
         Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList();
 
         StringToResultPromptConverter resultPromptConverter = new StringToResultPromptConverter(resultPromptFixedListMap);
@@ -71,7 +72,7 @@ public class FileResultLoader implements ResultLoader {
     }
 
     @Override
-    public List<ResultPromptSynonym> loadResultPromptSynonym() {
+    public List<ResultPromptSynonym> loadResultPromptSynonym(final LocalDate hearingDate) {
         StringToResultPromptSynonymConverter converter = new StringToResultPromptSynonymConverter();
         return unmodifiableList(new ResourceFileReader().getLines("/file-store/result-prompt-synonyms.tdf", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()));

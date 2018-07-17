@@ -20,9 +20,6 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 
-import com.jayway.awaitility.Awaitility;
-import org.junit.After;
-import org.junit.Test;
 import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -34,16 +31,21 @@ import uk.gov.moj.cpp.hearing.utils.NotifyStub;
 import uk.gov.moj.cpp.hearing.utils.QueueUtil;
 import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
 
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import com.jayway.awaitility.Awaitility;
+import org.junit.After;
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class GenerateNowsIT extends AbstractIT {

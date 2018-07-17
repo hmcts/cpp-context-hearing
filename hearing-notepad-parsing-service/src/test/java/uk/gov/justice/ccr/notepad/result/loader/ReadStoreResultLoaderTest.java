@@ -14,6 +14,7 @@ import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import uk.gov.justice.ccr.notepad.service.ResultingQueryService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,11 +39,12 @@ public class ReadStoreResultLoaderTest {
 
     @Test
     public void loadResultDefinition() throws Exception {
-        given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
+        final LocalDate hearingDate = LocalDate.now();
+        given(resultingQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.result-definitions.json"));
 
-        final List<ResultDefinition> resultDefinitions = underTest.loadResultDefinition();
+        final List<ResultDefinition> resultDefinitions = underTest.loadResultDefinition(hearingDate);
         assertThat(resultDefinitions, hasSize(4));
 
         assertThat(resultDefinitions.get(0).getKeywords(), hasItems("restraining", "order", "period"));
@@ -51,34 +53,37 @@ public class ReadStoreResultLoaderTest {
 
     @Test
     public void loadResultDefinitionSynonym() throws Exception {
-        given(resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope)).willReturn(jsonEnvelope);
+        final LocalDate hearingDate = LocalDate.now();
+        given(resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.result-word-synonyms.json"));
 
-        assertThat(underTest.loadResultDefinitionSynonym(), hasSize(3));
+        assertThat(underTest.loadResultDefinitionSynonym(hearingDate), hasSize(3));
     }
 
 
     @Test
     public void loadResultPromptSynonym() throws Exception {
-        given(resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope)).willReturn(jsonEnvelope);
+        final LocalDate hearingDate = LocalDate.now();
+        given(resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.result-prompt-synonyms.json"));
 
-        assertThat(underTest.loadResultPromptSynonym(), hasSize(2));
+        assertThat(underTest.loadResultPromptSynonym(hearingDate), hasSize(2));
     }
 
     @Test
     public void loadResultPrompts() throws Exception {
         //given
-        given(resultingQueryService.getAllFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
-        given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
+        final LocalDate hearingDate = LocalDate.now();
+        given(resultingQueryService.getAllFixedLists(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);
+        given(resultingQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.fixedlists.json"))
                 .willReturn(givenPayload("/referencedata.result-definitions.json"));
 
         //when
-        final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt();
+        final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt(hearingDate);
 
         //then
         Set<String> fixedList = resultPrompts.get(0).getFixedList();
@@ -91,14 +96,15 @@ public class ReadStoreResultLoaderTest {
     @Test
     public void resultPromptShouldLoadAssociatedFixedlist() throws Exception {
         //given
-        given(resultingQueryService.getAllFixedLists(jsonEnvelope)).willReturn(jsonEnvelope);
-        given(resultingQueryService.getAllDefinitions(jsonEnvelope)).willReturn(jsonEnvelope);
+        final LocalDate hearingDate = LocalDate.now();
+        given(resultingQueryService.getAllFixedLists(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);
+        given(resultingQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);
         given(jsonEnvelope.payloadAsJsonObject())
                 .willReturn(givenPayload("/referencedata.fixedlists.json"))
                 .willReturn(givenPayload("/referencedata.result-definitions.json"));
 
         //when
-        final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt();
+        final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt(hearingDate);
 
         //then
         List<ResultPrompt> resultPromptsWithFixedlist = resultPrompts.stream()

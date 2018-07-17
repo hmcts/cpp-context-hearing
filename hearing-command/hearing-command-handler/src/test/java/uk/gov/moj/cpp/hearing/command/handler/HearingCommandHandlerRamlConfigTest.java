@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+
 import uk.gov.justice.services.core.annotation.Handles;
 
 import java.io.File;
@@ -13,9 +15,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 public class HearingCommandHandlerRamlConfigTest {
 

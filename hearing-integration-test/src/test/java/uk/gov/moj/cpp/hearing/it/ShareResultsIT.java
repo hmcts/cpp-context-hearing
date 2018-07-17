@@ -18,20 +18,11 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.resultPromptTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.resultPromptTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-
-import java.time.LocalDate;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.core.Is;
-import org.junit.Before;
-import org.junit.Test;
 
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
@@ -48,6 +39,15 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
+
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.core.Is;
+import org.junit.Before;
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
@@ -232,7 +232,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
 
-        final AllResultDefinitionsReferenceDataHelper allResultDefinitions = setupResultDefinitionsReferenceData(orderedDate, allNows.getFirstNowDefinitionFirstResultDefinitionId());
+        setupResultDefinitionsReferenceData(orderedDate, allNows.getFirstNowDefinitionFirstResultDefinitionId());
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 

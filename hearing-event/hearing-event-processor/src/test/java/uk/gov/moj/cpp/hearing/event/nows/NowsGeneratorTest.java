@@ -1,31 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
-import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
-
-import java.time.ZoneId;
-import java.util.List;
-import java.util.UUID;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -52,6 +26,33 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.completedResultLineTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.uncompletedResultLineTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+
+import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NowsGeneratorTest {

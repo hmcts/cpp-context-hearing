@@ -17,9 +17,9 @@ protocols: [ HTTP, HTTPS ]
           type: string
           required: true
         orderedDate:
-          description: orderedDate
+          description: date the result was ordered / captured
           type: string
-          required: false  
+          required: true
 
       responses:
             200:
@@ -40,6 +40,10 @@ protocols: [ HTTP, HTTPS ]
       queryParameters:
         resultCode:
           description: resultCode
+          type: string
+          required: true
+        orderedDate:
+          description: date the result was ordered / captured
           type: string
           required: true
 

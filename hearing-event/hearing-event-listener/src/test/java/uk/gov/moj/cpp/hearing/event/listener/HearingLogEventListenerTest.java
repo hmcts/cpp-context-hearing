@@ -16,13 +16,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -39,13 +45,6 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingLogEventListenerTest {

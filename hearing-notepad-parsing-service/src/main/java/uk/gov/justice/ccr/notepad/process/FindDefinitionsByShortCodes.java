@@ -6,11 +6,11 @@ import static java.util.stream.Collectors.toMap;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -20,9 +20,9 @@ class FindDefinitionsByShortCodes implements ResultFilter<Set<ResultDefinition>,
     ResultCache resultCache;
 
     @Override
-    public Set<ResultDefinition> run(final List<String> values) throws ExecutionException {
+    public Set<ResultDefinition> run(final List<String> values, final LocalDate orderedDate) {
 
-        Map<String, ResultDefinition> filteredResult = resultCache.getResultDefinitions().stream()
+        final Map<String, ResultDefinition> filteredResult = resultCache.getResultDefinitions(orderedDate).stream()
                 .filter(v -> !v.getShortCode().isEmpty())
                 .filter(v -> values.contains(v.getShortCode()))
                 .collect(toMap(ResultDefinition::getShortCode, v -> v, (p1, p2) -> p1));

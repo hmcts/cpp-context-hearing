@@ -12,8 +12,6 @@ import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.subscription.events.SubscriptionUploaded;
 import uk.gov.moj.cpp.hearing.subscription.events.SubscriptionsUploaded;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -21,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 @ServiceComponent(EVENT_LISTENER)
 public class SubscriptionsUploadEventListener {

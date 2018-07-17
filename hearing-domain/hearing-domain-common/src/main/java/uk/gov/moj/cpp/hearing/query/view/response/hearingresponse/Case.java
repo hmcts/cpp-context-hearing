@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings({"squid:UnusedPrivateMethod"})
 public class Case {

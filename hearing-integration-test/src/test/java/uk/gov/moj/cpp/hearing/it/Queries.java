@@ -8,6 +8,7 @@ import static uk.gov.moj.cpp.hearing.it.AbstractIT.CPP_UID_HEADER;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getURL;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.jsonPayloadMatchesBean;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.print;
+
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 

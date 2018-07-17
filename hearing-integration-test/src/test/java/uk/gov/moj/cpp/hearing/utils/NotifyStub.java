@@ -1,11 +1,5 @@
 package uk.gov.moj.cpp.hearing.utils;
 
-import com.github.tomakehurst.wiremock.client.RequestPatternBuilder;
-import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
-
-import java.util.List;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -18,6 +12,13 @@ import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
+
+import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
+
+import java.util.List;
+
+import com.github.tomakehurst.wiremock.client.RequestPatternBuilder;
 
 public class NotifyStub {
 

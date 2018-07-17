@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
@@ -26,12 +28,6 @@ import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -42,9 +38,15 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HearingService {
 

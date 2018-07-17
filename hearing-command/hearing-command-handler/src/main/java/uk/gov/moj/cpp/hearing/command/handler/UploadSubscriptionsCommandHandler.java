@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -10,13 +10,15 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.SubscriptionAggregate;
 
-import javax.inject.Inject;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class UploadSubscriptionsCommandHandler extends AbstractCommandHandler {

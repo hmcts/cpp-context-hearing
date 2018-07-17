@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -10,16 +14,13 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.transaction.Transactional;
 
 @ServiceComponent(EVENT_LISTENER)
 public class NowsRequestedEventListener {

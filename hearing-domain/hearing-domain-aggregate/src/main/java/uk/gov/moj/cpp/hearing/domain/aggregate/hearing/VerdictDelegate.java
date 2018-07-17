@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Optional.ofNullable;
+
 import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
@@ -11,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
 
 public class VerdictDelegate  implements Serializable {
 

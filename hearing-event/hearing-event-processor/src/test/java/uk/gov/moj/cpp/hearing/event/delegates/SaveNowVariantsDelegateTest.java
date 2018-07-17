@@ -1,29 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.util.List;
-
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -45,6 +21,31 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertToEnvelopeMatcher;
+
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SaveNowVariantsDelegateTest {

@@ -17,15 +17,17 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
-import org.junit.Test;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
+import java.util.UUID;
+
 import javax.json.Json;
 import javax.json.JsonObject;
-import java.util.UUID;
+
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class ChangeHearingDetailIT extends AbstractIT {

@@ -4,12 +4,12 @@ package uk.gov.justice.ccr.notepad.process;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
@@ -20,9 +20,9 @@ class ComparePromptKeywordsUsingIndexes implements ResultFilter<ResultPrompt, Ma
     ResultCache resultCache;
 
     @Override
-    public ResultPrompt run(final Map<Set<String>, Set<Long>> indexes) throws ExecutionException {
+    public ResultPrompt run(final Map<Set<String>, Set<Long>> indexes, final LocalDate orderedDate) {
 
-        List<ResultPrompt> resultPrompts = resultCache.getResultPrompt();
+        final List<ResultPrompt> resultPrompts = resultCache.getResultPrompt(orderedDate);
         OptionalLong index = indexes.entrySet()
                 .stream()
                 .mapToLong(value -> {

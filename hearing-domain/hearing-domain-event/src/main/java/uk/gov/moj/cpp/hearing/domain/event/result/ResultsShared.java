@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event.result;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Optional.ofNullable;
+
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings({"squid:S2384", "pmd:BeanMembersShouldSerialize"})
 @Event("hearing.results-shared")

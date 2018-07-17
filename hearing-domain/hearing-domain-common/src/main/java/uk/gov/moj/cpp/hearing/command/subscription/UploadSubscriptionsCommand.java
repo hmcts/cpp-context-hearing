@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.command.subscription;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UploadSubscriptionsCommand {
 

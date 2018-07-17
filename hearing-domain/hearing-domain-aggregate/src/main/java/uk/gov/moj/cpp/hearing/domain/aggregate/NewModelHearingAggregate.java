@@ -56,13 +56,14 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
 public class NewModelHearingAggregate implements Aggregate {

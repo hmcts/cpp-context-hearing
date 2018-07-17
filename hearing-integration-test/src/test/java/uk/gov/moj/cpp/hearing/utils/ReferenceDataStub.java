@@ -5,7 +5,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static java.text.MessageFormat.format;
+import static java.lang.String.format;
 import static org.apache.http.HttpStatus.SC_OK;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -19,20 +19,24 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.it.TestUtilities;
 
-import javax.ws.rs.core.Response;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import javax.ws.rs.core.Response;
 
 public class ReferenceDataStub {
 
     private static final String REFERENCE_DATA_SERVICE_NAME = "referencedata-service";
+    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions?on=%s";
+    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL_WITHOUT_DATE = "/referencedata-service/query/api/rest/referencedata/result-definitions";
+    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_KEYWORDS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-word-synonyms?on=%s";
+    private static final String REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/fixed-list?on=%s";
+    private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-prompt-word-synonyms?on=%s";
 
-    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/withdrawn";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/next-hearing";
     private static final String REFERENCE_DATA_RESULT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-word-synonyms";
-    private static final String REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/fixed-list";
-    private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-prompt-word-synonyms";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/nows-metadata";
 
 
@@ -44,12 +48,24 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-prompt-word-synonyms+json";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE = "application/vnd.referencedata.get-all-now-metadata+json";
 
+    public static void stubForReferenceDataResults(){
+        stubGetReferenceDataResultDefinitionsForFirstDay();
+        stubGetReferenceDataResultDefinitionsKeywordsForFirstDay();
+        stubGetReferenceDataResultPromptWordSynonymsForFirstDay();
+        stubGetReferenceDataResultPromptFixedListsForFirstDay();
 
-    public static void stubForReferenceDataResults() {
-        stubGetReferenceDataResultDefinitions();
-        stubGetReferenceDataResultWordSynonyms();
-        stubGetReferenceDataResultPromptWordSynonyms();
-        stubGetReferenceDataResultPromptFixedLists();
+        stubGetReferenceDataResultDefinitionsForSecondDay();
+        stubGetReferenceDataResultDefinitionsKeywordsForSecondDay();
+        stubGetReferenceDataResultPromptWordSynonymsForSecondDay();
+        stubGetReferenceDataResultPromptFixedListsForSecondDay();
+    }
+
+    private static void stubGetReferenceDataResultDefinitionsForFirstDay() {
+        stubGetReferenceDataResultDefinitions(LocalDate.now(), "referencedata.result-definitions.json");
+    }
+
+    private static void stubGetReferenceDataResultDefinitionsKeywordsForFirstDay() {
+        stubGetReferenceDataResultDefinitionsKeywords(LocalDate.now(), "referencedata.result-word-synonyms.json");
     }
 
     public static void stubRelistReferenceDataResults() {
@@ -86,7 +102,7 @@ public class ReferenceDataStub {
     }
 
     public static void stubGetAllResultDefinitions(LocalDate referenceDate, AllResultDefinitions allResultDefinitions) {
-        stub(allResultDefinitions, REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL, REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE, referenceDate);
+        stub(allResultDefinitions, REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL_WITHOUT_DATE, REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE, referenceDate);
     }
 
     private static void stub(Object result, String queryUrl, String mediaType, LocalDate referenceDate) {
@@ -105,55 +121,83 @@ public class ReferenceDataStub {
                         .withHeader("Content-Type", mediaType)
                         .withBody(strPayload)));
 
-        poll(requestParams(format("{0}/{1}?on={2}", getBaseUri(), queryUrl, referenceDate.toString()), mediaType).build())
+        poll(requestParams(MessageFormat.format("{0}/{1}?on={2}", getBaseUri(), queryUrl, referenceDate.toString()), mediaType).build())
                 .until(status().is(Response.Status.OK));
     }
 
-    private static void stubGetReferenceDataResultDefinitions() {
+    private static void stubGetReferenceDataResultPromptWordSynonymsForFirstDay() {
+        stubGetReferenceDataResultPromptWordSynonyms(LocalDate.now(), "referencedata.result-prompt-word-synonyms.json");
+    }
+
+    private static void stubGetReferenceDataResultPromptFixedListsForFirstDay() {
+        stubGetReferenceDataResultPromptFixedLists(LocalDate.now(), "referencedata.fixed-list-collection.json");
+    }
+
+    private static void stubGetReferenceDataResultDefinitionsForSecondDay() {
+        stubGetReferenceDataResultDefinitions(LocalDate.now().plusDays(1), "referencedata.result-definitions-version2.json");
+    }
+
+    private static void stubGetReferenceDataResultDefinitionsKeywordsForSecondDay() {
+        stubGetReferenceDataResultDefinitionsKeywords(LocalDate.now().plusDays(1), "referencedata.result-word-synonyms.json");
+    }
+
+    private static void stubGetReferenceDataResultPromptWordSynonymsForSecondDay() {
+        stubGetReferenceDataResultPromptWordSynonyms(LocalDate.now().plusDays(1), "referencedata.result-prompt-word-synonyms.json");
+    }
+
+    private static void stubGetReferenceDataResultPromptFixedListsForSecondDay() {
+        stubGetReferenceDataResultPromptFixedLists(LocalDate.now().plusDays(1), "referencedata.fixed-list-collection.json");
+    }
+
+    private static void stubGetReferenceDataResultDefinitions(final LocalDate orderedDate, final String responsePath) {
         InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
-        stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL))
+        final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL, orderedDate.toString());
+        stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withHeader("CPPID", UUID.randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE)
-                        .withBody(getPayload("referencedata.result-definitions.json"))));
+                        .withBody(getPayload(responsePath))));
 
-        waitForStubToBeReady(REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL, REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE);
+        waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE);
     }
 
-    private static void stubGetReferenceDataResultWordSynonyms() {
+    private static void stubGetReferenceDataResultDefinitionsKeywords(final LocalDate orderedDate, final String responsePath) {
         InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
-        stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_WORD_SYNONYMS_QUERY_URL))
+        final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_KEYWORDS_QUERY_URL, orderedDate.toString());
+        stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withHeader("CPPID", UUID.randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_WORD_SYNONYMS_MEDIA_TYPE)
-                        .withBody(getPayload("referencedata.result-word-synonyms.json"))));
+                        .withBody(getPayload(responsePath))));
 
-        waitForStubToBeReady(REFERENCE_DATA_RESULT_WORD_SYNONYMS_QUERY_URL, REFERENCE_DATA_RESULT_WORD_SYNONYMS_MEDIA_TYPE);
+        waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_WORD_SYNONYMS_MEDIA_TYPE);
     }
 
-    private static void stubGetReferenceDataResultPromptFixedLists() {
+    private static void stubGetReferenceDataResultPromptFixedLists(final LocalDate orderedDate, final String responsePath) {
         InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
-        stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL))
+        final String urlPath = format(REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL, orderedDate.toString());
+        stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withHeader("CPPID", UUID.randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_MEDIA_TYPE)
-                        .withBody(getPayload("referencedata.fixed-list-collection.json"))));
+                        .withBody(getPayload(responsePath))));
 
-        waitForStubToBeReady(REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL, REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_MEDIA_TYPE);
+        waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_MEDIA_TYPE);
     }
 
-    private static void stubGetReferenceDataResultPromptWordSynonyms() {
+    private static void stubGetReferenceDataResultPromptWordSynonyms(final LocalDate orderedDate, final String responsePath) {
         InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
-        stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL))
+        final String urlPath = format(REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL, orderedDate.toString());
+        stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withHeader("CPPID", UUID.randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE)
-                        .withBody(getPayload("referencedata.result-prompt-word-synonyms.json"))));
+                        .withBody(getPayload(responsePath))));
 
-        waitForStubToBeReady(REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL, REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE);
+        waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE);
     }
 }
