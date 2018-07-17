@@ -72,8 +72,7 @@ public class GenerateNowsDelegate {
                 .setHearing(
                         translateReferenceData(resultsShared)
                                 .setNows(nows)
-                                .setNowTypes(findNowDefinitions(
-                                        resultsShared.getCompletedResultLines())
+                                .setNowTypes(findNowDefinitions(resultsShared.getCompletedResultLines())
                                         .stream()
                                         .map(nowDefinition -> {
 
@@ -81,6 +80,7 @@ public class GenerateNowsDelegate {
                                                     Stream.of(nowDefinition.getText()),
                                                     nowDefinition.getResultDefinitions().stream()
                                                             .map(ResultDefinitions::getText)
+                                                            .distinct()
                                             )
                                                     .filter(Objects::nonNull)
                                                     .filter(s -> !s.isEmpty())
@@ -90,6 +90,7 @@ public class GenerateNowsDelegate {
                                                     Stream.of(nowDefinition.getWelshText()),
                                                     nowDefinition.getResultDefinitions().stream()
                                                             .map(ResultDefinitions::getWelshText)
+                                                            .distinct()
                                             )
                                                     .filter(Objects::nonNull)
                                                     .filter(s -> !s.isEmpty())
