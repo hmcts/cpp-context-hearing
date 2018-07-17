@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
 import java.util.UUID;
 
 public class AddProsecutionCounselCommand {
@@ -15,6 +16,7 @@ public class AddProsecutionCounselCommand {
     private String firstName;
     private String lastName;
     private String title;
+    private List<String> hearingDates;
 
     @JsonCreator
     public AddProsecutionCounselCommand(
@@ -24,7 +26,8 @@ public class AddProsecutionCounselCommand {
             @JsonProperty("status") String status,
             @JsonProperty("firstName") String firstName,
             @JsonProperty("lastName") String lastName,
-            @JsonProperty("title") String title) {
+            @JsonProperty("title") String title,
+            @JsonProperty("hearingDates") List<String> hearingDates) {
         this.personId = personId;
         this.attendeeId = attendeeId;
         this.hearingId = hearingId;
@@ -32,6 +35,7 @@ public class AddProsecutionCounselCommand {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = title;
+        this.hearingDates = hearingDates;
     }
 
     @JsonIgnore
@@ -71,6 +75,14 @@ public class AddProsecutionCounselCommand {
 
     public String getTitle() {
         return title;
+    }
+
+    public List<String> getHearingDates() {
+        return hearingDates;
+    }
+
+    public void setHearingDates(List<String> hearingDates) {
+        this.hearingDates = hearingDates;
     }
 
     public AddProsecutionCounselCommand setStatus(String status) {

@@ -1,5 +1,9 @@
 {
-  "attendeeId": "d06f6539-2a7c-4bc8-bca3-A1e5a225471a",
-  "personId": "a06f6539-2a7c-4bc8-bca3-A1e5a225471b",
-  "status" : "QC"
+  "attendeeId": "fab947a3-c50c-4dbb-accf-b2758b1d2d6d",
+  "status": "QC",
+  "firstName": "Eric",
+  "lastName": "Ormsby",
+  "hearingDates": ["2018-07-17", "2018-07-18", "2018-07-19", "2018-07-21", "2018-07-22"],
+  "title": "Mr",
+  "personId": "0305de0e-eb0e-478f-8ae4-f2c7966961e3"
 }

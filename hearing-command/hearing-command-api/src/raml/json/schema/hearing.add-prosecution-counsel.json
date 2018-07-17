@@ -19,6 +19,12 @@
     },
     "title": {
       "type": "string"
+    },
+    "hearingDates": {
+      "type": "array",
+      "item": {
+        "type": "string"
+      }
     }
   },
   "required": [
