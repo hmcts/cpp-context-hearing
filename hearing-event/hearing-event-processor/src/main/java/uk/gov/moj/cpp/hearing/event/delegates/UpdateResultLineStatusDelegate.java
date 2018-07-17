@@ -43,7 +43,7 @@ public class UpdateResultLineStatusDelegate {
 
     private List<SharedResultLineId> mapSharedResultsLinesStatus(final List<CompletedResultLine> completedResultLines, final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
         return completedResultLines.stream()
-                .filter(crl -> completedResultLinesStatus.get(crl.getId()).getLastSharedDateTime() == null)
+                .filter(crl -> completedResultLinesStatus.get(crl.getId()) == null || completedResultLinesStatus.get(crl.getId()).getLastSharedDateTime() == null)
                 .map(status -> SharedResultLineId.builder()
                         .withSharedResultLineId(status.getId())
                         .build()

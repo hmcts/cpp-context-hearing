@@ -10,6 +10,7 @@ import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 
 import javax.jms.MessageConsumer;
 import java.text.MessageFormat;
@@ -32,22 +33,18 @@ public class TestUtilities {
 
         private MessageConsumer messageConsumer;
         private String eventType;
-        private List<Matcher<Object>> matchers = new ArrayList<>();
+        private Matcher<?> matcher;
 
         public EventListener(final String eventType) {
             this.eventType = eventType;
             this.messageConsumer = publicEvents.createConsumer(eventType);
         }
 
-        private boolean matches(String json) {
-            return matchers.stream().allMatch(m -> m.matches(json));
-        }
-
         public void expectNoneWithin(long timeout) {
 
             JsonPath message = retrieveMessage(messageConsumer, timeout);
 
-            while (message != null && !matches(message.prettify())) {
+            while (message != null && !this.matcher.matches(message.prettify())) {
                 message = retrieveMessage(messageConsumer);
             }
             if (message != null) {
@@ -58,18 +55,26 @@ public class TestUtilities {
         public JsonPath waitFor() {
 
             JsonPath message = retrieveMessage(messageConsumer, 30000);
+            StringDescription description = new StringDescription();
 
-            while (message != null && !matches(message.prettify())) {
+            while (message != null && !this.matcher.matches(message.prettify())) {
+                description = new StringDescription();
+                description.appendText("Expected ");
+                this.matcher.describeTo(description);
+                description.appendText(" but ");
+                this.matcher.describeMismatch(message.prettify(), description);
+
                 message = retrieveMessage(messageConsumer);
             }
+
             if (message == null) {
-                fail("Expected '" + eventType + "' message to emit on the public.event topic.");
+                fail("Expected '" + eventType + "' message to emit on the public.event topic: " + description.toString());
             }
             return message;
         }
 
-        public EventListener withFilter(Matcher<Object> matcher) {
-            this.matchers.add(matcher);
+        public EventListener withFilter(Matcher<?> matcher) {
+            this.matcher = matcher;
             return this;
         }
     }

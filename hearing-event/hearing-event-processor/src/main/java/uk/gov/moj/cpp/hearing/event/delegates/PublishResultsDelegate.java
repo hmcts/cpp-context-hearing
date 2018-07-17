@@ -279,7 +279,7 @@ public class PublishResultsDelegate {
     }
 
     private ZonedDateTime getLastSharedResultDateTime(final ZonedDateTime sharedTime, final CompletedResultLineStatus completedResultLineStatus) {
-        if (completedResultLineStatus.getLastSharedDateTime() == null) {
+        if (completedResultLineStatus == null || completedResultLineStatus.getLastSharedDateTime() == null) {
             return sharedTime;
         } else {
             return completedResultLineStatus.getLastSharedDateTime();
@@ -287,7 +287,7 @@ public class PublishResultsDelegate {
     }
 
     private CourtClerk getCourtClerkDetails(final CourtClerk courtClerk, final CompletedResultLineStatus completedResultLineStatus) {
-        if (completedResultLineStatus.getCourtClerk() == null) {
+        if (completedResultLineStatus == null || completedResultLineStatus.getCourtClerk() == null) {
             return courtClerk;
         } else {
             return completedResultLineStatus.getCourtClerk();

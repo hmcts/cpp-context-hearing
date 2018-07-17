@@ -47,12 +47,12 @@ public class MapJsonObjectToTypeMatcher<T> extends BaseMatcher<JsonObject> {
         try {
             T object = mapper.readValue(mapper.writeValueAsString(source), clazz);
             if (object == null) {
-                throw new ConverterException(String.format("Failed to convert %s to Object", JSONObjectValueObfuscator.obfuscated(source)));
+                throw new ConverterException(String.format("Failed to convert %s to Object", source));
             } else {
                 return object;
             }
         } catch (IOException var4) {
-            throw new IllegalArgumentException(String.format("Error while converting %s to JsonObject", JSONObjectValueObfuscator.obfuscated(source)), var4);
+            throw new IllegalArgumentException(String.format("Error while converting %s to JsonObject", source), var4);
         }
     }
 

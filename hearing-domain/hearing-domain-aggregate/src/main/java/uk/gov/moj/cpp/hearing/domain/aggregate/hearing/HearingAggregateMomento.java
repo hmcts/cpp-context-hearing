@@ -31,7 +31,7 @@ public class HearingAggregateMomento implements Serializable {
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
-    private final Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
+    private Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
     private List<UUID> adjournedHearingIds = new ArrayList<>();
 
     private boolean published = false;
@@ -86,6 +86,10 @@ public class HearingAggregateMomento implements Serializable {
 
     public Map<UUID, CompletedResultLine> getCompletedResultLines() {
         return completedResultLines;
+    }
+
+    public void setCompletedResultLines(Map<UUID, CompletedResultLine> completedResultLines) {
+        this.completedResultLines = completedResultLines;
     }
 
     public boolean isPublished() {

@@ -21,6 +21,7 @@ public class Nows implements Serializable {
     private UUID defendantId;
 
     private List<Material> materials;
+
     @JsonIgnore
     private LocalDate referenceDate;
 

@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,7 +49,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -122,14 +121,13 @@ public class ShareResultsCommandHandlerTest {
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
                 .withStatus(STRING.next())
-                .withDefendantIds(asList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
+                .withDefendantIds(singletonList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
                 .build();
         nowsVariantsSavedEvent = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
                 .setHearingId(initiateHearingCommand.getHearing().getId())
-                .setVariants(Arrays.asList(
-                        Variant.variant()
-                                .setKey(VariantKey.variantKey().setDefendantId(UUID.randomUUID()))
-                                .setValue(VariantValue.variantValue())
+                .setVariants(singletonList(Variant.variant()
+                        .setKey(VariantKey.variantKey().setDefendantId(UUID.randomUUID()))
+                        .setValue(VariantValue.variantValue())
                 ));
     }
 

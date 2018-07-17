@@ -113,7 +113,7 @@ public class DefenceCounselUpsert implements Serializable {
         }
 
         public Builder withDefendantIds(List<UUID> defendantIds) {
-            this.defendantIds = defendantIds;
+            this.defendantIds = new ArrayList<>(defendantIds);
             return this;
         }
 

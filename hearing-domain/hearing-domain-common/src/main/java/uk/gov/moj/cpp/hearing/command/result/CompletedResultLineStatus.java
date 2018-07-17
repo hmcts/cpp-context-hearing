@@ -39,12 +39,14 @@ public final class CompletedResultLineStatus implements Serializable {
         return courtClerk;
     }
 
-    public void setCourtClerk(final CourtClerk courtClerk) {
+    public CompletedResultLineStatus setCourtClerk(final CourtClerk courtClerk) {
         this.courtClerk = courtClerk;
+        return this;
     }
 
-    public void setLastSharedDateTime(final ZonedDateTime lastSharedDateTime) {
+    public CompletedResultLineStatus setLastSharedDateTime(final ZonedDateTime lastSharedDateTime) {
         this.lastSharedDateTime = lastSharedDateTime;
+        return this;
     }
 
     public static Builder builder() {

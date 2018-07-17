@@ -12,6 +12,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Address;
@@ -147,7 +148,7 @@ public class GenerateNowsDelegate {
         final List<SharedResultLines> sharedResultLines = resultsShared.getCompletedResultLines().stream()
                 .map(line -> SharedResultLines.sharedResultLines()
                         .setId(line.getId())
-                        .setSharedDate(resultsShared.getCompletedResultLinesStatus().get(line.getId()).getLastSharedDateTime())
+                        .setSharedDate(ofNullable(resultsShared.getCompletedResultLinesStatus().get(line.getId())).map(CompletedResultLineStatus::getLastSharedDateTime).orElse(null))
                         .setOrderedDate(line.getOrderedDate())
                         .setLevel(line.getLevel().name())
                         .setCaseId(line.getCaseId())

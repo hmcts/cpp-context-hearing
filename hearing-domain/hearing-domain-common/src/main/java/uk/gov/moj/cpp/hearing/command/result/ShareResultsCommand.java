@@ -17,11 +17,11 @@ public final class ShareResultsCommand implements Serializable {
 
     private UUID hearingId;
 
-    private final CourtClerk courtClerk;
+    private CourtClerk courtClerk;
 
-    private final List<UncompletedResultLine> uncompletedResultLines;
+    private List<UncompletedResultLine> uncompletedResultLines;
 
-    private final List<CompletedResultLine> completedResultLines;
+    private List<CompletedResultLine> completedResultLines;
 
     @JsonCreator
     private ShareResultsCommand(
@@ -49,6 +49,18 @@ public final class ShareResultsCommand implements Serializable {
 
     public List<CompletedResultLine> getCompletedResultLines() {
         return completedResultLines;
+    }
+
+    public void setCourtClerk(CourtClerk courtClerk) {
+        this.courtClerk = courtClerk;
+    }
+
+    public void setUncompletedResultLines(List<UncompletedResultLine> uncompletedResultLines) {
+        this.uncompletedResultLines = new ArrayList<>(uncompletedResultLines);
+    }
+
+    public void setCompletedResultLines(List<CompletedResultLine> completedResultLines) {
+        this.completedResultLines = new ArrayList<>(completedResultLines);
     }
 
     public static Builder builder() {
