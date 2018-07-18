@@ -43,7 +43,7 @@ public class NowsRequestedToOrderConvertorTest {
         assertThat(ofNullable(getSharedResultLines(nowsRequested).get(0).getOrderedDate()).orElse(""), is(nowsDocumentOrder.getOrderDate()));
 
         assertThat(getDefendants(nowsRequested).get(0).getCases().get(0).getUrn(), is(nowsDocumentOrder.getCaseUrns().get(0)));
-        assertThat("Mr David  LLOYD", is(nowsDocumentOrder.getDefendant().getName()));
+        assertThat("Mr David LLOYD", is(nowsDocumentOrder.getDefendant().getName()));
         assertThat(getDefendants(nowsRequested).get(0).getPerson().getAddress().getPostCode(), is(nowsDocumentOrder.getDefendant().getAddress().getPostCode()));
 //defendantCaseResults
         assertThat(getDefendants(nowsRequested).get(0).getCases().get(0).getUrn(), is(getOrderCase(nowsDocumentOrder).getUrn()));

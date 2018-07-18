@@ -141,7 +141,7 @@ public class NowsRequestedToOrderConvertor {
         Optional<Defendant> matchingDefendantForNows = getMatchingDefendant(nowsRequested, now.getDefendantId());
         if (matchingDefendantForNows.isPresent()) {
             Defendant defendant = matchingDefendantForNows.get();
-            String defendantName = format("%s %s  %s", trimToEmpty(defendant.getPerson().getTitle()), trimToEmpty(defendant.getPerson().getFirstName()), trimToEmpty(defendant.getPerson().getLastName())).trim();
+            String defendantName = format("%s %s %s", trimToEmpty(defendant.getPerson().getTitle()), trimToEmpty(defendant.getPerson().getFirstName()), trimToEmpty(defendant.getPerson().getLastName())).trim();
             String line1 = format("%s %s", trimToEmpty(defendant.getPerson().getAddress().getAddress1()), trimToEmpty(defendant.getPerson().getAddress().getAddress2()));
             String line2 = format("%s %s", trimToEmpty(defendant.getPerson().getAddress().getAddress3()), trimToEmpty(defendant.getPerson().getAddress().getAddress4()));
 
