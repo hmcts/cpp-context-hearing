@@ -8,6 +8,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.nows.events.MaterialUserGroup;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
@@ -22,6 +23,7 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.transaction.Transactional;
 
+@SuppressWarnings("squid:S1188")
 @ServiceComponent(EVENT_LISTENER)
 public class NowsRequestedEventListener {
 
@@ -41,30 +43,50 @@ public class NowsRequestedEventListener {
         UUID hearingId = fromString(nowsRequested.getHearing().getId());
 
         List<Nows> nowsList = nowsRepository.findByHearingId(hearingId);
+
         if (nowsList != null) {
             nowsList.forEach(nows -> nowsRepository.remove(nows));
         }
+
         nowsRequested.getHearing().getNows().forEach(now -> {
+
             UUID typeId = now.getNowsTypeId() == null ? randomUUID() : fromString(now.getNowsTypeId());
-            Nows nows = Nows.builder().withNowsTypeId(typeId).withDefendantId(fromString(now.getDefendantId()))
-                    .withHearingId(hearingId).withId(fromString(now.getId())).build();
 
-            now.getMaterials().forEach(material -> {
-                List<String> stringList = material.getUserGroups().stream().map(materialUserGroup -> materialUserGroup.getGroup()).collect(Collectors.toList());
-                NowsMaterial nowsMaterial = NowsMaterial.builder().withUserGroups(stringList).withStatus("requested")
-                        .withId(fromString(material.getId())).withLanguage(material.getLanguage()).withNows(nows).build();
+            final Nows nows = Nows.builder()
+                    .withId(fromString(now.getId()))
+                    .withNowsTypeId(typeId)
+                    .withDefendantId(fromString(now.getDefendantId()))
+                    .withHearingId(hearingId)
+                    .build();
 
-                material.getNowResult().forEach(result -> {
-                    NowsResult nowResult = NowsResult.builder().withSharedResultId(fromString(result.getSharedResultId())).withSequence(result.getSequence()).withNowsMaterial(nowsMaterial).build();
-                    nowsMaterial.getNowResult().add(nowResult);
-                });
-                nows.getMaterial().add(nowsMaterial);
-            });
+            nows.setMaterial(now.getMaterials().stream()
+                    .map(material -> {
 
+                        final NowsMaterial nowsMaterial = NowsMaterial.builder()
+                                .withId(fromString(material.getId()))
+                                .withUserGroups(material.getUserGroups().stream()
+                                        .map(MaterialUserGroup::getGroup)
+                                        .collect(Collectors.toList()))
+                                .withStatus("requested")
+                                .withLanguage(material.getLanguage())
+                                .withNows(nows)
+                                .build();
+
+                        nowsMaterial.setNowResult(material.getNowResult().stream()
+                                .map(result -> NowsResult.builder()
+                                        .withId(randomUUID())
+                                        .withSharedResultId(fromString(result.getSharedResultId()))
+                                        .withSequence(result.getSequence())
+                                        .withNowsMaterial(nowsMaterial)
+                                        .build()
+                                )
+                                .collect(Collectors.toList()));
+
+                        return nowsMaterial;
+                    })
+                    .collect(Collectors.toList()));
 
             nowsRepository.save(nows);
         });
-
-
     }
 }

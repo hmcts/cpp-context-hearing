@@ -61,6 +61,7 @@ public class NowsRepositoryTest {
         nows.getMaterial().add(nowsMaterial);
 
         NowsResult nowsResult = new NowsResult();
+        nowsResult.setId(randomUUID());
         nowsResult.setSequence(1);
         nowsResult.setSharedResultId(sharedResultId);
         nowsResult.setNowsMaterial(nowsMaterial);

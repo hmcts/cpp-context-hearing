@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -10,10 +9,13 @@ import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name = "nows_result")
+@Table(name = "ha_nows_result")
 public class NowsResult {
 
     @Id
+    @Column(name = "id", nullable = false)
+    private UUID id;
+
     @Column(name = "shared_result_id", nullable = false)
     private UUID sharedResultId;
 
@@ -23,6 +25,14 @@ public class NowsResult {
     @ManyToOne
     @JoinColumn(name = "nows_material_id", nullable = false)
     private NowsMaterial nowsMaterial;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public UUID getSharedResultId() {
         return sharedResultId;
@@ -52,13 +62,18 @@ public class NowsResult {
         return new Builder();
     }
 
-
     public static final class Builder {
+        private UUID id;
         private UUID sharedResultId;
         private Integer sequence;
         private NowsMaterial nowsMaterial;
 
         private Builder() {
+        }
+
+        public Builder withId(UUID id) {
+            this.id = id;
+            return this;
         }
 
         public Builder withSharedResultId(UUID sharedResultId) {
@@ -78,6 +93,7 @@ public class NowsResult {
 
         public NowsResult build() {
             NowsResult nowsResult = new NowsResult();
+            nowsResult.setId(id);
             nowsResult.setSharedResultId(sharedResultId);
             nowsResult.setSequence(sequence);
             nowsResult.setNowsMaterial(nowsMaterial);

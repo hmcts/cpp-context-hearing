@@ -49,6 +49,7 @@ public class NowsMaterialRepositoryTest {
                     .withUserGroups(Arrays.asList("LO", "GA"))
                     .withLanguage(language)
                     .withNowResult(Arrays.asList(NowsResult.builder()
+                            .withId(randomUUID())
                             .withSequence(1)
                             .withSharedResultId(sharedResultId)
                             .build()))
