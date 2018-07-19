@@ -73,7 +73,11 @@ public class NowsRequestedToOrderConvertor {
                         .setCourtClerkName(nowsDocumentOrder.getCourtClerkName())
                         .setCaseUrns(nowsDocumentOrder.getCaseUrns())
                         .setNowsTypeId(UUID.fromString(matchingNowType.get().getId()))
-                        .setJurisdiction(matchingNowType.get().getJurisdiction());
+                        .setJurisdiction(matchingNowType.get().getJurisdiction())
+                        .setCourtCentreName(getCourtCentreName(nowsRequested))
+                        .setOrderName(matchingNowType.map(NowType::getDescription).orElse(EMPTY))
+                        .setPriority(matchingNowType.map(NowType::getPriority).orElse(EMPTY))
+                        .setMaterialId(selectedNowMaterial.getId());
                 nowsDocumentOrders.put(nowsDocumentOrder, nowsNotificationDocumentState);
             });
         });
