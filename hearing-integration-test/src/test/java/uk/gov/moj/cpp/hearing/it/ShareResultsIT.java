@@ -111,7 +111,6 @@ public class ShareResultsIT extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
         final UUID resultLineId1 = randomUUID();
-        final UUID resultLineId2 = randomUUID();
         UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
                 basicShareResultsCommandTemplate(),
                 command -> command.setCompletedResultLines(singletonList(

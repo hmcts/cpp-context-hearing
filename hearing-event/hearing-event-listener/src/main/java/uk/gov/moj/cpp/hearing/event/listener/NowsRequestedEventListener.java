@@ -33,7 +33,6 @@ public class NowsRequestedEventListener {
     @Inject
     private NowsRepository nowsRepository;
 
-
     @Transactional
     @Handles("hearing.events.nows-requested")
     public void nowsRequested(final JsonEnvelope event) {
