@@ -35,7 +35,6 @@ public class EmailNowNotificationChannelTest {
 
     private String destination;
     private String replyToAddress;
-    private String channelType;
     private Map<String, String> properties;
     private NowsNotificationDocumentState nowsNotificationDocumentState;
     private UUID templateId = UUID.randomUUID();
@@ -65,7 +64,6 @@ public class EmailNowNotificationChannelTest {
     public void setupGreenPath() {
         destination = "a@test.com";
         replyToAddress = "b@test.com";
-        channelType = EmailNowNotificationChannel.EMAIL_TYPE;
         properties = new HashMap<>();
         properties.put(EmailNowNotificationChannel.TEMPLATE_ID_PROPERTY_NAME, templateId.toString());
         properties.put(EmailNowNotificationChannel.FROM_ADDRESS_PROPERTY_NAME, replyToAddress);
@@ -86,7 +84,7 @@ public class EmailNowNotificationChannelTest {
         );
         target.notify(sender, event, destination, properties, nowsNotificationDocumentState);
         assertThat(requestPayloads.getAllValues().size(), is(1));
-        verify(sender, times(1)).send(requestEnvelopes.capture());
+        verify(sender, times(1)).sendAsAdmin(requestEnvelopes.capture());
         assertThat(requestEnvelopes.getValue(), is(jsonEnvelope));
         assertThat("", requestPayloads.getValue().getClass() == Notification.class);
         Notification payloadSent = (Notification) requestPayloads.getValue();
@@ -94,8 +92,6 @@ public class EmailNowNotificationChannelTest {
         assertThat(payloadSent.getReplyToAddress(), is(replyToAddress));
         final String expectedCaseUrns = nowsNotificationDocumentState.getCaseUrns().stream().collect(Collectors.joining(","));
         assertThat(payloadSent.getPersonalisation().get(EmailNowNotificationChannel.CASE_URNS_PERSONALISATION_KEY), is(expectedCaseUrns));
-        assertThat(payloadSent.getPersonalisation().get(EmailNowNotificationChannel.DEFENDANT_NAME_PERSONALISATION_KEY), is(nowsNotificationDocumentState.getDefendantName()));
         assertThat(payloadSent.getPersonalisation().get(EmailNowNotificationChannel.COURT_CLERK_NAME_PERSONALISATION_KEY), is(nowsNotificationDocumentState.getCourtClerkName()));
-
     }
 }

@@ -867,7 +867,7 @@ public class TestTemplates {
             properties.putIfAbsent(STRING.next(), STRING.next());
             properties.putIfAbsent(STRING.next(), STRING.next());
             properties.putIfAbsent(STRING.next(), STRING.next());
-            properties.putIfAbsent("template", UUID.randomUUID().toString());
+            properties.putIfAbsent("templateId", UUID.randomUUID().toString());
             properties.putIfAbsent("fromAddress", "noreply@test.com");
 
             final List<UUID> courtCentreIds = asList(randomUUID(), randomUUID());
