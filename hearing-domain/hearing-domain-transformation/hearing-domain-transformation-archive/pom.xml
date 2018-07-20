@@ -12,7 +12,7 @@
     <artifactId>hearing-domain-transformation-archive</artifactId>
 
     <properties>
-        <stream-transformation-tool.version>2.0.0</stream-transformation-tool.version>
+        <stream-transformation-tool.version>2.1.0</stream-transformation-tool.version>
     </properties>
 
     <dependencies>
