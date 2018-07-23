@@ -57,11 +57,7 @@ public class PublishResultsDelegate {
         this.referenceDataService = referenceDataService;
     }
 
-    public void setContext(final JsonEnvelope context) {
-        referenceDataService.setContext(context);
-    }
-
-    public void shareResults(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, final List<Variant> newVariants) {
+    public void shareResults(JsonEnvelope context, final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, final List<Variant> newVariants) {
 
         final List<Variant> variants = Stream.concat(
                 resultsShared.getVariantDirectory().stream().map(replaceWithInputs(newVariants)),
@@ -79,17 +75,17 @@ public class PublishResultsDelegate {
                         .setHearingDates(resultsShared.getHearing().getHearingDays())
                         .setStartDateTime(resultsShared.getHearing().getHearingDays().get(0))
                 )
-                .setVariants(mapVariantDirectory(variants))
+                .setVariants(mapVariantDirectory(context, variants))
                 .setSharedTime(resultsShared.getSharedTime());
 
         sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
                 .apply(this.objectToJsonObjectConverter.convert(shareResultsMessage)));
     }
 
-    private List<uk.gov.moj.cpp.hearing.message.shareResults.Variant> mapVariantDirectory(final List<Variant> updatedVariantDirectory) {
+    private List<uk.gov.moj.cpp.hearing.message.shareResults.Variant> mapVariantDirectory(JsonEnvelope context, final List<Variant> updatedVariantDirectory) {
         return updatedVariantDirectory.stream()
                 .map(variant -> {
-                            final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(variant.getReferenceDate(), variant.getKey().getNowsTypeId());
+                            final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(context, variant.getReferenceDate(), variant.getKey().getNowsTypeId());
                             return variant()
                                     .setKey(variant.getKey())
                                     .setStatus(variant.getValue().getStatus().toString())

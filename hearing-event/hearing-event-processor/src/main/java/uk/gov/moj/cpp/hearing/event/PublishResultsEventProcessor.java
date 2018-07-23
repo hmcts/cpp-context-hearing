@@ -57,9 +57,7 @@ public class PublishResultsEventProcessor {
 
         adjournHearingDelegate.execute(resultsShared, event);
 
-        this.nowsGenerator.setContext(event);
-
-        final List<Nows> nows = nowsGenerator.createNows(resultsShared);
+        final List<Nows> nows = nowsGenerator.createNows(event, resultsShared);
 
         List<Variant> newVariants = emptyList();
 
@@ -72,8 +70,6 @@ public class PublishResultsEventProcessor {
 
         updateResultLineStatusDelegate.updateResultLineStatus(sender, event, resultsShared);
 
-        publishResultsDelegate.setContext(event);
-
-        publishResultsDelegate.shareResults(sender, event, resultsShared, newVariants);
+        publishResultsDelegate.shareResults(event, sender, event, resultsShared, newVariants);
     }
 }

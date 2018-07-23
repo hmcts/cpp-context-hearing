@@ -85,9 +85,7 @@ public class NowsReferenceDataLoaderTest {
 
         when(requester.request(any())).thenReturn(resultEnvelope);
 
-        target.setContext(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL));
-
-        AllNows actual = target.loadAllNowsReference(referenceDate);
+        AllNows actual = target.loadAllNowsReference(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
 
         assertThat(actual.getNows().get(0), BeanMatcher.isBean(NowDefinition.class)
                 .with(NowDefinition::getId, is(data.getNows().get(0).getId()))

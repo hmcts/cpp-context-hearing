@@ -8,11 +8,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public interface ReferenceDataService {
-    NowDefinition getNowDefinitionByPrimaryResultDefinitionId(LocalDate referenceDate, UUID resultDefinitionId);
+    NowDefinition getNowDefinitionByPrimaryResultDefinitionId(JsonEnvelope context, LocalDate referenceDate, UUID resultDefinitionId);
 
-    NowDefinition getNowDefinitionById(LocalDate referenceDate, UUID id);
+    NowDefinition getNowDefinitionById(JsonEnvelope context, LocalDate referenceDate, UUID id);
 
-    ResultDefinition getResultDefinitionById(LocalDate referenceDate, UUID id);
-
-    void setContext(JsonEnvelope jsonEnvelope);
+    ResultDefinition getResultDefinitionById(JsonEnvelope context, LocalDate referenceDate, UUID id);
 }

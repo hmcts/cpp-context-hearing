@@ -101,7 +101,7 @@ public class GenerateNowsDelegateTest {
 
         final NowDefinition nowDefinition = standardNowDefinition();
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
                 .thenReturn(nowDefinition);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
@@ -232,7 +232,7 @@ public class GenerateNowsDelegateTest {
             d.setText(null);
         });
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
                 .thenReturn(nowDefinition);
 
         target.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
@@ -260,7 +260,7 @@ public class GenerateNowsDelegateTest {
             d.getResultDefinitions().forEach(l -> l.setText(null));
         });
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
                 .thenReturn(nowDefinition);
 
         target.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),

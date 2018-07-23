@@ -47,11 +47,7 @@ public class NowsGenerator {
         this.referenceDataService = referenceDataService;
     }
 
-    public void setContext(final JsonEnvelope context) {
-        referenceDataService.setContext(context);
-    }
-
-    public List<Nows> createNows(final ResultsShared resultsShared) {
+    public List<Nows> createNows(final JsonEnvelope context, final ResultsShared resultsShared) {
 
         final GenerateVariantDecisionMakerFactory generateVariantDecisionMakerFactory = new GenerateVariantDecisionMakerFactory()
                 .setVariantDirectory(resultsShared.getVariantDirectory())
@@ -71,14 +67,14 @@ public class NowsGenerator {
                             .filter(resultLine -> resultLine.getDefendantId().equals(defendant.getId()))
                             .collect(toList());
 
-                    nows.addAll(createNowsForDefendant(defendant, completedResultLines4Defendant, generateVariantDecisionMakerFactory));
+                    nows.addAll(createNowsForDefendant(context, defendant, completedResultLines4Defendant, generateVariantDecisionMakerFactory));
                 }
         );
 
         return nows;
     }
 
-    private List<Nows> createNowsForDefendant(final Defendant defendant,
+    private List<Nows> createNowsForDefendant(final JsonEnvelope context, final Defendant defendant,
                                               final List<CompletedResultLine> resultLines,
                                               final GenerateVariantDecisionMakerFactory generateVariantDecisionMakerFactory) {
 
@@ -88,7 +84,7 @@ public class NowsGenerator {
 
         final List<Nows> results = new ArrayList<>();
 
-        for (final NowDefinition nowDefinition : findNowDefinitions(resultLines)) {
+        for (final NowDefinition nowDefinition : findNowDefinitions(context, resultLines)) {
 
             if (anyMandatoryResultLineNotPresent(completedResultDefinitionIds, nowDefinition)) {
                 LOGGER.info("aborting NOW generation {} for defendant {} as not all mandatory results are present", defendant.getId(), nowDefinition.getId());
@@ -102,7 +98,7 @@ public class NowsGenerator {
             final List<CompletedResultLine> resultLines4Now = resultLines.stream()
                     .filter(l -> resultDefinitionIds4Now.contains(l.getResultDefinitionId()))
                     .collect(toList());
-            final Nows nows = createNow(nowDefinition, resultLines4Now, defendant.getId(),
+            final Nows nows = createNow(context, nowDefinition, resultLines4Now, defendant.getId(),
                     generateVariantDecisionMakerFactory.buildFor(defendant.getId(),
                             nowDefinition));
             if (!nows.getMaterials().isEmpty()) {
@@ -112,14 +108,14 @@ public class NowsGenerator {
         return results;
     }
 
-    private Nows createNow(final NowDefinition nowDefinition,
+    private Nows createNow(final JsonEnvelope context, final NowDefinition nowDefinition,
                            final List<CompletedResultLine> resultLines4Now, final UUID defendantId,
                            final GenerateVariantDecisionMaker generateVariantDecisionMaker) {
 
         //The userGroups of the prompts are not bounded by the userGroups of the resultDefinition.  I'm told that the userGroups
         //of the resultDefinition is more of a default for when no prompts are present.
 
-        final Map<NowVariant, List<String>> variantToUserGroupsMappings = calculateVariants(resultLines4Now);
+        final Map<NowVariant, List<String>> variantToUserGroupsMappings = calculateVariants(context, resultLines4Now);
 
         final List<Material> materials = new ArrayList<>();
 
@@ -138,7 +134,7 @@ public class NowsGenerator {
 
             final List<NowResult> nowResults = resultLines4Variant.stream()
                     .map(resultLine -> {
-                        final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(resultLine.getOrderedDate(),
+                        final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(context, resultLine.getOrderedDate(),
                                 resultLine.getResultDefinitionId());
 
                         final List<PromptRef> promptRefs = resultDefinition.getPrompts().stream()
@@ -179,13 +175,13 @@ public class NowsGenerator {
                 .setReferenceDate(nowDefinition.getReferenceDate());
     }
 
-    private Map<NowVariant, List<String>> calculateVariants(final List<CompletedResultLine> resultLines4Now) {
+    private Map<NowVariant, List<String>> calculateVariants(final JsonEnvelope context, final List<CompletedResultLine> resultLines4Now) {
         final Map<NowVariant, List<String>> variantToUserGroupsMappings = new HashMap<>();
 
-        for (final String userGroup : extractUserGroupsFromResultLinesAndPrompts(resultLines4Now)) {
+        for (final String userGroup : extractUserGroupsFromResultLinesAndPrompts(context, resultLines4Now)) {
 
             final Set<UUID> resultDefinitionsIds4UserGroup = resultLines4Now.stream().map(
-                    resultLine -> referenceDataService.getResultDefinitionById(resultLine.getOrderedDate(), resultLine.getResultDefinitionId()))
+                    resultLine -> referenceDataService.getResultDefinitionById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId()))
                     .filter(resultDefinition -> resultDefinition.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)) ||
                             resultDefinition.getPrompts().stream().anyMatch(p -> p.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
                     )
@@ -193,7 +189,7 @@ public class NowsGenerator {
                     .collect(toSet());
 
             final Set<UUID> resultPromptIds4UserGroup = resultLines4Now.stream()
-                    .map(resultLine -> referenceDataService.getResultDefinitionById(resultLine.getOrderedDate(), resultLine.getResultDefinitionId()))
+                    .map(resultLine -> referenceDataService.getResultDefinitionById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId()))
                     .flatMap(resultDefinition -> resultDefinition.getPrompts().stream())
                     .filter(resultPrompt -> resultPrompt.getUserGroups().stream().anyMatch(ug -> ug.equals(userGroup)))
                     .map(Prompt::getId)
@@ -205,13 +201,13 @@ public class NowsGenerator {
         return variantToUserGroupsMappings;
     }
 
-    private Set<String> extractUserGroupsFromResultLinesAndPrompts(
-                    final List<CompletedResultLine> resultLines) {
+    private Set<String> extractUserGroupsFromResultLinesAndPrompts(final JsonEnvelope context,
+                                                                   final List<CompletedResultLine> resultLines) {
 
         return resultLines.stream()
                 .flatMap(resultLine -> {
                             final ResultDefinition resultDefinition = referenceDataService
-                                    .getResultDefinitionById(resultLine.getOrderedDate(),
+                                    .getResultDefinitionById(context, resultLine.getOrderedDate(),
                                             resultLine.getResultDefinitionId());
 
                             return Stream.concat(
@@ -223,10 +219,10 @@ public class NowsGenerator {
                 ).collect(toSet());
     }
 
-    private Set<NowDefinition> findNowDefinitions(final List<CompletedResultLine> resultLines) {
+    private Set<NowDefinition> findNowDefinitions(final JsonEnvelope context, final List<CompletedResultLine> resultLines) {
         return resultLines.stream()
                 .map(resultLine -> referenceDataService
-                        .getNowDefinitionByPrimaryResultDefinitionId(
+                        .getNowDefinitionByPrimaryResultDefinitionId(context,
                                 resultLine.getOrderedDate(),
                                 resultLine.getResultDefinitionId()))
                 .filter(Objects::nonNull)

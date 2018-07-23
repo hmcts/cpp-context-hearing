@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -86,7 +87,7 @@ public class PublishResultsEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        when(nowsGenerator.createNows(Mockito.any())).thenReturn(nows);
+        when(nowsGenerator.createNows(eq(event), Mockito.any())).thenReturn(nows);
 
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
 
@@ -98,7 +99,7 @@ public class PublishResultsEventProcessorTest {
 
         verify(saveNowVariantsDelegate).saveNowsVariants(sender, event, nows, resultsShared);
 
-        verify(publishResultsDelegate).shareResults(sender, event, resultsShared, resultsShared.getVariantDirectory());
+        verify(publishResultsDelegate).shareResults(event, sender, event, resultsShared, resultsShared.getVariantDirectory());
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
     }
@@ -113,7 +114,7 @@ public class PublishResultsEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        when(nowsGenerator.createNows(Mockito.any())).thenReturn(nows);
+        when(nowsGenerator.createNows(eq(event), Mockito.any())).thenReturn(nows);
 
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
 
@@ -123,7 +124,7 @@ public class PublishResultsEventProcessorTest {
 
         verifyNoMoreInteractions(generateNowsDelegate, saveNowVariantsDelegate);
 
-        verify(publishResultsDelegate).shareResults(sender, event, resultsShared, Collections.emptyList());
+        verify(publishResultsDelegate).shareResults(event, sender, event, resultsShared, Collections.emptyList());
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 

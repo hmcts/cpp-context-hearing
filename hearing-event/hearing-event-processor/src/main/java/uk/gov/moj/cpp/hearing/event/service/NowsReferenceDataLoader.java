@@ -21,8 +21,6 @@ public class NowsReferenceDataLoader {
 
     private static final String ON_QUERY_PARAMETER = "on";
 
-    private JsonEnvelope context;
-
     @Inject
     @ServiceComponent(Component.EVENT_PROCESSOR)
     private Requester requester;
@@ -33,11 +31,7 @@ public class NowsReferenceDataLoader {
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-    public void setContext(JsonEnvelope context) {
-        this.context = context;
-    }
-
-    public AllNows loadAllNowsReference(LocalDate localDate) {
+    public AllNows loadAllNowsReference(JsonEnvelope context, LocalDate localDate) {
 
         final String strLocalDate = localDate.toString();
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_NOWS_REQUEST_ID)
@@ -52,7 +46,7 @@ public class NowsReferenceDataLoader {
         return allNows;
     }
 
-    public AllResultDefinitions loadAllResultDefinitions(LocalDate localDate) {
+    public AllResultDefinitions loadAllResultDefinitions(JsonEnvelope context, LocalDate localDate) {
 
         final String strLocalDate = localDate.toString();
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_RESULT_DEFINITIONS_REQUEST_ID)

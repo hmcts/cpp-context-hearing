@@ -10,7 +10,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Al
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -36,9 +35,9 @@ public class NowsReferenceCacheTest {
 
         final LocalDate referenceDate = LocalDate.now();
 
-        when(nowsReferenceDataLoader.loadAllNowsReference(referenceDate)).thenReturn(allNows);
+        when(nowsReferenceDataLoader.loadAllNowsReference(null, referenceDate)).thenReturn(allNows);
 
-        final AllNows results = target.getAllNows(referenceDate);
+        final AllNows results = target.getAllNows(null, referenceDate);
 
         assertThat(results, is(allNows));
     }
@@ -53,9 +52,9 @@ public class NowsReferenceCacheTest {
 
         final LocalDate referenceDate = LocalDate.now();
 
-        when(nowsReferenceDataLoader.loadAllResultDefinitions(referenceDate)).thenReturn(allResultDefinitions);
+        when(nowsReferenceDataLoader.loadAllResultDefinitions(null, referenceDate)).thenReturn(allResultDefinitions);
 
-        final ResultDefinition results = target.getResultDefinitionById(referenceDate, allResultDefinitions.getResultDefinitions().get(0).getId());
+        final ResultDefinition results = target.getResultDefinitionById(null, referenceDate, allResultDefinitions.getResultDefinitions().get(0).getId());
 
         assertThat(results, is(allResultDefinitions.getResultDefinitions().get(0)));
     }
@@ -66,9 +65,9 @@ public class NowsReferenceCacheTest {
 
         final LocalDate referenceDate = LocalDate.now();
 
-        when(nowsReferenceDataLoader.loadAllResultDefinitions(referenceDate)).thenReturn(allResultDefinitions);
+        when(nowsReferenceDataLoader.loadAllResultDefinitions(null, referenceDate)).thenReturn(allResultDefinitions);
 
-        final ResultDefinition results = target.getResultDefinitionById(referenceDate, randomUUID());
+        final ResultDefinition results = target.getResultDefinitionById(null, referenceDate, randomUUID());
 
         assertThat(results, nullValue());
     }

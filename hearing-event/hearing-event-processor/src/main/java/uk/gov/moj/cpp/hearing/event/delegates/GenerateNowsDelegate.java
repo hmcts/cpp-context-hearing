@@ -72,7 +72,7 @@ public class GenerateNowsDelegate {
                 .setHearing(
                         translateReferenceData(resultsShared)
                                 .setNows(nows)
-                                .setNowTypes(findNowDefinitions(resultsShared.getCompletedResultLines())
+                                .setNowTypes(findNowDefinitions(event, resultsShared.getCompletedResultLines())
                                         .stream()
                                         .map(nowDefinition -> {
 
@@ -255,9 +255,9 @@ public class GenerateNowsDelegate {
                 String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors());
     }
 
-    private Set<NowDefinition> findNowDefinitions(final List<CompletedResultLine> resultLines) {
+    private Set<NowDefinition> findNowDefinitions(final JsonEnvelope context, final List<CompletedResultLine> resultLines) {
         return resultLines.stream()
-                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(
+                .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(context,
                         resultLine.getOrderedDate(),
                         resultLine.getResultDefinitionId()))
                 .filter(Objects::nonNull)

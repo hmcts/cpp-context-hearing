@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -108,10 +109,10 @@ public class PublishResultsDelegateTest {
         );
 
         when(referenceDataService.getNowDefinitionById(
-                newVariants.get(0).getReferenceDate(),
+                null, newVariants.get(0).getReferenceDate(),
                 nowDefinition.getId())).thenReturn(nowDefinition);
 
-        publishResultsDelegate.shareResults(sender,
+        publishResultsDelegate.shareResults(null, sender,
                 envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared)),
                 resultsShared.it(), newVariants);
 

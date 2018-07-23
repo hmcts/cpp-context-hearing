@@ -20,7 +20,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-
 @SuppressWarnings("squid:S00112")
 @Startup
 @ApplicationScoped
@@ -29,11 +28,14 @@ public class NowsReferenceCache {
     @Inject
     private NowsReferenceDataLoader nowsReferenceDataLoader;
 
+    private ThreadLocal<JsonEnvelope> context = new ThreadLocal<>();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsReferenceCache.class);
 
     private enum Type {
         NOWS, RESULT_DEFINITIONS
     }
+
     private final LoadingCache<CacheKey, Object> cache = CacheBuilder.newBuilder()
             .refreshAfterWrite(1, TimeUnit.DAYS)
             .expireAfterAccess(4, TimeUnit.HOURS)
@@ -43,24 +45,17 @@ public class NowsReferenceCache {
                 @Override
                 public Object load(CacheKey key) {
                     if (Type.NOWS.equals(key.getType())) {
-                        nowsReferenceDataLoader.setContext(context);
-                        return nowsReferenceDataLoader.loadAllNowsReference(key.getReferenceDate());
+                        return nowsReferenceDataLoader.loadAllNowsReference(context.get(), key.getReferenceDate());
                     } else if (Type.RESULT_DEFINITIONS.equals(key.getType())) {
-                        nowsReferenceDataLoader.setContext(context);
-                        return nowsReferenceDataLoader.loadAllResultDefinitions(key.getReferenceDate());
+                        return nowsReferenceDataLoader.loadAllResultDefinitions(context.get(), key.getReferenceDate());
                     }
                     return null;
                 }
             });
 
-    private JsonEnvelope context;
-
-    public void setContext(JsonEnvelope context) {
-        this.context = context;
-    }
-
-    public ResultDefinition getResultDefinitionById(LocalDate referenceDate, UUID resultDefinitionId) {
+    public ResultDefinition getResultDefinitionById(JsonEnvelope context, LocalDate referenceDate, UUID resultDefinitionId) {
         try {
+            this.context.set(context);
             final AllResultDefinitions allResultDefinitions = (AllResultDefinitions) cache.get(new CacheKey(Type.RESULT_DEFINITIONS, referenceDate));
 
             return allResultDefinitions.getResultDefinitions().stream()
@@ -70,15 +65,20 @@ public class NowsReferenceCache {
         } catch (ExecutionException executionException) {
             LOGGER.error("getResultDefinitionById reference data service not available", executionException);
             throw new RuntimeException("unrecoverable system error", executionException);
+        } finally {
+            this.context.remove();
         }
     }
 
-    public AllNows getAllNows(LocalDate referenceDate) {
+    public AllNows getAllNows(JsonEnvelope context, LocalDate referenceDate) {
+        this.context.set(context);
         try {
             return (AllNows) cache.get(new CacheKey(Type.NOWS, referenceDate));
         } catch (ExecutionException executionException) {
             LOGGER.error("getAllNows reference data service not available", executionException);
             throw new RuntimeException("unrecoverable system error", executionException);
+        } finally {
+            this.context.remove();
         }
     }
 
