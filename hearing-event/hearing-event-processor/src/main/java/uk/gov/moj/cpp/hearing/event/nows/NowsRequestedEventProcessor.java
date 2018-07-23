@@ -45,11 +45,14 @@ import org.slf4j.LoggerFactory;
 @ServiceComponent(EVENT_PROCESSOR)
 public class NowsRequestedEventProcessor {
 
-    public static final String FAILED = "FAILED";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedEventProcessor.class);
+
+    private static final String FAILED = "FAILED";
     public static final String HEARING_UPDATE_NOWS_MATERIAL_STATUS = "hearing.command.update-nows-material-status";
     public static final String RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS = "resultinghmps.update-nows-material-status";
-    static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-    private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedEventProcessor.class);
+
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
     private final Enveloper enveloper;
     private final Sender sender;
     private final DocmosisService docmosisService;
@@ -116,6 +119,7 @@ public class NowsRequestedEventProcessor {
         final JsonObject metadata = createObjectBuilder().add("fileName", filename).build();
         try {
             final UUID fileId = fileStorer.store(metadata, fileContent);
+            LOGGER.info("Stored material {} in file store {}", materialId, fileId);
             uploadMaterialService.uploadFile(userId, fromString(hearingId), materialId, fileId, nowsDocumentOrder);
 
         } catch (final FileServiceException e) {

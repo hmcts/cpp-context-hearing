@@ -45,7 +45,7 @@ public class DocmosisService {
             DocumentProcessor.renderDoc(templateId, generateDataProvder(jsonData), conversionInstruction, byteArrayOutputStream);
             return byteArrayOutputStream.toByteArray();
         } catch (IOException | TemplateStoreException | ProcessingException | JSONException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getMessage(), e);
             throw new DocumentGenerationException(e);
         }
     }
