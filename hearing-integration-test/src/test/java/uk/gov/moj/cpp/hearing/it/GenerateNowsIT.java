@@ -18,11 +18,24 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
+
+import uk.gov.justice.services.messaging.JsonObjectMetadata;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
+import uk.gov.moj.cpp.hearing.utils.NotifyStub;
+import uk.gov.moj.cpp.hearing.utils.QueueUtil;
+import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,15 +54,6 @@ import org.junit.Test;
 
 import com.jayway.awaitility.Awaitility;
 
-import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.utils.NotifyStub;
-import uk.gov.moj.cpp.hearing.utils.QueueUtil;
-import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
 
 @SuppressWarnings("unchecked")
 public class GenerateNowsIT extends AbstractIT {
@@ -60,6 +64,7 @@ public class GenerateNowsIT extends AbstractIT {
     private static final String CASEURN = "CASE12345";
     private static final String ORIGINATOR = "originator";
     private static final String ORIGINATOR_VALUE = "court";
+    private static final String DOCUMENT_TEXT = STRING.next();
 
     @Test
     public void shouldAddUpdateNows() throws IOException {
@@ -94,6 +99,7 @@ public class GenerateNowsIT extends AbstractIT {
                 .withFilter(isJson(withJsonPath("$.hearing.id", is(hearing.getHearingId().toString()))));
 
         NotifyStub.stubNotifications();
+        DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
 
         final String nowsTypeId = subscription0.getNowTypeIds().get(0).toString();
         makeCommand(requestSpec, "hearing.generate-nows")
@@ -137,6 +143,7 @@ public class GenerateNowsIT extends AbstractIT {
                         )));
 
         NotifyStub.verifyNotification(subscription0, Arrays.asList(CASEURN));
+        DocumentGeneratorStub.verifyCreate(Arrays.asList(materialId));
 
     }
 

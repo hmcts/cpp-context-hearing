@@ -6,26 +6,26 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.moj.cpp.hearing.activiti.common.JsonHelper.assembleEnvelopeWithPayloadAndMetaDetails;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
-import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_CONTEXT;
-import static uk.gov.moj.cpp.hearing.event.nows.service.NowsTemplateRegistrationService.TEMPLATE_IDENTIFIER;
 
 import uk.gov.justice.services.common.converter.JSONObjectValueObfuscator;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.fileservice.api.FileServiceException;
 import uk.gov.justice.services.fileservice.api.FileStorer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nows.order.NowsDocumentOrder;
-import uk.gov.moj.cpp.hearing.event.nows.service.DocmosisService;
 import uk.gov.moj.cpp.hearing.event.nows.service.UploadMaterialService;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
+import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClientProducer;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,18 +55,23 @@ public class NowsRequestedEventProcessor {
 
     private final Enveloper enveloper;
     private final Sender sender;
-    private final DocmosisService docmosisService;
+    private final DocumentGeneratorClientProducer documentGeneratorClientProducer;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
     private final FileStorer fileStorer;
     private final UploadMaterialService uploadMaterialService;
 
+
     @Inject
-    public NowsRequestedEventProcessor(final Enveloper enveloper, final Sender sender, final DocmosisService docmosisService,
+    private SystemUserProvider systemUserProvider;
+
+
+    @Inject
+    public NowsRequestedEventProcessor(final Enveloper enveloper, final Sender sender, final DocumentGeneratorClientProducer documentGeneratorClientProducer,
                                        final JsonObjectToObjectConverter jsonObjectToObjectConverter, final ObjectToJsonObjectConverter objectToJsonObjectConverter, final FileStorer fileStorer, final UploadMaterialService uploadMaterialService) {
         this.enveloper = enveloper;
         this.sender = sender;
-        this.docmosisService = docmosisService;
+        this.documentGeneratorClientProducer = documentGeneratorClientProducer;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.fileStorer = fileStorer;
@@ -88,12 +93,13 @@ public class NowsRequestedEventProcessor {
             LOGGER.info("Input for docmosis order {}", JSONObjectValueObfuscator.obfuscated(objectToJsonObjectConverter.convert(nowsDocumentOrder)));
 
             try {
-                final byte[] resultOrderAsByteArray = docmosisService.generateDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), TEMPLATE_CONTEXT, TEMPLATE_IDENTIFIER);
-                final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));
                 final NowsNotificationDocumentState nowsNotificationDocumentState = nowsDocumentOrderToNotificationState.get(nowsDocumentOrder);
+                final String templateName = getTemplateName(nowsRequested, nowsNotificationDocumentState);
+                final byte[] resultOrderAsByteArray = documentGeneratorClientProducer.documentGeneratorClient().generatePdfDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), templateName, userId);
+                final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));
                 addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
                         userId, hearingId, fromString(nowsDocumentOrder.getMaterialId()), nowsNotificationDocumentState);
-            } catch (RuntimeException e) {
+            } catch (IOException | RuntimeException e) {
                 LOGGER.error("Error while uploading document generation or upload ", e);
                 updateStatus(hearingId, nowsDocumentOrder.getMaterialId(), userId.toString(), FAILED, HEARING_UPDATE_NOWS_MATERIAL_STATUS);
                 updateStatus(hearingId, nowsDocumentOrder.getMaterialId(), userId.toString(), FAILED, RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS);
@@ -111,6 +117,14 @@ public class NowsRequestedEventProcessor {
                         .add("materialId", envelope.payloadAsJsonObject().getJsonString("materialId"))
                         .build()
                 ));
+    }
+
+    private String getTemplateName(NowsRequested nowsRequested, NowsNotificationDocumentState nowsNotificationDocumentState) {
+        final UUID nowsTypeId = nowsNotificationDocumentState.getNowsTypeId();
+        return nowsRequested.getHearing().getNowTypes().stream()
+                .filter(nt -> nowsTypeId.toString().equals(nt.getId()))
+                .findFirst()
+                .map(nt -> nt.getTemplateName()).orElseThrow(() -> new NowsTemplateNameNotFoundException(String.format("Could not find templateName for nowsTypeId: %s", nowsTypeId)));
     }
 
     private void addDocumentToMaterial(final String filename, final InputStream fileContent,
