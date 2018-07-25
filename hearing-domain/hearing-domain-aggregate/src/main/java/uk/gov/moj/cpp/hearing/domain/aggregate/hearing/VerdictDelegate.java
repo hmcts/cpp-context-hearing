@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -43,12 +44,12 @@ public class VerdictDelegate  implements Serializable {
                 .withVerdictTypeId(verdict.getValue().getVerdictTypeId())
                 .withCategory(verdict.getValue().getCategory())
                 .withCategoryType(verdict.getValue().getCategoryType())
-                .withLesserOffence(verdict.getValue().getLesserOffence())
+                .withLesserOffence(Optional.ofNullable(verdict.getValue().getLesserOffence()).orElse(null))
                 .withCode(verdict.getValue().getCode())
                 .withDescription(verdict.getValue().getDescription())
-                .withNumberOfJurors(verdict.getNumberOfJurors())
-                .withNumberOfSplitJurors(verdict.getNumberOfSplitJurors())
-                .withUnanimous(verdict.getUnanimous())
+                .withNumberOfJurors(Optional.ofNullable(verdict.getNumberOfJurors()).orElse(null))
+                .withNumberOfSplitJurors(Optional.ofNullable(verdict.getNumberOfSplitJurors()).orElse(null))
+                .withUnanimous(Optional.ofNullable(verdict.getUnanimous()).orElse(null))
                 .withVerdictDate(verdict.getVerdictDate())
                 .build()
         );

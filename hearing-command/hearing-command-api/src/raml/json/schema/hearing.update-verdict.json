@@ -113,7 +113,14 @@
         "description": {
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "id",
+        "category",
+        "categoryType",
+        "verdictTypeId",
+        "description"
+      ]
     }
   }
 }

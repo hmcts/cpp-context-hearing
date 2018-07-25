@@ -450,6 +450,40 @@ public class NewModelHearingAggregateTest {
     }
 
     @Test
+    public void updateVerdict_shouldHandleOptionalVerdictValues() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final Verdict verdict = Verdict.builder()
+                .withId(randomUUID())
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withValue(VerdictValue.builder()
+                        .withId(randomUUID())
+                        .withDescription(STRING.next())
+                        .withCode(STRING.next())
+                        .withCategory(STRING.next())
+                        .withCategoryType(STRING.next())
+                        .withVerdictTypeId(randomUUID())
+                )
+                .build();
+
+        final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+
+        final VerdictUpsert verdictUpsert = (VerdictUpsert) hearingAggregate.updateVerdict(
+                initiateHearingCommand.getHearing().getId(),
+                initiateHearingCommand.getCases().get(0).getCaseId(),
+                initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
+                verdict
+        ).collect(Collectors.toList()).get(0);
+
+        assertThat(verdictUpsert.getLesserOffence(), Matchers.is(verdict.getValue().getLesserOffence()));
+        assertThat(verdictUpsert.getNumberOfJurors(), Matchers.is(verdict.getNumberOfJurors()));
+        assertThat(verdictUpsert.getNumberOfSplitJurors(), Matchers.is(verdict.getNumberOfSplitJurors()));
+        assertThat(verdictUpsert.getUnanimous(), Matchers.is(verdict.getUnanimous()));
+    }
+
+    @Test
     public void updateDefendantDetails_shouldIgnore_when_resultShared() {
 
         final int expected = 0;
