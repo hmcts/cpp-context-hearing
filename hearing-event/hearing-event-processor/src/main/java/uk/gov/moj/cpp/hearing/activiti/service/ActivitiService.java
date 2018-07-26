@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.Execution;
@@ -28,17 +29,18 @@ public class ActivitiService {
         runtimeService.startProcessInstanceByKey(processName, processMap);
     }
 
-    public void signalProcessByActivitiIdAndFieldName(final String activityId, final String fieldName, final Object businessKey) {
-        final Execution execution = runtimeService.createExecutionQuery()
-                .activityId(activityId)
-                .variableValueEquals(fieldName, businessKey)
-                .singleResult();
-        if (execution != null && !Strings.isNullOrEmpty(execution.getId())) {
-            LOGGER.info("Nudging process: Step Name {}, Process Id {}, BusinessKey {}", activityId, execution.getId(), businessKey);
-            runtimeService.signal(execution.getId());
-        } else {
-            LOGGER.info("No process Found: Step Name {}, BusinessKey {}", activityId, businessKey);
-        }
-    }
 
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
+    public boolean signalProcessByActivitiIdAndFieldName(final String activityId,
+                    final String fieldName, final Object businessKey) {
+        final Execution execution = runtimeService.createExecutionQuery().activityId(activityId)
+                        .variableValueEquals(fieldName, businessKey).singleResult();
+        if (execution != null && !Strings.isNullOrEmpty(execution.getId())) {
+            LOGGER.info("Nudging process: Step Name {}, Process Id {}, BusinessKey {}", activityId,
+                            execution.getId(), businessKey);
+            runtimeService.signal(execution.getId());
+            return true;
+        } 
+            return false;
+    }
 }

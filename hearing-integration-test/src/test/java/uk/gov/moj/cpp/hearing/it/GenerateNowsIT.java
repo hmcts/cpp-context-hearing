@@ -10,6 +10,10 @@ import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
+import static uk.gov.justice.services.messaging.JsonMetadata.ID;
+import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
+import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -19,17 +23,6 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
-
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
-import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.utils.NotifyStub;
-import uk.gov.moj.cpp.hearing.utils.QueueUtil;
-import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -43,9 +36,20 @@ import javax.jms.MessageProducer;
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import com.jayway.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Test;
+
+import com.jayway.awaitility.Awaitility;
+
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.utils.NotifyStub;
+import uk.gov.moj.cpp.hearing.utils.QueueUtil;
+import uk.gov.moj.cpp.hearing.utils.WireMockStubUtils;
 
 @SuppressWarnings("unchecked")
 public class GenerateNowsIT extends AbstractIT {
@@ -54,6 +58,8 @@ public class GenerateNowsIT extends AbstractIT {
     private static final String USERGROUP1 = "courtAdmin";
     private static final String USERGROUP2 = "defence";
     private static final String CASEURN = "CASE12345";
+    private static final String ORIGINATOR = "originator";
+    private static final String ORIGINATOR_VALUE = "court";
 
     @Test
     public void shouldAddUpdateNows() throws IOException {
@@ -191,7 +197,7 @@ public class GenerateNowsIT extends AbstractIT {
 
     private static String getGenerateNowsCommand(final String hearingId, final String defendantId, final String materialId,
                                                  final String nowsId, final String nowsTypeId, final String sharedResultId,
-                                                 final String usergroup1, final String usergroup2, final String courtCentreId, String caseURN) throws IOException {
+                                                 final String usergroup1, final String usergroup2, final String courtCentreId, final String caseURN) throws IOException {
         return getStringFromResource("hearing.generate-nows.json")
                 .replace("HEARING_ID", hearingId)
                 .replace("DEFENDANT_ID", defendantId)
@@ -219,8 +225,7 @@ public class GenerateNowsIT extends AbstractIT {
 
     private void sendMaterialFileUploadedPublicEvent(final String materialId, final String userId) {
         final String commandName = "material.material-added";
-        final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), commandName)
-                .withUserId(userId).build();
+        final Metadata metadata = getMetadataFrom(userId, commandName);
         final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId).add(
                 "fileDetails",
                 Json.createObjectBuilder().add("alfrescoAssetId", "aGVsbG8=")
@@ -232,13 +237,19 @@ public class GenerateNowsIT extends AbstractIT {
     private void sendHearingHmpsMaterialStatusUpdatedPublicMessage(final String materialId,
                                                                    final String userId, final String hearingId) {
         final String commandName = "public.resultinghmps.event.nows-material-status-updated";
-        final Metadata metadata = JsonObjectMetadata.metadataOf(UUID.randomUUID(), commandName)
-                .withUserId(userId).build();
+        final Metadata metadata = getMetadataFrom(userId, commandName);
         final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId)
                 .add("hearingId", hearingId).add("status", "generated").build();
         QueueUtil.sendMessage(messageProducerClientPublic, commandName, payload, metadata);
     }
-
+    private Metadata getMetadataFrom(final String userId, final String commandName) {
+        return metadataFrom(Json.createObjectBuilder()
+                        .add(ORIGINATOR, ORIGINATOR_VALUE)
+                        .add(ID, randomUUID().toString())
+                        .add(USER_ID, userId)
+                        .add(NAME, commandName)
+                        .build()).build();
+    }
     @After
     public void tearDown() throws JMSException {
         messageProducerClientPublic.close();
