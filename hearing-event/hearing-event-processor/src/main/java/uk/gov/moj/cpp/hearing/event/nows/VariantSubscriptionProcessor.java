@@ -31,6 +31,13 @@ public class VariantSubscriptionProcessor {
 
         final List<Subscription> subscriptions = subscriptionClient.getAll(context, nowsNotificationDocumentState.getNowsTypeId(), LocalDate.now()).getSubscriptions();
 
+        if(subscriptions.isEmpty()) {
+            LOGGER.error("No subscription retrieved for nowTypeId - {}", nowsNotificationDocumentState.getNowsTypeId());
+        } else {
+            LOGGER.info("Displaying subscription for nowTypeId - {}", nowsNotificationDocumentState.getNowsTypeId());
+            subscriptions.forEach(subscription -> LOGGER.info(subscription.toString()));
+        }
+
         subscriptions.stream()
                 .filter(subscription -> userGroupMatch(subscription, nowsNotificationDocumentState.getUsergroups()))
                 .filter(subscription -> courtCentreMatch(subscription, nowsNotificationDocumentState.getOriginatingCourtCentreId()))
