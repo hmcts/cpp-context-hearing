@@ -14,17 +14,17 @@ public class CaseDefendantOffencesChangedCommand {
 
     private final LocalDate modifiedDate;
 
-    private final List<UpdatedOffence> updatedOffences;
+    private final List<DefendantOffences> updatedOffences;
 
-    private final List<DeletedOffence> deletedOffences;
+    private final List<DeletedOffences> deletedOffences;
 
-    private final List<AddedOffence> addedOffences;
+    private final List<DefendantOffences> addedOffences;
 
     @JsonCreator
     private CaseDefendantOffencesChangedCommand(@JsonProperty("modifiedDate") final LocalDate modifiedDate,
-                                                @JsonProperty("addedOffences") final List<AddedOffence> addedOffences,
-                                                @JsonProperty("updatedOffences") final List<UpdatedOffence> updatedOffences,
-                                                @JsonProperty("deletedOffences") final List<DeletedOffence> deletedOffences) {
+                                                @JsonProperty("addedOffences") final List<DefendantOffences> addedOffences,
+                                                @JsonProperty("updatedOffences") final List<DefendantOffences> updatedOffences,
+                                                @JsonProperty("deletedOffences") final List<DeletedOffences> deletedOffences) {
         this.modifiedDate = modifiedDate;
 
         this.updatedOffences = nonNull(updatedOffences) ? new ArrayList<>(updatedOffences) : new ArrayList<>();
@@ -38,15 +38,15 @@ public class CaseDefendantOffencesChangedCommand {
         return modifiedDate;
     }
 
-    public List<UpdatedOffence> getUpdatedOffences() {
+    public List<DefendantOffences> getUpdatedOffences() {
         return updatedOffences;
     }
 
-    public List<DeletedOffence> getDeletedOffences() {
+    public List<DeletedOffences> getDeletedOffences() {
         return deletedOffences;
     }
 
-    public List<AddedOffence> getAddedOffences() {
+    public List<DefendantOffences> getAddedOffences() {
         return addedOffences;
     }
 
@@ -58,28 +58,28 @@ public class CaseDefendantOffencesChangedCommand {
 
         private LocalDate modifiedDate;
 
-        private List<UpdatedOffence> updatedOffences;
+        private List<DefendantOffences> updatedOffences;
 
-        private List<DeletedOffence> deletedOffences;
+        private List<DeletedOffences> deletedOffences;
 
-        private List<AddedOffence> addedOffences;
+        private List<DefendantOffences> addedOffences;
 
         public Builder withModifiedDate(final LocalDate modifiedDate) {
             this.modifiedDate = modifiedDate;
             return this;
         }
 
-        public Builder withUpdateOffences(final List<UpdatedOffence> updatedOffences) {
+        public Builder withUpdateOffences(final List<DefendantOffences> updatedOffences) {
             this.updatedOffences = updatedOffences;
             return this;
         }
 
-        public Builder withDeletedOffences(final List<DeletedOffence> deletedOffences) {
+        public Builder withDeletedOffences(final List<DeletedOffences> deletedOffences) {
             this.deletedOffences = deletedOffences;
             return this;
         }
 
-        public Builder withAddedOffences(final List<AddedOffence> addedOffences) {
+        public Builder withAddedOffences(final List<DefendantOffences> addedOffences) {
             this.addedOffences = addedOffences;
             return this;
         }

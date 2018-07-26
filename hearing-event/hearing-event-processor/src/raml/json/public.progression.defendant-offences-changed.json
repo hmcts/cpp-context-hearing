@@ -12,7 +12,11 @@
           "startDate": "2010-08-01",
           "endDate": "2011-08-01",
           "count": 1,
-          "convictionDate": "2017-08-01"
+          "convictionDate": "2017-08-01",
+          "statementOfOffence": {
+            "title": "Wounding with intent",
+            "legislation": "legislation"
+          }
         },
         {
           "id": "d5e03eb8-3274-457c-9db3-e67638c0e8b0",
@@ -21,7 +25,11 @@
           "startDate": "2010-08-01",
           "endDate": "2011-08-01",
           "count": 1,
-          "convictionDate": "2017-08-01"
+          "convictionDate": "2017-08-01",
+          "statementOfOffence": {
+            "title": "Wounding with intent",
+            "legislation": "legislation"
+          }
         }
       ]
     }

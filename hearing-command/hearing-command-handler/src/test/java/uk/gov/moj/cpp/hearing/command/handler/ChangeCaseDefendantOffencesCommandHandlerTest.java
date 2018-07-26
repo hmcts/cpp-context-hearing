@@ -32,12 +32,10 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
-import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
-import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
-import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
+import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
@@ -106,11 +104,11 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
                 .withStatementOfOffence(new StatementOfOffence(STRING.next(), STRING.next()))
                 .build());
 
-        final List<AddedOffence> addedOffences = Collections.singletonList(
-                AddedOffence.builder()
+        final List<DefendantOffences> addedOffences = Collections.singletonList(
+                DefendantOffences.builder()
                         .withDefendantId(randomUUID())
                         .withCaseId(randomUUID())
-                        .withAddedOffences(offences)
+                        .withDefendantOffences(offences)
                         .build());
 
         final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = CaseDefendantOffencesChangedCommand.builder()
@@ -135,14 +133,21 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
 
     @Test
     public void testUpdateCaseDefendantOffences_Sends_OffenceUpdateAddEvent() throws EventStreamException {
+        final List<DefendantOffence> offences = Collections.singletonList( DefendantOffence.builder(randomUUID(), STRING.next(), STRING.next(), PAST_LOCAL_DATE.next(), PAST_LOCAL_DATE.next(), INTEGER.next(), PAST_LOCAL_DATE.next())
+                .withStatementOfOffence(new StatementOfOffence(STRING.next(), STRING.next()))
+                .build());
 
-        final List<BaseDefendantOffence> offences = Collections.singletonList(BaseDefendantOffence.builder().withId(randomUUID()).build());
+
+        final List<DefendantOffences> updatedOffences = Collections.singletonList(
+                DefendantOffences.builder()
+                        .withDefendantId(randomUUID())
+                        .withCaseId(randomUUID())
+                        .withDefendantOffences(offences)
+                        .build());
+
         final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = CaseDefendantOffencesChangedCommand.builder()
                 .withModifiedDate(LocalDate.now())
-                .withUpdateOffences(Collections.singletonList(
-                        UpdatedOffence.builder()
-                        .withUpdatedOffences(offences)
-                        .build()))
+                .withUpdateOffences(updatedOffences)
                 .build();
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offences"), objectToJsonObjectConverter.convert(caseDefendantOffencesChanged));
@@ -161,8 +166,8 @@ public class ChangeCaseDefendantOffencesCommandHandlerTest {
     @Test
     public void testUpdateCaseDefendantOffences_Sends_OffenceDeleteEvent() throws EventStreamException {
 
-        final List<DeletedOffence> offences = Collections.singletonList(
-                DeletedOffence.builder()
+        final List<DeletedOffences> offences = Collections.singletonList(
+                DeletedOffences.builder()
                         .withOffences(Collections.singletonList(randomUUID()))
                         .build());
 
