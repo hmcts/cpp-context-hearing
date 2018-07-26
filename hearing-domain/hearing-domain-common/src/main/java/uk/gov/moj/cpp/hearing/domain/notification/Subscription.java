@@ -75,4 +75,16 @@ public class Subscription {
     public void setNowTypeIds(List<UUID> nowTypeIds) {
         this.nowTypeIds = nowTypeIds;
     }
+
+    @Override
+    public String toString() {
+        return "Subscription{" +
+                "channel='" + channel + '\'' +
+                ", destination='" + destination + '\'' +
+                ", channelProperties=" + channelProperties +
+                ", userGroups=" + userGroups +
+                ", courtCentreIds=" + courtCentreIds +
+                ", nowTypeIds=" + nowTypeIds +
+                '}';
+    }
 }
