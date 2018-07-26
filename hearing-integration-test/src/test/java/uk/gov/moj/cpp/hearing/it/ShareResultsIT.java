@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -173,7 +174,7 @@ public class ShareResultsIT extends AbstractIT {
                         .with(ShareResultsMessage::getVariants, first(isBean(Variant.class)
                                 .with(Variant::getTemplateName, is(allNows.getFirstNowDefinition().getTemplateName()))
                                 .with(Variant::getDescription, is(allNows.getFirstNowDefinition().getName()))
-                                .with(Variant::getStatus, is("BUILDING"))
+                                .with(Variant::getStatus, anyOf(is("BUILDING"), is("GENERATED")))
                         ))
 
                 ));
@@ -228,12 +229,12 @@ public class ShareResultsIT extends AbstractIT {
                         .with(ShareResultsMessage::getVariants, first(isBean(Variant.class)
                                 .with(Variant::getTemplateName, is(allNows.getFirstNowDefinition().getTemplateName()))
                                 .with(Variant::getDescription, is(allNows.getFirstNowDefinition().getName()))
-                                .with(Variant::getStatus, is("BUILDING"))
+                                .with(Variant::getStatus, anyOf(is("BUILDING"), is("GENERATED")))
                         ))
                         .with(ShareResultsMessage::getVariants, second(isBean(Variant.class)
                                 .with(Variant::getTemplateName, is(allNows2.getFirstNowDefinition().getTemplateName()))
                                 .with(Variant::getDescription, is(allNows2.getFirstNowDefinition().getName()))
-                                .with(Variant::getStatus, is("BUILDING"))
+                                .with(Variant::getStatus, anyOf(is("BUILDING"), is("GENERATED")))
                         ))
                 ));
 
@@ -282,7 +283,7 @@ public class ShareResultsIT extends AbstractIT {
                         .with(ShareResultsMessage::getVariants, first(isBean(Variant.class)
                                 .with(Variant::getTemplateName, is(allNows.getFirstNowDefinition().getTemplateName()))
                                 .with(Variant::getDescription, is(allNows.getFirstNowDefinition().getName()))
-                                .with(Variant::getStatus, is("BUILDING"))
+                                .with(Variant::getStatus, anyOf(is("BUILDING"), is("GENERATED")))
                         ))
                 ));
 
