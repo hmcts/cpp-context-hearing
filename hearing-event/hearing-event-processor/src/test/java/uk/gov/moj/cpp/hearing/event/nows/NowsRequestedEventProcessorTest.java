@@ -28,13 +28,14 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.fileservice.api.FileServiceException;
 import uk.gov.justice.services.fileservice.api.FileStorer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nows.service.DocmosisService;
 import uk.gov.moj.cpp.hearing.event.nows.service.UploadMaterialService;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.DocumentGenerationException;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.nows.events.Person;
+import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClient;
+import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClientProducer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,7 +78,10 @@ public class NowsRequestedEventProcessorTest {
     private UploadMaterialService uploadMaterialService;
 
     @Mock
-    private DocmosisService docmosisService;
+    private DocumentGeneratorClientProducer documentGeneratorClientProducer;
+
+    @Mock
+    private DocumentGeneratorClient documentGeneratorClient;
 
     @Mock
     private FileStorer fileStorer;
@@ -120,7 +124,7 @@ public class NowsRequestedEventProcessorTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void shouldGenerateNowAndStoreInFileStore() throws IOException, FileServiceException {
+    public void shouldGenerateNowAndStoreInFileStore() throws  IOException, FileServiceException {
 
         final InputStream is = NowsRequestedToOrderConvertorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
@@ -130,7 +134,8 @@ public class NowsRequestedEventProcessorTest {
                 objectToJsonObjectConverter.convert(nowsRequested));
 
         final byte[] bytesIn = new byte[2];
-        when(docmosisService.generateDocument(any(), any(), any())).thenReturn(bytesIn);
+        when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
+        when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenReturn(bytesIn);
         when(fileStorer.store(Mockito.any(JsonObject.class), Mockito.any(InputStream.class)))
                 .thenReturn(fileId);
         this.nowsRequestedEventProcessor.processNowsRequested(event);
@@ -160,7 +165,7 @@ public class NowsRequestedEventProcessorTest {
     }
 
     @Test
-    public void shouldNotGenerateNowOnDocumentGenerationException() throws IOException, FileServiceException {
+    public void shouldNotGenerateNowOnDocumentGenerationException() throws  IOException, FileServiceException {
 
         final InputStream is = NowsRequestedToOrderConvertorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
@@ -169,7 +174,8 @@ public class NowsRequestedEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
                 objectToJsonObjectConverter.convert(nowsRequested));
 
-        when(docmosisService.generateDocument(any(), any(), any())).thenThrow(new DocumentGenerationException());
+        when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
+        when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenThrow(new DocumentGenerationException());
         this.nowsRequestedEventProcessor.processNowsRequested(event);
 
         verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
@@ -198,7 +204,7 @@ public class NowsRequestedEventProcessorTest {
     }
 
     @Test
-    public void shouldNotGenerateNowOnFileUploadException() throws IOException, FileServiceException {
+    public void shouldNotGenerateNowOnFileUploadException() throws  IOException, FileServiceException {
 
         final InputStream is = NowsRequestedToOrderConvertorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
@@ -208,7 +214,8 @@ public class NowsRequestedEventProcessorTest {
                 objectToJsonObjectConverter.convert(nowsRequested));
 
         final byte[] bytesIn = new byte[2];
-        when(docmosisService.generateDocument(any(), any(), any())).thenReturn(bytesIn);
+        when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
+        when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenReturn(bytesIn);
         doThrow(new FileUploadException()).when(fileStorer).store(any(), any());
         this.nowsRequestedEventProcessor.processNowsRequested(event);
 

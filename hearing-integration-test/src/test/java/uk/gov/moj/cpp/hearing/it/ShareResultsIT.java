@@ -32,9 +32,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 
-import org.hamcrest.core.Is;
-import org.junit.Before;
-import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
@@ -56,14 +53,21 @@ import uk.gov.moj.cpp.hearing.message.shareResults.Variant;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.hamcrest.core.Is;
+import org.junit.Before;
+import org.junit.Test;
+
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
+
+    public static final String DOCUMENT_TEXT = "someDocumentText";
 
     @Before
     public void begin() {
@@ -153,6 +157,7 @@ public class ShareResultsIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(ShareResultsMessage.class, isBean(ShareResultsMessage.class)

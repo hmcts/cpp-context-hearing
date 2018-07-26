@@ -335,7 +335,7 @@
     "nows": [
       {
         "id": "4005807c9-004c-4b75-9cfd-29757fd4fd78",
-        "nowsTypeId" :"7005807c9-004c-4b75-9cfd-29757fd4fd78",
+        "nowsTypeId" :"448da731-b85d-40be-8a0f-e4e5b8eeef63",
         "nowsTemplateName": "SingleTemplate",
         "defendantId": "3005807c9-004c-4b75-9cfd-29757fd4fd78",
         "materials": [
@@ -386,7 +386,7 @@
     ],
     "nowTypes": [
       {
-        "id" :"7005807c9-004c-4b75-9cfd-29757fd4fd78",
+        "id" :"448da731-b85d-40be-8a0f-e4e5b8eeef63",
         "templateName": "SingleTemplate",
         "description": "Imprisonment Order",
         "rank": 1,
