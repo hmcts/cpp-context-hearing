@@ -6,11 +6,11 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
 import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
-import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
-import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
+import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
@@ -28,8 +28,8 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
 
         final CaseDefendantOffencesChangedCommand command = convertToObject(envelope, CaseDefendantOffencesChangedCommand.class);
 
-        for (AddedOffence addedOffence : command.getAddedOffences()) {
-            for (BaseDefendantOffence offence : addedOffence.getOffences()) {
+        for (DefendantOffences addedOffence : command.getAddedOffences()) {
+            for (DefendantOffence offence : addedOffence.getOffences()) {
                 aggregate(DefendantAggregate.class,
                         addedOffence.getDefendantId(),
                         envelope,
@@ -37,8 +37,8 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
             }
         }
 
-        for (UpdatedOffence updateOffence : command.getUpdatedOffences()) {
-            for (BaseDefendantOffence offence : updateOffence.getOffences()) {
+        for (DefendantOffences updateOffence : command.getUpdatedOffences()) {
+            for (DefendantOffence offence : updateOffence.getOffences()) {
                 aggregate(OffenceAggregate.class,
                         offence.getId(),
                         envelope,
@@ -46,7 +46,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
             }
         }
 
-        for (DeletedOffence deletedOffence : command.getDeletedOffences()) {
+        for (DeletedOffences deletedOffence : command.getDeletedOffences()) {
             for (UUID offenceId : deletedOffence.getOffences()) {
                 aggregate(OffenceAggregate.class,
                         offenceId,

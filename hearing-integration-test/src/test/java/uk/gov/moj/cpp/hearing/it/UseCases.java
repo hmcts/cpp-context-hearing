@@ -371,7 +371,7 @@ public class UseCases {
     public static CaseDefendantOffencesChangedCommand addOffence(UUID hearingId, Consumer<CaseDefendantOffencesChangedCommand> consumer) throws Exception {
 
         CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand = with(minimalCaseDefendantDetailsChangedTemplate(), command -> {
-            command.getAddedOffences().add(TestTemplates.CaseDefendantDetailsChangedCommandTemplates.addedOffence());
+            command.getAddedOffences().add(TestTemplates.CaseDefendantDetailsChangedCommandTemplates.defendantOffences());
         });
 
         consumer.accept(caseDefendantOffencesChangedCommand);
@@ -390,7 +390,7 @@ public class UseCases {
         final String eventName = "public.progression.defendant-offences-changed";
 
         CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand = with(minimalCaseDefendantDetailsChangedTemplate(), command -> {
-            command.getUpdatedOffences().add(TestTemplates.CaseDefendantDetailsChangedCommandTemplates.updatedOffence());
+            command.getUpdatedOffences().add(TestTemplates.CaseDefendantDetailsChangedCommandTemplates.defendantOffences());
         });
 
         consumer.accept(caseDefendantOffencesChangedCommand);

@@ -6,16 +6,16 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class DeletedOffence {
+public class DeletedOffences {
     private  UUID defendantId;
     private  UUID caseId;
     private  List<UUID> offences;
 
 
     @JsonCreator
-    public DeletedOffence(@JsonProperty("defendantId") final UUID defendantId,
-                          @JsonProperty("caseId") final UUID caseId,
-                          @JsonProperty("offences") final List<UUID> offences) {
+    public DeletedOffences(@JsonProperty("defendantId") final UUID defendantId,
+                           @JsonProperty("caseId") final UUID caseId,
+                           @JsonProperty("offences") final List<UUID> offences) {
         this.defendantId = defendantId;
         this.caseId = caseId;
         this.offences = offences;
@@ -47,8 +47,8 @@ public class DeletedOffence {
 
     }
 
-    public static DeletedOffence.Builder builder() {
-        return new DeletedOffence.Builder();
+    public static DeletedOffences.Builder builder() {
+        return new DeletedOffences.Builder();
     }
 
     public static class Builder {
@@ -72,8 +72,8 @@ public class DeletedOffence {
         }
 
 
-        public DeletedOffence build() {
-            return new DeletedOffence(this.defendantId, this.caseId, this.offences);
+        public DeletedOffences build() {
+            return new DeletedOffences(this.defendantId, this.caseId, this.offences);
         }
     }
 }

@@ -9,7 +9,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public final class AddedOffence {
+public final class DefendantOffences {
 
     private UUID defendantId;
 
@@ -18,9 +18,9 @@ public final class AddedOffence {
     private final List<DefendantOffence> offences;
 
     @JsonCreator
-    public AddedOffence(@JsonProperty("defendantId") final UUID defendantId,
-                        @JsonProperty("caseId") final UUID caseId,
-                        @JsonProperty("offences") final List<DefendantOffence> offences) {
+    public DefendantOffences(@JsonProperty("defendantId") final UUID defendantId,
+                             @JsonProperty("caseId") final UUID caseId,
+                             @JsonProperty("offences") final List<DefendantOffence> offences) {
         this.defendantId = defendantId;
         this.caseId = caseId;
         this.offences = offences;
@@ -34,12 +34,12 @@ public final class AddedOffence {
         return caseId;
     }
 
-    public AddedOffence setDefendantId(UUID defendantId) {
+    public DefendantOffences setDefendantId(UUID defendantId) {
         this.defendantId = defendantId;
         return this;
     }
 
-    public AddedOffence setCaseId(UUID caseId) {
+    public DefendantOffences setCaseId(UUID caseId) {
         this.caseId = caseId;
         return this;
     }
@@ -70,13 +70,13 @@ public final class AddedOffence {
             return this;
         }
 
-        public Builder withAddedOffences(final List<DefendantOffence> offences) {
+        public Builder withDefendantOffences(final List<DefendantOffence> offences) {
             this.addedOffences = offences;
             return this;
         }
 
-        public AddedOffence build() {
-            return new AddedOffence(defendantId, caseId, ofNullable(addedOffences).orElse(new ArrayList<>()));
+        public DefendantOffences build() {
+            return new DefendantOffences(defendantId, caseId, ofNullable(addedOffences).orElse(new ArrayList<>()));
         }
     }
 }

@@ -32,12 +32,10 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.command.offence.AddedOffence;
-import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
-import uk.gov.moj.cpp.hearing.command.offence.DeletedOffence;
-import uk.gov.moj.cpp.hearing.command.offence.UpdatedOffence;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
+import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.command.plea.Plea;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
@@ -470,39 +468,20 @@ public class TestTemplates {
                     .build();
         }
 
-        public static AddedOffence addedOffence() {
-            return AddedOffence.builder()
+        public static DefendantOffences defendantOffences() {
+            return DefendantOffences.builder()
                     .withDefendantId(randomUUID())
                     .withCaseId(randomUUID())
-                    .withAddedOffences(asList(
+                    .withDefendantOffences(asList(
                             DefendantOffence.builder(randomUUID(), STRING.next(), STRING.next(), PAST_LOCAL_DATE.next(), PAST_LOCAL_DATE.next(), INTEGER.next(), PAST_LOCAL_DATE.next())
                                     .withStatementOfOffence(new StatementOfOffence(STRING.next(), STRING.next()))
                                     .build()))
                     .build();
         }
 
-        public static UpdatedOffence updatedOffence() {
 
-            final BaseDefendantOffence offences = BaseDefendantOffence.builder()
-                    .withId(randomUUID())
-                    .withOffenceCode(STRING.next())
-                    .withWording(STRING.next())
-                    .withStartDate(PAST_LOCAL_DATE.next())
-                    .withEndDate(PAST_LOCAL_DATE.next())
-                    .withCount(INTEGER.next())
-                    .withConvictionDate(PAST_LOCAL_DATE.next())
-                    .build();
-
-
-            return UpdatedOffence.builder()
-                    .withUpdatedOffences(Arrays.asList(offences))
-                    .withCaseId(randomUUID())
-                    .withDefendantId(randomUUID())
-                    .build();
-        }
-
-        public static DeletedOffence deletedOffence() {
-            return DeletedOffence.builder().withCaseId(randomUUID()).withDefendantId(randomUUID()).build();
+        public static DeletedOffences deletedOffence() {
+            return DeletedOffences.builder().withCaseId(randomUUID()).withDefendantId(randomUUID()).build();
         }
 
     }
