@@ -18,6 +18,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
+import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.HEARING_UPDATE_NOWS_MATERIAL_STATUS;
+import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -28,6 +30,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.fileservice.api.FileServiceException;
 import uk.gov.justice.services.fileservice.api.FileStorer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService;
 import uk.gov.moj.cpp.hearing.event.nows.service.UploadMaterialService;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.DocumentGenerationException;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
@@ -62,7 +65,6 @@ public class NowsRequestedEventProcessorTest {
 
     public static final UUID fileId = UUID.randomUUID();
 
-    @InjectMocks
     private NowsRequestedEventProcessor nowsRequestedEventProcessor;
 
     @Mock
@@ -118,15 +120,21 @@ public class NowsRequestedEventProcessorTest {
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
+        nowsRequestedEventProcessor = new NowsRequestedEventProcessor(this.enveloper,
+                this.sender,
+                new NowGeneratorService(this.documentGeneratorClientProducer, this.objectToJsonObjectConverter, this.fileStorer, this.uploadMaterialService),
+                this.jsonObjectToObjectConverter,
+                this.objectToJsonObjectConverter
+        );
     }
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void shouldGenerateNowAndStoreInFileStore() throws  IOException, FileServiceException {
+    public void shouldGenerateNowAndStoreInFileStore() throws IOException, FileServiceException {
 
-        final InputStream is = NowsRequestedToOrderConvertorTest.class
+        final InputStream is = NowsRequestedEventProcessorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
         final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
@@ -144,7 +152,7 @@ public class NowsRequestedEventProcessorTest {
         verify(this.uploadMaterialService).uploadFile(
                 eq(UUID.fromString(USER_ID)),
                 eq(UUID.fromString(nowsRequested.getHearing().getId())),
-                eq(UUID.fromString(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId())) ,
+                eq(UUID.fromString(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId())),
                 eq(fileId),
                 nowsNotificationDocumentStateArgumentCaptor.capture());
         verify(this.fileStorer).store(jsonObjectArgumentCaptor.capture(), inputStreamArgumentCaptor.capture());
@@ -165,9 +173,9 @@ public class NowsRequestedEventProcessorTest {
     }
 
     @Test
-    public void shouldNotGenerateNowOnDocumentGenerationException() throws  IOException, FileServiceException {
+    public void shouldNotGenerateNowOnDocumentGenerationException() throws IOException, FileServiceException {
 
-        final InputStream is = NowsRequestedToOrderConvertorTest.class
+        final InputStream is = NowsRequestedEventProcessorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
         final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
@@ -181,13 +189,13 @@ public class NowsRequestedEventProcessorTest {
         verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(0), jsonEnvelope(
-                metadata().withName(NowsRequestedEventProcessor.HEARING_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(HEARING_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
                                 is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
-                metadata().withName(NowsRequestedEventProcessor.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
                                 is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
@@ -204,9 +212,9 @@ public class NowsRequestedEventProcessorTest {
     }
 
     @Test
-    public void shouldNotGenerateNowOnFileUploadException() throws  IOException, FileServiceException {
+    public void shouldNotGenerateNowOnFileUploadException() throws IOException, FileServiceException {
 
-        final InputStream is = NowsRequestedToOrderConvertorTest.class
+        final InputStream is = NowsRequestedEventProcessorTest.class
                 .getResourceAsStream("/data/hearing.events.nows-requested.json");
         final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
@@ -226,13 +234,13 @@ public class NowsRequestedEventProcessorTest {
         verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(0), jsonEnvelope(
-                metadata().withName(NowsRequestedEventProcessor.HEARING_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(HEARING_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
                                 is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
-                metadata().withName(NowsRequestedEventProcessor.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
                                 is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
