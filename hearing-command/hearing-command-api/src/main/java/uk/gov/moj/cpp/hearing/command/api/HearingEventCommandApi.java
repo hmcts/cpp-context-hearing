@@ -3,16 +3,16 @@ package uk.gov.moj.cpp.hearing.command.api;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 @ServiceComponent(COMMAND_API)
@@ -20,7 +20,7 @@ public class HearingEventCommandApi {
 
     private static final String COMMAND_LOG_HEARING_EVENT = "hearing.log-hearing-event";
     private static final String COMMAND_CORRECT_HEARING_EVENT = "hearing.correct-hearing-event";
-
+    private static final String COMMAND_UPDATE_HEARING_EVENTS = "hearing.update-hearing-events";
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_ALTERABLE = "alterable";
@@ -49,6 +49,12 @@ public class HearingEventCommandApi {
     public void correctEvent(final JsonEnvelope command) {
         final JsonObject responsePayload = getEventDefinition(command);
         enrichAndSendCommand(command, responsePayload, "hearing.command.correct-hearing-event");
+    }
+
+    @Handles(COMMAND_UPDATE_HEARING_EVENTS)
+    public void updateHearingEvents(final JsonEnvelope command) {
+        sender.send(enveloper.withMetadataFrom(command, "hearing.command.update-hearing-events")
+                        .apply(command.payloadAsJsonObject()));
     }
 
     private void enrichAndSendCommand(final JsonEnvelope command, final JsonObject eventDefinitionDetails, final String eventName) {

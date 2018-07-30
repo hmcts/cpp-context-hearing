@@ -1,0 +1,133 @@
+package uk.gov.moj.cpp.hearing.event;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
+import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.delegates.AdjournHearingDelegate;
+import uk.gov.moj.cpp.hearing.event.delegates.GenerateNowsDelegate;
+import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
+import uk.gov.moj.cpp.hearing.event.delegates.SaveNowVariantsDelegate;
+import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
+import uk.gov.moj.cpp.hearing.event.nows.NowsGenerator;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
+
+import java.util.Collections;
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+public class PublishResultsEventProcessorTest {
+
+    @Spy
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
+    @Spy
+    @InjectMocks
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
+
+    @Spy
+    @InjectMocks
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
+
+    @Mock
+    private Sender sender;
+
+    @Mock
+    private NowsGenerator nowsGenerator;
+
+    @Mock
+    private GenerateNowsDelegate generateNowsDelegate;
+
+    @Mock
+    private AdjournHearingDelegate adjournHearingDelegate;
+
+    @Mock
+    private SaveNowVariantsDelegate saveNowVariantsDelegate;
+
+    @Mock
+    private UpdateResultLineStatusDelegate updateResultLineStatusDelegate;
+
+    @Mock
+    private PublishResultsDelegate publishResultsDelegate;
+
+    @InjectMocks
+    private PublishResultsEventProcessor publishResultsEventProcessor;
+
+    @Before
+    public void initMocks() {
+        MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void resultsShared() {
+
+        final ResultsShared resultsShared = resultsSharedTemplate();
+
+        final List<Nows> nows = basicNowsTemplate();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared));
+
+        when(nowsGenerator.createNows(eq(event), Mockito.any())).thenReturn(nows);
+
+        when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
+
+        when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
+
+        publishResultsEventProcessor.resultsShared(event);
+
+        verify(generateNowsDelegate).generateNows(sender, event, nows, resultsShared);
+
+        verify(saveNowVariantsDelegate).saveNowsVariants(sender, event, nows, resultsShared);
+
+        verify(publishResultsDelegate).shareResults(event, sender, event, resultsShared, resultsShared.getVariantDirectory());
+
+        verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
+    }
+
+    @Test
+    public void resultsShared_withNoNewNows() {
+
+        final ResultsShared resultsShared = resultsSharedTemplate();
+
+        final List<Nows> nows = Collections.emptyList();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared));
+
+        when(nowsGenerator.createNows(eq(event), Mockito.any())).thenReturn(nows);
+
+        when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
+
+        when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
+
+        publishResultsEventProcessor.resultsShared(event);
+
+        verifyNoMoreInteractions(generateNowsDelegate, saveNowVariantsDelegate);
+
+        verify(publishResultsDelegate).shareResults(event, sender, event, resultsShared, Collections.emptyList());
+
+        verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
+
+        verify(adjournHearingDelegate).execute(resultsShared, event);
+    }
+}

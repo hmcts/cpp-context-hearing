@@ -1,11 +1,13 @@
 package uk.gov.justice.ccr.notepad.result.loader.converter;
 
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionKey.RESULT_WORD_GROUP;
+
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionKey;
 
-import java.util.Arrays;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class StringToResultDefinitionConverter {
@@ -21,11 +23,17 @@ public class StringToResultDefinitionConverter {
 
         if (MAX_TOKEN == values.length) {
             ResultDefinition resultDefinition = new ResultDefinition();
-            resultDefinition.setId(UUID.randomUUID().toString());
+            resultDefinition.setId(values[ResultDefinitionKey.UUID.getOrder()].trim());
             resultDefinition.setLabel(values[ResultDefinitionKey.LABEL.getOrder()].trim());
             resultDefinition.setShortCode(values[ResultDefinitionKey.SHORT_CODE.getOrder()].toLowerCase().trim());
             resultDefinition.setLevel(values[ResultDefinitionKey.LEVEL.getOrder()]);
-            resultDefinition.setKeywords(Arrays.asList(COMMA_SPLITTER.split(values[ResultDefinitionKey.KEYWORDS.getOrder()].replaceAll(" ", "").toLowerCase())));
+            resultDefinition.setKeywords(newArrayList(COMMA_SPLITTER.split(values[RESULT_WORD_GROUP.getOrder()]))
+                    .stream()
+                    .map(word -> word.replaceAll("\"", ""))
+                    .map(String::trim)
+                    .map(String::toLowerCase)
+                    .collect(toList())
+            );
             return resultDefinition;
         }
         return null;

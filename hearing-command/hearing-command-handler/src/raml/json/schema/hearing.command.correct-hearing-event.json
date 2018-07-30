@@ -27,6 +27,12 @@
     },
     "alterable": {
       "type": "boolean"
+    },
+	"counselId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "witnessId": {
+      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,

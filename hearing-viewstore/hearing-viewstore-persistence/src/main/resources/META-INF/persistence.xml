@@ -8,9 +8,9 @@
     <persistence-unit name="hearing-persistence-unit">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <jta-data-source>java:/DS.hearing</jta-data-source>
-        <class>uk.gov.moj.cpp.hearing.persist.entity.Hearing</class>
-        <class>uk.gov.moj.cpp.hearing.persist.entity.HearingCase</class>
-        <class>uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome</class>
+        <class>uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing</class>
+        <!-- <class>uk.gov.moj.cpp.hearing.persist.entity.HearingCase</class> -->
+        <class>uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome</class>
     </persistence-unit>
 
 </persistence>

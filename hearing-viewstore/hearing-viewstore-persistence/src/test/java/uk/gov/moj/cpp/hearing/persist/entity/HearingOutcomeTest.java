@@ -4,6 +4,7 @@ import static com.google.code.beanmatchers.BeanMatchers.hasValidBeanConstructor;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.Test;
+import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
 
 public class HearingOutcomeTest {
 

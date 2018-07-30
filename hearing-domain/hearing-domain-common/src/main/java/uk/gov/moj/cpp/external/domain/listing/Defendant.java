@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @SuppressWarnings("squid:S1067")
 public class Defendant implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final String id;
     private final String personId;
     private final String firstName;

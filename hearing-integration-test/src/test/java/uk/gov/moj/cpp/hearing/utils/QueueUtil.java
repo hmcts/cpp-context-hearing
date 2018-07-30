@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.utils;
 
-import static uk.gov.justice.services.messaging.DefaultJsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
@@ -74,7 +74,8 @@ public class QueueUtil {
     public static void sendMessage(final MessageProducer messageProducer, final String commandName, final JsonObject payload, final Metadata metadata) {
         
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, payload);
-        final String json = jsonEnvelope.toDebugStringPrettyPrint();
+
+        final String json = jsonEnvelope.asJsonObject().toString();
 
         try {
             final TextMessage message = new ActiveMQTextMessage();
@@ -95,6 +96,8 @@ public class QueueUtil {
                 LOGGER.error("No message retrieved using consumer with selector {}", consumer.getMessageSelector());
                 return null;
             }
+            System.out.println("public queue:");
+            System.out.println(message.getText());
             return new JsonPath(message.getText());
         } catch (final JMSException e) {
             throw new RuntimeException(e);

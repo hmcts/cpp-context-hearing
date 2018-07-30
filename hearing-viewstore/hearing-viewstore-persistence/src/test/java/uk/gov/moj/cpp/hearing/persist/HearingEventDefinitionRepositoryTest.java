@@ -12,7 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.LON
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 
 import java.util.List;
 import java.util.Random;
@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 
 @SuppressWarnings("CdiInjectionPointsInspection")
 @RunWith(CdiTestRunner.class)

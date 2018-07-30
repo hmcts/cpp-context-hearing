@@ -1,0 +1,20 @@
+{
+  "caseId": "d4d85ebb-8b36-4d59-ab01-7bc3d4ad3776",
+  "hearingId": "bf537ed1-4648-4a68-8429-96a69d5db49d",
+  "defendants": [
+    {
+      "id": "f08cd01f-0421-487c-acae-2170f7ac8791",
+      "personId": "3464d03b-9e92-4e71-8cc0-c1f9fdb03fe8",
+      "offences": [
+        {
+          "id": "05e3788d-fd77-4744-a1e2-668f79ffd9e8",
+          "plea": {
+            "id": "d049fdea-8692-41b5-8902-3b421f15c808",
+            "value": "GUILTY",
+            "pleaDate": "2017-02-02"
+          }
+        }
+      ]
+    }
+  ]
+}

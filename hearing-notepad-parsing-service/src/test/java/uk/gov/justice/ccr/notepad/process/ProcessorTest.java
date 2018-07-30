@@ -3,6 +3,8 @@ package uk.gov.justice.ccr.notepad.process;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DATE;
@@ -12,6 +14,7 @@ import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TIME;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TXT;
 import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
 
+import uk.gov.justice.ccr.notepad.result.cache.CacheFactory;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
@@ -19,28 +22,58 @@ import uk.gov.justice.ccr.notepad.view.Part;
 import uk.gov.justice.ccr.notepad.view.PromptChoice;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class ProcessorTest {
 
+    @InjectMocks
     Processor processor = new Processor();
+
+    @Spy
     FileResultLoader fileResultLoader = new FileResultLoader();
+
+    @Spy
+    @InjectMocks
     ResultCache resultCache = new ResultCache();
+
     ResultPromptMatcher resultPromptMatcher = new ResultPromptMatcher();
+
+    @Mock
+    private CacheFactory cacheFactory;
+
+    @Mock
+    private LoadingCache<String, Object> cache;
+
+    @Spy
     ResultDefinitionMatcher resultDefinitionMatcher = new ResultDefinitionMatcher();
+    @Spy
     FindPromptsIndexesByKeyword findPromptsIndexesByKeyword = new FindPromptsIndexesByKeyword();
+    @Spy
     ComparePromptKeywordsUsingIndexes comparePromptKeywordsUsingIndexes = new ComparePromptKeywordsUsingIndexes();
+    @Spy
     FindPromptSynonyms findPromptSynonyms = new FindPromptSynonyms();
+    @Spy
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
+    @Spy
     CompareDefinitionKeywordsUsingIndexes compareDefinitionKeywordsUsingIndexes = new CompareDefinitionKeywordsUsingIndexes();
+    @Spy
     FindDefinitionPartialMatchSynonyms findDefinitionPartialMatchSynonyms = new FindDefinitionPartialMatchSynonyms();
+    @Spy
     FindDefinitionsByShortCodes findDefinitionsByShortCodes = new FindDefinitionsByShortCodes();
     FindDefinitionExactMatchSynonyms findDefinitionExactMatchSynonyms = new FindDefinitionExactMatchSynonyms();
     GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
@@ -49,8 +82,12 @@ public class ProcessorTest {
 
     @Before
     public void init() throws ExecutionException {
-        resultCache.setResultLoader(fileResultLoader);
-        resultCache.lazyLoad(null);
+        when(cacheFactory.build()).thenReturn(cache);
+        final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
+        when(cache.asMap()).thenReturn(cacheValue);
+
+        resultCache.lazyLoad(null, LocalDate.now());
+
         findPromptsIndexesByKeyword.resultCache = resultCache;
         comparePromptKeywordsUsingIndexes.resultCache = resultCache;
         findPromptSynonyms.resultCache = resultCache;
@@ -74,9 +111,9 @@ public class ProcessorTest {
         resultDefinitionMatcher.findDefinitionsByShortCodes = findDefinitionsByShortCodes;
         processor.resultPromptMatcher = resultPromptMatcher;
         processor.resultDefinitionMatcher = resultDefinitionMatcher;
-        processor.resultCache = resultCache;
         processor.time24HoursMatcher = time24HoursMatcher;
         processor.dateMatcher = dateMatcher;
+        processor.resultCache = resultCache;
     }
 
     @Test
@@ -84,7 +121,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("Imp 2 years");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processParts(values);
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -102,7 +139,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("Pard $367 conc conc [33] m");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processParts(values);
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -124,31 +161,19 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("sus imp 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processParts(values);
-        assertThat(
-                knowledge.getResultDefinitionParts().size()
-                , is(2)
-        );
-        assertThat(
-                knowledge.getResultPromptParts().size()
-                , is(11)
-        );
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
+        assertThat(knowledge.getResultDefinitionParts().entrySet(), hasSize(2));
+        assertThat(knowledge.getResultPromptParts().entrySet(), hasSize(11));
     }
 
     @Test
     public void processResultDefinition4() throws Exception {
-        List<Part> parts = new PartsResolver().getParts("Spec cust conc 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
-        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        final List<Part> parts = new PartsResolver().getParts("Spec cust conc 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
+        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processParts(values);
-        assertThat(
-                knowledge.getResultDefinitionParts().size()
-                , is(3)
-        );
-        assertThat(
-                knowledge.getResultPromptParts().size()
-                , is(10)
-        );
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
+        assertThat(knowledge.getResultDefinitionParts().entrySet(), hasSize(4));
+        assertThat(knowledge.getResultPromptParts().entrySet(), hasSize(9));
     }
 
     @Test
@@ -156,7 +181,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("vs 2 yr 3m 3£3 02:25 30/11/1980");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processParts(values);
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -190,8 +215,6 @@ public class ProcessorTest {
                 knowledge.getResultPromptParts().get("30/11/1980").getType()
                 , is(DATE)
         );
-
-
     }
 
     @Test
@@ -199,7 +222,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("life imp release 2 yr mand conc £0 £");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processParts(values);
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -244,7 +267,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("alc req pard shope 2 yr mand conc £300 344");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processParts(values);
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -267,8 +290,8 @@ public class ProcessorTest {
                 , is(11)
         );
         assertThat(
-                knowledge.getResultDefinitionParts().get("alc").getResultChoices().size()
-                , is(5)
+                knowledge.getResultDefinitionParts().get("alc").getResultChoices()
+                , hasSize(7)
         );
         assertThat(
                 knowledge.getResultPromptParts().get("yr").getType()
@@ -292,13 +315,9 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values).getResultDefinitionParts().get("imp").getCode());
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("imp").getCode(), LocalDate.now());
 
-
-        assertThat(
-                knowledge.getPromptChoices().size()
-                , is(13)
-        );
+        assertThat(knowledge.getPromptChoices(), hasSize(13));
     }
 
     @Test
@@ -306,7 +325,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("f");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values).getResultDefinitionParts().get("f").getCode());
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("f").getCode(), LocalDate.now());
 
 
         assertThat(
@@ -320,7 +339,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("imp");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values).getResultDefinitionParts().get("imp").getCode());
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("imp").getCode(), LocalDate.now());
 
 
         assertThat(
@@ -334,7 +353,7 @@ public class ProcessorTest {
         List<Part> parts = new PartsResolver().getParts("restraop conv");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values).getResultDefinitionParts().get("restraop").getCode());
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("restraop").getCode(), LocalDate.now());
         Optional<PromptChoice> pc = knowledge.getPromptChoices().stream().filter(p -> p.getLabel().equals("Conviction / acquittal")).findFirst();
 
         assertThat(pc.isPresent(), is(true));

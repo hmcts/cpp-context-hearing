@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @SuppressWarnings("squid:S1067")
 public class Offence implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final String id;
     private final String offenceCode;
     private final LocalDate startDate;

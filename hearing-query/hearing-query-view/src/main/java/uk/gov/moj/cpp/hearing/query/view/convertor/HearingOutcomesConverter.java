@@ -6,7 +6,7 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 
 import uk.gov.justice.services.common.converter.Converter;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
+import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
 
 import java.util.List;
 

@@ -9,6 +9,7 @@ import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.
 
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -45,14 +45,14 @@ class ResultDefinitionMatcher {
     @Inject
     FindDefinitionExactMatchSynonyms findDefinitionExactMatchSynonyms;
 
-    public ResultDefinitionMatchingOutput match(final List<String> values) throws ExecutionException {
+    public ResultDefinitionMatchingOutput match(final List<String> values, final LocalDate orderedDate) {
         ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = new ResultDefinitionMatchingOutput();
-        Optional<ResultDefinition> resultDefinition = matchEqual(values);
+        Optional<ResultDefinition> resultDefinition = matchEqual(values, orderedDate);
         if (resultDefinition.isPresent()) {
             resultDefinitionMatchingOutput.setResultDefinition(resultDefinition.get());
             resultDefinitionMatchingOutput.setMatchingType(EQUALS);
         } else {
-            resultDefinition = matchShortCode(values);
+            resultDefinition = matchShortCode(values, orderedDate);
             if (resultDefinition.isPresent()) {
                 resultDefinitionMatchingOutput.setResultDefinition(resultDefinition.get());
                 resultDefinitionMatchingOutput.setMatchingType(SHORT_CODE);
@@ -61,27 +61,27 @@ class ResultDefinitionMatcher {
         return resultDefinitionMatchingOutput;
     }
 
-    Optional<ResultDefinition> matchContains(final List<String> values) throws ExecutionException {
+    Optional<ResultDefinition> matchContains(final List<String> values, final LocalDate orderedDate) {
         //For contains search part length should be > 1
         List<String> filteredValues = values.stream().filter(v -> v.length() > 1).collect(Collectors.toList());
-        Map<String, Set<String>> matchedSynonymWords = findDefinitionPartialMatchSynonyms.run(filteredValues);
-        return Optional.ofNullable(matchResultDefinition(matchedSynonymWords));
+        final Map<String, Set<String>> matchedSynonymWords = findDefinitionPartialMatchSynonyms.run(filteredValues, orderedDate);
+        return Optional.ofNullable(matchResultDefinition(matchedSynonymWords, orderedDate));
     }
 
-    Optional<ResultDefinition> matchShortCode(final List<String> values) throws ExecutionException {
-        Set<ResultDefinition> outPut = findDefinitionsByShortCodes.run(values);
+    Optional<ResultDefinition> matchShortCode(final List<String> values, final LocalDate orderedDate) {
+        final Set<ResultDefinition> outPut = findDefinitionsByShortCodes.run(values, orderedDate);
         if (outPut.size() > 1) {
             return Optional.empty();
         }
         return outPut.stream().findFirst();
     }
 
-    Optional<ResultDefinition> matchEqual(final List<String> values) throws ExecutionException {
-        Map<String, Set<String>> matchedSynonymWords = findDefinitionExactMatchSynonyms.run(values);
-        return Optional.ofNullable(matchResultDefinition(matchedSynonymWords));
+    Optional<ResultDefinition> matchEqual(final List<String> values, final LocalDate orderedDate) {
+        final Map<String, Set<String>> matchedSynonymWords = findDefinitionExactMatchSynonyms.run(values, orderedDate);
+        return Optional.ofNullable(matchResultDefinition(matchedSynonymWords, orderedDate));
     }
 
-    private ResultDefinition matchResultDefinition(final Map<String, Set<String>> matchedSynonymWords) throws ExecutionException {
+    private ResultDefinition matchResultDefinition(final Map<String, Set<String>> matchedSynonymWords, final LocalDate orderedDate) {
         Set<List<String>> allCombinations = cartesianProduct(matchedSynonymWords.entrySet().stream().map(Map.Entry::getValue)
                 .collect(Collectors.toList()));
         Set<Set<String>> setOfPossibleCombination = newHashSet();
@@ -90,11 +90,11 @@ class ResultDefinitionMatcher {
             powerSets.stream().filter(CollectionUtils::isNotEmpty).forEach(setOfPossibleCombination::add);
         }
 
-        Map<Long, Set<Set<String>>> matchingWordsInDescendingOrder = findCombinationHaveMaximumMatches(setOfPossibleCombination);
+        final Map<Long, Set<Set<String>>> matchingWordsInDescendingOrder = findCombinationHaveMaximumMatches(setOfPossibleCombination, orderedDate);
 
 
         for (Map.Entry<Long, Set<Set<String>>> entry : matchingWordsInDescendingOrder.entrySet()) {
-            List<ResultDefinition> resultDefinitions = getMatchedResultDefinition(entry.getValue());
+            final List<ResultDefinition> resultDefinitions = getMatchedResultDefinition(entry.getValue(), orderedDate);
             if (resultDefinitions.size() > 1) {
                 return null;
             } else if (resultDefinitions.size() == 1) {
@@ -106,18 +106,18 @@ class ResultDefinitionMatcher {
         return null;
     }
 
-    private List<ResultDefinition> getMatchedResultDefinition(final Set<Set<String>> setOfWords) throws ExecutionException {
+    private List<ResultDefinition> getMatchedResultDefinition(final Set<Set<String>> setOfWords, final LocalDate orderedDate) {
         Map<Set<String>, Set<Long>> input = Maps.newHashMap();
         for (Set<String> words : setOfWords) {
-            input.put(words, new HashSet<>(findDefinitionsIndexesByKeyword.run(words)));
+            input.put(words, new HashSet<>(findDefinitionsIndexesByKeyword.run(words, orderedDate)));
         }
-        return compareDefinitionKeywordsUsingIndexes.run(input);
+        return compareDefinitionKeywordsUsingIndexes.run(input, orderedDate);
     }
 
-    private Map<Long, Set<Set<String>>> findCombinationHaveMaximumMatches(final Set<Set<String>> allCombinations) throws ExecutionException {
+    private Map<Long, Set<Set<String>>> findCombinationHaveMaximumMatches(final Set<Set<String>> allCombinations, final LocalDate orderedDate) {
         Map<Long, Set<Set<String>>> orderedMatchedAsPerCount = Maps.newHashMap();
         for (Set<String> words : allCombinations) {
-            List<Long> resultDefinitionIndexes = findDefinitionsIndexesByKeyword.run(words);
+            final List<Long> resultDefinitionIndexes = findDefinitionsIndexesByKeyword.run(words, orderedDate);
             Map<Long, Long> byIndex = groupResultByIndex.run(resultDefinitionIndexes);
             if (!byIndex.isEmpty()) {
                 long maxMatch = Collections.max(byIndex.values());
@@ -127,7 +127,7 @@ class ResultDefinitionMatcher {
                 }
             }
         }
-        Map<Long, Set<Set<String>>> descendingOrder = new TreeMap(Collections.reverseOrder());
+        Map<Long, Set<Set<String>>> descendingOrder = new TreeMap<>(Collections.reverseOrder());
         descendingOrder.putAll(orderedMatchedAsPerCount);
         return descendingOrder;
     }

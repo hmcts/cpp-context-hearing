@@ -3,24 +3,32 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public class Hearing {
-    private final UUID caseId;
+public class Hearing implements Serializable {
 
-    private final String caseUrn;
+    private static final long serialVersionUID = 1L;
 
-    private final String courtCentreId;
+    private UUID caseId;
 
-    private final String courtCentreName;
+    private String caseUrn;
 
-    private final List<Defendant> defendants;
+    private String courtCentreId;
 
-    private final LocalDate sendingCommittalDate;
+    private String courtCentreName;
 
-    private final String type;
+    private List<Defendant> defendants;
+
+    private LocalDate sendingCommittalDate;
+
+    private String type;
+
+    public Hearing() {
+
+    }
 
     @JsonCreator
     public Hearing(@JsonProperty("caseId") final UUID caseId,
@@ -125,4 +133,9 @@ public class Hearing {
             return new Hearing(caseId, caseUrn, courtCentreId, courtCentreName, defendants, sendingCommittalDate, type);
         }
     }
+
+    public static Builder builder(){
+        return new Builder();
+    }
+
 }

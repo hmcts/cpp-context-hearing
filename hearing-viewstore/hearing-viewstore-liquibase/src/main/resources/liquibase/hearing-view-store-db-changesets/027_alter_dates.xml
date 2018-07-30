@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    <changeSet id="27" author="CCR" logicalFilePath="alter-dates"  >
+
+        <modifyDataType tableName="a_offence" newDataType="DATE" columnName="conviction_date" />
+        <modifyDataType tableName="a_offence" newDataType="DATE" columnName="plea_date" />
+        <modifyDataType tableName="a_offence" newDataType="DATE" columnName="verdict_date" />
+
+        <modifyDataType tableName="a_offence" newDataType="DATE" columnName="start_date" />
+        <modifyDataType tableName="a_offence" newDataType="DATE" columnName="end_date" />
+    </changeSet>
+</databaseChangeLog>

@@ -1,49 +1,4 @@
 {
   "capabilities": [
-    {
-      "name": "hearing.get.hearing",
-      "type": "action",
-      "action": "hearing.get.hearing"
-    },
-    {
-      "name": "hearing.get.hearings-by-startdate",
-      "type": "action",
-      "action": "hearing.get.hearings-by-startdate"
-    },
-    {
-      "name": "hearing.get.hearings-by-caseid",
-      "type": "action",
-      "action": "hearing.get.hearings-by-caseid"
-    },
-    {
-      "name": "hearing.get.prosecution-counsels",
-      "type": "action",
-      "action": "hearing.get.prosecution-counsels"
-    },
-    {
-      "name": "hearing.get-draft-result",
-      "type": "action",
-      "action": "hearing.get-draft-result"
-    },
-    {
-      "name": "hearing.get.defence-counsels",
-      "type": "action",
-      "action": "hearing.get.defence-counsels"
-    },
-    {
-      "name": "hearing.get-hearing-event-definitions",
-      "type": "action",
-      "action": "hearing.get-hearing-event-definitions"
-    },
-    {
-      "name": "hearing.get-hearing-event-log",
-      "type": "action",
-      "action": "hearing.get-hearing-event-log"
-    },
-    {
-      "name": "hearing.get.case.pleas",
-      "type": "action",
-      "action": "hearing.get.case.pleas"
-    }
   ]
 }

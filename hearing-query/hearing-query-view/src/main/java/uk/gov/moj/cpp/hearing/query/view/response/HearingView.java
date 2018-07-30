@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.response;
 
-import uk.gov.moj.cpp.external.domain.listing.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -29,7 +27,6 @@ public class HearingView {
     private String roomId;
 
     private String courtCentreId;
-
 
     public String getHearingId() {
         return hearingId;

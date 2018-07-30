@@ -2,40 +2,34 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.services.common.converter.ZonedDateTimes.fromJsonString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
-import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventDefinitionAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventLogAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
 import javax.json.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(COMMAND_HANDLER)
-public class HearingEventCommandHandler {
+public class HearingEventCommandHandler extends AbstractCommandHandler {
 
-    private static final String FIELD_HEARING_ID = "hearingId";
-
-    private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
-    private static final String FIELD_LATEST_HEARING_EVENT_ID = "latestHearingEventId";
-    private static final String FIELD_EVENT_TIME = "eventTime";
-    private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
-    private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(HearingEventCommandHandler.class.getName());
 
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
@@ -47,18 +41,14 @@ public class HearingEventCommandHandler {
     private static final String FIELD_ALTERABLE = "alterable";
     private static final String FIELD_GROUP_LABEL = "groupLabel";
     private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
-
-    @Inject
-    private EventSource eventSource;
-
-    @Inject
-    private Enveloper enveloper;
-
-    @Inject
-    private AggregateService aggregateService;
+    private static final String FIELD_HEARING_ID = "hearingId";
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.create-hearing-event-definitions event received {}", envelope.toObfuscatedDebugString());
+        }
+
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID hearingEventDefinitionsId = fromString(payload.getString(FIELD_GENERIC_ID));
         final List<HearingEventDefinition> hearingEventDefinitions = payload
@@ -83,38 +73,30 @@ public class HearingEventCommandHandler {
 
     @Handles("hearing.command.log-hearing-event")
     public void logHearingEvent(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
-        final UUID hearingEventDefinitionId = fromString(payload.getString(FIELD_HEARING_EVENT_DEFINITION_ID));
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final String recordedLabel = payload.getString(FIELD_RECORDED_LABEL);
-        final ZonedDateTime eventTime = fromJsonString(payload.getJsonString(FIELD_EVENT_TIME));
-        final ZonedDateTime lastModifiedTime = fromJsonString(payload.getJsonString(FIELD_LAST_MODIFIED_TIME));
-        final boolean alterable = payload.getBoolean(FIELD_ALTERABLE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.log-hearing-event event received {}", command.toObfuscatedDebugString());
+        }
+        final LogEventCommand logEventCommand = convertToObject(command, LogEventCommand.class);
 
-        final EventStream eventStream = eventSource.getStreamById(hearingId);
-        final HearingEventLogAggregate aggregate = aggregateService.get(eventStream, HearingEventLogAggregate.class);
-        final Stream<Object> events = aggregate.logHearingEvent(hearingId, hearingEventId, hearingEventDefinitionId, recordedLabel, eventTime, lastModifiedTime, alterable);
-        eventStream.append(events.map(enveloper.withMetadataFrom(command)));
+        aggregate(NewModelHearingAggregate.class, logEventCommand.getHearingId(), command, a -> a.logHearingEvent(logEventCommand));
+    }
+
+    @Handles("hearing.command.update-hearing-events")
+    public void updateHearingEvents(final JsonEnvelope command) throws EventStreamException {
+        final JsonObject payload = command.payloadAsJsonObject();
+        aggregate(NewModelHearingAggregate.class, fromString(payload.getString(FIELD_HEARING_ID)),
+                command,
+                a -> a.updateHearingEvents(payload));
     }
 
     @Handles("hearing.command.correct-hearing-event")
     public void correctEvent(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        final UUID hearingId = fromString(payload.getString(FIELD_HEARING_ID));
-        final UUID hearingEventId = fromString(payload.getString(FIELD_HEARING_EVENT_ID));
-        final UUID hearingEventDefinitionId = fromString(payload.getString(FIELD_HEARING_EVENT_DEFINITION_ID));
-        final String recordedLabel = payload.getString(FIELD_RECORDED_LABEL);
-        final ZonedDateTime eventTime = fromJsonString(payload.getJsonString(FIELD_EVENT_TIME));
-        final ZonedDateTime lastModifiedTime = fromJsonString(payload.getJsonString(FIELD_LAST_MODIFIED_TIME));
-        final UUID latestHearingEventId = fromString(payload.getString(FIELD_LATEST_HEARING_EVENT_ID));
-        final boolean alterable = payload.getBoolean(FIELD_ALTERABLE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.correct-hearing-event event received {}", command.toObfuscatedDebugString());
+        }
 
-        final EventStream eventStream = eventSource.getStreamById(hearingId);
-        final HearingEventLogAggregate aggregate = aggregateService.get(eventStream, HearingEventLogAggregate.class);
-        final Stream<Object> events = aggregate.correctEvent(hearingId, hearingEventId, hearingEventDefinitionId,
-                recordedLabel, eventTime, lastModifiedTime, latestHearingEventId, alterable);
-        eventStream.append(events.map(enveloper.withMetadataFrom(command)));
+        final CorrectLogEventCommand logEventCommand = convertToObject(command, CorrectLogEventCommand.class);
+
+        aggregate(NewModelHearingAggregate.class, logEventCommand.getHearingId(), command, a -> a.correctHearingEvent(logEventCommand));
     }
-
 }

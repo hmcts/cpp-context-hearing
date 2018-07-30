@@ -1,8 +1,13 @@
 package uk.gov.justice.ccr.notepad.result.loader;
 
-
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
+import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.valueOf;
 
@@ -15,55 +20,73 @@ import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import uk.gov.justice.ccr.notepad.service.ResultingQueryService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.util.Arrays;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonString;
 
+@SuppressWarnings("squid:S1188")
 @Named("readStoreResultLoader")
 public class ReadStoreResultLoader implements ResultLoader {
+
+    private static final String FIELD_WORD_GROUP = "wordGroup";
 
     @Inject
     private ResultingQueryService resultingQueryService;
 
     private JsonEnvelope jsonEnvelope;
 
-    private static final Pattern COMMA_SPLITTER = Pattern.compile(",");
-
     public void setJsonEnvelope(final JsonEnvelope jsonEnvelope) {
         this.jsonEnvelope = jsonEnvelope;
     }
 
     @Override
-    public List<ResultDefinition> loadResultDefinition() {
+    public List<ResultDefinition> loadResultDefinition(final LocalDate orderedDate) {
         final List<ResultDefinition> resultDefinitions = newArrayList();
-        final JsonArray resultDefinitionsJson = resultingQueryService.getAllDefinitions(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultDefinitions");
-        resultDefinitionsJson.stream().forEach(jsonValue -> {
-            ResultDefinition resultDefinition = new ResultDefinition();
-            resultDefinition.setId(((JsonObject) jsonValue).getString("id"));
-            resultDefinition.setLabel(((JsonObject) jsonValue).getString("label").trim());
-            resultDefinition.setShortCode(((JsonObject) jsonValue).getString("shortCode").toLowerCase().trim());
-            resultDefinition.setLevel(((JsonObject) jsonValue).getString("level"));
-            resultDefinition.setKeywords(Arrays.asList(COMMA_SPLITTER.split(((JsonObject) jsonValue).getString("keywords").replaceAll(" ", "").toLowerCase())));
-            resultDefinitions.add(resultDefinition);
-        });
+        resultingQueryService.getAllDefinitions(jsonEnvelope, orderedDate).payloadAsJsonObject().getJsonArray("resultDefinitions").getValuesAs(JsonObject.class)
+                .forEach(jsonObjectResultDefinition ->
+                        getKeywordsGroups(jsonObjectResultDefinition).forEach(keywords -> {
+                                    final ResultDefinition resultDefinition = new ResultDefinition();
+                                    resultDefinition.setId(jsonObjectResultDefinition.getString("id"));
+                                    resultDefinition.setLabel(jsonObjectResultDefinition.getString("label").trim());
+                                    resultDefinition.setShortCode(jsonObjectResultDefinition.getString("shortCode").toLowerCase().trim());
+                                    resultDefinition.setLevel(jsonObjectResultDefinition.getString("level"));
+                                    resultDefinition.setKeywords(keywords);
+
+                                    resultDefinitions.add(resultDefinition);
+                                }
+                        ));
+
         return resultDefinitions;
     }
 
+    private List<List<String>> getKeywordsGroups(final JsonObject resultDefinition) {
+        if (!resultDefinition.containsKey("wordGroups")) {
+            return emptyList();
+        }
+
+        return resultDefinition.getJsonArray("wordGroups").getValuesAs(JsonObject.class)
+                .stream()
+                .map(wordGroup -> wordGroup.getJsonArray(FIELD_WORD_GROUP).getValuesAs(JsonString.class)
+                        .stream()
+                        .map(word -> word.getString().toLowerCase())
+                        .collect(toList()))
+                .collect(toList());
+    }
 
     @Override
-    public List<ResultDefinitionSynonym> loadResultDefinitionSynonym() {
+    public List<ResultDefinitionSynonym> loadResultDefinitionSynonym(final LocalDate orderedDate) {
         final List<ResultDefinitionSynonym> resultDefinitionSynonyms = newArrayList();
-        final JsonArray resultDefinitionSynonymsJson = resultingQueryService.getAllDefinitionKeywordSynonyms(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultDefinitionKeywordSynonyms");
-        resultDefinitionSynonymsJson.stream().forEach(jsonValue -> {
+        final JsonArray resultDefinitionSynonymsJson = resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope, orderedDate).payloadAsJsonObject().getJsonArray("synonymCollection");
+        resultDefinitionSynonymsJson.forEach(jsonValue -> {
             ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
             resultDefinitionSynonym.setWord(((JsonObject) jsonValue).getString("word").replaceAll(" ", "").trim().toLowerCase());
             resultDefinitionSynonym.setSynonym(((JsonObject) jsonValue).getString("synonym").trim().toLowerCase());
@@ -73,58 +96,80 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     @Override
-    public List<ResultPrompt> loadResultPrompt() {
+    public List<ResultPrompt> loadResultPrompt(final LocalDate orderedDate) {
         final List<ResultPrompt> resultPrompts = newArrayList();
-        final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList();
+        final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList(orderedDate);
+        final JsonObject resultDefinitionsJson = resultingQueryService.getAllDefinitions(jsonEnvelope, orderedDate).payloadAsJsonObject();
+        final Map<UUID, List<JsonObject>> resultPromptsByIdMap = resultDefinitionsJson.getJsonArray("resultDefinitions").getValuesAs(JsonObject.class)
+                .stream()
+                .filter(jsonObject -> jsonObject.containsKey("prompts"))
+                .collect(toMap(jsonObject -> fromString(jsonObject.getString("id")),
+                        jsonObject -> jsonObject.getJsonArray("prompts").getValuesAs(JsonObject.class)));
 
-        final JsonArray resultPromptsJson = resultingQueryService.getAllPrompts(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultPrompts");
-        resultPromptsJson.stream().forEach(jsonValue -> {
-            ResultPrompt resultPrompt = new ResultPrompt();
-            resultPrompt.setId(((JsonObject) jsonValue).getString("id"));
-            resultPrompt.setLabel(((JsonObject) jsonValue).getString("label").trim());
-            resultPrompt.setResultDefinitionLabel(((JsonObject) jsonValue).getString("resultDefinitionLabel").trim());
-            String durationElement = ((JsonObject) jsonValue).getString("durationElement").trim();
-            if (!durationElement.isEmpty()) {
-                resultPrompt.setType(DURATION);
-            } else {
-                resultPrompt.setType(valueOf(((JsonObject) jsonValue).getString("promptType").trim().toUpperCase()));
-            }
-            resultPrompt.setPromptOrder(((JsonObject) jsonValue).getInt("promptOrder"));
-            resultPrompt.setMandatory(((JsonObject) jsonValue).getString("mandatory"));
-            resultPrompt.setDurationElement(durationElement);
-            resultPrompt.setKeywords(Arrays.asList(COMMA_SPLITTER.split(((JsonObject) jsonValue).getString("keywords").replaceAll(" ", "").toLowerCase())));
-            String fixedListId = ((JsonObject) jsonValue).getString("fixedListId").trim();
-            if (fixedListId != null && ResultType.FIXL == resultPrompt.getType()) {
-                resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId));
-            }
-            resultPrompts.add(resultPrompt);
-        });
+        resultPromptsByIdMap.forEach((id, prompts) ->
+                prompts.forEach(promptJson -> {
+                    ResultPrompt resultPrompt = new ResultPrompt();
+                    resultPrompt.setId(promptJson.getString("id"));
+                    resultPrompt.setResultDefinitionId(id);
+                    resultPrompt.setLabel(promptJson.getString("label").trim());
+                    String durationElement = promptJson.getString("duration", null);
+                    if (durationElement != null && !durationElement.isEmpty()) {
+                        resultPrompt.setType(DURATION);
+                    } else {
+                        resultPrompt.setType(valueOf(promptJson.getString("type").trim().toUpperCase()));
+                    }
+                    resultPrompt.setReference(promptJson.getString("reference", null));
+                    resultPrompt.setPromptOrder(promptJson.getInt("sequence"));
+                    resultPrompt.setMandatory(promptJson.getBoolean("mandatory"));
+                    resultPrompt.setDurationElement(durationElement);
+                    resultPrompt.setKeywords(getKeywordsForPrompts(promptJson));
+
+                    final String fixedListId = promptJson.getString("fixedListId", null);
+                    if (fixedListId != null && (ResultType.FIXL == resultPrompt.getType() || ResultType.FIXLM == resultPrompt.getType())) {
+                        resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId.trim()));
+                    }
+                    resultPrompts.add(resultPrompt);
+
+                }));
         return resultPrompts;
     }
 
-    private Map<String, Set<String>> loadResultPromptFixedList() {
-        final JsonArray resultPromptFixedListsJson = resultingQueryService.getAllPromptFixedLists(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultPromptFixedLists");
-        List<ResultPromptFixedList> resultPromptFixedLists = newArrayList();
-        resultPromptFixedListsJson.stream().forEach(jsonValue -> {
-            ResultPromptFixedList resultPromptFixedList = new ResultPromptFixedList();
-            resultPromptFixedList.setId(((JsonObject) jsonValue).getString("fixedListId").trim());
-            resultPromptFixedList.setValue(((JsonObject) jsonValue).getString("value").trim());
-            resultPromptFixedLists.add(resultPromptFixedList);
-        });
+    private List<String> getKeywordsForPrompts(final JsonObject resultPromptJson) {
+        if (!resultPromptJson.containsKey(FIELD_WORD_GROUP)) {
+            return emptyList();
+        }
 
-        return resultPromptFixedLists.stream().collect(groupingBy(ResultPromptFixedList::getId, Collectors.mapping(ResultPromptFixedList::getValue, Collectors.toCollection(TreeSet::new))));
+        return resultPromptJson.getJsonArray(FIELD_WORD_GROUP).getValuesAs(JsonString.class).stream()
+                .map(word -> word.getString().toLowerCase())
+                .collect(toList());
+    }
+
+    private Map<String, Set<String>> loadResultPromptFixedList(final LocalDate orderedDate) {
+        return resultingQueryService.getAllFixedLists(this.jsonEnvelope, orderedDate).payloadAsJsonObject()
+                .getJsonArray("fixedListCollection").getValuesAs(JsonObject.class)
+                .stream()
+                .flatMap(fixedList -> fixedList.getJsonArray("elements").getValuesAs(JsonObject.class)
+                        .stream()
+                        .map(element -> {
+                            final ResultPromptFixedList resultPromptFixedList = new ResultPromptFixedList();
+                            resultPromptFixedList.setId(fixedList.getString("id").trim());
+                            resultPromptFixedList.setValue(element.getString("value").trim());
+                            return resultPromptFixedList;
+                        })
+                ).collect(groupingBy(ResultPromptFixedList::getId, mapping(ResultPromptFixedList::getValue, toCollection(TreeSet::new))));
     }
 
     @Override
-    public List<ResultPromptSynonym> loadResultPromptSynonym() {
-        final List<ResultPromptSynonym> resultPromptSynonyms = newArrayList();
-        final JsonArray resultPromptSynonymsJson = resultingQueryService.getAllPromptKeywordSynonyms(jsonEnvelope).payloadAsJsonObject().getJsonArray("resultPromptKeywordSynonyms");
-        resultPromptSynonymsJson.stream().forEach(jsonValue -> {
-            ResultPromptSynonym resultPromptSynonym = new ResultPromptSynonym();
-            resultPromptSynonym.setWord(((JsonObject) jsonValue).getString("word").replaceAll(" ", "").trim().toLowerCase());
-            resultPromptSynonym.setSynonym(((JsonObject) jsonValue).getString("synonym").trim().toLowerCase());
-            resultPromptSynonyms.add(resultPromptSynonym);
-        });
-        return resultPromptSynonyms;
+    public List<ResultPromptSynonym> loadResultPromptSynonym(final LocalDate orderedDate) {
+        return resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope, orderedDate).payloadAsJsonObject()
+                .getJsonArray("synonymCollection").getValuesAs(JsonObject.class)
+                .stream()
+                .map(wordSynonymJson -> {
+                    final ResultPromptSynonym resultPromptSynonym = new ResultPromptSynonym();
+                    resultPromptSynonym.setWord(wordSynonymJson.getString("word").trim().toLowerCase());
+                    resultPromptSynonym.setSynonym(wordSynonymJson.getString("synonym").trim().toLowerCase());
+                    return resultPromptSynonym;
+                })
+                .collect(toList());
     }
 }

@@ -6,7 +6,7 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
-import uk.gov.moj.cpp.hearing.persist.entity.HearingOutcome;
+import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
 
 @RunWith(CdiTestRunner.class)
 public class HearingOutcomeRepositoryTest extends BaseTransactionalTest {

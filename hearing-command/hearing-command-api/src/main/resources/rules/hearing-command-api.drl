@@ -6,6 +6,14 @@ import java.util.Arrays;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
 
+rule "Command - API - Action - hearing.initiate"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.initiate");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
 
 rule "Command - API - Action - hearing.add-prosecution-counsel"
   when
@@ -61,6 +69,15 @@ rule "Command - API - Action - hearing.log-hearing-event"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.update-hearing-events"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-hearing-events");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.correct-hearing-event"
   when
     $outcome: Outcome();
@@ -75,6 +92,60 @@ rule "Command - API - Action - hearing.update-plea"
     $outcome: Outcome();
     $action: Action(name == "hearing.update-plea");
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.update-verdict"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-verdict");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.add-update-witness"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-update-witness");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.generate-nows"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.generate-nows");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.update-nows-material-status"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-nows-material-status");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.delete-attendee"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.delete-attendee");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.upload-subscriptions"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.upload-subscriptions");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "System Users"));
   then
     $outcome.setSuccess(true);
 end

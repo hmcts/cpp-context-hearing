@@ -11,6 +11,12 @@
     "hearingEventDefinitionId": {
       "$ref": "#/definitions/uuid"
     },
+    "witnessId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "counselId": {
+      "$ref": "#/definitions/uuid"
+    },	
     "recordedLabel": {
       "type": "string"
     },
@@ -33,8 +39,7 @@
     "hearingEventDefinitionId",
     "recordedLabel",
     "eventTime",
-    "lastModifiedTime",
-    "alterable"
+    "lastModifiedTime"
   ],
   "definitions": {
     "uuid": {

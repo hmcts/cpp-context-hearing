@@ -3,78 +3,7 @@ title: Hearing Query view
 baseUri: http://localhost:8080/hearing-query-view/query/view/rest/hearing
 protocols: [ HTTP, HTTPS ]
 
-/hearings/{hearingId}:
-  uriParameters:
-        hearingId:
-          description: ID of hearing to get
-          type: string
-  get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.get.hearing+json
-            name: hearing.get.hearing
-        ...
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.get.hearing+json:
-                    example:  !include json/hearing.get.hearing.json
-                    schema:  !include  json/schema/hearing.get.hearing.json
-
-/cases/{caseId}/pleas:
-  uriParameters:
-        caseId:
-          description: get all pleas by caseId
-          type: string
-  get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.get.case.pleas+json
-            name: hearing.get.case.pleas
-        ...
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.get.case.pleas+json:
-                    example:  !include json/hearing.get.pleas.json
-                    schema:  !include  json/schema/hearing.get.pleas.json
-
-/hearings:
-   get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.get.hearings-by-startdate+json
-            name: hearing.get.hearings-by-startdate
-        (mapping):
-            responseType: application/vnd.hearing.get.hearings-by-caseid+json
-            name: hearing.get.hearings-by-caseid
-        ...
-      queryParameters:
-        startDate:
-          description: startDate of hearing
-          type: string
-          required: false
-        caseId:
-          description: case Id
-          type: string
-          required: false
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.get.hearings-by-startdate+json:
-                    example:  !include json/hearing.get.hearings.json
-                    schema:  !include  json/schema/hearing.get.hearings.json
-                  application/vnd.hearing.get.hearings-by-caseid+json:
-                    example:  !include json/hearing.get.hearings.json
-                    schema:  !include  json/schema/hearing.get.hearings.json
-
-/hearings/{hearingId}/event-definitions:
+/event-definitions:
     get:
       description: |
         ...
@@ -113,46 +42,6 @@ protocols: [ HTTP, HTTPS ]
                 application/vnd.hearing.hearing-event-definition+json:
                   example:  !include json/hearing.hearing-event-definition.json
                   schema:   !include json/schema/hearing.get-hearing-event-definition.json
-
-/hearings/{hearingId}/prosecution-counsels:
-  uriParameters:
-        hearingId:
-          description: ID of hearing to get the prosecution counsels for
-          type: string
-  get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.get.prosecution-counsels+json
-            name: hearing.get.prosecution-counsels
-        ...
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.get.prosecution-counsels+json:
-                    example:  !include json/hearing.get.prosecution-counsels.json
-                    schema:  !include  json/schema/hearing.get.prosecution-counsels.json
-
-/hearings/{hearingId}/defence-counsels:
-  uriParameters:
-        hearingId:
-          description: ID of hearing to get the defence counsels for
-          type: string
-  get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.get.defence-counsels+json
-            name: hearing.get.defence-counsels
-        ...
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.get.defence-counsels+json:
-                    example:  !include json/hearing.get.defence-counsels.json
-                    schema:  !include  json/schema/hearing.get.defence-counsels.json
 
 /hearings/{hearingId}/draft-result:
   uriParameters:
@@ -193,3 +82,96 @@ protocols: [ HTTP, HTTPS ]
                      application/vnd.hearing.hearing-event-log+json:
                         example: !include json/hearing.hearing-event-log.json
                         schema: !include json/schema/hearing.get-hearing-event-log.json
+
+
+
+/hearings/{hearingId}:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearing+json
+            name: hearing.get.hearing
+        (mapping):
+            responseType: application/vnd.hearing.get.nows+json
+            name: hearing.get.nows
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearing+json:
+                    example:  !include json/hearing.get.hearing.json
+                    schema:  !include  json/schema/hearing.get.hearing.json
+                  application/vnd.hearing.get.nows+json:
+                    example:  !include json/hearing.get.nows.json
+                    schema:  !include  json/schema/hearing.get.nows.json
+
+/hearings:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearings-by-date+json
+            name: hearing.get.hearings-by-date
+        ...
+      queryParameters:
+        date:
+          description: date of hearing
+          type: string
+          required: false
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearings-by-date+json:
+                    example:  !include json/hearing.get.hearings.json
+                    schema:  !include  json/schema/hearing.get.hearings.json
+
+/search:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.query.search-by-material-id+json
+            name: hearing.query.search-by-material-id
+        ...
+      queryParameters:
+        q:
+          description: query
+          type: string
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.query.search-by-material-id+json:
+                    example:  !include json/hearing.query.search-by-material-id.json
+                    schema:  !include  json/schema/hearing.query.search-by-material-id.json
+
+/retrieve:
+    get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.retrieve-subscriptions+json
+            name: hearing.retrieve-subscriptions
+        ...
+      queryParameters:
+        referenceDate:
+          description: query
+          type: string
+        nowTypeId:
+          description: query
+          type: string
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.retrieve-subscriptions+json:
+                    example:  !include json/hearing.retrieve-subscriptions.json
+                    schema:  !include json/schema/hearing.retrieve-subscriptions.json

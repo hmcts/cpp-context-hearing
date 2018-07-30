@@ -7,8 +7,12 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
+
 @Event("hearing.sending-sheet-recorded")
-public class SendingSheetCompletedRecorded {
+public class SendingSheetCompletedRecorded implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final CrownCourtHearing crownCourtHearing;
 
@@ -52,5 +56,9 @@ public class SendingSheetCompletedRecorded {
         public SendingSheetCompletedRecorded build() {
             return new SendingSheetCompletedRecorded(crownCourtHearing, hearing);
         }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

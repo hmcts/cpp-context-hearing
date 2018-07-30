@@ -3,14 +3,22 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class IndicatedPlea {
-    private final AllocationDecision allocationDecision;
+public class IndicatedPlea implements Serializable {
 
-    private final UUID id;
+    private static final long serialVersionUID = 1L;
 
-    private final IndicatedPleaValue value;
+    private AllocationDecision allocationDecision;
+
+    private UUID id;
+
+    private IndicatedPleaValue value;
+
+    public IndicatedPlea() {
+    }
+
 
     @JsonCreator
     public IndicatedPlea(

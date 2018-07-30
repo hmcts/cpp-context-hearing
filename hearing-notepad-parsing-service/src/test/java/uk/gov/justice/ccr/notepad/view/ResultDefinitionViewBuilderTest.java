@@ -3,6 +3,7 @@ package uk.gov.justice.ccr.notepad.view;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DATE;
@@ -18,24 +19,57 @@ import static uk.gov.justice.ccr.notepad.view.Part.State.UNRESOLVED;
 import uk.gov.justice.ccr.notepad.process.Knowledge;
 import uk.gov.justice.ccr.notepad.process.Processor;
 import uk.gov.justice.ccr.notepad.process.ProcessorTest;
+import uk.gov.justice.ccr.notepad.result.cache.CacheFactory;
+import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
+import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
+import uk.gov.justice.ccr.notepad.result.loader.ResultLoader;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import com.google.common.cache.LoadingCache;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class ResultDefinitionViewBuilderTest {
+    @Spy
+    @InjectMocks
+    ResultCache resultCache = new ResultCache();
+
+    @Spy
+    private ResultLoader resultLoader = new FileResultLoader();
+
     Processor processor;
-    ResultDefinitionViewBuilder testObj = new ResultDefinitionViewBuilder();
+
+    @InjectMocks
+    ResultDefinitionViewBuilder testObj;
+
+    @InjectMocks
     ProcessorTest processorTest = new ProcessorTest();
+
+    @Mock
+    private CacheFactory cacheFactory;
+
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void setup() throws ExecutionException {
+        when(cacheFactory.build()).thenReturn(cache);
+        final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
+        when(cache.asMap()).thenReturn(cacheValue);
+
         processorTest.init();
         processor = processorTest.getProcessor();
     }
@@ -43,7 +77,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void buildFromKnowledge() throws Exception {
         List<Part> parts = new PartsResolver().getParts("imp 2Y 4 M 9d sus 5 m 6 w 7 d ");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -92,7 +126,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void buildFromKnowledge1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("CrEdit bail reMand");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -116,7 +150,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void buildFromKnowledge3() throws Exception {
         List<Part> parts = new PartsResolver().getParts("imp 2 yr 8 m conc");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -149,7 +183,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void buildFromKnowledge4() throws Exception {
         List<Part> parts = new PartsResolver().getParts("2 yr m imp 18 $20 23:23 3/3/1980 [2y]");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -192,7 +226,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void buildFromKnowledge5() throws Exception {
         List<Part> parts = new PartsResolver().getParts("alc req conc 78 £2,000 2 mo ");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -215,7 +249,7 @@ public class ResultDefinitionViewBuilderTest {
                 , containsInAnyOrder(Arrays.asList(true, UNRESOLVED, BOOLEAN).toArray()));
         ResultChoice resultChoice = p1.getResultChoices().stream().filter(v -> v.getLevel().equals("O")).findFirst().get();
         assertThat(Arrays.asList(p1.getValue(), p1.getState(), p1.getResultChoices().size(), resultChoice.getCode().length(), resultChoice.getLabel().length() > 0, resultChoice.getType() != null)
-                , containsInAnyOrder(Arrays.asList("alc", UNRESOLVED, 5, 36, true, true).toArray()));
+                , containsInAnyOrder(Arrays.asList("alc", UNRESOLVED, 7, 36, true, true).toArray()));
         assertThat(Arrays.asList(p2.getValue(), p2.getState(), p2.getResultChoices().size())
                 , containsInAnyOrder(Arrays.asList("req", UNRESOLVED, 11).toArray()));
         assertThat(Arrays.asList(p4.getValue(), p4.getState(), p4.getType())
@@ -229,7 +263,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void buildFromKnowledgeHavingDuplicateResultDefinitionMapping() throws Exception {
         List<Part> parts = new PartsResolver().getParts("Curfew");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -244,14 +278,14 @@ public class ResultDefinitionViewBuilderTest {
                 , is(1)
         );
         assertThat(Arrays.asList(p1.getValue(), p1.getState(), p1.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("Curfew", UNRESOLVED, 7).toArray()));
+                , containsInAnyOrder(Arrays.asList("Curfew", UNRESOLVED, 5).toArray()));
 
     }
 
     @Test
     public void buildFromKnowledgeWithSameKeywordCountHavingMutipleResult() throws Exception {
         List<Part> parts = new PartsResolver().getParts("resTr Ord prd Fur");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -269,20 +303,19 @@ public class ResultDefinitionViewBuilderTest {
                 , is(4)
         );
         assertThat(Arrays.asList(p1.getValue(), p1.getState(), p1.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("resTr", UNRESOLVED, 2).toArray()));
+                , containsInAnyOrder(Arrays.asList("resTr", UNRESOLVED, 4).toArray()));
         assertThat(Arrays.asList(p2.getValue(), p2.getState(), p2.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("Ord", UNRESOLVED, 15).toArray()));
+                , containsInAnyOrder(Arrays.asList("Ord", UNRESOLVED, 38).toArray()));
         assertThat(Arrays.asList(p3.getValue(), p3.getState(), p3.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("prd", UNRESOLVED, 10).toArray()));
+                , containsInAnyOrder(Arrays.asList("prd", UNRESOLVED, 19).toArray()));
         assertThat(Arrays.asList(p4.getValue(), p4.getState(), p4.getResultChoices().size())
-                , containsInAnyOrder(Arrays.asList("Fur", UNRESOLVED, 2).toArray()));
-
+                , containsInAnyOrder(Arrays.asList("Fur", UNRESOLVED, 8).toArray()));
     }
 
     @Test
     public void buildFromKnowledgeKeywordCountHavingOneResult() throws Exception {
         List<Part> parts = new PartsResolver().getParts("resT Ord prd Furth");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -313,7 +346,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void buildFromKnowledge6() throws Exception {
         List<Part> parts = new PartsResolver().getParts("imp 2 y 8 m sus 6 y conc 7 y 8 m 89 w 90 d");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 
@@ -363,7 +396,7 @@ public class ResultDefinitionViewBuilderTest {
     @Test
     public void testWhenNoResultFoundAllPartsShouldTXT() throws Exception {
         List<Part> parts = new PartsResolver().getParts("aaaAAaaaa 34 £23.00 conc");
-        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()));
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
         ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
 

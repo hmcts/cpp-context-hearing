@@ -16,12 +16,16 @@ import org.mockito.Mock;
 public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlTest {
 
     private static final String ACTION_NAME_UPDATE_PLEA = "hearing.update-plea";
+    private static final String ACTION_NAME_UPDATE_VERDICT = "hearing.update-verdict";
     private static final String ACTION_NAME_ADD_PROSECUTION_COUNSEL = "hearing.add-prosecution-counsel";
     private static final String ACTION_NAME_SAVE_DRAFT_RESULT = "hearing.save-draft-result";
     private static final String ACTION_NAME_LOG_HEARING_EVENT = "hearing.log-hearing-event";
     private static final String ACTION_NAME_CORRECT_HEARING_EVENT = "hearing.correct-hearing-event";
     private static final String ACTION_NAME_SHARE_RESULTS_EVENT = "hearing.share-results";
     private static final String ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT = "hearing.create-hearing-event-definitions";
+    private static final String ACTION_NAME_GENERATE_NOWS = "hearing.generate-nows";
+    private static final String ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS = "hearing.update-nows-material-status";
+    private static final String ACTION_NAME_DELETE_ATTENDEE = "hearing.delete-attendee";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -39,6 +43,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToUpdatePlea() {
         final Action action = createActionFor(ACTION_NAME_UPDATE_PLEA);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToUpdateVerdict() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_VERDICT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToUpdateVerdict() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_VERDICT);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -148,6 +171,63 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToCreateHearingEventDefinitions() {
         final Action action = createActionFor(ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToGenerateNows() {
+        final Action action = createActionFor(ACTION_NAME_GENERATE_NOWS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToGenerateNows() {
+        final Action action = createActionFor(ACTION_NAME_GENERATE_NOWS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToUpdateNowsMaterialStatus() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToUpdateNowsMaterialStatus() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToDeleteAtendee() {
+        final Action action = createActionFor(ACTION_NAME_DELETE_ATTENDEE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToDeleteAtendee() {
+        final Action action = createActionFor(ACTION_NAME_DELETE_ATTENDEE);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

@@ -1,0 +1,34 @@
+package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
+
+import java.io.Serializable;
+
+public class Interpreter implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+
+    private String language;
+
+    public static Interpreter interpreter() {
+        return new Interpreter();
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public Interpreter setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public String getLanguage() {
+        return this.language;
+    }
+
+    public Interpreter setLanguage(String language) {
+        this.language = language;
+        return this;
+    }
+}

@@ -7,7 +7,9 @@
     },
     "defendants": {
       "type": "array",
-      "$ref": "#/definitions/defendant"
+      "items": {
+        "$ref": "#/definitions/defendant"
+      }
     }
   },
   "additionalProperties": false,
@@ -26,7 +28,9 @@
         },
         "offences": {
           "type": "array",
-          "$ref": "#/definitions/offence"
+          "items" : {
+            "$ref": "#/definitions/offence"
+          }
         }
       },
       "additionalProperties": false,

@@ -1,22 +1,61 @@
 package uk.gov.justice.ccr.notepad.result.cache.model;
 
 
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import static java.util.stream.Collectors.toCollection;
 
+import java.util.*;
+
+@SuppressWarnings({"squid:S00107"})
 public class ResultPrompt {
 
-    private String id ;
+    private String id;
+    private UUID resultDefinitionId;
     private String resultDefinitionLabel;
     private String label;
     private ResultType type;
-    private String mandatory;
+    private boolean mandatory;
     private String durationElement;
-    private Set<String> keywords = new TreeSet<>();
+    private Set<String> keywords;
     private Set<String> fixedList;
     private Integer promptOrder;
+    private String reference;
+
+    public ResultPrompt() {
+
+    }
+
+    public ResultPrompt(final String id, final UUID resultDefinitionId, final String resultDefinitionLabel,
+                        final String label, final ResultType type, final boolean mandatory,
+                        final String durationElement, final Set<String> keywords,
+                        final Set<String> fixedList, final Integer promptOrder, final String reference) {
+        this.id = id;
+        this.resultDefinitionId = resultDefinitionId;
+        this.resultDefinitionLabel = resultDefinitionLabel;
+        this.label = label;
+        this.type = type;
+        this.mandatory = mandatory;
+        this.durationElement = durationElement;
+        this.keywords = keywords;
+        this.fixedList = fixedList;
+        this.promptOrder = promptOrder;
+        this.reference = reference;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public UUID getResultDefinitionId() {
+        return resultDefinitionId;
+    }
+
+    public void setResultDefinitionId(final UUID resultDefinitionId) {
+        this.resultDefinitionId = resultDefinitionId;
+    }
 
     public String getResultDefinitionLabel() {
         return resultDefinitionLabel;
@@ -42,16 +81,12 @@ public class ResultPrompt {
         type = value;
     }
 
-    public String getMandatory() {
+    public boolean isMandatory() {
         return mandatory;
     }
 
-    public final void setMandatory(String value) {
+    public final void setMandatory(boolean value) {
         mandatory = value;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public String getDurationElement() {
@@ -63,12 +98,12 @@ public class ResultPrompt {
     }
 
     public final Set<String> getKeywords() {
-        return keywords;
+        return Optional.ofNullable(keywords).orElse(new HashSet<>());
     }
 
     public final void setKeywords(List<String> keywords) {
         if (!keywords.isEmpty()) {
-            this.keywords = new TreeSet<>(keywords.stream().filter(v -> !v.isEmpty()).collect(Collectors.toSet()));
+            this.keywords = keywords.stream().filter(v -> !v.isEmpty()).distinct().collect(toCollection(TreeSet::new));
         }
     }
 
@@ -80,16 +115,20 @@ public class ResultPrompt {
         return fixedList;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public Integer getPromptOrder() {
         return promptOrder;
     }
 
     public void setPromptOrder(Integer promptOrder) {
         this.promptOrder = promptOrder;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 
     @Override
@@ -104,6 +143,7 @@ public class ResultPrompt {
                 ", keywords=" + keywords +
                 ", fixedList=" + fixedList +
                 ", promptOrder=" + promptOrder +
+                ", reference='" + reference + '\'' +
                 '}';
     }
 }

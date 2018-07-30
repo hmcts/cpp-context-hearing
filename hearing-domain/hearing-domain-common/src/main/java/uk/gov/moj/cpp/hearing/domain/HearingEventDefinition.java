@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain;
 
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class HearingEventDefinition {
+public class HearingEventDefinition implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final UUID id;
     private final String actionLabel;

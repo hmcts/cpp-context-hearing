@@ -1,5 +1,6 @@
 package uk.gov.justice.ccr.notepad.result.loader;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
@@ -22,16 +23,16 @@ public class ResultPromptsProcessor {
 
     public Map<String, List<ResultPrompt>> groupByResultDefinition(List<String> lines) {
       List<ResultPrompt> rps=  lines.stream()
-                .map(line -> resultPromptConverter.convert(line)).filter(Objects::nonNull).collect(toList());
+                .map(resultPromptConverter::convert).filter(Objects::nonNull).collect(toList());
 
-      return rps.stream().collect(Collectors.groupingBy(ResultPrompt::getResultDefinitionLabel, LinkedHashMap::new, toList()));
+      return rps.stream().collect(groupingBy(prompt -> prompt.getResultDefinitionId().toString(), LinkedHashMap::new, toList()));
     }
 
     public Map<String, List<ResultPrompt>> order(Map<String, List<ResultPrompt>> resultPromptsByResultDefinition) {
         return resultPromptsByResultDefinition.entrySet()
                 .stream()
                 .collect(Collectors.toMap(
-                        elem -> elem.getKey(),
+                        Map.Entry::getKey,
                         elem -> IntStream.range(0, elem.getValue().size())
                                 .mapToObj(i -> {
                                     ResultPrompt rp = elem.getValue().get(i);

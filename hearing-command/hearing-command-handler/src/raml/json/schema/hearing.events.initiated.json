@@ -1,0 +1,314 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "cases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/case"
+      }
+    },
+    "hearing": {
+      "$ref": "#/definitions/hearing"
+    }
+  },
+  "required": [
+    "cases",
+    "hearing"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "case": {
+      "type": "object",
+      "properties": {
+        "caseId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "urn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "caseId",
+        "urn"
+      ]
+    },
+    "address": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "address1": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "address2": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "address3": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "address4": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "postCode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "judge": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "firstName",
+        "lastName"
+      ]
+    },
+    "defendant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gender": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "address": {
+          "$ref": "#/definitions/address"
+        },
+        "dateOfBirth": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "defenceOrganisation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interpreter": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "needed": {
+              "type": "boolean"
+            },
+            "language": {
+              "type": "string"
+            }
+          }
+        },
+        "defendantCases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/defendantCase"
+          }
+        },
+        "offences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/offence"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "personId",
+        "firstName",
+        "lastName",
+        "offences"
+      ]
+    },
+    "offence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "offenceCode": {
+          "type": "string"
+        },
+        "wording": {
+          "type": "string"
+        },
+        "section": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "endDate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "orderIndex": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "count": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "convictionDate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "legislation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "offenceCode",
+        "wording",
+        "startDate"
+      ]
+    },
+    "defendantCase": {
+      "type": "object",
+      "properties": {
+        "caseId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "bailStatus": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "custodyTimeLimitDate": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "type": {
+          "type": "string"
+        },
+        "courtCentreId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "courtCentreName": {
+          "type": "string"
+        },
+        "courtRoomId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "courtRoomName": {
+          "type": "string"
+        },
+        "judge": {
+          "$ref": "#/definitions/judge"
+        },
+        "hearingDays": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "defendants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/defendant"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "courtCentreId",
+        "courtRoomId",
+        "courtRoomName",
+        "judge",
+        "hearingDays",
+        "defendants"
+      ]
+    }
+  }
+}
+

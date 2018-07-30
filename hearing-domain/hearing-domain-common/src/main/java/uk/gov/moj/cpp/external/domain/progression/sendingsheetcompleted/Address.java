@@ -3,7 +3,12 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Address {
+import java.io.Serializable;
+
+public class Address implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final String address1;
 
     private final String address2;
@@ -51,8 +56,10 @@ public class Address {
         return new Address.Builder();
     }
 
-    public static class Builder {
-        private String address1;
+  public static class Builder {
+
+    private String address1;
+
 
         private String address2;
 
@@ -62,10 +69,13 @@ public class Address {
 
         private String postcode;
 
-        public Builder withAddress1(final String address1) {
-            this.address1 = address1;
-            return this;
-        }
+
+    private Builder() {}
+
+    public Builder withAddress1(final String address1) {
+      this.address1 = address1;
+      return this;
+    }
 
         public Builder withAddress2(final String address2) {
             this.address2 = address2;

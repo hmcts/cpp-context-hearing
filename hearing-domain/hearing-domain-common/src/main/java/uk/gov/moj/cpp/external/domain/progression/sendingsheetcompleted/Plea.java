@@ -3,20 +3,24 @@ package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class Plea {
+public class Plea implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private final UUID id;
 
     private final LocalDate pleaDate;
 
-    private final PleaValue value;
+    private final String value;
 
     @JsonCreator
     public Plea(@JsonProperty("id") final UUID id,
                 @JsonProperty("pleaDate") final LocalDate pleaDate,
-                @JsonProperty("value") final PleaValue value) {
+                @JsonProperty("value") final String value) {
         this.id = id;
         this.pleaDate = pleaDate;
         this.value = value;
@@ -30,7 +34,8 @@ public class Plea {
         return pleaDate;
     }
 
-    public PleaValue getValue() {
+
+    public String getValue() {
         return value;
     }
 
@@ -43,7 +48,8 @@ public class Plea {
 
         private LocalDate pleaDate;
 
-        private PleaValue pleaValue;
+        private String pleaValue;
+
 
         public Builder withId(final UUID id) {
             this.id = id;
@@ -55,10 +61,12 @@ public class Plea {
             return this;
         }
 
-        public Builder withPleaValue(final PleaValue pleaValue) {
+
+        public Builder withPleaValue(final String pleaValue) {
             this.pleaValue = pleaValue;
             return this;
         }
+
 
         public Plea build() {
             return new Plea(id, pleaDate, pleaValue);

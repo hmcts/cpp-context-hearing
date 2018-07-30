@@ -36,7 +36,7 @@
         "description" : "testOffence",
         "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
-        "id" : "d3ab931c-17a6-4291-8058-77477ca3d64a",
+        "id" : "OFFENCE_ID_1",
         "offenceCode" : "offenceCode",
         "plea" : {
           "id" : "PLEA_ID",

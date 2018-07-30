@@ -14,13 +14,8 @@ public class HearingQueryApi {
     @Inject
     private Requester requester;
 
-    @Handles("hearing.get.hearings-by-startdate")
-    public JsonEnvelope findHearingsByStartDate(final JsonEnvelope query) {
-       return this.requester.request(query);
-    }
-
-    @Handles("hearing.get.hearings-by-caseid")
-    public JsonEnvelope findHearingsByCaseId(final JsonEnvelope query) {
+    @Handles("hearing.get.hearings-by-date")
+    public JsonEnvelope findHearingsByDate(final JsonEnvelope query) {
         return this.requester.request(query);
     }
 
@@ -29,18 +24,8 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
-    @Handles("hearing.get.prosecution-counsels")
-    public JsonEnvelope getProsecutionCounsels(final JsonEnvelope query) {
-        return this.requester.request(query);
-    }
-
-    @Handles("hearing.get.defence-counsels")
-    public JsonEnvelope getDefenceCounsels(final JsonEnvelope query) {
-        return this.requester.request(query);
-    }
-
     @Handles("hearing.get-hearing-event-definitions")
-    public JsonEnvelope getHearingEventDefinitions(final JsonEnvelope query) {
+    public JsonEnvelope getHearingEventDefinitionsVersionTwo(final JsonEnvelope query) {
         return this.requester.request(query);
     }
 
@@ -59,9 +44,18 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
-    @Handles("hearing.get.case.pleas")
-    public JsonEnvelope getCasePleas(final JsonEnvelope query) {
+    @Handles("hearing.get.nows")
+    public JsonEnvelope getNows(final JsonEnvelope query) {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.query.search-by-material-id")
+    public JsonEnvelope searchByMaterialId(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
+    @Handles("hearing.retrieve-subscriptions")
+    public JsonEnvelope retrieveSubscriptions(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
 }

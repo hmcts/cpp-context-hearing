@@ -7,13 +7,13 @@ import static com.google.common.collect.Sets.powerSet;
 
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -36,19 +36,19 @@ class ResultPromptMatcher {
     @Inject
     FindPromptSynonyms findPromptSynonyms;
 
-    public ResultPromptMatchingOutput match(final List<String> values) throws ExecutionException {
-        return matchEqual(values);
+    public ResultPromptMatchingOutput match(final List<String> values, final LocalDate orderedDate) {
+        return matchEqual(values, orderedDate);
     }
 
 
-    ResultPromptMatchingOutput matchEqual(final List<String> values) throws ExecutionException {
-        Map<String, Set<String>> matchedSynonymWords = findPromptSynonyms.run(values);
+    ResultPromptMatchingOutput matchEqual(final List<String> values, final LocalDate orderedDate) {
+        final Map<String, Set<String>> matchedSynonymWords = findPromptSynonyms.run(values, orderedDate);
         ResultPromptMatchingOutput resultPromptMatchingOutput = new ResultPromptMatchingOutput();
-        resultPromptMatchingOutput.setResultPrompt(matchResultPrompts(matchedSynonymWords));
+        resultPromptMatchingOutput.setResultPrompt(matchResultPrompts(matchedSynonymWords, orderedDate));
         return resultPromptMatchingOutput;
     }
 
-    private ResultPrompt matchResultPrompts(final Map<String, Set<String>> matchedSynonymWords) throws ExecutionException {
+    private ResultPrompt matchResultPrompts(final Map<String, Set<String>> matchedSynonymWords, final LocalDate orderedDate) {
         Set<List<String>> allCombinations = cartesianProduct(matchedSynonymWords.entrySet().stream().map(Map.Entry::getValue)
                 .collect(Collectors.toList()));
         Set<Set<String>> setOfPossibleCombination = newHashSet();
@@ -57,11 +57,11 @@ class ResultPromptMatcher {
             powerSets.stream().filter(CollectionUtils::isNotEmpty).forEach(setOfPossibleCombination::add);
         }
 
-        Map<Long, Set<Set<String>>> matchingWordsInDescendingOrder = findCombinationHaveMaximumMatches(setOfPossibleCombination);
+        final Map<Long, Set<Set<String>>> matchingWordsInDescendingOrder = findCombinationHaveMaximumMatches(setOfPossibleCombination, orderedDate);
 
 
         for (Map.Entry<Long, Set<Set<String>>> entry : matchingWordsInDescendingOrder.entrySet()) {
-            ResultPrompt resultPrompt = getMatchedResultDefinition(entry.getValue());
+            final ResultPrompt resultPrompt = getMatchedResultDefinition(entry.getValue(), orderedDate);
             if (resultPrompt != null) {
                 return resultPrompt;
             }
@@ -71,18 +71,18 @@ class ResultPromptMatcher {
         return null;
     }
 
-    private ResultPrompt getMatchedResultDefinition(final Set<Set<String>> setOfWords) throws ExecutionException {
+    private ResultPrompt getMatchedResultDefinition(final Set<Set<String>> setOfWords, final LocalDate orderedDate) {
         Map<Set<String>, Set<Long>> input = Maps.newHashMap();
         for (Set<String> words : setOfWords) {
-            input.put(words, new HashSet<>(findPromptsIndexesByKeyword.run(words)));
+            input.put(words, new HashSet<>(findPromptsIndexesByKeyword.run(words, orderedDate)));
         }
-        return comparePromptKeywordsUsingIndexes.run(input);
+        return comparePromptKeywordsUsingIndexes.run(input, orderedDate);
     }
 
-    private Map<Long, Set<Set<String>>> findCombinationHaveMaximumMatches(final Set<Set<String>> allCombinations) throws ExecutionException {
+    private Map<Long, Set<Set<String>>> findCombinationHaveMaximumMatches(final Set<Set<String>> allCombinations, final LocalDate orderedDate) {
         Map<Long, Set<Set<String>>> orderedMatchedAsPerCount = Maps.newHashMap();
         for (Set<String> words : allCombinations) {
-            List<Long> resultDefinitionIndexes = findPromptsIndexesByKeyword.run(words);
+            final List<Long> resultDefinitionIndexes = findPromptsIndexesByKeyword.run(words, orderedDate);
             Map<Long, Long> byIndex = groupResultByIndex.run(resultDefinitionIndexes);
             if (!byIndex.isEmpty()) {
                 long maxMatch = Collections.max(byIndex.values());
@@ -92,7 +92,7 @@ class ResultPromptMatcher {
                 }
             }
         }
-        Map<Long, Set<Set<String>>> descendingOrder = new TreeMap(Collections.reverseOrder());
+        Map<Long, Set<Set<String>>> descendingOrder = new TreeMap<>(Collections.reverseOrder());
         descendingOrder.putAll(orderedMatchedAsPerCount);
         return descendingOrder;
     }

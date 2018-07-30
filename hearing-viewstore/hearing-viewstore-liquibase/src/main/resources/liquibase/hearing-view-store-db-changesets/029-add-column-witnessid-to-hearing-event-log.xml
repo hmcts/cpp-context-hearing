@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="29" author="hearing" logicalFilePath="029-add-column-witnessid-to-hearing-event-log.xml">
+
+        <addColumn tableName="hearing_event">
+            <column name="witnessid" type="UUID"/>
+        </addColumn>
+
+    </changeSet>
+</databaseChangeLog>

@@ -1,33 +1,79 @@
 {
-  "hearings": [
+  "hearings":[
     {
-      "hearingId": "1daefec3-2f76-8109-82d9-2e60544a6c01",
-      "startDate": "2016-06-08",
-      "startTime": "10:34:345",
-      "hearingType": "Trial",
-      "duration": 1,
-      "courtCentreName": "Liverpool",
-      "roomName": "Room 1",
-      "roomId": "1daefec3-2f76-8109-82d9-2e60544a6c02",
-      "courtCentreId": "1daefec3-2f76-8109-82d9-2e60544a6c03",
-      "caseIds": [
-        "0161a828-cfd1-4608-8616-d92870baba3d",
-        "1b8e3c17-a699-4798-80b8-5e6f72510473",
-        "4bb4cd5a-ce2a-467d-8984-76b62ec92072"
+      "hearingId":"23ef34ec-63e5-422e-8071-9b3753008c10",
+      "hearingType":"TRIAL",
+      "caseUrn":[
+        "32GD9387517"
+      ],
+      "defendants":[
+        {
+          "firstName":"Mark",
+          "lastName":"Zuckerberg"
+        },
+        {
+          "firstName":"Sean",
+          "lastName":"Parker"
+        }
+      ],
+      "witnesses": [
+        {
+          "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
+          "type":"Prosecution",
+          "classification": "Professional",
+          "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+          "title": "Mr",
+          "firstName": "David",
+          "lastName": "LLOYD",
+          "dateOfBirth": "1980-07-15",
+          "nationality": "England",
+          "gender": "Male",
+          "homeTelephone": "02012345678",
+          "workTelephone": "02012345679",
+          "mobile": "07777777777",
+          "fax": "02011111111",
+          "email": "email@email.com"
+        }
       ]
     },
     {
-      "hearingId": "4bb4cd5a-ce2a-467d-8984-76b62ec92072",
-      "startDate": "2016-06-08",
-      "startTime": "13:34:345",
-      "hearingType": "Trial",
-      "duration": 1,
-      "courtCentreName": "Liverpool",
-      "roomName": "Room 1",
-      "roomId": "1daefec3-2f76-8109-82d9-2e60544a6c04",
-      "courtCentreId": "1daefec3-2f76-8109-82d9-2e60544a6c05",
-      "caseIds": [
-        "ed0bbb23-533e-4dd5-82fc-2ad4edcdae6d"
+      "hearingId":"1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "hearingType":"TRIAL",
+      "caseUrn":[
+        "32GD9387518"
+      ],
+      "defendants":[
+        {
+          "firstName":"Larry",
+          "lastName":"Wall"
+        },
+        {
+          "firstName":"Dennis",
+          "lastName":"Ritchie"
+        },
+        {
+          "firstName":"James",
+          "lastName":"Gosling"
+        }
+      ],
+      "witnesses": [
+        {
+          "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
+          "type":"Prosecution",
+          "classification": "Professional",
+          "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+          "title": "Mr",
+          "firstName": "David",
+          "lastName": "LLOYD",
+          "dateOfBirth": "1980-07-15",
+          "nationality": "England",
+          "gender": "Male",
+          "homeTelephone": "02012345678",
+          "workTelephone": "02012345679",
+          "mobile": "07777777777",
+          "fax": "02011111111",
+          "email": "email@email.com"
+        }
       ]
     }
   ]

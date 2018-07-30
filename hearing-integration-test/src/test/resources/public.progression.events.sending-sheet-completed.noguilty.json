@@ -1,6 +1,6 @@
 {
   "crownCourtHearing" : {
-    "ccHearingDate" : "ccHearingDate",
+    "ccHearingDate" : "2016-11-01",
     "courtCentreId" : "12d9d09a-3bd6-4eba-a966-7573bd7061f3",
     "courtCentreName" : "courtCentrName"
   },
@@ -33,6 +33,7 @@
       "offences" : [ {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "d3ab931c-17a6-4291-8058-77477ca3d64a",
         "offenceCode" : "offenceCode",
@@ -42,6 +43,7 @@
       }, {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "18a60336-7b29-4f48-aac9-c6a070186854",
         "offenceCode" : "offenceCode",
@@ -51,6 +53,7 @@
       }, {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "bb79e8c2-7440-4002-a70b-746b808c01bb",
         "offenceCode" : "offenceCode",
@@ -83,6 +86,7 @@
       "offences" : [ {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "5af8503c-73b5-4171-b4a8-35d520422d9b",
         "offenceCode" : "offenceCode",
@@ -92,6 +96,7 @@
       }, {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "2da6868a-34df-4359-8120-261e12b5bb3e",
         "offenceCode" : "offenceCode",
@@ -101,6 +106,7 @@
       }, {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "f126c349-8cc9-4ae1-a706-f0353ee7acc1",
         "offenceCode" : "offenceCode",
@@ -133,6 +139,7 @@
       "offences" : [ {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "39592191-f105-4022-8674-e65c2420202a",
         "offenceCode" : "offenceCode",
@@ -142,6 +149,7 @@
       }, {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "96a716f4-a66a-4d79-a536-d8c2c4175bf0",
         "offenceCode" : "offenceCode",
@@ -151,6 +159,7 @@
       }, {
         "category" : "category",
         "description" : "testOffence",
+        "startDate" : "2016-11-12",
         "endDate" : "2016-11-12",
         "id" : "41c29f59-0b36-4e62-8f97-28c342641b69",
         "offenceCode" : "offenceCode",

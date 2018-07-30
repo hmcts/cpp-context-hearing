@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.utils;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.reset;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.text.MessageFormat.format;
 import static java.util.UUID.randomUUID;
@@ -25,14 +26,21 @@ import java.util.UUID;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.http.HttpStatus;
+
 /**
  * Utility class for setting stubs.
  */
 public class WireMockStubUtils {
 
+    public static final String MATERIAL_STATUS_UPLOAD_COMMAND =
+                    "/resultinghmps-service/command/api/rest/resultinghmps/hearings/.*/nowsmaterial/.*";
+    public static final String MATERIAL_UPLOAD_COMMAND =
+                    "/material-service/command/api/rest/material/material";
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
     private static final String CONTENT_TYPE_QUERY_GROUPS = "application/vnd.usersgroups.groups+json";
     private static final String CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS = "application/vnd.progression.query.caseprogressiondetail+json";
+
 
     static {
         configureFor(HOST, 8080);
@@ -51,6 +59,18 @@ public class WireMockStubUtils {
         waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
+    public static void setupAsSystemUser(final UUID userId) {
+        stubPingFor("usersgroups-service");
+
+        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-systemuser-groups-by-user.json"))));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
+    }
+
     public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
         stubPingFor("progression-service");
 
@@ -63,13 +83,31 @@ public class WireMockStubUtils {
         waitForStubToBeReady(format("/progression-service/query/api/rest/progression/cases/{0}", caseId), CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS);
     }
 
+    public static final void mockMaterialUpload() {
+        stubPingFor("material-service");
+
+        stubFor(post(urlMatching(MATERIAL_UPLOAD_COMMAND))
+                        .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
+                                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                        .withBody("")));
+    }
+
+    public static final void mockUpdateHmpsMaterialStatus() {
+        stubPingFor("resultinghmps-service");
+        stubFor(post(urlMatching(
+                        MATERIAL_STATUS_UPLOAD_COMMAND))
+                                        .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
+                                                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                                                        .withBody("")));
+    }
 
     static void waitForStubToBeReady(final String resource, final String mediaType) {
         waitForStubToBeReady(resource, mediaType, Status.OK);
     }
 
     private static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
-        poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType)).until(status().is(expectedStatus));
+        poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType).build())
+                        .until(status().is(expectedStatus));
     }
 
     private static JsonObject getProgressionCaseJson(final UUID caseId, final String caseUrn) {

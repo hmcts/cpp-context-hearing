@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="36" author="I2T" logicalFilePath="036_create_nows_table.xml">
+
+
+        <createTable tableName="nows">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID"/>
+            <column name="defendant_id" type="UUID"/>
+            <column name="nows_type_id" type="UUID"/>
+        </createTable>
+        <createTable tableName="nows_result">
+            <column name="shared_result_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nows_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sequence" type="INT"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="nows_pkey" tableName="nows"/>
+
+        <addForeignKeyConstraint baseColumnNames="nows_id" baseTableName="nows_result"
+                                 constraintName="fk_nows_nows_result" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+                                 referencedTableName="nows"/>
+
+        <dropColumn tableName="nows_material" columnName="hearing_id"/>
+        <dropColumn tableName="nows_material" columnName="defendant_id"/>
+        <addColumn tableName="nows_material">
+            <column name="language" type="TEXT"/>
+            <column name="nows_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="nows_id" baseTableName="nows_material"
+                                 constraintName="fk_nows_nows_material" deferrable="false"
+                                 initiallyDeferred="false"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+                                 referencedTableName="nows"/>
+
+    </changeSet>
+
+
+</databaseChangeLog>
+
+

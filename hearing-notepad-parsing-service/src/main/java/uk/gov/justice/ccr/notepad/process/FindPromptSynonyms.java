@@ -6,10 +6,10 @@ import static java.util.Map.Entry;
 
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -22,11 +22,11 @@ class FindPromptSynonyms implements ResultFilter<Map<String, Set<String>>, List<
     ResultCache resultCache;
 
     @Override
-    public Map<String, Set<String>> run(final List<String> values) throws ExecutionException {
+    public Map<String, Set<String>> run(final List<String> values, final LocalDate orderedDate) {
         Map<String, Set<String>> output = newHashMap();
         values.forEach(v -> output.putIfAbsent(v, Sets.newHashSet()));
 
-        resultCache.getResultPromptSynonym()
+        resultCache.getResultPromptSynonym(orderedDate)
                 .forEach(v -> output.entrySet().stream().forEach(stringSetEntry -> {
                     if (v.getSynonym().equals(stringSetEntry.getKey())) {
                         stringSetEntry.getValue().add(v.getWord());

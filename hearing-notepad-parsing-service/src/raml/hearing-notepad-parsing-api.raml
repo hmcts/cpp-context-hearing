@@ -13,7 +13,11 @@ protocols: [ HTTP, HTTPS ]
         ...
       queryParameters:
         originalText:
-          description: originalText unformmated text
+          description: originalText unformatted text
+          type: string
+          required: true
+        orderedDate:
+          description: date the result was ordered / captured
           type: string
           required: true
 
@@ -36,6 +40,10 @@ protocols: [ HTTP, HTTPS ]
       queryParameters:
         resultCode:
           description: resultCode
+          type: string
+          required: true
+        orderedDate:
+          description: date the result was ordered / captured
           type: string
           required: true
 

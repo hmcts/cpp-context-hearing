@@ -1,0 +1,264 @@
+{
+  "hearing": {
+    "id": "HEARING_ID",
+    "hearingType": "TRIAL",
+    "startDateTime": "2016-06-01T10:00:00Z",
+    "hearingDates": [
+      "2016-06-01T10:00:00Z",
+      "2016-06-02T10:00:00Z",
+      "2016-06-03T10:00:00Z"
+    ],
+    "courtCentre": {
+      "courtCentreId": "COURTCENTRE_ID",
+      "courtCentreName": "Liverpool Crown Court",
+      "courtRoomId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
+      "courtRoomName": "3"
+    },
+    "attendees": [
+      {
+        "firstName": "Cherie",
+        "lastName": "Blair",
+        "type": "COURTCLERK"
+      },
+      {
+        "firstName": "Nina",
+        "lastName": "Turner",
+        "type": "JUDGE",
+        "title": "HHJ"
+      },
+      {
+        "firstName": "Donald",
+        "lastName": "Smith",
+        "type": "DEFENCEADVOCATE",
+        "status": "Leading QC",
+        "defendants": [
+          {
+            "defendantId": "DEFENDANT_ID"
+          }
+        ]
+      },
+      {
+        "firstName": "Cherie",
+        "lastName": "Blair",
+        "type": "PROSECUTIONADVOCATE",
+        "status": "Leading QC",
+        "cases": [
+          {
+            "caseId": "af52dc35-6b80-4633-8c64-649fd1140630"
+          }
+        ]
+      }
+    ],
+    "defendants": [
+      {
+        "id": "DEFENDANT_ID",
+        "person": {
+          "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
+          "title": "Mr",
+          "firstName": "David",
+          "lastName": "LLOYD",
+          "dateOfBirth": "1980-07-15",
+          "nationality": "England",
+          "gender": "Male",
+          "homeTelephone": "02012345678",
+          "workTelephone": "02012345679",
+          "mobile": "07777777777",
+          "fax": "02011111111",
+          "email": "email@email.com",
+          "address": {
+            "addressId": "17c783c8-ff96-4c8c-9932-14c6280bc943",
+            "address1": "14 Tottenham Court Road",
+            "address2": "London",
+            "address3": "England",
+            "address4": "UK",
+            "postCode": "W1T 1JY"
+          }
+        },
+        "defenceOrganisation": "XYZ Solicitors",
+        "interpreter": {
+          "name": "Robert Carlyle",
+          "language": "English"
+        },
+        "cases": [
+          {
+            "id": "af52dc35-6b80-4633-8c64-649fd1140630",
+            "urn": "CASEURN",
+            "bailStatus": "in custody",
+            "custodyTimeLimitDate": "2018-01-30",
+            "offences": [
+              {
+                "id": "73bb9c02-b16b-46f1-b259-3cdd559a8b42",
+                "code": "OF61131",
+                "convictionDate": "2017-08-01",
+                "plea": {
+                  "id": "d83e6a66-d6e0-47b6-b98b-de297d8dc78d",
+                  "value": "NOT GUILTY",
+                  "date": "2017-02-02",
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "verdict": {
+                  "typeId": "a271dae9-6798-4eac-9e0e-af898014bcc8",
+                  "verdictDescription": "Not Guilty, guilty of a lesser or alternative offence",
+                  "verdictCategory": "GUILTY",
+                  "lesserOrAlternativeOffence": {
+                    "offenceTypeId": "694dad02-e03d-412e-98ff-2bd1b7b88f12",
+                    "code": "OF62222",
+                    "convictionDate": "2017-08-01",
+                    "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you did not have a ticket"
+                  },
+                  "numberOfSplitJurors": "9-1",
+                  "verdictDate": "2017-02-02",
+                  "numberOfJurors": 10,
+                  "unanimous": false,
+                  "enteredHearingId": "95a71d08-c019-41fa-8f5b-fa0a5d5cef82"
+                },
+                "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you were taking a ticket which had been issued for use by another person on terms that it is not transferable",
+                "startDate": "2016-06-21",
+                "endDate": "2017-08-01"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "sharedResultLines": [
+      {
+        "id": "RESULT_ID",
+        "defendantId": "DEFENDANT_ID",
+        "caseId": "af52dc35-6b80-4633-8c64-649fd1140630",
+        "offenceId": "73bb9c02-b16b-46f1-b259-3cdd559a8b42",
+        "sharedDate": "2018-04-20",
+        "orderedDate": "2018-04-19",
+        "level": "CASE",
+        "label": "Imprisonment",
+        "rank": 1,
+        "prompts": [
+          {
+            "label": "Imprisonment duration",
+            "value": "1 year 6 months"
+          },
+          {
+            "label": "Prison",
+            "value": "Wormwood Scrubs"
+          }
+        ]
+      },
+      {
+        "id": "2079fde7-6dfc-4466-95df-36e584bbc3b0",
+        "defendantId": "DEFENDANT_ID",
+        "caseId": "af52dc35-6b80-4633-8c64-649fd1140630",
+        "offenceId": "73bb9c02-b16b-46f1-b259-3cdd559a8b42",
+        "sharedDate": "2018-04-20",
+        "orderedDate": "2018-04-19",
+        "level": "DEFENDANT",
+        "label": "Imprisonment",
+        "rank": 1,
+        "prompts": [
+          {
+            "label": "Imprisonment duration",
+            "value": "1 year 6 months"
+          },
+          {
+            "label": "Prison",
+            "value": "Wormwood Scrubs"
+          }
+        ]
+      },
+      {
+        "id": "3079fde7-6dfc-4466-95df-36e584bbc3b0",
+        "defendantId": "DEFENDANT_ID",
+        "caseId": "af52dc35-6b80-4633-8c64-649fd1140630",
+        "offenceId": "73bb9c02-b16b-46f1-b259-3cdd559a8b42",
+        "sharedDate": "2018-04-20",
+        "orderedDate": "2018-04-19",
+        "level": "OFFENCE",
+        "label": "Imprisonment",
+        "rank": 1,
+        "prompts": [
+          {
+            "label": "Imprisonment duration",
+            "value": "1 year 6 months"
+          },
+          {
+            "label": "Prison",
+            "value": "Wormwood Scrubs"
+          }
+        ]
+      }
+    ],
+    "nows": [
+      {
+        "id": "NOW_ID",
+        "nowsTypeId" :"NOWTYPE_ID",
+        "nowsTemplateName": "SingleTemplate",
+        "defendantId": "DEFENDANT_ID",
+        "materials": [
+          {
+            "id": "MATERIAL_ID",
+            "nowResult": [
+              {
+                "sharedResultId": "RESULT_ID",
+                "sequence": 1,
+                "prompts": [
+                  {
+                    "label": "Imprisonment duration"
+                  }
+                ]
+
+              },
+              {
+                "sharedResultId": "2079fde7-6dfc-4466-95df-36e584bbc3b0",
+                "sequence": 2,
+                "prompts": [
+                  {
+                    "label": "Imprisonment duration"
+                  }
+                ]
+              },
+              {
+                "sharedResultId": "3079fde7-6dfc-4466-95df-36e584bbc3b0",
+                "sequence": 3,
+                "prompts": [
+                  {
+                    "label": "Imprisonment duration"
+                  }
+                ]
+              }
+
+            ],
+            "userGroups": [
+              {
+                "group": "USERGROUP1"
+              },
+              {
+                "group": "USERGROUP2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "nowTypes": [
+      {
+        "id" :"NOWTYPE_ID",
+        "templateName": "SingleTemplate",
+        "description": "Imprisonment Order",
+        "rank": 1,
+        "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
+        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "priority": "0.5 hours",
+        "jurisdiction": "B"
+      },
+      {
+        "id" :"525807c9-004c-4b75-9cfd-29757fd4fd78",
+        "templateName": "NotSingleTemplate",
+        "description": "Fine Order",
+        "rank": 1,
+        "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
+        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "priority": "1.0 hours",
+        "jurisdiction": "B"
+      }
+    ]
+  }
+}

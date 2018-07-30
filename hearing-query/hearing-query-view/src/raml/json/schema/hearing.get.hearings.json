@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "hearings": {
       "type": "array",
@@ -12,7 +13,6 @@
   "required": [
     "hearings"
   ],
-  "additionalProperties": false,
   "definitions": {
     "hearing": {
       "type": "object",
@@ -20,48 +20,118 @@
         "hearingId": {
           "$ref": "#/definitions/uuid"
         },
-        "startDate": {
-          "type": "string"
-        },
-        "startTime": {
-          "type": "string"
-        },
         "hearingType": {
           "type": "string"
         },
-        "duration": {
-          "type": "integer"
-        },
-        "courtCentreName": {
-          "type": "string"
-        },
-        "roomName": {
-          "type": "string"
-        },
-        "roomId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "courtCentreId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "caseIds": {
+        "cases": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/uuid"
+            "$ref": "#/definitions/case"
+          }
+        },
+        "defendants": {
+          "type": "array",
+          "$ref": "#/definitions/defendant"
+        },
+        "witnesses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/witness"
           }
         }
       },
       "required": [
         "hearingId",
-        "startDate",
-        "startTime",
         "hearingType",
-        "duration",
-        "courtCentreName",
-        "roomName",
-        "caseIds"
-      ],
-      "additionalProperties": false
+        "cases",
+        "defendants"
+      ]
+    },
+    "case": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "urn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "urn"
+      ]
+    },
+    "defendant": {
+      "type": "array",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "firstName",
+        "lastName"
+      ]
+    },
+    "witness": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
+        },
+        "type": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "homeTelephone": {
+          "type": "string"
+        },
+        "workTelephone": {
+          "type": "string"
+        },
+        "mobile": {
+          "type": "string"
+        },
+        "fax": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "classification",
+        "personId"
+      ]
     },
     "uuid": {
       "type": "string",

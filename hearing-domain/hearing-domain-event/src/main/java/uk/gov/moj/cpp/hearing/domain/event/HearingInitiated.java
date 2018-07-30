@@ -1,43 +1,40 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.moj.cpp.hearing.command.initiate.Case;
+import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
 
-import java.time.ZonedDateTime;
-import java.util.UUID;
+import java.io.Serializable;
+import java.util.List;
 
-@Event("hearing.hearing-initiated")
-public class HearingInitiated {
+@Event("hearing.events.initiated")
+public class HearingInitiated  implements Serializable {
 
-    private UUID hearingId;
-    private ZonedDateTime startDateTime;
-    private Integer duration;
-    private String hearingType;
+    private static final long serialVersionUID = 1L;
 
-    public HearingInitiated(final UUID hearingId, final ZonedDateTime startDateTime, final Integer duration,
-                            final String hearingType) {
-        this.hearingId = hearingId;
-        this.startDateTime = startDateTime;
-        this.duration = duration;
-        this.hearingType = hearingType;
+    private List<Case> cases;
+    private Hearing hearing;
+
+    public HearingInitiated(){
+
     }
 
-    public HearingInitiated() {
-        // default constructor for Jackson serialisation
+    @JsonCreator
+    public HearingInitiated(
+            @JsonProperty("cases") List<Case> cases,
+            @JsonProperty("hearing") Hearing hearing){
+        this.cases = cases;
+        this.hearing = hearing;
     }
 
-    public UUID getHearingId() {
-        return hearingId;
+    public List<Case> getCases() {
+        return cases;
     }
 
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public ZonedDateTime getStartDateTime() {
-        return startDateTime;
-    }
-
-    public String getHearingType() {
-        return hearingType;
+    public Hearing getHearing() {
+        return hearing;
     }
 }

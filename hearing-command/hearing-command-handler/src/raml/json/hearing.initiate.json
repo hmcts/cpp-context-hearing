@@ -1,0 +1,67 @@
+{
+  "cases": [{
+    "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
+    "urn": "87GD9945217"
+  }],
+  "hearing": {
+    "id": "f6541c25-825c-6a98-1764-caee654c763a",
+    "type": "TRIAL",
+    "courtCentreId": "e8821a38-546d-4b56-9992-ebdd772a561f",
+    "courtCentreName": "Liverpool Crown Court",
+    "courtRoomId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
+    "courtRoomName": "3",
+    "judge": {
+      "id": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "title": "HHJ",
+      "firstName": "Neil",
+      "lastName": "Flewitt"
+    },
+    "hearingDays":["2016-06-01T10:00:00Z"],
+    "defendants": [
+      {
+        "id": "0baecac5-222b-402d-9047-84803679edac",
+        "personId": "0baecac5-222b-402d-9047-84803679edad",
+        "firstName": "David",
+        "lastName": "Lloyd",
+        "nationality": "British",
+        "gender": "Male",
+        "address": {
+          "address1": "222 Furze Road",
+          "address2": "Exeter",
+          "address3": "England",
+          "address4": "UK",
+          "postCode": "W1T 1JY"
+        },
+        "dateOfBirth": "1995-03-23",
+        "defenceOrganisation": "Solicitor XYZ",
+        "interpreter": {
+          "needed": false,
+          "language": "English"
+        },
+        "defendantCases": [
+          {
+            "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
+            "bailStatus": "bailed",
+            "custodyTimeLimitDate": "2018-01-30"
+          }
+        ],
+        "offences": [
+          {
+            "id": "7e2f843e-d639-40b3-8611-8015f3a18958",
+            "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
+            "offenceCode": "H8198",
+            "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
+            "section": "Section 51",
+            "startDate": "2010-08-01",
+            "endDate": "2011-08-01",
+            "orderIndex": 1,
+            "count": 1,
+            "convictionDate": "2017-08-01",
+            "title": "Wounding with intent",
+            "legislation": "legislation"
+          }
+        ]
+      }
+    ]
+  }
+}

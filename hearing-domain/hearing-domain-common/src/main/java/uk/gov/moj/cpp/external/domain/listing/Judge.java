@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(value = Include.NON_NULL)
 public class Judge implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final String id;
     private final String title;
     private final String firstName;

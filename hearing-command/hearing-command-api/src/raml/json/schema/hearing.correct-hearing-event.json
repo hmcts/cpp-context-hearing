@@ -18,6 +18,12 @@
     "lastModifiedTime": {
       "type": "string",
       "format": "date-time"
+    },
+    "counselId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "witnessId": {
+      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,
