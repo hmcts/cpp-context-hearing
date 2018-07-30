@@ -6,9 +6,8 @@ import static uk.gov.moj.cpp.hearing.activiti.common.JsonHelper.assembleEnvelope
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.fileservice.api.FileServiceException;
 import uk.gov.justice.services.fileservice.api.FileStorer;
@@ -20,10 +19,6 @@ import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClientProducer;
 
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +26,14 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NowGeneratorService {
 
@@ -50,12 +53,16 @@ public class NowGeneratorService {
 
     private UploadMaterialService uploadMaterialService;
 
+    private SystemUserProvider systemUserProvider;
+
     @Inject
-    public NowGeneratorService(final DocumentGeneratorClientProducer documentGeneratorClientProducer,
+    public NowGeneratorService(final  SystemUserProvider systemUserProvider,
+                               final DocumentGeneratorClientProducer documentGeneratorClientProducer,
                                final ObjectToJsonObjectConverter objectToJsonObjectConverter,
                                final FileStorer fileStorer,
                                final UploadMaterialService uploadMaterialService
     ) {
+        this.systemUserProvider = systemUserProvider;
         this.documentGeneratorClientProducer = documentGeneratorClientProducer;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.fileStorer = fileStorer;
@@ -67,9 +74,11 @@ public class NowGeneratorService {
         try {
             final NowsNotificationDocumentState nowsNotificationDocumentState = nowsDocumentOrderToNotificationState.get(nowsDocumentOrder);
             final String templateName = getTemplateName(nowsRequested, nowsNotificationDocumentState);
-            final byte[] resultOrderAsByteArray = documentGeneratorClientProducer.documentGeneratorClient().generatePdfDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), templateName, userId);
+            final UUID systemUserId = systemUserProvider.getContextSystemUserId().orElseThrow(() -> new NowsTemplateNameNotFoundException("Could not find systemId "));
+            final byte[] resultOrderAsByteArray = documentGeneratorClientProducer.documentGeneratorClient().generatePdfDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), templateName, systemUserId);
             final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));
-            addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
+
+                    addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
                     userId, hearingId, fromString(nowsDocumentOrder.getMaterialId()), nowsNotificationDocumentState);
         } catch (IOException | RuntimeException e) {
             LOGGER.error("Error while uploading document generation or upload ", e);

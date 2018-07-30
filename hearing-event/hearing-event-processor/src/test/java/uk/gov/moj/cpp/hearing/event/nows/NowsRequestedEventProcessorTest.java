@@ -24,6 +24,7 @@ import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.RESU
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
@@ -42,6 +43,7 @@ import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClientPro
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -88,6 +90,9 @@ public class NowsRequestedEventProcessorTest {
     @Mock
     private FileStorer fileStorer;
 
+    @Mock
+    private SystemUserProvider systemUserProvider;
+
     @Spy
     private final Enveloper enveloper = createEnveloper();
 
@@ -122,7 +127,8 @@ public class NowsRequestedEventProcessorTest {
         MockitoAnnotations.initMocks(this);
         nowsRequestedEventProcessor = new NowsRequestedEventProcessor(this.enveloper,
                 this.sender,
-                new NowGeneratorService(this.documentGeneratorClientProducer, this.objectToJsonObjectConverter, this.fileStorer, this.uploadMaterialService),
+                new NowGeneratorService(this. systemUserProvider, this.documentGeneratorClientProducer,
+                        this.objectToJsonObjectConverter, this.fileStorer, this.uploadMaterialService),
                 this.jsonObjectToObjectConverter,
                 this.objectToJsonObjectConverter
         );
@@ -144,10 +150,13 @@ public class NowsRequestedEventProcessorTest {
         final byte[] bytesIn = new byte[2];
         when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
         when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenReturn(bytesIn);
+        UUID systemUserid = UUID.randomUUID();
+        when(systemUserProvider.getContextSystemUserId()).thenReturn(Optional.of(systemUserid));
         when(fileStorer.store(Mockito.any(JsonObject.class), Mockito.any(InputStream.class)))
                 .thenReturn(fileId);
         this.nowsRequestedEventProcessor.processNowsRequested(event);
 
+        verify(this.documentGeneratorClient).generatePdfDocument(any(), any(), eq(systemUserid));
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
         verify(this.uploadMaterialService).uploadFile(
                 eq(UUID.fromString(USER_ID)),
@@ -223,10 +232,13 @@ public class NowsRequestedEventProcessorTest {
 
         final byte[] bytesIn = new byte[2];
         when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
+        UUID systemUserId = UUID.randomUUID();
+        when(systemUserProvider.getContextSystemUserId()).thenReturn(Optional.of(systemUserId));
         when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenReturn(bytesIn);
         doThrow(new FileUploadException()).when(fileStorer).store(any(), any());
         this.nowsRequestedEventProcessor.processNowsRequested(event);
 
+        verify(this.documentGeneratorClient).generatePdfDocument(any(), any(), eq(systemUserId));
         verify(this.fileStorer).store(jsonObjectArgumentCaptor.capture(), inputStreamArgumentCaptor.capture());
         assertThat(inputStreamArgumentCaptor.getValue().read(new byte[2]), is(bytesIn.length));
 
