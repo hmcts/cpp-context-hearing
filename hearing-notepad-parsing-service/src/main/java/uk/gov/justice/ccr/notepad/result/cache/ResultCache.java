@@ -57,10 +57,10 @@ public class ResultCache {
     public void lazyLoad(final JsonEnvelope envelope, final LocalDate orderedDate) {
         cache = cacheFactory.build();
 
-        if (cache.asMap().size() == 0) {
+        if (!cache.asMap().containsKey(getKey(orderedDate, RESULT_DEFINITION_KEY))) {
             synchronized (this) {
                 //Double protection to stop multiple cache loads
-                if (cache.asMap().size() == 0) {
+                if (!cache.asMap().containsKey(getKey(orderedDate, RESULT_DEFINITION_KEY))) {
                     if (resultLoader instanceof ReadStoreResultLoader) {
                         ((ReadStoreResultLoader) resultLoader).setJsonEnvelope(envelope);
                     }

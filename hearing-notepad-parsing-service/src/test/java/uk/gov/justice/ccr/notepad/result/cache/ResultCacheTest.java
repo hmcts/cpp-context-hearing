@@ -94,7 +94,7 @@ public class ResultCacheTest {
     @Test
     public void shouldNotLoadTheCacheWhenNotEmpty() throws Exception {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
-        cacheValue.put(STRING.next(), new Object());
+        cacheValue.put("resultDefinitionKey-2018-06-01", new Object());
         when(cache.asMap()).thenReturn(cacheValue);
 
         underTest.lazyLoad(envelope, hearingDate);
