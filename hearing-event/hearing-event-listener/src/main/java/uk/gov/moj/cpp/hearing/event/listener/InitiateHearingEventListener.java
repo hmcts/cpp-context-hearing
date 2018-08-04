@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
@@ -239,6 +240,12 @@ public class InitiateHearingEventListener {
         if (hearing != null) {
             final HearingSnapshotKey witnessKey = new HearingSnapshotKey(id, hearingId);
 
+            final Defendant defendant = hearing.getDefendants().stream()
+                    .filter(d -> d.getId().getId().equals((defendantId))).findFirst()
+                    .orElseThrow(() -> new RuntimeException(String.format(
+                            "hearing %s witness added for unkown defendant %s ",
+                            hearing.getId(), defendantId)));
+
             final Witness witness = ofNullable(witnessRepository.findBy(witnessKey))
                     .orElseGet(() -> {
                         LOGGER.info("Witness {} not found for hearing id  {}  , creating new witness", id,
@@ -246,24 +253,19 @@ public class InitiateHearingEventListener {
                         return Witness.builder()
                                 .withId(witnessKey)
                                 .withHearing(hearing)
-                                .withType(type)
-                                .withTitle(title)
-                                .withFirstName(firstName)
-                                .withLastName(lastName)
-                                .withClassification(classification)
+                                .withDefendants(asList(defendant))
                                 .build();
                     });
 
-            final Defendant defendant = hearing.getDefendants().stream()
-                    .filter(d -> d.getId().getId().equals((defendantId))).findFirst()
-                    .orElseThrow(() -> new RuntimeException(String.format(
-                            "hearing %s witness added for unkown defendant %s ",
-                            hearing.getId(), defendantId)));
+            witness.setClassification(classification);
+            witness.setFirstName(firstName);
+            witness.setLastName(lastName);
+            witness.setTitle(title);
+            witness.setType(type);
 
-
-            witness.getDefendants().add(defendant);
-            defendant.getDefendantWitnesses().removeIf(w -> w.getId().getId().equals(witness.getId().getId()));
-            defendant.getDefendantWitnesses().add(witness);
+            if (defendant.getDefendantWitnesses().stream().noneMatch(w -> w.getId().getId().equals(witness.getId().getId()))){
+                defendant.getDefendantWitnesses().add(witness);
+            }
 
             hearingRepository.saveAndFlush(hearing);
         }

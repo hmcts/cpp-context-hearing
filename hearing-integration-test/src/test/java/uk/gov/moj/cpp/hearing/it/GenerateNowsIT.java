@@ -69,6 +69,9 @@ public class GenerateNowsIT extends AbstractIT {
     @Test
     public void shouldAddUpdateNows() throws IOException {
 
+        NotifyStub.stubNotifications();
+        DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
+
         final String strToday = LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy"));
 
         final UploadSubscriptionsCommand uploadSubscriptionsCommand = buildUploadSubscriptionsCommand();
@@ -97,9 +100,6 @@ public class GenerateNowsIT extends AbstractIT {
 
         final TestUtilities.EventListener nowsRequestedEventListener = listenFor("public.hearing.events.nows-requested")
                 .withFilter(isJson(withJsonPath("$.hearing.id", is(hearing.getHearingId().toString()))));
-
-        NotifyStub.stubNotifications();
-        DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
 
         final String nowsTypeId = subscription0.getNowTypeIds().get(0).toString();
         makeCommand(requestSpec, "hearing.generate-nows")

@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.utils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -16,14 +17,13 @@ import com.github.tomakehurst.wiremock.client.RequestPatternBuilder;
 
 public class DocumentGeneratorStub {
 
-    public static final String PATH = "/system-documentgenerator-api/rest/documentgenerator/*";
+    public static final String PATH = "/system-documentgenerator-api/rest/documentgenerator/render";
 
     public static void stubDocumentCreate(String documentText) {
-
         stubFor(post(urlPathMatching(PATH ))
+                .withHeader(CONTENT_TYPE, equalTo("application/vnd.system.documentgenerator.render+json"))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
-                        .withBody(documentText.getBytes())
-                        .withHeader(CONTENT_TYPE, "application/vnd.system-documentgenerator.render+json")));
+                        .withBody(documentText.getBytes())));
     }
 
     public static void verifyCreate(List<String> expectedValues) {
