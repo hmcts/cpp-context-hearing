@@ -4,7 +4,7 @@
 
 2. Run with the following command
         1. touch processFile
-        2. java -jar -Dorg.wildfly.swarm.mainProcessFile=/path/to/processFile -Devent.transformation.jar=hearing-domain-transformation-archive-2.0.120-R2-SNAPSHOT.jar event-tool-0.0.1-SNAPSHOT-swarm.jar -c standalone-ds.xml
+        2. java -jar -Dorg.wildfly.swarm.mainProcessFile=/path/to/processFile -Devent.transformation.jar=hearing-domain-transformation-archive-2.0.120.jar event-tool-0.0.1-SNAPSHOT-swarm.jar -c standalone-ds.xml
 
 3. Run with debug option
-     java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Dorg.wildfly.swarm.mainProcessFile=/path/to/processFile -Devent.transformation.jar=hearing-domain-transformation-archive-2.0.120-R2-SNAPSHOT.jar event-tool-0.0.1-SNAPSHOT-swarm.jar -c standalone-ds.xml
+     java -jar -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Dorg.wildfly.swarm.mainProcessFile=/path/to/processFile -Devent.transformation.jar=hearing-domain-transformation-archive-2.0.120.jar event-tool-0.0.1-swarm.jar -c standalone-ds.xml
