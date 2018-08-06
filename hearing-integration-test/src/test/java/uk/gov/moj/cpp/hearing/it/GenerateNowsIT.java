@@ -25,7 +25,6 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimalInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 
-import uk.gov.justice.services.messaging.JsonObjectMetadata;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
@@ -111,10 +110,10 @@ public class GenerateNowsIT extends AbstractIT {
                         USERGROUP2, initiateHearingCommand.getHearing().getCourtCentreId().toString(), CASEURN))
                 .executeSuccessfully();
         // ensure upload material and update status called
-        Awaitility.await().atMost(60, TimeUnit.SECONDS)
-                .until(this::uploadMaterialCalled);
+        Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> uploadMaterialCalled(materialId));
+
         sendMaterialFileUploadedPublicEvent(materialId, userId);
-        Awaitility.await().atMost(60, TimeUnit.SECONDS).until(this::updateMaterialStatusHmpsCalled);
+        Awaitility.await().atMost(60, TimeUnit.SECONDS).until(() -> updateMaterialStatusHmpsCalled(materialId));
         sendHearingHmpsMaterialStatusUpdatedPublicMessage(materialId, userId, hearing.getHearingId().toString());
 
         nowsRequestedEventListener.waitFor();
@@ -218,16 +217,16 @@ public class GenerateNowsIT extends AbstractIT {
                 .replace("CASEURN", caseURN);
     }
 
-    private boolean uploadMaterialCalled() {
-        return (findAll(postRequestedFor(
-                urlPathMatching(WireMockStubUtils.MATERIAL_UPLOAD_COMMAND)))
-                .size() == 1);
+    private boolean uploadMaterialCalled(String materialId) {
+        return findAll(postRequestedFor(urlPathMatching(WireMockStubUtils.MATERIAL_UPLOAD_COMMAND)))
+                .stream()
+                .anyMatch(log -> log.getBodyAsString().contains(materialId));
     }
 
-    private boolean updateMaterialStatusHmpsCalled() {
-        return (findAll(postRequestedFor(
-                urlPathMatching(WireMockStubUtils.MATERIAL_STATUS_UPLOAD_COMMAND)))
-                .size() == 1);
+    private boolean updateMaterialStatusHmpsCalled(String materialId) {
+        return findAll(postRequestedFor(urlPathMatching(WireMockStubUtils.MATERIAL_STATUS_UPLOAD_COMMAND)))
+                .stream()
+                .anyMatch(log -> log.getBodyAsString().contains(materialId));
     }
 
     private void sendMaterialFileUploadedPublicEvent(final String materialId, final String userId) {
@@ -249,14 +248,16 @@ public class GenerateNowsIT extends AbstractIT {
                 .add("hearingId", hearingId).add("status", "generated").build();
         QueueUtil.sendMessage(messageProducerClientPublic, commandName, payload, metadata);
     }
+
     private Metadata getMetadataFrom(final String userId, final String commandName) {
         return metadataFrom(Json.createObjectBuilder()
-                        .add(ORIGINATOR, ORIGINATOR_VALUE)
-                        .add(ID, randomUUID().toString())
-                        .add(USER_ID, userId)
-                        .add(NAME, commandName)
-                        .build()).build();
+                .add(ORIGINATOR, ORIGINATOR_VALUE)
+                .add(ID, randomUUID().toString())
+                .add(USER_ID, userId)
+                .add(NAME, commandName)
+                .build()).build();
     }
+
     @After
     public void tearDown() throws JMSException {
         messageProducerClientPublic.close();

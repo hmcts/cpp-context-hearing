@@ -31,7 +31,7 @@ public class HearingEventDelegate implements Serializable {
     private static final String RECORDED_LABEL = "recordedLabel";
     private static final String HEARING_ID = "hearingId";
 
-    private final transient HearingAggregateMomento momento;
+    private final HearingAggregateMomento momento;
 
     public HearingEventDelegate(final HearingAggregateMomento momento) {
         this.momento = momento;

@@ -14,8 +14,8 @@ fi
 
 declare -rx WILDFLY_DEPLOYMENT_DIR="${VAGRANT_DIR}/deployments"
 declare -rx CONTEXT_NAME=hearing
-declare -rx FRAMEWORK_VERSION=4.3.2
-declare -rx EVENT_BUFFER_VERSION=4.3.2
+declare -rx FRAMEWORK_VERSION=4.1.2
+declare -rx EVENT_BUFFER_VERSION=4.1.2
 declare -rx FILE_SERVICE_VERSION=1.14.0
 
 #fail script on error
@@ -23,4 +23,5 @@ set -e
 
 source functions.sh
 
-buildDeployAndTest ${@}
+integrationTests ${@}
+
