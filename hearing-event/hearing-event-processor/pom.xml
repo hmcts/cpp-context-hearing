@@ -12,7 +12,7 @@
 
     <properties>
         <cpp.service-component>QUERY_API</cpp.service-component>
-        <referencedata.version>2.0.161</referencedata.version>
+        <referencedata.version>2.0.163</referencedata.version>
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
         <material.version>2.0.110</material.version>
         <resultinghmps.version>1.0.30</resultinghmps.version>

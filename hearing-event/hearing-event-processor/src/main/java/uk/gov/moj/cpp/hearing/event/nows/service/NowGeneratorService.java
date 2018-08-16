@@ -39,7 +39,7 @@ public class NowGeneratorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NowGeneratorService.class);
 
-    private static final String FAILED = "FAILED";
+    private static final String FAILED = "failed";
     public static final String HEARING_UPDATE_NOWS_MATERIAL_STATUS = "hearing.command.update-nows-material-status";
     public static final String RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS = "resultinghmps.update-nows-material-status";
 
