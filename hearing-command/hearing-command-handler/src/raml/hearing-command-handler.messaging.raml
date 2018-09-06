@@ -18,10 +18,6 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.update-hearing-with-inherited-plea.json
             example: !include json/hearing.command.update-hearing-with-inherited-plea.json
 
-        application/vnd.hearing.command.lookup-witnesses-on-defendant-for-hearing+json:
-            schema: !include json/schema/hearing.command.lookup-witnesses-on-defendant-for-hearing.json
-            example: !include json/hearing.command.lookup-witnesses-on-defendant-for-hearing.json
-
         application/vnd.hearing.command.register-hearing-against-defendant+json:
             schema: !include json/schema/hearing.command.register-hearing-against-defendant.json
             example: !include json/hearing.command.register-hearing-against-defendant.json
@@ -57,9 +53,9 @@ baseUri:  message://command/handler/message/hearing
             schema:  !include json/schema/hearing.add-defence-counsel.json
 
 # Results
-        application/vnd.hearing.save-draft-result+json:
-            example: !include json/hearing.save-draft-result.json
-            schema: !include json/schema/hearing.save-draft-result.json
+        application/vnd.hearing.command.save-draft-result+json:
+            example: !include json/hearing.command.save-draft-result.json
+            schema: !include json/schema/hearing.command.save-draft-result.json
 
         application/vnd.hearing.command.share-results+json:
             example: !include json/hearing.command.share-results.json
@@ -92,14 +88,6 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.record-mags-court-hearing.json
             schema:  !include json/schema/hearing.record-mags-court-hearing.json
 
-# Add Witness
-        application/vnd.hearing.command.add-update-witness+json:
-            example: !include json/hearing.command.add-update-witness.json
-            schema:  !include json/schema/hearing.command.add-update-witness.json
-        application/vnd.hearing.defence-witness-added+json:
-            schema: !include json/schema/hearing.defence-witness-added.json
-            example: !include json/hearing.defence-witness-added.json
-
 # Nows
         application/vnd.hearing.command.generate-nows+json:
             example: !include json/hearing.command.generate-nows.json
@@ -112,11 +100,6 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.save-nows-variants+json:
             example: !include json/hearing.command.save-nows-variants.json
             schema:  !include json/schema/hearing.command.save-nows-variants.json
-
-# Attendees
-        application/vnd.hearing.command.delete-attendee+json:
-            example: !include json/hearing.command.delete-attendee.json
-            schema: !include json/schema/hearing.command.delete-attendee.json
 
 # Case Defendant Details Update
         application/vnd.hearing.update-case-defendant-details-against-hearing-aggregate+json:

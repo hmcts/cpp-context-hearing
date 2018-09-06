@@ -6,16 +6,23 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class BeanMatcher<T> extends BaseMatcher<T> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BeanMatcher.class.getName());
     private Class<T> clazz;
     private Error error;
     private String methodName;
@@ -44,7 +51,7 @@ public class BeanMatcher<T> extends BaseMatcher<T> {
             return false;
         }
 
-        Enhancer enhancer = new Enhancer();
+        final Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setCallback((MethodInterceptor) (obj, method, args, proxy) -> {
             methodName = method.getName();
@@ -52,25 +59,75 @@ public class BeanMatcher<T> extends BaseMatcher<T> {
         });
 
         try {
-            T proxy = (T) enhancer.create();
+            final T proxy = (T) create(enhancer, clazz);
 
-            for (Assertion<T, ?> assertion: assertions){
-                if (!assertion.getMatcher().matches(assertion.getAccessor().apply((T) proxy))){
+            for (final Assertion<T, ?> assertion : assertions) {
+                if (!assertion.getMatcher().matches(assertion.getAccessor().apply(proxy))) {
                     this.failedAssertion = assertion;
                     this.error = Error.INVALID_ASSERTION;
                     return false;
                 }
             }
 
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("invalid super clazz: " + clazz.getName(), e);
         }
-
-
-
         return true;
     }
 
+    private Object create(final Enhancer enhancer, final Class<?> theClazz) {
+
+        //try the default constructor first
+        final Class<?>[] noArgs = new Class[0];
+        final Constructor<?> constructor = createConstructor(theClazz, noArgs);
+        if (constructor != null && Modifier.isPublic(constructor.getModifiers())) {
+            return enhancer.create();
+        }
+        // try to find a non default constructor
+        final Optional<Constructor<?>> nonDefaultConstructor = Arrays.asList(theClazz.getConstructors()).stream()
+                .filter(c -> c.getParameterTypes().length > 0).findFirst();
+
+        final Class<?>[] paramTypes = nonDefaultConstructor.orElseThrow(
+                () -> new RuntimeException("failed to find non default constructor for " + theClazz.getCanonicalName())).getParameterTypes();
+
+        final Object[] parameters = new Object[paramTypes.length];
+        for (int done = 0; done < parameters.length; done++) {
+            parameters[done] = getExampleParamValue(paramTypes[done]);
+        }
+        return enhancer.create(paramTypes, parameters);
+    }
+
+    private Constructor<?> createConstructor(Class<?> theClazz, Class<?>[] noArgs) {
+        Constructor<?> constructor = null;
+        try {
+            constructor = theClazz.getDeclaredConstructor(noArgs);
+        } catch (NoSuchMethodException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return constructor;
+    }
+
+    private Object getExampleParamValue(Class theClass) {
+        if (Integer.TYPE == theClass) {
+            return 1;
+        } else if (Long.TYPE == theClass) {
+            return 1L;
+        } else if (Boolean.TYPE == theClass) {
+            return Boolean.TRUE;
+        } else if (Float.TYPE == theClass) {
+            return 1f;
+        } else if (Double.TYPE == theClass) {
+            return 1d;
+        } else if (Short.TYPE == theClass) {
+            return (short) 1;
+        } else if (Byte.TYPE == theClass) {
+            return (byte) 1;
+        } else if (Character.TYPE == theClass) {
+            return 'a';
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public void describeTo(Description description) {

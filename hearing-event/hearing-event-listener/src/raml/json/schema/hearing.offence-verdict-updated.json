@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.offence-verdict-updated.json",
   "type": "object",
   "properties": {
     "caseId": {
@@ -11,19 +12,25 @@
     "offenceId": {
       "$ref": "#/definitions/uuid"
     },
-    "verdictId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "verdictValueId": {
+    "verdictTypeId": {
       "$ref": "#/definitions/uuid"
     },
     "category": {
       "type": "string"
     },
-    "code": {
+    "categoryType": {
       "type": "string"
     },
-    "description": {
+    "offenceDefinitionId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "title": {
+      "type": "string"
+    },
+    "offenceCode": {
+      "type": "string"
+    },
+    "legislation": {
       "type": "string"
     },
     "numberOfJurors": {
@@ -43,9 +50,9 @@
     "caseId",
     "hearingId",
     "offenceId",
-    "verdictId",
-    "verdictValueId",
+    "verdictTypeId",
     "category",
+    "categoryType",
     "verdictDate"
   ],
   "definitions": {

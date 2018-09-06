@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.save-draft-result.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "target": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/target.json"
+    }
+  },
+  "required": [
+    "target"
+  ],
+  "additionalProperties": true
+}

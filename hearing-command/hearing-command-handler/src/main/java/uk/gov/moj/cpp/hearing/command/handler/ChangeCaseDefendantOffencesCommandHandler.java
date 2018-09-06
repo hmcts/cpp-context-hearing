@@ -12,7 +12,7 @@ import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
@@ -33,7 +33,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
                 aggregate(DefendantAggregate.class,
                         addedOffence.getDefendantId(),
                         envelope,
-                        defendantAggregate -> defendantAggregate.lookupHearingsForNewOffenceOnDefendant(addedOffence.getDefendantId(), addedOffence.getCaseId(), offence));
+                        defendantAggregate -> defendantAggregate.lookupHearingsForNewOffenceOnDefendant(addedOffence.getDefendantId(), addedOffence.getCaseId(),offence));
             }
         }
 
@@ -62,7 +62,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
         final FoundHearingsForNewOffence foundHearingsForNewOffence = convertToObject(envelope, FoundHearingsForNewOffence.class);
 
         for (UUID hearingId : foundHearingsForNewOffence.getHearingIds()) {
-            aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
                     hearingAggregate.addOffence(
                             hearingId,
                             foundHearingsForNewOffence.getDefendantId(),
@@ -86,7 +86,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
         final FoundHearingsForEditOffence foundHearingsForEditOffence = convertToObject(envelope, FoundHearingsForEditOffence.class);
 
         for (UUID hearingId : foundHearingsForEditOffence.getHearingIds()) {
-            aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
                     hearingAggregate.updateOffence(hearingId, BaseDefendantOffence.builder()
                             .withId(foundHearingsForEditOffence.getId())
                             .withOffenceCode(foundHearingsForEditOffence.getOffenceCode())
@@ -105,7 +105,7 @@ public class ChangeCaseDefendantOffencesCommandHandler extends AbstractCommandHa
         final FoundHearingsForDeleteOffence offenceWithHearingIds = convertToObject(envelope, FoundHearingsForDeleteOffence.class);
 
         for (UUID hearingId : offenceWithHearingIds.getHearingIds()) {
-            aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate ->
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
                     hearingAggregate.deleteOffence(offenceWithHearingIds.getId(), hearingId));
         }
     }

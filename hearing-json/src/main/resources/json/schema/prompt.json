@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/prompt.json",
+  "description": "The resultLine",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "label": {
+      "type": "string"
+    },
+    "fixedListCode": {
+      "type": "string"
+    },
+    "value": {
+      "type": "string"
+    },
+    "welshValue": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "label",
+    "value"
+  ],
+  "additionalProperties": false
+}

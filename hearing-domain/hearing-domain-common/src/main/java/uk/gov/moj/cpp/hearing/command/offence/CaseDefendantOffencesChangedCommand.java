@@ -12,13 +12,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CaseDefendantOffencesChangedCommand {
 
-    private final LocalDate modifiedDate;
+    private LocalDate modifiedDate;
 
-    private final List<DefendantOffences> updatedOffences;
+    private List<DefendantOffences> updatedOffences;
 
-    private final List<DeletedOffences> deletedOffences;
+    private List<DeletedOffences> deletedOffences;
 
-    private final List<DefendantOffences> addedOffences;
+    private List<DefendantOffences> addedOffences;
+
+    public CaseDefendantOffencesChangedCommand() {
+    }
 
     @JsonCreator
     private CaseDefendantOffencesChangedCommand(@JsonProperty("modifiedDate") final LocalDate modifiedDate,
@@ -50,45 +53,27 @@ public class CaseDefendantOffencesChangedCommand {
         return addedOffences;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public CaseDefendantOffencesChangedCommand setModifiedDate(LocalDate modifiedDate) {
+        this.modifiedDate = modifiedDate;
+        return this;
     }
 
-    public static class Builder {
+    public CaseDefendantOffencesChangedCommand setUpdatedOffences(List<DefendantOffences> updatedOffences) {
+        this.updatedOffences = new ArrayList<>(updatedOffences);
+        return this;
+    }
 
-        private LocalDate modifiedDate;
+    public CaseDefendantOffencesChangedCommand setDeletedOffences(List<DeletedOffences> deletedOffences) {
+        this.deletedOffences = new ArrayList<>(deletedOffences);
+        return this;
+    }
 
-        private List<DefendantOffences> updatedOffences;
+    public CaseDefendantOffencesChangedCommand setAddedOffences(List<DefendantOffences> addedOffences) {
+        this.addedOffences = new ArrayList<>(addedOffences);
+        return this;
+    }
 
-        private List<DeletedOffences> deletedOffences;
-
-        private List<DefendantOffences> addedOffences;
-
-        public Builder withModifiedDate(final LocalDate modifiedDate) {
-            this.modifiedDate = modifiedDate;
-            return this;
-        }
-
-        public Builder withUpdateOffences(final List<DefendantOffences> updatedOffences) {
-            this.updatedOffences = updatedOffences;
-            return this;
-        }
-
-        public Builder withDeletedOffences(final List<DeletedOffences> deletedOffences) {
-            this.deletedOffences = deletedOffences;
-            return this;
-        }
-
-        public Builder withAddedOffences(final List<DefendantOffences> addedOffences) {
-            this.addedOffences = addedOffences;
-            return this;
-        }
-
-        public CaseDefendantOffencesChangedCommand build() {
-            return new CaseDefendantOffencesChangedCommand(modifiedDate,
-                    ofNullable(addedOffences).orElse(new ArrayList<>()),
-                    ofNullable(updatedOffences).orElse(new ArrayList<>()),
-                    ofNullable(deletedOffences).orElse(new ArrayList<>()));
-        }
+    public static CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand() {
+        return new CaseDefendantOffencesChangedCommand();
     }
 }

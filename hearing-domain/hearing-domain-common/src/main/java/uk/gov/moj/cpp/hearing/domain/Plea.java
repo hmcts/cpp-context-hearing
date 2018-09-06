@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import uk.gov.justice.json.schemas.core.PleaValue;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Plea implements Serializable {
@@ -15,7 +16,7 @@ public class Plea implements Serializable {
     private UUID originHearingId;
     private UUID offenceId;
     private LocalDate pleaDate;
-    private String value;
+    private PleaValue value;
 
     public UUID getOriginHearingId() {
         return originHearingId;
@@ -30,7 +31,7 @@ public class Plea implements Serializable {
         return pleaDate;
     }
 
-    public String getValue() {
+    public PleaValue getValue() {
         return value;
     }
 
@@ -49,7 +50,7 @@ public class Plea implements Serializable {
         return this;
     }
 
-    public Plea setValue(String value) {
+    public Plea setValue(PleaValue value) {
         this.value = value;
         return this;
     }

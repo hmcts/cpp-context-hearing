@@ -10,8 +10,8 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
 import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
-import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
@@ -29,6 +29,10 @@ public class HearingQueryView {
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_DATE = "date";
+    private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
+    private static final String FIELD_ROOM_ID = "roomId";
+    private static final String FIELD_START_TIME = "startTime";
+    private static final String FIELD_END_TIME = "endTime";
 
     @Inject
     private HearingService hearingService;
@@ -47,7 +51,12 @@ public class HearingQueryView {
     @Handles("hearing.get.hearings-by-date")
     public JsonEnvelope findHearingsByDateV2(final JsonEnvelope envelope) {
         final LocalDate date = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_DATE));
-        final HearingListResponse hearingListResponse = hearingService.getHearingByDateV2(date);
+        final UUID courtCentreId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_COURT_CENTRE_ID));
+        final UUID roomId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_ROOM_ID));
+        final String startTime = Optional.ofNullable(envelope.payloadAsJsonObject().getString(FIELD_START_TIME)).orElse("00:00");
+        final String endTime = Optional.ofNullable(envelope.payloadAsJsonObject().getString(FIELD_END_TIME)).orElse("23:59");
+
+        final HearingListResponse hearingListResponse = hearingService.getHearingByDateV2(date, startTime, endTime, courtCentreId, roomId);
         return enveloper.withMetadataFrom(envelope, "hearing.get.hearings")
                 .apply(hearingListResponse);
     }
@@ -55,7 +64,7 @@ public class HearingQueryView {
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingByIdV2(hearingId.get());
+        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingById(hearingId.get());
         return enveloper.withMetadataFrom(envelope, "hearing.get-hearing")
                 .apply(hearingDetailsResponse);
     }

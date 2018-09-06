@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.add-new-offence-to-hearings.json",
   "type": "object",
   "properties": {
     "id": {

@@ -10,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
+import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -73,8 +74,8 @@ public class NowsTemplates {
         return ResultsShared.builder()
                 .withHearingId(hearingOne.getHearingId())
                 .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
-                .withHearing(hearingOne.it().getHearing())
-                .withCases(hearingOne.it().getCases())
+//                .withHearing(hearingOne.it().getHearing())
+//                .withCases(hearingOne.it().getCases())
                 .withDefenceCounsels(ImmutableMap.of(randomUUID(), DefenceCounselUpsert.builder()
                         .withHearingId(hearingOne.getHearingId())
                         .withPersonId(randomUUID())
@@ -97,24 +98,32 @@ public class NowsTemplates {
                         .build()
                 ))
                 .withPleas(ImmutableMap.of(randomUUID(), Plea.plea()
-                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                        .setOriginHearingId(hearingOne.getHearingId())
-                        .setPleaDate(PAST_LOCAL_DATE.next())
-                        .setValue(STRING.next())
+//                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                                .setOriginHearingId(hearingOne.getHearingId())
+                                .setPleaDate(PAST_LOCAL_DATE.next())
+                                .setValue(RandomGenerator.values(PleaValue.values()).next())
                 ))
-                .withVerdicts(ImmutableMap.of(randomUUID(), VerdictUpsert.builder()
-                        .withVerdictId(randomUUID())
-                        .withCategory(STRING.next())
-                        .withCode(STRING.next())
-                        .withDescription(STRING.next())
-                        .withNumberOfJurors(RandomGenerator.integer(9, 12).next())
-                        .withNumberOfSplitJurors(RandomGenerator.integer(0, 3).next())
-                        .withVerdictDate(PAST_LOCAL_DATE.next())
-                        .withVerdictValueId(randomUUID())
-                        .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                        .withUnanimous(BOOLEAN.next())
-                        .withHearingId(hearingOne.getHearingId())
-                        .build()))
+                .withVerdicts(ImmutableMap.of(randomUUID(), VerdictUpsert.verdictUpsert()
+//                        .setCaseId(hearingOne.getFirstCaseId())
+                                .setHearingId(hearingOne.getHearingId())
+//                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                                .setVerdictTypeId(randomUUID())
+                                .setCategory(STRING.next())
+                                .setCategoryType(STRING.next())
+                                .setOffenceDefinitionId(randomUUID())
+                                .setTitle(STRING.next())
+                                .setOffenceCode(STRING.next())
+                                .setLegislation(STRING.next())
+                                .setNumberOfJurors(RandomGenerator.integer(9, 12).next())
+                                .setNumberOfSplitJurors(RandomGenerator.integer(0, 3).next())
+
+                                .setVerdictDate(PAST_LOCAL_DATE.next())
+//                        .setVerdictValueId(randomUUID())
+//                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+
+                                .setUnanimous(BOOLEAN.next())
+                                .setVerdictDate(PAST_LOCAL_DATE.next())
+                ))
                 .withCourtClerk(CourtClerk.builder()
                         .withId(randomUUID())
                         .withFirstName(STRING.next())
@@ -123,9 +132,9 @@ public class NowsTemplates {
                 .withCompletedResultLines(new ArrayList<>(singletonList(
                         CompletedResultLine.builder()
                                 .withId(completedResultLineId)
-                                .withCaseId(hearingOne.getFirstCaseId())
-                                .withDefendantId(hearingOne.getFirstDefendantId())
-                                .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+//                                .withCaseId(hearingOne.getFirstCaseId())
+//                                .withDefendantId(hearingOne.getFirstDefendantId())
+//                                .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
                                 .withLevel(Level.CASE)
                                 .withResultDefinitionId(randomUUID())
                                 .withResultLabel(STRING.next())
@@ -147,9 +156,9 @@ public class NowsTemplates {
                         .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                         .build()
                 ))
-                .withVariantDirectory(singletonList(
-                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
-                ))
+//                .withVariantDirectory(singletonList(
+//                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
+//                ))
                 .build();
     }
 }

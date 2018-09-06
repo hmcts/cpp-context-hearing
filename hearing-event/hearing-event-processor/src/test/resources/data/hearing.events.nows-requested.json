@@ -391,7 +391,7 @@
         "description": "Imprisonment Order",
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
-        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
         "priority": "0.5 hours",
         "jurisdiction": "B"
       },
@@ -401,7 +401,7 @@
         "description": "Fine Order",
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
-        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
         "priority": "1.0 hours",
         "jurisdiction": "B"
       }

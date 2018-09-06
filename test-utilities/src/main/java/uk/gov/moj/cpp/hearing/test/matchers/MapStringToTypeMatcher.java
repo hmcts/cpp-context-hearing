@@ -22,7 +22,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import uk.gov.justice.services.common.converter.exception.ConverterException;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.converter.jackson.additionalproperties.AdditionalPropertiesModule;
 import uk.gov.justice.services.common.converter.jackson.jsr353.InclusionAwareJSR353Module;
 

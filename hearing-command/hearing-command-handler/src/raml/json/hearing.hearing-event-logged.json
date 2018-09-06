@@ -1,19 +1,23 @@
 {
-  "hearingEventId": "4daefec6-5f78-4109-82d9-1e60544a6c01",
-  "lastHearingEventId": "4daefec6-5f78-4109-82d9-1e60544a6c02",
-  "hearingEventDefinitionId": "4d123ec6-5f78-4109-82d9-1e60544a6c56",
-  "recordedLabel": "Hearing Started",
-  "hearingId": "4daefec6-5f78-4109-82d9-1e60544a6c02",
-  "eventTime": "2010-08-02T09:30:00Z",
-  "reason": "Already deleted",
-  "alterable": false,
-  "caseId": "4daefec6-5f78-4109-82d9-1e60544a6c01",
-  "caseUrn": "12345678901",
-  "courtCentreId": "4daefec6-5f78-4109-82d9-1e60544a6c01",
-  "courtCentreName": "Hotel California",
-  "courtRoomId": "4daefec6-5f78-4109-82d9-1e60544a6c01",
-  "courtRoomName": "Somewhere",
-  "hearingType": "PTP",
-  "witnessId": "4daefec6-5f78-4109-82d9-1e60544a6c02",  
-  "counselId": "4daefec6-5f78-4109-82d9-1e60544a6c01"  
+  "hearingEventId":"0e803252-c496-4edc-bc82-ae85f633bfd3",
+  "hearingId":"acda5624-98b0-4178-be0b-4e76e2480e61",
+  "hearingEventDefinitionId":"6950b72e-cc62-45c5-b913-2d663973df37",
+  "defenceCounselId":"09079a53-1681-41c2-8e7f-a5d0ea8a2fd3",
+  "recordedLabel":"IzXCCN2C3S",
+  "eventTime":"2016-02-23T14:31:10.354Z",
+  "lastModifiedTime":"2014-04-10T00:33:12.197Z",
+  "alterable":false,
+  "courtCentre":{
+    "id":"4551bd67-724e-4b48-82f6-3939b336e9c2",
+    "name":"ZRxYiGmQbu",
+    "roomId":"af0a0fbd-0ed8-4e3f-b2d3-da2171dce837",
+    "roomName":"xosS6VgeW9",
+    "welshName":"j551iTEOpZ",
+    "welshRoomName":"5oxfzkRc6S"
+  },
+  "hearingType":{
+    "description":"liJccqNNpL",
+    "id":"fb80883c-6000-4fe8-893d-5893f6c9e48d"
+  },
+  "caseURN":"FtmZc6OvIt"
 }

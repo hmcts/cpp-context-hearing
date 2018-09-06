@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.upload-subscriptions.json",
   "$ref": "#/definitions/Document",
   "definitions": {
     "Document": {

@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/personDefendant.json",
+  "type": "object",
+  "properties": {
+    "personDetails": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/person.json"
+    },
+    "bailStatus": {
+      "description": "The defendant bail status for the given case",
+      "type": "string"
+    },
+    "custodyTimeLimit": {
+      "description": "The custody time limit for the given case when the bail status is remanded-in-custody",
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "perceivedBirthYear": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/positiveInteger"
+    },
+    "observedEthnicityId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "observedEthnicityCode": {
+      "type": "string"
+    },
+    "selfDefinedEthnicityId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "selfDefinedEthnicityCode": {
+      "type": "string"
+    },
+    "driverNumber": {
+      "type": "string"
+    },
+    "pncId": {
+      "type": "string"
+    },
+    "arrestSummonsNumber": {
+      "type": "string"
+    },
+    "aliases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "employerOrganisation": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/organisation.json"
+    },
+    "employerPayrollReference": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "personDetails"
+  ],
+  "additionalProperties": false
+}

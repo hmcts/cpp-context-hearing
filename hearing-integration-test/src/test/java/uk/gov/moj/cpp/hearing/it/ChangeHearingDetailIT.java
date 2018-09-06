@@ -12,116 +12,91 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.caseDefendantDetailsChangedCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
+import uk.gov.justice.json.schemas.core.Address;
+import uk.gov.justice.json.schemas.core.CourtCentre;
+import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.HearingDay;
+import uk.gov.justice.json.schemas.core.HearingType;
+import uk.gov.justice.json.schemas.core.JudicialRole;
+import uk.gov.justice.json.schemas.core.Person;
+import uk.gov.justice.json.schemas.core.PersonDefendant;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.command.hearingDetails.Judge;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
+import java.time.ZoneId;
+import java.util.Collections;
 import java.util.UUID;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import javax.print.DocFlavor;
 
 import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class ChangeHearingDetailIT extends AbstractIT {
-    public static final String ARBITRARY_TRIAL = RandomGenerator.STRING.next();
-    public static final String ARBITRARY_COURT_ROOM_NAME = RandomGenerator.STRING.next();
-    public static final String ARBITRARY_HEARING_DAY = "2016-06-01T10:00:00Z";
-    private static final String ARBITRARY_HEARING_COURT_ROOM_ID = UUID.randomUUID().toString();
-    private static final String ARBITRARY_HEARING_JUDGE_ID = UUID.randomUUID().toString();
-    private static final String ARBITRARY_HEARING_JUDGE_TITLE = RandomGenerator.STRING.next();
-    private static final String ARBITRARY_HEARING_JUDGE_FIRST_NAME = RandomGenerator.STRING.next();
-    private static final String ARBITRARY_HEARING_JUDGE_LAST_NAME = RandomGenerator.STRING.next();
 
     @Test
-    public void should_update_hearing_when_public_hearing_detail_changed_event_received() {
+    public void shouldUpdateHearing() throws Exception {
 
-        //Given Hearing is already created
-        final String hearingId = createHearing().getId().toString();
-        //new hearing changes payload
-        JsonObject hearingChangeDetails = publicHearingChangedEvent(hearingId);
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
 
-        //When hearing received  'public.hearing-detail-changed' should apply changes accordingly
-        sendPublicHearingDetailChangedNotification(hearingChangeDetails);
+        HearingDetailsUpdateCommand hearingDetailsUpdateCommand = UseCases.updateHearing(HearingDetailsUpdateCommand.hearingDetailsUpdateCommand()
+                .setHearing(uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing.hearing()
+                        .setId(hearingOne.getHearingId())
+                        .setCourtRoomId(randomUUID())
+                        .setCourtRoomName(STRING.next())
+                        .setType(STRING.next())
+                        .setHearingDays(Collections.singletonList(PAST_ZONED_DATE_TIME.next()))
+                        .setJudge(Judge.judge()
+                                .setFirstName(STRING.next())
+                                .setLastName(STRING.next())
+                                .setId(randomUUID())
+                                .setTitle(STRING.next())
+                        )
+                ));
 
-        poll(requestParams(getURL("hearing.get.hearing", hearingId), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingId)),
-                                withJsonPath("$.hearingType", is(ARBITRARY_TRIAL)),
-                                withJsonPath("$.roomName", is(ARBITRARY_COURT_ROOM_NAME)),
-                                withJsonPath("$.roomId", is(ARBITRARY_HEARING_COURT_ROOM_ID)),
-                                withJsonPath("$.judge.id", is(ARBITRARY_HEARING_JUDGE_ID)),
-                                withJsonPath("$.judge.title", is(ARBITRARY_HEARING_JUDGE_TITLE)),
-                                withJsonPath("$.judge.firstName", is(ARBITRARY_HEARING_JUDGE_FIRST_NAME)),
-                                withJsonPath("$.judge.lastName", is(ARBITRARY_HEARING_JUDGE_LAST_NAME)),
-                                withJsonPath("$.hearingDays[0]", is(ISO_INSTANT.format(ZonedDateTimes.fromString(ARBITRARY_HEARING_DAY))))
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getRoomId, is(hearingDetailsUpdateCommand.getHearing().getCourtRoomId()))
+                                .with(CourtCentre::getRoomName, is(hearingDetailsUpdateCommand.getHearing().getCourtRoomName()))
 
-                        )));
-
-    }
-
-    private void sendPublicHearingDetailChangedNotification(final JsonObject jsonObject) {
-        final String eventName = "public.hearing-detail-changed";
-
-
-        sendMessage(publicEvents.createProducer(),
-                eventName,
-                jsonObject,
-                metadataOf(randomUUID(), eventName)
-                        .withUserId(randomUUID().toString())
-                        .build()
+                        )
+                        .with(Hearing::getType, isBean(HearingType.class)
+                                .with(HearingType::getDescription, is(hearingDetailsUpdateCommand.getHearing().getType()))
+                        )
+                        .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
+                                //TODO - look into why I need to hack the time zone here.
+                                .with(HearingDay::getSittingDay, is(hearingDetailsUpdateCommand.getHearing().getHearingDays().get(0).withZoneSameLocal(ZoneId.of("UTC"))))
+                        ))
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getFirstName, is(hearingDetailsUpdateCommand.getHearing().getJudge().getFirstName()))
+                                .with(JudicialRole::getLastName, is(hearingDetailsUpdateCommand.getHearing().getJudge().getLastName()))
+                                .with(JudicialRole::getTitle, is(hearingDetailsUpdateCommand.getHearing().getJudge().getTitle()))
+                                .with(JudicialRole::getJudicialId, is(hearingDetailsUpdateCommand.getHearing().getJudge().getId()))
+                        ))
+                )
         );
-    }
-
-    private Hearing createHearing() {
-
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
-
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))
-
-                        )));
-
-        return hearingOne.it().getHearing();
-    }
-
-
-    private JsonObject publicHearingChangedEvent(final String hearingId) {
-        return Json.createObjectBuilder()
-                .add("hearing", Json.createObjectBuilder()
-                        .add("id", hearingId)
-                        .add("type", ARBITRARY_TRIAL)
-                        .add("judge", getJudge())
-                        .add("courtRoomId", ARBITRARY_HEARING_COURT_ROOM_ID)
-                        .add("courtRoomName", ARBITRARY_COURT_ROOM_NAME)
-                        .add("hearingDays", Json.createArrayBuilder().add(ARBITRARY_HEARING_DAY).build())
-                        .build())
-                .build();
-    }
-
-    private JsonObject getJudge() {
-        final JsonObject judgeJsonObject = Json.createObjectBuilder()
-                .add("id", ARBITRARY_HEARING_JUDGE_ID)
-                .add("firstName", ARBITRARY_HEARING_JUDGE_FIRST_NAME)
-                .add("lastName", ARBITRARY_HEARING_JUDGE_LAST_NAME)
-                .add("title", ARBITRARY_HEARING_JUDGE_TITLE)
-                .build();
-        return judgeJsonObject;
     }
 
 }

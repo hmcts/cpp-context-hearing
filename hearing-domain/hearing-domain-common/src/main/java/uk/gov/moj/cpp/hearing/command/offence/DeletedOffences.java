@@ -7,10 +7,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DeletedOffences {
-    private  UUID defendantId;
-    private  UUID caseId;
-    private  List<UUID> offences;
 
+    private UUID defendantId;
+    private UUID caseId;
+    private List<UUID> offences;
+
+    public DeletedOffences() {
+    }
 
     @JsonCreator
     public DeletedOffences(@JsonProperty("defendantId") final UUID defendantId,
@@ -33,47 +36,22 @@ public class DeletedOffences {
         return offences;
     }
 
-    public void setCaseId(UUID caseId) {
+    public DeletedOffences setCaseId(UUID caseId) {
         this.caseId = caseId;
+        return this;
     }
 
-    public void setOffences(List<UUID> offences) {
+    public DeletedOffences setOffences(List<UUID> offences) {
         this.offences = offences;
+        return this;
     }
 
-    public void setDefendantId(UUID defendantId) {
+    public DeletedOffences setDefendantId(UUID defendantId) {
         this.defendantId = defendantId;
-
-
+        return this;
     }
 
-    public static DeletedOffences.Builder builder() {
-        return new DeletedOffences.Builder();
-    }
-
-    public static class Builder {
-        private List<UUID> offences;
-        private UUID defendantId;
-        private UUID caseId;
-
-        public Builder withCaseId(UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withDefendantId(UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-
-        public Builder withOffences(List<UUID> offences) {
-            this.offences = offences;
-            return this;
-        }
-
-
-        public DeletedOffences build() {
-            return new DeletedOffences(this.defendantId, this.caseId, this.offences);
-        }
+    public static DeletedOffences deletedOffences() {
+        return new DeletedOffences();
     }
 }

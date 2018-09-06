@@ -15,15 +15,18 @@ public class Defendant implements Serializable {
 
     private UUID id;
 
-    private final Person person;
+    private Person person;
 
-    private final String bailStatus;
+    private String bailStatus;
 
-    private final LocalDate custodyTimeLimitDate;
+    private LocalDate custodyTimeLimitDate;
 
-    private final String defenceOrganisation;
+    private String defenceOrganisation;
 
-    private final Interpreter interpreter;
+    private Interpreter interpreter;
+
+    public Defendant() {
+    }
 
     @JsonCreator
     public Defendant(@JsonProperty("id") final UUID id,
@@ -41,18 +44,12 @@ public class Defendant implements Serializable {
         this.interpreter = interpreter;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public UUID getId() {
+        return id;
     }
 
-    public static Builder builder(Defendant defendant) {
-        return Defendant.builder()
-                .withId(defendant.getId())
-                .withPerson(Person.builder(defendant.getPerson()))
-                .withBailStatus(defendant.getBailStatus())
-                .withCustodyTimeLimitDate(defendant.getCustodyTimeLimitDate())
-                .withDefenceOrganisation(defendant.getDefenceOrganisation())
-                .withInterpreter(Interpreter.builder(defendant.getInterpreter().getLanguage()));
+    public Person getPerson() {
+        return person;
     }
 
     public String getBailStatus() {
@@ -67,76 +64,41 @@ public class Defendant implements Serializable {
         return defenceOrganisation;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public Interpreter getInterpreter() {
         return interpreter;
     }
 
-    public Person getPerson() {
-        return person;
+    public Defendant setId(UUID id) {
+        this.id = id;
+        return this;
     }
 
-    public static class Builder {
+    public Defendant setPerson(Person person) {
+        this.person = person;
+        return this;
+    }
 
-        private UUID id;
+    public Defendant setBailStatus(String bailStatus) {
+        this.bailStatus = bailStatus;
+        return this;
+    }
 
-        private Person.Builder person;
+    public Defendant setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
+        this.custodyTimeLimitDate = custodyTimeLimitDate;
+        return this;
+    }
 
-        private String bailStatus;
+    public Defendant setDefenceOrganisation(String defenceOrganisation) {
+        this.defenceOrganisation = defenceOrganisation;
+        return this;
+    }
 
-        private LocalDate custodyTimeLimitDate;
+    public Defendant setInterpreter(Interpreter interpreter) {
+        this.interpreter = interpreter;
+        return this;
+    }
 
-        private String defenceOrganisation;
-
-        private Interpreter.Builder interpreter;
-
-        private Builder() {
-        }
-
-        public Builder withBailStatus(final String bailStatus) {
-            this.bailStatus = bailStatus;
-            return this;
-        }
-
-        public Builder withCustodyTimeLimitDate(final LocalDate custodyTimeLimitDate) {
-            this.custodyTimeLimitDate = custodyTimeLimitDate;
-            return this;
-        }
-
-        public Builder withDefenceOrganisation(final String defenceOrganisation) {
-            this.defenceOrganisation = defenceOrganisation;
-            return this;
-        }
-
-        public Builder withId(final UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withPerson(final Person.Builder person) {
-            this.person = person;
-            return this;
-        }
-
-        public Builder withInterpreter(final Interpreter.Builder interpreter) {
-            this.interpreter = interpreter;
-            return this;
-        }
-
-        public Defendant build() {
-            return new Defendant(id,
-                    ofNullable(person).map(Person.Builder::build).orElse(null),
-                    bailStatus,
-                    custodyTimeLimitDate,
-                    defenceOrganisation,
-                    ofNullable(interpreter).map(Interpreter.Builder::build).orElse(null));
-        }
+    public static Defendant defendant(){
+        return new Defendant();
     }
 }

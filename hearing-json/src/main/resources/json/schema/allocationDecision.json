@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/allocationDecision.json",
+  "description": "The allocation decision made regarding the jurisdiction required or elected for dealing with the offence in question and based on the indicated plea",
+  "type": "object",
+  "properties": {
+    "courtDecision": {
+      "type": "string",
+      "enum": [
+        "CONSENT_SUMMARY_TRIAL",
+        "ELECT_TRIAL_ON_INDICTMENT",
+        "INDICTABLE_ONLY_LINKED_TO_INDICTABLE"
+      ]
+    },
+    "prosecutionRepresentation": {
+      "type": "string",
+      "enum": [
+        "CONSENT_SUMMARY_TRIAL",
+        "ELECT_TRIAL_ON_INDICTMENT"
+      ]
+    },
+    "defendantRepresentation": {
+      "type": "string",
+      "enum": [
+        "CONSENT_SUMMARY_TRIAL",
+        "ELECT_TRIAL_ON_INDICTMENT"
+      ]
+    },
+    "indicationOfSentence": {
+      "description": "When a court decision is made the indication of possible sentence based on the allocation decision",
+      "type": "string"
+    }
+  },
+  "required": [
+    "courtDecision",
+    "prosecutionRepresentation",
+    "defendantRepresentation"
+  ],
+  "additionalProperties": false
+}

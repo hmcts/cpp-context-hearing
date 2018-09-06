@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
@@ -21,36 +20,43 @@ public class OffenceDelegate implements Serializable {
     }
 
     public void handleOffenceAdded(OffenceAdded offenceAdded) {
-        this.momento.getHearing().getDefendants().stream()
-                .filter(d -> d.getId().equals(offenceAdded.getDefendantId()))
-                .forEach(d -> d.getOffences().add(Offence.offence()
-                        .setId(offenceAdded.getId())
-                        .setCaseId(offenceAdded.getCaseId())
-                        .setOffenceCode(offenceAdded.getOffenceCode())
-                        .setWording(offenceAdded.getWording())
-                        .setStartDate(offenceAdded.getStartDate())
-                        .setEndDate(offenceAdded.getEndDate())
-                        .setCount(offenceAdded.getCount())
-                        .setConvictionDate(offenceAdded.getConvictionDate())
-                ));
+
+        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
+                prosecutionCase.getDefendants().stream()
+                .filter(defendant -> defendant.getId().equals(offenceAdded.getDefendantId()))
+                .forEach(defendant -> defendant.getOffences().add(
+                        uk.gov.justice.json.schemas.core.Offence.offence()
+                                .withId(offenceAdded.getId())
+                                .withOffenceCode(offenceAdded.getOffenceCode())
+                                .withWording(offenceAdded.getWording())
+                                .withStartDate(offenceAdded.getStartDate())
+                                .withCount(offenceAdded.getCount())
+                                .withOffenceDefinitionId(UUID.randomUUID())//TODO: the offence definition is missing in Offence Added
+                                .withOrderIndex(0)//TODO: the offence definition is missing in Offence Added
+                                .withConvictionDate(offenceAdded.getConvictionDate())
+                                .build()
+                )));
     }
 
     public void handleOffenceUpdated(OffenceUpdated offenceUpdated) {
-        this.momento.getHearing().getDefendants().forEach(d -> d.getOffences().stream()
-                .filter(o -> o.getId().equals(offenceUpdated.getId()))
-                .forEach(o -> {
-                    o.setOffenceCode(offenceUpdated.getOffenceCode());
-                    o.setWording(offenceUpdated.getWording());
-                    o.setStartDate(offenceUpdated.getStartDate());
-                    o.setEndDate(offenceUpdated.getEndDate());
-                    o.setCount(offenceUpdated.getCount());
-                    o.setConvictionDate(offenceUpdated.getConvictionDate());
-                }));
+
+        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
+                prosecutionCase.getDefendants().forEach(defendant -> defendant.getOffences().stream()
+                .filter(offence -> offence.getId().equals(offenceUpdated.getId()))
+                .forEach(offence -> {
+                    offence.setOffenceCode(offenceUpdated.getOffenceCode());
+                    offence.setWording(offenceUpdated.getWording());
+                    offence.setStartDate(offenceUpdated.getStartDate());
+                    offence.setEndDate(offenceUpdated.getEndDate());
+                    offence.setCount(offenceUpdated.getCount());
+                    offence.setConvictionDate(offenceUpdated.getConvictionDate());
+                })));
     }
 
     public void handleOffenceDeleted(OffenceDeleted offenceDeleted) {
-        this.momento.getHearing().getDefendants()
-                .forEach(d -> d.getOffences().removeIf(o -> o.getId().equals(offenceDeleted.getId())));
+        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
+                prosecutionCase.getDefendants().forEach(defendant ->
+                        defendant.getOffences().removeIf(offence -> offence.getId().equals(offenceDeleted.getId()))));
     }
 
 

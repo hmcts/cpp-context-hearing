@@ -2,17 +2,18 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.verdict.Defendant;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.Offence;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class UpdateVerdictCommandHandler extends AbstractCommandHandler {
@@ -22,24 +23,20 @@ public class UpdateVerdictCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.update-verdict")
     public void updateVerdict(final JsonEnvelope command) throws EventStreamException {
+ 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.update-verdict event received {}", command.toObfuscatedDebugString());
         }
+
         final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = convertToObject(command, HearingUpdateVerdictCommand.class);
+        final UUID hearingId = hearingUpdateVerdictCommand.getHearingId();
+                
+        for (final Verdict verdict : hearingUpdateVerdictCommand.getVerdicts()) {
 
-        for (Defendant defendant : hearingUpdateVerdictCommand.getDefendants()) {
-            for (Offence offence : defendant.getOffences()) {
+            aggregate(HearingAggregate.class, hearingUpdateVerdictCommand.getHearingId(), command,
+                    hearingAggregate -> hearingAggregate.updateVerdict(hearingId, verdict)
+            );
 
-                aggregate(NewModelHearingAggregate.class, hearingUpdateVerdictCommand.getHearingId(), command,
-                        hearingAggregate ->
-                                hearingAggregate.updateVerdict(
-                                        hearingUpdateVerdictCommand.getHearingId(),
-                                        hearingUpdateVerdictCommand.getCaseId(),
-                                        offence.getId(),
-                                        offence.getVerdict()
-                                )
-                );
-            }
         }
     }
 }

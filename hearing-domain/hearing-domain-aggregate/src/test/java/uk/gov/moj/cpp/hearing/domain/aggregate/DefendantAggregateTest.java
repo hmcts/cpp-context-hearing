@@ -7,6 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.justice.json.schemas.core.Gender;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
@@ -46,12 +49,12 @@ public class DefendantAggregateTest {
     @Test
     public void testRegisteringHearing() {
 
-        RegisterHearingAgainstDefendantCommand expected = RegisterHearingAgainstDefendantCommand.builder()
+        final RegisterHearingAgainstDefendantCommand expected = RegisterHearingAgainstDefendantCommand.builder()
                 .withDefendantId(randomUUID())
                 .withHearingId(randomUUID())
                 .build();
 
-        RegisteredHearingAgainstDefendant result = (RegisteredHearingAgainstDefendant) defendantAggregate.registerHearing(expected).collect(Collectors.toList()).get(0);
+        final RegisteredHearingAgainstDefendant result = (RegisteredHearingAgainstDefendant) defendantAggregate.registerHearing(expected).collect(Collectors.toList()).get(0);
 
         assertThat(result.getDefendantId(), is(expected.getDefendantId()));
         assertThat(result.getHearingId(), is(expected.getHearingId()));
@@ -62,38 +65,38 @@ public class DefendantAggregateTest {
 
         final UUID previousHearingId = randomUUID();
 
-        final Address.Builder address = Address.address()
-                .withAddress1(STRING.next())
-                .withAddress2(STRING.next())
-                .withAddress3(STRING.next())
-                .withAddress4(STRING.next())
-                .withPostcode(STRING.next());
+        final Address address = Address.address()
+                .setAddress1(STRING.next())
+                .setAddress2(STRING.next())
+                .setAddress3(STRING.next())
+                .setAddress4(STRING.next())
+                .setPostCode(STRING.next());
 
-        final CaseDefendantDetailsCommand command = CaseDefendantDetailsCommand.builder()
-                .withCaseId(randomUUID())
-                .withDefendant(Defendant.builder()
-                        .withId(randomUUID())
-                        .withPerson(Person.builder().withId(randomUUID())
-                        .withFirstName(STRING.next())
-                        .withLastName(STRING.next())
-                        .withNationality(STRING.next())
-                        .withGender(STRING.next())
-                        .withAddress(address)
-                        .withDateOfBirth(PAST_LOCAL_DATE.next()))
-                        .withBailStatus(STRING.next())
-                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                        .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(Interpreter.builder(STRING.next())))
-                .build();
+        final CaseDefendantDetailsCommand command = CaseDefendantDetailsCommand.caseDefendantDetailsCommand()
+                .setCaseId(randomUUID())
+                .setDefendant(Defendant.defendant()
+                        .setId(randomUUID())
+                        .setPerson(Person.person().setId(randomUUID())
+                                .setFirstName(STRING.next())
+                                .setLastName(STRING.next())
+                                .setNationality(STRING.next())
+                                .setGender(RandomGenerator.values(Gender.values()).next())
+                                .setAddress(address)
+                                .setDateOfBirth(PAST_LOCAL_DATE.next()))
+                        .setBailStatus(STRING.next())
+                        .setCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
+                        .setDefenceOrganisation(STRING.next())
+                        .setInterpreter(Interpreter.interpreter().setLanguage(STRING.next()))
+                );
 
-        RegisteredHearingAgainstDefendant registerDefendantWithHearingCommand = RegisteredHearingAgainstDefendant.builder()
+        final RegisteredHearingAgainstDefendant registerDefendantWithHearingCommand = RegisteredHearingAgainstDefendant.builder()
                 .withDefendantId(randomUUID())
                 .withHearingId(previousHearingId)
                 .build();
 
         defendantAggregate.apply(registerDefendantWithHearingCommand);
 
-        CaseDefendantDetailsWithHearings result = (CaseDefendantDetailsWithHearings) defendantAggregate.enrichCaseDefendantDetailsWithHearingIds(command).collect(Collectors.toList()).get(0);
+        final CaseDefendantDetailsWithHearings result = (CaseDefendantDetailsWithHearings) defendantAggregate.enrichCaseDefendantDetailsWithHearingIds(command).collect(Collectors.toList()).get(0);
 
         assertThat(result.getHearingIds(), hasItems(previousHearingId));
     }

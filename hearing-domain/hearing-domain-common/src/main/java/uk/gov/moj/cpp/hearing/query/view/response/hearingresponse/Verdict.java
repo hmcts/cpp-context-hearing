@@ -1,12 +1,13 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class Verdict {
 
-    private final String verdictId;
-    private final String hearingId;
+    private final UUID verdictTypeId;
     private final Value value;
     private final String verdictDate;
     private final Integer numberOfSplitJurors;
@@ -14,15 +15,13 @@ public final class Verdict {
     private final Boolean unanimous;
 
     @JsonCreator
-    private Verdict(@JsonProperty("verdictId") final String verdictId,
-                    @JsonProperty("hearingId") final String hearingId,
+    protected Verdict(@JsonProperty("verdictTypeId") final UUID verdictTypeId,
                     @JsonProperty("value") final Value value,
                     @JsonProperty("verdictDate") final String verdictDate,
                     @JsonProperty("numberOfSplitJurors") final Integer numberOfSplitJurors,
                     @JsonProperty("numberOfJurors") final Integer numberOfJurors,
                     @JsonProperty("unanimous") final Boolean unanimous) {
-        this.verdictId = verdictId;
-        this.hearingId = hearingId;
+        this.verdictTypeId = verdictTypeId;
         this.value = value;
         this.verdictDate = verdictDate;
         this.numberOfSplitJurors = numberOfSplitJurors;
@@ -31,8 +30,7 @@ public final class Verdict {
     }
 
     private Verdict(Builder builder) {
-        this.verdictId = builder.verdictId;
-        this.hearingId = builder.hearingId;
+        this.verdictTypeId = builder.verdictTypeId;
         this.value = builder.value;
         this.verdictDate = builder.verdictDate;
         this.numberOfSplitJurors = builder.numberOfSplitJurors;
@@ -44,12 +42,8 @@ public final class Verdict {
         return new Builder();
     }
 
-    public String getVerdictId() {
-        return verdictId;
-    }
-
-    public String getHearingId() {
-        return hearingId;
+    public UUID getVerdictTypeId() {
+        return verdictTypeId;
     }
 
     public Value getValue() {
@@ -74,21 +68,15 @@ public final class Verdict {
 
     public static final class Builder {
 
-        private String verdictId;
-        private String hearingId;
+        private UUID verdictTypeId;
         private Value value;
         private String verdictDate;
         private Integer numberOfSplitJurors;
         private Integer numberOfJurors;
         private Boolean unanimous;
 
-        public Builder withVerdictId(final String verdictId) {
-            this.verdictId = verdictId;
-            return this;
-        }
-
-        public Builder withHearingId(final String hearingId) {
-            this.hearingId = hearingId;
+        public Builder withVerdictTypeId(final UUID verdictId) {
+            this.verdictTypeId = verdictId;
             return this;
         }
 

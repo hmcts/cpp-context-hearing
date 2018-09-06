@@ -1,5 +1,6 @@
 {
   "$schema":"http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/public.hearing.offence-conviction-date-changed.json",
   "type":"object",
   "properties":{
     "caseId": {

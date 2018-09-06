@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 
+import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -77,13 +78,11 @@ public class PleaUpdateEventProcessorTest {
     public void offencePleaUpdate() {
 
 
-        PleaUpsert pleaUpsert = PleaUpsert.builder()
-                .withHearingId(randomUUID())
-                .withOffenceId(randomUUID())
-                .withPleaDate(PAST_LOCAL_DATE.next())
-                .withValue("GUILTY")
-                .build();
-
+        PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
+                .setHearingId(randomUUID())
+                .setOffenceId(randomUUID())
+                .setPleaDate(PAST_LOCAL_DATE.next())
+                .setValue(PleaValue.GUILTY);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
                 objectToJsonObjectConverter.convert(pleaUpsert));
@@ -101,7 +100,7 @@ public class PleaUpdateEventProcessorTest {
                                 withJsonPath("$.hearingId", is(pleaUpsert.getHearingId().toString())),
                                 withJsonPath("$.offenceId", is(pleaUpsert.getOffenceId().toString())),
                                 withJsonPath("$.pleaDate", is(pleaUpsert.getPleaDate().toString())),
-                                withJsonPath("$.value", is(pleaUpsert.getValue()))
+                                withJsonPath("$.value", is(pleaUpsert.getValue().name()))
 
                                 )
                         )

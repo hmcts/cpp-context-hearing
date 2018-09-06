@@ -1,81 +1,56 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.update-plea.json",
   "type": "object",
   "properties": {
-    "caseId": {
-      "$ref": "#/definitions/uuidPattern"
-    },
-    "defendants": {
+    "pleas": {
       "type": "array",
+      "minItems": 1,
       "items": {
-        "$ref": "#/definitions/defendant"
+        "$ref": "#/definitions/plea"
       }
     }
   },
-  "additionalProperties": false,
   "required": [
-    "caseId",
-    "defendants"
+    "pleas"
   ],
+  "additionalProperties": false,
+
   "definitions": {
-    "defendant": {
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/uuidPattern"
-        },
-        "personId": {
-          "$ref": "#/definitions/uuidPattern"
-        },
-        "offences": {
-          "type": "array",
-          "items" : {
-            "$ref": "#/definitions/offence"
-          }
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "id",
-        "offences"
-      ]
-    },
-    "offence": {
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/uuidPattern"
-        },
-        "plea": {
-          "type": "object",
-          "$ref": "#/definitions/plea"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "id"
-      ]
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "plea": {
+      "type": "object",
       "properties": {
-        "id": {
-          "$ref": "#/definitions/uuidPattern"
+        "originatingHearingId": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
         },
-        "value": {
-          "type": "string"
+        "delegatedPowers": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/delegatedPowers.json"
+        },
+        "offenceId": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
         },
         "pleaDate": {
           "$ref": "#/definitions/datePattern"
+        },
+        "value": {
+          "type": "string",
+          "enum": [
+            "GUILTY",
+            "NOT_GUILTY"
+          ]
         }
       },
-      "additionalProperties": false,
       "required": [
-        "id",
-        "value",
-        "pleaDate"
-      ]
-    },
-    "uuidPattern": {
-      "type": "string",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        "originatingHearingId",
+        "offenceId",
+        "pleaDate",
+        "value"
+      ],
+      "additionalProperties": false
     },
     "datePattern": {
       "type": "string",

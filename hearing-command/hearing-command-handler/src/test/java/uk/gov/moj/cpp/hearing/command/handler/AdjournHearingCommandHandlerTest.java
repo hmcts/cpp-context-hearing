@@ -25,7 +25,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 
 import java.util.UUID;
@@ -72,7 +72,7 @@ public class AdjournHearingCommandHandlerTest {
     @Test
     public void eventHearingAdjournedShouldCreated() throws Exception {
         //Given
-        setupMockedEventStream(UUID.fromString(ARBITRARY_HEARING_ID), this.hearingEventStream, with(new NewModelHearingAggregate(), a -> {
+        setupMockedEventStream(UUID.fromString(ARBITRARY_HEARING_ID), this.hearingEventStream, with(new HearingAggregate(), a -> {
             a.apply(jsonObjectToObjectConverter.convert(commandHearingChangedEvent(), HearingAdjourned.class));
         }));
 

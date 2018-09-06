@@ -1,22 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.jayway.restassured.path.json.JsonPath;
-import com.jayway.restassured.response.Response;
-import com.jayway.restassured.specification.RequestSpecification;
-import org.apache.http.HttpStatus;
-import org.hamcrest.Matcher;
-import org.hamcrest.StringDescription;
-
-import javax.jms.MessageConsumer;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -26,6 +9,29 @@ import static uk.gov.moj.cpp.hearing.it.AbstractIT.CPP_UID_HEADER;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
+import org.apache.http.HttpStatus;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
+import org.json.JSONObject;
+import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+import uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher;
+
+import javax.jms.MessageConsumer;
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.io.StringReader;
+import java.text.MessageFormat;
 
 public class TestUtilities {
 
@@ -54,7 +60,7 @@ public class TestUtilities {
 
         public JsonPath waitFor() {
 
-            JsonPath message = retrieveMessage(messageConsumer, 30000);
+            JsonPath message = retrieveMessage(messageConsumer, 10000);
             StringDescription description = new StringDescription();
 
             while (message != null && !this.matcher.matches(message.prettify())) {
@@ -77,7 +83,52 @@ public class TestUtilities {
             this.matcher = matcher;
             return this;
         }
+
+        public EventListener withFilter(final BeanMatcher<?> beanMatcher, final String expectedMetaDataName, final String expectedMetaDataContextUser) {
+
+            this.matcher = new BaseMatcher() {
+                Object beanValue;
+                String metadataError = null;
+
+                @Override
+                public boolean matches(final Object o) {
+                    final JSONObject jsonObjectMutable = new JSONObject(o.toString());
+                    final JSONObject metadata = jsonObjectMutable.getJSONObject("_metadata");
+                    final String actualMetadataContextUser = metadata != null ? metadata.getJSONObject("context").getString("user") : "";
+                    final String actualMetadataName = metadata != null ? metadata.getString("name") : "";
+                    if (!actualMetadataName.equals(expectedMetaDataName) || !actualMetadataContextUser.equals(expectedMetaDataContextUser)) {
+                        metadataError = String.format("actual metadata user/name %s/%s doesnt match expected %s/%s ", actualMetadataContextUser, actualMetadataName, expectedMetaDataContextUser, expectedMetaDataName);
+                        return false;
+                    }
+
+                    jsonObjectMutable.remove("_metadata");
+                    JsonObject jsonObject = Json.createReader(new StringReader(jsonObjectMutable.toString())).readObject();
+                    beanValue = MapJsonObjectToTypeMatcher.convert(PublicHearingDraftResultSaved.class, jsonObject);
+                    return beanMatcher.matches(beanValue);
+                }
+
+                @Override
+                public void describeMismatch(Object item, Description description) {
+                    if (metadataError != null) {
+                        description.appendText(metadataError);
+                    } else {
+                        beanMatcher.describeMismatch(beanValue, description);
+                    }
+                }
+
+                @Override
+                public void describeTo(Description description) {
+                    beanMatcher.describeTo(description);
+                }
+
+            };
+
+            return this;
+        }
+
+
     }
+
 
     public static EventListener listenFor(String mediaType) {
         return new EventListener(mediaType);

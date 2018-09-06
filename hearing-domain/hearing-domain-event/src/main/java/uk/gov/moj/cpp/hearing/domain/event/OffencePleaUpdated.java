@@ -1,30 +1,33 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Event("hearing.offence-plea-updated")
-public final class OffencePleaUpdated implements Serializable{
+public class OffencePleaUpdated implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private final UUID hearingId;
-    private final UUID offenceId;
-    private final LocalDate pleaDate;
-    private final String value;
+    private UUID hearingId;
+    private UUID offenceId;
+    private LocalDate pleaDate;
+    private String value;
+    private DelegatedPowers delegatedPowers;
+
+    public OffencePleaUpdated() {
+    }
 
     @JsonCreator
     public OffencePleaUpdated(@JsonProperty("hearingId") final UUID originHearingId,
-            @JsonProperty("offenceId") final UUID offenceId,
-            @JsonProperty("pleaDate") final LocalDate pleaDate,
-            @JsonProperty("value") final String value) {
+                              @JsonProperty("offenceId") final UUID offenceId,
+                              @JsonProperty("pleaDate") final LocalDate pleaDate,
+                              @JsonProperty("value") final String value) {
         this.hearingId = originHearingId;
         this.offenceId = offenceId;
         this.pleaDate = pleaDate;
@@ -37,6 +40,7 @@ public final class OffencePleaUpdated implements Serializable{
         this.offenceId = builder.offenceId;
         this.pleaDate = builder.pleaDate;
         this.value = builder.value;
+        this.delegatedPowers = builder.delegatedPowers;
     }
 
     public UUID getHearingId() {
@@ -59,12 +63,17 @@ public final class OffencePleaUpdated implements Serializable{
         return new Builder();
     }
 
+    public DelegatedPowers getDelegatedPowers() {
+        return delegatedPowers;
+    }
+
     public static final class Builder {
 
         private UUID hearingId;
         private UUID offenceId;
         private LocalDate pleaDate;
         private String value;
+        private DelegatedPowers delegatedPowers;
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
@@ -83,6 +92,11 @@ public final class OffencePleaUpdated implements Serializable{
 
         public Builder withValue(final String value) {
             this.value = value;
+            return this;
+        }
+
+        public Builder withDelegatedPowers(final DelegatedPowers delegatedPowers) {
+            this.delegatedPowers = delegatedPowers;
             return this;
         }
 

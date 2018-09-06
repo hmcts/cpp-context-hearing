@@ -11,7 +11,7 @@ public class UploadSubscriptionsCommand {
     private UUID id;
 
     @JsonProperty("subscriptions")
-    private List<UploadSubscriptionCommand> subscriptions;
+    private List<UploadSubscription> subscriptions;
 
     @JsonProperty("referenceDate")
     private String referenceDate;
@@ -32,11 +32,11 @@ public class UploadSubscriptionsCommand {
         this.referenceDate = referenceDate;
     }
 
-    public List<UploadSubscriptionCommand> getSubscriptions() {
+    public List<UploadSubscription> getSubscriptions() {
         return subscriptions;
     }
 
-    public void setSubscriptions(List<UploadSubscriptionCommand> subscriptions) {
+    public void setSubscriptions(List<UploadSubscription> subscriptions) {
         this.subscriptions = subscriptions;
     }
 }

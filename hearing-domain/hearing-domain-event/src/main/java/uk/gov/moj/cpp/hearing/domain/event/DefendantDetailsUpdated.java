@@ -15,11 +15,14 @@ public class DefendantDetailsUpdated implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID hearingId;
+    private UUID hearingId;
 
-    private final UUID caseId;
+    private UUID caseId;
 
-    private final Defendant defendant;
+    private Defendant defendant;
+
+    public DefendantDetailsUpdated() {
+    }
 
     @JsonCreator
     public DefendantDetailsUpdated(
@@ -30,10 +33,6 @@ public class DefendantDetailsUpdated implements Serializable {
         this.hearingId = hearingId;
         this.caseId = caseId;
         this.defendant = defendant;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public UUID getHearingId() {
@@ -48,35 +47,23 @@ public class DefendantDetailsUpdated implements Serializable {
         return caseId;
     }
 
-    public static class Builder {
 
-        private UUID hearingId;
+    public DefendantDetailsUpdated setHearingId(UUID hearingId) {
+        this.hearingId = hearingId;
+        return this;
+    }
 
-        private UUID caseId;
+    public DefendantDetailsUpdated setCaseId(UUID caseId) {
+        this.caseId = caseId;
+        return this;
+    }
 
-        private Defendant.Builder defendant;
+    public DefendantDetailsUpdated setDefendant(Defendant defendant) {
+        this.defendant = defendant;
+        return this;
+    }
 
-        private Builder() {
-        }
-
-        public Builder withHearingId(final UUID hearingId) {
-            this.hearingId = hearingId;
-            return this;
-        }
-
-        public Builder withCaseId(final UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withDefendant(Defendant.Builder defendant) {
-            this.defendant = defendant;
-            return this;
-        }
-
-        public DefendantDetailsUpdated build() {
-            return new DefendantDetailsUpdated(hearingId, caseId,
-                    ofNullable(defendant).map(Defendant.Builder::build).orElse(null));
-        }
+    public static DefendantDetailsUpdated defendantDetailsUpdated() {
+        return new DefendantDetailsUpdated();
     }
 }

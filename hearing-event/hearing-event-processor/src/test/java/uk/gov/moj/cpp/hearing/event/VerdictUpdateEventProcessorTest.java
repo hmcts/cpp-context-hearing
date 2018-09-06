@@ -13,9 +13,9 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -71,24 +71,27 @@ public class VerdictUpdateEventProcessorTest {
         MockitoAnnotations.initMocks(this);
     }
 
-
+    @SuppressWarnings("unchecked")
     @Test
     public void offencePleaUpdate() {
 
-        VerdictUpsert verdictUpsert = VerdictUpsert.builder()
-                .withHearingId(randomUUID())
-                .withOffenceId(randomUUID())
-                .withCaseId(randomUUID())
-                .withVerdictId(randomUUID())
-                .withVerdictValueId(randomUUID())
-                .withCategory(STRING.next())
-                .withCode(STRING.next())
-                .withDescription(STRING.next())
-                .withNumberOfJurors(INTEGER.next())
-                .withNumberOfSplitJurors(INTEGER.next())
-                .withUnanimous(BOOLEAN.next())
-                .withVerdictDate(PAST_LOCAL_DATE.next())
-                .build();
+        final boolean unanimous = BOOLEAN.next();
+        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
+
+        final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
+                .setCaseId(randomUUID())
+                .setHearingId(randomUUID())
+                .setOffenceId(randomUUID())
+                .setCategory(STRING.next())
+                .setCategoryType(STRING.next())
+                .setOffenceDefinitionId(randomUUID())
+                .setOffenceCode(STRING.next())
+                .setTitle(STRING.next())
+                .setLegislation(STRING.next())
+                .setNumberOfJurors(integer(9, 12).next())
+                .setNumberOfSplitJurors(numberOfSplitJurors)
+                .setUnanimous(unanimous)
+                .setVerdictDate(PAST_LOCAL_DATE.next());
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
                 objectToJsonObjectConverter.convert(verdictUpsert));
@@ -102,7 +105,6 @@ public class VerdictUpdateEventProcessorTest {
                         metadata().withName("public.hearing.verdict-updated"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearingId", is(verdictUpsert.getHearingId().toString()))
-
                                 )
                         )
                 )

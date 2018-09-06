@@ -1,53 +1,26 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static com.google.common.io.Resources.getResource;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
-
-import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import com.tngtech.java.junit.dataprovider.DataProvider;
@@ -61,6 +34,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import uk.gov.justice.json.schemas.core.Target;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
@@ -88,12 +84,13 @@ public class HearingEventProcessorTest {
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @Spy
-    @InjectMocks
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
 
     @Spy
-    @InjectMocks
     private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(this.objectMapper);
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
 
     private static final String HEARING_INITIATED_EVENT = "hearing.initiated";
@@ -197,27 +194,28 @@ public class HearingEventProcessorTest {
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
+        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
     @Test
     public void publicDraftResultSavedPublicEvent() {
         final String draftResult = "some random text";
-        final JsonEnvelope event = createDraftResultSavedPrivateEvent(draftResult);
+        final Target target = CoreTestTemplates.target().build();
+        final JsonEnvelope eventIn = createDraftResultSavedPrivateEvent(target);
 
-        this.hearingEventProcessor.publicDraftResultSavedPublicEvent(event);
+        this.hearingEventProcessor.publicDraftResultSavedPublicEvent(eventIn);
 
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                metadata().withName("public.hearing.draft-result-saved"),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_TARGET_ID), equalTo(TARGET_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_DEFENDANT_ID), equalTo(DEFENDANT_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_OFFENCE_ID), equalTo(OFFENCE_ID.toString())),
-                        withJsonPath(format("$.%s", FIELD_DRAFT_RESULT), equalTo(draftResult)),
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString()))
-                        )
-                )).thatMatchesSchema());
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED));
+        final PublicHearingDraftResultSaved publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingDraftResultSaved.class);
+        assertThat(publicEventOut.getDefendantId(), is(target.getDefendantId()));
+        assertThat(publicEventOut.getDraftResult(), is(target.getDraftResult()));
+        assertThat(publicEventOut.getHearingId(), is(target.getHearingId()));
+        assertThat(publicEventOut.getOffenceId(), is(target.getOffenceId()));
+        assertThat(publicEventOut.getTargetId(), is(target.getTargetId()));
+        //TODO json schema check ?
     }
 
     @DataProvider
@@ -306,7 +304,13 @@ public class HearingEventProcessorTest {
                         .build());
     }
 
+    private JsonEnvelope createDraftResultSavedPrivateEvent(final uk.gov.justice.json.schemas.core.Target target) {
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(target);
+        return envelope().withPayloadOf(jsonObject, "target").with(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT)).build();
+    }
+
     private JsonEnvelope createDraftResultSavedPrivateEvent(String draftResult) {
+
         final JsonObjectBuilder result = createObjectBuilder()
                 .add(FIELD_TARGET_ID, TARGET_ID.toString())
                 .add(FIELD_DEFENDANT_ID, DEFENDANT_ID.toString())

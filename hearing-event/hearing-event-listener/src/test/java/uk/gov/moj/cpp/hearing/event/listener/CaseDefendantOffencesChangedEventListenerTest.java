@@ -7,8 +7,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -19,22 +26,11 @@ import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
-import uk.gov.moj.cpp.hearing.repository.LegalCaseRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.util.Collections;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDefendantOffencesChangedEventListenerTest {
@@ -47,9 +43,6 @@ public class CaseDefendantOffencesChangedEventListenerTest {
 
     @Mock
     private DefendantRepository defendantRepository;
-
-    @Mock
-    private LegalCaseRepository legalCaseRepository;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -74,19 +67,6 @@ public class CaseDefendantOffencesChangedEventListenerTest {
 
         final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceToBeAdded));
 
-        final Defendant defendant = Defendant.builder()
-                .withId(new HearingSnapshotKey(offenceToBeAdded.getDefendantId(), offenceToBeAdded.getHearingId()))
-                .build();
-
-        final LegalCase legalCase = LegalCase.builder()
-                .withId(offenceToBeAdded.getCaseId())
-                .withCaseurn(STRING.next())
-                .build();
-
-        when(defendantRepository.findBy(new HearingSnapshotKey(offenceToBeAdded.getDefendantId(), offenceToBeAdded.getHearingId()))).thenReturn(defendant);
-
-        when(legalCaseRepository.findById(offenceToBeAdded.getCaseId())).thenReturn(legalCase);
-
         caseDefendantOffencesChangedEventListener.addOffence(envelope);
 
         ArgumentCaptor<Offence> defendantExArgumentCaptor = ArgumentCaptor.forClass(Offence.class);
@@ -97,11 +77,6 @@ public class CaseDefendantOffencesChangedEventListenerTest {
 
         assertThat(offenceToBeAdded.getId(), is(offenceOut.getId().getId()));
 
-        assertThat(offenceToBeAdded.getHearingId(), is(offenceOut.getId().getHearingId()));
-
-        assertThat(offenceToBeAdded.getDefendantId(), is(offenceOut.getDefendantId()));
-
-        assertThat(offenceToBeAdded.getCaseId(), is(offenceOut.getLegalCase().getId()));
     }
 
     @Test
@@ -114,11 +89,10 @@ public class CaseDefendantOffencesChangedEventListenerTest {
 
         final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
 
-        final Offence offence = Offence.builder()
-                .withId(new HearingSnapshotKey(offenceUpdated.getId(), offenceUpdated.getHearingId()))
-                .build();
+        final Offence offence = new Offence();
+        offence.setId(new HearingSnapshotKey(offenceUpdated.getId(), offenceUpdated.getHearingId()));
 
-        when(offenceRepository.findBy(new HearingSnapshotKey(offenceUpdated.getId(), offenceUpdated.getHearingId()))).thenReturn(offence);
+        when(offenceRepository.findBy(offence.getId())).thenReturn(offence);
 
         caseDefendantOffencesChangedEventListener.updateOffence(envelope);
 
@@ -129,8 +103,6 @@ public class CaseDefendantOffencesChangedEventListenerTest {
         final Offence offenceOut = defendantExArgumentCaptor.getValue();
 
         assertThat(offenceUpdated.getId(), is(offenceOut.getId().getId()));
-
-        assertThat(offenceUpdated.getHearingId(), is(offenceOut.getId().getHearingId()));
     }
 
     @Test
@@ -140,28 +112,24 @@ public class CaseDefendantOffencesChangedEventListenerTest {
 
         final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceDeleted));
 
-        final Defendant defendant = Defendant.builder()
-                .withId(new HearingSnapshotKey(randomUUID(), offenceDeleted.getHearingId()))
-                .withOffences(Collections.emptyList())
-                .build();
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(randomUUID(), offenceDeleted.getHearingId()));
+        defendant.setOffences(Collections.emptyList());
 
-        final Offence offence = Offence.builder()
-                .withId(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()))
-                .withDefendant(defendant)
-                .build();
+        final Offence offence = new Offence();
+        offence.setId(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()));
+        offence.setDefendant(defendant);
 
-        when(offenceRepository.findBy(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()))).thenReturn(offence);
-
-        when(defendantRepository.findBy(new HearingSnapshotKey(offence.getDefendantId(), offenceDeleted.getHearingId()))).thenReturn(defendant);
+        when(offenceRepository.findBy(offence.getId())).thenReturn(offence);
 
         caseDefendantOffencesChangedEventListener.deleteOffence(envelope);
 
-        final ArgumentCaptor<Offence> defendantExArgumentCaptor = ArgumentCaptor.forClass(Offence.class);
+        final ArgumentCaptor<Defendant> defendantExArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
 
-        verify(offenceRepository).removeAndFlush(defendantExArgumentCaptor.capture());
+        verify(defendantRepository).save(defendantExArgumentCaptor.capture());
 
-        final Offence offenceOut = defendantExArgumentCaptor.getValue();
+        final Defendant defendantOut = defendantExArgumentCaptor.getValue();
 
-        assertThat(offenceDeleted.getId(), is(offenceOut.getId().getId()));
+        assertThat(defendant.getId().getId(), is(defendantOut.getId().getId()));
     }
 }

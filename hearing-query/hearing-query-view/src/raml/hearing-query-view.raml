@@ -123,7 +123,23 @@ protocols: [ HTTP, HTTPS ]
         date:
           description: date of hearing
           type: string
+          required: true
+        startTime:
+          description: start time
+          type: string
           required: false
+        endTime:
+          description: end time
+          type: string
+          required: false
+        courtCentreId:
+          description: court centre id
+          type: string
+          required: true
+        roomId:
+          description: room id
+          type: string
+          required: true
 
       responses:
             200:

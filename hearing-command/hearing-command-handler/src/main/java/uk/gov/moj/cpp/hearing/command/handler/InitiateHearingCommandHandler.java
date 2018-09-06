@@ -8,13 +8,12 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.LookupWitnessesOnDefendantForHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.initiate event received {}", envelope.toObfuscatedDebugString());
         }
         final InitiateHearingCommand command = convertToObject(envelope, InitiateHearingCommand.class);
-        aggregate(NewModelHearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command));
+        aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command));
     }
 
     @Handles("hearing.command.lookup-plea-on-offence-for-hearing")
@@ -50,16 +49,7 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.update-hearing-with-inherited-plea event received {}", envelope.toObfuscatedDebugString());
         }
         final UpdateHearingWithInheritedPleaCommand command = convertToObject(envelope, UpdateHearingWithInheritedPleaCommand.class);
-        aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope, a -> a.inheritPlea(command));
-    }
-
-    @Handles("hearing.command.lookup-witnesses-on-defendant-for-hearing")
-    public void initiateHearingDefenceWitness(final JsonEnvelope envelope) throws EventStreamException {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.lookup-witnesses-on-defendant-for-hearing event received {}", envelope.toObfuscatedDebugString());
-        }
-        final LookupWitnessesOnDefendantForHearingCommand command = convertToObject(envelope, LookupWitnessesOnDefendantForHearingCommand.class);
-        aggregate(DefendantAggregate.class, command.getDefendantId(), envelope, a -> a.lookupWitnessesForHearing(command));
+        aggregate(HearingAggregate.class, command.getHearingId(), envelope, a -> a.inheritPlea(command));
     }
 
     @Handles("hearing.command.register-hearing-against-defendant")

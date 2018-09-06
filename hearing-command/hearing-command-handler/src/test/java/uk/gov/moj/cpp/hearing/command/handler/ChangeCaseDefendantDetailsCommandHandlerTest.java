@@ -20,6 +20,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.json.schemas.core.Gender;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -30,13 +31,14 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
 import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -88,22 +90,29 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
     @Test
     public void testInitiateCaseDefendantChanged() throws Exception {
 
-        CaseDefendantDetails caseDefendantChanged = CaseDefendantDetails.builder()
-                .withCaseId(randomUUID())
-                .addDefendant(
-                        Defendant.builder()
-                                .withId(randomUUID())
-                                .withPerson(Person.builder().withId(randomUUID())
-                                        .withFirstName(STRING.next())
-                                        .withLastName(STRING.next())
-                                        .withNationality(STRING.next())
-                                        .withGender(STRING.next())
-                                        .withAddress(generateAddress())
-                                        .withDateOfBirth(PAST_LOCAL_DATE.next()))
-                                .withBailStatus(STRING.next())
-                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                                .withDefenceOrganisation(STRING.next())
-                                .withInterpreter(Interpreter.builder(STRING.next()))).build();
+        CaseDefendantDetails caseDefendantChanged = CaseDefendantDetails.caseDefendantDetails()
+                .setCaseId(randomUUID())
+                .setDefendants(Collections.singletonList(Defendant.defendant()
+                        .setId(randomUUID())
+                        .setPerson(Person.person().setId(randomUUID())
+                                .setFirstName(STRING.next())
+                                .setLastName(STRING.next())
+                                .setNationality(STRING.next())
+                                .setGender(RandomGenerator.values(Gender.values()).next())
+                                .setAddress(Address.address()
+                                        .setAddress1(STRING.next())
+                                        .setAddress2(STRING.next())
+                                        .setAddress3(STRING.next())
+                                        .setAddress4(STRING.next())
+                                        .setPostCode(STRING.next())
+                                )
+                                .setDateOfBirth(PAST_LOCAL_DATE.next()))
+                        .setBailStatus(STRING.next())
+                        .setCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
+                        .setDefenceOrganisation(STRING.next())
+                        .setInterpreter(Interpreter.interpreter().setLanguage(STRING.next()))
+                ));
+
 
         setupMockedEventStream(caseDefendantChanged.getDefendants().get(0).getId(), this.eventStream, new DefendantAggregate());
 
@@ -125,28 +134,33 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
-        final NewModelHearingAggregate hearingAggregate = new NewModelHearingAggregate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
 
-        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearingsEvent = CaseDefendantDetailsWithHearings.builder()
-                .withCaseId(randomUUID())
-                .withDefendant(
-                        Defendant.builder()
-                                .withId(randomUUID())
-                                .withPerson(Person.builder().withId(randomUUID())
-                                        .withFirstName(STRING.next())
-                                        .withLastName(STRING.next())
-                                        .withNationality(STRING.next())
-                                        .withGender(STRING.next())
-                                        .withAddress(generateAddress())
-                                        .withDateOfBirth(PAST_LOCAL_DATE.next()))
-                                .withBailStatus(STRING.next())
-                                .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                                .withDefenceOrganisation(STRING.next())
-                                .withInterpreter(Interpreter.builder(STRING.next())))
-                .withHearingIds(Collections.singletonList(randomUUID()))
-                .build();
+        CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearingsEvent = CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
+                .setCaseId(randomUUID())
+                .setDefendant(
+                        Defendant.defendant()
+                                .setId(randomUUID())
+                                .setPerson(Person.person().setId(randomUUID())
+                                        .setFirstName(STRING.next())
+                                        .setLastName(STRING.next())
+                                        .setNationality(STRING.next())
+                                        .setGender(RandomGenerator.values(Gender.values()).next())
+                                        .setAddress(Address.address()
+                                                .setAddress1(STRING.next())
+                                                .setAddress2(STRING.next())
+                                                .setAddress3(STRING.next())
+                                                .setAddress4(STRING.next())
+                                                .setPostCode(STRING.next())
+                                        )
+                                        .setDateOfBirth(PAST_LOCAL_DATE.next()))
+                                .setBailStatus(STRING.next())
+                                .setCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
+                                .setDefenceOrganisation(STRING.next())
+                                .setInterpreter(Interpreter.interpreter().setLanguage(STRING.next())))
+                .setHearingIds(Collections.singletonList(randomUUID()));
 
         setupMockedEventStream(caseDefendantDetailsWithHearingsEvent.getHearingIds().get(0), this.eventStream, hearingAggregate);
 
@@ -165,14 +179,5 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
         Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
-    }
-
-    private Address.Builder generateAddress() {
-        return Address.address()
-                .withAddress1(STRING.next())
-                .withAddress2(STRING.next())
-                .withAddress3(STRING.next())
-                .withAddress4(STRING.next())
-                .withPostcode(STRING.next());
     }
 }

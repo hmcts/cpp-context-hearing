@@ -34,6 +34,12 @@ public class NowDefinition {
 
     private LocalDate referenceDate;
 
+    private String welshName;
+
+    private String bilingualTemplateName;
+
+    private Boolean remotePrintingRequired;
+
     public UUID getId() {
         return this.id;
     }
@@ -153,6 +159,34 @@ public class NowDefinition {
 
     public static NowDefinition now() {
         return new NowDefinition();
+    }
+
+    public String getWelshName() {
+        return welshName;
+    }
+
+
+    public String getBilingualTemplateName() {
+        return bilingualTemplateName;
+    }
+
+    public Boolean getRemotePrintingRequired() {
+        return remotePrintingRequired;
+    }
+
+    public NowDefinition setWelshName(final String welshName) {
+        this.welshName = welshName;
+        return this;
+    }
+
+    public NowDefinition setBilingualTemplateName(final String bilingualTemplateName) {
+        this.bilingualTemplateName = bilingualTemplateName;
+        return this;
+    }
+
+    public NowDefinition setRemotePrintingRequired(final Boolean remotePrintingRequired) {
+        this.remotePrintingRequired = remotePrintingRequired;
+        return this;
     }
 
 }

@@ -3,14 +3,14 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public final class Address {
+public class Address {
 
-    private final String formattedAddress;
-    private final String address1;
-    private final String address2;
-    private final String address3;
-    private final String address4;
-    private final String postCode;
+    private String formattedAddress;
+    private String address1;
+    private String address2;
+    private String address3;
+    private String address4;
+    private String postCode;
 
 
     @JsonCreator
@@ -27,6 +27,9 @@ public final class Address {
         this.address4 = address4;
         this.postCode = postCode;
 
+    }
+
+    public Address() {
     }
 
     private Address(final Builder builder) {

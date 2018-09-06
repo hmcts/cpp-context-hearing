@@ -1,4 +1,6 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.generate-nows.json",
   "type": "object",
   "definitions": {
     "uuid": {
@@ -18,7 +20,6 @@
       }
     }
   },
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "properties": {
     "hearing": {
       "type": "object",
@@ -407,8 +408,17 @@
               "staticText": {
                 "type": "string"
               },
-              "staticTextWelsh": {
+              "welshStaticText": {
                 "type": "string"
+              },
+              "welshDescription": {
+                "type": "string"
+              },
+              "bilingualTemplateName": {
+                "type": "string"
+              },
+              "remotePrintingRequired": {
+                "type": "boolean"
               },
               "priority": {
                 "type": "string"
@@ -416,7 +426,16 @@
               "jurisdiction": {
                 "type": "string"
               }
-            }
+            },
+            "required": [
+              "id",
+              "templateName",
+              "description",
+              "rank",
+              "welshDescription",
+              "bilingualTemplateName",
+              "remotePrintingRequired"
+            ]
           }
         }
       }

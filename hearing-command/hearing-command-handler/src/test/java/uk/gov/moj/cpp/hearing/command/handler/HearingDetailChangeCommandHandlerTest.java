@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
@@ -14,9 +16,14 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.json.schemas.core.JudicialRole;
+import uk.gov.justice.json.schemas.core.JudicialRoleType;
+import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -26,12 +33,13 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import javax.json.Json;
@@ -44,6 +52,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingDetailChangeCommandHandlerTest {
@@ -89,9 +98,10 @@ public class HearingDetailChangeCommandHandlerTest {
 
     @Test
     public void eventHearingDetailChangedShouldCreated() throws Exception {
+
         //Given
-        setupMockedEventStream(UUID.fromString(ARBITRARY_HEARING_ID), this.hearingEventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new HearingInitiated(null,Hearing.hearing().setId(UUID.fromString(ARBITRARY_HEARING_ID))));
+        setupMockedEventStream(UUID.fromString(ARBITRARY_HEARING_ID), this.hearingEventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate().getHearing()));
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID(PRIVATE_HEARING_COMMAND_HEARING_DETAIL_CHANGE), commandHearingChangedEvent());
@@ -123,7 +133,7 @@ public class HearingDetailChangeCommandHandlerTest {
 
     @Test
     public void eventHearingDetailChangedShouldIgnored() throws Exception {
-        setupMockedEventStream(UUID.fromString(ARBITRARY_HEARING_ID), this.hearingEventStream, new NewModelHearingAggregate());
+        setupMockedEventStream(UUID.fromString(ARBITRARY_HEARING_ID), this.hearingEventStream, new HearingAggregate());
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID(PRIVATE_HEARING_COMMAND_HEARING_DETAIL_CHANGE), commandHearingChangedEvent());
 
         testObj.changeHearingDetail(command);

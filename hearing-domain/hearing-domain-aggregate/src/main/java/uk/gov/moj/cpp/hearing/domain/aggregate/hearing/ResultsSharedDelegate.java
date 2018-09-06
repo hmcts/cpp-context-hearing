@@ -3,12 +3,14 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
+import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
@@ -20,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"squid:CommentedOutCodeLine"})
 public class ResultsSharedDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -61,13 +64,26 @@ public class ResultsSharedDelegate implements Serializable {
                 )
                         .setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
                         .setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
-        );
+         );
+    }
+
+    public void handleDraftResultShared(final DraftResultSaved draftResultSaved ) {
+        this.momento.getTargets().put(draftResultSaved.getTarget().getTargetId(), draftResultSaved.getTarget());
+    }
+
+    public Stream<Object> saveDraftResult(final Target target) {
+           return Stream.of(new DraftResultSaved(target));
     }
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
+        final List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .filter(rl->rl.getIsComplete())
+                .map(rl->rl.getResultLineId())
+                .collect(Collectors.toList());
 
-        List<UUID> completedResultLineIds = command.getCompletedResultLines().stream().map(CompletedResultLine::getId).collect(Collectors.toList());
-        List<Variant> variants = this.momento.getVariantDirectory().stream()
+//        List<UUID> completedResultLineIds = command.getCompletedResultLines().stream().map(CompletedResultLine::getId).collect(Collectors.toList());
+        final List<Variant> variants = this.momento.getVariantDirectory().stream()
                 .filter(variant -> {
                     List<UUID> resultLineIds = variant.getValue().getResultLines().stream().map(ResultLineReference::getResultLineId).collect(Collectors.toList());
 
@@ -88,8 +104,8 @@ public class ResultsSharedDelegate implements Serializable {
                 .withCourtClerk(command.getCourtClerk())
                 .withUncompletedResultLines(command.getUncompletedResultLines())
                 .withCompletedResultLines(command.getCompletedResultLines())
-                .withHearing(this.momento.getHearing())
-                .withCases(this.momento.getCases())
+//                .withHearing(this.momento.getHearing())
+//                .withCases(this.momento.getCases())
                 .withProsecutionCounsels(this.momento.getProsecutionCounsels())
                 .withDefenceCounsels(this.momento.getDefenceCounsels())
                 .withPleas(this.momento.getPleas())

@@ -11,7 +11,7 @@ import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 
 import java.util.Collections;
@@ -35,10 +35,9 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
         for (final Defendant defendant : caseDefendantDetails.getDefendants()) {
 
-            final CaseDefendantDetailsCommand caseDefendantDetailsCommand = CaseDefendantDetailsCommand.builder()
-                    .withCaseId(caseDefendantDetails.getCaseId())
-                    .withDefendant(Defendant.builder(defendant))
-                    .build();
+            final CaseDefendantDetailsCommand caseDefendantDetailsCommand = CaseDefendantDetailsCommand.caseDefendantDetailsCommand()
+                    .setCaseId(caseDefendantDetails.getCaseId())
+                    .setDefendant(defendant);
 
             aggregate(DefendantAggregate.class,
                     defendant.getId(),
@@ -57,13 +56,12 @@ public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHan
 
         for (final UUID hearingId : caseDefendantDetailsWithHearings.getHearingIds()) {
 
-            final CaseDefendantDetailsWithHearingCommand defendantWithHearingCommand = CaseDefendantDetailsWithHearingCommand.builder()
-                    .withCaseId(caseDefendantDetailsWithHearings.getCaseId())
-                    .withDefendants(Defendant.builder(caseDefendantDetailsWithHearings.getDefendant()))
-                    .withHearingIds(Collections.singletonList(hearingId))
-                    .build();
+            final CaseDefendantDetailsWithHearingCommand defendantWithHearingCommand = CaseDefendantDetailsWithHearingCommand.caseDefendantDetailsWithHearingCommand()
+                    .setCaseId(caseDefendantDetailsWithHearings.getCaseId())
+                    .setHearingIds(Collections.singletonList(hearingId))
+                    .setDefendant(caseDefendantDetailsWithHearings.getDefendant());
 
-            aggregate(NewModelHearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.updateDefendantDetails(defendantWithHearingCommand));
+            aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.updateDefendantDetails(defendantWithHearingCommand));
 
         }
     }

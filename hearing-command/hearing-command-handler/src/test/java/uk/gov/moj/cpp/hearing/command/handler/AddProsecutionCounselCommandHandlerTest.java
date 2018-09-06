@@ -28,7 +28,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 
 import java.util.UUID;
@@ -91,7 +91,7 @@ public class AddProsecutionCounselCommandHandlerTest {
                 .withStatus(STRING.next())
                 .build();
 
-        setupMockedEventStream(addProsecutionCounselCommand.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
+        setupMockedEventStream(addProsecutionCounselCommand.getHearingId(), this.hearingEventStream, new HearingAggregate());
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.add-prosecution-counsel"),
                 objectToJsonObjectConverter.convert(addProsecutionCounselCommand));

@@ -1,26 +1,35 @@
 package uk.gov.moj.cpp.hearing.test;
 
-
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.PleaValue;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
+import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.initiate.Case;
 import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
+import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -40,7 +49,7 @@ public class CommandHelpers {
         return new InitiateHearingCommandHelper(initiateHearingCommand);
     }
 
-    public static UpdatePleaCommandHelper h(HearingUpdatePleaCommand hearingUpdatePleaCommand) {
+    public static UpdatePleaCommandHelper h(UpdatePleaCommand hearingUpdatePleaCommand) {
         return new UpdatePleaCommandHelper(hearingUpdatePleaCommand);
     }
 
@@ -56,35 +65,47 @@ public class CommandHelpers {
         return new ShareResultsCommandHelper(shareResultsCommand);
     }
 
-    public static AllNowsReferenceDataHelper h(AllNows allNows){
+    public static AllNowsReferenceDataHelper h(AllNows allNows) {
         return new AllNowsReferenceDataHelper(allNows);
     }
 
-    public static AllResultDefinitionsReferenceDataHelper h(AllResultDefinitions allResultDefinitions){
+    public static AllResultDefinitionsReferenceDataHelper h(AllResultDefinitions allResultDefinitions) {
         return new AllResultDefinitionsReferenceDataHelper(allResultDefinitions);
+    }
+
+    public static CaseDefendantOffencesChangedCommandHelper h(CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand) {
+        return new CaseDefendantOffencesChangedCommandHelper(caseDefendantOffencesChangedCommand);
+    }
+
+    public static CaseDefendantDetailsHelper h(CaseDefendantDetails caseDefendantDetails) {
+        return new CaseDefendantDetailsHelper(caseDefendantDetails);
+    }
+
+    public static UploadSubscriptionsCommandHelper h(UploadSubscriptionsCommand uploadSubscriptionsCommand){
+        return new UploadSubscriptionsCommandHelper(uploadSubscriptionsCommand);
     }
 
     public static class AllNowsReferenceDataHelper {
         private AllNows allNows;
 
-        public AllNowsReferenceDataHelper(AllNows allNows){
+        public AllNowsReferenceDataHelper(AllNows allNows) {
             this.allNows = allNows;
         }
 
-        public NowDefinition getFirstNowDefinition(){
+        public NowDefinition getFirstNowDefinition() {
             return this.allNows.getNows().get(0);
         }
 
-        public UUID getFirstNowDefinitionId(){
+        public UUID getFirstNowDefinitionId() {
             return this.allNows.getNows().get(0).getId();
         }
 
-        public UUID getFirstNowDefinitionFirstResultDefinitionId(){
+        public UUID getFirstNowDefinitionFirstResultDefinitionId() {
             return this.allNows.getNows().get(0).getResultDefinitions().get(0).getId();
         }
 
 
-        public AllNows it(){
+        public AllNows it() {
             return this.allNows;
         }
     }
@@ -92,15 +113,15 @@ public class CommandHelpers {
     public static class AllResultDefinitionsReferenceDataHelper {
         private AllResultDefinitions allResultDefinitions;
 
-        public AllResultDefinitionsReferenceDataHelper(AllResultDefinitions allResultDefinitions){
+        public AllResultDefinitionsReferenceDataHelper(AllResultDefinitions allResultDefinitions) {
             this.allResultDefinitions = allResultDefinitions;
         }
 
-        public Prompt getFirstResultDefinitionFirstResultPrompt(){
+        public Prompt getFirstResultDefinitionFirstResultPrompt() {
             return allResultDefinitions.getResultDefinitions().get(0).getPrompts().get(0);
         }
 
-        public AllResultDefinitions it(){
+        public AllResultDefinitions it() {
             return this.allResultDefinitions;
         }
     }
@@ -116,89 +137,65 @@ public class CommandHelpers {
             return initiateHearingCommand.getHearing().getId();
         }
 
-        public Judge getJudge() {
-            return initiateHearingCommand.getHearing().getJudge();
+        public Hearing getHearing() {
+            return initiateHearingCommand.getHearing();
         }
 
-        public UUID getFirstCaseId() {
-            return initiateHearingCommand.getCases().get(0).getCaseId();
+        public ProsecutionCase getFirstCase() {
+            return initiateHearingCommand.getHearing().getProsecutionCases().get(0);
         }
 
-        public String getFirstCaseUrn() {
-            return initiateHearingCommand.getCases().get(0).getUrn();
+        public uk.gov.justice.json.schemas.core.Defendant getFirstDefendantForFirstCase() {
+            return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
         }
 
-        public UUID getFirstDefendantId() {
-            return initiateHearingCommand.getHearing().getDefendants().get(0).getId();
+        public uk.gov.justice.json.schemas.core.Defendant getFirstCaseForFirstDefendant() {
+            return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
         }
 
-        public DefendantCase getFirstCaseForFirstDefendant() {
-            return initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0);
-        }
-
-        public UUID getSecondDefendantId() {
-            return initiateHearingCommand.getHearing().getDefendants().get(1).getId();
-        }
-
-        public Defendant getSecondDefendant() {
-            return initiateHearingCommand.getHearing().getDefendants().get(0);
-        }
 
         public UUID getFirstOffenceIdForFirstDefendant() {
-            return initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId();
+            return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
         }
 
         public UUID getSecondOffenceIdForFirstDefendant() {
-            return initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(1).getId();
+            return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(1).getId();
         }
 
         public InitiateHearingCommand it() {
             return initiateHearingCommand;
         }
 
-        public InitiateHearingCommandHelper setFirstCaseId(UUID caseId) {
-            this.initiateHearingCommand.getCases().get(0).setCaseId(caseId);
-            return this;
-        }
-
-        public Case getFirstCase() {
-            return this.initiateHearingCommand.getCases().get(0);
-        }
-
-        public Defendant getFirstDefendant() {
-            return this.initiateHearingCommand.getHearing().getDefendants().get(0);
-        }
-
-        public Offence getFirstOffenceForFirstDefendant() {
-            return this.initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0);
-        }
-
-        public DefendantCase getFirstDefendantCaseForFirstDefendant() {
-            return this.initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0);
-        }
-
-        public Offence getFirstOffence() {
-            return this.initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0);
+        public uk.gov.justice.json.schemas.core.Offence getFirstOffenceForFirstDefendantForFirstCase() {
+            return this.initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
         }
     }
 
     public static class UpdatePleaCommandHelper {
-        private HearingUpdatePleaCommand hearingUpdatePleaCommand;
 
-        public UpdatePleaCommandHelper(HearingUpdatePleaCommand hearingUpdatePleaCommand) {
+        private UpdatePleaCommand hearingUpdatePleaCommand;
+
+        public UpdatePleaCommandHelper(UpdatePleaCommand hearingUpdatePleaCommand) {
             this.hearingUpdatePleaCommand = hearingUpdatePleaCommand;
         }
 
         public LocalDate getFirstPleaDate() {
-            return this.hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea().getPleaDate();
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getPleaDate();
         }
 
-        public TestTemplates.PleaValueType getFirstPleaValue() {
-            return TestTemplates.PleaValueType.valueOf(this.hearingUpdatePleaCommand.getDefendants().get(0).getOffences().get(0).getPlea().getValue());
+        public PleaValue getFirstPleaValue() {
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getValue();
         }
+
+        public DelegatedPowers getFirstDelegatePowers() {
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getDelegatedPowers();
+        }
+
+
     }
 
     public static class UpdateVerdictCommandHelper {
+
         private HearingUpdateVerdictCommand hearingUpdateVerdictCommand;
 
         public UpdateVerdictCommandHelper(HearingUpdateVerdictCommand hearingUpdateVerdictCommand) {
@@ -206,30 +203,31 @@ public class CommandHelpers {
         }
 
         public String getFirstVerdictCategory() {
-            return this.hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue().getCategory();
+            return this.hearingUpdateVerdictCommand.getVerdicts().get(0).getVerdictType().getCategory();
         }
 
         public TestTemplates.VerdictCategoryType getFirstVerdictCategoryType() {
-            return TestTemplates.VerdictCategoryType.valueOf(this.hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0).getVerdict().getValue().getCategoryType());
+            return TestTemplates.VerdictCategoryType.valueOf(this.hearingUpdateVerdictCommand.getVerdicts().get(0).getVerdictType().getCategoryType());
         }
 
-        public uk.gov.moj.cpp.hearing.command.verdict.Offence getFirstOffenceForFirstDefendant() {
-            return this.hearingUpdateVerdictCommand.getDefendants().get(0).getOffences().get(0);
+        public Verdict getFirstVerdict() {
+            return this.hearingUpdateVerdictCommand.getVerdicts().get(0);
         }
     }
 
     public static class ShareResultsCommandHelper {
+
         private ShareResultsCommand shareResultsCommand;
 
         public ShareResultsCommandHelper(ShareResultsCommand shareResultsCommand) {
             this.shareResultsCommand = shareResultsCommand;
         }
 
-        public CompletedResultLine getFirstCompletedResultLine(){
+        public CompletedResultLine getFirstCompletedResultLine() {
             return shareResultsCommand.getCompletedResultLines().get(0);
         }
 
-        public CompletedResultLine getSecondCompletedResultLine(){
+        public CompletedResultLine getSecondCompletedResultLine() {
             return shareResultsCommand.getCompletedResultLines().get(1);
         }
 
@@ -319,6 +317,58 @@ public class CommandHelpers {
 
         public Variant getFirstVariant() {
             return this.resultsShared.getVariantDirectory().get(0);
+        }
+    }
+
+    public static class CaseDefendantOffencesChangedCommandHelper {
+        private CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand;
+
+        public CaseDefendantOffencesChangedCommandHelper(CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand) {
+            this.caseDefendantOffencesChangedCommand = caseDefendantOffencesChangedCommand;
+        }
+
+        public DefendantOffences getFirstAddedOffences() {
+            return this.caseDefendantOffencesChangedCommand.getAddedOffences().get(0);
+        }
+
+        public DefendantOffence getFirstOffenceFromAddedOffences() {
+            return this.caseDefendantOffencesChangedCommand.getAddedOffences().get(0).getOffences().get(0);
+        }
+
+        public DefendantOffence getFirstOffenceFromUpdatedOffences() {
+            return this.caseDefendantOffencesChangedCommand.getUpdatedOffences().get(0).getOffences().get(0);
+        }
+
+        public UUID getFirstOffenceIdFromDeletedOffences() {
+            return this.caseDefendantOffencesChangedCommand.getDeletedOffences().get(0).getOffences().get(0);
+        }
+
+        public CaseDefendantOffencesChangedCommand it() {
+            return this.caseDefendantOffencesChangedCommand;
+        }
+    }
+
+    public static class CaseDefendantDetailsHelper {
+        private CaseDefendantDetails caseDefendantDetails;
+
+        public CaseDefendantDetailsHelper(CaseDefendantDetails caseDefendantDetails) {
+            this.caseDefendantDetails = caseDefendantDetails;
+        }
+
+        public uk.gov.moj.cpp.hearing.command.defendant.Defendant getFirstDefendant() {
+            return caseDefendantDetails.getDefendants().get(0);
+        }
+    }
+
+    public static class UploadSubscriptionsCommandHelper {
+        private UploadSubscriptionsCommand uploadSubscriptionsCommand;
+
+        public UploadSubscriptionsCommandHelper(UploadSubscriptionsCommand uploadSubscriptionsCommand) {
+            this.uploadSubscriptionsCommand = uploadSubscriptionsCommand;
+        }
+
+        public UploadSubscription getFirstSubscription(){
+            return uploadSubscriptionsCommand.getSubscriptions().get(0);
         }
     }
 }

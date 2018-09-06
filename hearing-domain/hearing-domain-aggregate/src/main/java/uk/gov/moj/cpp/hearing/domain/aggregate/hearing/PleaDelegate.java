@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.Offence;
+import uk.gov.justice.json.schemas.core.PleaValue;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
@@ -11,12 +15,11 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 public class PleaDelegate implements Serializable {
-
-    private static final String GUILTY = "GUILTY";
 
     private final HearingAggregateMomento momento;
 
@@ -24,7 +27,7 @@ public class PleaDelegate implements Serializable {
         this.momento = momento;
     }
 
-    public void handleInheritedPlea(InheritedPlea inheritedPlea) {
+    public void handleInheritedPlea(final InheritedPlea inheritedPlea) {
         this.momento.getPleas().computeIfAbsent(inheritedPlea.getOffenceId(), offenceId -> Plea.plea()
                 .setOriginHearingId(inheritedPlea.getHearingId())
                 .setOffenceId(offenceId)
@@ -32,7 +35,7 @@ public class PleaDelegate implements Serializable {
                 .setPleaDate(inheritedPlea.getPleaDate()));
     }
 
-    public void handlePleaUpsert(PleaUpsert pleaUpsert) {
+    public void handlePleaUpsert(final PleaUpsert pleaUpsert) {
         this.momento.getPleas().put(pleaUpsert.getOffenceId(),
                 Plea.plea()
                         .setOriginHearingId(pleaUpsert.getHearingId())
@@ -43,47 +46,57 @@ public class PleaDelegate implements Serializable {
     }
 
     public Stream<Object> inheritPlea(final UpdateHearingWithInheritedPleaCommand command) {
-        return Stream.of(InheritedPlea.builder()
-                .withOffenceId(command.getOffenceId())
-                .withCaseId(command.getCaseId())
-                .withDefendantId(command.getDefendantId())
-                .withHearingId(command.getHearingId())
-                .withOriginHearingId(command.getOriginHearingId())
-                .withPleaDate(command.getPleaDate())
-                .withValue(command.getValue())
-                .build()
+        return Stream.of(InheritedPlea.inheritedPlea()
+                .setOffenceId(command.getOffenceId())
+                .setCaseId(command.getCaseId())
+                .setDefendantId(command.getDefendantId())
+                .setHearingId(command.getHearingId())
+                .setOriginHearingId(command.getOriginHearingId())
+                .setPleaDate(command.getPleaDate())
+                .setValue(command.getValue())
+                .setDelegatedPowers(command.getDelegatedPowers())
         );
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate,
-                                     final String pleaValue) {
+                                     final PleaValue pleaValue, final DelegatedPowers delegatedPowers) {
 
-        final UUID caseId = this.momento.getHearing().getDefendants().stream()
-                .flatMap(d -> d.getOffences().stream())
-                .filter(o -> offenceId.equals(o.getId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("case id is not present"))
-                .getCaseId();
+        UUID caseId = null;
+        for (final ProsecutionCase prosecutionCase : this.momento.getHearing().getProsecutionCases()) {
+            final Optional<Offence> offence = prosecutionCase.getDefendants().stream()
+                    .flatMap(d -> d.getOffences().stream())
+                    .filter(o -> offenceId.equals(o.getId()))
+                    .findFirst();
+            if (offence.isPresent()) {
+                caseId = prosecutionCase.getId();
+                break;
+            }
+        }
 
         final List<Object> events = new ArrayList<>();
-        events.add(PleaUpsert.builder()
-                .withHearingId(hearingId)
-                .withOffenceId(offenceId)
-                .withPleaDate(pleaDate)
-                .withValue(pleaValue)
-                .build());
-        events.add(GUILTY.equalsIgnoreCase(pleaValue) ?
-                ConvictionDateAdded.builder()
-                        .withCaseId(caseId)
-                        .withHearingId(hearingId)
-                        .withOffenceId(offenceId)
-                        .withConvictionDate(pleaDate)
-                        .build() :
-                ConvictionDateRemoved.builder()
-                        .withCaseId(caseId)
-                        .withHearingId(hearingId)
-                        .withOffenceId(offenceId)
-                        .build());
+
+        if (caseId == null) {
+            throw new IllegalArgumentException("Offence not found, so caseId cannot be determined for " + offenceId);
+        }
+
+
+        events.add(PleaUpsert.pleaUpsert()
+                .setHearingId(hearingId)
+                .setOffenceId(offenceId)
+                .setPleaDate(pleaDate)
+                .setValue(pleaValue)
+                .setDelegatedPowers(delegatedPowers));
+        events.add(pleaValue == PleaValue.GUILTY ?
+                ConvictionDateAdded.convictionDateAdded()
+                        .setCaseId(caseId)
+                        .setHearingId(hearingId)
+                        .setOffenceId(offenceId)
+                        .setConvictionDate(pleaDate) :
+                ConvictionDateRemoved.convictionDateRemoved()
+                        .setCaseId(caseId)
+                        .setHearingId(hearingId)
+                        .setOffenceId(offenceId)
+        );
         return events.stream();
     }
 

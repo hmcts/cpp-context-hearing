@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsDeleted;
@@ -47,7 +49,7 @@ public class HearingEventDefinitionAggregateTest {
     @Test
     public void testHearingEventDefinition() throws Exception {
         final UUID hearingEventDefinitionId = randomUUID();
-        final Stream<Object> events = hearingEventDefinitionAggregate.createEventDefinitions(hearingEventDefinitionId, hearingDefinitions());
+        final Stream<Object> events = hearingEventDefinitionAggregate.createEventDefinitions(new CreateHearingEventDefinitionsCommand(hearingEventDefinitionId, hearingDefinitions()));
         final List<Object> lEvents = events.collect(Collectors.toList());
 
 

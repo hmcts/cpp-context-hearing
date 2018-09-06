@@ -1,6 +1,6 @@
 {
   "$schema":"http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/progression/events/progression.events.sending-sheet-completed.json",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.record-sending-sheet-complete.json",
   "type":"object",
   "required": [
     "hearing",

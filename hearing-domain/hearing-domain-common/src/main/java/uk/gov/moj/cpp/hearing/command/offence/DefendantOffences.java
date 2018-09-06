@@ -1,13 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.offence;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+import java.util.UUID;
 
 public final class DefendantOffences {
 
@@ -15,7 +12,10 @@ public final class DefendantOffences {
 
     private UUID caseId;
 
-    private final List<DefendantOffence> offences;
+    private List<DefendantOffence> offences;
+
+    public DefendantOffences() {
+    }
 
     @JsonCreator
     public DefendantOffences(@JsonProperty("defendantId") final UUID defendantId,
@@ -34,6 +34,10 @@ public final class DefendantOffences {
         return caseId;
     }
 
+    public List<DefendantOffence> getOffences() {
+        return offences;
+    }
+
     public DefendantOffences setDefendantId(UUID defendantId) {
         this.defendantId = defendantId;
         return this;
@@ -44,39 +48,12 @@ public final class DefendantOffences {
         return this;
     }
 
-    public List<DefendantOffence> getOffences() {
-        return offences;
+    public DefendantOffences setOffences(List<DefendantOffence> offences) {
+        this.offences = offences;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private UUID defendantId;
-
-        private UUID caseId;
-
-        private List<DefendantOffence> addedOffences;
-
-        public Builder withDefendantId(final UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-
-        public Builder withCaseId(final UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withDefendantOffences(final List<DefendantOffence> offences) {
-            this.addedOffences = offences;
-            return this;
-        }
-
-        public DefendantOffences build() {
-            return new DefendantOffences(defendantId, caseId, ofNullable(addedOffences).orElse(new ArrayList<>()));
-        }
+    public static DefendantOffences defendantOffences() {
+        return new DefendantOffences();
     }
 }

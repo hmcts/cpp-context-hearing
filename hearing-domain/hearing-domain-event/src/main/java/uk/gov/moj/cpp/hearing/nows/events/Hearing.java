@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Hearing implements Serializable {
-    private final static long serialVersionUID = -791406733718995646L;
+    private static final long serialVersionUID = -791406733718995646L;
 
     private String id;
     private String hearingType;

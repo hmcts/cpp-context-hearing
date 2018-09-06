@@ -7,7 +7,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class AdjournHearingCommandHandler extends AbstractCommandHandler {
         }
 
         final AdjournHearing adjournHearing = convertToObject(envelope, AdjournHearing.class);
-        aggregate(NewModelHearingAggregate.class, adjournHearing.getRequestedByHearingId(), envelope, a -> a.adjournHearing(adjournHearing));
+        aggregate(HearingAggregate.class, adjournHearing.getRequestedByHearingId(), envelope, a -> a.adjournHearing(adjournHearing));
     }
 
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
@@ -10,147 +10,164 @@
         <version>6.2.0</version>
     </parent>
 
-	<groupId>uk.gov.moj.cpp.hearing</groupId>
-	<artifactId>hearing-parent</artifactId>
-	<version>2.0.123-R2-SNAPSHOT</version>
-	<packaging>pom</packaging>
+   <groupId>uk.gov.moj.cpp.hearing</groupId>
+   <artifactId>hearing-parent</artifactId>
+   <version>2.0.124-R2-SNAPSHOT</version>
+   <packaging>pom</packaging>
 
-    <name>Hearing Context - Parent Module</name>
-    <description>A applications for hearing service.</description>
-    <properties>
-        <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec
-        </sonar.jacoco.itReportPath>
-        <sonar.report.export.path>sonar-report.json</sonar.report.export.path>
-        <sonar.scm.provider>git</sonar.scm.provider>
-        <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
-        <authorisation.service.version>0.1.19</authorisation.service.version>
-        <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
-        <datafactory.version>0.8</datafactory.version>
-        <commons.fileupload.version>1.3.3</commons.fileupload.version>
-    </properties>
-    <modules>
-        <module>hearing-query</module>
-        <module>hearing-viewstore</module>
-        <module>hearing-command</module>
-        <module>hearing-domain</module>
-        <module>hearing-event</module>
-        <module>hearing-integration-test</module>
-        <module>hearing-performance-test</module>
-        <module>hearing-notepad-parsing-service</module>
-        <module>hearing-service</module>
-        <module>test-utilities</module>
-    </modules>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>external.atlassian.jgitflow</groupId>
-                    <artifactId>jgitflow-maven-plugin</artifactId>
-                </plugin>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-                <plugin>
-                	<groupId>org.eclipse.m2e</groupId>
-                	<artifactId>lifecycle-mapping</artifactId>
-                	<version>1.0.0</version>
-                	<configuration>
-                		<lifecycleMappingMetadata>
-                			<pluginExecutions>
-                				<pluginExecution>
-                					<pluginExecutionFilter>
-                						<groupId>
-                							uk.gov.justice.maven
-                						</groupId>
-                						<artifactId>
-                							raml-maven-plugin
-                						</artifactId>
-                						<versionRange>
-                							[1.5.0,)
-                						</versionRange>
-                						<goals>
-                							<goal>check-syntax</goal>
-                						</goals>
-                					</pluginExecutionFilter>
-                					<action>
-                						<ignore></ignore>
-                					</action>
-                				</pluginExecution>
-                				<pluginExecution>
-                					<pluginExecutionFilter>
-                						<groupId>
-                							org.apache.maven.plugins
-                						</groupId>
-                						<artifactId>
-                							maven-remote-resources-plugin
-                						</artifactId>
-                						<versionRange>
-                							[1.5,)
-                						</versionRange>
-                						<goals>
-                							<goal>process</goal>
-                						</goals>
-                					</pluginExecutionFilter>
-                					<action>
-                						<ignore></ignore>
-                					</action>
-                				</pluginExecution>
-                			</pluginExecutions>
-                		</lifecycleMappingMetadata>
-                	</configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
-        <plugins>
+   <name>Hearing Context - Parent Module</name>
+   <description>A applications for hearing service.</description>
+   <properties>
+      <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec
+      </sonar.jacoco.itReportPath>
+      <sonar.report.export.path>sonar-report.json</sonar.report.export.path>
+      <sonar.scm.provider>git</sonar.scm.provider>
+      <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
+      <authorisation.service.version>0.1.19</authorisation.service.version>
+      <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
+      <datafactory.version>0.8</datafactory.version>
+      <commons.fileupload.version>1.3.3</commons.fileupload.version>
+   </properties>
+   <modules>
+      <module>hearing-query</module>
+      <module>hearing-viewstore</module>
+      <module>hearing-command</module>
+      <module>hearing-domain</module>
+      <module>hearing-event</module>
+      <module>hearing-integration-test</module>
+      <module>hearing-performance-test</module>
+      <module>hearing-notepad-parsing-service</module>
+      <module>hearing-service</module>
+      <module>test-utilities</module>
+      <module>hearing-json</module>
+      <module>pojo-plugin</module>
+   </modules>
+   <build>
+      <pluginManagement>
+         <plugins>
             <plugin>
-                <groupId>external.atlassian.jgitflow</groupId>
-                <artifactId>jgitflow-maven-plugin</artifactId>
-                <configuration>
-                    <flowInitContext>
-                        <masterBranchName>dev/hearing-release</masterBranchName>
-                        <developBranchName>master</developBranchName>
-                        <featureBranchPrefix>dev/hearing-feature-</featureBranchPrefix>
-                        <releaseBranchPrefix>dev/hearing-release-</releaseBranchPrefix>
-                        <hotfixBranchPrefix>dev/hearing-hotfix-</hotfixBranchPrefix>
-                        <versionTagPrefix>hearing-tag-</versionTagPrefix>
-                    </flowInitContext>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <enableSshAgent>true</enableSshAgent>
-                    <pushReleases>true</pushReleases>
-                </configuration>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+                  <fork>true</fork>
+                  <compilerArgs>
+                     <arg>-parameters</arg>
+                     <arg>-Xlint:all,-options,-path</arg>
+                     <arg>-verbose</arg>
+                  </compilerArgs>
+               </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <archiveClasses>true</archiveClasses>
-                    <attachClasses>true</attachClasses>
-                </configuration>
+               <groupId>external.atlassian.jgitflow</groupId>
+               <artifactId>jgitflow-maven-plugin</artifactId>
             </plugin>
-        </plugins>
-    </build>
+            <!--This plugin's configuration is used to store Eclipse m2e 
+               settings only. It has no influence on the Maven build itself. -->
+            <plugin>
+               <groupId>org.eclipse.m2e</groupId>
+               <artifactId>lifecycle-mapping</artifactId>
+               <version>1.0.0</version>
+               <configuration>
+                  <lifecycleMappingMetadata>
+                     <pluginExecutions>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>
+                                 uk.gov.justice.maven
+                              </groupId>
+                              <artifactId>
+                                 raml-maven-plugin
+                              </artifactId>
+                              <versionRange>
+                                 [1.5.0,)
+                              </versionRange>
+                              <goals>
+                                 <goal>check-syntax</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore></ignore>
+                           </action>
+                        </pluginExecution>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>
+                                 org.apache.maven.plugins
+                              </groupId>
+                              <artifactId>
+                                 maven-remote-resources-plugin
+                              </artifactId>
+                              <versionRange>
+                                 [1.5,)
+                              </versionRange>
+                              <goals>
+                                 <goal>process</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore></ignore>
+                           </action>
+                        </pluginExecution>
+                     </pluginExecutions>
+                  </lifecycleMappingMetadata>
+               </configuration>
+            </plugin>
+         </plugins>
+      </pluginManagement>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- TODO junit-dataprovider should come from test utils once moved -->
-            <dependency>
-                <groupId>com.tngtech.java</groupId>
-                <artifactId>junit-dataprovider</artifactId>
-                <version>${junit-dataprovider.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <!-- TODO datafactory should come from test utils once moved -->
-            <dependency>
-                <groupId>org.fluttercode.datafactory</groupId>
-                <artifactId>datafactory</artifactId>
-                <version>${datafactory.version}</version>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+      <plugins>
+         <plugin>
+            <groupId>external.atlassian.jgitflow</groupId>
+            <artifactId>jgitflow-maven-plugin</artifactId>
+            <configuration>
+               <flowInitContext>
+                  <masterBranchName>dev/hearing-release</masterBranchName>
+                  <developBranchName>master</developBranchName>
+                  <featureBranchPrefix>dev/hearing-feature-</featureBranchPrefix>
+                  <releaseBranchPrefix>dev/hearing-release-</releaseBranchPrefix>
+                  <hotfixBranchPrefix>dev/hearing-hotfix-</hotfixBranchPrefix>
+                  <versionTagPrefix>hearing-tag-</versionTagPrefix>
+               </flowInitContext>
+               <autoVersionSubmodules>true</autoVersionSubmodules>
+               <enableSshAgent>true</enableSshAgent>
+               <pushReleases>true</pushReleases>
+            </configuration>
+         </plugin>
+         <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <configuration>
+               <archiveClasses>true</archiveClasses>
+               <attachClasses>true</attachClasses>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
 
-    <distributionManagement>
-        <site>
-            <id>site</id>
-            <url>${mvn.site.url}</url>
-        </site>
-    </distributionManagement>
+   <dependencyManagement>
+      <dependencies>
+         <!-- TODO junit-dataprovider should come from test utils once moved -->
+         <dependency>
+            <groupId>com.tngtech.java</groupId>
+            <artifactId>junit-dataprovider</artifactId>
+            <version>${junit-dataprovider.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <!-- TODO datafactory should come from test utils once moved -->
+         <dependency>
+            <groupId>org.fluttercode.datafactory</groupId>
+            <artifactId>datafactory</artifactId>
+            <version>${datafactory.version}</version>
+            <scope>test</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
+
+   <distributionManagement>
+      <site>
+         <id>site</id>
+         <url>${mvn.site.url}</url>
+      </site>
+   </distributionManagement>
 </project>

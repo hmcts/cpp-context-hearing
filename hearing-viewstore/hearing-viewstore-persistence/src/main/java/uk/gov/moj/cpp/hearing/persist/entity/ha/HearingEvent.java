@@ -36,11 +36,8 @@ public class HearingEvent {
     @Column(name = "deleted")
     private boolean deleted;
 
-    @Column(name = "witnessid")
-    private UUID witnessId;
-
-    @Column(name = "counselId")
-    private UUID counselId;
+    @Column(name = "defence_counsel_id")
+    private UUID defenceCounselId;
 
     public HearingEvent() {
         // for JPA
@@ -76,10 +73,6 @@ public class HearingEvent {
 
     public UUID getHearingEventDefinitionId() {
         return hearingEventDefinitionId;
-    }
-
-    public UUID getWitnessId() {
-        return witnessId;
     }
 
     public HearingEvent setId(final UUID id) {
@@ -122,17 +115,12 @@ public class HearingEvent {
         return this;
     }
 
-    public HearingEvent setWitnessId(final UUID witnessId) {
-        this.witnessId = witnessId;
-        return this;
+    public UUID getDefenceCounselId() {
+        return defenceCounselId;
     }
 
-    public UUID getCounselId() {
-        return counselId;
-    }
-
-    public HearingEvent setCounselId(final UUID counselId) {
-        this.counselId = counselId;
+    public HearingEvent setDefenceCounselId(final UUID counselId) {
+        this.defenceCounselId = counselId;
         return this;
     }
 

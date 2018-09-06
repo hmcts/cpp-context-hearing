@@ -1,4 +1,6 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.events.nows-requested.json",
   "type": "object",
   "definitions": {
     "uuid": {
@@ -18,7 +20,6 @@
       }
     }
   },
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "properties": {
     "hearing": {
       "type": "object",
@@ -404,7 +405,7 @@
               "staticText": {
                 "type": "string"
               },
-              "staticTextWelsh": {
+              "welshStaticText": {
                 "type": "string"
               },
               "priority": {

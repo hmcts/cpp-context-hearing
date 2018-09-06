@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/verdict.json",
+  "description": "The verdict i.e. the court decision",
+  "type": "object",
+  "properties": {
+    "offenceId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "verdictDate": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "verdictType": {
+      "type": "object",
+      "properties": {
+        "verdictTypeId": {
+          "description": "The identifier of the verdict type from reference data",
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+        },
+        "code": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "categoryType": {
+          "$ref": "#/definitions/categoryType"
+        }
+      },
+      "additionalProperties": false
+    },
+    "lesserOrAlternativeOffence": {
+      "type": "object",
+      "properties": {
+        "offenceDefinitionId": {
+          "description": "The identifier of the offence from reference data",
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+        },
+        "offenceCode": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "legislation": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "jurors": {
+      "type": "object",
+      "properties": {
+        "numberOfJurors": {
+          "type": "integer"
+        },
+        "numberOfSplitJurors": {
+          "type": "integer"
+        },
+        "unanimous": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "numberOfJurors",
+        "numberOfSplitJurors",
+        "unanimous"
+      ]
+    }
+  },
+  "definitions": {
+    "categoryType": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "offenceId",
+    "verdictDate",
+    "verdictType"
+  ],
+  "additionalProperties": false
+}

@@ -8,12 +8,15 @@ import java.io.Serializable;
 public class Address implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     private String address1;
     private String address2;
     private String address3;
     private String address4;
     private String postCode;
+
+    public Address() {
+    }
 
     @JsonCreator
     public Address(@JsonProperty("address1") final String address1,
@@ -26,19 +29,6 @@ public class Address implements Serializable {
         this.address3 = address3;
         this.address4 = address4;
         this.postCode = postCode;
-    }
-
-    public static Builder address() {
-        return new Address.Builder();
-    }
-
-    public static Builder builder(Address address) {
-        return Address.address()
-                .withAddress1(address.address1)
-                .withAddress2(address.address2)
-                .withAddress3(address.address3)
-                .withAddress4(address.address4)
-                .withPostcode(address.postCode);
     }
 
     public String getAddress1() {
@@ -61,48 +51,32 @@ public class Address implements Serializable {
         return postCode;
     }
 
-    public static class Builder {
+    public Address setAddress1(String address1) {
+        this.address1 = address1;
+        return this;
+    }
 
-        private String address1;
+    public Address setAddress2(String address2) {
+        this.address2 = address2;
+        return this;
+    }
 
-        private String address2;
+    public Address setAddress3(String address3) {
+        this.address3 = address3;
+        return this;
+    }
 
-        private String address3;
+    public Address setAddress4(String address4) {
+        this.address4 = address4;
+        return this;
+    }
 
-        private String address4;
+    public Address setPostCode(String postCode) {
+        this.postCode = postCode;
+        return this;
+    }
 
-        private String postcode;
-
-        private Builder() {
-        }
-
-        public Builder withAddress1(final String address1) {
-            this.address1 = address1;
-            return this;
-        }
-
-        public Builder withAddress2(final String address2) {
-            this.address2 = address2;
-            return this;
-        }
-
-        public Builder withAddress3(final String address3) {
-            this.address3 = address3;
-            return this;
-        }
-
-        public Builder withAddress4(final String address4) {
-            this.address4 = address4;
-            return this;
-        }
-
-        public Builder withPostcode(final String postcode) {
-            this.postcode = postcode;
-            return this;
-        }
-
-        public Address build() {
-            return new Address(address1, address2, address3, address4, postcode);
-        }
+    public static Address address() {
+        return new Address();
     }
 }

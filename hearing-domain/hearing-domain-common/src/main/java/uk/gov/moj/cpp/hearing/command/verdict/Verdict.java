@@ -1,168 +1,86 @@
 package uk.gov.moj.cpp.hearing.command.verdict;
 
-
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Verdict implements Serializable {
+
     private static final long serialVersionUID = 1L;
-    final private UUID id;
-    final private VerdictValue value;
-    final private LocalDate verdictDate;
-    final private Integer numberOfJurors;
-    final private Integer numberOfSplitJurors;
-    final private Boolean unanimous;
+    private UUID offenceId;
+    private VerdictType verdictType;
+    private LocalDate verdictDate;
+    private LesserOffence lesserOffence;
+    private Jurors jurors;
+
+    public Verdict() {
+    }
 
     @JsonCreator
-    public Verdict(@JsonProperty("id") final UUID id,
-                   @JsonProperty("value") final VerdictValue value,
-                   @JsonProperty("verdictDate") final LocalDate verdictDate,
-                   @JsonProperty("numberOfJurors") final Integer numberOfJurors,
-                   @JsonProperty("numberOfSplitJurors") final Integer numberOfSplitJurors,
-                   @JsonProperty("unanimous") final Boolean unanimous) {
-        this.id = id;
-        this.value = value;
+    protected Verdict(
+            @JsonProperty("offenceId") final UUID offenceId,
+            @JsonProperty("verdictType") final VerdictType verdictType,
+            @JsonProperty("verdictDate") final LocalDate verdictDate,
+            @JsonProperty("lesserOffence") final LesserOffence lesserOffence,
+            @JsonProperty("jurors") final Jurors jurors) {
+        this.offenceId = offenceId;
+        this.verdictType = verdictType;
         this.verdictDate = verdictDate;
-        this.numberOfJurors = numberOfJurors;
-        this.numberOfSplitJurors = numberOfSplitJurors;
-        this.unanimous = unanimous;
+        this.lesserOffence = lesserOffence;
+        this.jurors = jurors;
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getOffenceId() {
+        return offenceId;
     }
 
-    public VerdictValue getValue() {
-        return value;
+    public VerdictType getVerdictType() {
+        return verdictType;
     }
 
     public LocalDate getVerdictDate() {
         return verdictDate;
     }
 
-    public Integer getNumberOfJurors() {
-        return numberOfJurors;
+    public LesserOffence getLesserOffence() {
+        return lesserOffence;
     }
 
-    public Integer getNumberOfSplitJurors() {
-        return numberOfSplitJurors;
+    public Jurors getJurors() {
+        return jurors;
     }
 
-    public Boolean getUnanimous() {
-        return unanimous;
+    public Verdict setOffenceId(UUID offenceId) {
+        this.offenceId = offenceId;
+        return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Verdict)) {
-            return false;
-        }
-        Verdict verdict = (Verdict) o;
-        return Objects.equals(getId(), verdict.getId()) &&
-                Objects.equals(getValue(), verdict.getValue()) &&
-                Objects.equals(getVerdictDate(), verdict.getVerdictDate()) &&
-                Objects.equals(getNumberOfJurors(), verdict.getNumberOfJurors()) &&
-                Objects.equals(getNumberOfSplitJurors(), verdict.getNumberOfSplitJurors()) &&
-                Objects.equals(getUnanimous(), verdict.getUnanimous());
-
+    public Verdict setVerdictType(VerdictType verdictType) {
+        this.verdictType = verdictType;
+        return this;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getValue(), getVerdictDate(), getNumberOfJurors(), getNumberOfSplitJurors(), getUnanimous());
+    public Verdict setVerdictDate(LocalDate verdictDate) {
+        this.verdictDate = verdictDate;
+        return this;
     }
 
-    public static class Builder {
-
-        private UUID id;
-        private VerdictValue.Builder value;
-        private LocalDate verdictDate;
-        private Integer numberOfJurors;
-        private Integer numberOfSplitJurors;
-        private Boolean unanimous;
-
-        private Builder() {
-
-        }
-
-        public UUID getId() {
-            return id;
-        }
-
-        public VerdictValue.Builder getValue() {
-            return value;
-        }
-
-        public LocalDate getVerdictDate() {
-            return verdictDate;
-        }
-
-        public Integer getNumberOfJurors() {
-            return numberOfJurors;
-        }
-
-        public Integer getNumberOfSplitJurors() {
-            return numberOfSplitJurors;
-        }
-
-        public Boolean getUnanimous() {
-            return unanimous;
-        }
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withValue(VerdictValue.Builder value) {
-            this.value = value;
-            return this;
-        }
-
-        public Builder withVerdictDate(LocalDate verdictDate) {
-            this.verdictDate = verdictDate;
-            return this;
-        }
-
-        public Builder withNumberOfJurors(Integer numberOfJurors) {
-            this.numberOfJurors = numberOfJurors;
-            return this;
-        }
-
-        public Builder withNumberOfSplitJurors(Integer numberOfSplitJurors) {
-            this.numberOfSplitJurors = numberOfSplitJurors;
-            return this;
-        }
-
-        public Builder withUnanimous(Boolean unanimous) {
-            this.unanimous = unanimous;
-            return this;
-        }
-
-        public Verdict build() {
-            return new Verdict(this.id, this.value.build(), this.verdictDate, this.numberOfJurors, this.numberOfSplitJurors, this.unanimous);
-        }
+    public Verdict setLesserOffence(LesserOffence lesserOffence) {
+        this.lesserOffence = lesserOffence;
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public Verdict setJurors(Jurors jurors) {
+        this.jurors = jurors;
+        return this;
     }
 
-    public static Builder from(Verdict verdict) {
-        return builder()
-                .withId(verdict.getId())
-                .withValue(VerdictValue.from(verdict.getValue()))
-                .withVerdictDate(verdict.getVerdictDate())
-                .withNumberOfJurors(verdict.getNumberOfJurors())
-                .withNumberOfSplitJurors(verdict.getNumberOfSplitJurors())
-                .withUnanimous(verdict.getUnanimous());
+
+    public static Verdict verdict(){
+        return new Verdict();
     }
+
 }

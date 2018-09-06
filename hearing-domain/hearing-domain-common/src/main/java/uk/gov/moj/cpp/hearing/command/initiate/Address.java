@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+//TODO remove this class and other classes in this package - replaced by core domaind
 public class Address implements Serializable {
 
     private static final long serialVersionUID = 1L;

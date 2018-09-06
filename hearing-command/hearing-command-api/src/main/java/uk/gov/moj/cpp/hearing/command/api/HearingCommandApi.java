@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -28,8 +27,8 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.save-draft-result")
-    public void saveDraftResult(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
+    public void saveDraftResult(final JsonEnvelope command) {
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.save-draft-result").apply(command.payloadAsJsonObject()));
     }
 
     @Handles("hearing.add-prosecution-counsel")
@@ -71,10 +70,5 @@ public class HearingCommandApi {
     @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.share-results").apply(envelope.payloadAsJsonObject()));
-    }
-
-    @Handles("hearing.delete-attendee")
-    public void deleteAttendee(final JsonEnvelope envelope) {
-        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.delete-attendee").apply(envelope.payloadAsJsonObject()));
     }
 }

@@ -2,12 +2,15 @@
   "caseId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
   "hearingId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
   "offenceId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
-  "verdictId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
-  "verdictValueId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
-  "category": "GUILTY",
-  "code": "A4",
-  "description": "Guilty as sin",
+  "verdictTypeId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "category": "Guilty",
+  "categoryType": "GUILTY",
+  "offenceDefinitionId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "title": "Guilty as sin",
+  "offenceCode":"GA96011",
+  "legislation":"Contrary to Byelaws 3(10) and 2(3) of the Gatwick Airport - London Byelaws 1996 and sections 63 and 64 of the Airports Act 1986.",
   "numberOfJurors": 12,
   "numberOfSplitJurors": 2,
-  "unanimous": false
+  "unanimous": false,
+  "verdictDate":"2017-02-20"
 }

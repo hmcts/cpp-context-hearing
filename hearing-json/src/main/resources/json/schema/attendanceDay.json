@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/attendanceDay.json",
+  "description": "Attendance date recorded with or without delegated powers",
+  "type": "object",
+  "properties": {
+    "day": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "isInAttendance": {
+      "type": "boolean"
+    },
+    "delegatedPowers": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/delegatedPowers.json"
+    }
+  },
+  "required": [
+    "day"
+  ],
+  "additionalProperties": false
+}

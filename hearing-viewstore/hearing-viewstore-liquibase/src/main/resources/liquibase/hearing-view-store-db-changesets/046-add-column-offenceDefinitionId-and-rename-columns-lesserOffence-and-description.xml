@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="46" author="hearing" logicalFilePath="046-add-column-offenceDefinitionId-and-rename-columns-lesserOffence-and-description.xml">
+
+        <renameColumn tableName="ha_offence" oldColumnName="verdict_code" newColumnName="lesser_offence_code"/>
+        <renameColumn tableName="ha_offence" oldColumnName="lesser_offence" newColumnName="lesser_offence_title"/>
+        <renameColumn tableName="ha_offence" oldColumnName="verdict_description" newColumnName="lesser_offence_legislation"/>
+
+        <addColumn tableName="ha_offence">
+            <column name="lesser_offence_definition_id" type="UUID">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>

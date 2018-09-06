@@ -16,23 +16,9 @@ import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuil
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
-import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +28,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Prompt;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
+import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventListenerTest {
@@ -57,9 +64,7 @@ public class HearingEventListenerTest {
     private static final String FIELD_PERSON_ID = "personId";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
 
-    private static final String FIELD_TARGET_ID = "targetId";
     private static final String FIELD_OFFENCE_ID = "offenceId";
-    private static final String FIELD_DRAFT_RESULT = "draftResult";
 
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_LEVEL = "level";
@@ -144,29 +149,75 @@ public class HearingEventListenerTest {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Spy
+    @InjectMocks
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Spy
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
 
     @InjectMocks
     private HearingEventListener hearingEventListener;
 
+    @Mock
+    private HearingRepository hearingRepository;
+
+    @Mock
+    private TargetJPAMapper targetJPAMapper;
+
+    @Captor
+    ArgumentCaptor<uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing> saveHearingCaptor;
+
     @Before
     public void setUp() {
-        setField(this.jsonObjectToObjectConverter, "mapper",
-                new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
     @Test
     public void shouldPersistHearingDraftResult() {
-        final JsonEnvelope event = getSaveDraftResultJsonEnvelope();
+
+        final uk.gov.justice.json.schemas.core.Target targetIn = CoreTestTemplates.target().build();
+        final uk.gov.justice.json.schemas.core.ResultLine resultLineIn = targetIn.getResultLines().get(0);
+        final uk.gov.justice.json.schemas.core.Prompt promptIn = resultLineIn.getPrompts().get(0);
+        final Target targetOut = new Target();
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing dbHearing =
+                new uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing()
+                        .setTargets(new ArrayList<>())
+                        .setId(targetIn.getHearingId());
+        when(hearingRepository.findBy(targetIn.getHearingId()))
+                .thenReturn(dbHearing);
+        when(targetJPAMapper.toJPA(dbHearing, targetIn)).thenReturn(targetOut);
+
+        final JsonEnvelope event = getSaveDraftResultJsonEnvelope(targetIn);
 
         this.hearingEventListener.draftResultSaved(event);
 
-        verify(this.hearingOutcomeRepository).save(this.hearingOutcomeArgumentCaptor.capture());
-        assertThat(this.hearingOutcomeArgumentCaptor.getValue().getId(), is(TARGET_ID));
-        assertThat(this.hearingOutcomeArgumentCaptor.getValue().getHearingId(), is(HEARING_ID));
-        assertThat(this.hearingOutcomeArgumentCaptor.getValue().getDraftResult(), is(DRAFT_RESULT));
-        assertThat(this.hearingOutcomeArgumentCaptor.getValue().getDefendantId(), is(DEFENDANT_ID));
-        assertThat(this.hearingOutcomeArgumentCaptor.getValue().getOffenceId(), is(OFFENCE_ID));
+        //check that hearing was saved
+        verify(this.hearingRepository, times(1)).save(saveHearingCaptor.capture());
+        assertThat(dbHearing, is(saveHearingCaptor.getValue()));
+        assertThat(dbHearing.getTargets().size(), is(1));
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Target targetSaved = dbHearing.getTargets().get(0);
+        assertThat(dbHearing.getTargets().get(0), is(targetSaved));
+
+        //check that the target saved matches the incoming target
+        //TODO move this to mapper test and should test all fields
+        /*assertThat(targetSaved.getId(), is(targetIn.getTargetId()));
+        assertThat(targetSaved, isBean(Target.class)
+                .with(Target::getId, is(targetIn.getTargetId()))
+                .with(Target::getDefendantId, is(targetIn.getDefendantId()))
+                .with(Target::getOffenceId, is(targetIn.getOffenceId()))
+                .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
+                .with(Target::getResultLines, first(isBean(ResultLine.class)
+                        .with(ResultLine::getId, is(resultLineIn.getResultLineId()))
+                        .with(ResultLine::getLevel, is(resultLineIn.getLevel()))
+                        .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
+                        .with(ResultLine::getPrompts, first(isBean(Prompt.class)
+                                .with(Prompt::getId, is(promptIn.getId()))
+                                .with(Prompt::getLabel, is(promptIn.getLabel()))
+                        ))
+                ))
+        );*/
     }
 
     @Test
@@ -209,14 +260,9 @@ public class HearingEventListenerTest {
         );
     }
 
-    private JsonEnvelope getSaveDraftResultJsonEnvelope() {
-        return envelope()
-                .withPayloadOf(HEARING_ID, FIELD_HEARING_ID)
-                .withPayloadOf(DEFENDANT_ID, FIELD_DEFENDANT_ID)
-                .withPayloadOf(TARGET_ID, FIELD_TARGET_ID)
-                .withPayloadOf(OFFENCE_ID, FIELD_OFFENCE_ID)
-                .withPayloadOf(DRAFT_RESULT, FIELD_DRAFT_RESULT)
-                .build();
+    private JsonEnvelope getSaveDraftResultJsonEnvelope(final uk.gov.justice.json.schemas.core.Target target) {
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(target);
+        return envelope().withPayloadOf(jsonObject, "target").build();
     }
 
     private JsonEnvelope getResultsSharedJsonEnvelope() {

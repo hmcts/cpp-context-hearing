@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/prosecutionCounsel.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "title": {
+      "description": "The attendee title",
+      "type": "string"
+    },
+    "firstName": {
+      "description": "The attendee fore name",
+      "type": "string"
+    },
+    "middleName": {
+      "description": "The attendee middle name",
+      "type": "string"
+    },
+    "lastName": {
+      "description": "The attendee last name",
+      "type": "string"
+    },
+    "status": {
+      "description": "The attendee status for the hearing e.g. junior counsel",
+      "type": "string"
+    },
+    "prosecutionCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      }
+    },
+    "attendanceDays": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
+      }
+    }
+  },
+  "required": [
+    "prosecutionCases",
+    "attendanceDays"
+  ]
+}

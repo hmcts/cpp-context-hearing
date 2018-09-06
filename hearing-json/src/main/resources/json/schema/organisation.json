@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/organisation.json",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "name": {
+      "type": "string"
+    },
+    "incorporationNumber": {
+      "type": "string"
+    },
+    "registeredCharityNumber": {
+      "type": "string"
+    },
+    "address": {
+      "description": "The organisation address details",
+      "$ref": "http://justice.gov.uk/json/schemas/core/address.json"
+    },
+    "contact": {
+      "description": "The organisation contact details",
+      "$ref": "http://justice.gov.uk/json/schemas/core/contactNumber.json"
+    }
+  },
+  "required": [
+    "id",
+    "name"
+  ],
+  "additionalProperties": false
+}

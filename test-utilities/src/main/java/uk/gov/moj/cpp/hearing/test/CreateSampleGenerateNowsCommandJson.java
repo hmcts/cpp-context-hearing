@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.*;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 
 import java.io.File;
@@ -19,19 +17,16 @@ public class CreateSampleGenerateNowsCommandJson {
 
     @SuppressWarnings({"squid:S106", "squid:S2096"})
     public static void main(String[] args) throws IOException {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+        final ObjectMapper objectMapper = createObjectMapper();
+
         final GenerateNowsCommand command = TestTemplates.generateNowsCommandTemplate(UUID.randomUUID(), UUID.randomUUID());
 
         final List<String> destinations = Arrays.asList(
-                "./hearing-command/hearing-command-api/src/raml/json/hearing.generate-nows.json",
-                "./hearing-command/hearing-command-handler/src/raml/json/hearing.command.generate-nows.json",
+                HEARING_COMMAND_HEARING_COMMAND_API_SRC_RAML_JSON + "/hearing.generate-nows.json",
+                HEARING_COMMAND_HEARING_COMMAND_HANDLER_SRC_RAML_JSON + "/hearing.command.generate-nows.json",
                 "./hearing-domain/hearing-domain-event/src/test/resources/hearing.events.nows-requested.json",
-                "./hearing-event/hearing-event-listener/src/raml/json/hearing.events.nows-requested.json",
-                "./hearing-event/hearing-event-processor/src/raml/json/hearing.events.nows-requested.json",
+                HEARING_EVENT_HEARING_EVENT_LISTENER_SRC_RAML_JSON + "/hearing.events.nows-requested.json",
+                HEARING_EVENT_HEARING_EVENT_PROCESSOR_SRC_RAML_JSON + "/hearing.events.nows-requested.json",
                 "./hearing-event/hearing-event-processor/src/test/resources/data/hearing.events.nows-requested.json"
         );
 

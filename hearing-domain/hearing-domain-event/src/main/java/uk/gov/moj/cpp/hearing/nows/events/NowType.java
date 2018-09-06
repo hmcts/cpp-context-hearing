@@ -5,15 +5,20 @@ import java.io.Serializable;
 
 public class NowType implements Serializable {
 
-    private final static long serialVersionUID = -8533556522837735944L;
+    private static final long serialVersionUID = -8533556522837735944L;
+    
     private String id;
     private String description;
     private String templateName;
     private Integer rank;
     private String staticText;
-    private String staticTextWelsh;
+    private String welshStaticText;
     private String priority;
     private String jurisdiction;
+    private String welshDescription;
+    private String bilingualTemplateName;
+    private Boolean remotePrintingRequired;
+
 
     public String getId() {
         return id;
@@ -55,12 +60,12 @@ public class NowType implements Serializable {
         this.staticText = staticText;
     }
 
-    public String getStaticTextWelsh() {
-        return staticTextWelsh;
+    public String getWelshStaticText() {
+        return welshStaticText;
     }
 
-    public void setStaticTextWelsh(String staticTextWelsh) {
-        this.staticTextWelsh = staticTextWelsh;
+    public void setWelshStaticText(String welshStaticText) {
+        this.welshStaticText = welshStaticText;
     }
 
     public String getPriority() {
@@ -77,5 +82,29 @@ public class NowType implements Serializable {
 
     public void setJurisdiction(String jurisdiction) {
         this.jurisdiction = jurisdiction;
+    }
+
+    public String getWelshDescription() {
+        return welshDescription;
+    }
+
+    public void setWelshDescription(final String welshDescription) {
+        this.welshDescription = welshDescription;
+    }
+
+    public String getBilingualTemplateName() {
+        return bilingualTemplateName;
+    }
+
+    public void setBilingualTemplateName(final String bilingualTemplateName) {
+        this.bilingualTemplateName = bilingualTemplateName;
+    }
+
+    public Boolean getRemotePrintingRequired() {
+        return remotePrintingRequired;
+    }
+
+    public void setRemotePrintingRequired(final Boolean remotePrintingRequired) {
+        this.remotePrintingRequired = remotePrintingRequired;
     }
 }

@@ -1,15 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.moj.cpp.hearing.command.initiate.Judge;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.event.detail-changed")
 public class HearingDetailChanged implements Serializable {
@@ -19,7 +17,7 @@ public class HearingDetailChanged implements Serializable {
     private final String type;
     private final UUID courtRoomId;
     private final String courtRoomName;
-    private final Judge judge;
+    private final uk.gov.moj.cpp.hearing.command.hearingDetails.Judge judge;
     private final List<ZonedDateTime> hearingDays;
 
     @JsonCreator
@@ -27,7 +25,7 @@ public class HearingDetailChanged implements Serializable {
                                 @JsonProperty("type") final String type,
                                 @JsonProperty("courtRoomId") final UUID courtRoomId,
                                 @JsonProperty("courtRoomName") final String courtRoomName,
-                                @JsonProperty("judge") final Judge judge,
+                                @JsonProperty("judge") final uk.gov.moj.cpp.hearing.command.hearingDetails.Judge judge,
                                 @JsonProperty("hearingDays") final List<ZonedDateTime> hearingDays) {
         this.id = id;
         this.type = type;
@@ -53,7 +51,7 @@ public class HearingDetailChanged implements Serializable {
         return courtRoomName;
     }
 
-    public Judge getJudge() {
+    public uk.gov.moj.cpp.hearing.command.hearingDetails.Judge getJudge() {
         return judge;
     }
 

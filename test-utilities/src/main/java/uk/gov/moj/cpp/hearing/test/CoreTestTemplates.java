@@ -1,0 +1,514 @@
+package uk.gov.moj.cpp.hearing.test;
+
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.json.schemas.core.HearingLanguage.WELSH;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.NI_NUMBER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.POST_CODE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.Pair.p;
+
+import uk.gov.justice.json.schemas.core.Address;
+import uk.gov.justice.json.schemas.core.AllocationDecision;
+import uk.gov.justice.json.schemas.core.AssociatedPerson;
+import uk.gov.justice.json.schemas.core.ContactNumber;
+import uk.gov.justice.json.schemas.core.CourtCentre;
+import uk.gov.justice.json.schemas.core.CourtDecision;
+import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.DefendantRepresentation;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.DocumentationLanguageNeeds;
+import uk.gov.justice.json.schemas.core.Gender;
+import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.HearingDay;
+import uk.gov.justice.json.schemas.core.HearingLanguage;
+import uk.gov.justice.json.schemas.core.HearingType;
+import uk.gov.justice.json.schemas.core.IndicatedPlea;
+import uk.gov.justice.json.schemas.core.IndicatedPleaValue;
+import uk.gov.justice.json.schemas.core.InitiationCode;
+import uk.gov.justice.json.schemas.core.JudicialRole;
+import uk.gov.justice.json.schemas.core.JudicialRoleType;
+import uk.gov.justice.json.schemas.core.JurisdictionType;
+import uk.gov.justice.json.schemas.core.LegalEntityDefendant;
+import uk.gov.justice.json.schemas.core.NotifiedPlea;
+import uk.gov.justice.json.schemas.core.NotifiedPleaValue;
+import uk.gov.justice.json.schemas.core.Offence;
+import uk.gov.justice.json.schemas.core.OffenceFacts;
+import uk.gov.justice.json.schemas.core.Organisation;
+import uk.gov.justice.json.schemas.core.Person;
+import uk.gov.justice.json.schemas.core.PersonDefendant;
+import uk.gov.justice.json.schemas.core.Plea;
+import uk.gov.justice.json.schemas.core.PleaValue;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
+import uk.gov.justice.json.schemas.core.ProsecutionCaseIdentifier;
+import uk.gov.justice.json.schemas.core.ProsecutionRepresentation;
+import uk.gov.justice.json.schemas.core.ReferralReason;
+import uk.gov.justice.json.schemas.core.Source;
+import uk.gov.justice.json.schemas.core.Target;
+import uk.gov.justice.json.schemas.core.Title;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+//TODO LocalDateTime should not be Local - Zoned.
+
+@SuppressWarnings({"WeakerAccess", "squid:S1067"})
+public class CoreTestTemplates {
+    public enum DefendantType {
+        PERSON, ORGANISATION
+    }
+
+    public static class CoreTemplateArguments {
+
+        private JurisdictionType jurisdictionType = JurisdictionType.CROWN;
+
+        private HearingLanguage hearingLanguage = HearingLanguage.ENGLISH;
+
+        private DefendantType defendantType = PERSON;
+
+        private boolean minimumAssociatedPerson;
+        private boolean minimumDefenceOrganisation;
+        private boolean minimumPerson;
+        private boolean minimumOrganisation;
+        private boolean minimumOffence;
+
+        private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), toList(randomUUID())));
+
+        public CoreTemplateArguments setJurisdictionType(JurisdictionType jurisdictionType) {
+            this.jurisdictionType = jurisdictionType;
+            return this;
+        }
+
+        public CoreTemplateArguments setHearingLanguage(HearingLanguage hearingLanguage) {
+            this.hearingLanguage = hearingLanguage;
+            return this;
+        }
+
+        public CoreTemplateArguments setDefendantType(DefendantType defendantType) {
+            this.defendantType = defendantType;
+            return this;
+        }
+
+        public CoreTemplateArguments setMinimumAssociatedPerson(boolean minimumAssociatedPerson) {
+            this.minimumAssociatedPerson = minimumAssociatedPerson;
+            return this;
+        }
+
+        public CoreTemplateArguments setMinimumDefenceOrganisation(boolean minimumDefenceOrganisation) {
+            this.minimumDefenceOrganisation = minimumDefenceOrganisation;
+            return this;
+        }
+
+        public CoreTemplateArguments setMinimumPerson(boolean minimumPerson) {
+            this.minimumPerson = minimumPerson;
+            return this;
+        }
+
+        public CoreTemplateArguments setMinimumOrganisation(boolean minimumOrganisation) {
+            this.minimumOrganisation = minimumOrganisation;
+            return this;
+        }
+
+        public CoreTemplateArguments setMinimumOffence(boolean minimumOffence) {
+            this.minimumOffence = minimumOffence;
+            return this;
+        }
+
+        public boolean isMinimumAssociatedPerson() {
+            return minimumAssociatedPerson;
+        }
+
+        public boolean isMinimumDefenceOrganisation() {
+            return minimumDefenceOrganisation;
+        }
+
+        public boolean isMinimumPerson() {
+            return minimumPerson;
+        }
+
+        public boolean isMinimumOrganisation() {
+            return minimumOrganisation;
+        }
+
+        public boolean isMinimumOffence() {
+            return minimumOffence;
+        }
+
+        public CoreTemplateArguments setStructure(Map<UUID, Map<UUID, List<UUID>>> structure) {
+            this.structure = structure;
+            return this;
+        }
+
+        public static <T, U> Map<T, U> toMap(T t, U u) {
+            final Map<T, U> map = new HashMap<>();
+            map.put(t, u);
+            return map;
+        }
+
+        public static <T, U> Map<T, U> toMap(List<Pair<T, U>> pairs) {
+            return pairs.stream().collect(Collectors.toMap(Pair::getK, Pair::getV));
+        }
+
+        @SafeVarargs
+        public static <T> List<T> toList(T... t) {
+            return new ArrayList<>(asList(t)); //want this to be mutable
+        }
+    }
+
+    public static CoreTemplateArguments defaultArguments() {
+        return new CoreTemplateArguments();
+    }
+
+    public static HearingDay.Builder hearingDay() {
+        return HearingDay.hearingDay()
+                .withSittingDay(RandomGenerator.PAST_UTC_DATE_TIME.next())
+                .withListingSequence(INTEGER.next())
+                .withListedDurationMinutes(INTEGER.next());
+    }
+
+    public static CourtCentre.Builder courtCentre() {
+        return CourtCentre.courtCentre()
+                .withId(randomUUID())
+                .withName(STRING.next())
+                .withWelshName(STRING.next())
+                .withRoomId(randomUUID())
+                .withRoomName(STRING.next())
+                .withWelshRoomName(STRING.next());
+    }
+
+    public static JudicialRole.Builder judiciaryRole(CoreTemplateArguments args) {
+        return JudicialRole.judicialRole()
+                .withJudicialId(randomUUID())
+                .withFirstName(STRING.next())
+                .withMiddleName(STRING.next())
+                .withLastName(STRING.next())
+                .withIsBenchChairman(BOOLEAN.next())
+                .withIsDeputy(BOOLEAN.next())
+                .withTitle(STRING.next())
+                .withJudicialRoleType(args.jurisdictionType == JurisdictionType.CROWN ? JudicialRoleType.CIRCUIT_JUDGE : JudicialRoleType.MAGISTRATE);
+    }
+
+    public static ProsecutionCaseIdentifier.Builder prosecutionCaseIdentifier(CoreTemplateArguments args) {
+        return ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                .withProsecutionAuthorityId(randomUUID())
+                .withProsecutionAuthorityReference(args.jurisdictionType == JurisdictionType.MAGISTRATES ? STRING.next() : null)
+                .withProsecutionAuthorityCode(STRING.next())
+                .withCaseURN(args.jurisdictionType == JurisdictionType.CROWN ? STRING.next() : null);
+    }
+
+    public static NotifiedPlea.Builder notifiedPlea(UUID offenceId) {
+        return NotifiedPlea.notifiedPlea()
+                .withOffenceId(offenceId)
+                .withNotifiedPleaValue(RandomGenerator.values(NotifiedPleaValue.values()).next())
+                .withNotifiedPleaDate(PAST_LOCAL_DATE.next());
+    }
+
+    public static IndicatedPlea.Builder indicatedPlea(UUID offenceId) {
+        return IndicatedPlea.indicatedPlea()
+                .withOffenceId(offenceId)
+                .withAllocationDecision(allocationDecision().build())
+                .withIndicatedPleaDate(PAST_LOCAL_DATE.next())
+                .withIndicatedPleaValue(RandomGenerator.values(IndicatedPleaValue.values()).next())
+                .withSource(RandomGenerator.values(Source.values()).next());
+    }
+
+    public static Plea.Builder plea(UUID offenceId, LocalDate convictionDate) {
+        return Plea.plea()
+                .withOffenceId(offenceId)
+                .withOriginatingHearingId(randomUUID())
+                .withDelegatedPowers(delegatedPowers().build())
+                .withPleaDate(convictionDate)
+                .withPleaValue(PleaValue.GUILTY);
+    }
+
+    public static AllocationDecision.Builder allocationDecision() {
+        return AllocationDecision.allocationDecision()
+                .withCourtDecision(RandomGenerator.values(CourtDecision.values()).next())
+                .withDefendantRepresentation(RandomGenerator.values(DefendantRepresentation.values()).next())
+                .withIndicationOfSentence(STRING.next())
+                .withProsecutionRepresentation(RandomGenerator.values(ProsecutionRepresentation.values()).next());
+    }
+
+    public static DelegatedPowers.Builder delegatedPowers() {
+        return DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next());
+    }
+
+    public static OffenceFacts.Builder offenceFacts() {
+        return OffenceFacts.offenceFacts()
+                .withAlcoholReadingAmount(STRING.next())
+                .withAlcoholReadingMethod(STRING.next())
+                .withVehicleRegistration(STRING.next());
+    }
+
+    public static Offence.Builder offence(CoreTemplateArguments args, UUID offenceId) {
+
+        if(args.isMinimumOffence()) {
+            return Offence.offence()
+                    .withId(offenceId)
+                    .withStartDate(PAST_LOCAL_DATE.next())
+                    .withOffenceDefinitionId(randomUUID())
+                    .withOffenceCode(STRING.next())
+                    .withCount(INTEGER.next())
+                    .withWording(STRING.next())
+                    .withOrderIndex(INTEGER.next());
+        }
+
+
+        final Offence.Builder result = Offence.offence()
+                .withId(offenceId)
+                .withStartDate(PAST_LOCAL_DATE.next())
+                .withEndDate(PAST_LOCAL_DATE.next())
+                .withArrestDate(PAST_LOCAL_DATE.next())
+                .withChargeDate(PAST_LOCAL_DATE.next())
+
+                .withIndicatedPlea(indicatedPlea(offenceId).build())
+                .withNotifiedPlea(notifiedPlea(offenceId).build())
+
+                .withOffenceDefinitionId(randomUUID())
+                .withOffenceTitle(STRING.next())
+                .withOffenceTitleWelsh(STRING.next())
+                .withOffenceCode(STRING.next())
+                .withCount(INTEGER.next())
+                .withOffenceFacts(offenceFacts().build())
+                .withOffenceLegislation(STRING.next())
+                .withOffenceLegislationWelsh(STRING.next())
+                .withWording(STRING.next())
+                .withWordingWelsh(STRING.next())
+                .withModeOfTrial(STRING.next())
+                .withOrderIndex(INTEGER.next());
+
+        if (args.jurisdictionType == JurisdictionType.MAGISTRATES) {
+            final LocalDate convictionDate = PAST_LOCAL_DATE.next();
+            result
+                    .withConvictionDate(convictionDate)
+                    .withPlea(plea(offenceId, convictionDate).build());
+        }
+
+        return result;
+    }
+
+    public static Address.Builder address() {
+        return Address.address()
+                .withAddress1(STRING.next())
+                .withAddress2(STRING.next())
+                .withAddress3(STRING.next())
+                .withAddress4(STRING.next())
+                .withAddress5(STRING.next())
+                .withPostcode(POST_CODE.next());
+    }
+
+    public static ContactNumber.Builder contactNumber() {
+        return ContactNumber.contactNumber()
+                .withFax(INTEGER.next().toString())
+                .withHome(INTEGER.next().toString())
+                .withMobile(INTEGER.next().toString())
+                .withPrimaryEmail(generateRandomEmail())
+                .withSecondaryEmail(generateRandomEmail())
+                .withWork(INTEGER.next().toString());
+    }
+
+    public static Person.Builder person(CoreTemplateArguments args) {
+
+        if(args.isMinimumPerson()) {
+            return Person.person()
+                    .withTitle(RandomGenerator.values(Title.values()).next())
+                    .withLastName(STRING.next())
+                    .withGender(RandomGenerator.values(Gender.values()).next());
+        }
+
+        return Person.person()
+                .withTitle(RandomGenerator.values(Title.values()).next())
+                .withContact(contactNumber().build())
+                .withAdditionalNationalityCode(STRING.next())
+                .withAdditionalNationalityId(randomUUID())
+                .withDateOfBirth(PAST_LOCAL_DATE.next())
+                .withDisabilityStatus(STRING.next())
+                .withDocumentationLanguageNeeds(args.hearingLanguage == WELSH ? DocumentationLanguageNeeds.WELSH : null)
+                .withEthnicityId(randomUUID())
+                .withEthnicity(STRING.next())
+                .withAddress(address().build())
+                .withFirstName(STRING.next())
+                .withMiddleName(STRING.next())
+                .withLastName(STRING.next())
+                .withGender(RandomGenerator.values(Gender.values()).next())
+                .withOccupation(STRING.next())
+                .withInterpreterLanguageNeeds(STRING.next())
+                .withOccupationCode(STRING.next())
+                .withSpecificRequirements(STRING.next())
+                .withNationalInsuranceNumber(NI_NUMBER.next())
+                .withNationalityId(randomUUID())
+                .withNationalityCode(STRING.next());
+    }
+
+    public static AssociatedPerson.Builder associatedPerson(CoreTemplateArguments args) {
+        return AssociatedPerson.associatedPerson()
+                .withPerson(person(args).build())
+                .withRole(STRING.next());
+    }
+
+    public static Organisation.Builder organisation(CoreTemplateArguments args) {
+
+        if(args.isMinimumOrganisation()) {
+            return Organisation.organisation()
+                    .withId(randomUUID())
+                    .withName(STRING.next());
+        }
+
+        return Organisation.organisation()
+                .withId(randomUUID())
+                .withAddress(address().build())
+                .withContact(contactNumber().build())
+                .withIncorporationNumber(STRING.next())
+                .withName(STRING.next())
+                .withRegisteredCharityNumber(STRING.next());
+    }
+
+    public static PersonDefendant.Builder personDefendant(CoreTemplateArguments args) {
+        return PersonDefendant.personDefendant()
+                .withPersonDetails(person(args).build())
+                .withAliases(asList(STRING.next()))
+                .withArrestSummonsNumber(STRING.next())
+                .withBailStatus(STRING.next())
+                .withDriverNumber(STRING.next())
+                .withPerceivedBirthYear(INTEGER.next())
+
+                .withSelfDefinedEthnicityId(randomUUID())
+                .withSelfDefinedEthnicityCode(STRING.next())
+                .withObservedEthnicityCode(STRING.next())
+                .withObservedEthnicityId(randomUUID())
+
+                .withEmployerOrganisation(organisation(args).build())
+                .withEmployerPayrollReference(STRING.next())
+
+                .withCustodyTimeLimit(PAST_LOCAL_DATE.next())
+                .withPncId(STRING.next());
+    }
+
+    public static LegalEntityDefendant.Builder legalEntityDefendant(CoreTemplateArguments args) {
+        return LegalEntityDefendant.legalEntityDefendant()
+                .withOrganisation(organisation(args).build());
+    }
+
+
+    public static Defendant.Builder defendant(UUID prosecutionCaseId, CoreTemplateArguments args, Pair<UUID, List<UUID>> structure) {
+
+        return Defendant.defendant()
+                .withId(structure.getK())
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withNumberOfPreviousConvictionsCited(INTEGER.next())
+                .withProsecutionAuthorityReference(STRING.next())
+                .withOffences(
+                        structure.getV().stream()
+                                .map(offenceId -> offence(args, offenceId).build())
+                                .collect(toList())
+                )
+                .withAssociatedPersons(args.isMinimumAssociatedPerson() ? asList(associatedPerson(args).build()) : null)
+                .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
+                .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
+                .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null);
+    }
+
+    public static ProsecutionCase.Builder prosecutionCase(CoreTemplateArguments args, Pair<UUID, Map<UUID, List<UUID>>> structure) {
+
+        return ProsecutionCase.prosecutionCase()
+                .withId(structure.getK())
+                .withProsecutionCaseIdentifier(prosecutionCaseIdentifier(args).build())
+                .withCaseStatus(STRING.next())
+                .withOriginatingOrganisation(STRING.next())
+                .withInitiationCode(RandomGenerator.values(InitiationCode.values()).next())
+                .withDefendants(
+                        structure.getV().entrySet().stream()
+                                .map(entry -> defendant(structure.getK(), args, p(entry.getKey(), entry.getValue())).build())
+                                .collect(toList())
+                );
+    }
+
+    public static ReferralReason.Builder referralReason() {
+        return ReferralReason.referralReason()
+                .withId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withDescription(STRING.next());
+    }
+
+    public static HearingType.Builder hearingType() {
+        return HearingType.hearingType()
+                .withId(randomUUID())
+                .withDescription(STRING.next());
+    }
+
+    public static Hearing.Builder hearing(CoreTemplateArguments args) {
+
+        if(args.hearingLanguage == WELSH) {
+            return Hearing.hearing()
+                    .withId(randomUUID())
+                    .withType(hearingType().build())
+                    .withHearingLanguage(HearingLanguage.WELSH)
+                    .withJurisdictionType(args.jurisdictionType)
+                    .withReportingRestrictionReason(STRING.next())
+                    .withHearingDays(asList(hearingDay().build()))
+                    .withCourtCentre(courtCentre().build())
+                    .withJudiciary(singletonList(judiciaryRole(args).build()))
+                    .withProsecutionCases(
+                            args.structure.entrySet().stream()
+                                    .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                    .collect(toList())
+                    );
+        }
+
+        return Hearing.hearing()
+                .withId(randomUUID())
+                .withType(hearingType().build())
+                .withJurisdictionType(args.jurisdictionType)
+                .withReportingRestrictionReason(STRING.next())
+                .withHearingDays(asList(hearingDay().build()))
+                .withCourtCentre(courtCentre().build())
+                .withJudiciary(singletonList(judiciaryRole(args).build()))
+                .withDefendantReferralReasons(singletonList(referralReason().build()))
+                .withHasSharedResults(false)
+                .withProsecutionCases(
+                        args.structure.entrySet().stream()
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                .collect(toList())
+                );
+    }
+
+    public static String generateRandomEmail() {
+        return STRING.next().toLowerCase() + "@" + STRING.next().toLowerCase() + "." + STRING.next().toLowerCase();
+    }
+
+    public static Target.Builder target() {
+        return Target.target()
+                .withHearingId(UUID.randomUUID())
+                .withTargetId(UUID.randomUUID())
+                .withResultLines(Arrays.asList(
+                        uk.gov.justice.json.schemas.core.ResultLine.resultLine()
+                                .withResultDefinitionId(UUID.randomUUID())
+                                .withPrompts(
+                                        Arrays.asList(
+                                                uk.gov.justice.json.schemas.core.Prompt.prompt()
+                                                        .withId(UUID.randomUUID())
+                                                        .build())
+                                )
+                                .build()
+                ));
+    }
+
+}

@@ -31,7 +31,7 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsComman
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
@@ -86,7 +86,7 @@ public class GenerateNowsCommandHandlerTest {
 
         final UUID hearingId = fromString(nowsRequestedCommand.getHearing().getId());
 
-        setupMockedEventStream(hearingId, this.hearingEventStream, new NewModelHearingAggregate());
+        setupMockedEventStream(hearingId, this.hearingEventStream, new HearingAggregate());
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.generate-nows"), objectToJsonObjectConverter.convert(nowsRequestedCommand));
 
@@ -108,7 +108,7 @@ public class GenerateNowsCommandHandlerTest {
 
         final SaveNowsVariantsCommand command = createSampleNowsVariantsCommand();
 
-        setupMockedEventStream(command.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
+        setupMockedEventStream(command.getHearingId(), this.hearingEventStream, new HearingAggregate());
 
         final JsonEnvelope commandEnvelope = envelopeFrom(metadataWithRandomUUID("hearing.command.save-nows-variants"), objectToJsonObjectConverter.convert(command));
 
@@ -132,7 +132,7 @@ public class GenerateNowsCommandHandlerTest {
 
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), "generated");
 
-        setupMockedEventStream(nowsMaterialStatusUpdated.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
+        setupMockedEventStream(nowsMaterialStatusUpdated.getHearingId(), this.hearingEventStream, new HearingAggregate());
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-nows-material-status"), objectToJsonObjectConverter.convert(nowsMaterialStatusUpdated));
 

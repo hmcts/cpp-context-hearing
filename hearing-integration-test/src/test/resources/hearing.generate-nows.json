@@ -242,22 +242,28 @@
       {
         "id" :"NOWTYPE_ID",
         "templateName": "SingleTemplate",
+        "bilingualTemplateName": "bilingualTemplateName",
         "description": "Imprisonment Order",
+        "welshDescription": "something or other",
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
-        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
         "priority": "0.5 hours",
-        "jurisdiction": "B"
+        "jurisdiction": "B",
+        "remotePrintingRequired": true
       },
       {
         "id" :"525807c9-004c-4b75-9cfd-29757fd4fd78",
         "templateName": "NotSingleTemplate",
+        "bilingualTemplateName": "bilingualTemplateName",
         "description": "Fine Order",
+        "welshDescription": "something or other",
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
-        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
         "priority": "1.0 hours",
-        "jurisdiction": "B"
+        "jurisdiction": "B",
+        "remotePrintingRequired": true
       }
     ]
   }

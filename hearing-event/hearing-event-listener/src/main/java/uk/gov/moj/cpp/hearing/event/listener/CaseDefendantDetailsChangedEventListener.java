@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.moj.cpp.hearing.Utilities.with;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -7,18 +10,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.function.Predicate;
 
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-
+@SuppressWarnings({"squid:S1188", "squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_LISTENER)
 public class CaseDefendantDetailsChangedEventListener {
 
@@ -38,69 +36,44 @@ public class CaseDefendantDetailsChangedEventListener {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantIn = defendantDetailsToBeUpdated.getDefendant();
 
-        defendant.setDefenceSolicitorFirm(defendantIn.getDefenceOrganisation());
-
         final uk.gov.moj.cpp.hearing.command.defendant.Person person = defendantIn.getPerson();
 
-        if(nonNull(person)) {
+        with(defendant.getPersonDefendant().getPersonDetails(), defendantDetailsToBeUpdated.getDefendant().getPerson(), (personDetails, inputPerson) -> {
+            personDetails.setFirstName(inputPerson.getFirstName());
+            personDetails.setLastName(inputPerson.getLastName());
+            personDetails.setDateOfBirth(inputPerson.getDateOfBirth());
+            personDetails.setGender(inputPerson.getGender());
+            personDetails.setNationalityCode(inputPerson.getNationality());
 
-            defendant.setFirstName(person.getFirstName());
+            with(personDetails.getContact(), contact -> {
+                contact.setFax(inputPerson.getFax());
+                contact.setHome(inputPerson.getHomeTelephone());
+                contact.setMobile(inputPerson.getMobile());
+                contact.setPrimaryEmail(inputPerson.getEmail());
+                contact.setWork(inputPerson.getWorkTelephone());
+            });
 
-            defendant.setLastName(person.getLastName());
-
-            defendant.setDateOfBirth(person.getDateOfBirth());
-
-            defendant.setNationality(person.getNationality());
-
-            defendant.setGender(person.getGender());
-
-            defendant.setWorkTelephone(person.getWorkTelephone());
-
-            defendant.setHomeTelephone(person.getHomeTelephone());
-
-            defendant.setMobileTelephone(person.getMobile());
-
-            defendant.setFax(person.getFax());
-
-            defendant.setEmail(person.getEmail());
-
-            final uk.gov.moj.cpp.hearing.command.defendant.Address addressIn = person.getAddress();
-
-            final Address address = ofNullable(addressIn).map(a -> Address.builder()
-                    .withAddress1(addressIn.getAddress1())
-                    .withAddress2(addressIn.getAddress2())
-                    .withAddress3(addressIn.getAddress3())
-                    .withAddress4(addressIn.getAddress4())
-                    .withPostCode(addressIn.getPostCode())
-                    .build())
-                    .orElse(null);
-
-            defendant.setAddress(address);
-        }
-
-        defendant.getDefendantCases().stream().filter(dc -> getDefendantCasePredicate(defendantDetailsToBeUpdated).test(dc)).forEach(dc -> {
-            dc.setBailStatus(defendantDetailsToBeUpdated.getDefendant().getBailStatus());
-            dc.setCustodyTimeLimitDate(defendantDetailsToBeUpdated.getDefendant().getCustodyTimeLimitDate());
+            if (person.getAddress() != null) {
+                personDetails.setAddress(with(new Address(), person.getAddress(), (output, input) -> {
+                    output.setAddress1(input.getAddress1());
+                    output.setAddress2(input.getAddress2());
+                    output.setAddress3(input.getAddress3());
+                    output.setAddress4(input.getAddress4());
+                    //output.setAddress5(input.getAddress5());
+                    output.setPostCode(input.getPostCode());
+                }));
+            }
         });
 
-        final uk.gov.moj.cpp.hearing.command.defendant.Interpreter interpreter = defendantIn.getInterpreter();
+        with(defendant.getPersonDefendant(), defendantDetailsToBeUpdated.getDefendant(), (output, input) ->{
+            output.setBailStatus(input.getBailStatus());
+            output.setCustodyTimeLimit(input.getCustodyTimeLimitDate());
+        });
 
-        if(nonNull(interpreter)) {
-
-            defendant.setInterpreterLanguage(interpreter.getLanguage());
+        if (defendantIn.getInterpreter() != null){
+            defendant.getPersonDefendant().getPersonDetails().setInterpreterLanguageNeeds(defendantIn.getInterpreter().getLanguage());
         }
 
-        defendantRepository.saveAndFlush(defendant);
-    }
-
-    private Predicate<DefendantCase> getDefendantCasePredicate(DefendantDetailsUpdated defendantDetailsToBeUpdated) {
-
-        final Predicate<DefendantCase> caseIdPredicate = p -> p.getId().getCaseId().equals(defendantDetailsToBeUpdated.getCaseId());
-
-        final Predicate<DefendantCase> hearingIdPredicate = p -> p.getId().getHearingId().equals(defendantDetailsToBeUpdated.getHearingId());
-
-        final Predicate<DefendantCase> defendantPredicate = p -> p.getId().getDefendantId().equals(defendantDetailsToBeUpdated.getDefendant().getId());
-
-        return caseIdPredicate.and(hearingIdPredicate).and(defendantPredicate);
+        defendantRepository.save(defendant);
     }
 }

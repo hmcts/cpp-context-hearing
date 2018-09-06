@@ -1,9 +1,17 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Test;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
@@ -12,14 +20,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 public class OffenceAggregateTest {
 
@@ -31,6 +31,7 @@ public class OffenceAggregateTest {
             // ensure aggregate is serializable
             SerializationUtils.serialize(offenceAggregate);
         } catch (SerializationException e) {
+            e.printStackTrace();
             fail("Aggregate should be serializable");
         }
     }
@@ -72,8 +73,20 @@ public class OffenceAggregateTest {
         UUID hearingId = randomUUID();
         LocalDate pleaDate = PAST_LOCAL_DATE.next();
         String value = STRING.next();
+        DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(UUID.randomUUID()).build();
 
-        List<Object> events = offenceAggregate.updatePlea(hearingId, offenceId, pleaDate, value).collect(Collectors.toList());
+        OffencePleaUpdated offencePleaUpdated = OffencePleaUpdated.builder()
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId)
+                .withPleaDate(pleaDate)
+                .withValue(value)
+                .withDelegatedPowers(delegatedPowers)
+                .build();
+
+        List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated).collect(Collectors.toList());
 
         assertThat(events.get(0), is(offenceAggregate.getPlea()));
 
@@ -81,6 +94,7 @@ public class OffenceAggregateTest {
         assertThat(offenceAggregate.getPlea().getOffenceId(), is(offenceId));
         assertThat(offenceAggregate.getPlea().getPleaDate(), is(pleaDate));
         assertThat(offenceAggregate.getPlea().getValue(), is(value));
+        assertThat(offenceAggregate.getPlea().getDelegatedPowers().getLastName(), is(delegatedPowers.getLastName()));
     }
 
 }

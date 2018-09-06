@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -27,12 +27,12 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
     private final Map<UUID, Plea> pleas = new HashMap<>();
     private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
-    private List<Case> cases;
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
     private Map<UUID, CompletedResultLine> completedResultLines = new HashMap<>();
     private List<UUID> adjournedHearingIds = new ArrayList<>();
+    private Map<UUID, Target> targets = new HashMap<>();
 
     private boolean published = false;
 
@@ -54,14 +54,6 @@ public class HearingAggregateMomento implements Serializable {
 
     public Map<UUID, VerdictUpsert> getVerdicts() {
         return verdicts;
-    }
-
-    public List<Case> getCases() {
-        return cases;
-    }
-
-    public void setCases(List<Case> cases) {
-        this.cases = cases;
     }
 
     public Hearing getHearing() {
@@ -106,5 +98,13 @@ public class HearingAggregateMomento implements Serializable {
 
     public void setAdjournedHearingIds(final List<UUID> adjournedHearingIds) {
         this.adjournedHearingIds = adjournedHearingIds;
+    }
+
+    public Map<UUID, Target> getTargets() {
+        return targets;
+    }
+
+    public void setTargets(Map<UUID, Target> targets) {
+        this.targets = targets;
     }
 }

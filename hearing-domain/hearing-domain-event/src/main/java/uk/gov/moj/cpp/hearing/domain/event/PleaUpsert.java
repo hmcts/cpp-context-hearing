@@ -1,42 +1,41 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.PleaValue;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import uk.gov.justice.domain.annotation.Event;
-
 @Event("hearing.hearing-offence-plea-updated")
-public final class PleaUpsert implements Serializable {
+public class PleaUpsert implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID hearingId;
-    private final UUID offenceId;
-    private final LocalDate pleaDate;
-    private final String value;
+    private UUID hearingId;
+    private UUID offenceId;
+    private LocalDate pleaDate;
+    private PleaValue value;
+    private DelegatedPowers delegatedPowers;
+
+    public PleaUpsert() {
+
+    }
 
     @JsonCreator
     public PleaUpsert(@JsonProperty("hearingId") final UUID originHearingId,
                       @JsonProperty("offenceId") final UUID offenceId,
                       @JsonProperty("pleaDate") final LocalDate pleaDate,
-                      @JsonProperty("value") final String value) {
+                      @JsonProperty("value") final PleaValue value,
+                      @JsonProperty("delegatedPowers") final DelegatedPowers delegatedPowers) {
         this.hearingId = originHearingId;
         this.offenceId = offenceId;
         this.pleaDate = pleaDate;
         this.value = value;
-    }
-
-    @JsonIgnore
-    private PleaUpsert(final Builder builder) {
-        this.hearingId = builder.originHearingId;
-        this.offenceId = builder.offenceId;
-        this.pleaDate = builder.pleaDate;
-        this.value = builder.value;
+        this.delegatedPowers = delegatedPowers;
     }
 
     public UUID getHearingId() {
@@ -51,59 +50,40 @@ public final class PleaUpsert implements Serializable {
         return pleaDate;
     }
 
-    public String getValue() {
+    public PleaValue getValue() {
         return value;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public DelegatedPowers getDelegatedPowers() {
+        return delegatedPowers;
     }
 
-    public static final class Builder {
+    public PleaUpsert setHearingId(UUID hearingId) {
+        this.hearingId = hearingId;
+        return this;
+    }
 
-        private UUID originHearingId;
-        private UUID offenceId;
-        private LocalDate pleaDate;
-        private String value;
+    public PleaUpsert setOffenceId(UUID offenceId) {
+        this.offenceId = offenceId;
+        return this;
+    }
 
-        public Builder withHearingId(final UUID hearingId) {
-            this.originHearingId = hearingId;
-            return this;
-        }
+    public PleaUpsert setPleaDate(LocalDate pleaDate) {
+        this.pleaDate = pleaDate;
+        return this;
+    }
 
-        public Builder withOffenceId(final UUID offenceId) {
-            this.offenceId = offenceId;
-            return this;
-        }
+    public PleaUpsert setValue(PleaValue value) {
+        this.value = value;
+        return this;
+    }
 
-        public Builder withPleaDate(final LocalDate pleaDate) {
-            this.pleaDate = pleaDate;
-            return this;
-        }
+    public PleaUpsert setDelegatedPowers(DelegatedPowers delegatedPowers) {
+        this.delegatedPowers = delegatedPowers;
+        return this;
+    }
 
-        public Builder withValue(final String value) {
-            this.value = value;
-            return this;
-        }
-
-        public UUID getOriginHearingId() {
-            return originHearingId;
-        }
-
-        public UUID getOffenceId() {
-            return offenceId;
-        }
-
-        public LocalDate getPleaDate() {
-            return pleaDate;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public PleaUpsert build() {
-            return new PleaUpsert(this);
-        }
+    public static PleaUpsert pleaUpsert() {
+        return new PleaUpsert();
     }
 }

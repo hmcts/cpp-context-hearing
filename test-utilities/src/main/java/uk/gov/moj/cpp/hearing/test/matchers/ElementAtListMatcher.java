@@ -6,7 +6,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.List;
 
-public class ElementAtListMatcher extends TypeSafeMatcher<List> {
+public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
 
     private int index;
     private Matcher<?> matcher;
@@ -18,7 +18,7 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List> {
     }
 
     @Override
-    protected boolean matchesSafely(List item) {
+    protected boolean matchesSafely(List<?> item) {
 
         if (this.index < 0 || this.index >= item.size()) {
             this.error = Error.INVALID_INDEX;
@@ -47,7 +47,7 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List> {
     }
 
     @Override
-    protected void describeMismatchSafely(List item, Description mismatchDescription) {
+    protected void describeMismatchSafely(List<?> item, Description mismatchDescription) {
         if (this.error == Error.MATCHER_FALSE) {
             this.matcher.describeMismatch(item.get(this.index), mismatchDescription);
         }

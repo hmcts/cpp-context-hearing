@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="48" author="hearing" logicalFilePath="048-rename-legal_case_id-to-prosecution_case_id.xml">
+
+        <dropAllForeignKeyConstraints baseTableName="ha_offence"/>
+        <dropPrimaryKey tableName="ha_offence" constraintName="pk_offence"/>
+
+        <dropAllForeignKeyConstraints baseTableName="associated_person"/>
+        <dropPrimaryKey tableName="associated_person" constraintName="pk_associated_person"/>
+
+        <dropAllForeignKeyConstraints baseTableName="ha_defendant"/>
+        <dropPrimaryKey constraintName="pk_defendant" tableName="ha_defendant"/>
+
+        <dropAllForeignKeyConstraints baseTableName="ha_case"/>
+        <dropPrimaryKey constraintName="pk_case" tableName="ha_case"/>
+
+        <delete tableName="ha_defendant"/>
+        <delete tableName="ha_offence"/>
+
+        <!-- Changes to ha_case table -->
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_case" tableName="ha_case"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="ha_case"
+                                 constraintName="fk_case_hearing" referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+
+
+        <!-- Changes to ha_defendant table -->
+        <addColumn tableName="ha_defendant">
+            <column name="hearing_id" type="UUID"/>
+        </addColumn>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_defendant" tableName="ha_defendant"/>
+        <addForeignKeyConstraint baseColumnNames="prosecution_case_id, hearing_id" baseTableName="ha_defendant"
+                                 constraintName="fk_defendant_case" referencedColumnNames="id, hearing_id"
+                                 referencedTableName="ha_case"/>
+
+        <!-- Changes to ha_offence -->
+        <addColumn tableName="ha_offence">
+            <column name="hearing_id" type="UUID"/>
+        </addColumn>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_offence" tableName="ha_offence"/>
+        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id" baseTableName="ha_offence"
+                                 constraintName="fk_offence_defendant" referencedColumnNames="id, hearing_id"
+                                 referencedTableName="ha_defendant"/>
+
+
+        <!-- Changes to associated person-->
+        <addColumn tableName="associated_person">
+            <column name="hearing_id" type="UUID"/>
+        </addColumn>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_associated_person" tableName="associated_person"/>
+        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id" baseTableName="associated_person"
+                                 constraintName="fk_associated_person_defendant" referencedColumnNames="id, hearing_id"
+                                 referencedTableName="ha_defendant"/>
+
+        <renameTable oldTableName="associated_person" newTableName="ha_associated_person"/>
+
+        <addColumn tableName="ha_case">
+            <column name="statement_of_facts" type="TEXT"/>
+            <column name="statement_of_facts_welsh" type="TEXT"/>
+        </addColumn>
+
+        <renameTable oldTableName="ha_hearing_date" newTableName="ha_hearing_day"/>
+
+        <addColumn tableName="ha_hearing_day">
+            <column name="date" type="DATETIME"/>
+            <column name="listed_duration_minutes" type="INT"/>
+        </addColumn>
+
+        <addColumn tableName="ha_offence">
+            <column name="allocation_decision" type="TEXT"/>
+            <column name="mode_of_trial" type="TEXT"/>
+        </addColumn>
+
+        <addColumn tableName="ha_defendant">
+            <column name="mitigation" type="TEXT"/>
+            <column name="mitigation_welsh" type="TEXT"/>
+            <column name="witness_statement" type="TEXT"/>
+            <column name="witness_statement_welsh" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,9 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.hearing-event-definitions-created.json",
   "type": "object",
   "properties": {
     "id": {
-      "$ref": "#/definitions/uuid"
+      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
     },
     "eventDefinitions": {
       "type": "array",
@@ -11,7 +12,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "$ref": "#/definitions/uuid"
+            "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
           },
           "groupLabel": {
             "type": "string"
@@ -52,12 +53,5 @@
     "id",
     "eventDefinitions"
   ],
-  "additionalProperties": false,
-  "definitions": {
-    "uuid": {
-      "type": "string",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-    }
-  }
+  "additionalProperties": false
 }
-

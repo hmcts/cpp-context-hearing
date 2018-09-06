@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/resultLine.json",
+  "description": "The resultLine",
+  "type": "object",
+  "properties": {
+    "delegatedPowers": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/delegatedPowers.json"
+    },
+    "orderedDate": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "sharedDate": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "resultLineId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "resultDefinitionId": {
+      "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "level": {
+      "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
+      "type": "string",
+      "enum": [
+        "DEFENDANT",
+        "CASE",
+        "OFFENCE"
+      ]
+    },
+    "resultLabel": {
+      "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
+      "type": "string"
+    },
+    "prompts": {
+      "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/prompt.json"
+      }
+    },
+    "isModified": {
+      "type": "boolean"
+    },
+    "isComplete": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "orderedDate",
+    "resultLineId",
+    "isModified",
+    "isComplete"
+  ],
+  "additionalProperties": false
+}

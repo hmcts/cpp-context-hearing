@@ -1,30 +1,24 @@
 {
-  "caseId": "bf537ed1-4648-4a68-8429-96a69d5db49d",
-  "defendants": [
+ "verdicts":[
     {
-      "id": "a6a5a1fd-67c8-42ee-9995-a10165ab3dbe",
-      "personId": "d3a0d0f9-78b0-47c6-a362-5febf0485d0f",
-      "offences": [
-        {
-          "id": "6da4527f-474a-47a8-82c5-21ea607aa9c3",
-          "verdict": {
-            "id": "0baecac5-222b-402d-9047-84803679edae",
-            "value": {
-              "id": "0baecac5-222b-402d-9047-84803679edab",
-              "category": "Not Guilty",
-              "categoryType": "NOT_GUILTY",
-              "verdictTypeId":"7baecac5-222b-402d-9047-84803679edab",
-              "lesserOffence": "Obstructing a Police Officer",
-              "code": "A1",
-              "description": "Not guilty under section 17 Criminal Justice Act (1967): prosecution offer no evidence"
-            },
-	    "verdictDate": "2017-02-20",
-            "numberOfJurors": 10,
-            "numberOfSplitJurors": 2,
-            "unanimous": false
-          }
-        }
-      ]
+      "offenceId":"ef537ed1-4648-4a68-8429-96a69d5db49d",
+      "verdictType":{
+        "id":"7baecac5-222b-402d-9047-84803679edab",
+        "category":"Guilty",
+        "categoryType":"NOT_GUILTY"
+      },
+      "verdictDate":"2017-02-20",
+      "lesserOffence":{
+        "offenceDefinitionId":"42a5fdfe-1642-4358-99c3-7d5816927944",
+        "offenceCode":"GA96011",
+        "title":"Allow a vehicle / an animal to be on Gatwick Airport after being forbidden to do so by a PC / airport official",
+        "legislation":"Contrary to Byelaws 3(10) and 2(3) of the Gatwick Airport - London Byelaws 1996 and sections 63 and 64 of the Airports Act 1986."
+      },
+      "jurors":{
+        "numberOfJurors":10,
+        "numberOfSplitJurors":2,
+        "unanimous":false
+      }
     }
   ]
 }

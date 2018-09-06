@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="38" author="hearing" logicalFilePath="045-new-view-changes-for-r24">
+
+        <!-- Hearing table changes -->
+        <addColumn tableName="ha_hearing">
+            <column name="hearing_type_id" type="UUID" />
+            <column name="hearing_type_description" type="TEXT"/>
+            <column name="jurisdiction_type" type="TEXT"/>
+            <column name="has_reporting_restrictions" type="boolean"/>
+            <column name="hearing_language" type="TEXT"/>
+            <column name="welsh_name" type="TEXT"/>
+            <column name="welsh_room_name" type="TEXT"/>
+            <column name="has_shared_results" type="boolean"/>
+        </addColumn>
+        <dropColumn tableName="ha_hearing" columnName="hearing_type"/>
+
+        <!-- Hearing Date table changes -->
+        <dropColumn tableName="ha_hearing_date" columnName="date"/>
+        <dropColumn tableName="ha_hearing_date" columnName="date_time"/>
+
+        <addColumn tableName="ha_hearing_date">
+            <column name="sitting_day" type="DATETIME TZ"/>
+            <column name="listing_sequence" type="INT"/>
+        </addColumn>
+
+        <!-- Attendee table changes -->
+        <addColumn tableName="ha_attendee">
+            <column name="middle_name" type="TEXT"/>
+        </addColumn>
+
+        <!-- Case table changes -->
+        <dropForeignKeyConstraint baseTableName="ha_attendee_case" constraintName="fk_attendee_case_case"/>
+        <dropForeignKeyConstraint baseTableName="ha_defendant_case" constraintName="fk_defendant_case_case"/>
+        <dropForeignKeyConstraint baseTableName="ha_offence" constraintName="fk_offence_case"/>
+        <dropForeignKeyConstraint baseTableName="ha_witness" constraintName="fk_witness_case"/>
+
+        <dropPrimaryKey constraintName="pk_case" tableName="ha_case"/>
+        <delete tableName="ha_case"/>
+        <addColumn tableName="ha_case">
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prosecution_authority_id" type="UUID"/>
+            <column name="prosecution_authority_code" type="TEXT"/>
+            <column name="prosecution_authority_reference" type="TEXT"/>
+            <column name="originating_organisation" type="TEXT"/>
+            <column name="initiation_code" type="TEXT" />
+            <column name="case_status" type="TEXT" />
+        </addColumn>
+        <addPrimaryKey columnNames="id" constraintName="pk_case" tableName="ha_case"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="ha_case"
+                                 constraintName="fk_case_hearing" referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+
+        <!-- Defendant table changes -->
+        <dropForeignKeyConstraint baseTableName="ha_attendee_defendant" constraintName="fk_attendee_defendant_defendant"/>
+        <dropForeignKeyConstraint baseTableName="ha_defendant_case" constraintName="fk_defendant_case_defendant"/>
+        <dropForeignKeyConstraint baseTableName="ha_offence" constraintName="fk_offence_defendant"/>
+
+        <dropAllForeignKeyConstraints baseTableName="ha_defendant"/>
+        <dropPrimaryKey tableName="ha_defendant" constraintName="pk_defendant"/>
+        <dropColumn tableName="ha_defendant" columnName="nationality"/>
+        <dropColumn tableName="ha_defendant" columnName="hearing_id"/>
+        <delete tableName="ha_defendant"/>
+        <addColumn tableName="ha_defendant">
+            <column name="legal_case_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defence_org_id" type="UUID"/>
+            <column name="defence_org_name" type="TEXT"/>
+            <column name="defence_org_inc_no" type="TEXT"/>
+            <column name="defence_org_reg_charity_no" type="TEXT"/>
+            <column name="defence_org_address_1" type="TEXT"/>
+            <column name="defence_org_address_2" type="TEXT"/>
+            <column name="defence_org_address_3" type="TEXT"/>
+            <column name="defence_org_address_4" type="TEXT"/>
+            <column name="defence_org_address_5" type="TEXT"/>
+            <column name="defence_org_post_code" type="TEXT"/>
+            <column name="defence_org_contact_home" type="TEXT"/>
+            <column name="defence_org_contact_work" type="TEXT"/>
+            <column name="defence_org_contact_mobile" type="TEXT"/>
+            <column name="defence_org_contact_primary_email" type="TEXT"/>
+            <column name="defence_org_contact_secondary_email" type="TEXT"/>
+            <column name="defence_org_contact_fax" type="TEXT"/>
+            <column name="emp_org_id" type="UUID"/>
+            <column name="emp_org_name" type="TEXT"/>
+            <column name="emp_org_inc_no" type="TEXT"/>
+            <column name="emp_org_reg_charity_no" type="TEXT"/>
+            <column name="emp_org_address_1" type="TEXT"/>
+            <column name="emp_org_address_2" type="TEXT"/>
+            <column name="emp_org_address_3" type="TEXT"/>
+            <column name="emp_org_address_4" type="TEXT"/>
+            <column name="emp_org_address_5" type="TEXT"/>
+            <column name="emp_org_post_code" type="TEXT"/>
+            <column name="emp_org_contact_home" type="TEXT"/>
+            <column name="emp_org_contact_work" type="TEXT"/>
+            <column name="emp_org_contact_mobile" type="TEXT"/>
+            <column name="emp_org_contact_primary_email" type="TEXT"/>
+            <column name="emp_org_contact_secondary_email" type="TEXT"/>
+            <column name="emp_org_contact_fax" type="TEXT"/>
+            <column name="leg_ent_org_id" type="UUID"/>
+            <column name="leg_ent_org_name" type="TEXT"/>
+            <column name="leg_ent_org_inc_no" type="TEXT"/>
+            <column name="leg_ent_org_reg_charity_no" type="TEXT"/>
+            <column name="leg_ent_address_1" type="TEXT"/>
+            <column name="leg_ent_address_2" type="TEXT"/>
+            <column name="leg_ent_address_3" type="TEXT"/>
+            <column name="leg_ent_address_4" type="TEXT"/>
+            <column name="leg_ent_address_5" type="TEXT"/>
+            <column name="leg_ent_post_code" type="TEXT"/>
+            <column name="leg_ent_contact_home" type="TEXT"/>
+            <column name="leg_ent_contact_work" type="TEXT"/>
+            <column name="leg_ent_contact_mobile" type="TEXT"/>
+            <column name="leg_ent_contact_primary_email" type="TEXT"/>
+            <column name="leg_ent_contact_secondary_email" type="TEXT"/>
+            <column name="leg_ent_contact_fax" type="TEXT"/>
+            <column name="title" type="TEXT"/>
+            <column name="middle_name" type="TEXT"/>
+            <column name="nationality_id" type="TEXT"/>
+            <column name="nationality_code" type="TEXT"/>
+            <column name="additional_nationality_id" type="TEXT"/>
+            <column name="additional_nationality_code" type="TEXT"/>
+            <column name="disability_status" type="TEXT"/>
+            <column name="ethnicity_id" type="TEXT"/>
+            <column name="ethnicity" type="TEXT"/>
+            <column name="interpreter_language_needs" type="TEXT"/>
+            <column name="documentation_language_needs" type="TEXT"/>
+            <column name="national_insurance_number" type="TEXT"/>
+            <column name="occupation" type="TEXT"/>
+            <column name="occupation_code" type="TEXT"/>
+            <column name="specific_requirements" type="TEXT"/>
+            <column name="defendant_address_1" type="TEXT"/>
+            <column name="defendant_address_2" type="TEXT"/>
+            <column name="defendant_address_3" type="TEXT"/>
+            <column name="defendant_address_4" type="TEXT"/>
+            <column name="defendant_address_5" type="TEXT"/>
+            <column name="defendant_post_code" type="TEXT"/>
+            <column name="defendant_contact_home" type="TEXT"/>
+            <column name="defendant_contact_work" type="TEXT"/>
+            <column name="defendant_contact_mobile" type="TEXT"/>
+            <column name="defendant_contact_primary_email" type="TEXT"/>
+            <column name="defendant_contact_secondary_email" type="TEXT"/>
+            <column name="defendant_contact_fax" type="TEXT"/>
+            <column name="prosecution_case_id" type="UUID"/>
+            <column name="number_of_previous_convictions_cited" type="INT"/>
+            <column name="prosecution_authority_reference" type="TEXT"/>
+            <column name="bail_status" type="TEXT"/>
+            <column name="custody_time_limit" type="DATETIME"/>
+            <column name="perceived_birth_year" type="INT"/>
+            <column name="observed_ethnicity_id" type="UUID"/>
+            <column name="observed_ethnicity_code" type="TEXT"/>
+            <column name="self_defined_ethnicity_id" type="UUID"/>
+            <column name="self_defined_ethnicity_code" type="TEXT"/>
+            <column name="driver_number" type="TEXT"/>
+            <column name="p_nci_id" type="TEXT"/>
+            <column name="arrest_summons_number" type="TEXT"/>
+            <column name="aliases" type="TEXT"/>
+            <column name="employer_payroll_reference" type="TEXT"/>
+        </addColumn>
+        <addPrimaryKey columnNames="id" constraintName="pk_defendant" tableName="ha_defendant"/>
+        <addForeignKeyConstraint baseColumnNames="legal_case_id" baseTableName="ha_defendant"
+                                 constraintName="fk_defendant_case" referencedColumnNames="id"
+                                 referencedTableName="ha_case"/>
+
+
+        <!-- Offence table changes -->
+        <delete tableName="ha_offence"/>
+        <dropAllForeignKeyConstraints baseTableName="ha_offence"/>
+        <dropPrimaryKey tableName="ha_offence" constraintName="pk_offence"/>
+        <dropColumn tableName="ha_offence" columnName="hearing_id"/>
+        <dropColumn tableName="ha_offence" columnName="case_id"/>
+        <addColumn tableName="ha_offence">
+            <column name="offence_definition_id" type="UUID"/>
+            <column name="title_welsh" type="TEXT" />
+            <column name="legislation_welsh" type="TEXT" />
+            <column name="wording_welsh" type="TEXT"/>
+            <column name="statement_of_facts" type="TEXT"/>
+            <column name="statement_of_facts_welsh" type="TEXT"/>
+            <column name="arrest_date" type="DATETIME"/>
+            <column name="charge_date" type="DATETIME"/>
+            <column name="order_index" type="INT"/>
+            <column name="notified_plea_date" type="DATETIME"/>
+            <column name="notified_plea_value" type="TEXT"/>
+            <column name="indicated_plea_date" type="DATETIME"/>
+            <column name="indicated_plea_value" type="TEXT"/>
+            <column name="indicated_plea_source" type="TEXT"/>
+            <column name="court_decision" type="TEXT"/>
+            <column name="prosecution_representation" type="TEXT"/>
+            <column name="defendant_representation" type="TEXT"/>
+            <column name="indication_of_sentence" type="TEXT"/>
+            <column name="originating_hearing_id" type="UUID"/>
+            <column name="delegated_powers_user_id" type="UUID"/>
+            <column name="delegated_powers_first_name" type="TEXT"/>
+            <column name="delegated_powers_last_name" type="TEXT"/>
+            <column name="vehicle_registration" type="TEXT"/>
+            <column name="prosecution_facts" type="TEXT"/>
+            <column name="witness_statement" type="TEXT"/>
+            <column name="mitigation" type="TEXT"/>
+            <column name="alcohol_reading_amount" type="TEXT"/>
+            <column name="alcohol_reading_method" type="TEXT"/>
+        </addColumn>
+        <addPrimaryKey columnNames="id" constraintName="pk_offence" tableName="ha_offence"/>
+        <addForeignKeyConstraint baseColumnNames="defendant_id" baseTableName="ha_offence"
+                                 constraintName="fk_offence_defendant" referencedColumnNames="id"
+                                 referencedTableName="ha_defendant"/>
+
+        <!-- AssociatedPerson table changes -->
+        <createTable tableName="associated_person">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defendant_id" type="UUID"/>
+            <column name="title" type="TEXT"/>
+            <column name="first_name" type="TEXT"/>
+            <column name="middle_name" type="TEXT"/>
+            <column name="last_name" type="TEXT"/>
+            <column name="date_of_birth" type="DATETIME"/>
+            <column name="nationality_id" type="UUID"/>
+            <column name="nationality_code" type="TEXT"/>
+            <column name="additional_nationality_id" type="UUID"/>
+            <column name="additional_nationality_code" type="TEXT"/>
+            <column name="disability_status" type="TEXT"/>
+            <column name="ethnicity_id" type="UUID"/>
+            <column name="ethnicity" type="TEXT"/>
+            <column name="gender" type="TEXT"/>
+            <column name="interpreter_language_needs" type="TEXT"/>
+            <column name="documentation_language_needs" type="TEXT"/>
+            <column name="national_insurance_number" type="TEXT"/>
+            <column name="occupation" type="TEXT"/>
+            <column name="occupation_code" type="TEXT"/>
+            <column name="specific_requirements" type="TEXT"/>
+            <column name="address_1" type="TEXT"/>
+            <column name="address_2" type="TEXT"/>
+            <column name="address_3" type="TEXT"/>
+            <column name="address_4" type="TEXT"/>
+            <column name="address_5" type="TEXT"/>
+            <column name="post_code" type="TEXT"/>
+            <column name="contact_home" type="TEXT"/>
+            <column name="contact_work" type="TEXT"/>
+            <column name="contact_mobile" type="TEXT"/>
+            <column name="contact_primary_email" type="TEXT"/>
+            <column name="contact_secondary_email" type="TEXT"/>
+            <column name="contact_fax" type="TEXT"/>
+            <column name="role" type="TEXT"/>
+        </createTable>
+        <addPrimaryKey columnNames="id" constraintName="pk_associated_person" tableName="associated_person"/>
+        <addForeignKeyConstraint baseColumnNames="defendant_id" baseTableName="associated_person"
+                                 constraintName="fk_associated_person_defendant" referencedColumnNames="id"
+                                 referencedTableName="ha_defendant"/>
+
+        <!-- DefendantRefferalReason table changes -->
+        <createTable tableName="defendant_referral_reason">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defendant_id" type="UUID"/>
+            <column name="description" type="TEXT"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="pk_defendant_referral_reason" tableName="defendant_referral_reason"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="defendant_referral_reason"
+                                 constraintName="fk_defendant_referral_reason_hearing" referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+    </changeSet>
+</databaseChangeLog>

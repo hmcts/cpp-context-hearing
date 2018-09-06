@@ -14,6 +14,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.caseDefendantDetailsChangedCommandTemplate;
 
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -35,6 +36,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 @SuppressWarnings("unchecked")
 @RunWith(MockitoJUnitRunner.class)
@@ -61,23 +63,8 @@ public class CaseDefendantDetailsChangeEventProcessorTest {
     @Test
     public void processPublicCaseDefendantChanged() {
 
-        CaseDefendantDetails defendantDetailsChangedPublicEvent = CaseDefendantDetails.builder()
-                .withCaseId(randomUUID())
-                .addDefendant(uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
-                        .withId(randomUUID())
-                        .withPerson(Person.builder()
-                                .withId(randomUUID())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                                .withNationality(STRING.next())
-                                .withGender(STRING.next())
-                                .withAddress(generateAddress())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
-                        .withBailStatus(STRING.next())
-                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                        .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(uk.gov.moj.cpp.hearing.command.defendant.Interpreter.builder(STRING.next())))
-                .build();
+
+        CaseDefendantDetails defendantDetailsChangedPublicEvent = caseDefendantDetailsChangedCommandTemplate(randomUUID(), randomUUID());
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.case-defendant-changed"),
                 objectToJsonObjectConverter.convert(defendantDetailsChangedPublicEvent));
@@ -100,25 +87,7 @@ public class CaseDefendantDetailsChangeEventProcessorTest {
     @Test
     public void enrichDefendantDetails() {
 
-        final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings = CaseDefendantDetailsWithHearings.builder()
-                .withCaseId(randomUUID())
-                .withDefendant(uk.gov.moj.cpp.hearing.command.defendant.Defendant.builder()
-                        .withId(randomUUID())
-                        .withPerson(Person.builder()
-                                .withId(randomUUID())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                                .withNationality(STRING.next())
-                                .withGender(STRING.next())
-                                .withAddress(generateAddress())
-                                .withDateOfBirth(PAST_LOCAL_DATE.next()))
-                        .withBailStatus(STRING.next())
-                        .withCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                        .withDefenceOrganisation(STRING.next())
-                        .withInterpreter(uk.gov.moj.cpp.hearing.command.defendant.Interpreter.builder(STRING.next()))
-                )
-                .withHearingIds(Arrays.asList(randomUUID(), randomUUID()))
-                .build();
+        CaseDefendantDetails caseDefendantDetailsWithHearings = caseDefendantDetailsChangedCommandTemplate(randomUUID(), randomUUID());
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-details-enriched-with-hearing-ids"), objectToJsonObjectConverter.convert(caseDefendantDetailsWithHearings));
 
@@ -135,14 +104,5 @@ public class CaseDefendantDetailsChangeEventProcessorTest {
                         )
                 )
         );
-    }
-
-    private uk.gov.moj.cpp.hearing.command.defendant.Address.Builder generateAddress() {
-        return uk.gov.moj.cpp.hearing.command.defendant.Address.address()
-                .withAddress1(STRING.next())
-                .withAddress2(STRING.next())
-                .withAddress3(STRING.next())
-                .withAddress4(STRING.next())
-                .withPostcode(STRING.next());
     }
 }

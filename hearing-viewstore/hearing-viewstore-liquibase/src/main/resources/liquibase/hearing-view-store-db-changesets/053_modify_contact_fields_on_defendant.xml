@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="53" author="hearing" logicalFilePath="053_modify_contact_fields_on_defendant.xml">
+
+        <addColumn tableName="ha_defendant">
+            <column name="contact_home" type="TEXT"/>
+        </addColumn>
+
+        <addColumn tableName="ha_defendant">
+            <column name="contact_work" type="TEXT"/>
+        </addColumn>
+
+        <addColumn tableName="ha_defendant">
+            <column name="contact_mobile" type="TEXT"/>
+        </addColumn>
+
+        <addColumn tableName="ha_defendant">
+            <column name="contact_primary_email" type="TEXT"/>
+        </addColumn>
+
+        <addColumn tableName="ha_defendant">
+            <column name="contact_secondary_email" type="TEXT"/>
+        </addColumn>
+
+        <addColumn tableName="ha_defendant">
+            <column name="contact_fax" type="TEXT"/>
+        </addColumn>
+
+        <dropColumn tableName="ha_defendant" columnName="work_telephone"/>
+        <dropColumn tableName="ha_defendant" columnName="home_telephone"/>
+        <dropColumn tableName="ha_defendant" columnName="mobile_telephone"/>
+        <dropColumn tableName="ha_defendant" columnName="fax"/>
+        <dropColumn tableName="ha_defendant" columnName="email"/>
+
+    </changeSet>
+
+</databaseChangeLog>

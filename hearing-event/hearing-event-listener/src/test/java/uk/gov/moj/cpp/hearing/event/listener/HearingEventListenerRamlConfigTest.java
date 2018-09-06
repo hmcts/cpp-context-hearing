@@ -79,8 +79,7 @@ public class HearingEventListenerRamlConfigTest {
                 NowsGeneratedEventListener.class,
                 CaseDefendantDetailsChangedEventListener.class,
                 CaseDefendantOffencesChangedEventListener.class,
-                AttendeeDeletedEventListener.class,
-                ChangeHearingDetailCommandHandler.class,
+                ChangeHearingDetailEventListener.class,
                 CaseDefendantOffencesChangedEventListener.class,
                 SubscriptionsUploadEventListener.class));
 

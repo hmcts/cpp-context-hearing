@@ -15,10 +15,6 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.events.inherited-plea.json
             example: !include json/hearing.events.inherited-plea.json
 
-        application/vnd.hearing.events.found-witnesses-for-hearing-to-inherit+json:
-            schema: !include json/schema/hearing.events.found-witnesses-for-hearing-to-inherit.json
-            example: !include json/hearing.events.found-witnesses-for-hearing-to-inherit.json
-
 # Update Plea
         application/vnd.hearing.hearing-offence-plea-updated+json:
             schema: !include json/schema/hearing.hearing-offence-plea-updated.json
@@ -48,10 +44,6 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.newdefence-counsel-added.json
             example: !include json/hearing.newdefence-counsel-added.json
 
-# Add hearing witnesses
-        application/vnd.hearing.events.witness-added+json:
-            schema: !include json/schema/hearing.events.witness-added.json
-            example: !include json/hearing.events.witness-added.json
 
 # Share Results
         application/vnd.hearing.draft-result-saved+json:
@@ -97,11 +89,6 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.events.nows-requested+json:
             schema: !include json/schema/hearing.events.nows-requested.json
             example: !include json/hearing.events.nows-requested.json
-
-# Attendees
-        application/vnd.hearing.events.attendee-deleted+json:
-            schema: !include json/schema/hearing.events.attendee-deleted.json
-            example: !include json/hearing.events.attendee-deleted.json
 
 # Event Definitions
         application/vnd.hearing.hearing-event-definitions-created+json:

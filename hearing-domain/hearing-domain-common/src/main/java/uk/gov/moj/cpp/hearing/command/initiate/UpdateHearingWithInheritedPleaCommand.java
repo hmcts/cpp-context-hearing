@@ -1,14 +1,15 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.PleaValue;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public final class UpdateHearingWithInheritedPleaCommand implements Serializable {
+public class UpdateHearingWithInheritedPleaCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -18,7 +19,11 @@ public final class UpdateHearingWithInheritedPleaCommand implements Serializable
     private UUID hearingId;
     private UUID originHearingId;
     private LocalDate pleaDate;
-    private String value;
+    private PleaValue value;
+    private DelegatedPowers delegatedPowers;
+
+    public UpdateHearingWithInheritedPleaCommand() {
+    }
 
     @JsonCreator
     public UpdateHearingWithInheritedPleaCommand(@JsonProperty("offenceId") UUID offenceId,
@@ -27,7 +32,8 @@ public final class UpdateHearingWithInheritedPleaCommand implements Serializable
                                                  @JsonProperty("hearingId") UUID hearingId,
                                                  @JsonProperty("originHearingId") UUID originHearingId,
                                                  @JsonProperty("pleaDate") LocalDate pleaDate,
-                                                 @JsonProperty("value") String value) {
+                                                 @JsonProperty("value") PleaValue value,
+                                                 @JsonProperty("delegatedPowers") DelegatedPowers delegatedPowers) {
         this.offenceId = offenceId;
         this.caseId = caseId;
         this.defendantId = defendantId;
@@ -35,17 +41,7 @@ public final class UpdateHearingWithInheritedPleaCommand implements Serializable
         this.originHearingId = originHearingId;
         this.pleaDate = pleaDate;
         this.value = value;
-    }
-    
-    @JsonIgnore
-    private UpdateHearingWithInheritedPleaCommand(final Builder builder) {
-        this.offenceId = builder.offenceId;
-        this.caseId = builder.caseId;
-        this.defendantId = builder.defendantId;
-        this.hearingId = builder.hearingId;
-        this.originHearingId = builder.originHearingId;
-        this.pleaDate = builder.pleaDate;
-        this.value = builder.value;
+        this.delegatedPowers = delegatedPowers;
     }
 
     public UUID getOffenceId() {
@@ -72,61 +68,55 @@ public final class UpdateHearingWithInheritedPleaCommand implements Serializable
         return pleaDate;
     }
 
-    public String getValue() {
+    public PleaValue getValue() {
         return value;
     }
-    
-    public static Builder builder() {
-        return new Builder();
+
+    public DelegatedPowers getDelegatedPowers() {
+        return delegatedPowers;
     }
-    
-    public static final class Builder {
-        
-        private UUID offenceId;
-        private UUID caseId;
-        private UUID defendantId;
-        private UUID hearingId;
-        private UUID originHearingId;
-        private LocalDate pleaDate;
-        private String value;
-        
-        public Builder withOffenceId(final UUID offenceId) {
-            this.offenceId = offenceId;
-            return this;
-        }
-        
-        public Builder withCaseId(final UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-        
-        public Builder withDefendantId(final UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-        
-        public Builder withHearingId(final UUID hearingId) {
-            this.hearingId = hearingId;
-            return this;
-        }
-        
-        public Builder withOriginHearingId(final UUID originHearingId) {
-            this.originHearingId = originHearingId;
-            return this;
-        }
-        
-        public Builder withPleaDate(final LocalDate pleaDate) {
-            this.pleaDate = pleaDate;
-            return this;
-        }
-        
-        public Builder withValue(final String value) {
-            this.value = value;
-            return this;
-        }
-        
-        public UpdateHearingWithInheritedPleaCommand build() {
-            return new UpdateHearingWithInheritedPleaCommand(this);
-        }
+
+    public UpdateHearingWithInheritedPleaCommand setOffenceId(UUID offenceId) {
+        this.offenceId = offenceId;
+        return this;
+    }
+
+    public UpdateHearingWithInheritedPleaCommand setCaseId(UUID caseId) {
+        this.caseId = caseId;
+        return this;
+    }
+
+    public UpdateHearingWithInheritedPleaCommand setDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
+        return this;
+    }
+
+    public UpdateHearingWithInheritedPleaCommand setHearingId(UUID hearingId) {
+        this.hearingId = hearingId;
+        return this;
+    }
+
+    public UpdateHearingWithInheritedPleaCommand setOriginHearingId(UUID originHearingId) {
+        this.originHearingId = originHearingId;
+        return this;
+    }
+
+    public UpdateHearingWithInheritedPleaCommand setPleaDate(LocalDate pleaDate) {
+        this.pleaDate = pleaDate;
+        return this;
+    }
+
+    public UpdateHearingWithInheritedPleaCommand setValue(PleaValue value) {
+        this.value = value;
+        return this;
+    }
+
+    public UpdateHearingWithInheritedPleaCommand setDelegatedPowers(DelegatedPowers delegatedPowers) {
+        this.delegatedPowers = delegatedPowers;
+        return this;
+    }
+
+    public static UpdateHearingWithInheritedPleaCommand updateHearingWithInheritedPleaCommand(){
+        return new UpdateHearingWithInheritedPleaCommand();
     }
 }

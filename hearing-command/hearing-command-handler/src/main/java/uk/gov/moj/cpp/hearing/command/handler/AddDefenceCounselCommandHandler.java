@@ -7,7 +7,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class AddDefenceCounselCommandHandler extends AbstractCommandHandler {
 
         final AddDefenceCounselCommand addDefenceCounselCommand = convertToObject(envelope, AddDefenceCounselCommand.class);
 
-        aggregate(NewModelHearingAggregate.class, addDefenceCounselCommand.getHearingId(), envelope,
+        aggregate(HearingAggregate.class, addDefenceCounselCommand.getHearingId(), envelope,
                 (hearingAggregate) -> hearingAggregate.addDefenceCounsel(addDefenceCounselCommand));
     }
 }

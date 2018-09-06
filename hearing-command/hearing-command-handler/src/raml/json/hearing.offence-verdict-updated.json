@@ -1,28 +1,16 @@
 {
-  "hearingId": "15fc69ca-f070-4324-96f5-4995857adbdb",
-  "caseId": "bf537ed1-4648-4a68-8429-96a69d5db49d",
-  "defendants": [
-    {
-      "id": "a6a5a1fd-67c8-42ee-9995-a10165ab3dbe",
-      "personId": "d3a0d0f9-78b0-47c6-a362-5febf0485d0f",
-      "offences": [
-        {
-          "id": "6da4527f-474a-47a8-82c5-21ea607aa9c3",
-          "verdict": {
-            "id": "0baecac5-222b-402d-9047-84803679edae",
-            "value": {
-              "id": "0baecac5-222b-402d-9047-84803679edab",
-              "category": "GUILTY",
-              "code": "A1",
-              "description": "Guilty By Jury On Judges Direction"
-            },
-        "verdictDate": "2017-02-20",
-            "numberOfJurors": 10,
-            "numberOfSplitJurors": 2,
-            "unanimous": false
-          }
-        }
-      ]
-    }
-  ]
+  "caseId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "hearingId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "offenceId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "verdictTypeId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "category": "Guilty",
+  "categoryType": "GUILTY",
+  "offenceDefinitionId": "e085c38e-dc4a-11e7-9296-cec278b6b50a",
+  "title": "Guilty as sin",
+  "offenceCode":"GA96011",
+  "legislation":"Contrary to Byelaws 3(10) and 2(3) of the Gatwick Airport - London Byelaws 1996 and sections 63 and 64 of the Airports Act 1986.",
+  "numberOfJurors": 12,
+  "numberOfSplitJurors": 2,
+  "unanimous": false,
+  "verdictDate":"2017-02-20"
 }

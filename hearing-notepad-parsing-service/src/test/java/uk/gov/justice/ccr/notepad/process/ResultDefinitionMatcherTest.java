@@ -4,11 +4,18 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.CONTAINS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.EQUALS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.SHORT_CODE;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.UNKNOWN;
 
+import com.google.common.cache.LoadingCache;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.ccr.notepad.result.cache.CacheFactory;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
@@ -21,16 +28,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
-import com.google.common.cache.LoadingCache;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResultDefinitionMatcherTest {
@@ -254,25 +251,6 @@ public class ResultDefinitionMatcherTest {
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
                 , is(SHORT_CODE)
-        );
-    }
-   
-    @Ignore
-    //Ignoring test case as it test synonym contains processing and we uncommented due to some reason check with BA before uncommenting
-    public void match6() throws Exception {
-        List<Part> parts = new PartsResolver().getParts("res ord prd im su");
-        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
-
-
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
-
-        assertThat(
-                resultDefinitionMatchingOutput.getResultDefinition().getLabel()
-                , is("Restraining order for period")
-        );
-        assertThat(
-                resultDefinitionMatchingOutput.getMatchingType()
-                , is(CONTAINS)
         );
     }
 

@@ -856,7 +856,7 @@
         "templateName": "Single template",
         "rank": 1,
         "staticText": "Static Text N/A",
-        "staticTextWelsh": "Welsh Static Text N/A",
+        "welshStaticText": "Welsh Static Text N/A",
         "priority": "30",
         "jurisdiction": "B"
       },
@@ -866,7 +866,7 @@
         "templateName": "Single template",
         "rank": 3,
         "staticText": "Static Text N/A",
-        "staticTextWelsh": "Welsh Static Text N/A",
+        "welshStaticText": "Welsh Static Text N/A",
         "priority": "0",
         "jurisdiction": "B"
       },
@@ -876,7 +876,7 @@
         "templateName": "Single template",
         "rank": 6,
         "staticText": "Static Text N/A",
-        "staticTextWelsh": "Welsh Static Text N/A",
+        "welshStaticText": "Welsh Static Text N/A",
         "priority": "0",
         "jurisdiction": "B"
       }

@@ -1,4 +1,6 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.save-nows-variants.json",
   "type": "object",
   "definitions": {
     "uuid": {
@@ -75,7 +77,6 @@
       }
     }
   },
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "additionalProperties": false,
   "properties": {
     "hearingId": {

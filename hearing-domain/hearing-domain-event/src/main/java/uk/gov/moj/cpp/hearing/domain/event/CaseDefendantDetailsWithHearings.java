@@ -10,18 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
-
 @Event("hearing.update-case-defendant-details-enriched-with-hearing-ids")
 public class CaseDefendantDetailsWithHearings implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID caseId;
+    private UUID caseId;
 
-    private final Defendant defendant;
+    private Defendant defendant;
 
-    private final List<UUID> hearingIds;
+    private List<UUID> hearingIds;
+
+    public CaseDefendantDetailsWithHearings() {
+    }
 
     @JsonCreator
     private CaseDefendantDetailsWithHearings(
@@ -32,10 +33,6 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
         this.caseId = caseId;
         this.defendant = defendant;
         this.hearingIds = new ArrayList<>(hearingIds);
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public UUID getCaseId() {
@@ -50,34 +47,22 @@ public class CaseDefendantDetailsWithHearings implements Serializable {
         return new ArrayList<>(hearingIds);
     }
 
-    public static class Builder {
+    public CaseDefendantDetailsWithHearings setCaseId(UUID caseId) {
+        this.caseId = caseId;
+        return this;
+    }
 
-        private UUID caseId;
+    public CaseDefendantDetailsWithHearings setDefendant(Defendant defendant) {
+        this.defendant = defendant;
+        return this;
+    }
 
-        private Defendant.Builder defendant;
+    public CaseDefendantDetailsWithHearings setHearingIds(List<UUID> hearingIds) {
+        this.hearingIds = hearingIds;
+        return this;
+    }
 
-        private List<UUID> hearingIds;
-
-        private Builder() {
-        }
-
-        public Builder withCaseId(UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withDefendant(Defendant.Builder defendant) {
-            this.defendant = defendant;
-            return this;
-        }
-
-        public Builder withHearingIds(List<UUID> hearingIds) {
-            this.hearingIds = new ArrayList<>(hearingIds);
-            return this;
-        }
-
-        public CaseDefendantDetailsWithHearings build() {
-            return new CaseDefendantDetailsWithHearings(caseId, ofNullable(defendant).map(Defendant.Builder::build).orElse(null), hearingIds);
-        }
+    public static CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings() {
+        return new CaseDefendantDetailsWithHearings();
     }
 }

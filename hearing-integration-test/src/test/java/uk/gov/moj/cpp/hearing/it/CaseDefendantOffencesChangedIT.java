@@ -1,30 +1,24 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static org.hamcrest.CoreMatchers.hasItems;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
-import static uk.gov.moj.cpp.hearing.it.UseCases.addOffence;
-import static uk.gov.moj.cpp.hearing.it.UseCases.deleteOffence;
-import static uk.gov.moj.cpp.hearing.it.UseCases.updateOffence;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.offenceTemplate;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.caseDefendantOffencesChangedTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.offencesChangedArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-
-import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
-import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Case;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Defendant;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.Offence;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 
 import org.junit.Test;
+import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.Offence;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 @SuppressWarnings("unchecked")
 public class CaseDefendantOffencesChangedIT extends AbstractIT {
@@ -32,109 +26,106 @@ public class CaseDefendantOffencesChangedIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_addOffenceToExistingHearing() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
-        );
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = addOffence(hearingOne.getHearingId(), command -> {
-            command.getAddedOffences().forEach(addedOffence -> {
-                addedOffence
-                        .setCaseId(hearingOne.getFirstCaseId())
-                        .setDefendantId(hearingOne.getFirstDefendantId());
-            });
-        });
-
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
-                isBean(HearingDetailsResponse.class)
-                        .with(HearingDetailsResponse::getHearingId, is(hearingOne.getHearingId().toString()))
-                        .with(HearingDetailsResponse::getCases, first(isBean(Case.class)
-                                        .with(Case::getCaseId, is(hearingOne.getFirstCaseId().toString()))
-                                        .with(Case::getCaseUrn, is(hearingOne.getFirstCaseUrn()))
-                                        .with(Case::getDefendants, first(isBean(Defendant.class)
-                                                        .with(Defendant::getDefendantId, is(hearingOne.getFirstDefendantId().toString()))
-                                                        .with(d -> d.getOffences().size(), is(2))
-                                                        .with(d -> d.getOffences().stream().map(Offence::getId).collect(Collectors.toSet()),
-                                                                hasItems(
-                                                                        caseDefendantOffencesChanged.getAddedOffences().get(0).getOffences().get(0).getId().toString(),
-                                                                        hearingOne.getFirstOffenceIdForFirstDefendant().toString())
-                                                        )
-
-                                                )
-                                        )
-                                )
+        final CommandHelpers.CaseDefendantOffencesChangedCommandHelper offenceUpdates = h(UseCases.updateOffences(
+                caseDefendantOffencesChangedTemplate(offencesChangedArguments(
+                        hearingOne.getFirstCase().getId(),
+                        hearingOne.getFirstDefendantForFirstCase().getId()
                         )
-        );
+                                .setOffencesToAdd(singletonList(randomUUID()))
+                )
+        ));
 
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceIdForFirstDefendant()))
+                                        ))
+                                        .with(Defendant::getOffences, second(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceUpdates.getFirstOffenceFromAddedOffences().getId()))
+                                                .with(Offence::getOffenceCode, is(offenceUpdates.getFirstOffenceFromAddedOffences().getOffenceCode()))
+                                                .with(Offence::getWording, is(offenceUpdates.getFirstOffenceFromAddedOffences().getWording()))
+                                                .with(Offence::getStartDate, is(offenceUpdates.getFirstOffenceFromAddedOffences().getStartDate()))
+                                                .with(Offence::getEndDate, is(offenceUpdates.getFirstOffenceFromAddedOffences().getEndDate()))
+                                                .with(Offence::getCount, is(offenceUpdates.getFirstOffenceFromAddedOffences().getCount()))
+                                                .with(Offence::getConvictionDate, is(offenceUpdates.getFirstOffenceFromAddedOffences().getConvictionDate()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
     }
 
     @Test
     public void caseDefendantOffencesChanged_updateExistingOffence() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
-        );
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        final CaseDefendantOffencesChangedCommand caseDefendantOffencesChanged = updateOffence(hearingOne.getHearingId(), command -> {
-            command.getUpdatedOffences().forEach(updatedOffence -> {
-                updatedOffence.getOffences()
-                        .forEach(bdo -> bdo.setId(hearingOne.getFirstOffenceIdForFirstDefendant()));
-            });
-        });
-
-        final BaseDefendantOffence updatedOffence0 = caseDefendantOffencesChanged.getUpdatedOffences().get(0).getOffences().get(0);
-
-        getHearingPollForMatch(hearingOne.getHearingId(), 30,
-                isBean(HearingDetailsResponse.class)
-                        .with(HearingDetailsResponse::getHearingId, is(hearingOne.getHearingId().toString()))
-                        .with(HearingDetailsResponse::getCases, first(isBean(Case.class)
-                                        .with(Case::getCaseId, is(hearingOne.getFirstCaseId().toString()))
-                                        .with(Case::getCaseUrn, is(hearingOne.getFirstCaseUrn()))
-                                        .with(Case::getDefendants, first(isBean(Defendant.class)
-                                                .with(Defendant::getDefendantId, is(hearingOne.getFirstDefendantId().toString()))
-                                                .with(Defendant::getOffences, first(isBean(Offence.class)
-                                                        .with(Offence::getId, is(updatedOffence0.getId().toString()))
-                                                        .with(Offence::getConvictionDate, is(updatedOffence0.getConvictionDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
-                                                        .with(Offence::getCount, is(updatedOffence0.getCount()))
-                                                        .with(Offence::getWording, is(updatedOffence0.getWording()))
-                                                )))
-                                        )
-                                )
+        final CommandHelpers.CaseDefendantOffencesChangedCommandHelper offenceUpdates = h(UseCases.updateOffences(
+                caseDefendantOffencesChangedTemplate(offencesChangedArguments(
+                        hearingOne.getFirstCase().getId(),
+                        hearingOne.getFirstDefendantForFirstCase().getId()
                         )
-        );
+                                .setOffencesToUpdate(singletonList(hearingOne.getFirstOffenceIdForFirstDefendant()))
+                )
 
+        ));
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getId()))
+                                                .with(Offence::getOffenceCode, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getOffenceCode()))
+                                                .with(Offence::getWording, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getWording()))
+                                                .with(Offence::getStartDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getStartDate()))
+                                                .with(Offence::getEndDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getEndDate()))
+                                                .with(Offence::getCount, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getCount()))
+                                                .with(Offence::getConvictionDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getConvictionDate()))
+
+                                        ))
+                                ))
+                        ))
+                )
+        );
     }
 
     @Test
     public void caseDefendantOffencesChanged_deleteExistingOffence() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-                    i.getHearing().getDefendants().get(0).getOffences().add(
-                            offenceTemplate(i.getCases().get(0).getCaseId())
-                    );
-                }))
-        );
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        deleteOffence(hearingOne.getHearingId(), command -> {
-            command.getDeletedOffences().forEach(deletedOffence -> {
-                deletedOffence.setOffences(Arrays.asList(hearingOne.getFirstOffenceIdForFirstDefendant()));
-            });
-        });
-
-        getHearingPollForMatch(hearingOne.getHearingId(), 30,
-                isBean(HearingDetailsResponse.class)
-                        .with(HearingDetailsResponse::getHearingId, is(hearingOne.getHearingId().toString()))
-                        .with(HearingDetailsResponse::getCases, first(isBean(Case.class)
-                                        .with(Case::getCaseId, is(hearingOne.getFirstCaseId().toString()))
-                                        .with(Case::getCaseUrn, is(hearingOne.getFirstCaseUrn()))
-                                        .with(Case::getDefendants, first(isBean(Defendant.class)
-                                                .with(Defendant::getDefendantId, is(hearingOne.getFirstDefendantId().toString()))
-                                                .with(Defendant::getOffences, first(isBean(Offence.class)
-                                                        .with(Offence::getId, is(hearingOne.getSecondOffenceIdForFirstDefendant().toString()))
-                                                )))
-                                        )
-                                )
+        h(UseCases.updateOffences(
+                caseDefendantOffencesChangedTemplate(offencesChangedArguments(
+                        hearingOne.getFirstCase().getId(),
+                        hearingOne.getFirstDefendantForFirstCase().getId()
                         )
+                                .setOffenceToDelete(singletonList(hearingOne.getFirstOffenceIdForFirstDefendant()))
+                )
+
+        ));
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, is(emptyList()))
+                                ))
+                        ))
+                )
         );
     }
 }

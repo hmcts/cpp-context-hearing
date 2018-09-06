@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.event;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ public class FoundPleaForHearingToInherit implements Serializable {
     private UUID originHearingId;
     private LocalDate pleaDate;
     private String value;
+    private DelegatedPowers delegatedPowers;
 
     @JsonCreator
     public FoundPleaForHearingToInherit(@JsonProperty("offenceId") UUID offenceId,
@@ -28,7 +30,8 @@ public class FoundPleaForHearingToInherit implements Serializable {
                                         @JsonProperty("hearingId") UUID hearingId,
                                         @JsonProperty("originHearingId") UUID originHearingId,
                                         @JsonProperty("pleaDate") LocalDate pleaDate,
-                                        @JsonProperty("value") String value) {
+                                        @JsonProperty("value") String value,
+                                        @JsonProperty("delegatedPowers") DelegatedPowers delegatedPowers) {
         this.offenceId = offenceId;
         this.caseId = caseId;
         this.defendantId = defendantId;
@@ -36,6 +39,7 @@ public class FoundPleaForHearingToInherit implements Serializable {
         this.originHearingId = originHearingId;
         this.pleaDate = pleaDate;
         this.value = value;
+        this.delegatedPowers = delegatedPowers;
     }
 
     public UUID getOffenceId() {
@@ -64,5 +68,9 @@ public class FoundPleaForHearingToInherit implements Serializable {
 
     public String getValue() {
         return value;
+    }
+
+    public DelegatedPowers getDelegatedPowers() {
+        return delegatedPowers;
     }
 }

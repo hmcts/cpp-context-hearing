@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.defendant-offences-changed.json",
   "type": "object",
   "properties": {
     "modifiedDate": {
@@ -46,7 +47,6 @@
             },
             "offences": {
               "type": "array",
-              "minItems": 1,
               "items": {
                 "$ref": "#/definitions/uuidPattern"
               }
