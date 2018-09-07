@@ -33,6 +33,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
+@SuppressWarnings("squid:S1188")
 @Named("readStoreResultLoader")
 public class ReadStoreResultLoader implements ResultLoader {
 

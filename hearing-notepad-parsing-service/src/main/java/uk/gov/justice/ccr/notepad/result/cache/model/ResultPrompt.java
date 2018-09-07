@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toCollection;
 
 import java.util.*;
 
+@SuppressWarnings({"squid:S00107"})
 public class ResultPrompt {
 
     private String id;

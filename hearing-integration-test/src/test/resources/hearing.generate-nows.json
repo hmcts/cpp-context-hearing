@@ -189,7 +189,7 @@
     "nows": [
       {
         "id": "NOW_ID",
-        "nowsTypeId" :"NOWTYPE_ID",
+        "nowsTypeId": "NOWTYPE_ID",
         "nowsTemplateName": "SingleTemplate",
         "defendantId": "DEFENDANT_ID",
         "materials": [
@@ -204,7 +204,6 @@
                     "label": "Imprisonment duration"
                   }
                 ]
-
               },
               {
                 "sharedResultId": "2079fde7-6dfc-4466-95df-36e584bbc3b0",
@@ -224,7 +223,6 @@
                   }
                 ]
               }
-
             ],
             "userGroups": [
               {
@@ -240,7 +238,7 @@
     ],
     "nowTypes": [
       {
-        "id" :"NOWTYPE_ID",
+        "id": "NOWTYPE_ID",
         "templateName": "SingleTemplate",
         "bilingualTemplateName": "bilingualTemplateName",
         "description": "Imprisonment Order",
@@ -248,12 +246,12 @@
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
         "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
-        "priority": "0.5 hours",
+        "priority": "30",
         "jurisdiction": "B",
         "remotePrintingRequired": true
       },
       {
-        "id" :"525807c9-004c-4b75-9cfd-29757fd4fd78",
+        "id": "525807c9-004c-4b75-9cfd-29757fd4fd78",
         "templateName": "NotSingleTemplate",
         "bilingualTemplateName": "bilingualTemplateName",
         "description": "Fine Order",
@@ -261,7 +259,7 @@
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
         "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
-        "priority": "1.0 hours",
+        "priority": "60",
         "jurisdiction": "B",
         "remotePrintingRequired": true
       }

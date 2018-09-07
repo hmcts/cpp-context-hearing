@@ -12,7 +12,7 @@
       "type": "string"
     },
     "status": {
-      "enum": ["requested","generated"]
+      "type": "string"
     }
   },
   "definitions": {}
