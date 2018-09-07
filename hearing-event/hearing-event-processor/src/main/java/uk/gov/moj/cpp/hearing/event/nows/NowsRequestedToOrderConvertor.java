@@ -42,12 +42,6 @@ public class NowsRequestedToOrderConvertor {
 
     }
 
-    /**
-     * Converts NowsRequested to Map<NowsDocumentOrder, NowsNotificationDocumentState>
-     *
-     * @param nowsRequested
-     * @return mapNowsDocumentOrder
-     */
     public static Map<NowsDocumentOrder, NowsNotificationDocumentState> convert(NowsRequested nowsRequested) {
         final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrders = new HashMap<>();
         nowsRequested.getHearing().getNows().forEach(selectedNow -> {
