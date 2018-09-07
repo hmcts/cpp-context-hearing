@@ -6,8 +6,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.SelfDescribing;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -20,9 +18,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+@SuppressWarnings({"squid:S1166", "squid:S1141", "squid:S00108", "squid:S2221", "squid:S00112", "squid:S2129"})
 public class BeanMatcher<T> extends BaseMatcher<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BeanMatcher.class.getName());
     private Class<T> clazz;
     private Error error;
     private String methodName;
@@ -76,54 +74,51 @@ public class BeanMatcher<T> extends BaseMatcher<T> {
     }
 
     private Object create(final Enhancer enhancer, final Class<?> theClazz) {
-
-        //try the default constructor first
-        final Class<?>[] noArgs = new Class[0];
-        final Constructor<?> constructor = createConstructor(theClazz, noArgs);
-        if (constructor != null && Modifier.isPublic(constructor.getModifiers())) {
-            return enhancer.create();
-        }
-        // try to find a non default constructor
-        final Optional<Constructor<?>> nonDefaultConstructor = Arrays.asList(theClazz.getConstructors()).stream()
-                .filter(c -> c.getParameterTypes().length > 0).findFirst();
-
-        final Class<?>[] paramTypes = nonDefaultConstructor.orElseThrow(
-                () -> new RuntimeException("failed to find non default constructor for " + theClazz.getCanonicalName())).getParameterTypes();
-
-        final Object[] parameters = new Object[paramTypes.length];
-        for (int done = 0; done < parameters.length; done++) {
-            parameters[done] = getExampleParamValue(paramTypes[done]);
-        }
-        return enhancer.create(paramTypes, parameters);
-    }
-
-    private Constructor<?> createConstructor(Class<?> theClazz, Class<?>[] noArgs) {
-        Constructor<?> constructor = null;
         try {
-            constructor = theClazz.getDeclaredConstructor(noArgs);
-        } catch (NoSuchMethodException e) {
-            LOGGER.error(e.getMessage(), e);
+            //try the default constructor first
+            final Class<?> noArgs[] = {};
+            Constructor<?> constructor = null;
+            try {
+                constructor = theClazz.getDeclaredConstructor(noArgs);
+            } catch (Exception ex) {
+            }
+            if (constructor != null && Modifier.isPublic(constructor.getModifiers())) {
+                return enhancer.create();
+            }
+            // try to find a non default constructor
+            final Optional<Constructor<?>> nonDefaultConstructor = Arrays.asList(theClazz.getConstructors()).stream()
+                    .filter(c -> c.getParameterTypes().length > 0).findFirst();
+
+            final Class<?>[] paramTypes = nonDefaultConstructor.orElseThrow(
+                    () -> new RuntimeException("failed to find non default constructor for " + theClazz.getCanonicalName())).getParameterTypes();
+
+            final Object[] parameters = new Object[paramTypes.length];
+            for (int done = 0; done < parameters.length; done++) {
+                parameters[done] = getExampleParamValue(paramTypes[done]);
+            }
+            return enhancer.create(paramTypes, parameters);
+        } catch (Exception ex) {
+            throw new RuntimeException("failed to create a " + theClazz.getCanonicalName(), ex);
         }
-        return constructor;
     }
 
     private Object getExampleParamValue(Class theClass) {
         if (Integer.TYPE == theClass) {
-            return 1;
+            return new Integer(1);
         } else if (Long.TYPE == theClass) {
-            return 1L;
+            return new Long(1);
         } else if (Boolean.TYPE == theClass) {
-            return Boolean.TRUE;
+            return new Boolean(true);
         } else if (Float.TYPE == theClass) {
-            return 1f;
+            return new Float(1);
         } else if (Double.TYPE == theClass) {
-            return 1d;
+            return new Double(1);
         } else if (Short.TYPE == theClass) {
-            return (short) 1;
+            return new Short((short) 1);
         } else if (Byte.TYPE == theClass) {
-            return (byte) 1;
+            return new Byte((byte) 1);
         } else if (Character.TYPE == theClass) {
-            return 'a';
+            return new Character('a');
         } else {
             return null;
         }
