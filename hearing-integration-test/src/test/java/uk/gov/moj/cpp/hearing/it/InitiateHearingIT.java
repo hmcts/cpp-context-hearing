@@ -42,6 +42,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListRes
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseHearing;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import java.time.ZoneId;
+import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class InitiateHearingIT extends AbstractIT {
@@ -101,31 +102,38 @@ public class InitiateHearingIT extends AbstractIT {
                                                         .with(Offence::getOrderIndex, is(offence.getOrderIndex()))
                                                         .with(Offence::getCount, is(offence.getCount()))))))))));
 
-        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
-                isBean(HearingListResponse.class)
-                        .with(HearingListResponse::getHearings, first(isBean(HearingListResponseHearing.class)
-                                .with(HearingListResponseHearing::getId, is(hearing.getId()))
-                                .with(HearingListResponseHearing::getJurisdictionType, is(hearing.getJurisdictionType()))
-                                .with(HearingListResponseHearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
-                                .with(HearingListResponseHearing::getHearingLanguage, is(HearingLanguage.ENGLISH.name()))
-                                .with(HearingListResponseHearing::getType, isBean(HearingType.class)
-                                        .with(HearingType::getId, is(hearing.getType().getId()))
-                                        .with(HearingType::getDescription, is(hearing.getType().getDescription())))
-                                .with(HearingListResponseHearing::getHearingDays, first(isBean(HearingDay.class)
-                                        .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
-                                        .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))
-                                        .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
-                                .with(HearingListResponseHearing::getProsecutionCases, first(isBean(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase.class)
-                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getId, is(prosecutionCase.getId()))
-                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
-                                                .with(ProsecutionCaseIdentifier::getCaseURN, is(prosecutionCaseIdentifier.getCaseURN()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(prosecutionCaseIdentifier.getProsecutionAuthorityCode()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(prosecutionCaseIdentifier.getProsecutionAuthorityId()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(prosecutionCaseIdentifier.getProsecutionAuthorityReference())))
-                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getDefendants, first(isBean(HearingListResponseDefendant.class)
-                                                .with(HearingListResponseDefendant::getId, is(defendant.getId()))
-                                                .with(HearingListResponseDefendant::getName, is(defendant.getPersonDefendant().getPersonDetails().getFirstName() + " " + defendant.getPersonDefendant().getPersonDetails().getMiddleName() + " " + defendant.getPersonDefendant().getPersonDetails().getLastName())))))))));
-
+try {
+    final UUID id = hearing.getCourtCentre().getId();
+    final UUID roomId = hearing.getCourtCentre().getRoomId();
+    final String utc = hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString();
+    Queries.getHearingsByDatePollForMatch(id, roomId, utc, "00:00", "23:59", 30,
+            isBean(HearingListResponse.class)
+                    .with(HearingListResponse::getHearings, first(isBean(HearingListResponseHearing.class)
+                            .with(HearingListResponseHearing::getId, is(hearing.getId()))
+                            .with(HearingListResponseHearing::getJurisdictionType, is(hearing.getJurisdictionType()))
+                            .with(HearingListResponseHearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
+                            .with(HearingListResponseHearing::getHearingLanguage, is(HearingLanguage.ENGLISH.name()))
+                            .with(HearingListResponseHearing::getType, isBean(HearingType.class)
+                                    .with(HearingType::getId, is(hearing.getType().getId()))
+                                    .with(HearingType::getDescription, is(hearing.getType().getDescription())))
+                            .with(HearingListResponseHearing::getHearingDays, first(isBean(HearingDay.class)
+                                    .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                    .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))
+                                    .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
+                            .with(HearingListResponseHearing::getProsecutionCases, first(isBean(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase.class)
+                                    .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getId, is(prosecutionCase.getId()))
+                                    .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                            .with(ProsecutionCaseIdentifier::getCaseURN, is(prosecutionCaseIdentifier.getCaseURN()))
+                                            .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(prosecutionCaseIdentifier.getProsecutionAuthorityCode()))
+                                            .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(prosecutionCaseIdentifier.getProsecutionAuthorityId()))
+                                            .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(prosecutionCaseIdentifier.getProsecutionAuthorityReference())))
+                                    .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getDefendants, first(isBean(HearingListResponseDefendant.class)
+                                            .with(HearingListResponseDefendant::getId, is(defendant.getId()))
+                                            .with(HearingListResponseDefendant::getName, is(defendant.getPersonDefendant().getPersonDetails().getFirstName() + " " + defendant.getPersonDefendant().getPersonDetails().getMiddleName() + " " + defendant.getPersonDefendant().getPersonDetails().getLastName())))))))));
+} catch (RuntimeException e){
+    e.printStackTrace();
+    throw e;
+}
     }
 
     @Test
