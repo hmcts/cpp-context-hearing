@@ -20,6 +20,11 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
     @Override
     protected boolean matchesSafely(List<?> item) {
 
+        if (item == null) {
+            this.error = Error.NULL;
+            return false;
+        }
+
         if (this.index < 0 || this.index >= item.size()) {
             this.error = Error.INVALID_INDEX;
             return false;
@@ -37,8 +42,11 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
     public void describeTo(Description description) {
         description.appendText("[").appendText(Integer.toString(this.index)).appendText("]");
 
-        if (this.error == Error.MATCHER_FALSE) {
+        if (this.error == Error.NULL){
+            description.appendText(" is a list object");
+        }
 
+        if (this.error == Error.MATCHER_FALSE) {
             description.appendDescriptionOf(this.matcher);
         }
         if (this.error == Error.INVALID_INDEX) {
@@ -48,6 +56,11 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
 
     @Override
     protected void describeMismatchSafely(List<?> item, Description mismatchDescription) {
+
+        if (this.error == Error.NULL){
+            mismatchDescription.appendText("was null");
+        }
+
         if (this.error == Error.MATCHER_FALSE) {
             this.matcher.describeMismatch(item.get(this.index), mismatchDescription);
         }
@@ -58,7 +71,7 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
     }
 
     private enum Error {
-        INVALID_INDEX, MATCHER_FALSE
+        NULL, INVALID_INDEX, MATCHER_FALSE
     }
 
     public static ElementAtListMatcher first(Matcher<?> matcher) {

@@ -22,7 +22,7 @@ public class ProsecutionCase {
         this.defendants = defendants;
     }
 
-    public ProsecutionCase(Builder builder) {
+    private ProsecutionCase(Builder builder) {
         this.id = builder.id;
         this.prosecutionCaseIdentifier = builder.prosecutionCaseIdentifier;
         this.defendants = builder.defendants;

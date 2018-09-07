@@ -41,6 +41,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListRes
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseDefendant;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseHearing;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
 import java.time.ZoneId;
 import java.util.UUID;
 
@@ -56,84 +57,76 @@ public class InitiateHearingIT extends AbstractIT {
 
         final HearingDay hearingDay = hearing.getHearingDays().get(0);
 
-        final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
-
-        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = prosecutionCase.getProsecutionCaseIdentifier();
-
-        final Defendant defendant = prosecutionCase.getDefendants().get(0);
-
-        final Offence offence = defendant.getOffences().get(0);
-
         final JudicialRole judicialRole = hearing.getJudiciary().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30,
-                isBean(HearingDetailsResponse.class)
-                        .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                             .with(Hearing::getId, is(hearing.getId()))
-                                .with(Hearing::getType, isBean(HearingType.class)
-                                        .with(HearingType::getId, is(hearing.getType().getId())))
-                                .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
-                                .with(Hearing::getHearingLanguage, is(ENGLISH))
-                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getType, isBean(HearingType.class)
+                                .with(HearingType::getId, is(hearing.getType().getId())))
+                        .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
+                        .with(Hearing::getHearingLanguage, is(ENGLISH))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))
-                                .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                        .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
-                                        .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
-                                .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
-                                        .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
-                                        .with(JudicialRole::getJudicialRoleType, is(judicialRole.getJudicialRoleType()))))
-                                .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
-                                        .with(ProsecutionCase::getId, is(prosecutionCase.getId()))
-                                        .with(ProsecutionCase::getInitiationCode, is(prosecutionCase.getInitiationCode()))
-                                        .with(ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(prosecutionCaseIdentifier.getProsecutionAuthorityId()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(prosecutionCaseIdentifier.getProsecutionAuthorityCode()))
-                                                .with(ProsecutionCaseIdentifier::getCaseURN, is(prosecutionCaseIdentifier.getCaseURN()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(prosecutionCaseIdentifier.getProsecutionAuthorityReference())))
-                                        .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
-                                                .with(Defendant::getId, is(defendant.getId()))
-                                                .with(Defendant::getProsecutionCaseId, is(defendant.getProsecutionCaseId()))
-                                                .with(Defendant::getOffences, first(isBean(Offence.class)
-                                                        .with(Offence::getId, is(offence.getId()))
-                                                        .with(Offence::getOffenceDefinitionId, is(offence.getOffenceDefinitionId()))
-                                                        .with(Offence::getOffenceCode, is(offence.getOffenceCode()))
-                                                        .with(Offence::getWording, is(offence.getWording()))
-                                                        .with(Offence::getStartDate, is(offence.getStartDate()))
-                                                        .with(Offence::getOrderIndex, is(offence.getOrderIndex()))
-                                                        .with(Offence::getCount, is(offence.getCount()))))))))));
+                        .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
+                                .with(JudicialRole::getJudicialRoleType, is(judicialRole.getJudicialRoleType()))))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getInitiationCode, is(hearingOne.getFirstCase().getInitiationCode()))
+                                .with(ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityId()))
+                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))
+                                        .with(ProsecutionCaseIdentifier::getCaseURN, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getCaseURN()))
+                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityReference())))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstCaseForFirstDefendant().getId()))
+                                        .with(Defendant::getProsecutionCaseId, is(hearingOne.getFirstCaseForFirstDefendant().getProsecutionCaseId()))
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getOffenceDefinitionId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOffenceDefinitionId()))
+                                                .with(Offence::getOffenceCode, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOffenceCode()))
+                                                .with(Offence::getWording, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getWording()))
+                                                .with(Offence::getStartDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getStartDate()))
+                                                .with(Offence::getOrderIndex, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOrderIndex()))
+                                                .with(Offence::getCount, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getCount()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
 
-try {
-    final UUID id = hearing.getCourtCentre().getId();
-    final UUID roomId = hearing.getCourtCentre().getRoomId();
-    final String utc = hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString();
-    Queries.getHearingsByDatePollForMatch(id, roomId, utc, "00:00", "23:59", 30,
-            isBean(HearingListResponse.class)
-                    .with(HearingListResponse::getHearings, first(isBean(HearingListResponseHearing.class)
-                            .with(HearingListResponseHearing::getId, is(hearing.getId()))
-                            .with(HearingListResponseHearing::getJurisdictionType, is(hearing.getJurisdictionType()))
-                            .with(HearingListResponseHearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
-                            .with(HearingListResponseHearing::getHearingLanguage, is(HearingLanguage.ENGLISH.name()))
-                            .with(HearingListResponseHearing::getType, isBean(HearingType.class)
-                                    .with(HearingType::getId, is(hearing.getType().getId()))
-                                    .with(HearingType::getDescription, is(hearing.getType().getDescription())))
-                            .with(HearingListResponseHearing::getHearingDays, first(isBean(HearingDay.class)
-                                    .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
-                                    .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))
-                                    .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
-                            .with(HearingListResponseHearing::getProsecutionCases, first(isBean(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase.class)
-                                    .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getId, is(prosecutionCase.getId()))
-                                    .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
-                                            .with(ProsecutionCaseIdentifier::getCaseURN, is(prosecutionCaseIdentifier.getCaseURN()))
-                                            .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(prosecutionCaseIdentifier.getProsecutionAuthorityCode()))
-                                            .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(prosecutionCaseIdentifier.getProsecutionAuthorityId()))
-                                            .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(prosecutionCaseIdentifier.getProsecutionAuthorityReference())))
-                                    .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getDefendants, first(isBean(HearingListResponseDefendant.class)
-                                            .with(HearingListResponseDefendant::getId, is(defendant.getId()))
-                                            .with(HearingListResponseDefendant::getName, is(defendant.getPersonDefendant().getPersonDetails().getFirstName() + " " + defendant.getPersonDefendant().getPersonDetails().getMiddleName() + " " + defendant.getPersonDefendant().getPersonDetails().getLastName())))))))));
-} catch (RuntimeException e){
-    e.printStackTrace();
-    throw e;
-}
+        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
+                isBean(HearingListResponse.class)
+                        .with(HearingListResponse::getHearings, first(isBean(HearingListResponseHearing.class)
+                                .with(HearingListResponseHearing::getId, is(hearing.getId()))
+                                .with(HearingListResponseHearing::getJurisdictionType, is(hearing.getJurisdictionType()))
+                                .with(HearingListResponseHearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
+                                .with(HearingListResponseHearing::getHearingLanguage, is(HearingLanguage.ENGLISH.name()))
+                                .with(HearingListResponseHearing::getType, isBean(HearingType.class)
+                                        .with(HearingType::getId, is(hearing.getType().getId()))
+                                        .with(HearingType::getDescription, is(hearing.getType().getDescription())))
+                                .with(HearingListResponseHearing::getHearingDays, first(isBean(HearingDay.class)
+                                        .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                        .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))
+                                        .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
+                                .with(HearingListResponseHearing::getProsecutionCases, first(isBean(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase.class)
+                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                                .with(ProsecutionCaseIdentifier::getCaseURN, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getCaseURN()))
+                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))
+                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityId()))
+                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityReference())))
+                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getDefendants, first(isBean(HearingListResponseDefendant.class)
+                                                .with(HearingListResponseDefendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                                .with(HearingListResponseDefendant::getName, is(hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails().getFirstName() + " " + hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails().getMiddleName() + " " + hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails().getLastName()))
+                                        ))
+                                ))
+                        ))
+        );
     }
 
     @Test
