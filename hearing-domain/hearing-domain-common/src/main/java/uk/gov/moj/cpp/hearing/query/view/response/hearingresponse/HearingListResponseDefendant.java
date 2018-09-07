@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.UUID;
@@ -11,6 +12,7 @@ public class HearingListResponseDefendant {
 
     private String name;
 
+    @JsonCreator
     public HearingListResponseDefendant(@JsonProperty(value = "id") final UUID id,
                                         @JsonProperty(value = "name") final String name) {
         this.id = id;
