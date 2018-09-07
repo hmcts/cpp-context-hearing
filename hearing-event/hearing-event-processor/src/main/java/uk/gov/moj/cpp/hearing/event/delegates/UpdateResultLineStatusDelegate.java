@@ -33,7 +33,8 @@ public class UpdateResultLineStatusDelegate {
         final UpdateResultLinesStatusCommand updateResultLinesStatusCommand = UpdateResultLinesStatusCommand.builder()
                 .withLastSharedDateTime(resultsShared.getSharedTime())
                 .withHearingId(resultsShared.getHearingId())
-                .withCourtClerk(resultsShared.getCourtClerk())
+                //TODO GPE-5480 restore this line
+                //.withCourtClerk(resultsShared.getCourtClerk())
                 .withSharedResultLines(mapSharedResultsLinesStatus(resultsShared.getCompletedResultLines(), resultsShared.getCompletedResultLinesStatus()))
                 .build();
         sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-result-lines-status")

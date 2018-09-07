@@ -19,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Gender;
 import uk.gov.justice.json.schemas.core.Hearing;
@@ -46,7 +47,6 @@ import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
@@ -270,7 +270,7 @@ public class TestTemplates {
         public static ShareResultsCommand basicShareResultsCommandTemplate() {
 
             return ShareResultsCommand.builder()
-                    .withCourtClerk(CourtClerk.builder()
+                    .withCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
                             .withId(randomUUID())
                             .withFirstName(STRING.next())
                             .withLastName(STRING.next())
@@ -278,10 +278,12 @@ public class TestTemplates {
                     .build();
         }
 
+        //TODO GPE-5480 this command has changed
+        @SuppressWarnings({"squid:S1172", "squid:CommentedOutCodeLine"})
         public static ShareResultsCommand standardShareResultsCommandTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId1, final UUID resultLineId2, LocalDate orderedDate) {
             return with(basicShareResultsCommandTemplate(), command -> {
-                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId1, orderedDate));
-                command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2, orderedDate));
+                //command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId1, orderedDate));
+                //command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2, orderedDate));
             });
         }
 
@@ -334,7 +336,7 @@ public class TestTemplates {
             return CompletedResultLineStatus.builder()
                     .withId(resultLineId)
                     .withLastSharedDateTime(startDateTime)
-                    .withCourtClerk(CourtClerk.builder()
+                    .withCourtClerk(CourtClerk.courtClerk()
                             .withId(randomUUID())
                             .withFirstName(STRING.next())
                             .withLastName(STRING.next())

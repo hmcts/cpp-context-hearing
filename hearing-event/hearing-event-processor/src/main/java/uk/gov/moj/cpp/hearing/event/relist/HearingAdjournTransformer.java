@@ -8,8 +8,8 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTIME;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.justice.json.schemas.core.Offence;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements;
@@ -58,11 +58,11 @@ public class HearingAdjournTransformer {
 
 
     public JsonObject transform(final ResultsShared resultsShared, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
-        final Case firstCase = resultsShared.getCases().get(0);//Hardcoded 0 as we are not handling mutiple cases yet, should be removed when services handle multi case hearing
+        final ProsecutionCase firstCase = resultsShared.getHearing().getProsecutionCases().get(0);//Hardcoded 0 as we are not handling mutiple cases yet, should be removed when services handle multi case hearing
         final List<CompletedResultLine> completedResultLines = resultsShared.getCompletedResultLines();
 
         final JsonArrayBuilder defendants = Json.createArrayBuilder();
-        resultsShared.getHearing().getDefendants().forEach(defendant -> {
+        resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream()).forEach(defendant -> {
             final List<Offence> offences = getOffencesHaveResultNextHearing(defendant, completedResultLines, nextHearingResultDefinitions);
             if (!offences.isEmpty()) {
                 final JsonArrayBuilder jsonOffences = Json.createArrayBuilder();
@@ -82,7 +82,7 @@ public class HearingAdjournTransformer {
 
         final JsonObjectBuilder hearing = Json.createObjectBuilder();
 
-        hearing.add(COURT_CENTRE_ID, resultsShared.getHearing().getCourtCentreId().toString());
+        hearing.add(COURT_CENTRE_ID, resultsShared.getHearing().getCourtCentre().getId().toString());
         getFirst(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HTYPE)))
                 .ifPresent(value -> hearing.add(TYPE, value));
         getFirst(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HDATE)))
@@ -93,8 +93,8 @@ public class HearingAdjournTransformer {
         hearing.add(DEFENDANTS, defendants.build());
 
         return Json.createObjectBuilder()
-                .add(CASE_ID, firstCase.getCaseId().toString())
-                .add(URN, firstCase.getUrn())
+                .add(CASE_ID, firstCase.getId().toString())
+                .add(URN, firstCase.getProsecutionCaseIdentifier().getCaseURN())
                 .add(REQUESTED_BY_HEARING_ID, resultsShared.getHearing().getId().toString())
                 .add(HEARINGS, Json.createArrayBuilder()
                         .add(hearing.build())

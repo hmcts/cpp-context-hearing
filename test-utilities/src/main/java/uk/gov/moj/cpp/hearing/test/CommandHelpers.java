@@ -2,23 +2,19 @@ package uk.gov.moj.cpp.hearing.test;
 
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
@@ -215,6 +211,7 @@ public class CommandHelpers {
         }
     }
 
+    @SuppressWarnings({"squid:S1135", "squid:CommentedOutCodeLine"})
     public static class ShareResultsCommandHelper {
 
         private ShareResultsCommand shareResultsCommand;
@@ -223,6 +220,7 @@ public class CommandHelpers {
             this.shareResultsCommand = shareResultsCommand;
         }
 
+/* TODO remove as part of GPE-5480
         public CompletedResultLine getFirstCompletedResultLine() {
             return shareResultsCommand.getCompletedResultLines().get(0);
         }
@@ -230,7 +228,7 @@ public class CommandHelpers {
         public CompletedResultLine getSecondCompletedResultLine() {
             return shareResultsCommand.getCompletedResultLines().get(1);
         }
-
+*/
         public ShareResultsCommand it() {
             return shareResultsCommand;
         }
@@ -244,23 +242,23 @@ public class CommandHelpers {
         }
 
         public ZonedDateTime getFirstHearingDay() {
-            return this.resultsShared.getHearing().getHearingDays().get(0);
+            return this.resultsShared.getHearing().getHearingDays().get(0).getSittingDay();
         }
 
         public UUID getHearingId() {
             return this.resultsShared.getHearing().getId();
         }
 
-        public List<Case> getCases() {
-            return this.resultsShared.getCases();
+        public List<ProsecutionCase> getCases() {
+            return this.resultsShared.getHearing().getProsecutionCases();
         }
 
-        public Case getFirstCase() {
-            return this.resultsShared.getCases().get(0);
+        public ProsecutionCase getFirstCase() {
+            return getCases().get(0);
         }
 
         public List<UUID> getCaseIds() {
-            return this.resultsShared.getCases().stream().map(Case::getCaseId).collect(toList());
+            return getCases().stream().map(ProsecutionCase::getId).collect(toList());
         }
 
         public ResultsShared it() {
@@ -275,12 +273,12 @@ public class CommandHelpers {
             return resultsShared.getDefenceCounsels().values().stream().findAny().orElse(null);
         }
 
-        public Defendant getFirstDefendant() {
-            return resultsShared.getHearing().getDefendants().get(0);
+        public uk.gov.justice.json.schemas.core.Defendant getFirstDefendant() {
+            return resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
         }
 
-        public Offence getFirstDefendantFirstOffence() {
-            return resultsShared.getHearing().getDefendants().get(0).getOffences().get(0);
+        public uk.gov.justice.json.schemas.core.Offence getFirstDefendantFirstOffence() {
+            return getFirstDefendant().getOffences().get(0);
         }
 
         public uk.gov.moj.cpp.hearing.domain.Plea getFirstPlea() {
@@ -291,8 +289,8 @@ public class CommandHelpers {
             return resultsShared.getVerdicts().values().stream().findFirst().orElse(null);
         }
 
-        public DefendantCase getFirstDefendantCase() {
-            return resultsShared.getHearing().getDefendants().get(0).getDefendantCases().get(0);
+        public ProsecutionCase getFirstDefendantCase() {
+            return resultsShared.getHearing().getProsecutionCases().get(0);
         }
 
         public CompletedResultLine getFirstCompletedResultLine() {
@@ -307,7 +305,7 @@ public class CommandHelpers {
             return resultsShared.getCompletedResultLines().get(0).getPrompts().get(0);
         }
 
-        public uk.gov.moj.cpp.hearing.command.initiate.Hearing getHearing() {
+        public Hearing getHearing() {
             return this.resultsShared.getHearing();
         }
 

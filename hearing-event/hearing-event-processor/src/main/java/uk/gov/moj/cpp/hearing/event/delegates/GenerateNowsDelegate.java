@@ -118,7 +118,7 @@ public class GenerateNowsDelegate {
         sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows")
                 .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
     }
-
+    @SuppressWarnings({"squid:S1135"})
     private Hearing translateReferenceData(final ResultsShared resultsShared) {
 
         final List<Attendees> attendees = new ArrayList<>();
@@ -149,6 +149,7 @@ public class GenerateNowsDelegate {
                         .setLastName(resultsShared.getCourtClerk().getLastName())
         );
 
+        @SuppressWarnings({"squid:CommentedOutCodeLine"})
         final List<SharedResultLines> sharedResultLines = resultsShared.getCompletedResultLines().stream()
                 .map(line -> SharedResultLines.sharedResultLines()
                         .setId(line.getId())
@@ -169,21 +170,21 @@ public class GenerateNowsDelegate {
                         )
                 ).collect(Collectors.toList());
 
-        final uk.gov.moj.cpp.hearing.command.initiate.Hearing hearingIn = resultsShared.getHearing();
-
         return Hearing.hearing()
                 .setId(resultsShared.getHearing().getId())
-                .setHearingDates(hearingIn.getHearingDays())
+
+/*                .setHearingDates(hearingIn.getHearingDays())
                 .setCourtCentre(CourtCentre.courtCentre()
                         .setCourtCentreId(hearingIn.getCourtCentreId())
                         .setCourtCentreName(hearingIn.getCourtCentreName())
                         .setCourtRoomId(hearingIn.getCourtRoomId())
-                        .setCourtRoomName(hearingIn.getCourtRoomName()))
-                .setDefendants(resultsShared.getHearing().getDefendants().stream()
+                        .setCourtRoomName(hearingIn.getCourtRoomName()))*/
+                .setDefendants(resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream())
                         .map(defendant -> Defendants.defendants()
                                 .setId(defendant.getId())
-                                .setPerson(Person.person()
-                                        .setId(defendant.getPersonId())
+                                //TODO GPE-5480
+/*                                .setPerson(Person.person()
+                                        //.setId(defendant.getPersonId())
                                         .setFirstName(defendant.getFirstName())
                                         .setLastName(defendant.getLastName())
                                         .setDateOfBirth(defendant.getDateOfBirth().toString())
@@ -245,7 +246,7 @@ public class GenerateNowsDelegate {
                                 .setInterpreter(of(defendant)
                                         .map(Defendant::getInterpreter)
                                         .map(i -> Interpreter.interpreter().setLanguage(i.getLanguage()))
-                                        .orElse(null))
+                                        .orElse(null))*/
                         )
                         .collect(toList())
                 )
@@ -253,6 +254,7 @@ public class GenerateNowsDelegate {
                 .setSharedResultLines(sharedResultLines);
     }
 
+    @SuppressWarnings({"squid:UnusedPrivateMethod"})
     private String formatSplitJurors(final VerdictUpsert v) {
         return v.getNumberOfJurors() == null || v.getNumberOfSplitJurors() == null ? "" :
                 String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors());

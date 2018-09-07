@@ -3,8 +3,8 @@ package uk.gov.moj.cpp.hearing.event.nows;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
+import uk.gov.justice.json.schemas.core.Defendant;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
@@ -56,7 +56,7 @@ public class NowsGenerator {
 
         final List<Nows> nows = new ArrayList<>();
 
-        resultsShared.getHearing().getDefendants().forEach(defendant -> {
+        resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream()).collect(toList()).forEach(defendant -> {
 
                     if (anyUncompletedResultLinesForDefendant(resultsShared, defendant)) {
                         LOGGER.info("aborting NOWs generation for defendant {} as there are uncompleted result lines", defendant.getId());

@@ -7,8 +7,8 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HEST;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingResultDefinition;
@@ -66,7 +66,7 @@ public class HearingAdjournValidator {
     }
 
     boolean checkSharedResultHaveNextHearingResult(final ResultsShared resultsShared, final List<UUID> withdrawnResultDefinitionUuid, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
-        final List<Offence> flatOffences = resultsShared.getHearing().getDefendants().stream().map(Defendant::getOffences).flatMap(List::stream)
+        final List<Offence> flatOffences = resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream()).map(Defendant::getOffences).flatMap(List::stream)
                 .collect(Collectors.toList());
         return flatOffences.size() == flatOffences.stream().filter(off -> isSharedResultHaveNextHearingOrWithdrawnResults(resultsShared.getCompletedResultLines(), off, Stream.concat(withdrawnResultDefinitionUuid.stream(), nextHearingResultDefinitions.keySet().stream()).collect(Collectors.toList()))).count();
     }

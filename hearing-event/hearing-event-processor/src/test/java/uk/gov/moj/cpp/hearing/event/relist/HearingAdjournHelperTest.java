@@ -52,7 +52,7 @@ public class HearingAdjournHelperTest {
 
         //when and then
         assertEquals(1, HearingAdjournHelper.getOffencesHaveResultNextHearing(
-                arbitraryResultsShared.getHearing().getDefendants().get(0),
+                arbitraryResultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0),
                 arbitraryResultsShared.getCompletedResultLines(),
                 arbitraryNextHearingMetaData()).size());
 

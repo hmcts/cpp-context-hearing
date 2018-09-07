@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.command.result;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.json.schemas.core.CourtClerk;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -13,7 +14,7 @@ public final class CompletedResultLineStatus implements Serializable {
 
     private final UUID id;
 
-    private CourtClerk courtClerk;
+    private uk.gov.justice.json.schemas.core.CourtClerk courtClerk;
 
     private ZonedDateTime lastSharedDateTime;
 
@@ -21,7 +22,7 @@ public final class CompletedResultLineStatus implements Serializable {
     @JsonCreator
     private CompletedResultLineStatus(@JsonProperty("id") final UUID id,
                                       @JsonProperty("lastSharedDateTime") final ZonedDateTime lastSharedDateTime,
-                                      @JsonProperty("courtClerk") final CourtClerk courtClerk) {
+                                      @JsonProperty("courtClerk") final uk.gov.justice.json.schemas.core.CourtClerk courtClerk) {
         this.id = id;
         this.lastSharedDateTime = lastSharedDateTime;
         this.courtClerk = courtClerk;
@@ -35,11 +36,11 @@ public final class CompletedResultLineStatus implements Serializable {
         return lastSharedDateTime;
     }
 
-    public CourtClerk getCourtClerk() {
+    public uk.gov.justice.json.schemas.core.CourtClerk getCourtClerk() {
         return courtClerk;
     }
 
-    public CompletedResultLineStatus setCourtClerk(final CourtClerk courtClerk) {
+    public CompletedResultLineStatus setCourtClerk(final uk.gov.justice.json.schemas.core.CourtClerk courtClerk) {
         this.courtClerk = courtClerk;
         return this;
     }
@@ -59,7 +60,7 @@ public final class CompletedResultLineStatus implements Serializable {
 
         private ZonedDateTime lastSharedDateTime;
 
-        private CourtClerk courtClerk;
+        private uk.gov.justice.json.schemas.core.CourtClerk courtClerk;
 
         public Builder withId(final UUID id) {
             this.id = id;
