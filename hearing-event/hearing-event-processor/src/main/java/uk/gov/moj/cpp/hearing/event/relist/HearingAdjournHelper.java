@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.relist;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
+import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPrompt;

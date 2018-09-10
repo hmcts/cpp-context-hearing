@@ -3,12 +3,11 @@ package uk.gov.moj.cpp.hearing.domain.event.result;
 import static java.util.Optional.ofNullable;
 
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Hearing;
+import uk.gov.justice.json.schemas.core.CourtClerk;
+import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
@@ -44,8 +43,6 @@ public final class ResultsShared implements Serializable {
 
     private final Hearing hearing;
 
-    private final List<Case> cases;
-
     private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
 
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels;
@@ -65,7 +62,6 @@ public final class ResultsShared implements Serializable {
                           @JsonProperty("uncompletedResultLines") final List<UncompletedResultLine> uncompletedResultLines,
                           @JsonProperty("completedResultLines") final List<CompletedResultLine> completedResultLines,
                           @JsonProperty("hearing") final Hearing hearing,
-                          @JsonProperty("cases") final List<Case> cases,
                           @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
                           @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
                           @JsonProperty("pleas") final Map<UUID, Plea> pleas,
@@ -78,7 +74,6 @@ public final class ResultsShared implements Serializable {
         this.uncompletedResultLines = ofNullable(uncompletedResultLines).orElseGet(ArrayList::new);
         this.completedResultLines = ofNullable(completedResultLines).orElseGet(ArrayList::new);
         this.hearing = hearing;
-        this.cases = ofNullable(cases).orElseGet(ArrayList::new);
         this.prosecutionCounsels = ofNullable(prosecutionCounsels).orElseGet(HashMap::new);
         this.defenceCounsels = ofNullable(defenceCounsels).orElseGet(HashMap::new);
         this.pleas = ofNullable(pleas).orElseGet(HashMap::new);
@@ -97,10 +92,6 @@ public final class ResultsShared implements Serializable {
 
     public Hearing getHearing() {
         return hearing;
-    }
-
-    public List<Case> getCases() {
-        return new ArrayList<>(cases);
     }
 
     public Map<UUID, ProsecutionCounselUpsert> getProsecutionCounsels() {
@@ -158,8 +149,6 @@ public final class ResultsShared implements Serializable {
 
         private Hearing hearing;
 
-        private List<Case> cases;
-
         private Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
 
         private Map<UUID, DefenceCounselUpsert> defenceCounsels;
@@ -202,11 +191,6 @@ public final class ResultsShared implements Serializable {
             return this;
         }
 
-        public Builder withCases(final List<Case> cases) {
-            this.cases = cases;
-            return this;
-        }
-
         public Builder withProsecutionCounsels(final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels) {
             this.prosecutionCounsels = prosecutionCounsels;
             return this;
@@ -245,7 +229,6 @@ public final class ResultsShared implements Serializable {
                     uncompletedResultLines,
                     completedResultLines,
                     hearing,
-                    cases,
                     prosecutionCounsels,
                     defenceCounsels,
                     pleas,

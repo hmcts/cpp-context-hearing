@@ -62,7 +62,8 @@ public class ResultsSharedDelegate implements Serializable {
                                 .withId(resultLineId)
                                 .build()
                 )
-                        .setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
+                        //TODO GPE 5480 reinstate this line
+                        //.setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
                         .setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
          );
     }
@@ -76,7 +77,7 @@ public class ResultsSharedDelegate implements Serializable {
     }
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
-        final List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
+        List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
                 .flatMap(t->t.getResultLines().stream())
                 .filter(rl->rl.getIsComplete())
                 .map(rl->rl.getResultLineId())
@@ -102,8 +103,9 @@ public class ResultsSharedDelegate implements Serializable {
                 .withHearingId(command.getHearingId())
                 .withSharedTime(sharedTime)
                 .withCourtClerk(command.getCourtClerk())
-                .withUncompletedResultLines(command.getUncompletedResultLines())
-                .withCompletedResultLines(command.getCompletedResultLines())
+                //TODO GPE-5480 address this commented out code
+                //.withUncompletedResultLines(command.getUncompletedResultLines())
+                //.withCompletedResultLines(command.getCompletedResultLines())
 //                .withHearing(this.momento.getHearing())
 //                .withCases(this.momento.getCases())
                 .withProsecutionCounsels(this.momento.getProsecutionCounsels())

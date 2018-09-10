@@ -10,11 +10,11 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
+import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.Plea;
@@ -124,7 +124,7 @@ public class NowsTemplates {
                                 .setUnanimous(BOOLEAN.next())
                                 .setVerdictDate(PAST_LOCAL_DATE.next())
                 ))
-                .withCourtClerk(CourtClerk.builder()
+                .withCourtClerk(CourtClerk.courtClerk()
                         .withId(randomUUID())
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next())
@@ -147,7 +147,7 @@ public class NowsTemplates {
                                 .build()
                 )))
                 .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
-                        .withCourtClerk(CourtClerk.builder()
+                        .withCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
                                 .withId(randomUUID())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next())
