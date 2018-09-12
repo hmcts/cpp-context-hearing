@@ -77,6 +77,8 @@ public class InitiateHearingIT extends AbstractIT {
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
                                 .with(ProsecutionCase::getInitiationCode, is(hearingOne.getFirstCase().getInitiationCode()))
+                                .with(ProsecutionCase::getStatementOfFacts, is(hearingOne.getFirstCase().getStatementOfFacts()))
+                                .with(ProsecutionCase::getStatementOfFactsWelsh, is(hearingOne.getFirstCase().getStatementOfFactsWelsh()))
                                 .with(ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
                                         .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityId()))
                                         .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))

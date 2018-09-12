@@ -12,6 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import org.apache.commons.lang3.SerializationException;
@@ -21,14 +22,9 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.justice.json.schemas.core.Gender;
+import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.PleaValue;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.command.defendant.Address;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
-import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
-import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -406,7 +402,9 @@ public class HearingAggregateTest {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
-        final CaseDefendantDetailsWithHearingCommand command = initiateDefendantCommandTemplate();
+        final CaseDefendantDetailsWithHearingCommand command = with(
+                initiateDefendantCommandTemplate(initiateHearingCommand.getHearing().getId()),
+                template -> template.getDefendant().setId(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
@@ -424,20 +422,24 @@ public class HearingAggregateTest {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
-        final CaseDefendantDetailsWithHearingCommand command = with(initiateDefendantCommandTemplate(),
-                template -> template.getDefendant().setId(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
+        final Hearing hearing = initiateHearingCommand.getHearing();
+
+        final CaseDefendantDetailsWithHearingCommand command = with(
+                initiateDefendantCommandTemplate(hearing.getId()),
+                template -> {
+                    template.getDefendant().setId(hearing.getProsecutionCases().get(0).getDefendants().get(0).getId());
+                    template.getDefendant().setProsecutionCaseId(hearing.getProsecutionCases().get(0).getDefendants().get(0).getProsecutionCaseId());
+                });
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
-        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        hearingAggregate.apply(new HearingInitiated(hearing));
 
         final DefendantDetailsUpdated result = (DefendantDetailsUpdated) hearingAggregate.updateDefendantDetails(command).collect(Collectors.toList()).get(0);
 
-        assertThat(result.getCaseId(), Matchers.is(command.getCaseId()));
+        assertThat(hearing.getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getFirstName(), Matchers.is(result.getDefendant().getPersonDefendant().getPersonDetails().getFirstName()));
 
-        assertThat(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getFirstName(), Matchers.is(result.getDefendant().getPerson().getFirstName()));
-
-        assertThat(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getLastName(), Matchers.is(result.getDefendant().getPerson().getLastName()));
+        assertThat(hearing.getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getLastName(), Matchers.is(result.getDefendant().getPersonDefendant().getPersonDetails().getLastName()));
 
     }
 
@@ -495,30 +497,10 @@ public class HearingAggregateTest {
 
     }
 
-    private CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate() {
+    private CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate(final UUID hearingId) {
 
         return CaseDefendantDetailsWithHearingCommand.caseDefendantDetailsWithHearingCommand()
-                .setCaseId(randomUUID())
-                .setHearingIds(singletonList(randomUUID()))
-                .setDefendant(Defendant.defendant()
-                        .setId(randomUUID())
-                        .setPerson(Person.person()
-                                .setId(randomUUID())
-                                .setFirstName(STRING.next())
-                                .setLastName(STRING.next())
-                                .setNationality(STRING.next())
-                                .setGender(RandomGenerator.values(Gender.values()).next())
-                                .setAddress(Address.address()
-                                        .setAddress1(STRING.next())
-                                        .setAddress2(STRING.next())
-                                        .setAddress3(STRING.next())
-                                        .setAddress4(STRING.next())
-                                        .setPostCode(STRING.next()))
-                                .setDateOfBirth(PAST_LOCAL_DATE.next()))
-                        .setBailStatus(STRING.next())
-                        .setCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                        .setDefenceOrganisation(STRING.next())
-                        .setInterpreter(Interpreter.interpreter().setLanguage(STRING.next()))
-                );
+                .setHearingId(hearingId)
+                .setDefendant(defendantTemplate());
     }
 }

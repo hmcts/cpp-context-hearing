@@ -1,18 +1,18 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.UUID;
+import uk.gov.justice.json.schemas.core.DocumentationLanguageNeeds;
+import uk.gov.justice.json.schemas.core.Gender;
+import uk.gov.justice.json.schemas.core.Title;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.UUID;
 
-import uk.gov.justice.json.schemas.core.DocumentationLanguageNeeds;
-import uk.gov.justice.json.schemas.core.Gender;
-import uk.gov.justice.json.schemas.core.Title;
 
 @SuppressWarnings("squid:S1067")
 @Embeddable
@@ -37,6 +37,7 @@ public class Person {
     private String disabilityStatus;
 
     @Column(name = "documentation_language_needs")
+    @Enumerated(EnumType.STRING)
     private DocumentationLanguageNeeds documentationLanguageNeeds;
 
     @Column(name = "ethnicity_id")
@@ -55,6 +56,7 @@ public class Person {
     private String lastName;
 
     @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @Column(name = "interpreter_language_needs")
@@ -79,6 +81,7 @@ public class Person {
     private String specificRequirements;
 
     @Column(name = "title")
+    @Enumerated(EnumType.STRING)
     private Title title;
 
     public Person() {

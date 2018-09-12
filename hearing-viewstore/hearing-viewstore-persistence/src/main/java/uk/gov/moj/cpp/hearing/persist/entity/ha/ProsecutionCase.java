@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -34,6 +36,7 @@ public class ProsecutionCase {
     private ProsecutionCaseIdentifier prosecutionCaseIdentifier;
 
     @Column(name = "initiation_code")
+    @Enumerated(EnumType.STRING)
     private InitiationCode initiationCode;
 
     @Column(name = "case_status")

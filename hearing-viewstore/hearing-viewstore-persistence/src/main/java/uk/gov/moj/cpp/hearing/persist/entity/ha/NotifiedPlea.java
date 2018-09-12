@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import uk.gov.justice.json.schemas.core.NotifiedPleaValue;
 
@@ -14,6 +16,7 @@ public class NotifiedPlea {
     private LocalDate notifiedPleaDate;
 
     @Column(name = "notified_plea_value")
+    @Enumerated(EnumType.STRING)
     private NotifiedPleaValue notifiedPleaValue;
 
     public LocalDate getNotifiedPleaDate() {

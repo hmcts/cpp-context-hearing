@@ -45,8 +45,8 @@ public class DefendantAggregate implements Aggregate {
 
     public Stream<Object> enrichCaseDefendantDetailsWithHearingIds(CaseDefendantDetailsCommand caseDefendantDetails) {
 
-        final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings = CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
-                .setCaseId(caseDefendantDetails.getCaseId())
+        final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings =
+                CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
                 .setDefendant(caseDefendantDetails.getDefendant())
                 .setHearingIds(hearingIds);
 

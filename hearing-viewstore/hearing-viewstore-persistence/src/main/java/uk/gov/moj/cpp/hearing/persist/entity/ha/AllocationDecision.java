@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import uk.gov.justice.json.schemas.core.CourtDecision;
 import uk.gov.justice.json.schemas.core.DefendantRepresentation;
@@ -13,12 +15,15 @@ import java.util.Objects;
 public class AllocationDecision {
 
     @Column(name = "court_decision")
+    @Enumerated(EnumType.STRING)
     private CourtDecision courtDecision;
 
     @Column(name = "prosecution_representation")
+    @Enumerated(EnumType.STRING)
     private ProsecutionRepresentation prosecutionRepresentation;
 
     @Column(name = "defendant_representation")
+    @Enumerated(EnumType.STRING)
     private DefendantRepresentation defendantRepresentation;
 
     @Column(name = "indication_of_sentence")

@@ -9,6 +9,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -32,12 +34,14 @@ public class Hearing {
     private HearingType hearingType;
 
     @Column(name = "jurisdiction_type")
+    @Enumerated(EnumType.STRING)
     private JurisdictionType jurisdictionType;
 
     @Column(name = "reporting_restriction_reason")
     private String reportingRestrictionReason;
 
     @Column(name = "hearing_language")
+    @Enumerated(EnumType.STRING)
     private HearingLanguage hearingLanguage;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
