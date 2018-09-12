@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/publichearingresulted/sharedResultLine.json",
+  "description": "Shared Result Line",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "delegatedPowers": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/delegatedPowers.json"
+    },
+    "isAvailableForCourtExtract": {
+      "description": "Indicates if the result is available to be included in a court extract",
+      "type": "boolean"
+    },
+    "prosecutionCaseId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "defendantId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "offenceId": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "level": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "welshLabel": {
+      "type": "string"
+    },
+    "rank": {
+      "type": "number"
+    },
+    "lastSharedDateTime": {
+      "type": "string"
+    },
+    "orderedDate": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
+    },
+    "usergroups": {
+      "description": "The user groups that are authorised to view the result",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "courtClerk": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtClerk.json"
+    },
+    "prompts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/publichearingresulted/sharedPrompt.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "level",
+    "label",
+    "prompts",
+    "isAvailableForCourtExtract"
+  ]
+}

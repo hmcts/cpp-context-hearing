@@ -25,11 +25,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Prompt;
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -45,6 +44,7 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -52,6 +52,7 @@ import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -63,6 +64,7 @@ import java.util.stream.Stream;
 public class ShareResultsCommandHandlerTest {
 
     final static String DRAFT_RESULT_SAVED_EVENT_NAME = "hearing.draft-result-saved";
+    public static final String HEARING_RESULTS_SHARED_EVENT_NAME = "hearing.results-shared";
 
     @InjectMocks
     private ShareResultsCommandHandler shareResultsCommandHandler;
@@ -163,53 +165,77 @@ public class ShareResultsCommandHandlerTest {
 
         assertThat(asPojo(efound.get(), DraftResultSaved.class), isBean(DraftResultSaved.class)
                 .with(DraftResultSaved::getTarget, isBean(Target.class)
-                                .with(Target::getTargetId, is(targetIn.getTargetId()))
-                                .with(Target::getDefendantId, is(targetIn.getDefendantId()))
-                                .with(Target::getDraftResult, is(targetIn.getDraftResult()))
-                                .with(Target::getHearingId, is(targetIn.getHearingId()))
-                                .with(Target::getOffenceId, is(targetIn.getOffenceId()))
-                                .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
-                                .with(Target::getResultLines, first(isBean(ResultLine.class)
-                                     //TODO add more fields
-                                     .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
-                                     .with(ResultLine::getOrderedDate, is(resultLineIn.getOrderedDate()))
-                                     .with(r->r.getPrompts().size(), is(resultLineIn.getPrompts().size()))
-                                     .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                           //TODO add more fields
-                                          .with(Prompt::getId, is(promptIn.getId()))
-                                          .with(Prompt::getLabel, is(promptIn.getLabel()))
-                                     ))
+                        .with(Target::getTargetId, is(targetIn.getTargetId()))
+                        .with(Target::getDefendantId, is(targetIn.getDefendantId()))
+                        .with(Target::getDraftResult, is(targetIn.getDraftResult()))
+                        .with(Target::getHearingId, is(targetIn.getHearingId()))
+                        .with(Target::getOffenceId, is(targetIn.getOffenceId()))
+                        .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
+                        .with(Target::getResultLines, first(isBean(ResultLine.class)
+                                //TODO add more fields
+                                .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
+                                .with(ResultLine::getOrderedDate, is(resultLineIn.getOrderedDate()))
+                                .with(r -> r.getPrompts().size(), is(resultLineIn.getPrompts().size()))
+                                .with(ResultLine::getPrompts, first(isBean(Prompt.class)
+                                        //TODO add more fields
+                                        .with(Prompt::getId, is(promptIn.getId()))
+                                        .with(Prompt::getLabel, is(promptIn.getLabel()))
                                 ))
+                        ))
                 )
         );
 
     }
 
-    //TODO: GPE-5480
-    //ShareREsultsCommand contract has updated
     @Test
     public void shouldRaiseResultsSharedEvent() throws Exception {
+
+        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplate(initiateHearingCommand);
+        final Target targetIn = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetIn.getResultLines().get(0);
+        final Prompt promptIn = resultLineIn.getPrompts().get(0);
+        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetIn));
 
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
             apply(Stream.of(prosecutionCounselUpsert));
             apply(Stream.of(defenceCounselUpsert));
             apply(Stream.of(nowsVariantsSavedEvent));
+            apply(draftResultSavedEvent);
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
-//        TODO:GPE-5363
-//        final ShareResultsCommand shareResultsCommand = TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate(
-//                initiateHearingCommand.getHearing().getDefendants().get(0).getId(),
-//                initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId(),
-//                initiateHearingCommand.getCases().get(0).getCaseId(), randomUUID(), randomUUID(), PAST_LOCAL_DATE.next()
-//        )
-//                .setHearingId(initiateHearingCommand.getHearing().getId());
 
-//        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
+        final ShareResultsCommand shareResultsCommand =
+                TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate(initiateHearingCommand.getHearing().getId());
 
-//        this.shareResultsCommandHandler.shareResult(envelope);
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
 
+        this.shareResultsCommandHandler.shareResult(envelope);
+
+        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> HEARING_RESULTS_SHARED_EVENT_NAME.equals(e.metadata().name())).findFirst();
+        assertThat("expected:" + HEARING_RESULTS_SHARED_EVENT_NAME, efound.get(), IsNull.notNullValue());
+
+        //structural check only !
+        assertThat(asPojo(efound.get(), ResultsShared.class), isBean(ResultsShared.class)
+                .with(ResultsShared::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(targetIn.getHearingId()))
+                        .with(h -> h.getTargets().size(), is(1))
+                        .with(Hearing::getTargets, first(isBean(Target.class)
+                                .with(Target::getTargetId, is(targetIn.getTargetId()))
+                                .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
+                                .with(Target::getResultLines, first(isBean(ResultLine.class)
+                                        .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
+                                        .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
+                                        .with(ResultLine::getPrompts, first(isBean(Prompt.class)
+                                                .with(Prompt::getId, is(promptIn.getId()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+        //TODO GPE-5480 - what out of this is important ?
         /*assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
                 jsonEnvelope(
                         withMetadataEnvelopedFrom(envelope)

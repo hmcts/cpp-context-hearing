@@ -5,6 +5,7 @@ import static java.util.Optional.ofNullable;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -27,33 +28,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings({"squid:S2384", "pmd:BeanMembersShouldSerialize"})
 @Event("hearing.results-shared")
-public final class ResultsShared implements Serializable {
+public class ResultsShared implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID hearingId;
+    private UUID hearingId;
 
-    private final ZonedDateTime sharedTime;
+    private ZonedDateTime sharedTime;
 
-    private final CourtClerk courtClerk;
+    private CourtClerk courtClerk;
 
-    private final List<UncompletedResultLine> uncompletedResultLines;
+    private Hearing hearing;
 
-    private final List<CompletedResultLine> completedResultLines;
+    private Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
 
-    private final Hearing hearing;
+    private Map<UUID, DefenceCounselUpsert> defenceCounsels;
 
-    private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
+    private Map<UUID, VerdictUpsert> verdicts;
 
-    private final Map<UUID, DefenceCounselUpsert> defenceCounsels;
+    private Map<UUID, Plea> pleas;
 
-    private final Map<UUID, VerdictUpsert> verdicts;
+    private List<Variant> variantDirectory;
 
-    private final Map<UUID, Plea> pleas;
+    private Map<UUID, CompletedResultLineStatus> completedResultLinesStatus;
 
-    private final List<Variant> variantDirectory;
-
-    private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus;
+    public ResultsShared() {
+    }
 
     @JsonCreator
     private ResultsShared(@JsonProperty("hearingId") final UUID hearingId,
@@ -71,8 +71,6 @@ public final class ResultsShared implements Serializable {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.courtClerk = courtClerk;
-        this.uncompletedResultLines = ofNullable(uncompletedResultLines).orElseGet(ArrayList::new);
-        this.completedResultLines = ofNullable(completedResultLines).orElseGet(ArrayList::new);
         this.hearing = hearing;
         this.prosecutionCounsels = ofNullable(prosecutionCounsels).orElseGet(HashMap::new);
         this.defenceCounsels = ofNullable(defenceCounsels).orElseGet(HashMap::new);
@@ -112,14 +110,6 @@ public final class ResultsShared implements Serializable {
 
     public CourtClerk getCourtClerk() {
         return courtClerk;
-    }
-
-    public List<UncompletedResultLine> getUncompletedResultLines() {
-        return uncompletedResultLines;
-    }
-
-    public List<CompletedResultLine> getCompletedResultLines() {
-        return completedResultLines;
     }
 
     public List<Variant> getVariantDirectory() {

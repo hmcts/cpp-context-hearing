@@ -5,6 +5,8 @@ import static java.util.UUID.fromString;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
 
 import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.Prompt;
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -41,20 +43,18 @@ public interface RelistTestHelper {
     static ResultsShared getArbitrarySharedResultWithNextHearingResult() {
         ResultsShared ARBITRARY_RESULT_SHARED = resultsSharedTemplate();
         Defendant firstDefendant = ARBITRARY_RESULT_SHARED.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
-        ResultPrompt dateOfHearing = ResultPrompt.builder().withId(fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283")).withLabel("Date of hearing").withValue("07/072018").build();
-        ResultPrompt hearingType = ResultPrompt.builder().withId(fromString("c1116d12-dd35-4171-807a-2cb845357d22")).withLabel("Hearing type").withValue("Trial").build();
-        ResultPrompt estimatedDuration = ResultPrompt.builder().withId(fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac")).withLabel("Estimated duration").withValue("1 weeks,2 days").build();
-        ResultPrompt remandStatus = ResultPrompt.builder().withId(fromString("9403f0d7-90b5-4377-84b4-f06a77811362")).withLabel("Remand Status").withValue("remand in custody").build();
-        ResultPrompt startTime = ResultPrompt.builder().withId(fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d")).withLabel("Time Of Hearing").withValue("10:45").build();
-        CompletedResultLine nextHearingResult = CompletedResultLine.builder()
-                .withId(UUID.randomUUID())
-                .withDefendantId(firstDefendant.getId())
+        Prompt dateOfHearing = Prompt.prompt().withId(fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283")).withLabel("Date of hearing").withValue("07/072018").build();
+        Prompt hearingType = Prompt.prompt().withId(fromString("c1116d12-dd35-4171-807a-2cb845357d22")).withLabel("Hearing type").withValue("Trial").build();
+        Prompt estimatedDuration = Prompt.prompt().withId(fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac")).withLabel("Estimated duration").withValue("1 weeks,2 days").build();
+        Prompt remandStatus = Prompt.prompt().withId(fromString("9403f0d7-90b5-4377-84b4-f06a77811362")).withLabel("Remand Status").withValue("remand in custody").build();
+        Prompt startTime = Prompt.prompt().withId(fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d")).withLabel("Time Of Hearing").withValue("10:45").build();
+        ResultLine nextHearingResult = ResultLine.resultLine()
+                .withResultLineId(UUID.randomUUID())
                 .withResultDefinitionId(fromString("fbed768b-ee95-4434-87c8-e81cbc8d24c8"))
                 .withResultLabel("Next Hearing")
-                .withResultPrompts(Arrays.asList(dateOfHearing, hearingType, estimatedDuration, remandStatus, startTime))
-                .withOffenceId(firstDefendant.getOffences().get(0).getId())
+                .withPrompts(Arrays.asList(dateOfHearing, hearingType, estimatedDuration, remandStatus, startTime))
                 .build();
-        ARBITRARY_RESULT_SHARED.getCompletedResultLines().add(nextHearingResult);
+        ARBITRARY_RESULT_SHARED.getHearing().getTargets().get(0).getResultLines().add(nextHearingResult);
         return ARBITRARY_RESULT_SHARED;
     }
 

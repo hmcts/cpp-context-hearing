@@ -174,7 +174,7 @@ public class GenerateNowsDelegateTest {
                                                 .with(Offences::getStartDate, is(resultsShared.getFirstDefendantFirstOffence().getStartDate()))
                                         ))
                                 ))
-                        ))*/
+                        ))
                         .with(Hearing::getSharedResultLines, first(isBean(SharedResultLines.class)
                                 .with(SharedResultLines::getId, is(resultsShared.getFirstCompletedResultLine().getId()))
                                 .with(SharedResultLines::getDefendantId, is(resultsShared.getFirstCompletedResultLine().getDefendantId()))
@@ -223,7 +223,7 @@ public class GenerateNowsDelegateTest {
                                 .with(NowTypes::getWelshDescription, is(nowDefinition.getWelshName()))
                                 .with(NowTypes::getBilingualTemplateName, is(nowDefinition.getBilingualTemplateName()))
                                 .with(NowTypes::getRemotePrintingRequired, is(nowDefinition.getRemotePrintingRequired()))
-                        ))
+                        ))*/
                 )
         );
     }

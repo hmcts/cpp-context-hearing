@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import uk.gov.justice.json.schemas.core.ResultLine;
+import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -20,7 +22,7 @@ public class GenerateVariantDecisionMakerFactory {
 
     private List<Variant> variantDirectory;
     private Map<UUID, CompletedResultLineStatus> completedResultLineStatuses;
-    private List<CompletedResultLine> completedResultLines;
+    private List<Target> targets;
 
     public GenerateVariantDecisionMakerFactory setVariantDirectory(List<Variant> variantDirectory) {
         this.variantDirectory = new ArrayList<>(variantDirectory);
@@ -32,8 +34,8 @@ public class GenerateVariantDecisionMakerFactory {
         return this;
     }
 
-    public GenerateVariantDecisionMakerFactory setCompletedResultLines(List<CompletedResultLine> completedResultLines) {
-        this.completedResultLines = new ArrayList<>(completedResultLines);
+    public GenerateVariantDecisionMakerFactory setTargets(List<Target> targets) {
+        this.targets = new ArrayList<>(targets);
         return this;
     }
 
@@ -43,13 +45,14 @@ public class GenerateVariantDecisionMakerFactory {
                 .map(ResultDefinitions::getId)
                 .collect(toSet());
 
-        final List<CompletedResultLine> completedResultLines4NowAndDefendant = completedResultLines.stream()
-                .filter(resultLine -> resultLine.getDefendantId().equals(defendantId))
-                .filter(l -> resultDefinitionIds4Now.contains(l.getResultDefinitionId()))
+        final List<ResultLine> completedResultLines4NowAndDefendant = targets.stream()
+                .filter(target -> target.getDefendantId().equals(defendantId))
+                .flatMap(target->target.getResultLines().stream())
+                .filter(l -> l.getIsComplete()!=null && l.getIsComplete() && resultDefinitionIds4Now.contains(l.getResultDefinitionId()))
                 .collect(toList());
 
         final Set<UUID> resultLineIds4NowAndDefendant = completedResultLines4NowAndDefendant.stream()
-                .map(CompletedResultLine::getId)
+                .map(ResultLine::getResultLineId)
                 .collect(toSet());
 
         final Map<UUID, CompletedResultLineStatus> completedResultLineStatuses4NowAndDefendant = completedResultLineStatuses

@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -52,7 +53,7 @@ public class NowsGenerator {
         final GenerateVariantDecisionMakerFactory generateVariantDecisionMakerFactory = new GenerateVariantDecisionMakerFactory()
                 .setVariantDirectory(resultsShared.getVariantDirectory())
                 .setCompletedResultLineStatuses(resultsShared.getCompletedResultLinesStatus())
-                .setCompletedResultLines(resultsShared.getCompletedResultLines());
+                .setTargets(resultsShared.getHearing().getTargets());
 
         final List<Nows> nows = new ArrayList<>();
 
@@ -63,8 +64,10 @@ public class NowsGenerator {
                         return; //we don't generate any NOW for the defendant if they have any uncompleted result lines.
                     }
 
-                    final List<CompletedResultLine> completedResultLines4Defendant = resultsShared.getCompletedResultLines().stream()
-                            .filter(resultLine -> resultLine.getDefendantId().equals(defendant.getId()))
+                    final List<ResultLine> completedResultLines4Defendant = resultsShared.getHearing().getTargets().stream()
+                            .filter(target -> target.getDefendantId().equals(defendant.getId()))
+                            .flatMap(target->target.getResultLines().stream())
+                            .filter(ResultLine::getIsComplete)
                             .collect(toList());
 
                     nows.addAll(createNowsForDefendant(context, defendant, completedResultLines4Defendant, generateVariantDecisionMakerFactory));
@@ -75,11 +78,11 @@ public class NowsGenerator {
     }
 
     private List<Nows> createNowsForDefendant(final JsonEnvelope context, final Defendant defendant,
-                                              final List<CompletedResultLine> resultLines,
+                                              final List<ResultLine> resultLines,
                                               final GenerateVariantDecisionMakerFactory generateVariantDecisionMakerFactory) {
 
         final Set<UUID> completedResultDefinitionIds = resultLines.stream()
-                .map(CompletedResultLine::getResultDefinitionId)
+                .map(ResultLine::getResultDefinitionId)
                 .collect(toSet());
 
         final List<Nows> results = new ArrayList<>();
@@ -95,7 +98,7 @@ public class NowsGenerator {
                     .map(ResultDefinitions::getId)
                     .collect(toSet());
 
-            final List<CompletedResultLine> resultLines4Now = resultLines.stream()
+            final List<ResultLine> resultLines4Now = resultLines.stream()
                     .filter(l -> resultDefinitionIds4Now.contains(l.getResultDefinitionId()))
                     .collect(toList());
             final Nows nows = createNow(context, nowDefinition, resultLines4Now, defendant.getId(),
@@ -109,7 +112,7 @@ public class NowsGenerator {
     }
 
     private Nows createNow(final JsonEnvelope context, final NowDefinition nowDefinition,
-                           final List<CompletedResultLine> resultLines4Now, final UUID defendantId,
+                           final List<ResultLine> resultLines4Now, final UUID defendantId,
                            final GenerateVariantDecisionMaker generateVariantDecisionMaker) {
 
         //The userGroups of the prompts are not bounded by the userGroups of the resultDefinition.  I'm told that the userGroups
@@ -128,7 +131,7 @@ public class NowsGenerator {
                 return;
             }
 
-            final Set<CompletedResultLine> resultLines4Variant = resultLines4Now.stream()
+            final Set<ResultLine> resultLines4Variant = resultLines4Now.stream()
                     .filter(resultLine -> variant.getResultDefinitionsIds().contains(resultLine.getResultDefinitionId()))
                     .collect(toSet());
 
@@ -143,7 +146,7 @@ public class NowsGenerator {
                                 .collect(toList());
 
                         return NowResult.nowResult()
-                                .setSharedResultId(resultLine.getId())
+                                .setSharedResultId(resultLine.getResultLineId())
                                 .setSequence(resultDefinition.getRank())
                                 .setPrompts(promptRefs);
                     })
@@ -175,7 +178,7 @@ public class NowsGenerator {
                 .setReferenceDate(nowDefinition.getReferenceDate());
     }
 
-    private Map<NowVariant, List<String>> calculateVariants(final JsonEnvelope context, final List<CompletedResultLine> resultLines4Now) {
+    private Map<NowVariant, List<String>> calculateVariants(final JsonEnvelope context, final List<ResultLine> resultLines4Now) {
         final Map<NowVariant, List<String>> variantToUserGroupsMappings = new HashMap<>();
 
         for (final String userGroup : extractUserGroupsFromResultLinesAndPrompts(context, resultLines4Now)) {
@@ -202,7 +205,7 @@ public class NowsGenerator {
     }
 
     private Set<String> extractUserGroupsFromResultLinesAndPrompts(final JsonEnvelope context,
-                                                                   final List<CompletedResultLine> resultLines) {
+                                                                   final List<ResultLine> resultLines) {
 
         return resultLines.stream()
                 .flatMap(resultLine -> {
@@ -219,7 +222,7 @@ public class NowsGenerator {
                 ).collect(toSet());
     }
 
-    private Set<NowDefinition> findNowDefinitions(final JsonEnvelope context, final List<CompletedResultLine> resultLines) {
+    private Set<NowDefinition> findNowDefinitions(final JsonEnvelope context, final List<ResultLine> resultLines) {
         return resultLines.stream()
                 .map(resultLine -> referenceDataService
                         .getNowDefinitionByPrimaryResultDefinitionId(context,
@@ -230,7 +233,10 @@ public class NowsGenerator {
     }
 
     private static boolean anyUncompletedResultLinesForDefendant(final ResultsShared resultsShared, final Defendant defendant) {
-        return resultsShared.getUncompletedResultLines().stream().anyMatch(l -> l.getDefendantId().equals(defendant.getId()));
+        return resultsShared.getHearing().getTargets().stream()
+                   .filter(target -> target.getDefendantId().equals(defendant.getId()))
+                    .flatMap(target->target.getResultLines().stream())
+                    .anyMatch(resultLine->!resultLine.getIsComplete());
     }
 
     private static boolean anyMandatoryResultLineNotPresent(final Set<UUID> completedResultDefinitionIds, final NowDefinition nowDefinition) {

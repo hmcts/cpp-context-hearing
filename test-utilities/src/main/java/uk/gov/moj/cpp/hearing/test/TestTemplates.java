@@ -278,13 +278,8 @@ public class TestTemplates {
                     .build();
         }
 
-        //TODO GPE-5480 this command has changed
-        @SuppressWarnings({"squid:S1172", "squid:CommentedOutCodeLine"})
-        public static ShareResultsCommand standardShareResultsCommandTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId1, final UUID resultLineId2, LocalDate orderedDate) {
-            return with(basicShareResultsCommandTemplate(), command -> {
-                //command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId1, orderedDate));
-                //command.getCompletedResultLines().add(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId2, orderedDate));
-            });
+        public static ShareResultsCommand standardShareResultsCommandTemplate(final UUID hearingId) {
+            return basicShareResultsCommandTemplate().setHearingId(hearingId);
         }
 
         public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId, LocalDate orderedDate) {

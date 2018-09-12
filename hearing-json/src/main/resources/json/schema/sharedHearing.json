@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/core/publichearingresulted/sharedHearing.json",
+  "description": "Shared Hearing",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "type": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/hearingType.json"
+    },
+    "jurisdictionType": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/jurisdictionType"
+    },
+    "reportingRestrictionReason": {
+      "type": "string"
+    },
+    "hearingLanguage": {
+      "type": "string"
+    },
+    "hearingDays": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/hearingDay.json"
+      }
+    },
+    "courtCentre": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtCentre.json"
+    },
+    "judiciary": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/judicialRole.json"
+      }
+    },
+    "prosecutionCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/prosecutionCase.json"
+      }
+    },
+    "hasSharedResults": {
+      "description": "Indicates that the hearing has at least one result shared",
+      "type": "boolean"
+    },
+    "prosecutionCounsels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/prosecutionCounsel.json"
+      }
+    },
+    "defenceCounsels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/defenceCounsel.json"
+      }
+    },
+    "defendantAttendance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/defendantAttendance.json"
+      }
+    },
+    "sharedResultLines": {
+      "type": "array",
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/publichearingresulted/sharedResultLine.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "jurisdictionType",
+    "prosecutionCases",
+    "judiciary",
+    "hearingDays",
+    "courtCentre"
+  ],
+  "additionalProperties": false
+}

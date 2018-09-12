@@ -7,6 +7,7 @@ import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
@@ -293,16 +294,19 @@ public class CommandHelpers {
             return resultsShared.getHearing().getProsecutionCases().get(0);
         }
 
-        public CompletedResultLine getFirstCompletedResultLine() {
-            return resultsShared.getCompletedResultLines().get(0);
+        public ResultLine getFirstCompletedResultLine() {
+            return resultsShared.getHearing().getTargets().stream()
+                    .flatMap(target->target.getResultLines().stream())
+                    .filter(ResultLine::getIsComplete)
+                    .findFirst().orElse(null);
         }
 
         public CompletedResultLineStatus getFirstCompletedResultLineStatus() {
             return resultsShared.getCompletedResultLinesStatus().values().stream().findFirst().orElse(null);
         }
 
-        public ResultPrompt getFirstCompletedResultLineFirstPrompt() {
-            return resultsShared.getCompletedResultLines().get(0).getPrompts().get(0);
+        public uk.gov.justice.json.schemas.core.Prompt getFirstCompletedResultLineFirstPrompt() {
+            return getFirstCompletedResultLine().getPrompts().get(0);
         }
 
         public Hearing getHearing() {

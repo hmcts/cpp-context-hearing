@@ -10,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements;
@@ -57,13 +58,17 @@ public class HearingAdjournTransformer {
     private static final String HEARINGS = "hearings";
 
 
+    private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
+        return resultsShared.getHearing().getTargets().stream().flatMap(target->target.getResultLines().stream()).collect(Collectors.toList());
+    }
+
     public JsonObject transform(final ResultsShared resultsShared, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
         final ProsecutionCase firstCase = resultsShared.getHearing().getProsecutionCases().get(0);//Hardcoded 0 as we are not handling mutiple cases yet, should be removed when services handle multi case hearing
-        final List<CompletedResultLine> completedResultLines = resultsShared.getCompletedResultLines();
+        final List<ResultLine> completedResultLines = getCompletedResultLines(resultsShared);
 
         final JsonArrayBuilder defendants = Json.createArrayBuilder();
         resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream()).forEach(defendant -> {
-            final List<Offence> offences = getOffencesHaveResultNextHearing(defendant, completedResultLines, nextHearingResultDefinitions);
+            final List<Offence> offences = getOffencesHaveResultNextHearing(defendant, resultsShared.getHearing().getTargets(), completedResultLines, nextHearingResultDefinitions);
             if (!offences.isEmpty()) {
                 final JsonArrayBuilder jsonOffences = Json.createArrayBuilder();
                 offences.forEach(offence -> {

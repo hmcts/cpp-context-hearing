@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -33,8 +34,11 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento = momento;
     }
 
+    @SuppressWarnings({"squid:S1172"})
     public void handleResultsShared(ResultsShared resultsShared) {
         this.momento.setPublished(true);
+/*
+        //TODO GPE-5480 review this
 
         resultsShared.getCompletedResultLines().forEach(completedResultLine -> {
 
@@ -52,6 +56,7 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento.setCompletedResultLines(resultsShared.getCompletedResultLines().stream().collect(toMap(CompletedResultLine::getId, Function.identity())));
 
         this.momento.setVariantDirectory(resultsShared.getVariantDirectory()); //variants might be deleted if their result lines have been deleted.
+  */
     }
 
     public void handleResultLinesStatusUpdated(ResultLinesStatusUpdated resultLinesStatusUpdated) {
@@ -77,13 +82,15 @@ public class ResultsSharedDelegate implements Serializable {
     }
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
+
         List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
                 .flatMap(t->t.getResultLines().stream())
                 .filter(rl->rl.getIsComplete())
                 .map(rl->rl.getResultLineId())
                 .collect(Collectors.toList());
 
-//        List<UUID> completedResultLineIds = command.getCompletedResultLines().stream().map(CompletedResultLine::getId).collect(Collectors.toList());
+        this.momento.getHearing().setTargets( new ArrayList<>(this.momento.getTargets().values()) );
+
         final List<Variant> variants = this.momento.getVariantDirectory().stream()
                 .filter(variant -> {
                     List<UUID> resultLineIds = variant.getValue().getResultLines().stream().map(ResultLineReference::getResultLineId).collect(Collectors.toList());
@@ -103,11 +110,8 @@ public class ResultsSharedDelegate implements Serializable {
                 .withHearingId(command.getHearingId())
                 .withSharedTime(sharedTime)
                 .withCourtClerk(command.getCourtClerk())
-                //TODO GPE-5480 address this commented out code
-                //.withUncompletedResultLines(command.getUncompletedResultLines())
-                //.withCompletedResultLines(command.getCompletedResultLines())
-//                .withHearing(this.momento.getHearing())
-//                .withCases(this.momento.getCases())
+                //TODO GPE-5480 remove  this commented out code
+                .withHearing(this.momento.getHearing())
                 .withProsecutionCounsels(this.momento.getProsecutionCounsels())
                 .withDefenceCounsels(this.momento.getDefenceCounsels())
                 .withPleas(this.momento.getPleas())
