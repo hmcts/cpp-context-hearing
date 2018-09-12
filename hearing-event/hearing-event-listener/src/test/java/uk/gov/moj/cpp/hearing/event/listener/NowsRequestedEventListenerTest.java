@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowsRequestedTemplates.nowsRequestedTemplate;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -55,7 +56,6 @@ public class NowsRequestedEventListenerTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
-
     @Test
     public void shouldUpdateNowsInformation() throws Exception {
 
@@ -67,17 +67,17 @@ public class NowsRequestedEventListenerTest {
         UUID sharedResultId = randomUUID();
         final String language = "english";
 
-        final InputStream is = NowsRequestedEventListenerTest.class.getResourceAsStream("/hearing.events.nows-generated.json");
-        NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
-        nowsRequested.getHearing().setId(hearingId.toString());
-        nowsRequested.getHearing().getNows().get(0).setDefendantId(defendantId.toString());
-        nowsRequested.getHearing().getNows().get(0).setId(nowsId.toString());
-        nowsRequested.getHearing().getNows().get(0).setNowsTypeId(nowsTypeId.toString());
-        nowsRequested.getHearing().getNows().get(0).setNowsTemplateName(nowsTypeId.toString());
-        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getNowResult().get(0).setSharedResultId(sharedResultId.toString());
-        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getNowResult().get(0).setSequence(1);
-        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).setId(materialId.toString());
-        nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).setLanguage(language);
+        NowsRequested nowsRequested = nowsRequestedTemplate();
+
+        nowsRequested.getHearing().setId(hearingId);
+        nowsRequested.getNows().get(0).setDefendantId(defendantId);
+        nowsRequested.getNows().get(0).setId(nowsId);
+        nowsRequested.getNows().get(0).setNowsTypeId(nowsTypeId);
+        nowsRequested.getNows().get(0).setNowsTemplateName(nowsTypeId.toString());
+        nowsRequested.getNows().get(0).getMaterials().get(0).getNowResult().get(0).setSharedResultId(sharedResultId);
+        nowsRequested.getNows().get(0).getMaterials().get(0).getNowResult().get(0).setSequence(1);
+        nowsRequested.getNows().get(0).getMaterials().get(0).setId(materialId);
+        nowsRequested.getNows().get(0).getMaterials().get(0).setLanguage(language);
 
 
         final List<Nows> nowsList = new ArrayList<>();

@@ -22,12 +22,12 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
             LoggerFactory.getLogger(GenerateNowsCommandHandler.class.getName());
 
     @Handles("hearing.command.generate-nows")
-    public void genarateNows(final JsonEnvelope envelope) throws EventStreamException {
+    public void generateNows(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.generate-nows event received {}", envelope.toObfuscatedDebugString());
         }
         final NowsRequested nowsRequested = convertToObject(envelope, NowsRequested.class);
-        aggregate(HearingAggregate.class, fromString(nowsRequested.getHearing().getId()), envelope, a -> a.generateNows(nowsRequested));
+        aggregate(HearingAggregate.class, nowsRequested.getHearing().getId(), envelope, a -> a.generateNows(nowsRequested));
     }
 
     @Handles("hearing.command.save-nows-variants")

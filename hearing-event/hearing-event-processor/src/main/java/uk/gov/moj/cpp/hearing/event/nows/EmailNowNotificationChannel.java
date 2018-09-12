@@ -148,7 +148,7 @@ public class EmailNowNotificationChannel {
                 String.format("%s - %s", nowTypeName, caseUrns);
     }
 
-    private String getNowsPdfFileUrl(final String materialId) {
-        return String.format(NOWS_PDF_URL, materialExternalWebLinkBaseUrl, materialId);
+    private String getNowsPdfFileUrl(final UUID materialId) {
+        return String.format(NOWS_PDF_URL, materialExternalWebLinkBaseUrl, materialId.toString());
     }
 }

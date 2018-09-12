@@ -146,11 +146,6 @@ public class CommandHelpers {
             return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
         }
 
-        public uk.gov.justice.json.schemas.core.Defendant getFirstCaseForFirstDefendant() {
-            return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
-        }
-
-
         public UUID getFirstOffenceIdForFirstDefendant() {
             return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
         }
@@ -221,15 +216,6 @@ public class CommandHelpers {
             this.shareResultsCommand = shareResultsCommand;
         }
 
-/* TODO remove as part of GPE-5480
-        public CompletedResultLine getFirstCompletedResultLine() {
-            return shareResultsCommand.getCompletedResultLines().get(0);
-        }
-
-        public CompletedResultLine getSecondCompletedResultLine() {
-            return shareResultsCommand.getCompletedResultLines().get(1);
-        }
-*/
         public ShareResultsCommand it() {
             return shareResultsCommand;
         }

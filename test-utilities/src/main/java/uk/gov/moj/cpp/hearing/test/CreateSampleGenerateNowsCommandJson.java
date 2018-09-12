@@ -19,7 +19,7 @@ public class CreateSampleGenerateNowsCommandJson {
     public static void main(String[] args) throws IOException {
         final ObjectMapper objectMapper = createObjectMapper();
 
-        final GenerateNowsCommand command = TestTemplates.generateNowsCommandTemplate(UUID.randomUUID(), UUID.randomUUID());
+        final GenerateNowsCommand command = TestTemplates.generateNowsCommandTemplate( UUID.randomUUID());
 
         final List<String> destinations = Arrays.asList(
                 HEARING_COMMAND_HEARING_COMMAND_API_SRC_RAML_JSON + "/hearing.generate-nows.json",

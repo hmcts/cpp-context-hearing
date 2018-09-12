@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -10,12 +11,8 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Defendants;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
@@ -25,7 +22,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefiniti
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +33,6 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("squid:S1188")
 public class GenerateNowsDelegate {
-
-    private static final String DEFENCE_COUNSEL_ATTENDEE_TYPE = "DefenseCounsel";
-    private static final String PROSECUTION_COUNSEL_ATTENDEE_TYPE = "ProsecutionCounsel";
-    private static final String COURTCLERK_ATTENDEE_TYPE = "CourtClerk";
 
     private final Enveloper enveloper;
 
@@ -65,88 +57,6 @@ public class GenerateNowsDelegate {
     }
 
     public void generateNows(final Sender sender, final JsonEnvelope event, final List<Nows> nows, final ResultsShared resultsShared) {
-
-        final GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
-                .setHearing(
-                        translateReferenceData(resultsShared)
-                                .setNows(nows)
-                                .setNowTypes(findNowDefinitions(event, getCompletedResultLines(resultsShared))
-                                        .stream()
-                                        .map(nowDefinition -> {
-
-                                            String nowText = Stream.concat(
-                                                    Stream.of(nowDefinition.getText()),
-                                                    nowDefinition.getResultDefinitions().stream()
-                                                            .map(ResultDefinitions::getText)
-                                                            .distinct()
-                                            )
-                                                    .filter(Objects::nonNull)
-                                                    .filter(s -> !s.isEmpty())
-                                                    .collect(Collectors.joining("\n"));
-
-                                            String welshText = Stream.concat(
-                                                    Stream.of(nowDefinition.getWelshText()),
-                                                    nowDefinition.getResultDefinitions().stream()
-                                                            .map(ResultDefinitions::getWelshText)
-                                                            .distinct()
-                                            )
-                                                    .filter(Objects::nonNull)
-                                                    .filter(s -> !s.isEmpty())
-                                                    .collect(Collectors.joining("\n"));
-
-
-                                            return NowTypes.nowTypes()
-                                                    .setId(nowDefinition.getId())
-                                                    .setStaticText(nowText)
-                                                    .setWelshStaticText(welshText)
-                                                    .setDescription(nowDefinition.getName())
-                                                    .setJurisdiction(nowDefinition.getJurisdiction())
-                                                    .setPriority(ofNullable(nowDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
-                                                    .setRank(nowDefinition.getRank())
-                                                    .setTemplateName(nowDefinition.getTemplateName())
-                                                    .setBilingualTemplateName(nowDefinition.getBilingualTemplateName())
-                                                    .setWelshDescription(nowDefinition.getWelshName())
-                                                    .setRemotePrintingRequired(nowDefinition.getRemotePrintingRequired());
-                                        })
-                                        .collect(toList())
-                                )
-
-                );
-
-        sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows")
-                .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
-    }
-    @SuppressWarnings({"squid:S1135"})
-    private Hearing translateReferenceData(final ResultsShared resultsShared) {
-
-        final List<Attendees> attendees = new ArrayList<>();
-
-        resultsShared.getDefenceCounsels().forEach((id, defenseCounsel) ->
-                attendees.add(
-                        Attendees.attendees()
-                                .setType(DEFENCE_COUNSEL_ATTENDEE_TYPE)
-                                .setFirstName(defenseCounsel.getFirstName())
-                                .setLastName(defenseCounsel.getLastName())
-                )
-
-        );
-
-        resultsShared.getProsecutionCounsels().forEach((id, prosecutionCounsel) ->
-                attendees.add(
-                        Attendees.attendees()
-                                .setType(PROSECUTION_COUNSEL_ATTENDEE_TYPE)
-                                .setFirstName(prosecutionCounsel.getFirstName())
-                                .setLastName(prosecutionCounsel.getLastName())
-                )
-        );
-
-        attendees.add(
-                Attendees.attendees()
-                        .setType(COURTCLERK_ATTENDEE_TYPE)
-                        .setFirstName(resultsShared.getCourtClerk().getFirstName())
-                        .setLastName(resultsShared.getCourtClerk().getLastName())
-        );
-
         final Map<ResultLine, Target> resultLine2Target = new HashMap<>();
         resultsShared.getHearing().getTargets().forEach(
                 target ->
@@ -158,13 +68,14 @@ public class GenerateNowsDelegate {
                         prosecutionCase.getDefendants().forEach(defendant -> defendantId2CaseId.put(defendant.getId(), prosecutionCase.getId()))
         );
 
-
-        @SuppressWarnings({"squid:CommentedOutCodeLine"})
         final List<SharedResultLines> sharedResultLines = getCompletedResultLines(resultsShared).stream()
                 .map(line -> SharedResultLines.sharedResultLines()
-                        .setId(line.getResultLineId())
-                        .setSharedDate(ofNullable(resultsShared.getCompletedResultLinesStatus()
-                                .get(line.getResultLineId())).map(CompletedResultLineStatus::getLastSharedDateTime).orElse(null))
+                                .setId(line.getResultLineId())
+                                .setSharedDate(ofNullable(resultsShared.getCompletedResultLinesStatus()
+                                        .get(line.getResultLineId()))
+                                        .map(CompletedResultLineStatus::getLastSharedDateTime)
+                                        .orElse(null)
+                                )
                         .setOrderedDate(line.getOrderedDate())
                         .setLevel(line.getLevel().name())
                         .setCaseId(defendantId2CaseId.get(resultLine2Target.get( line).getDefendantId()))
@@ -181,94 +92,54 @@ public class GenerateNowsDelegate {
                         )
                 ).collect(Collectors.toList());
 
-        return Hearing.hearing()
-                .setId(resultsShared.getHearing().getId())
 
-/*                .setHearingDates(hearingIn.getHearingDays())
-                .setCourtCentre(CourtCentre.courtCentre()
-                        .setCourtCentreId(hearingIn.getCourtCentreId())
-                        .setCourtCentreName(hearingIn.getCourtCentreName())
-                        .setCourtRoomId(hearingIn.getCourtRoomId())
-                        .setCourtRoomName(hearingIn.getCourtRoomName()))*/
-                .setDefendants(resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream())
-                        .map(defendant -> Defendants.defendants()
-                                .setId(defendant.getId())
-                                //TODO GPE-5480
-/*                                .setPerson(Person.person()
-                                        //.setId(defendant.getPersonId())
-                                        .setFirstName(defendant.getFirstName())
-                                        .setLastName(defendant.getLastName())
-                                        .setDateOfBirth(defendant.getDateOfBirth().toString())
-                                        .setNationality(defendant.getNationality())
-                                        .setGender(defendant.getGender())
-                                        .setAddress(Address.address()
-                                                .setAddress1(defendant.getAddress().getAddress1())
-                                                .setAddress2(defendant.getAddress().getAddress2())
-                                                .setAddress3(defendant.getAddress().getAddress3())
-                                                .setAddress4(defendant.getAddress().getAddress4())
-                                                .setPostCode(defendant.getAddress().getPostCode())))
-                                .setCases(defendant.getDefendantCases().stream()
-                                        .map(caseIn -> Cases.cases()
-                                                .setId(caseIn.getCaseId())
-                                                .setUrn(resultsShared.getCases().stream()
-                                                        .filter(c -> c.getCaseId().equals(caseIn.getCaseId()))
-                                                        .map(Case::getUrn)
-                                                        .findFirst()
-                                                        .orElse(null))
-                                                .setBailStatus(caseIn.getBailStatus())
-                                                .setCustodyTimeLimitDate(caseIn.getCustodyTimeLimitDate())
-                                                .setOffences(defendant.getOffences().stream()
-                                                        .filter(offence -> offence.getCaseId().equals(caseIn.getCaseId()))
-                                                        .map(offIn -> Offences.offences()
-                                                                .setId(offIn.getId())
-                                                                .setCode(offIn.getOffenceCode())
-                                                                .setStartDate(offIn.getStartDate())
-                                                                .setEndDate(offIn.getEndDate())
-                                                                .setConvictionDate(offIn.getConvictionDate())
-                                                                .setWording(offIn.getWording())
-                                                                .setPlea(ofNullable(resultsShared.getPleas().get(offIn.getId()))
-                                                                        .map(p -> Plea.plea()
-                                                                                .setId(p.getOffenceId())
-                                                                                .setDate(p.getPleaDate())
-                                                                                .setValue(p.getValue().toString())
-                                                                                .setEnteredHearingId(p.getOriginHearingId())
-                                                                        )
-                                                                        .orElse(null)
-                                                                )
-                                                                .setVerdict(resultsShared.getVerdicts().values().stream()
-                                                                        .filter(v -> v.getOffenceId().equals(offIn.getId()))
-                                                                        .map(v -> Verdict.verdict()
-                                                                                .setTypeId(v.getVerdictTypeId())
-                                                                                .setEnteredHearingId(v.getHearingId())
-                                                                                .setNumberOfJurors(v.getNumberOfJurors())
-                                                                                .setNumberOfSplitJurors(formatSplitJurors(v))
-                                                                                .setUnanimous(v.getUnanimous())
-                                                                                .setVerdictCategory(v.getCategory())
-                                                                                .setVerdictDate(v.getVerdictDate())
-                                                                                .setVerdictDescription(v.getLegislation())
-                                                                        )
-                                                                        .findFirst()
-                                                                        .orElse(null)
-                                                                )
-                                                        )
-                                                        .collect(toList())
-                                                ))
-                                        .collect(toList()))
-                                .setInterpreter(of(defendant)
-                                        .map(Defendant::getInterpreter)
-                                        .map(i -> Interpreter.interpreter().setLanguage(i.getLanguage()))
-                                        .orElse(null))*/
-                        )
+        final GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()
+                .setHearing(resultsShared.getHearing())
+                .setNows(nows)
+                .setSharedResultLines(sharedResultLines)
+                .setCourtClerk(resultsShared.getCourtClerk())
+                .setNowTypes(findNowDefinitions(event, getCompletedResultLines(resultsShared))
+                        .stream()
+                        .map(nowDefinition -> {
+
+                            String nowText = Stream.concat(
+                                    Stream.of(nowDefinition.getText()),
+                                    nowDefinition.getResultDefinitions().stream()
+                                            .map(ResultDefinitions::getText)
+                                            .distinct()
+                            )
+                                    .filter(Objects::nonNull)
+                                    .filter(s -> !s.isEmpty())
+                                    .collect(Collectors.joining("\n"));
+
+                            String welshText = Stream.concat(
+                                    Stream.of(nowDefinition.getWelshText()),
+                                    nowDefinition.getResultDefinitions().stream()
+                                            .map(ResultDefinitions::getWelshText)
+                                            .distinct()
+                            )
+                                    .filter(Objects::nonNull)
+                                    .filter(s -> !s.isEmpty())
+                                    .collect(Collectors.joining("\n"));
+
+                            return NowTypes.nowTypes()
+                                    .setId(nowDefinition.getId())
+                                    .setStaticText(nowText)
+                                    .setWelshStaticText(welshText)
+                                    .setDescription(nowDefinition.getName())
+                                    .setJurisdiction(nowDefinition.getJurisdiction())
+                                    .setPriority(ofNullable(nowDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
+                                    .setRank(nowDefinition.getRank())
+                                    .setTemplateName(nowDefinition.getTemplateName())
+                                    .setBilingualTemplateName(nowDefinition.getBilingualTemplateName())
+                                    .setWelshDescription(nowDefinition.getWelshName())
+                                    .setRemotePrintingRequired(nowDefinition.getRemotePrintingRequired());
+                        })
                         .collect(toList())
-                )
-                .setAttendees(attendees)
-                .setSharedResultLines(sharedResultLines);
-    }
+                );
 
-    @SuppressWarnings({"squid:UnusedPrivateMethod"})
-    private String formatSplitJurors(final VerdictUpsert v) {
-        return v.getNumberOfJurors() == null || v.getNumberOfSplitJurors() == null ? "" :
-                String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors());
+        sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.generate-nows")
+                .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
     }
 
     private Set<NowDefinition> findNowDefinitions(final JsonEnvelope context, final List<ResultLine> resultLines) {

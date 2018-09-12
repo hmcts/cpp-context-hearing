@@ -6,6 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -23,6 +24,7 @@ import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowsRequestedTemplates.nowsRequestedTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -31,6 +33,10 @@ import org.junit.After;
 import org.junit.Test;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
+import uk.gov.moj.cpp.hearing.nows.events.MaterialUserGroup;
+import uk.gov.moj.cpp.hearing.nows.events.Now;
+import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
+import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
@@ -54,7 +60,6 @@ public class GenerateNowsIT extends AbstractIT {
     private static final MessageProducer messageProducerClientPublic = QueueUtil.publicEvents.createProducer();
     private static final String USERGROUP1 = "courtAdmin";
     private static final String USERGROUP2 = "defence";
-    private static final String CASEURN = "CASE12345";
     private static final String ORIGINATOR = "originator";
     private static final String ORIGINATOR_VALUE = "court";
     private static final String DOCUMENT_TEXT = STRING.next();
@@ -73,8 +78,8 @@ public class GenerateNowsIT extends AbstractIT {
             i.getHearing().getCourtCentre().setId(subscriptions.getFirstSubscription().getCourtCentreIds().get(0));
         })));
 
-        final String userId = randomUUID().toString();
-        final String materialId = randomUUID().toString();
+        final UUID userId = randomUUID();
+        final UUID materialId = randomUUID();
         final String nowsId = randomUUID().toString();
         final String sharedResultId = randomUUID().toString();
 
@@ -86,17 +91,41 @@ public class GenerateNowsIT extends AbstractIT {
 
         makeCommand(requestSpec, "hearing.generate-nows")
                 .ofType("application/vnd.hearing.generate-nows+json")
-                .withPayload(getGenerateNowsCommand(
-                        hearing.getHearingId().toString(),
-                        hearing.getFirstDefendantForFirstCase().getId().toString(),
-                        materialId,
-                        nowsId,
-                        subscriptions.getFirstSubscription().getNowTypeIds().get(0).toString(),
-                        sharedResultId,
-                        USERGROUP1,
-                        USERGROUP2,
-                        subscriptions.getFirstSubscription().getCourtCentreIds().get(0).toString(),
-                        CASEURN))
+                .withPayload(with(nowsRequestedTemplate(), nowsRequested -> {
+                    nowsRequested.getHearing().setId(hearing.getHearingId());
+                    with(nowsRequested.getHearing().getProsecutionCases().get(0), prosecutionCase -> {
+                        prosecutionCase.setId(hearing.getFirstDefendantForFirstCase().getId());
+                        prosecutionCase.getProsecutionCaseIdentifier().setCaseURN(hearing.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN());
+                    });
+                    nowsRequested.getHearing().getCourtCentre().setId(subscriptions.getFirstSubscription().getCourtCentreIds().get(0));
+
+                    with(nowsRequested.getNows().get(0), nows -> {
+                        nows.setId(fromString(nowsId));
+                    });
+                    for (Now now: nowsRequested.getNows()){
+                        now.setDefendantId(hearing.getFirstDefendantForFirstCase().getId());
+                        now.setNowsTypeId(subscriptions.getFirstSubscription().getNowTypeIds().get(0));
+                    }
+
+                    nowsRequested.getNowTypes().get(0).setId(subscriptions.getFirstSubscription().getNowTypeIds().get(0));
+                    nowsRequested.getSharedResultLines().get(0).setId(fromString(sharedResultId));
+                    for (SharedResultLine sharedResultLine: nowsRequested.getSharedResultLines()){
+                        sharedResultLine.setDefendantId(hearing.getFirstDefendantForFirstCase().getId());
+                        sharedResultLine.setCaseId(hearing.getFirstCase().getId());
+                        sharedResultLine.setOffenceId(hearing.getFirstOffenceIdForFirstDefendant());
+                    }
+
+                    with(nowsRequested.getNows().get(0).getMaterials().get(0), material -> {
+                        material.setId(materialId);
+                        material.getUserGroups().clear();
+                        material.getUserGroups().add(MaterialUserGroup.materialUserGroup().setGroup(USERGROUP1));
+                        material.getUserGroups().add(MaterialUserGroup.materialUserGroup().setGroup(USERGROUP2));
+                        material.getNowResult().get(0).setSharedResultId(fromString(sharedResultId));
+                    });
+
+                    nowsRequested.setHearing(hearing.getHearing());
+
+                }))
                 .executeSuccessfully();
 
         // ensure upload material and update status called
@@ -118,13 +147,12 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.nows[0].id", is(nowsId)),
                                 withJsonPath("$.nows[0].defendantId", is(hearing.getFirstDefendantForFirstCase().getId().toString())),
                                 withJsonPath("$.nows[0].nowsTypeId", is(subscriptions.getFirstSubscription().getNowTypeIds().get(0).toString())),
-                                withJsonPath("$.nows[0].material[0].id", is(materialId)),
+                                withJsonPath("$.nows[0].material[0].id", is(materialId.toString())),
                                 withJsonPath("$.nows[0].material[0].status", is("generated")),
-                                withJsonPath("$.nows[0].material[0].nowResult[0].sharedResultId", is(sharedResultId)),
-                                withJsonPath("$.nows[0].material[0].nowResult[0].sequence", is(1))
+                                withJsonPath("$.nows[0].material[0].nowResult[0].sharedResultId", is(sharedResultId))
                         )));
 
-        poll(requestParams(getURL("hearing.query.search-by-material-id", materialId), "application/vnd.hearing.query.search-by-material-id+json")
+        poll(requestParams(getURL("hearing.query.search-by-material-id", materialId.toString()), "application/vnd.hearing.query.search-by-material-id+json")
                 .withHeader(CPP_UID_HEADER_AS_ADMIN.getName(), CPP_UID_HEADER_AS_ADMIN.getValue()).build())
                 .until(status().is(OK),
                         print(),
@@ -133,8 +161,8 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.allowedUserGroups[1]", is("defence"))
                         )));
 
-        NotifyStub.verifyNotification(subscriptions.getFirstSubscription(), Arrays.asList(CASEURN));
-        DocumentGeneratorStub.verifyCreate(Arrays.asList(materialId));
+        NotifyStub.verifyNotification(subscriptions.getFirstSubscription(), Arrays.asList(hearing.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()));
+        DocumentGeneratorStub.verifyCreate(Arrays.asList(materialId.toString()));
 
     }
 
@@ -155,16 +183,40 @@ public class GenerateNowsIT extends AbstractIT {
 
         makeCommand(requestSpec, "hearing.generate-nows")
                 .ofType("application/vnd.hearing.generate-nows+json")
-                .withPayload(getGenerateNowsCommand(hearing.getHearingId().toString(),
-                        hearing.getFirstDefendantForFirstCase().getId().toString(),
-                        materialId.toString(),
-                        nowsId,
-                        nowsTypeId,
-                        sharedResultId,
-                        USERGROUP1,
-                        USERGROUP2,
-                        randomUUID().toString(),
-                        CASEURN))
+                .withPayload(with(nowsRequestedTemplate(), nowsRequested -> {
+                    nowsRequested.getHearing().setId(hearing.getHearingId());
+                    with(nowsRequested.getHearing().getProsecutionCases().get(0), prosecutionCase -> {
+                        prosecutionCase.setId(hearing.getFirstDefendantForFirstCase().getId());
+                        prosecutionCase.getProsecutionCaseIdentifier().setCaseURN(hearing.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN());
+                    });
+
+                    with(nowsRequested.getNows().get(0), nows -> {
+                        nows.setId(fromString(nowsId));
+                    });
+                    for (Now now: nowsRequested.getNows()){
+                        now.setDefendantId(hearing.getFirstDefendantForFirstCase().getId());
+                        now.setNowsTypeId(fromString(nowsTypeId));
+                    }
+
+                    nowsRequested.getNowTypes().get(0).setId(fromString(nowsTypeId));
+                    nowsRequested.getSharedResultLines().get(0).setId(fromString(sharedResultId));
+                    for (SharedResultLine sharedResultLine: nowsRequested.getSharedResultLines()){
+                        sharedResultLine.setDefendantId(hearing.getFirstDefendantForFirstCase().getId());
+                        sharedResultLine.setCaseId(hearing.getFirstCase().getId());
+                        sharedResultLine.setOffenceId(hearing.getFirstOffenceIdForFirstDefendant());
+                    }
+
+                    with(nowsRequested.getNows().get(0).getMaterials().get(0), material -> {
+                        material.setId(materialId);
+                        material.getUserGroups().clear();
+                        material.getUserGroups().add(MaterialUserGroup.materialUserGroup().setGroup(USERGROUP1));
+                        material.getUserGroups().add(MaterialUserGroup.materialUserGroup().setGroup(USERGROUP2));
+                        material.getNowResult().get(0).setSharedResultId(fromString(sharedResultId));
+                    });
+
+                    nowsRequested.setHearing(hearing.getHearing());
+
+                }))
                 .executeSuccessfully();
 
         nowsRequestedEventListener.waitFor();
@@ -200,39 +252,22 @@ public class GenerateNowsIT extends AbstractIT {
         nowsMaterialStatusUpdatedEventListener.waitFor();
     }
 
-
-    private static String getGenerateNowsCommand(final String hearingId, final String defendantId, final String materialId,
-                                                 final String nowsId, final String nowsTypeId, final String sharedResultId,
-                                                 final String usergroup1, final String usergroup2, final String courtCentreId, final String caseURN) throws IOException {
-        return getStringFromResource("hearing.generate-nows.json")
-                .replace("HEARING_ID", hearingId)
-                .replace("DEFENDANT_ID", defendantId)
-                .replace("NOW_ID", nowsId)
-                .replace("MATERIAL_ID", materialId)
-                .replace("NOWTYPE_ID", nowsTypeId)
-                .replace("USERGROUP1", usergroup1)
-                .replace("USERGROUP2", usergroup2)
-                .replace("RESULT_ID", sharedResultId)
-                .replace("COURTCENTRE_ID", courtCentreId)
-                .replace("CASEURN", caseURN);
-    }
-
-    private boolean uploadMaterialCalled(String materialId) {
+    private boolean uploadMaterialCalled(UUID materialId) {
         return findAll(postRequestedFor(urlPathMatching(WireMockStubUtils.MATERIAL_UPLOAD_COMMAND)))
                 .stream()
-                .anyMatch(log -> log.getBodyAsString().contains(materialId));
+                .anyMatch(log -> log.getBodyAsString().contains(materialId.toString()));
     }
 
-    private boolean updateMaterialStatusHmpsCalled(String materialId) {
+    private boolean updateMaterialStatusHmpsCalled(UUID materialId) {
         return findAll(postRequestedFor(urlPathMatching(WireMockStubUtils.MATERIAL_STATUS_UPLOAD_COMMAND)))
                 .stream()
-                .anyMatch(log -> log.getBodyAsString().contains(materialId));
+                .anyMatch(log -> log.getBodyAsString().contains(materialId.toString()));
     }
 
-    private void sendMaterialFileUploadedPublicEvent(final String materialId, final String userId) {
+    private void sendMaterialFileUploadedPublicEvent(final UUID materialId, final UUID userId) {
         final String commandName = "material.material-added";
-        final Metadata metadata = getMetadataFrom(userId, commandName);
-        final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId).add(
+        final Metadata metadata = getMetadataFrom(userId.toString(), commandName);
+        final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId.toString()).add(
                 "fileDetails",
                 Json.createObjectBuilder().add("alfrescoAssetId", "aGVsbG8=")
                         .add("mimeType", "text/plain").add("fileName", "file.txt"))
@@ -240,11 +275,11 @@ public class GenerateNowsIT extends AbstractIT {
         QueueUtil.sendMessage(messageProducerClientPublic, commandName, payload, metadata);
     }
 
-    private void sendHearingHmpsMaterialStatusUpdatedPublicMessage(final String materialId,
-                                                                   final String userId, final String hearingId) {
+    private void sendHearingHmpsMaterialStatusUpdatedPublicMessage(final UUID materialId,
+                                                                   final UUID userId, final String hearingId) {
         final String commandName = "public.resultinghmps.event.nows-material-status-updated";
-        final Metadata metadata = getMetadataFrom(userId, commandName);
-        final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId)
+        final Metadata metadata = getMetadataFrom(userId.toString(), commandName);
+        final JsonObject payload = Json.createObjectBuilder().add("materialId", materialId.toString())
                 .add("hearingId", hearingId).add("status", "generated").build();
         QueueUtil.sendMessage(messageProducerClientPublic, commandName, payload, metadata);
     }

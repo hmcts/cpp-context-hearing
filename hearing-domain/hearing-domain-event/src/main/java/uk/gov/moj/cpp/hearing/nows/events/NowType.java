@@ -1,110 +1,136 @@
 package uk.gov.moj.cpp.hearing.nows.events;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 
 public class NowType implements Serializable {
 
-    private static final long serialVersionUID = -8533556522837735944L;
-    
-    private String id;
+    private static final long serialVersionUID = 2L;
+
+    private UUID id;
+
     private String description;
+
     private String templateName;
+
     private Integer rank;
+
     private String staticText;
+
     private String welshStaticText;
+
     private String priority;
+
     private String jurisdiction;
+
     private String welshDescription;
+
     private String bilingualTemplateName;
+
     private Boolean remotePrintingRequired;
 
 
-    public String getId() {
+    public UUID getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getTemplateName() {
         return templateName;
-    }
-
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
     }
 
     public Integer getRank() {
         return rank;
     }
 
-    public void setRank(Integer rank) {
-        this.rank = rank;
-    }
-
     public String getStaticText() {
         return staticText;
-    }
-
-    public void setStaticText(String staticText) {
-        this.staticText = staticText;
     }
 
     public String getWelshStaticText() {
         return welshStaticText;
     }
 
-    public void setWelshStaticText(String welshStaticText) {
-        this.welshStaticText = welshStaticText;
-    }
-
     public String getPriority() {
         return priority;
-    }
-
-    public void setPriority(String priority) {
-        this.priority = priority;
     }
 
     public String getJurisdiction() {
         return jurisdiction;
     }
 
-    public void setJurisdiction(String jurisdiction) {
-        this.jurisdiction = jurisdiction;
-    }
-
     public String getWelshDescription() {
         return welshDescription;
-    }
-
-    public void setWelshDescription(final String welshDescription) {
-        this.welshDescription = welshDescription;
     }
 
     public String getBilingualTemplateName() {
         return bilingualTemplateName;
     }
 
-    public void setBilingualTemplateName(final String bilingualTemplateName) {
-        this.bilingualTemplateName = bilingualTemplateName;
-    }
-
     public Boolean getRemotePrintingRequired() {
         return remotePrintingRequired;
     }
 
-    public void setRemotePrintingRequired(final Boolean remotePrintingRequired) {
+    public NowType setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public NowType setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public NowType setTemplateName(String templateName) {
+        this.templateName = templateName;
+        return this;
+    }
+
+    public NowType setRank(Integer rank) {
+        this.rank = rank;
+        return this;
+    }
+
+    public NowType setStaticText(String staticText) {
+        this.staticText = staticText;
+        return this;
+    }
+
+    public NowType setWelshStaticText(String welshStaticText) {
+        this.welshStaticText = welshStaticText;
+        return this;
+    }
+
+    public NowType setPriority(String priority) {
+        this.priority = priority;
+        return this;
+    }
+
+    public NowType setJurisdiction(String jurisdiction) {
+        this.jurisdiction = jurisdiction;
+        return this;
+    }
+
+    public NowType setWelshDescription(String welshDescription) {
+        this.welshDescription = welshDescription;
+        return this;
+    }
+
+    public NowType setBilingualTemplateName(String bilingualTemplateName) {
+        this.bilingualTemplateName = bilingualTemplateName;
+        return this;
+    }
+
+    public NowType setRemotePrintingRequired(Boolean remotePrintingRequired) {
         this.remotePrintingRequired = remotePrintingRequired;
+        return this;
+    }
+
+    public static NowType nowType() {
+        return new NowType();
     }
 }

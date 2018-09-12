@@ -18,7 +18,7 @@ public class NowsNotificationDocumentState implements Serializable {
     private String courtCentreName;
     private String orderName;
     private String priority;
-    private String materialId;
+    private UUID materialId;
 
     public UUID getOriginatingCourtCentreId() {
         return originatingCourtCentreId;
@@ -110,12 +110,12 @@ public class NowsNotificationDocumentState implements Serializable {
         return priority;
     }
 
-    public NowsNotificationDocumentState setMaterialId(String materialId) {
+    public NowsNotificationDocumentState setMaterialId(UUID materialId) {
         this.materialId = materialId;
         return this;
     }
 
-    public String getMaterialId() {
+    public UUID getMaterialId() {
         return materialId;
     }
 }

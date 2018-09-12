@@ -3,11 +3,13 @@ package uk.gov.moj.cpp.hearing.event.nows.order;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class NowsDocumentOrder implements Serializable {
 
     private static final long serialVersionUID = -781257956072320445L;
-    private String materialId;
+
+    private UUID materialId;
     private String priority;
     private boolean amended;
     private String orderName;
@@ -19,11 +21,11 @@ public class NowsDocumentOrder implements Serializable {
     private List<OrderCase> cases = new ArrayList<>();
     private String nowText;
 
-    public String getMaterialId() {
+    public UUID getMaterialId() {
         return materialId;
     }
 
-    public void setMaterialId(String materialId) {
+    public void setMaterialId(UUID materialId) {
         this.materialId = materialId;
     }
 
@@ -112,7 +114,7 @@ public class NowsDocumentOrder implements Serializable {
     }
 
     public static final class Builder {
-        private String materialId;
+        private UUID materialId;
         private String priority;
         private boolean amended;
         private String orderName;
@@ -127,8 +129,7 @@ public class NowsDocumentOrder implements Serializable {
         private Builder() {
         }
 
-
-        public Builder withMaterialId(String materialId) {
+        public Builder withMaterialId(UUID materialId) {
             this.materialId = materialId;
             return this;
         }

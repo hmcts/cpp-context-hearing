@@ -11,8 +11,13 @@ public class MaterialUserGroup implements Serializable {
         return group;
     }
 
-    public void setGroup(String group) {
+    public MaterialUserGroup setGroup(String group) {
         this.group = group;
+        return this;
+    }
+
+    public static MaterialUserGroup materialUserGroup(){
+        return new MaterialUserGroup();
     }
 
 }

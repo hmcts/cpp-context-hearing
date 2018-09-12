@@ -71,6 +71,7 @@ public class EmailNowNotificationChannelTest {
         nowsNotificationDocumentState.setDefendantName("David Bowie");
         nowsNotificationDocumentState.setCourtClerkName("Iggy Pop");
         nowsNotificationDocumentState.setCaseUrns(Arrays.asList("C123", "C124"));
+        nowsNotificationDocumentState.setMaterialId(UUID.randomUUID());
     }
 
 

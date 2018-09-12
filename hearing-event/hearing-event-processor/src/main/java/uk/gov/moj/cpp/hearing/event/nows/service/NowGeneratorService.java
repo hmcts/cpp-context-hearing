@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.event.nows.NowsNotificationDocumentState;
 import uk.gov.moj.cpp.hearing.event.nows.NowsTemplateNameNotFoundException;
 import uk.gov.moj.cpp.hearing.event.nows.order.NowsDocumentOrder;
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
+import uk.gov.moj.cpp.hearing.nows.events.NowType;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClientProducer;
 
@@ -56,7 +57,7 @@ public class NowGeneratorService {
     private SystemUserProvider systemUserProvider;
 
     @Inject
-    public NowGeneratorService(final  SystemUserProvider systemUserProvider,
+    public NowGeneratorService(final SystemUserProvider systemUserProvider,
                                final DocumentGeneratorClientProducer documentGeneratorClientProducer,
                                final ObjectToJsonObjectConverter objectToJsonObjectConverter,
                                final FileStorer fileStorer,
@@ -78,21 +79,22 @@ public class NowGeneratorService {
             final byte[] resultOrderAsByteArray = documentGeneratorClientProducer.documentGeneratorClient().generatePdfDocument(objectToJsonObjectConverter.convert(nowsDocumentOrder), templateName, systemUserId);
             final String filename = String.format("%s_%s.pdf", nowsDocumentOrder.getOrderName(), ZonedDateTime.now().format(TIMESTAMP_FORMATTER));
 
-                    addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
-                    userId, hearingId, fromString(nowsDocumentOrder.getMaterialId()), nowsNotificationDocumentState);
+            addDocumentToMaterial(filename, new ByteArrayInputStream(resultOrderAsByteArray),
+                    userId, hearingId, fromString(nowsDocumentOrder.getMaterialId().toString()), nowsNotificationDocumentState);
         } catch (IOException | RuntimeException e) {
             LOGGER.error("Error while uploading document generation or upload ", e);
-            updateStatus(sender, hearingId, nowsDocumentOrder.getMaterialId(), userId.toString(), FAILED, HEARING_UPDATE_NOWS_MATERIAL_STATUS);
-            updateStatus(sender, hearingId, nowsDocumentOrder.getMaterialId(), userId.toString(), FAILED, RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS);
+            updateStatus(sender, hearingId, nowsDocumentOrder.getMaterialId().toString(), userId.toString(), FAILED, HEARING_UPDATE_NOWS_MATERIAL_STATUS);
+            updateStatus(sender, hearingId, nowsDocumentOrder.getMaterialId().toString(), userId.toString(), FAILED, RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS);
         }
     }
 
     private String getTemplateName(NowsRequested nowsRequested, NowsNotificationDocumentState nowsNotificationDocumentState) {
         final UUID nowsTypeId = nowsNotificationDocumentState.getNowsTypeId();
-        return nowsRequested.getHearing().getNowTypes().stream()
-                .filter(nt -> nowsTypeId.toString().equals(nt.getId()))
+        return nowsRequested.getNowTypes().stream()
+                .filter(nt -> nowsTypeId.equals(nt.getId()))
                 .findFirst()
-                .map(nt -> nt.getTemplateName()).orElseThrow(() -> new NowsTemplateNameNotFoundException(String.format("Could not find templateName for nowsTypeId: %s", nowsTypeId)));
+                .map(NowType::getTemplateName)
+                .orElseThrow(() -> new NowsTemplateNameNotFoundException(String.format("Could not find templateName for nowsTypeId: %s", nowsTypeId)));
     }
 
     private void addDocumentToMaterial(final String filename, final InputStream fileContent,

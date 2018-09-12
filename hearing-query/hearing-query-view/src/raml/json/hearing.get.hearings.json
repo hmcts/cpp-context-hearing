@@ -1,80 +1,30 @@
 {
-  "hearings":[
-    {
-      "hearingId":"23ef34ec-63e5-422e-8071-9b3753008c10",
-      "hearingType":"TRIAL",
-      "caseUrn":[
-        "32GD9387517"
-      ],
-      "defendants":[
-        {
-          "firstName":"Mark",
-          "lastName":"Zuckerberg"
-        },
-        {
-          "firstName":"Sean",
-          "lastName":"Parker"
-        }
-      ],
-      "witnesses": [
-        {
-          "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
-          "type":"Prosecution",
-          "classification": "Professional",
-          "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-          "title": "Mr",
-          "firstName": "David",
-          "lastName": "LLOYD",
-          "dateOfBirth": "1980-07-15",
-          "nationality": "England",
-          "gender": "Male",
-          "homeTelephone": "02012345678",
-          "workTelephone": "02012345679",
-          "mobile": "07777777777",
-          "fax": "02011111111",
-          "email": "email@email.com"
-        }
-      ]
+  "hearings": [{
+    "id": "88705e62-383d-4fc4-bba9-922448849f3d",
+    "type": {
+      "description": "qm1rJUZb0f",
+      "id": "9623a7ac-25bb-43f8-b219-2ae4cd8b05db"
     },
-    {
-      "hearingId":"1daefec3-2f76-8109-82d9-2e60544a6c01",
-      "hearingType":"TRIAL",
-      "caseUrn":[
-        "32GD9387518"
-      ],
-      "defendants":[
-        {
-          "firstName":"Larry",
-          "lastName":"Wall"
-        },
-        {
-          "firstName":"Dennis",
-          "lastName":"Ritchie"
-        },
-        {
-          "firstName":"James",
-          "lastName":"Gosling"
-        }
-      ],
-      "witnesses": [
-        {
-          "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
-          "type":"Prosecution",
-          "classification": "Professional",
-          "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-          "title": "Mr",
-          "firstName": "David",
-          "lastName": "LLOYD",
-          "dateOfBirth": "1980-07-15",
-          "nationality": "England",
-          "gender": "Male",
-          "homeTelephone": "02012345678",
-          "workTelephone": "02012345679",
-          "mobile": "07777777777",
-          "fax": "02011111111",
-          "email": "email@email.com"
-        }
-      ]
-    }
-  ]
+    "jurisdictionType": "CROWN",
+    "reportingRestrictionReason": "0bxiILwsNy",
+    "hearingLanguage": "ENGLISH",
+    "hearingDays": [{
+      "listedDurationMinutes": 1531791578,
+      "listingSequence": 810249414,
+      "sittingDay": "2015-01-12T05:27:17.210Z"
+    }],
+    "prosecutionCases": [{
+      "id": "9f035918-5dd6-4771-a6bb-9b05fa92f129",
+      "prosecutionCaseIdentifier": {
+        "prosecutionAuthorityCode": "4ZKOPhuyh5",
+        "prosecutionAuthorityId": "e677b61a-3360-48b0-8eee-649911475106",
+        "caseURN": "qriGUBZKR5"
+      },
+      "defendants": [{
+        "id": "5bdab12c-dfa5-4a7a-b302-21ca74652a96",
+        "name": "JquMYcAJxw 3YAWVaBXGj 6tyOhRMREc"
+      }]
+    }],
+    "hasSharedResults": false
+  }]
 }

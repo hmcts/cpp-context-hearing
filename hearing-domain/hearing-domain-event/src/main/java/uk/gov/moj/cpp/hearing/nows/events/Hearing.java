@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.nows.events;
 
+import uk.gov.justice.json.schemas.core.CourtCentre;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +13,7 @@ public class Hearing implements Serializable {
     private String hearingType;
     private String startDateTime;
     private List<String> hearingDates = new ArrayList<String>();
-    private CourtCentre courtCentre;
+    private uk.gov.justice.json.schemas.core.CourtCentre courtCentre;
     private List<Attendee> attendees = new ArrayList<Attendee>();
     private List<Defendant> defendants = new ArrayList<Defendant>();
     private List<SharedResultLine> sharedResultLines = new ArrayList<SharedResultLine>();
@@ -50,11 +52,11 @@ public class Hearing implements Serializable {
         this.hearingDates = hearingDates;
     }
 
-    public CourtCentre getCourtCentre() {
+    public uk.gov.justice.json.schemas.core.CourtCentre getCourtCentre() {
         return courtCentre;
     }
 
-    public void setCourtCentre(CourtCentre courtCentre) {
+    public void setCourtCentre(uk.gov.justice.json.schemas.core.CourtCentre courtCentre) {
         this.courtCentre = courtCentre;
     }
 
@@ -104,7 +106,7 @@ public class Hearing implements Serializable {
         private String hearingType;
         private String startDateTime;
         private List<String> hearingDates = new ArrayList<String>();
-        private CourtCentre courtCentre;
+        private uk.gov.justice.json.schemas.core.CourtCentre courtCentre;
         private List<Attendee> attendees = new ArrayList<Attendee>();
         private List<Defendant> defendants = new ArrayList<Defendant>();
         private List<SharedResultLine> sharedResultLines = new ArrayList<SharedResultLine>();

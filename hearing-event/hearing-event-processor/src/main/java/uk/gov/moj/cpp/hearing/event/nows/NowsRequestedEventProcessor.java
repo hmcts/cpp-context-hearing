@@ -56,10 +56,10 @@ public class NowsRequestedEventProcessor {
         UUID userId = fromString(event.metadata().userId().orElseThrow(() -> new RuntimeException("UserId missing from event.")));
 
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NowsRequested.class);
-        final String hearingId = nowsRequested.getHearing().getId();
+        final String hearingId = nowsRequested.getHearing().getId().toString();
         LOGGER.info("Nows requested for hearing id {}", hearingId);
 
-        final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrderToNotificationState = NowsRequestedToOrderConvertor.convert(nowsRequested);
+        final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrderToNotificationState = NowsRequestedToOrderConverter.convert(nowsRequested);
         final List<NowsDocumentOrder> nowsDocumentOrdersList = new ArrayList<>(nowsDocumentOrderToNotificationState.keySet());
         nowsDocumentOrdersList.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriority)).forEach(nowsDocumentOrder -> {
             LOGGER.info("Input for docmosis order {}", JSONObjectValueObfuscator.obfuscated(objectToJsonObjectConverter.convert(nowsDocumentOrder)));

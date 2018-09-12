@@ -29,15 +29,4 @@ public class SerializationTest {
        Assert.assertEquals(UUID.fromString("0baecac5-222b-402d-9047-84803679edae"), sendingSheetCompleted.getHearing().getCaseId() );
 
    }
-
-
-   @Test
-   public void deserializeTestNows() throws Exception {
-
-      final InputStream is = SerializationTest.class.getResourceAsStream("/hearing.events.nows-requested.json");
-      final ObjectMapper objectMapper =  new ObjectMapperProducer().objectMapper();
-      final NowsRequested nowsRequested = objectMapper.readValue(is, NowsRequested.class);
-      Assert.assertEquals("91ee6bc2-c5ea-45cc-9743-90c50b1aa821", nowsRequested.getHearing().getId());
-
-   }
 }

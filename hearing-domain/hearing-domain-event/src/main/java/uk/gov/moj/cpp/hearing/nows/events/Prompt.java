@@ -15,28 +15,27 @@ public class Prompt implements Serializable {
         return label;
     }
 
-    public void setLabel(String label) {
+    public Prompt setLabel(String label) {
         this.label = label;
+        return this;
     }
 
     public String getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public Prompt setValue(String value) {
         this.value = value;
-    }
-
-    public static Builder builder() {
-        return new Builder();
+        return this;
     }
 
     public UUID getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public Prompt setId(UUID id) {
         this.id = id;
+        return this;
     }
 
     public static final class Builder {
@@ -69,5 +68,13 @@ public class Prompt implements Serializable {
             prompt.setId(id);
             return prompt;
         }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Prompt prompt(){
+        return new Prompt();
     }
 }

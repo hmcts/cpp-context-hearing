@@ -7,6 +7,8 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import uk.gov.justice.json.schemas.core.DocumentationLanguageNeeds;
 import uk.gov.justice.json.schemas.core.Gender;

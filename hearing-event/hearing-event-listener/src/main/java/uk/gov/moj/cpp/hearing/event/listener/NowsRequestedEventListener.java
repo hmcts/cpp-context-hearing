@@ -39,7 +39,7 @@ public class NowsRequestedEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(payload, NowsRequested.class);
 
-        UUID hearingId = fromString(nowsRequested.getHearing().getId());
+        UUID hearingId = nowsRequested.getHearing().getId();
 
         List<Nows> nowsList = nowsRepository.findByHearingId(hearingId);
 
@@ -47,14 +47,14 @@ public class NowsRequestedEventListener {
             nowsList.forEach(nows -> nowsRepository.remove(nows));
         }
 
-        nowsRequested.getHearing().getNows().forEach(now -> {
+        nowsRequested.getNows().forEach(now -> {
 
-            UUID typeId = now.getNowsTypeId() == null ? randomUUID() : fromString(now.getNowsTypeId());
+            UUID typeId = now.getNowsTypeId() == null ? randomUUID() : now.getNowsTypeId();
 
             final Nows nows = Nows.builder()
-                    .withId(fromString(now.getId()))
+                    .withId(now.getId())
                     .withNowsTypeId(typeId)
-                    .withDefendantId(fromString(now.getDefendantId()))
+                    .withDefendantId(now.getDefendantId())
                     .withHearingId(hearingId)
                     .build();
 
@@ -62,7 +62,7 @@ public class NowsRequestedEventListener {
                     .map(material -> {
 
                         final NowsMaterial nowsMaterial = NowsMaterial.builder()
-                                .withId(fromString(material.getId()))
+                                .withId(material.getId())
                                 .withUserGroups(material.getUserGroups().stream()
                                         .map(MaterialUserGroup::getGroup)
                                         .collect(Collectors.toList()))
@@ -74,7 +74,7 @@ public class NowsRequestedEventListener {
                         nowsMaterial.setNowResult(material.getNowResult().stream()
                                 .map(result -> NowsResult.builder()
                                         .withId(randomUUID())
-                                        .withSharedResultId(fromString(result.getSharedResultId()))
+                                        .withSharedResultId(result.getSharedResultId())
                                         .withSequence(result.getSequence())
                                         .withNowsMaterial(nowsMaterial)
                                         .build()
