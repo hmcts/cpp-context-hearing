@@ -309,8 +309,6 @@ public class HearingServiceTest {
 
         final JsonObject response = caseHearingService.getSubscriptions(referenceDate, nowTypeId);
 
-        System.out.println(response.toString());
-
         assertThat(response.toString(), is("{}"));
     }
 
@@ -326,8 +324,6 @@ public class HearingServiceTest {
         when(documentRepository.findAllByOrderByStartDateAsc()).thenReturn(asList(document));
 
         final JsonObject response = caseHearingService.getSubscriptions(referenceDate, nowTypeId);
-
-        System.out.println(response.toString());
 
         assertThat(response.toString(), is("{\"subscriptions\":[]}"));
     }

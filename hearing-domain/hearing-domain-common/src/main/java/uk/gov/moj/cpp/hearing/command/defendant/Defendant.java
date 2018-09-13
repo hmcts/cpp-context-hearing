@@ -1,13 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.defendant;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
+import uk.gov.justice.json.schemas.core.AssociatedPerson;
+import uk.gov.justice.json.schemas.core.LegalEntityDefendant;
+import uk.gov.justice.json.schemas.core.Organisation;
+import uk.gov.justice.json.schemas.core.PersonDefendant;
 
 public class Defendant implements Serializable {
 
@@ -15,90 +15,121 @@ public class Defendant implements Serializable {
 
     private UUID id;
 
-    private Person person;
+    private UUID prosecutionCaseId;
 
-    private String bailStatus;
+    private Integer numberOfPreviousConvictionsCited;
 
-    private LocalDate custodyTimeLimitDate;
+    private String prosecutionAuthorityReference;
 
-    private String defenceOrganisation;
+    private String witnessStatement;
 
-    private Interpreter interpreter;
+    private String witnessStatementWelsh;
 
-    public Defendant() {
+    private String mitigation;
+
+    private String mitigationWelsh;
+
+    private List<AssociatedPerson> associatedPersons;
+
+    private Organisation defenceOrganisation;
+
+    private PersonDefendant personDefendant;
+
+    private LegalEntityDefendant legalEntityDefendant;
+
+    public List<AssociatedPerson> getAssociatedPersons() {
+        return associatedPersons;
     }
 
-    @JsonCreator
-    public Defendant(@JsonProperty("id") final UUID id,
-                     @JsonProperty("person") final Person person,
-                     @JsonProperty("bailStatus") final String bailStatus,
-                     @JsonProperty("custodyTimeLimitDate") final LocalDate custodyTimeLimitDate,
-                     @JsonProperty("defenceOrganisation") final String defenceOrganisation,
-                     @JsonProperty("interpreter") final Interpreter interpreter) {
+    public void setAssociatedPersons(List<AssociatedPerson> associatedPersons) {
+        this.associatedPersons = associatedPersons;
+    }
 
-        this.id = id;
-        this.person = person;
-        this.bailStatus = bailStatus;
-        this.custodyTimeLimitDate = custodyTimeLimitDate;
+    public Organisation getDefenceOrganisation() {
+        return defenceOrganisation;
+    }
+
+    public void setDefenceOrganisation(Organisation defenceOrganisation) {
         this.defenceOrganisation = defenceOrganisation;
-        this.interpreter = interpreter;
     }
 
     public UUID getId() {
         return id;
     }
 
-    public Person getPerson() {
-        return person;
-    }
-
-    public String getBailStatus() {
-        return bailStatus;
-    }
-
-    public LocalDate getCustodyTimeLimitDate() {
-        return custodyTimeLimitDate;
-    }
-
-    public String getDefenceOrganisation() {
-        return defenceOrganisation;
-    }
-
-    public Interpreter getInterpreter() {
-        return interpreter;
-    }
-
-    public Defendant setId(UUID id) {
+    public void setId(UUID id) {
         this.id = id;
-        return this;
     }
 
-    public Defendant setPerson(Person person) {
-        this.person = person;
-        return this;
+    public LegalEntityDefendant getLegalEntityDefendant() {
+        return legalEntityDefendant;
     }
 
-    public Defendant setBailStatus(String bailStatus) {
-        this.bailStatus = bailStatus;
-        return this;
+    public void setLegalEntityDefendant(LegalEntityDefendant legalEntityDefendant) {
+        this.legalEntityDefendant = legalEntityDefendant;
     }
 
-    public Defendant setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
-        this.custodyTimeLimitDate = custodyTimeLimitDate;
-        return this;
+    public String getMitigation() {
+        return mitigation;
     }
 
-    public Defendant setDefenceOrganisation(String defenceOrganisation) {
-        this.defenceOrganisation = defenceOrganisation;
-        return this;
+    public void setMitigation(String mitigation) {
+        this.mitigation = mitigation;
     }
 
-    public Defendant setInterpreter(Interpreter interpreter) {
-        this.interpreter = interpreter;
-        return this;
+    public String getMitigationWelsh() {
+        return mitigationWelsh;
     }
 
-    public static Defendant defendant(){
-        return new Defendant();
+    public void setMitigationWelsh(String mitigationWelsh) {
+        this.mitigationWelsh = mitigationWelsh;
+    }
+
+    public Integer getNumberOfPreviousConvictionsCited() {
+        return numberOfPreviousConvictionsCited;
+    }
+
+    public void setNumberOfPreviousConvictionsCited(Integer numberOfPreviousConvictionsCited) {
+        this.numberOfPreviousConvictionsCited = numberOfPreviousConvictionsCited;
+    }
+
+    public PersonDefendant getPersonDefendant() {
+        return personDefendant;
+    }
+
+    public void setPersonDefendant(PersonDefendant personDefendant) {
+        this.personDefendant = personDefendant;
+    }
+
+    public String getProsecutionAuthorityReference() {
+        return prosecutionAuthorityReference;
+    }
+
+    public void setProsecutionAuthorityReference(String prosecutionAuthorityReference) {
+        this.prosecutionAuthorityReference = prosecutionAuthorityReference;
+    }
+
+    public UUID getProsecutionCaseId() {
+        return prosecutionCaseId;
+    }
+
+    public void setProsecutionCaseId(UUID prosecutionCaseId) {
+        this.prosecutionCaseId = prosecutionCaseId;
+    }
+
+    public String getWitnessStatement() {
+        return witnessStatement;
+    }
+
+    public void setWitnessStatement(String witnessStatement) {
+        this.witnessStatement = witnessStatement;
+    }
+
+    public String getWitnessStatementWelsh() {
+        return witnessStatementWelsh;
+    }
+
+    public void setWitnessStatementWelsh(String witnessStatementWelsh) {
+        this.witnessStatementWelsh = witnessStatementWelsh;
     }
 }

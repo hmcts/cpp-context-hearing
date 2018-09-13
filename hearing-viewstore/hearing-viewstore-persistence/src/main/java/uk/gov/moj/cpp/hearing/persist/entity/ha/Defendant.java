@@ -96,18 +96,18 @@ public class Defendant {
             @AttributeOverride(name = "employerOrganisation.contact.primaryEmail", column = @Column(name = "emp_org_contact_primary_email")),
             @AttributeOverride(name = "employerOrganisation.contact.secondaryEmail", column = @Column(name = "emp_org_contact_secondary_email")),
             @AttributeOverride(name = "employerOrganisation.contact.fax", column = @Column(name = "emp_org_contact_fax")),
-            @AttributeOverride(name = "address.address1", column = @Column(name = "defendant_address_1")),
-            @AttributeOverride(name = "address.address2", column = @Column(name = "defendant_address_2")),
-            @AttributeOverride(name = "address.address3", column = @Column(name = "defendant_address_3")),
-            @AttributeOverride(name = "address.address4", column = @Column(name = "defendant_address_4")),
-            @AttributeOverride(name = "address.address5", column = @Column(name = "defendant_address_5")),
-            @AttributeOverride(name = "address.postCode", column = @Column(name = "defendant_post_code")),
-            @AttributeOverride(name = "contact.home", column = @Column(name = "defendant_contact_home")),
-            @AttributeOverride(name = "contact.work", column = @Column(name = "defendant_contact_work")),
-            @AttributeOverride(name = "contact.mobile", column = @Column(name = "defendant_contact_mobile")),
-            @AttributeOverride(name = "contact.primaryEmail", column = @Column(name = "defendant_contact_primary_email")),
-            @AttributeOverride(name = "contact.secondaryEmail", column = @Column(name = "defendant_contact_secondary_email")),
-            @AttributeOverride(name = "contact.fax", column = @Column(name = "defendant_contact_fax"))
+            @AttributeOverride(name = "personDetails.address.address1", column = @Column(name = "defendant_address_1")),
+            @AttributeOverride(name = "personDetails.address.address2", column = @Column(name = "defendant_address_2")),
+            @AttributeOverride(name = "personDetails.address.address3", column = @Column(name = "defendant_address_3")),
+            @AttributeOverride(name = "personDetails.address.address4", column = @Column(name = "defendant_address_4")),
+            @AttributeOverride(name = "personDetails.address.address5", column = @Column(name = "defendant_address_5")),
+            @AttributeOverride(name = "personDetails.address.postCode", column = @Column(name = "defendant_post_code")),
+            @AttributeOverride(name = "personDetails.contact.home", column = @Column(name = "defendant_contact_home")),
+            @AttributeOverride(name = "personDetails.contact.work", column = @Column(name = "defendant_contact_work")),
+            @AttributeOverride(name = "personDetails.contact.mobile", column = @Column(name = "defendant_contact_mobile")),
+            @AttributeOverride(name = "personDetails.contact.primaryEmail", column = @Column(name = "defendant_contact_primary_email")),
+            @AttributeOverride(name = "personDetails.contact.secondaryEmail", column = @Column(name = "defendant_contact_secondary_email")),
+            @AttributeOverride(name = "personDetails.contact.fax", column = @Column(name = "defendant_contact_fax"))
     })
     @Embedded
     private PersonDefendant personDefendant;

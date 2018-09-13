@@ -7,8 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,20 +17,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.json.schemas.core.Gender;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.command.defendant.Address;
-import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
-import uk.gov.moj.cpp.hearing.command.defendant.Person;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import javax.json.JsonObject;
@@ -63,42 +57,27 @@ public class CaseDefendantDetailsChangedEventListenerTest {
 
         final UUID hearingId = randomUUID();
 
-        final UUID defendantId = randomUUID();
+        final DefendantDetailsUpdated defendantDetailsUpdated = DefendantDetailsUpdated.defendantDetailsUpdated()
+                .setHearingId(hearingId)
+                .setDefendant(defendantTemplate());
 
-        final JsonEnvelope envelope = getDefendantJsonEnvelope(hearingId, defendantId);
+        final JsonEnvelope envelope = createJsonEnvelope(defendantDetailsUpdated);
 
         final Defendant defendant = new Defendant();
 
-        uk.gov.moj.cpp.hearing.persist.entity.ha.Address address = new uk.gov.moj.cpp.hearing.persist.entity.ha.Address();
-        address.setAddress1(STRING.next());
-        address.setAddress2(STRING.next());
-        address.setAddress3(STRING.next());
-        address.setAddress4(STRING.next());
-        address.setAddress5(STRING.next());
-        address.setPostCode(STRING.next());
+        defendant.setId(new HearingSnapshotKey(defendantDetailsUpdated.getDefendant().getId(), hearingId));
 
-        uk.gov.moj.cpp.hearing.persist.entity.ha.Contact contact = new uk.gov.moj.cpp.hearing.persist.entity.ha.Contact();
-        contact.setFax(STRING.next());
-        contact.setSecondaryEmail(STRING.next());
-        contact.setPrimaryEmail(STRING.next());
-        contact.setMobile(STRING.next());
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
 
-        uk.gov.moj.cpp.hearing.persist.entity.ha.Person person = new uk.gov.moj.cpp.hearing.persist.entity.ha.Person();
-        person.setFirstName(STRING.next());
-        person.setLastName(STRING.next());
-        person.setAddress(address);
-        person.setContact(contact);
+        prosecutionCase.setId(new HearingSnapshotKey(defendantDetailsUpdated.getDefendant().getProsecutionCaseId(), hearingId));
 
-        PersonDefendant personDefendant = new PersonDefendant();
-        personDefendant.setPersonDetails(person);
+        defendant.setProsecutionCase(prosecutionCase);
 
-        defendant.setPersonDefendant(personDefendant);
-
-        when(defendantRepository.findBy(new HearingSnapshotKey(defendantId, hearingId))).thenReturn(defendant);
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
 
         caseDefendantDetailsChangedEventListener.defendantDetailsUpdated(envelope);
 
-        ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+        final ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
 
         verify(defendantRepository).save(defendantexArgumentCaptor.capture());
 
@@ -107,35 +86,9 @@ public class CaseDefendantDetailsChangedEventListenerTest {
         assertThat(defendant.getId(), is(defendantOut.getId()));
     }
 
-    private JsonEnvelope getDefendantJsonEnvelope(final UUID hearingId, final UUID defendantId) {
+    private JsonEnvelope createJsonEnvelope(final DefendantDetailsUpdated defendantDetailsUpdated) {
 
-        DefendantDetailsUpdated document = DefendantDetailsUpdated.defendantDetailsUpdated()
-                .setCaseId(randomUUID())
-                .setHearingId(hearingId)
-                .setDefendant(uk.gov.moj.cpp.hearing.command.defendant.Defendant.defendant()
-                        .setId(defendantId)
-                        .setPerson(Person.person().setId(randomUUID())
-                                .setFirstName(STRING.next())
-                                .setLastName(STRING.next())
-                                .setNationality(STRING.next())
-                                .setGender(RandomGenerator.values(Gender.values()).next())
-                                .setAddress(Address.address()
-                                        .setAddress1(STRING.next())
-                                        .setAddress2(STRING.next())
-                                        .setAddress3(STRING.next())
-                                        .setAddress4(STRING.next())
-                                        .setPostCode(STRING.next())
-                                )
-                                .setFax(STRING.next())
-                                .setHomeTelephone(STRING.next())
-                                .setDateOfBirth(PAST_LOCAL_DATE.next()))
-                        .setBailStatus(STRING.next())
-                        .setCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                        .setDefenceOrganisation(STRING.next())
-                        .setInterpreter(Interpreter.interpreter().setLanguage(STRING.next()))
-                );
-
-        JsonObject jsonObject = objectToJsonObjectConverter.convert(document);
+        final JsonObject jsonObject = objectToJsonObjectConverter.convert(defendantDetailsUpdated);
 
         return envelopeFrom((Metadata) null, jsonObject);
     }

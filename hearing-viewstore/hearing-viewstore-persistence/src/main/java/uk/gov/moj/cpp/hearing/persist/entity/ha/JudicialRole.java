@@ -5,6 +5,8 @@ import uk.gov.justice.json.schemas.core.JudicialRoleType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -38,6 +40,7 @@ public class JudicialRole {
     private String lastName;
 
     @Column(name = "judicial_role_type")
+    @Enumerated(EnumType.STRING)
     private JudicialRoleType judicialRoleType;
 
     @Column(name = "is_deputy")

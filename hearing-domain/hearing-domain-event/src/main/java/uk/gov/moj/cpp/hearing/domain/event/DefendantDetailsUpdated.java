@@ -8,16 +8,12 @@ import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import java.io.Serializable;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
-
 @Event("hearing.defendant-details-updated")
 public class DefendantDetailsUpdated implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private UUID hearingId;
-
-    private UUID caseId;
 
     private Defendant defendant;
 
@@ -27,11 +23,9 @@ public class DefendantDetailsUpdated implements Serializable {
     @JsonCreator
     public DefendantDetailsUpdated(
             @JsonProperty("hearingId") UUID hearingId,
-            @JsonProperty("caseId") UUID caseId,
             @JsonProperty("defendant") Defendant defendant) {
         super();
         this.hearingId = hearingId;
-        this.caseId = caseId;
         this.defendant = defendant;
     }
 
@@ -43,18 +37,8 @@ public class DefendantDetailsUpdated implements Serializable {
         return defendant;
     }
 
-    public UUID getCaseId() {
-        return caseId;
-    }
-
-
     public DefendantDetailsUpdated setHearingId(UUID hearingId) {
         this.hearingId = hearingId;
-        return this;
-    }
-
-    public DefendantDetailsUpdated setCaseId(UUID caseId) {
-        this.caseId = caseId;
         return this;
     }
 

@@ -17,25 +17,25 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.val
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.legalEntityDefendant;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
-import uk.gov.justice.json.schemas.core.Gender;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.command.defendant.Address;
-import uk.gov.moj.cpp.hearing.command.defendant.Interpreter;
+import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
@@ -63,18 +63,11 @@ import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.command.verdict.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Cases;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.CourtCentre;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Defendants;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.LesserOrAlternativeOffence;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Offences;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Person;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
@@ -93,7 +86,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -464,34 +456,9 @@ public class TestTemplates {
 
         }
 
-        public static CaseDefendantDetails caseDefendantDetailsChangedCommandTemplate(UUID caseId, UUID defendantId) {
+        public static CaseDefendantDetails caseDefendantDetailsChangedCommandTemplate() {
             return CaseDefendantDetails.caseDefendantDetails()
-                    .setCaseId(caseId)
-                    .setDefendants(singletonList(defendant(defendantId, randomUUID())));
-        }
-
-        public static uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant(UUID defendantId, UUID personId) {
-            return uk.gov.moj.cpp.hearing.command.defendant.Defendant.defendant()
-                    .setId(defendantId)
-                    .setPerson(uk.gov.moj.cpp.hearing.command.defendant.Person.person()
-                            .setId(personId)
-                            .setFirstName(STRING.next())
-                            .setLastName(STRING.next())
-                            .setNationality(STRING.next())
-                            .setGender(RandomGenerator.values(Gender.values()).next())
-                            .setAddress(Address.address()
-                                    .setAddress1(STRING.next())
-                                    .setAddress2(STRING.next())
-                                    .setAddress3(STRING.next())
-                                    .setAddress4(STRING.next())
-                                    .setPostCode(STRING.next()))
-                            .setDateOfBirth(PAST_LOCAL_DATE.next()))
-                    .setBailStatus(STRING.next())
-                    .setCustodyTimeLimitDate(PAST_LOCAL_DATE.next())
-                    .setDefenceOrganisation(STRING.next())
-                    .setInterpreter(Interpreter.interpreter()
-                            .setLanguage(STRING.next())
-                    );
+                    .setDefendants(singletonList(defendantTemplate()));
         }
     }
 
@@ -938,4 +905,34 @@ public class TestTemplates {
         }
     }
 
+    public static uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantTemplate() {
+
+        Defendant defendant = new Defendant();
+
+        defendant.setId(randomUUID());
+
+        defendant.setProsecutionCaseId(randomUUID());
+
+        defendant.setNumberOfPreviousConvictionsCited(INTEGER.next());
+
+        defendant.setProsecutionAuthorityReference(STRING.next());
+
+        defendant.setWitnessStatement(STRING.next());
+
+        defendant.setWitnessStatementWelsh(STRING.next());
+
+        defendant.setMitigation(STRING.next());
+
+        defendant.setMitigationWelsh(STRING.next());
+
+        defendant.setAssociatedPersons(asList(associatedPerson(defaultArguments()).build()));
+
+        defendant.setDefenceOrganisation(organisation(defaultArguments()).build());
+
+        defendant.setPersonDefendant(personDefendant(defaultArguments()).build());
+
+        defendant.setLegalEntityDefendant(legalEntityDefendant(defaultArguments()).build());
+
+        return defendant;
+    }
 }

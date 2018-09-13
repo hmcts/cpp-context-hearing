@@ -341,7 +341,7 @@ public class CoreTestTemplates {
                 .withAdditionalNationalityId(randomUUID())
                 .withDateOfBirth(PAST_LOCAL_DATE.next())
                 .withDisabilityStatus(STRING.next())
-                .withDocumentationLanguageNeeds(args.hearingLanguage == WELSH ? DocumentationLanguageNeeds.WELSH : null)
+                .withDocumentationLanguageNeeds(args.hearingLanguage == WELSH ? DocumentationLanguageNeeds.WELSH : DocumentationLanguageNeeds.ENGLISH)
                 .withEthnicityId(randomUUID())
                 .withEthnicity(STRING.next())
                 .withAddress(address().build())
@@ -434,6 +434,8 @@ public class CoreTestTemplates {
                 .withCaseStatus(STRING.next())
                 .withOriginatingOrganisation(STRING.next())
                 .withInitiationCode(RandomGenerator.values(InitiationCode.values()).next())
+                .withStatementOfFacts(STRING.next())
+                .withStatementOfFactsWelsh(STRING.next())
                 .withDefendants(
                         structure.getV().entrySet().stream()
                                 .map(entry -> defendant(structure.getK(), args, p(entry.getKey(), entry.getValue())).build())

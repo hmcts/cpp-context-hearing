@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import uk.gov.justice.json.schemas.core.IndicatedPleaValue;
 import uk.gov.justice.json.schemas.core.Source;
@@ -17,9 +19,11 @@ public class IndicatedPlea {
     private LocalDate indicatedPleaDate;
 
     @Column(name = "indicated_plea_value")
+    @Enumerated(EnumType.STRING)
     private IndicatedPleaValue indicatedPleaValue;
 
     @Column(name = "indicated_plea_source")
+    @Enumerated(EnumType.STRING)
     private Source indicatedPleaSource;
 
     @Embedded

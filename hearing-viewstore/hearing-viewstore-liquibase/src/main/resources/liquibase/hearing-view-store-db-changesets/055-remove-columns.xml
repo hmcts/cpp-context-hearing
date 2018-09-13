@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="55" author="hearing" logicalFilePath="055-remove-columns">
+
+        <dropColumn tableName="ha_defendant" columnName="person_id"/>
+        <dropColumn tableName="ha_defendant" columnName="address_1"/>
+        <dropColumn tableName="ha_defendant" columnName="address_2"/>
+        <dropColumn tableName="ha_defendant" columnName="address_3"/>
+        <dropColumn tableName="ha_defendant" columnName="address_4"/>
+        <dropColumn tableName="ha_defendant" columnName="post_code"/>
+        <dropColumn tableName="ha_defendant" columnName="defence_solicitor_firm"/>
+        <dropColumn tableName="ha_defendant" columnName="interpreter_name"/>
+        <dropColumn tableName="ha_defendant" columnName="interpreter_language"/>
+        <dropColumn tableName="ha_defendant" columnName="address_5"/>
+        <dropColumn tableName="ha_defendant" columnName="contact_home"/>
+        <dropColumn tableName="ha_defendant" columnName="contact_work"/>
+        <dropColumn tableName="ha_defendant" columnName="contact_mobile"/>
+        <dropColumn tableName="ha_defendant" columnName="contact_primary_email"/>
+        <dropColumn tableName="ha_defendant" columnName="contact_secondary_email"/>
+        <dropColumn tableName="ha_defendant" columnName="contact_fax"/>
+
+        <dropColumn tableName="ha_offence" columnName="statement_of_facts"/>
+        <dropColumn tableName="ha_offence" columnName="statement_of_facts_welsh"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -7,9 +7,6 @@ final class JPACompositeMappers {
 
     private static final TargetJPAMapper TARGET_JPA_MAPPER = new TargetJPAMapper(RESULT_LINE_JPA_MAPPER);
 
-    public static final AssociatedPersonJPAMapper ASSOCIATED_PERSON_JPA_MAPPER = new AssociatedPersonJPAMapper(
-            new AddressJPAMapper(), new ContactNumberJPAMapper());
-
     public static final IndicatedPleaJPAMapper INDICATED_PLEA_JPA_MAPPER = new IndicatedPleaJPAMapper(
             new AllocationDecisionJPAMapper());
 
@@ -26,6 +23,8 @@ final class JPACompositeMappers {
 
     public static final PersonJPAMapper PERSON_JPA_MAPPER = new PersonJPAMapper(new AddressJPAMapper(),
             new ContactNumberJPAMapper());
+
+    public static final AssociatedPersonJPAMapper ASSOCIATED_PERSON_JPA_MAPPER = new AssociatedPersonJPAMapper(PERSON_JPA_MAPPER);
 
     public static final PersonDefendantJPAMapper PERSON_DEFENDANT_JPA_MAPPER = new PersonDefendantJPAMapper(
             new DefendantAliasesJPAMapper(), ORGANISATION_JPA_MAPPER, PERSON_JPA_MAPPER);

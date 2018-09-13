@@ -6,6 +6,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -37,6 +39,7 @@ public class ResultLine {
     private Boolean isModified;
 
     @Column(name = "level")
+    @Enumerated(EnumType.STRING)
     private Level level;
 
     @Column(name = "ordered_date")
