@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.common.collect.ImmutableMap;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 public class NowsTemplates {
 
@@ -70,12 +72,17 @@ public class NowsTemplates {
     public static ResultsShared resultsSharedTemplate() {
 
         InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+
         UUID completedResultLineId = randomUUID();
+
+        hearingOne.it().getHearing().setTargets(asList(
+                CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
+        ));
+
         return ResultsShared.builder()
                 .withHearingId(hearingOne.getHearingId())
                 .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
-//                .withHearing(hearingOne.it().getHearing())
-//                .withCases(hearingOne.it().getCases())
+                .withHearing(hearingOne.getHearing())
                 .withDefenceCounsels(ImmutableMap.of(randomUUID(), DefenceCounselUpsert.builder()
                         .withHearingId(hearingOne.getHearingId())
                         .withPersonId(randomUUID())
@@ -98,54 +105,33 @@ public class NowsTemplates {
                         .build()
                 ))
                 .withPleas(ImmutableMap.of(randomUUID(), Plea.plea()
-//                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                                .setOriginHearingId(hearingOne.getHearingId())
-                                .setPleaDate(PAST_LOCAL_DATE.next())
-                                .setValue(RandomGenerator.values(PleaValue.values()).next())
+                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                        .setOriginHearingId(hearingOne.getHearingId())
+                        .setPleaDate(PAST_LOCAL_DATE.next())
+                        .setValue(RandomGenerator.values(PleaValue.values()).next())
                 ))
                 .withVerdicts(ImmutableMap.of(randomUUID(), VerdictUpsert.verdictUpsert()
-//                        .setCaseId(hearingOne.getFirstCaseId())
-                                .setHearingId(hearingOne.getHearingId())
-//                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                                .setVerdictTypeId(randomUUID())
-                                .setCategory(STRING.next())
-                                .setCategoryType(STRING.next())
-                                .setOffenceDefinitionId(randomUUID())
-                                .setTitle(STRING.next())
-                                .setOffenceCode(STRING.next())
-                                .setLegislation(STRING.next())
-                                .setNumberOfJurors(RandomGenerator.integer(9, 12).next())
-                                .setNumberOfSplitJurors(RandomGenerator.integer(0, 3).next())
-
-                                .setVerdictDate(PAST_LOCAL_DATE.next())
-//                        .setVerdictValueId(randomUUID())
-//                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-
-                                .setUnanimous(BOOLEAN.next())
-                                .setVerdictDate(PAST_LOCAL_DATE.next())
+                        .setCaseId(hearingOne.getFirstCase().getId())
+                        .setHearingId(hearingOne.getHearingId())
+                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                        .setVerdictTypeId(randomUUID())
+                        .setCategory(STRING.next())
+                        .setCategoryType(STRING.next())
+                        .setOffenceDefinitionId(randomUUID())
+                        .setTitle(STRING.next())
+                        .setOffenceCode(STRING.next())
+                        .setLegislation(STRING.next())
+                        .setNumberOfJurors(RandomGenerator.integer(9, 12).next())
+                        .setNumberOfSplitJurors(RandomGenerator.integer(0, 3).next())
+                        .setVerdictDate(PAST_LOCAL_DATE.next())
+                        .setUnanimous(BOOLEAN.next())
+                        .setVerdictDate(PAST_LOCAL_DATE.next())
                 ))
                 .withCourtClerk(CourtClerk.courtClerk()
                         .withId(randomUUID())
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next())
                         .build())
-                .withCompletedResultLines(new ArrayList<>(singletonList(
-                        CompletedResultLine.builder()
-                                .withId(completedResultLineId)
-//                                .withCaseId(hearingOne.getFirstCaseId())
-//                                .withDefendantId(hearingOne.getFirstDefendantId())
-//                                .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                                .withLevel(Level.CASE)
-                                .withResultDefinitionId(randomUUID())
-                                .withResultLabel(STRING.next())
-                                .withOrderedDate(LocalDate.now())
-                                .withResultPrompts(singletonList(ResultPrompt.builder()
-                                        .withId(randomUUID())
-                                        .withLabel(STRING.next())
-                                        .withValue(STRING.next())
-                                        .build()))
-                                .build()
-                )))
                 .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
                         .withCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
                                 .withId(randomUUID())
@@ -156,9 +142,9 @@ public class NowsTemplates {
                         .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                         .build()
                 ))
-//                .withVariantDirectory(singletonList(
-//                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
-//                ))
+                .withVariantDirectory(singletonList(
+                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
+                ))
                 .build();
     }
 }

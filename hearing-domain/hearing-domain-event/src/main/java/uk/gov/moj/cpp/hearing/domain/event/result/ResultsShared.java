@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Event("hearing.results-shared")
 public class ResultsShared implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private UUID hearingId;
 
@@ -59,8 +59,6 @@ public class ResultsShared implements Serializable {
     private ResultsShared(@JsonProperty("hearingId") final UUID hearingId,
                           @JsonProperty("sharedTime") final ZonedDateTime sharedTime,
                           @JsonProperty("courtClerk") final CourtClerk courtClerk,
-                          @JsonProperty("uncompletedResultLines") final List<UncompletedResultLine> uncompletedResultLines,
-                          @JsonProperty("completedResultLines") final List<CompletedResultLine> completedResultLines,
                           @JsonProperty("hearing") final Hearing hearing,
                           @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
                           @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
@@ -133,10 +131,6 @@ public class ResultsShared implements Serializable {
 
         private CourtClerk courtClerk;
 
-        private List<UncompletedResultLine> uncompletedResultLines;
-
-        private List<CompletedResultLine> completedResultLines;
-
         private Hearing hearing;
 
         private Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels;
@@ -163,16 +157,6 @@ public class ResultsShared implements Serializable {
 
         public Builder withCourtClerk(final CourtClerk courtClerk) {
             this.courtClerk = courtClerk;
-            return this;
-        }
-
-        public Builder withUncompletedResultLines(final List<UncompletedResultLine> uncompletedResultLines) {
-            this.uncompletedResultLines = uncompletedResultLines;
-            return this;
-        }
-
-        public Builder withCompletedResultLines(final List<CompletedResultLine> completedResultLines) {
-            this.completedResultLines = completedResultLines;
             return this;
         }
 
@@ -216,8 +200,6 @@ public class ResultsShared implements Serializable {
                     hearingId,
                     sharedTime,
                     courtClerk,
-                    uncompletedResultLines,
-                    completedResultLines,
                     hearing,
                     prosecutionCounsels,
                     defenceCounsels,

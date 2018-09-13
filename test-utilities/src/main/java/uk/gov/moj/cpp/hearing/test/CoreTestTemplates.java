@@ -38,6 +38,7 @@ import uk.gov.justice.json.schemas.core.JudicialRole;
 import uk.gov.justice.json.schemas.core.JudicialRoleType;
 import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.justice.json.schemas.core.LegalEntityDefendant;
+import uk.gov.justice.json.schemas.core.Level;
 import uk.gov.justice.json.schemas.core.NotifiedPlea;
 import uk.gov.justice.json.schemas.core.NotifiedPleaValue;
 import uk.gov.justice.json.schemas.core.Offence;
@@ -47,10 +48,12 @@ import uk.gov.justice.json.schemas.core.Person;
 import uk.gov.justice.json.schemas.core.PersonDefendant;
 import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
+import uk.gov.justice.json.schemas.core.Prompt;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ProsecutionCaseIdentifier;
 import uk.gov.justice.json.schemas.core.ProsecutionRepresentation;
 import uk.gov.justice.json.schemas.core.ReferralReason;
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Source;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.json.schemas.core.Title;
@@ -59,6 +62,7 @@ import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -260,7 +264,7 @@ public class CoreTestTemplates {
 
     public static Offence.Builder offence(CoreTemplateArguments args, UUID offenceId) {
 
-        if(args.isMinimumOffence()) {
+        if (args.isMinimumOffence()) {
             return Offence.offence()
                     .withId(offenceId)
                     .withStartDate(PAST_LOCAL_DATE.next())
@@ -327,7 +331,7 @@ public class CoreTestTemplates {
 
     public static Person.Builder person(CoreTemplateArguments args) {
 
-        if(args.isMinimumPerson()) {
+        if (args.isMinimumPerson()) {
             return Person.person()
                     .withTitle(RandomGenerator.values(Title.values()).next())
                     .withLastName(STRING.next())
@@ -366,7 +370,7 @@ public class CoreTestTemplates {
 
     public static Organisation.Builder organisation(CoreTemplateArguments args) {
 
-        if(args.isMinimumOrganisation()) {
+        if (args.isMinimumOrganisation()) {
             return Organisation.organisation()
                     .withId(randomUUID())
                     .withName(STRING.next());
@@ -458,7 +462,7 @@ public class CoreTestTemplates {
 
     public static Hearing.Builder hearing(CoreTemplateArguments args) {
 
-        if(args.hearingLanguage == WELSH) {
+        if (args.hearingLanguage == WELSH) {
             return Hearing.hearing()
                     .withId(randomUUID())
                     .withType(hearingType().build())
@@ -496,20 +500,28 @@ public class CoreTestTemplates {
         return STRING.next().toLowerCase() + "@" + STRING.next().toLowerCase() + "." + STRING.next().toLowerCase();
     }
 
-    public static Target.Builder target() {
+    public static Target.Builder target(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
         return Target.target()
-                .withHearingId(UUID.randomUUID())
-                .withTargetId(UUID.randomUUID())
-                .withResultLines(Arrays.asList(
-                        uk.gov.justice.json.schemas.core.ResultLine.resultLine()
-                                .withResultDefinitionId(UUID.randomUUID())
-                                .withPrompts(
-                                        Arrays.asList(
-                                                uk.gov.justice.json.schemas.core.Prompt.prompt()
-                                                        .withId(UUID.randomUUID())
-                                                        .build())
-                                )
-                                .build()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult("json string")
+                .withResultLines(singletonList(ResultLine.resultLine()
+                        .withResultDefinitionId(randomUUID())
+                        .withResultLineId(resultLineId)
+                        .withResultLabel(STRING.next())
+                        .withLevel(Level.CASE)
+                        .withOrderedDate(PAST_LOCAL_DATE.next())
+                        .withSharedDate(PAST_LOCAL_DATE.next())
+                        .withPrompts(singletonList(Prompt.prompt()
+                                .withId(randomUUID())
+                                .build())
+                        )
+                        .withDelegatedPowers(null)
+                        .withIsComplete(true)
+                        .withIsModified(false)
+                        .build()
                 ));
     }
 

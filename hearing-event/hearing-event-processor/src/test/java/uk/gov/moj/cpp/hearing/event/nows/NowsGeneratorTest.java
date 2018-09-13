@@ -89,8 +89,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+                //.withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+                //.withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -139,11 +139,13 @@ public class NowsGeneratorTest {
 //                        defendantTemplate(caseId, defendantId_1, offenceId_1),
 //                        defendantTemplate(caseId, defendantId_2, offenceId_2)
 //                )))
+/*
                 .withCompletedResultLines(asList(
                         completedResultLineTemplate(defendantId_1, offenceId_1, caseId, resultLineId_1, resultDefinition.getId(), PAST_LOCAL_DATE.next()),
                         completedResultLineTemplate(defendantId_2, offenceId_2, caseId, resultLineId_2, resultDefinition.getId(), PAST_LOCAL_DATE.next())
                 ))
-                .withUncompletedResultLines(emptyList())
+                */
+                //.withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId_1, completedResultLineStatus(resultLineId_1)))
                 .build();
 
@@ -180,8 +182,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -202,8 +204,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(singletonList(uncompletedResultLineTemplate(defendantId)))
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(singletonList(uncompletedResultLineTemplate(defendantId)))
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -228,8 +230,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(singletonList(uncompletedResultLineTemplate(randomUUID())))
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(singletonList(uncompletedResultLineTemplate(randomUUID())))
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -267,8 +269,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
@@ -303,8 +305,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
@@ -347,8 +349,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -400,8 +402,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -445,8 +447,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -498,8 +500,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .build();
 
@@ -546,8 +548,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
                 //               .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus))
                 .withVariantDirectory(singletonList(
                         Variant.variant()
@@ -587,8 +589,8 @@ public class NowsGeneratorTest {
         final ResultsShared resultsShared = ResultsShared.builder()
 //                .withCases(singletonList(caseTemplate(caseId)))
 //                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                .withUncompletedResultLines(emptyList())
+//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
+//                .withUncompletedResultLines(emptyList())
                 .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
                 .withVariantDirectory(singletonList(
                         Variant.variant()

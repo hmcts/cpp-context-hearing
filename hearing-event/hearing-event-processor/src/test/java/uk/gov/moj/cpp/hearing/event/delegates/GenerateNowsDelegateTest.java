@@ -21,37 +21,26 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
 
+import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Address;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Attendees;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Cases;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.CourtCentre;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Defendants;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Hearing;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Interpreter;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Offences;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Person;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ResultsSharedEventHelper;
-
-import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -86,20 +75,19 @@ public class GenerateNowsDelegateTest {
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
     @InjectMocks
-    private GenerateNowsDelegate target;
+    private GenerateNowsDelegate generateNowsDelegate;
 
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Ignore("GPE-5480 - will fix when share results is updated to new model")
     @Test
     public void testGenerateNows() {
 
         final ResultsSharedEventHelper resultsShared = h(resultsSharedTemplate());
 
-        final List<Nows> nows = basicNowsTemplate();
+        final CommandHelpers.NowsHelper nows = h(basicNowsTemplate());
 
         final NowDefinition nowDefinition = standardNowDefinition();
 
@@ -109,190 +97,138 @@ public class GenerateNowsDelegateTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        target.generateNows(sender, event, nows, resultsShared.it());
+        generateNowsDelegate.generateNows(sender, event, nows.it(), resultsShared.it());
 
         verify(sender).send(envelopeArgumentCaptor.capture());
+
         final JsonEnvelope createNowsMessage = envelopeArgumentCaptor.getValue();
 
         assertThat(createNowsMessage, jsonEnvelope(metadata().withName("hearing.command.generate-nows"), payloadIsJson(print())));
 
-
- /*
         assertThat(asPojo(createNowsMessage, GenerateNowsCommand.class), isBean(GenerateNowsCommand.class)
+                .with(GenerateNowsCommand::getHearing, isBean(uk.gov.justice.json.schemas.core.Hearing.class))
 
-                .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, is(resultsShared.getHearingId()))
-                        .with(Hearing::getHearingDates, first(is(resultsShared.getFirstHearingDay())))
-                        //TODO re-add this as part of GPE-5480
-                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
-                                .with(CourtCentre::getCourtCentreId, is(resultsShared.getHearing().getCourtCentreId()))
-                                .with(CourtCentre::getCourtCentreName, is(resultsShared.getHearing().getCourtCentreName()))
-                                .with(CourtCentre::getCourtRoomId, is(resultsShared.getHearing().getCourtRoomId()))
-                                .with(CourtCentre::getCourtRoomName, is(resultsShared.getHearing().getCourtRoomName()))
-                        )
-                        .with(Hearing::getAttendees, first(isBean(Attendees.class)
-                                .with(Attendees::getLastName, is(resultsShared.getFirstDefenseCounsel().getLastName()))
-                                .with(Attendees::getFirstName, is(resultsShared.getFirstDefenseCounsel().getFirstName()))
-                                .with(Attendees::getType, is("DefenseCounsel"))
-                        ))
-                        .with(Hearing::getAttendees, second(isBean(Attendees.class)
-                                .with(Attendees::getLastName, is(resultsShared.getFirstProsecutionCounsel().getLastName()))
-                                .with(Attendees::getFirstName, is(resultsShared.getFirstProsecutionCounsel().getFirstName()))
-                                .with(Attendees::getType, is("ProsecutionCounsel"))
-                        ))
-                        .with(Hearing::getAttendees, third(isBean(Attendees.class)
-                                .with(Attendees::getLastName, is(resultsShared.getCourtClerk().getLastName()))
-                                .with(Attendees::getFirstName, is(resultsShared.getCourtClerk().getFirstName()))
-                                .with(Attendees::getType, is("CourtClerk"))
-                        ))
-                        //TODO re-add this as part of GPE-5480
-/*                        .with(Hearing::getDefendants, first(isBean(Defendants.class)
-                                .with(Defendants::getId, is(resultsShared.getFirstDefendant().getId()))
-                                .with(Defendants::getPerson, isBean(Person.class)
-                                        .with(Person::getId, is(resultsShared.getFirstDefendant().getPersonId()))
-                                        .with(Person::getFirstName, is(resultsShared.getFirstDefendant().getFirstName()))
-                                        .with(Person::getLastName, is(resultsShared.getFirstDefendant().getLastName()))
-                                        .with(Person::getDateOfBirth, is(resultsShared.getFirstDefendant().getDateOfBirth().toString()))
-                                        .with(Person::getNationality, is(resultsShared.getFirstDefendant().getNationality()))
-                                        .with(Person::getGender, is(resultsShared.getFirstDefendant().getGender()))
-                                        .with(Person::getAddress, isBean(Address.class)
-                                                .with(Address::getAddress1, is(resultsShared.getFirstDefendant().getAddress().getAddress1()))
-                                                .with(Address::getAddress2, is(resultsShared.getFirstDefendant().getAddress().getAddress2()))
-                                                .with(Address::getAddress3, is(resultsShared.getFirstDefendant().getAddress().getAddress3()))
-                                                .with(Address::getAddress4, is(resultsShared.getFirstDefendant().getAddress().getAddress4()))
-                                                .with(Address::getPostCode, is(resultsShared.getFirstDefendant().getAddress().getPostCode()))
-                                        )
-                                )
-                                .with(Defendants::getInterpreter, isBean(Interpreter.class)
-                                        .with(Interpreter::getLanguage, is(resultsShared.getFirstDefendant().getInterpreter().getLanguage()))
-                                )
-                                .with(Defendants::getCases, first(isBean(Cases.class)
-                                        .with(Cases::getId, is(resultsShared.getFirstDefendantCase().getCaseId()))
-                                        .with(Cases::getUrn, is(resultsShared.getFirstCase().getUrn()))
-                                        .with(Cases::getBailStatus, is(resultsShared.getFirstDefendantCase().getBailStatus()))
-                                        .with(Cases::getCustodyTimeLimitDate, is(resultsShared.getFirstDefendantCase().getCustodyTimeLimitDate()))
-                                        .with(Cases::getOffences, first(isBean(Offences.class)
-                                                .with(Offences::getId, is(resultsShared.getFirstDefendantFirstOffence().getId()))
-                                                .with(Offences::getCode, is(resultsShared.getFirstDefendantFirstOffence().getOffenceCode()))
-                                                .with(Offences::getStartDate, is(resultsShared.getFirstDefendantFirstOffence().getStartDate()))
-                                        ))
-                                ))
-
-                        ))*/
-                        /*
-
-                        .with(Hearing::getSharedResultLines, first(isBean(SharedResultLines.class)
-                                .with(SharedResultLines::getId, is(resultsShared.getFirstCompletedResultLine().getId()))
-                                .with(SharedResultLines::getDefendantId, is(resultsShared.getFirstCompletedResultLine().getDefendantId()))
-                                .with(SharedResultLines::getCaseId, is(resultsShared.getFirstCompletedResultLine().getCaseId()))
-                                .with(SharedResultLines::getOffenceId, is(resultsShared.getFirstCompletedResultLine().getOffenceId()))
-                                .with(SharedResultLines::getLevel, is(resultsShared.getFirstCompletedResultLine().getLevel().toString()))
-                                .with(SharedResultLines::getLabel, is(resultsShared.getFirstCompletedResultLine().getResultLabel()))
-                                .with(SharedResultLines::getPrompts, first(isBean(Prompts.class)
-                                        .with(Prompts::getId, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getId()))
-                                        .with(Prompts::getLabel, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getLabel()))
-                                        .with(Prompts::getValue, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getValue()))
-                                ))
-                                .with(SharedResultLines::getSharedDate, is(resultsShared.getFirstCompletedResultLineStatus().getLastSharedDateTime()))
-                                .with(SharedResultLines::getOrderedDate, is(resultsShared.getFirstCompletedResultLine().getOrderedDate()))
-                        ))
-                        .with(Hearing::getNows, first(isBean(Nows.class)
-                                .with(Nows::getId, is(nows.get(0).getId()))
-                                .with(Nows::getNowsTypeId, is(nows.get(0).getNowsTypeId()))
-                                .with(Nows::getNowsTemplateName, is(nows.get(0).getNowsTemplateName()))
-                                .with(Nows::getDefendantId, is(nows.get(0).getDefendantId()))
-                                .with(Nows::getMaterials, first(isBean(Material.class)
-                                        .with(Material::getId, is(nows.get(0).getMaterials().get(0).getId()))
-                                        .with(Material::isAmended, is(nows.get(0).getMaterials().get(0).isAmended()))
-                                        .with(Material::getNowResult, first(isBean(NowResult.class)
-                                                .with(NowResult::getSharedResultId, is(nows.get(0).getMaterials().get(0).getNowResult().get(0).getSharedResultId()))
-                                                .with(NowResult::getSequence, is(nows.get(0).getMaterials().get(0).getNowResult().get(0).getSequence()))
-                                                .with(NowResult::getPrompts, first(isBean(PromptRef.class)
-                                                        .with(PromptRef::getId, is(nows.get(0).getMaterials().get(0).getNowResult().get(0).getPrompts().get(0).getId()))
-                                                        .with(PromptRef::getLabel, is(nows.get(0).getMaterials().get(0).getNowResult().get(0).getPrompts().get(0).getLabel()))
-                                                ))
-                                        ))
-                                        .with(Material::getUserGroups, first(isBean(UserGroups.class)
-                                                .with(UserGroups::getGroup, is(nows.get(0).getMaterials().get(0).getUserGroups().get(0).getGroup()))
-                                        ))
-                                ))
-                        ))
-                        .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
-                                .with(NowTypes::getId, is(nowDefinition.getId()))
-                                .with(NowTypes::getDescription, is(nowDefinition.getName()))
-                                .with(NowTypes::getJurisdiction, is(nowDefinition.getJurisdiction()))
-                                .with(NowTypes::getPriority, is(nowDefinition.getUrgentTimeLimitInMinutes().toString()))
-                                .with(NowTypes::getTemplateName, is(nowDefinition.getTemplateName()))
-                                .with(NowTypes::getRank, is(nowDefinition.getRank()))
-                                .with(NowTypes::getStaticText, is(nowDefinition.getText() + "\n" + nowDefinition.getResultDefinitions().get(0).getText()))
-                                .with(NowTypes::getWelshStaticText, is(nowDefinition.getWelshText() + "\n" + nowDefinition.getResultDefinitions().get(0).getWelshText()))
-                                .with(NowTypes::getWelshDescription, is(nowDefinition.getWelshName()))
-                                .with(NowTypes::getBilingualTemplateName, is(nowDefinition.getBilingualTemplateName()))
-                                .with(NowTypes::getRemotePrintingRequired, is(nowDefinition.getRemotePrintingRequired()))
-                        ))
+                .with(GenerateNowsCommand::getCourtClerk, isBean(CourtClerk.class)
+                        .with(CourtClerk::getId, is(resultsShared.getCourtClerk().getId()))
+                        .with(CourtClerk::getLastName, is(resultsShared.getCourtClerk().getLastName()))
+                        .with(CourtClerk::getFirstName, is(resultsShared.getCourtClerk().getFirstName()))
                 )
+                .with(GenerateNowsCommand::getNows, first(isBean(Nows.class)
+                        .with(Nows::getId, is(nows.getFirstNow().getId()))
+                        .with(Nows::getNowsTypeId, is(nows.getFirstNow().getNowsTypeId()))
+                        .with(Nows::getNowsTemplateName, is(nows.getFirstNow().getNowsTemplateName()))
+                        .with(Nows::getDefendantId, is(nows.getFirstNow().getDefendantId()))
+                        .with(Nows::getMaterials, first(isBean(Material.class)
+                                .with(Material::getId, is(nows.getFirstMaterial().getId()))
+                                .with(Material::isAmended, is(nows.getFirstMaterial().isAmended()))
+                                .with(Material::getNowResult, first(isBean(NowResult.class)
+                                        .with(NowResult::getSharedResultId, is(nows.getFirstNowsResult().getSharedResultId()))
+                                        .with(NowResult::getSequence, is(nows.getFirstNowsResult().getSequence()))
+                                        .with(NowResult::getPrompts, first(isBean(PromptRef.class)
+                                                .with(PromptRef::getId, is(nows.getFirstPrompt().getId()))
+                                                .with(PromptRef::getLabel, is(nows.getFirstPrompt().getLabel()))
+                                        ))
+                                ))
+                                .with(Material::getUserGroups, first(isBean(UserGroups.class)
+                                        .with(UserGroups::getGroup, is(nows.getFirstUserGroup().getGroup()))
+                                ))
+                        ))
+                ))
+                .with(GenerateNowsCommand::getSharedResultLines, first(isBean(SharedResultLines.class)
+                        .with(SharedResultLines::getId, is(resultsShared.getHearing().getTargets().get(0).getResultLines().get(0).getResultLineId()))
+                        .with(SharedResultLines::getId, is(resultsShared.getFirstCompletedResultLine().getResultLineId()))
+                        .with(SharedResultLines::getDefendantId, is(resultsShared.getFirstTarget().getDefendantId()))
+                        .with(SharedResultLines::getCaseId, is(resultsShared.getFirstCase().getId()))
+                        .with(SharedResultLines::getOffenceId, is(resultsShared.getFirstTarget().getOffenceId()))
+                        .with(SharedResultLines::getLevel, is(resultsShared.getFirstCompletedResultLine().getLevel().toString()))
+                        .with(SharedResultLines::getLabel, is(resultsShared.getFirstCompletedResultLine().getResultLabel()))
+                        .with(SharedResultLines::getPrompts, first(isBean(Prompts.class)
+                                .with(Prompts::getId, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getId()))
+                                .with(Prompts::getLabel, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getLabel()))
+                                .with(Prompts::getValue, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getValue()))
+                        ))
+                        .with(SharedResultLines::getSharedDate, is(resultsShared.getFirstCompletedResultLineStatus().getLastSharedDateTime()))
+                        .with(SharedResultLines::getOrderedDate, is(resultsShared.getFirstCompletedResultLine().getOrderedDate()))
+                ))
+                .with(GenerateNowsCommand::getNowTypes, first(isBean(NowTypes.class)
+                        .with(NowTypes::getId, is(nowDefinition.getId()))
+                        .with(NowTypes::getDescription, is(nowDefinition.getName()))
+                        .with(NowTypes::getJurisdiction, is(nowDefinition.getJurisdiction()))
+                        .with(NowTypes::getPriority, is(nowDefinition.getUrgentTimeLimitInMinutes().toString()))
+                        .with(NowTypes::getTemplateName, is(nowDefinition.getTemplateName()))
+                        .with(NowTypes::getRank, is(nowDefinition.getRank()))
+                        .with(NowTypes::getStaticText, is(nowDefinition.getText() + "\n" + nowDefinition.getResultDefinitions().get(0).getText()))
+                        .with(NowTypes::getWelshStaticText, is(nowDefinition.getWelshText() + "\n" + nowDefinition.getResultDefinitions().get(0).getWelshText()))
+                        .with(NowTypes::getWelshDescription, is(nowDefinition.getWelshName()))
+                        .with(NowTypes::getBilingualTemplateName, is(nowDefinition.getBilingualTemplateName()))
+                        .with(NowTypes::getRemotePrintingRequired, is(nowDefinition.getRemotePrintingRequired()))
+                ))
         );
-        */
     }
 
-    @Ignore("GPE-5480 - will fix when share results is updated to new model")
     @Test
     public void testGenerateNows_withNullNowText() {
-        /*
+
         final ResultsSharedEventHelper resultsShared = h(resultsSharedTemplate());
 
-        final List<Nows> nows = basicNowsTemplate();
+        final CommandHelpers.NowsHelper nows = h(basicNowsTemplate());
 
         final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
             d.setText(null);
+            d.setWelshText(null);
         });
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
                 .thenReturn(nowDefinition);
 
-        target.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(resultsShared)), nows, resultsShared.it());
+        generateNowsDelegate.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared)), nows.it(), resultsShared.it());
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 
-        assertThat(asPojo(envelopeArgumentCaptor.getValue(), GenerateNowsCommand.class), isBean(GenerateNowsCommand.class)
-                .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
-                                .with(NowTypes::getStaticText, is(nowDefinition.getResultDefinitions().get(0).getText()))
-                        ))
-                )
+        final JsonEnvelope createNowsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(asPojo(createNowsMessage, GenerateNowsCommand.class), isBean(GenerateNowsCommand.class)
+                .with(GenerateNowsCommand::getHearing, isBean(uk.gov.justice.json.schemas.core.Hearing.class))
+
+                .with(GenerateNowsCommand::getNowTypes, first(isBean(NowTypes.class)
+
+                        .with(NowTypes::getStaticText, is(nowDefinition.getResultDefinitions().get(0).getText()))
+                        .with(NowTypes::getWelshStaticText, is(nowDefinition.getResultDefinitions().get(0).getWelshText()))
+
+                ))
         );
-        */
     }
 
-    @Ignore("GPE-5480 - will fix when share results is updated to new model")
     @Test
     public void testGenerateNows_withNullNowText_AndNullResultDefinitionNowText() {
-        /*
         final ResultsSharedEventHelper resultsShared = h(resultsSharedTemplate());
 
-        final List<Nows> nows = basicNowsTemplate();
+        final CommandHelpers.NowsHelper nows = h(basicNowsTemplate());
 
         final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
             d.setText(null);
-            d.getResultDefinitions().forEach(l -> l.setText(null));
+            d.getResultDefinitions().get(0).setText(null);
+            d.setWelshText(null);
+            d.getResultDefinitions().get(0).setWelshText(null);
         });
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
                 .thenReturn(nowDefinition);
 
-        target.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(resultsShared)), nows, resultsShared.it());
+        generateNowsDelegate.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared)), nows.it(), resultsShared.it());
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 
-        assertThat(asPojo(envelopeArgumentCaptor.getValue(), GenerateNowsCommand.class), isBean(GenerateNowsCommand.class)
-                .with(GenerateNowsCommand::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getNowTypes, first(isBean(NowTypes.class)
-                                .with(NowTypes::getStaticText, is(""))
-                        ))
-                )
+        final JsonEnvelope createNowsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(asPojo(createNowsMessage, GenerateNowsCommand.class), isBean(GenerateNowsCommand.class)
+                .with(GenerateNowsCommand::getHearing, isBean(uk.gov.justice.json.schemas.core.Hearing.class))
+                .with(GenerateNowsCommand::getNowTypes, first(isBean(NowTypes.class)
+                        .with(NowTypes::getStaticText, is(""))
+                        .with(NowTypes::getWelshStaticText, is(""))
+                ))
         );
-        */
     }
 }

@@ -201,7 +201,7 @@ public class HearingEventProcessorTest {
     @Test
     public void publicDraftResultSavedPublicEvent() {
         final String draftResult = "some random text";
-        final Target target = CoreTestTemplates.target().build();
+        final Target target = CoreTestTemplates.target(randomUUID(), randomUUID(), randomUUID(), randomUUID()).build();
         final JsonEnvelope eventIn = createDraftResultSavedPrivateEvent(target);
 
         this.hearingEventProcessor.publicDraftResultSavedPublicEvent(eventIn);

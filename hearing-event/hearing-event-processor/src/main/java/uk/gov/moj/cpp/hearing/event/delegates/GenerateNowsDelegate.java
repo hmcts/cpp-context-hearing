@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefiniti
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("squid:S1188")
+@SuppressWarnings({"squid:S1188", "squid:S1602"})
 public class GenerateNowsDelegate {
 
     private final Enveloper enveloper;
@@ -57,40 +58,48 @@ public class GenerateNowsDelegate {
     }
 
     public void generateNows(final Sender sender, final JsonEnvelope event, final List<Nows> nows, final ResultsShared resultsShared) {
-        final Map<ResultLine, Target> resultLine2Target = new HashMap<>();
-        resultsShared.getHearing().getTargets().forEach(
-                target ->
-                        target.getResultLines().forEach(resultLine -> resultLine2Target.put(resultLine, target))
-        );
-        final Map<UUID, UUID> defendantId2CaseId = new HashMap<>();
-        resultsShared.getHearing().getProsecutionCases().forEach(
-                prosecutionCase ->
-                        prosecutionCase.getDefendants().forEach(defendant -> defendantId2CaseId.put(defendant.getId(), prosecutionCase.getId()))
-        );
 
-        final List<SharedResultLines> sharedResultLines = getCompletedResultLines(resultsShared).stream()
-                .map(line -> SharedResultLines.sharedResultLines()
+        List<SharedResultLines> sharedResultLines = new ArrayList<>();
+
+        resultsShared.getHearing().getTargets().forEach(target -> {
+
+            sharedResultLines.addAll(target.getResultLines().stream()
+                    .filter(ResultLine::getIsComplete)
+                    .map(line -> {
+
+                        //This is a potential hack. - we are getting the first case id that the defendant belongs to.
+                        UUID caseId = resultsShared.getHearing().getProsecutionCases().stream()
+                                .filter(prosecutionCase -> prosecutionCase.getDefendants().stream().anyMatch(d -> d.getId().equals(target.getDefendantId())))
+                                .findAny()
+                                .get()
+                                .getId();
+
+
+                        return SharedResultLines.sharedResultLines()
                                 .setId(line.getResultLineId())
+                                .setCaseId(caseId)
+                                .setOffenceId(target.getOffenceId())
+                                .setDefendantId(target.getDefendantId())
+                                .setOrderedDate(line.getOrderedDate())
+                                .setLevel(line.getLevel().name())
+                                .setLabel(line.getResultLabel())
+
+                                .setPrompts(
+                                        line.getPrompts().stream()
+                                                .map(pIn -> Prompts.prompts()
+                                                        .setId(pIn.getId())
+                                                        .setLabel(pIn.getLabel())
+                                                        .setValue(pIn.getValue())
+                                                ).collect(Collectors.toList())
+                                )
                                 .setSharedDate(ofNullable(resultsShared.getCompletedResultLinesStatus()
                                         .get(line.getResultLineId()))
                                         .map(CompletedResultLineStatus::getLastSharedDateTime)
                                         .orElse(null)
-                                )
-                        .setOrderedDate(line.getOrderedDate())
-                        .setLevel(line.getLevel().name())
-                        .setCaseId(defendantId2CaseId.get(resultLine2Target.get( line).getDefendantId()))
-                        .setDefendantId(resultLine2Target.get( line).getDefendantId())
-                        .setLabel(line.getResultLabel())
-                        .setOffenceId(resultLine2Target.get( line).getOffenceId())
-                        .setPrompts(
-                                line.getPrompts().stream()
-                                        .map(pIn -> Prompts.prompts()
-                                                .setId(pIn.getId())
-                                                .setLabel(pIn.getLabel())
-                                                .setValue(pIn.getValue())
-                                        ).collect(Collectors.toList())
-                        )
-                ).collect(Collectors.toList());
+                                );
+                    })
+                    .collect(Collectors.toList()));
+        });
 
 
         final GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand()

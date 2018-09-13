@@ -5,9 +5,11 @@ import static java.util.stream.Collectors.toList;
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.Material;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ResultLine;
+import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
@@ -27,6 +29,10 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -80,6 +86,43 @@ public class CommandHelpers {
 
     public static UploadSubscriptionsCommandHelper h(UploadSubscriptionsCommand uploadSubscriptionsCommand){
         return new UploadSubscriptionsCommandHelper(uploadSubscriptionsCommand);
+    }
+
+    public static NowsHelper h(List<Nows> nows){
+        return new NowsHelper(nows);
+    }
+
+    public static class NowsHelper {
+
+        private List<Nows> nows;
+
+        public NowsHelper(List<Nows> nows) {
+            this.nows = nows;
+        }
+
+        public List<Nows> it(){
+            return nows;
+        }
+
+        public Nows getFirstNow(){
+            return nows.get(0);
+        }
+
+        public uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material getFirstMaterial(){
+            return nows.get(0).getMaterials().get(0);
+        }
+
+        public NowResult getFirstNowsResult(){
+            return nows.get(0).getMaterials().get(0).getNowResult().get(0);
+        }
+
+        public PromptRef getFirstPrompt(){
+            return nows.get(0).getMaterials().get(0).getNowResult().get(0).getPrompts().get(0);
+        }
+
+        public UserGroups getFirstUserGroup(){
+            return nows.get(0).getMaterials().get(0).getUserGroups().get(0);
+        }
     }
 
     public static class AllNowsReferenceDataHelper {
@@ -278,6 +321,10 @@ public class CommandHelpers {
 
         public ProsecutionCase getFirstDefendantCase() {
             return resultsShared.getHearing().getProsecutionCases().get(0);
+        }
+
+        public Target getFirstTarget() {
+            return resultsShared.getHearing().getTargets().get(0);
         }
 
         public ResultLine getFirstCompletedResultLine() {

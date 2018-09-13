@@ -177,7 +177,7 @@ public class HearingEventListenerTest {
     @Test
     public void shouldPersistHearingDraftResult() {
 
-        final uk.gov.justice.json.schemas.core.Target targetIn = CoreTestTemplates.target().build();
+        final uk.gov.justice.json.schemas.core.Target targetIn = CoreTestTemplates.target(randomUUID(), randomUUID(), randomUUID(), randomUUID()).build();
         final uk.gov.justice.json.schemas.core.ResultLine resultLineIn = targetIn.getResultLines().get(0);
         final uk.gov.justice.json.schemas.core.Prompt promptIn = resultLineIn.getPrompts().get(0);
         final Target targetOut = new Target();

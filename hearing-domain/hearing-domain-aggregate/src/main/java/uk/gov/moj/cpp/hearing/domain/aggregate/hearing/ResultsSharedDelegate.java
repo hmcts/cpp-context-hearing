@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toMap;
 
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
@@ -37,9 +38,8 @@ public class ResultsSharedDelegate implements Serializable {
     @SuppressWarnings({"squid:S1172"})
     public void handleResultsShared(ResultsShared resultsShared) {
         this.momento.setPublished(true);
+        //TODO - GPE-5480 - need to go through the whole versioning of result lines very carefully.
 /*
-        //TODO GPE-5480 review this
-
         resultsShared.getCompletedResultLines().forEach(completedResultLine -> {
 
             boolean resultLineHasBeenModified = this.momento.getCompletedResultLines().containsKey(completedResultLine.getId())
@@ -54,9 +54,9 @@ public class ResultsSharedDelegate implements Serializable {
         });
 
         this.momento.setCompletedResultLines(resultsShared.getCompletedResultLines().stream().collect(toMap(CompletedResultLine::getId, Function.identity())));
-
-        this.momento.setVariantDirectory(resultsShared.getVariantDirectory()); //variants might be deleted if their result lines have been deleted.
   */
+        this.momento.setVariantDirectory(resultsShared.getVariantDirectory()); //variants might be deleted if their result lines have been deleted.
+
     }
 
     public void handleResultLinesStatusUpdated(ResultLinesStatusUpdated resultLinesStatusUpdated) {
@@ -70,26 +70,31 @@ public class ResultsSharedDelegate implements Serializable {
                         //TODO GPE 5480 reinstate this line
                         //.setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
                         .setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
-         );
+        );
     }
 
-    public void handleDraftResultShared(final DraftResultSaved draftResultSaved ) {
+    public void handleDraftResultShared(final DraftResultSaved draftResultSaved) {
+
+        //TODO GPE-5480 - this code must clear the last shared date time when the line has been modified.
+
+
         this.momento.getTargets().put(draftResultSaved.getTarget().getTargetId(), draftResultSaved.getTarget());
     }
 
     public Stream<Object> saveDraftResult(final Target target) {
-           return Stream.of(new DraftResultSaved(target));
+        return Stream.of(new DraftResultSaved(target));
     }
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
 
         List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
-                .flatMap(t->t.getResultLines().stream())
-                .filter(rl->rl.getIsComplete())
-                .map(rl->rl.getResultLineId())
+                .flatMap(t -> t.getResultLines().stream())
+                .filter(ResultLine::getIsComplete)
+                .map(ResultLine::getResultLineId)
                 .collect(Collectors.toList());
 
-        this.momento.getHearing().setTargets( new ArrayList<>(this.momento.getTargets().values()) );
+        //TODO GPE-5480 - clear lastSharedDateTime and court clerk for each result line that has been newly modified.
+        this.momento.getHearing().setTargets(new ArrayList<>(this.momento.getTargets().values()));
 
         final List<Variant> variants = this.momento.getVariantDirectory().stream()
                 .filter(variant -> {
@@ -110,7 +115,6 @@ public class ResultsSharedDelegate implements Serializable {
                 .withHearingId(command.getHearingId())
                 .withSharedTime(sharedTime)
                 .withCourtClerk(command.getCourtClerk())
-                //TODO GPE-5480 remove  this commented out code
                 .withHearing(this.momento.getHearing())
                 .withProsecutionCounsels(this.momento.getProsecutionCounsels())
                 .withDefenceCounsels(this.momento.getDefenceCounsels())
