@@ -39,12 +39,6 @@ import java.util.UUID;
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
 
-    private static final String FIELD_HEARING_ID = "hearingId";
-    private static final String FIELD_COMPLETED_RESULT_LINES = "completedResultLines";
-    private static final String FIELD_GENERIC_ID = "id";
-    private static final String FIELD_RESULTS = "results";
-    private static final String FIELD_RESULT_LINE_ID = "resultLineId";
-
     @Inject
     //TODO remove this
     private HearingOutcomeRepository hearingOutcomeRepository;
@@ -77,10 +71,11 @@ public class HearingEventListener {
 
     }
 
-    @Handles("hearing.results-shared")
+    // GPE-5480 delete this method and delete hearingOutcomeRepsository
+     @Handles("hearing.results-shared")
     public void updateDraftResultWithFromSharedResults(final JsonEnvelope event) {
 
-        final JsonObject payload = event.payloadAsJsonObject();
+        /*final JsonObject payload = event.payloadAsJsonObject();
 
         final List<HearingOutcome> hearingOutcomes = this.hearingOutcomeRepository.findByHearingId(fromString(payload.getString(FIELD_HEARING_ID)));
 
@@ -104,6 +99,7 @@ public class HearingEventListener {
         });
 
         persistModifiedHearingOutcomes(hearingOutcomes, hearingOutcomeToDraftResultMap);
+        */
     }
 
     //TODO what should this do ?
@@ -132,48 +128,4 @@ public class HearingEventListener {
         }
     }
 
-    private void hydrateWithDraftResultJson(final Map<UUID, JsonObject> hearingOutcomeToDraftResultMap, final HearingOutcome hearingOutcome) {
-        hearingOutcomeToDraftResultMap.put(hearingOutcome.getId(), parseDraftResultToJson(hearingOutcome));
-    }
-
-    private JsonObject parseDraftResultToJson(final HearingOutcome hearingOutcome) {
-        try (final JsonReader jsonReader = createReader(new StringReader(hearingOutcome.getDraftResult()))) {
-            return jsonReader.readObject();
-        }
-    }
-
-    private List<String> getResultLineIdsFromDraftResultJson(final JsonObject draftResultJson) {
-        return draftResultJson.getJsonArray(FIELD_RESULTS).getValuesAs(JsonObject.class).stream()
-                .map(result -> result.getString(FIELD_RESULT_LINE_ID)).collect(toList());
-    }
-
-    private JsonObjectBuilder updateDraftResult(final JsonObject draftResultJson) {
-        final JsonObjectBuilder updatedDraftResultJson = createObjectBuilder();
-        draftResultJson.forEach((key, value) -> {
-            if (key.equals(FIELD_RESULTS)) {
-                final JsonArray results = (JsonArray) value;
-                final JsonArrayBuilder updatedResultsJson = createArrayBuilder();
-
-                results.getValuesAs(JsonObject.class).forEach(result -> {
-                    final JsonObjectBuilder updatedResultJson = createObjectBuilder();
-                    result.forEach(updatedResultJson::add);
-                    updatedResultsJson.add(updatedResultJson);
-                });
-                updatedDraftResultJson.add(key, updatedResultsJson);
-            } else {
-                updatedDraftResultJson.add(key, value);
-            }
-        });
-        return updatedDraftResultJson;
-    }
-
-    private void persistModifiedHearingOutcomes(final List<HearingOutcome> hearingOutcomes, final Map<UUID, JsonObject> hearingOutcomeToDraftResult) {
-        hearingOutcomes.forEach(hearingOutcome -> {
-            if (hearingOutcomeToDraftResult.containsKey(hearingOutcome.getId())) {
-                this.hearingOutcomeRepository.save(new HearingOutcome(hearingOutcome.getOffenceId(),
-                        hearingOutcome.getHearingId(), hearingOutcome.getDefendantId(), hearingOutcome.getId(),
-                        hearingOutcomeToDraftResult.get(hearingOutcome.getId()).toString()));
-            }
-        });
-    }
 }

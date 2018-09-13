@@ -54,6 +54,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -151,7 +152,7 @@ public class ShareResultsCommandHandlerTest {
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
 
         final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(saveDraftResultCommand));
 
@@ -190,7 +191,7 @@ public class ShareResultsCommandHandlerTest {
     @Test
     public void shouldRaiseResultsSharedEvent() throws Exception {
 
-        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplate(initiateHearingCommand);
+        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
         final Target targetIn = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetIn.getResultLines().get(0);
         final Prompt promptIn = resultLineIn.getPrompts().get(0);

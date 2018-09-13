@@ -13,6 +13,7 @@ import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class CreateSampleDraftResultSharedJson {
     public static void main(String[] args) throws IOException {
         final ObjectMapper objectMapper = createObjectMapper();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
-        final SaveDraftResultCommand command = saveDraftResultCommandTemplate(initiateHearingCommand);
+        final SaveDraftResultCommand command = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
         command.setHearingId(command.getTarget().getHearingId());
 
         final List<String> destinations = Arrays.asList(

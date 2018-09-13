@@ -228,7 +228,7 @@ public class TestTemplates {
     }
 
     public static SaveDraftResultCommand saveDraftResultCommandTemplate(
-            final InitiateHearingCommand initiateHearingCommand) {
+            final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
         final Hearing hearing = initiateHearingCommand.getHearing();
         final uk.gov.justice.json.schemas.core.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
         final Offence offence0 = defendant0.getOffences().get(0);
@@ -250,7 +250,7 @@ public class TestTemplates {
                                 .withIsComplete(true)
                                 .withIsModified(true)
                                 .withLevel(uk.gov.justice.json.schemas.core.Level.OFFENCE)
-                                .withOrderedDate(LocalDate.now())
+                                .withOrderedDate(orderedDate)
                                 .withResultLineId(UUID.randomUUID())
                                 .withResultLabel("imprisonment")
                                 .withSharedDate(LocalDate.now())
