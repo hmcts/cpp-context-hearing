@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -16,141 +15,50 @@ public class FoundHearingsForEditOffence implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
+    private List<UUID> hearingIds;
+    private UUID defendantId;
+    private uk.gov.justice.json.schemas.core.Offence offence;
 
-    private final String offenceCode;
-
-    private final String wording;
-
-    private final LocalDate startDate;
-
-    private final LocalDate endDate;
-
-    private final Integer count;
-
-    private final LocalDate convictionDate;
-
-    private final List<UUID> hearingIds;
+    private FoundHearingsForEditOffence() {
+    }
 
     @JsonCreator
-    private FoundHearingsForEditOffence(@JsonProperty("id") final UUID id,
-                                        @JsonProperty("offenceCode") final String offenceCode,
-                                        @JsonProperty("wording") final String wording,
-                                        @JsonProperty("startDate") final LocalDate startDate,
-                                        @JsonProperty("endDate") final LocalDate endDate,
-                                        @JsonProperty("count") final Integer count,
-                                        @JsonProperty("convictionDate") final LocalDate convictionDate,
-                                        @JsonProperty("hearingIds") final List<UUID> hearingIds) {
-        this.id = id;
-        this.offenceCode = offenceCode;
-        this.wording = wording;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.count = count;
-        this.convictionDate = convictionDate;
+    protected FoundHearingsForEditOffence(@JsonProperty("hearingIds") final List<UUID> hearingIds,
+            @JsonProperty("defendantId") final UUID defendantId,
+            @JsonProperty("offence") final uk.gov.justice.json.schemas.core.Offence offence) {
         this.hearingIds = new ArrayList<>(hearingIds);
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getOffenceCode() {
-        return offenceCode;
-    }
-
-    public String getWording() {
-        return wording;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public LocalDate getConvictionDate() {
-        return convictionDate;
+        this.defendantId = defendantId;
+        this.offence = offence;
     }
 
     public List<UUID> getHearingIds() {
-        return new ArrayList<>(hearingIds);
+        return hearingIds;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public UUID getDefendantId() {
+        return defendantId;
     }
 
-    public static class Builder {
+    public uk.gov.justice.json.schemas.core.Offence getOffence() {
+        return offence;
+    }
 
-        private UUID id;
+    public FoundHearingsForEditOffence withHearingIds(final List<UUID> hearingIds) {
+        this.hearingIds = hearingIds;
+        return this;
+    }
 
-        private String offenceCode;
+    public FoundHearingsForEditOffence withDefendantId(final UUID defendantId) {
+        this.defendantId = defendantId;
+        return this;
+    }
 
-        private String wording;
+    public FoundHearingsForEditOffence withOffence(final uk.gov.justice.json.schemas.core.Offence offence) {
+        this.offence = offence;
+        return this;
+    }
 
-        private LocalDate startDate;
-
-        private LocalDate endDate;
-
-        private Integer count;
-
-        private LocalDate convictionDate;
-
-        private List<UUID> hearingIds;
-
-        private Builder() {
-        }
-
-        public Builder withId(final UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withHearingIds(final List<UUID> hearingIds) {
-            this.hearingIds = new ArrayList<>(hearingIds);
-            return this;
-        }
-
-        public Builder withOffenceCode(final String offenceCode) {
-            this.offenceCode = offenceCode;
-            return this;
-        }
-
-        public Builder withWording(final String wording) {
-            this.wording = wording;
-            return this;
-        }
-
-        public Builder withStartDate(final LocalDate startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder withEndDate(final LocalDate endDate) {
-            this.endDate = endDate;
-            return this;
-        }
-
-        public Builder withCount(final Integer count) {
-            this.count = count;
-            return this;
-        }
-
-        public Builder withConvictionDate(final LocalDate convictionDate) {
-            this.convictionDate = convictionDate;
-            return this;
-        }
-
-        public FoundHearingsForEditOffence build() {
-            return new FoundHearingsForEditOffence(id, offenceCode, wording, startDate, endDate, count, convictionDate, hearingIds);
-        }
-
+    public static FoundHearingsForEditOffence foundHearingsForEditOffence() {
+        return new FoundHearingsForEditOffence();
     }
 }

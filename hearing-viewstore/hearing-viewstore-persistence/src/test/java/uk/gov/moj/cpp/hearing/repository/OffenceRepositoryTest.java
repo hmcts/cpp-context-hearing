@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.After;
@@ -14,6 +15,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -37,7 +39,12 @@ public class OffenceRepositoryTest {
     @BeforeClass
     public static void create() {
 
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
+        final InitiateHearingCommand initiateHearingCommand = with(initiateHearingTemplateForMagistrates(), i -> {
+            i.getHearing().getProsecutionCases().stream()
+                    .flatMap(p -> p.getDefendants().stream())
+                    .flatMap(d -> d.getOffences().stream())
+                    .forEach(o -> o.setPlea(CoreTestTemplates.plea(o.getId(), o.getConvictionDate()).build()));
+        });
 
         hearings.add(initiateHearingCommand.getHearing());
     }

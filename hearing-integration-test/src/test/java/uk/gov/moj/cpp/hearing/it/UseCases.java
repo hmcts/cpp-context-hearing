@@ -37,7 +37,7 @@ import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
+import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
@@ -370,13 +370,15 @@ public class UseCases {
     }
 
 
-    public static CaseDefendantOffencesChangedCommand updateOffences(CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand) throws Exception {
+    public static UpdateOffencesForDefendantCommand updateOffences(UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand) throws Exception {
 
-        final String eventName = "public.progression.defendant-offences-changed";
+        final String eventName = "public.progression.events.offences-for-defendant-updated";
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
-        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantOffencesChangedCommand), JsonObject.class);
+        final String jsonValueAsString = mapper.writeValueAsString(updateOffencesForDefendantCommand);
+
+        final JsonObject jsonObject = mapper.readValue(jsonValueAsString, JsonObject.class);
 
         sendMessage(
                 publicEvents.createProducer(),
@@ -384,7 +386,7 @@ public class UseCases {
                 jsonObject,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
-        return caseDefendantOffencesChangedCommand;
+        return updateOffencesForDefendantCommand;
     }
 
     public static HearingDetailsUpdateCommand updateHearing(HearingDetailsUpdateCommand hearingDetailsUpdateCommand) throws Exception {

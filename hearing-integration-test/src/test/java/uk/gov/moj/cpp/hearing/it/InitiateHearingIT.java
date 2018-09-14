@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.json.schemas.core.HearingLanguage.ENGLISH;
 import static uk.gov.justice.json.schemas.core.JurisdictionType.MAGISTRATES;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -17,7 +18,6 @@ import uk.gov.justice.json.schemas.core.AssociatedPerson;
 import uk.gov.justice.json.schemas.core.ContactNumber;
 import uk.gov.justice.json.schemas.core.CourtCentre;
 import uk.gov.justice.json.schemas.core.Defendant;
-import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.HearingDay;
 import uk.gov.justice.json.schemas.core.HearingLanguage;
@@ -32,7 +32,6 @@ import uk.gov.justice.json.schemas.core.OffenceFacts;
 import uk.gov.justice.json.schemas.core.Organisation;
 import uk.gov.justice.json.schemas.core.Person;
 import uk.gov.justice.json.schemas.core.PersonDefendant;
-import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ProsecutionCaseIdentifier;
 import uk.gov.justice.json.schemas.core.ReferralReason;
@@ -43,7 +42,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListRes
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.ZoneId;
-import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class InitiateHearingIT extends AbstractIT {
@@ -594,10 +592,6 @@ public class InitiateHearingIT extends AbstractIT {
 
         final NotifiedPlea notifiedPlea = offence.getNotifiedPlea();
 
-        final Plea plea = offence.getPlea();
-
-        final DelegatedPowers delegatedPowers = plea.getDelegatedPowers();
-
         final OffenceFacts offenceFacts = offence.getOffenceFacts();
 
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
@@ -688,15 +682,7 @@ public class InitiateHearingIT extends AbstractIT {
                                                                         .with(AllocationDecision::getDefendantRepresentation, is(allocationDecision.getDefendantRepresentation()))
                                                                         .with(AllocationDecision::getProsecutionRepresentation, is(allocationDecision.getProsecutionRepresentation()))
                                                                         .with(AllocationDecision::getIndicationOfSentence, is(allocationDecision.getIndicationOfSentence()))))
-                                                        .with(Offence::getPlea, isBean(Plea.class)
-                                                                .with(Plea::getOffenceId, is(plea.getOffenceId()))
-                                                                .with(Plea::getPleaDate, is(plea.getPleaDate()))
-                                                                .with(Plea::getPleaValue, is(plea.getPleaValue()))
-                                                                .with(Plea::getOriginatingHearingId, is(plea.getOriginatingHearingId()))
-                                                                .with(Plea::getDelegatedPowers, isBean(DelegatedPowers.class)
-                                                                        .with(DelegatedPowers::getUserId, is(delegatedPowers.getUserId()))
-                                                                        .with(DelegatedPowers::getFirstName, is(delegatedPowers.getFirstName()))
-                                                                        .with(DelegatedPowers::getLastName, is(delegatedPowers.getLastName()))))
+                                                        .with(Offence::getPlea, is(nullValue()))
                                                         .with(Offence::getOffenceFacts, isBean(OffenceFacts.class)
                                                                 .with(OffenceFacts::getVehicleRegistration, is(offenceFacts.getVehicleRegistration()))
                                                                 .with(OffenceFacts::getAlcoholReadingAmount, is(offenceFacts.getAlcoholReadingAmount()))

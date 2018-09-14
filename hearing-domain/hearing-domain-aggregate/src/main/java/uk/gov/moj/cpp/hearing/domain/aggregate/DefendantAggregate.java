@@ -5,9 +5,9 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
@@ -53,19 +53,12 @@ public class DefendantAggregate implements Aggregate {
         return apply(Stream.of(caseDefendantDetailsWithHearings));
     }
 
-    public Stream<Object> lookupHearingsForNewOffenceOnDefendant(UUID defendantId, UUID caseId, DefendantOffence offence) {
-        return apply(Stream.of(FoundHearingsForNewOffence.builder()
-                .withId(offence.getId())
+    public Stream<Object> lookupHearingsForNewOffenceOnDefendant(final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
+        return apply(Stream.of(FoundHearingsForNewOffence.foundHearingsForNewOffence()
                 .withDefendantId(defendantId)
-                .withCaseId(caseId)
-                .withOffenceCode(offence.getOffenceCode())
-                .withWording(offence.getWording())
-                .withStartDate(offence.getStartDate())
-                .withEndDate(offence.getEndDate())
-                .withCount(offence.getCount())
-                .withConvictionDate(offence.getConvictionDate())
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withOffence(offence)
                 .withHearingIds(hearingIds)
-                .build()
         ));
     }
 }

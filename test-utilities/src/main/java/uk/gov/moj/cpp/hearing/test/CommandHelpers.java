@@ -13,9 +13,8 @@ import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
+import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffences;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
@@ -76,8 +75,8 @@ public class CommandHelpers {
         return new AllResultDefinitionsReferenceDataHelper(allResultDefinitions);
     }
 
-    public static CaseDefendantOffencesChangedCommandHelper h(CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand) {
-        return new CaseDefendantOffencesChangedCommandHelper(caseDefendantOffencesChangedCommand);
+    public static UpdateOffencesForDefendantCommandHelper h(UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand) {
+        return new UpdateOffencesForDefendantCommandHelper(updateOffencesForDefendantCommand);
     }
 
     public static CaseDefendantDetailsHelper h(CaseDefendantDetails caseDefendantDetails) {
@@ -355,31 +354,31 @@ public class CommandHelpers {
         }
     }
 
-    public static class CaseDefendantOffencesChangedCommandHelper {
-        private CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand;
+    public static class UpdateOffencesForDefendantCommandHelper {
+        private UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand;
 
-        public CaseDefendantOffencesChangedCommandHelper(CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedCommand) {
-            this.caseDefendantOffencesChangedCommand = caseDefendantOffencesChangedCommand;
+        public UpdateOffencesForDefendantCommandHelper(UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand) {
+            this.updateOffencesForDefendantCommand = updateOffencesForDefendantCommand;
         }
 
-        public DefendantOffences getFirstAddedOffences() {
-            return this.caseDefendantOffencesChangedCommand.getAddedOffences().get(0);
+        public DefendantCaseOffences getFirstAddedOffences() {
+            return this.updateOffencesForDefendantCommand.getAddedOffences().get(0);
         }
 
-        public DefendantOffence getFirstOffenceFromAddedOffences() {
-            return this.caseDefendantOffencesChangedCommand.getAddedOffences().get(0).getOffences().get(0);
+        public uk.gov.justice.json.schemas.core.Offence getFirstOffenceFromAddedOffences() {
+            return this.updateOffencesForDefendantCommand.getAddedOffences().get(0).getOffences().get(0);
         }
 
-        public DefendantOffence getFirstOffenceFromUpdatedOffences() {
-            return this.caseDefendantOffencesChangedCommand.getUpdatedOffences().get(0).getOffences().get(0);
+        public uk.gov.justice.json.schemas.core.Offence getFirstOffenceFromUpdatedOffences() {
+            return this.updateOffencesForDefendantCommand.getUpdatedOffences().get(0).getOffences().get(0);
         }
 
         public UUID getFirstOffenceIdFromDeletedOffences() {
-            return this.caseDefendantOffencesChangedCommand.getDeletedOffences().get(0).getOffences().get(0);
+            return this.updateOffencesForDefendantCommand.getDeletedOffences().get(0).getOffences().get(0);
         }
 
-        public CaseDefendantOffencesChangedCommand it() {
-            return this.caseDefendantOffencesChangedCommand;
+        public UpdateOffencesForDefendantCommand it() {
+            return this.updateOffencesForDefendantCommand;
         }
     }
 

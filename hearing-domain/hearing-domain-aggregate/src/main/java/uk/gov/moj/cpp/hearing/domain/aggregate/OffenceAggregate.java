@@ -5,8 +5,8 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
@@ -74,19 +74,11 @@ public class OffenceAggregate implements Aggregate {
         return plea;
     }
 
-    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final DefendantOffence offence) {
-
-        return apply(Stream.of(FoundHearingsForEditOffence.builder()
-                .withId(offence.getId())
-                .withOffenceCode(offence.getOffenceCode())
-                .withWording(offence.getWording())
-                .withStartDate(offence.getStartDate())
-                .withEndDate(offence.getEndDate())
-                .withCount(offence.getCount())
-                .withConvictionDate(offence.getConvictionDate())
+    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final UUID defendantId, final Offence offence) {
+        return apply(Stream.of(FoundHearingsForEditOffence.foundHearingsForEditOffence()
                 .withHearingIds(hearingIds)
-                .build()));
-
+                .withDefendantId(defendantId)
+                .withOffence(offence)));
     }
 
     public Stream<Object> lookupHearingsForDeleteOffenceOnOffence(final UUID offenceId) {

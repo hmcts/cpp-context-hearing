@@ -24,14 +24,19 @@ import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
-import uk.gov.justice.json.schemas.core.CourtClerk;
+import uk.gov.justice.json.schemas.core.CourtDecision;
+import uk.gov.justice.json.schemas.core.DefendantRepresentation;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.IndicatedPleaValue;
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.PleaValue;
+import uk.gov.justice.json.schemas.core.ProsecutionRepresentation;
 import uk.gov.justice.json.schemas.core.ResultLine;
+import uk.gov.justice.json.schemas.core.Source;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -42,13 +47,13 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.command.offence.CaseDefendantOffencesChangedCommand;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantOffence;
-import uk.gov.moj.cpp.hearing.command.offence.DefendantOffences;
+import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffences;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
+import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
@@ -92,6 +97,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("squid:S1188")
 public class TestTemplates {
 
     public static final String DAVID = "David";
@@ -332,7 +338,7 @@ public class TestTemplates {
             return CompletedResultLineStatus.builder()
                     .withId(resultLineId)
                     .withLastSharedDateTime(startDateTime)
-                    .withCourtClerk(CourtClerk.courtClerk()
+                    .withCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
                             .withId(randomUUID())
                             .withFirstName(STRING.next())
                             .withLastName(STRING.next())
@@ -349,19 +355,19 @@ public class TestTemplates {
 
         public static class TemplateArguments {
 
-            private UUID caseId;
+            private UUID prosecutionCaseId;
             private UUID defendantId;
             private List<UUID> offencesToAdd = new ArrayList<>();
             private List<UUID> offencesToUpdate = new ArrayList<>();
             private List<UUID> offenceToDelete = new ArrayList<>();
 
-            public TemplateArguments(UUID caseId, UUID defendantId) {
-                this.caseId = caseId;
+            public TemplateArguments(UUID prosecutionCaseId, UUID defendantId) {
+                this.prosecutionCaseId = prosecutionCaseId;
                 this.defendantId = defendantId;
             }
 
-            public TemplateArguments setCaseId(UUID caseId) {
-                this.caseId = caseId;
+            public TemplateArguments setProsecutionCaseId(UUID caseId) {
+                this.prosecutionCaseId = caseId;
                 return this;
             }
 
@@ -385,8 +391,8 @@ public class TestTemplates {
                 return this;
             }
 
-            public UUID getCaseId() {
-                return caseId;
+            public UUID getProsecutionCaseId() {
+                return prosecutionCaseId;
             }
 
             public UUID getDefendantId() {
@@ -408,43 +414,76 @@ public class TestTemplates {
 
         }
 
-        public static TemplateArguments offencesChangedArguments(UUID caseId, UUID defendantId) {
-            return new TemplateArguments(caseId, defendantId);
+        public static TemplateArguments updateOffencesForDefendantArguments(UUID prosecutionCaseId, UUID defendantId) {
+            return new TemplateArguments(prosecutionCaseId, defendantId);
         }
 
-        public static CaseDefendantOffencesChangedCommand caseDefendantOffencesChangedTemplate(TemplateArguments args) {
-            return CaseDefendantOffencesChangedCommand.caseDefendantOffencesChangedCommand()
-                    .setAddedOffences(singletonList(defendantOffences(args.getCaseId(), args.getDefendantId(), args.getOffencesToAdd())))
-                    .setUpdatedOffences(singletonList(defendantOffences(args.getCaseId(), args.getDefendantId(), args.getOffencesToUpdate())))
-                    .setDeletedOffences(singletonList(deletedOffence(args.getCaseId(), args.getDefendantId(), args.getOffenceToDelete())))
+        public static UpdateOffencesForDefendantCommand addOffencesForDefendantTemplate(TemplateArguments args) {
+            return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
+                    .setAddedOffences(singletonList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToAdd())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
-        public static DefendantOffences defendantOffences(UUID caseId, UUID defendantId, List<UUID> offenceIds) {
-            return DefendantOffences.defendantOffences()
-                    .setCaseId(caseId)
-                    .setDefendantId(defendantId)
-                    .setOffences(offenceIds.stream()
-                            .map(offenceId -> DefendantOffence.defendantOffence()
-                                    .setId(offenceId)
-                                    .setOffenceCode(STRING.next())
-                                    .setWording(STRING.next())
-                                    .setStartDate(PAST_LOCAL_DATE.next())
-                                    .setEndDate(PAST_LOCAL_DATE.next())
-                                    .setCount(INTEGER.next())
-                                    .setConvictionDate(PAST_LOCAL_DATE.next())
-                                    .setStatementOfOffence(StatementOfOffence.statementOfOffence()
-                                            .setTitle(STRING.next())
-                                            .setLegislation(STRING.next())
-                                    )
-                            )
+        public static UpdateOffencesForDefendantCommand updateOffencesForDefendantTemplate(TemplateArguments args) {
+            return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
+                    .setUpdatedOffences(singletonList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToUpdate())))
+                    .setModifiedDate(PAST_LOCAL_DATE.next());
+        }
+
+        public static UpdateOffencesForDefendantCommand deleteOffencesForDefendantTemplate(TemplateArguments args) {
+            return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
+                    .setDeletedOffences(singletonList(deletedOffence(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffenceToDelete())))
+                    .setModifiedDate(PAST_LOCAL_DATE.next());
+        }
+
+        public static DefendantCaseOffences defendantCaseOffences(UUID prosecutionCaseId, UUID defendantId, List<UUID> offenceIds) {
+            return DefendantCaseOffences.defendantCaseOffences()
+                    .withProsecutionCaseId(prosecutionCaseId)
+                    .withDefendantId(defendantId)
+                    .withOffences(offenceIds.stream()
+                            .map(offenceId -> Offence.offence()
+                                    .withArrestDate(PAST_LOCAL_DATE.next())
+                                    .withChargeDate(PAST_LOCAL_DATE.next())
+                                    //.withConvictionDate(PAST_LOCAL_DATE.next())
+                                    .withCount(INTEGER.next())
+                                    .withEndDate(PAST_LOCAL_DATE.next())
+                                    .withId(offenceId)
+                                    .withIndicatedPlea(uk.gov.justice.json.schemas.core.IndicatedPlea.indicatedPlea()
+                                            .withAllocationDecision(uk.gov.justice.json.schemas.core.AllocationDecision.allocationDecision()
+                                                    .withCourtDecision(RandomGenerator.values(CourtDecision.values()).next())
+                                                    .withDefendantRepresentation(RandomGenerator.values(DefendantRepresentation.values()).next())
+                                                    .withIndicationOfSentence(STRING.next())
+                                                    .withProsecutionRepresentation(RandomGenerator.values(ProsecutionRepresentation.values()).next())
+                                                    .build())
+                                            .withIndicatedPleaDate(PAST_LOCAL_DATE.next())
+                                            .withIndicatedPleaValue(RandomGenerator.values(IndicatedPleaValue.values()).next())
+                                            .withOffenceId(offenceId)
+                                            .withSource(RandomGenerator.values(Source.values()).next())
+                                            .build())
+                                    .withModeOfTrial(STRING.next())
+                                    .withOffenceCode(STRING.next())
+                                    .withOffenceDefinitionId(randomUUID())
+                                    .withOffenceFacts(uk.gov.justice.json.schemas.core.OffenceFacts.offenceFacts()
+                                            .withAlcoholReadingAmount(STRING.next())
+                                            .withAlcoholReadingMethod(STRING.next())
+                                            .withVehicleRegistration(STRING.next())
+                                            .build())
+                                    .withOffenceLegislation(STRING.next())
+                                    .withOffenceLegislationWelsh(STRING.next())
+                                    .withOffenceTitle(STRING.next())
+                                    .withOffenceTitleWelsh(STRING.next())
+                                    .withOrderIndex(INTEGER.next())
+                                    .withStartDate(PAST_LOCAL_DATE.next())
+                                    .withWording(STRING.next())
+                                    .withWordingWelsh(STRING.next())
+                                    .build())
                             .collect(Collectors.toList())
                     );
         }
 
         public static DeletedOffences deletedOffence(UUID caseId, UUID defendantId, List<UUID> offenceIds) {
             return DeletedOffences.deletedOffences()
-                    .setCaseId(caseId)
+                    .setProsecutionCaseId(caseId)
                     .setDefendantId(defendantId)
                     .setOffences(offenceIds);
         }
@@ -516,6 +555,7 @@ public class TestTemplates {
 
         Hearing hearing = standardInitiateHearingTemplate().getHearing();
         return GenerateNowsCommand.generateNowsCommand()
+
                 .setHearing(hearing)
                 .setSharedResultLines(asList(
                         SharedResultLines.sharedResultLines()
@@ -581,7 +621,7 @@ public class TestTemplates {
                                 .setId(UUID.randomUUID())
                                 .setNowsTypeId(nowsTypeId)
                                 .setDefendantId(defendantId)
-                                //.setNowsTemplateName("SingleTemplate")
+                                .setNowsTemplateName(STRING.next())
                                 .setMaterials(asList(
                                         Material.material()
                                                 .setId(materialId)
@@ -796,7 +836,7 @@ public class TestTemplates {
             CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
 
             return NowsRequested.nowsRequested()
-                    .setCourtClerk(CourtClerk.courtClerk()
+                    .setCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
                             .withId(randomUUID())
                             .withFirstName(STRING.next())
                             .withLastName(STRING.next())

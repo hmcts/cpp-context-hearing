@@ -9,18 +9,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DeletedOffences {
 
     private UUID defendantId;
-    private UUID caseId;
+    private UUID prosecutionCaseId;
     private List<UUID> offences;
 
     public DeletedOffences() {
     }
 
     @JsonCreator
-    public DeletedOffences(@JsonProperty("defendantId") final UUID defendantId,
-                           @JsonProperty("caseId") final UUID caseId,
-                           @JsonProperty("offences") final List<UUID> offences) {
+    public DeletedOffences(@JsonProperty(value = "defendantId", required = true) final UUID defendantId,
+            @JsonProperty(value = "prosecutionCaseId", required = true) final UUID prosecutionCaseId,
+            @JsonProperty(value = "offences", required = true) final List<UUID> offences) {
         this.defendantId = defendantId;
-        this.caseId = caseId;
+        this.prosecutionCaseId = prosecutionCaseId;
         this.offences = offences;
     }
 
@@ -28,16 +28,16 @@ public class DeletedOffences {
         return defendantId;
     }
 
-    public UUID getCaseId() {
-        return caseId;
+    public UUID getProsecutionCaseId() {
+        return prosecutionCaseId;
     }
 
     public List<UUID> getOffences() {
         return offences;
     }
 
-    public DeletedOffences setCaseId(UUID caseId) {
-        this.caseId = caseId;
+    public DeletedOffences setProsecutionCaseId(UUID caseId) {
+        this.prosecutionCaseId = caseId;
         return this;
     }
 

@@ -6,6 +6,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
@@ -16,9 +17,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCom
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
-import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
@@ -187,12 +186,12 @@ public class HearingAggregate implements Aggregate {
         return apply(this.defendantDelegate.updateDefendantDetails(command));
     }
 
-    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final BaseDefendantOffence offence) {
-        return apply(this.offenceDelegate.addOffence(hearingId, defendantId, caseId, offence));
+    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
+        return apply(this.offenceDelegate.addOffence(hearingId, defendantId, prosecutionCaseId, offence));
     }
 
-    public Stream<Object> updateOffence(final UUID hearingId, final BaseDefendantOffence offence) {
-        return apply(this.offenceDelegate.updateOffence(hearingId, offence));
+    public Stream<Object> updateOffence(final UUID hearingId, final UUID defendantId, final Offence offence) {
+        return apply(this.offenceDelegate.updateOffence(hearingId, defendantId, offence));
     }
 
     public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
@@ -206,7 +205,6 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> generateNows(final NowsRequested nowsRequested) {
         return apply(Stream.of(nowsRequested));
     }
-
 
     public Stream<Object> saveNowsVariants(final SaveNowsVariantsCommand command) {
         final NowsVariantsSavedEvent event = NowsVariantsSavedEvent.nowsVariantsSavedEvent()

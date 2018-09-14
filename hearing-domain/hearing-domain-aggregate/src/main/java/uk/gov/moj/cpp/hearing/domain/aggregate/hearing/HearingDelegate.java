@@ -57,7 +57,17 @@ public class HearingDelegate implements Serializable {
         this.momento.getHearing().setType(HearingType.hearingType().withDescription(hearingDetailChanged.getType()).build());
     }
 
-    public Stream<Object> initiate(InitiateHearingCommand initiateHearingCommand) {
+    public Stream<Object> initiate(final InitiateHearingCommand initiateHearingCommand) {
+        // initiate Hearing command must not contain verdict and plea
+        initiateHearingCommand.getHearing().getProsecutionCases().stream()
+                .flatMap(p-> p.getDefendants().stream())
+                .collect(Collectors.toList())
+                .stream()
+                .flatMap(d -> d.getOffences().stream())
+                .forEach(o -> {
+                    o.setVerdict(null);
+                    o.setPlea(null);
+                });
         return Stream.of(new HearingInitiated(initiateHearingCommand.getHearing()));
     }
 

@@ -301,9 +301,7 @@ public class CoreTestTemplates {
 
         if (args.jurisdictionType == JurisdictionType.MAGISTRATES) {
             final LocalDate convictionDate = PAST_LOCAL_DATE.next();
-            result
-                    .withConvictionDate(convictionDate)
-                    .withPlea(plea(offenceId, convictionDate).build());
+            result.withConvictionDate(convictionDate);
         }
 
         return result;

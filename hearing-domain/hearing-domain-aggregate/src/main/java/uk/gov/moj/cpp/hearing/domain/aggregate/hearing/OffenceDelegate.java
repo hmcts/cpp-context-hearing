@@ -1,11 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
+import static java.util.stream.Stream.empty;
+
+import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -19,92 +22,64 @@ public class OffenceDelegate implements Serializable {
         this.momento = momento;
     }
 
-    public void handleOffenceAdded(OffenceAdded offenceAdded) {
-
-        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
-                prosecutionCase.getDefendants().stream()
+    public void handleOffenceAdded(final OffenceAdded offenceAdded) {
+        this.momento.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .filter(defendant -> defendant.getId().equals(offenceAdded.getDefendantId()))
-                .forEach(defendant -> defendant.getOffences().add(
-                        uk.gov.justice.json.schemas.core.Offence.offence()
-                                .withId(offenceAdded.getId())
-                                .withOffenceCode(offenceAdded.getOffenceCode())
-                                .withWording(offenceAdded.getWording())
-                                .withStartDate(offenceAdded.getStartDate())
-                                .withCount(offenceAdded.getCount())
-                                .withOffenceDefinitionId(UUID.randomUUID())//TODO: the offence definition is missing in Offence Added
-                                .withOrderIndex(0)//TODO: the offence definition is missing in Offence Added
-                                .withConvictionDate(offenceAdded.getConvictionDate())
-                                .build()
-                )));
+                .forEach(defendant -> defendant.getOffences().add(offenceAdded.getOffence()));
     }
 
-    public void handleOffenceUpdated(OffenceUpdated offenceUpdated) {
-
-        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
-                prosecutionCase.getDefendants().forEach(defendant -> defendant.getOffences().stream()
-                .filter(offence -> offence.getId().equals(offenceUpdated.getId()))
-                .forEach(offence -> {
-                    offence.setOffenceCode(offenceUpdated.getOffenceCode());
-                    offence.setWording(offenceUpdated.getWording());
-                    offence.setStartDate(offenceUpdated.getStartDate());
-                    offence.setEndDate(offenceUpdated.getEndDate());
-                    offence.setCount(offenceUpdated.getCount());
-                    offence.setConvictionDate(offenceUpdated.getConvictionDate());
-                })));
+    public void handleOffenceUpdated(final OffenceUpdated offenceUpdated) {
+        final UUID offenceId = offenceUpdated.getOffence().getId();
+        this.momento.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .forEach(defendant -> {
+                        final List<Offence> offences = defendant.getOffences();
+                        if (offences.removeIf(offence -> offence.getId().equals(offenceId))) {
+                            offences.add(offenceUpdated.getOffence());
+                        }
+                });
     }
 
-    public void handleOffenceDeleted(OffenceDeleted offenceDeleted) {
-        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
-                prosecutionCase.getDefendants().forEach(defendant ->
-                        defendant.getOffences().removeIf(offence -> offence.getId().equals(offenceDeleted.getId()))));
+    public void handleOffenceDeleted(final OffenceDeleted offenceDeleted) {
+        final UUID offenceId = offenceDeleted.getId();
+        this.momento.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .forEach(defendant -> defendant.getOffences().removeIf(offence -> offence.getId().equals(offenceId)));
     }
 
-
-    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID caseId, final BaseDefendantOffence offence) {
-        if (!this.momento.isPublished()) {
-            return Stream.of(OffenceAdded.builder()
-                    .withId(offence.getId())
-                    .withHearingId(hearingId)
-                    .withDefendantId(defendantId)
-                    .withCaseId(caseId)
-                    .withOffenceCode(offence.getOffenceCode())
-                    .withWording(offence.getWording())
-                    .withStartDate(offence.getStartDate())
-                    .withEndDate(offence.getEndDate())
-                    .withCount(offence.getCount())
-                    .withConvictionDate(offence.getConvictionDate())
-                    .build());
+    public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, 
+            final Offence offence) {
+        if (this.momento.isPublished()) {
+            return empty();
         }
-
-        return Stream.empty();
+        return Stream.of(OffenceAdded.offenceAdded()
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withOffence(offence));
     }
 
-    public Stream<Object> updateOffence(final UUID hearingId, final BaseDefendantOffence offence) {
-        if (!this.momento.isPublished()) {
-            return Stream.of(OffenceUpdated.builder()
-                    .withHearingId(hearingId)
-                    .withId(offence.getId())
-                    .withOffenceCode(offence.getOffenceCode())
-                    .withWording(offence.getWording())
-                    .withStartDate(offence.getStartDate())
-                    .withEndDate(offence.getEndDate())
-                    .withCount(offence.getCount())
-                    .withConvictionDate(offence.getConvictionDate())
-                    .build());
+    public Stream<Object> updateOffence(final UUID hearingId, final UUID defendantId, final Offence offence) {
+        if (this.momento.isPublished()) {
+            return empty();
         }
-
-        return Stream.empty();
+        return Stream.of(OffenceUpdated.offenceUpdated()
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffence(offence)
+                .withPlea(this.momento.getPleas().get(offence.getId()))
+                .withVerdict(this.momento.getVerdicts().get(offence.getId()))
+                .withConvictionDate(this.momento.getConvictionDates().get(offence.getId())));
     }
 
     public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
-
-        if (!this.momento.isPublished()) {
-            return Stream.of(OffenceDeleted.builder()
-                    .withId(offenceId)
-                    .withHearingId(hearingId)
-                    .build());
+        if (this.momento.isPublished()) {
+            return empty();
         }
-
-        return Stream.empty();
+        return Stream.of(OffenceDeleted.builder()
+                .withId(offenceId)
+                .withHearingId(hearingId)
+                .build());
     }
 }
