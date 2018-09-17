@@ -29,8 +29,14 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import uk.gov.justice.json.schemas.core.CourtCentre;
+import uk.gov.justice.json.schemas.core.DefenceCounsel;
+import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.HearingDay;
 import uk.gov.justice.json.schemas.core.HearingType;
+import uk.gov.justice.json.schemas.core.JudicialRole;
 import uk.gov.justice.json.schemas.core.Prompt;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.json.schemas.core.publichearingresulted.SharedHearing;
@@ -47,7 +53,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Al
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
 import uk.gov.moj.cpp.hearing.message.shareResults.Case;
-import uk.gov.moj.cpp.hearing.message.shareResults.Defendant;
 import uk.gov.moj.cpp.hearing.message.shareResults.Hearing;
 import uk.gov.moj.cpp.hearing.message.shareResults.Offence;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -61,6 +66,7 @@ import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
@@ -179,15 +185,16 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines() {
-
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         //TODO put this ordered data into save draft results command
+        //the resultDefinitionIds must correspond to those in the noews reference data stub
+
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
         final AllResultDefinitionsReferenceDataHelper allResultDefinitions = setupResultDefinitionsReferenceData(orderedDate, allNows.getFirstNowDefinitionFirstResultDefinitionId());
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate, allNows.it());
 
         final uk.gov.justice.json.schemas.core.Hearing hearing = hearingOne.getHearing();
 
@@ -196,28 +203,64 @@ public class ShareResultsIT extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
         DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
 
-        final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+        final HearingDay hearingDay = hearing.getHearingDays().get(0);
+        final JudicialRole judicialRole = hearing.getJudiciary().get(0);
+        final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
+        final Defendant defendant = prosecutionCase.getDefendants().get(0);
+        //final DefenceCounsel defenceCounsel0 = hearing.getDefenceCounsels().get(0);
+
+        final EventListener publicEventResulted = listenFor("public.hearing.resulted", 30000)
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(SharedHearing.class)
                                 .with(SharedHearing::getId, is(hearingOne.getHearingId()))
-                                /*.with(SharedHearing::getDefendants, first(isBean(Defendant.class)
-                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantId()))
-                                        .with(Defendant::getCases, first(isBean(Case.class)
-                                                .with(Case::getId, is(hearingOne.getFirstCaseId()))
-                                                .with(Case::getOffences, first(isBean(Offence.class)
-                                                        .with(Offence::getId, is(hearingOne.getFirstOffenceIdForFirstDefendant()))
-                                                ))
+                                .with(SharedHearing::getCourtCentre, isBean(CourtCentre.class)
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
+                                        .with(CourtCentre::getName, is(hearing.getCourtCentre().getName()))
+                                        .with(CourtCentre::getRoomId, is(hearing.getCourtCentre().getRoomId()))
+                                )
+                                //.with(sh->sh.getDefenceCounsels().size(),  is(hearing.getDefenceCounsels().size()) )
+                                //.with(SharedHearing::getDefenceCounsels, first(isBean(DefenceCounsel.class)
+                                //       .with(DefenceCounsel::getId, is(defenceCounsel0))
+                                //       ))
+                                .with(SharedHearing::getHasSharedResults, is(hearing.getHasSharedResults()))
+                                .with(sh->sh.getHearingDays().size(), is(hearing.getHearingDays().size()))
+                                .with(SharedHearing::getHearingDays, first(isBean(HearingDay.class)
+                                       .with(hd->hd.getSittingDay().toLocalDate(), is(hearingDay.getSittingDay().toLocalDate()))
+                                       .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
+                                       .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))
+                                ))
+                                .with(SharedHearing::getHearingLanguage, is(hearing.getHearingLanguage()))
+                                .with(sh->sh.getJudiciary().size(), is(hearing.getJudiciary().size()))
+                                .with(SharedHearing::getJudiciary, first(isBean(JudicialRole.class)
+                                         .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
+                                        .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
+                                        .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
+                                        .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
+                                ))
+                                .with(sh->sh.getJurisdictionType().name(), is(hearing.getJurisdictionType().name() ))
+                                .with(sh->sh.getProsecutionCases().size(), is(hearing.getProsecutionCases().size()))
+                                .with(SharedHearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                       .with(ProsecutionCase::getId, is(prosecutionCase.getId()))
+                                       .with(ProsecutionCase::getCaseStatus, is(prosecutionCase.getCaseStatus()))
+                                       //TODO more prosecution case fields
+                                        .with(pc->pc.getDefendants().size(), is(prosecutionCase.getDefendants().size()))
+                                        .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                             .with(Defendant::getId, is(defendant.getId()))
+                                                .with(Defendant::getMitigation, is(defendant.getMitigation()))
+                                                //TODO more defendant fields and sub objects
                                         ))
-                                ))*/
+                                ))
+
+
                                 .with(SharedHearing::getSharedResultLines, first(isBean(uk.gov.justice.json.schemas.core.publichearingresulted.SharedResultLine.class)
                                         .with(uk.gov.justice.json.schemas.core.publichearingresulted.SharedResultLine::getOrderedDate, is(orderedDate))
                                 ))
                         )
-/*                        .with(PublicHearingResulted::getVariants, first(isBean(Variant.class)
-                                .with(Variant::getTemplateName, is(allNows.getFirstNowDefinition().getTemplateName()))
-                                .with(Variant::getDescription, is(allNows.getFirstNowDefinition().getName()))
-                                .with(Variant::getStatus, anyOf(is("BUILDING"), is("GENERATED")))
-                        ))*/
+                        .with(PublicHearingResulted::getVariants, first(isBean(SharedVariant.class)
+                                .with(SharedVariant::getTemplateName, is(allNows.getFirstNowDefinition().getTemplateName()))
+                                .with(SharedVariant::getDescription, is(allNows.getFirstNowDefinition().getName()))
+                                .with(SharedVariant::getStatus, anyOf(is("BUILDING"), is("GENERATED")))
+                        ))
                 ));
 
         //TODO GPE-5480 rationalise this
@@ -236,6 +279,21 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                                 .with(PublicHearingResulted::getHearing, isBean(SharedHearing.class)
                                                 .with(SharedHearing::getId, is(hearingOne.getHearingId()))
+                                        .with(SharedHearing::getCourtCentre, isBean(CourtCentre.class)
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))
+
+        /*defenceCounsels;
+        defendantAttendance;
+        hasSharedResults;
+        hearingDays;
+        hearingLanguage;
+        judiciary;
+        jurisdictionType;
+        prosecutionCases;
+        prosecutionCounsels;
+        reportingRestrictionReason;
+        sharedResultLines;
+        type;*/
                                                 /*.with(SharedHearing::getDefendants, first(isBean(Defendant.class)
                                         .with(Defendant::getId, is(hearingOne.getFirstDefendantId()))
                                                                 .with(Defendant::getCases, first(isBean(Case.class)

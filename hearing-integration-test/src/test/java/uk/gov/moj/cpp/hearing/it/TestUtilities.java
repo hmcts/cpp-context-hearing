@@ -40,10 +40,16 @@ public class TestUtilities {
         private MessageConsumer messageConsumer;
         private String eventType;
         private Matcher<?> matcher;
+        private long timeout;
 
         public EventListener(final String eventType) {
+            this(eventType, 1000);
+        }
+
+        public EventListener(final String eventType, long timeout) {
             this.eventType = eventType;
             this.messageConsumer = publicEvents.createConsumer(eventType);
+            this.timeout=timeout;
         }
 
         public void expectNoneWithin(long timeout) {
@@ -59,8 +65,7 @@ public class TestUtilities {
         }
 
         public JsonPath waitFor() {
-
-            JsonPath message = retrieveMessage(messageConsumer, 10000);
+            JsonPath message = retrieveMessage(messageConsumer, timeout);
             StringDescription description = new StringDescription();
 
             while (message != null && !this.matcher.matches(message.prettify())) {
@@ -125,13 +130,14 @@ public class TestUtilities {
 
             return this;
         }
-
-
     }
-
 
     public static EventListener listenFor(String mediaType) {
         return new EventListener(mediaType);
+    }
+
+    public static EventListener listenFor(String mediaType, long timeout) {
+        return new EventListener(mediaType, timeout);
     }
 
     public static class JsonUtil {
