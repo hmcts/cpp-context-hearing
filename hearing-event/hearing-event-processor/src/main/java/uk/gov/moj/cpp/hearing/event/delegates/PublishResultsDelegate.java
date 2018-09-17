@@ -3,10 +3,13 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.moj.cpp.hearing.message.shareResults.Variant.variant;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Prompt;
 import uk.gov.justice.json.schemas.core.Target;
+import uk.gov.justice.json.schemas.core.publichearingresulted.JurisdictionType;
 import uk.gov.justice.json.schemas.core.publichearingresulted.Key;
 import uk.gov.justice.json.schemas.core.publichearingresulted.SharedHearing;
 import uk.gov.justice.json.schemas.core.publichearingresulted.SharedPrompt;
@@ -32,12 +35,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S1188", "squid:S1612"})
 public class PublishResultsDelegate {
@@ -100,6 +105,10 @@ public class PublishResultsDelegate {
                  .collect(Collectors.toList());
     }
 
+    private JurisdictionType translateJurisdictionType(uk.gov.justice.json.schemas.core.JurisdictionType from) {
+        return JurisdictionType.valueOf(from.name());
+    }
+
     public void shareResults(JsonEnvelope context, final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared, final List<Variant> newVariants) {
 
         final List<Variant> variants = Stream.concat(
@@ -113,21 +122,28 @@ public class PublishResultsDelegate {
                            SharedHearing.sharedHearing()
                                    .withId(hearingIn.getId())
                                    .withType(hearingIn.getType())
+                                   .withJurisdictionType(translateJurisdictionType(hearingIn.getJurisdictionType()))
                                    .withCourtCentre(hearingIn.getCourtCentre())
                                    .withDefendantAttendance(hearingIn.getDefendantAttendance())
                                    .withDefenceCounsels(hearingIn.getDefenceCounsels())
                                    .withProsecutionCases(hearingIn.getProsecutionCases())
                                    .withHearingDays(hearingIn.getHearingDays())
+                                   .withHearingLanguage(Optional.ofNullable(hearingIn.getHearingLanguage()).map(hearingLanguage->hearingLanguage.name()).orElse(null))
+                                   .withType(hearingIn.getType())
                                    .withJudiciary(hearingIn.getJudiciary())
                                    .withProsecutionCounsels(hearingIn.getProsecutionCounsels())
                                    .withSharedResultLines(extractSharedResultLines(hearingIn.getTargets(), resultsShared.getCourtClerk()))
+                                   .withDefenceCounsels(hearingIn.getDefenceCounsels())
+                                   .withHasSharedResults(hearingIn.getHasSharedResults())
                                    .build()
                 )
                 .setVariants(mapVariantDirectory(context, variants))
                 .setSharedTime(resultsShared.getSharedTime());
 
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(shareResultsMessage);
+
         sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.resulted")
-                .apply(this.objectToJsonObjectConverter.convert(shareResultsMessage)));
+                .apply(jsonObject));
     }
 
     Key mapVariantKey(final VariantKey keyIn) {

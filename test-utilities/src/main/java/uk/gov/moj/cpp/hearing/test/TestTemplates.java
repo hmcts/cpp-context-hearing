@@ -77,6 +77,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
@@ -227,6 +228,22 @@ public class TestTemplates {
 
     public static SaveDraftResultCommand saveDraftResultCommandTemplate(
             final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
+        AllNows allNows = AllNows.allNows()
+                .setNows(singletonList(NowDefinition.now()
+                        .setId(randomUUID())
+                        .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions()
+                                .setId(randomUUID())
+                                .setMandatory(true)
+                                .setPrimary(true)
+                        ))
+                        .setName(STRING.next())
+                        .setTemplateName(STRING.next())
+                ));
+        return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, allNows);
+    }
+
+    public static SaveDraftResultCommand saveDraftResultCommandTemplate(
+            final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final AllNows allNows) {
         final Hearing hearing = initiateHearingCommand.getHearing();
         final uk.gov.justice.json.schemas.core.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
         final Offence offence0 = defendant0.getOffences().get(0);
@@ -252,7 +269,9 @@ public class TestTemplates {
                                 .withResultLineId(UUID.randomUUID())
                                 .withResultLabel("imprisonment")
                                 .withSharedDate(LocalDate.now())
-                                .withResultDefinitionId(UUID.randomUUID())
+                                .withResultDefinitionId(allNows.getNows().get(0).getResultDefinitions().stream()
+                                        .filter(ResultDefinitions::getPrimary)
+                                        .findFirst().map(ResultDefinitions::getId ).orElse(null))
                                 .withPrompts(
                                         asList(
                                                 uk.gov.justice.json.schemas.core.Prompt.prompt()

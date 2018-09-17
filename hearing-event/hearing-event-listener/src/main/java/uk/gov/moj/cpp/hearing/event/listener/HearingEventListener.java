@@ -102,7 +102,7 @@ public class HearingEventListener {
         */
     }
 
-    //TODO what should this do ?
+    //TODO GPE-5480 what should this do ?
     @Handles("hearing.result-lines-status-updated")
     public void updateSharedResultLineStatus(final JsonEnvelope event) {
 
@@ -112,18 +112,23 @@ public class HearingEventListener {
 
         if (hearing != null) {
             resultLinesStatusUpdated.getSharedResultLines().forEach(sharedResultLineId -> {
-                final HearingSnapshotKey resultLineKey = new HearingSnapshotKey(sharedResultLineId.getSharedResultLineId(), resultLinesStatusUpdated.getHearingId());
-                final ResultLine resultLine = this.resultLineRepository.findBy(resultLineKey);
                 //TODO what should this do ?
-                /*if (resultLine != null) {
+
+
+                /*final HearingSnapshotKey resultLineKey = new HearingSnapshotKey(sharedResultLineId.getSharedResultLineId(), resultLinesStatusUpdated.getHearingId());
+
+                /*final ResultLine resultLine = this.resultLineRepository.findBy(resultLineKey);
+
+                 if (resultLine != null) {
                     resultLine.setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime());
                 } else {
                     resultLine = ResultLine.builder()
                             .withId(new HearingSnapshotKey(sharedResultLineId.getSharedResultLineId(), resultLinesStatusUpdated.getHearingId()))
                             .withLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
                             .build();
-                }*/
+                }
                 this.resultLineRepository.save(resultLine);
+                */
             });
         }
     }
