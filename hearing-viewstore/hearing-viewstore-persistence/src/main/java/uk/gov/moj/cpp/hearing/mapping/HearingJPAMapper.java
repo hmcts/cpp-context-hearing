@@ -61,7 +61,7 @@ public class HearingJPAMapper {
         hearing.setId(pojo.getId());
         hearing.setCourtCentre(courtCentreJPAMapper.toJPA(pojo.getCourtCentre()));
         hearing.setDefenceCounsels(defenceCounselJPAMapper.toJPA(hearing, pojo.getDefenceCounsels()));
-        hearing.setDefendantAttendance(defendantAttendanceJPAMapper.toJPA(hearing, pojo.getDefendantAttendance()));
+        hearing.setDefendantAttendance(defendantAttendanceJPAMapper.toJPA(pojo.getDefendantAttendance()));
         hearing.setDefendantReferralReasons(defendantReferralReasonsJPAMapper.toJPA(hearing, pojo.getDefendantReferralReasons()));
         hearing.setHasSharedResults(pojo.getHasSharedResults());
         hearing.setHearingCaseNotes(hearingCaseNoteJPAMapper.toJPA(pojo.getHearingCaseNotes()));
@@ -98,6 +98,7 @@ public class HearingJPAMapper {
                 .withReportingRestrictionReason(entity.getReportingRestrictionReason())
                 .withTargets(targetJPAMapper.fromJPA(entity.getTargets()))
                 .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
                 .build();
     }
 }

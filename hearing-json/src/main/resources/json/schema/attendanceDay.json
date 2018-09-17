@@ -9,9 +9,6 @@
     },
     "isInAttendance": {
       "type": "boolean"
-    },
-    "delegatedPowers": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/delegatedPowers.json"
     }
   },
   "required": [

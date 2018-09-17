@@ -12,6 +12,7 @@ import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -38,6 +39,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VerdictDelegate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
@@ -119,6 +121,7 @@ public class HearingAggregate implements Aggregate {
                 when(NowsMaterialStatusUpdated.class).apply(variantDirectoryDelegate::handleNowsMaterialStatusUpdatedEvent),
                 when(HearingAdjourned.class).apply(adjournHearingDelegate::handleHearingAdjournedEvent),
                 when(DraftResultSaved.class).apply(resultsSharedDelegate::handleDraftResultShared),
+                when(DefendantAttendanceUpdated.class).apply(defendantDelegate::handleDefendantAttendanceUpdated),
                 otherwiseDoNothing()
         );
 
@@ -215,5 +218,9 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> nowsMaterialStatusUpdated(final NowsMaterialStatusUpdated nowsRequested) {
         return apply(Stream.of(nowsRequested));
+    }
+
+    public Stream<Object> updateDefendantAttendance(final UpdateDefendantAttendanceCommand command) {
+        return apply(this.defendantDelegate.updateDefendantAttendance(command));
     }
 }
