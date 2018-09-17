@@ -37,6 +37,8 @@ import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";
@@ -60,7 +62,9 @@ public class HearingEventListenerRamlConfigTest {
             RegisteredHearingAgainstOffence.class.getAnnotation(Event.class).value(),
             RegisteredHearingAgainstCase.class.getAnnotation(Event.class).value(),
             NowsVariantsSavedEvent.class.getAnnotation(Event.class).value(),
-            HearingAdjourned.class.getAnnotation(Event.class).value()
+            HearingAdjourned.class.getAnnotation(Event.class).value(),
+            ResultsShared.class.getAnnotation(Event.class).value(),
+            ResultLinesStatusUpdated.class.getAnnotation(Event.class).value()
     );
 
     private Map<String, String> handlerNames = new HashMap<>();

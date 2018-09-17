@@ -170,7 +170,7 @@ public class Hearing {
 
 
     public Hearing setTargets(List<Target> targets) {
-        this.targets = targets;
+        this.targets = new ArrayList<>(targets);
         return this;
     }
 

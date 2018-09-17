@@ -1,13 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toMap;
-
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
@@ -20,11 +16,9 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"squid:CommentedOutCodeLine"})
 public class ResultsSharedDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -35,28 +29,9 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento = momento;
     }
 
-    @SuppressWarnings({"squid:S1172"})
     public void handleResultsShared(ResultsShared resultsShared) {
         this.momento.setPublished(true);
-        //TODO - GPE-5480 - need to go through the whole versioning of result lines very carefully.
-/*
-        resultsShared.getCompletedResultLines().forEach(completedResultLine -> {
-
-            boolean resultLineHasBeenModified = this.momento.getCompletedResultLines().containsKey(completedResultLine.getId())
-                    && !completedResultLine.equals(this.momento.getCompletedResultLines().get(completedResultLine.getId()));
-
-            if (resultLineHasBeenModified) {
-                ofNullable(this.momento.getCompletedResultLinesStatus().get(completedResultLine.getId()))
-                        .ifPresent(status -> status
-                                .setLastSharedDateTime(null)
-                                .setCourtClerk(null));
-            }
-        });
-
-        this.momento.setCompletedResultLines(resultsShared.getCompletedResultLines().stream().collect(toMap(CompletedResultLine::getId, Function.identity())));
-  */
-        this.momento.setVariantDirectory(resultsShared.getVariantDirectory()); //variants might be deleted if their result lines have been deleted.
-
+        this.momento.setVariantDirectory(resultsShared.getVariantDirectory());
     }
 
     public void handleResultLinesStatusUpdated(ResultLinesStatusUpdated resultLinesStatusUpdated) {
@@ -67,18 +42,25 @@ public class ResultsSharedDelegate implements Serializable {
                                 .withId(resultLineId)
                                 .build()
                 )
-                        //TODO GPE 5480 reinstate this line
-                        //.setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
+                        .setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
                         .setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
         );
     }
 
     public void handleDraftResultShared(final DraftResultSaved draftResultSaved) {
-
-        //TODO GPE-5480 - this code must clear the last shared date time when the line has been modified.
-
-
         this.momento.getTargets().put(draftResultSaved.getTarget().getTargetId(), draftResultSaved.getTarget());
+        this.momento.getHearing().setTargets(new ArrayList<>(this.momento.getTargets().values()));
+
+
+        momento.getTargets().values().stream()
+                .flatMap(target -> target.getResultLines().stream())
+                .forEach(resultLine -> {
+                    if (resultLine.getIsModified() && this.momento.getCompletedResultLinesStatus().containsKey(resultLine.getResultLineId())){
+                        momento.getCompletedResultLinesStatus().get(resultLine.getResultLineId())
+                                .setLastSharedDateTime(null)
+                                .setCourtClerk(null);
+                    }
+                });
     }
 
     public Stream<Object> saveDraftResult(final Target target) {
@@ -87,16 +69,41 @@ public class ResultsSharedDelegate implements Serializable {
 
     public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
 
+        return Stream.of(ResultsShared.builder()
+                .withHearingId(command.getHearingId())
+                .withSharedTime(sharedTime)
+                .withCourtClerk(command.getCourtClerk())
+                .withVariantDirectory(calculateNewVariants())
+
+                .withHearing(this.momento.getHearing())
+                .withProsecutionCounsels(this.momento.getProsecutionCounsels())
+                .withDefenceCounsels(this.momento.getDefenceCounsels())
+                .withPleas(this.momento.getPleas())
+                .withVerdicts(this.momento.getVerdicts())
+                .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus())
+                .build());
+    }
+
+    public Stream<Object> updateResultLinesStatus(final UpdateResultLinesStatusCommand command) {
+        return Stream.of(ResultLinesStatusUpdated.builder()
+                .withHearingId(command.getHearingId())
+                .withLastSharedDateTime(command.getLastSharedDateTime())
+                .withSharedResultLines(command.getSharedResultLines())
+                .withCourtClerk(command.getCourtClerk())
+                .build());
+    }
+
+    private List<Variant> calculateNewVariants() {
+
+        //We cull variants that have result lines that are no longer present.
+
         List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
                 .flatMap(t -> t.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
                 .map(ResultLine::getResultLineId)
                 .collect(Collectors.toList());
 
-        //TODO GPE-5480 - clear lastSharedDateTime and court clerk for each result line that has been newly modified.
-        this.momento.getHearing().setTargets(new ArrayList<>(this.momento.getTargets().values()));
-
-        final List<Variant> variants = this.momento.getVariantDirectory().stream()
+        return this.momento.getVariantDirectory().stream()
                 .filter(variant -> {
                     List<UUID> resultLineIds = variant.getValue().getResultLines().stream().map(ResultLineReference::getResultLineId).collect(Collectors.toList());
 
@@ -110,27 +117,5 @@ public class ResultsSharedDelegate implements Serializable {
                     //We should delete the variant.
                 })
                 .collect(Collectors.toList());
-
-        return Stream.of(ResultsShared.builder()
-                .withHearingId(command.getHearingId())
-                .withSharedTime(sharedTime)
-                .withCourtClerk(command.getCourtClerk())
-                .withHearing(this.momento.getHearing())
-                .withProsecutionCounsels(this.momento.getProsecutionCounsels())
-                .withDefenceCounsels(this.momento.getDefenceCounsels())
-                .withPleas(this.momento.getPleas())
-                .withVerdicts(this.momento.getVerdicts())
-                .withVariantDirectory(variants)
-                .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus())
-                .build());
-    }
-
-    public Stream<Object> updateResultLinesStatus(final UpdateResultLinesStatusCommand command) {
-        return Stream.of(ResultLinesStatusUpdated.builder()
-                .withHearingId(command.getHearingId())
-                .withLastSharedDateTime(command.getLastSharedDateTime())
-                .withSharedResultLines(command.getSharedResultLines())
-                .withCourtClerk(command.getCourtClerk())
-                .build());
     }
 }

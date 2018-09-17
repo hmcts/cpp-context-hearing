@@ -24,13 +24,12 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.justice.json.schemas.core.CourtCentre;
-import uk.gov.justice.json.schemas.core.DefenceCounsel;
 import uk.gov.justice.json.schemas.core.Defendant;
 import uk.gov.justice.json.schemas.core.HearingDay;
 import uk.gov.justice.json.schemas.core.HearingType;
@@ -52,9 +51,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefiniti
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
-import uk.gov.moj.cpp.hearing.message.shareResults.Case;
-import uk.gov.moj.cpp.hearing.message.shareResults.Hearing;
-import uk.gov.moj.cpp.hearing.message.shareResults.Offence;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
@@ -66,7 +62,6 @@ import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class ShareResultsIT extends AbstractIT {
@@ -92,8 +87,6 @@ public class ShareResultsIT extends AbstractIT {
         saveDraftResultCommand.getTarget().setDraftResult("draft result version 2");
 
         testSaveDraftResult(saveDraftResultCommand, hearing);
-
-
     }
 
 
