@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -18,19 +16,25 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.target;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CompletedResultLineStatusTemplates.completedResultLineStatus;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.completedResultLineTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.uncompletedResultLineTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 
-import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.NowsTemplates;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
@@ -41,16 +45,13 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefiniti
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+import uk.gov.moj.cpp.hearing.test.Pair;
 
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NowsGeneratorTest {
@@ -77,174 +78,152 @@ public class NowsGeneratorTest {
                             .setMandatory(true)
             ));
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_generateSingleNowForSingleDefendant() {
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
-
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-                //.withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-                //.withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            h(event).getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
-        assertThat(nows.size(), is(1));
 
-        Nows now = nows.get(0);
-        assertThat(now.getDefendantId(), is(defendantId));
-        assertThat(now.getNowsTypeId(), is(nowDefinition.getId()));
-        assertThat(now.getMaterials().size(), is(1));
+        assertThat(nows, first(isBean(Nows.class)
+                .with(Nows::getDefendantId, is(resultsShared.getFirstDefendant().getId()))
+                .with(Nows::getNowsTypeId, is(nowDefinition.getId()))
+                .with(Nows::getMaterials, first(isBean(Material.class)
+                        .with(Material::getId, is(not(nullValue())))
+                        .with(Material::getUserGroups, hasItems(isBean(UserGroups.class)
+                                .with(UserGroups::getGroup, is("Court Clerk"))
+                        ))
+                        .with(Material::isAmended, is(false))
+                        .with(Material::getNowResult, first(isBean(NowResult.class)
+                                .with(NowResult::getSharedResultId, is(resultsShared.getFirstCompletedResultLine().getResultLineId()))
+                                .with(NowResult::getPrompts, first(isBean(PromptRef.class)
+                                        .with(PromptRef::getLabel, is("Lock him up"))
+                                ))
+                        ))
+                ))
+        ));
 
-        Material material = now.getMaterials().get(0);
-        assertThat(material.getId(), is(not(nullValue())));
-        assertThat(material.getUserGroups().stream().map(UserGroups::getGroup).collect(toList()), hasItems("Court Clerk"));
-        assertThat(material.isAmended(), is(false));
-        assertThat(material.getNowResult().size(), is(1));
 
-        NowResult nowResult = material.getNowResult().get(0);
-        assertThat(nowResult.getSharedResultId(), is(resultLineId));
-        assertThat(nowResult.getPrompts().size(), is(1));
-
-        PromptRef promptRefs = nowResult.getPrompts().get(0);
-        assertThat(promptRefs.getLabel(), is("Lock him up"));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_generateANowForEachDefendant() {
 
-        UUID caseId = randomUUID();
-        UUID defendantId_1 = randomUUID();
-        UUID defendantId_2 = randomUUID();
-        UUID offenceId_1 = randomUUID();
-        UUID offenceId_2 = randomUUID();
-        UUID resultLineId_1 = randomUUID();
-        UUID resultLineId_2 = randomUUID();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            CommandHelpers.ResultsSharedEventHelper helper = h(event);
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(asList(
-//                        defendantTemplate(caseId, defendantId_1, offenceId_1),
-//                        defendantTemplate(caseId, defendantId_2, offenceId_2)
-//                )))
-/*
-                .withCompletedResultLines(asList(
-                        completedResultLineTemplate(defendantId_1, offenceId_1, caseId, resultLineId_1, resultDefinition.getId(), PAST_LOCAL_DATE.next()),
-                        completedResultLineTemplate(defendantId_2, offenceId_2, caseId, resultLineId_2, resultDefinition.getId(), PAST_LOCAL_DATE.next())
-                ))
-                */
-                //.withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId_1, completedResultLineStatus(resultLineId_1)))
-                .build();
+            UUID secondDefendantId = randomUUID();
+            UUID secondOffenceId = randomUUID();
+            helper.getFirstCase().getDefendants().add(CoreTestTemplates.defendant(helper.getFirstCase().getId(),
+                    CoreTestTemplates.defaultArguments(),
+                    new Pair<>(secondDefendantId, asList(secondOffenceId))
+            ).build());
+
+            helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+
+            helper.getHearing().getTargets().add(with(target(helper.getHearingId(), secondDefendantId, secondOffenceId, randomUUID()).build(), target -> {
+                target.getResultLines().get(0).setResultDefinitionId(resultDefinition.getId());
+            }));
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
-        assertThat(nows.size(), is(2));
+        assertThat(nows, first(isBean(Nows.class)
+                .with(Nows::getDefendantId, is(resultsShared.getFirstDefendant().getId()))
+                .with(Nows::getMaterials, first(isBean(Material.class)
+                        .with(Material::getNowResult, first(isBean(NowResult.class)
+                                        .with(NowResult::getSharedResultId, is(resultsShared.getFirstCompletedResultLine().getResultLineId()))
+                                )
+                        )
+                ))
+        ));
 
-        with(nows.get(0), now -> {
-            assertThat(now.getDefendantId(), is(defendantId_1));
-
-            assertThat(now.getMaterials().get(0).getNowResult().get(0).getSharedResultId(), is(resultLineId_1));
-        });
-
-        with(nows.get(1), now -> {
-            assertThat(now.getDefendantId(), is(defendantId_2));
-
-            assertThat(now.getMaterials().get(0).getNowResult().get(0).getSharedResultId(), is(resultLineId_2));
-        });
+        assertThat(nows, second(isBean(Nows.class)
+                .with(Nows::getDefendantId, is(resultsShared.getSecondDefendant().getId()))
+                .with(Nows::getMaterials, first(isBean(Material.class)
+                        .with(Material::getNowResult, first(isBean(NowResult.class)
+                                        .with(NowResult::getSharedResultId, is(resultsShared.getSecondCompletedResultLine().getResultLineId()))
+                                )
+                        )
+                ))
+        ));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_withAResultLineThatIsNotRelatedToANow() {
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(NowsTemplates.resultsSharedTemplate());
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
-
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(0));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_whenIncompleteLineIsPresent_noNowGenerated() {
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            CommandHelpers.ResultsSharedEventHelper helper = h(event);
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(singletonList(uncompletedResultLineTemplate(defendantId)))
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+
+            helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+
+            helper.getHearing().getTargets().add(with(target(helper.getHearingId(), helper.getFirstDefendant().getId(), helper.getFirstDefendantFirstOffence().getId(), randomUUID()).build(), target -> {
+                target.getResultLines().get(0).setResultDefinitionId(resultDefinition.getId());
+                target.getResultLines().get(0).setIsComplete(false);
+            }));
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(0));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_whenIncompleteLineIsPresentForADifferentDefendant_NowsAreGenerated() {
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            CommandHelpers.ResultsSharedEventHelper helper = h(event);
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(singletonList(uncompletedResultLineTemplate(randomUUID())))
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+            UUID secondDefendantId = randomUUID();
+            UUID secondOffenceId = randomUUID();
+            helper.getFirstCase().getDefendants().add(CoreTestTemplates.defendant(helper.getFirstCase().getId(),
+                    CoreTestTemplates.defaultArguments(),
+                    new Pair<>(secondDefendantId, asList(secondOffenceId))
+            ).build());
+
+            helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+
+            helper.getHearing().getTargets().add(with(target(helper.getHearingId(), secondDefendantId, secondOffenceId, randomUUID()).build(), target -> {
+                target.getResultLines().get(0).setResultDefinitionId(resultDefinition.getId());
+                target.getResultLines().get(0).setIsComplete(false);
+            }));
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(1));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_whenNonMandatoryLineIsNotPresent_NowsAreGenerated() {
 
@@ -261,28 +240,20 @@ public class NowsGeneratorTest {
                                 .setPrimary(false)
                 ));
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            h(event).getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(1));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_whenMandatoryLineIsNotPresent_NowsAreNotGenerated() {
 
@@ -297,28 +268,19 @@ public class NowsGeneratorTest {
                                 .setMandatory(true)
                 ));
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
-
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            h(event).getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(0));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_generateMultipleVariants_forDifferentPrompts() {
         final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
@@ -341,24 +303,15 @@ public class NowsGeneratorTest {
                                 .setMandatory(true)
                 ));
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
-
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            h(event).getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(1));
 
@@ -375,7 +328,6 @@ public class NowsGeneratorTest {
         assertThat(now.getMaterials().get(1).getNowResult().get(0).getPrompts().get(0).getLabel(), is("Set him free"));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_generateSingleVariant_forMultipleUserGroups() {
         final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
@@ -394,24 +346,15 @@ public class NowsGeneratorTest {
                                 .setMandatory(true)
                 ));
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
-
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            h(event).getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(1));
 
@@ -424,7 +367,7 @@ public class NowsGeneratorTest {
         assertThat(now.getMaterials().get(0).getNowResult().get(0).getPrompts().get(0).getLabel(), is("Lock him up"));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
+
     @Test
     public void createNows_generateVariant_ResultDefinitionWithoutPrompts() {
         final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
@@ -439,24 +382,15 @@ public class NowsGeneratorTest {
                                 .setMandatory(true)
                 ));
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
-
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            h(event).getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(1));
 
@@ -468,7 +402,7 @@ public class NowsGeneratorTest {
         assertThat(now.getMaterials().get(0).getNowResult().get(0).getPrompts(), is(empty()));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
+
     @Test
     public void createNows_generateMultipleVariants_forDifferentPromptsAndAdditionalUserGroups() {
         final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
@@ -492,24 +426,16 @@ public class NowsGeneratorTest {
                                 .setMandatory(true)
                 ));
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .build();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            h(event).getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows.size(), is(1));
 
@@ -534,85 +460,77 @@ public class NowsGeneratorTest {
         assertThat(now.getMaterials().get(3).getNowResult().get(0).getPrompts().get(0).getLabel(), is("Set him free"));
     }
 
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
+
     @Test
     public void createNows_givenPreviouslyGenerated_noNowIsGenerated() {
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            CommandHelpers.ResultsSharedEventHelper helper = h(event);
 
-        CompletedResultLineStatus completedResultLineStatus = completedResultLineStatus(resultLineId);
+            CompletedResultLineStatus completedResultLineStatus = completedResultLineStatus(helper.getFirstCompletedResultLine().getResultLineId());
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-                //               .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus))
-                .withVariantDirectory(singletonList(
-                        Variant.variant()
-                                .setKey(VariantKey.variantKey()
-                                        .setDefendantId(defendantId)
-                                        .setUsergroups(singletonList("Court Clerk"))
-                                        .setNowsTypeId(nowDefinition.getId())
-                                )
-                                .setValue(VariantValue.variantValue()
-                                        .setResultLines(singletonList(ResultLineReference.resultLineReference()
-                                                .setResultLineId(resultLineId)
-                                                .setLastSharedTime(completedResultLineStatus.getLastSharedDateTime())
-                                        ))
-                                )
-                ))
-                .build();
+            helper.it().getCompletedResultLinesStatus().put(helper.getFirstCompletedResultLine().getResultLineId(), completedResultLineStatus);
+
+            helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+
+            helper.it().setVariantDirectory(singletonList(
+                    Variant.variant()
+                            .setKey(VariantKey.variantKey()
+                                    .setDefendantId(helper.getFirstDefendant().getId())
+                                    .setUsergroups(singletonList("Court Clerk"))
+                                    .setNowsTypeId(nowDefinition.getId())
+                            )
+                            .setValue(VariantValue.variantValue()
+                                    .setResultLines(singletonList(ResultLineReference.resultLineReference()
+                                            .setResultLineId(helper.getFirstCompletedResultLine().getResultLineId())
+                                            .setLastSharedTime(completedResultLineStatus.getLastSharedDateTime())
+                                    ))
+                            )
+            ));
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows, empty());
     }
 
-
-    @Ignore("GPE-5480 share results story should fix the ResultsShared object.")
     @Test
     public void createNows_givenPreviouslyGeneratedButWeNowHaveANewLine_aNowIsGenerated() {
 
-        UUID caseId = randomUUID();
-        UUID defendantId = randomUUID();
-        UUID offenceId = randomUUID();
-        UUID resultLineId = randomUUID();
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+            CommandHelpers.ResultsSharedEventHelper helper = h(event);
 
-        final ResultsShared resultsShared = ResultsShared.builder()
-//                .withCases(singletonList(caseTemplate(caseId)))
-//                .withHearing(hearingTemplate().setDefendants(singletonList(defendantTemplate(caseId, defendantId, offenceId))))
-//                .withCompletedResultLines(singletonList(completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, resultDefinition.getId(), PAST_LOCAL_DATE.next())))
-//                .withUncompletedResultLines(emptyList())
-                .withCompletedResultLinesStatus(singletonMap(resultLineId, completedResultLineStatus(resultLineId)))
-                .withVariantDirectory(singletonList(
-                        Variant.variant()
-                                .setKey(VariantKey.variantKey()
-                                        .setDefendantId(defendantId)
-                                        .setUsergroups(singletonList("Court Clerk"))
-                                        .setNowsTypeId(nowDefinition.getId())
-                                )
-                                .setValue(VariantValue.variantValue()
-                                        .setResultLines(singletonList(ResultLineReference.resultLineReference()
-                                                .setResultLineId(resultLineId)
-                                                .setLastSharedTime(FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
-                                        ))
-                                )
-                ))
-                .build();
+            CompletedResultLineStatus completedResultLineStatus = completedResultLineStatus(helper.getFirstCompletedResultLine().getResultLineId());
+
+            helper.it().getCompletedResultLinesStatus().put(helper.getFirstCompletedResultLine().getResultLineId(), completedResultLineStatus);
+
+            helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+
+            helper.it().setVariantDirectory(singletonList(
+                    Variant.variant()
+                            .setKey(VariantKey.variantKey()
+                                    .setDefendantId(helper.getFirstDefendant().getId())
+                                    .setUsergroups(singletonList("Court Clerk"))
+                                    .setNowsTypeId(nowDefinition.getId())
+                            )
+                            .setValue(VariantValue.variantValue()
+                                    .setResultLines(singletonList(ResultLineReference.resultLineReference()
+                                            .setResultLineId(helper.getFirstCompletedResultLine().getResultLineId())
+                                            .setLastSharedTime(FUTURE_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                                    ))
+                            )
+            ));
+        }));
 
         when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(nowDefinition);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
 
-        List<Nows> nows = target.createNows(null, resultsShared);
+        List<Nows> nows = target.createNows(null, resultsShared.it());
 
         assertThat(nows, hasSize(1));
 

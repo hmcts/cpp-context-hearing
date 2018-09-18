@@ -53,7 +53,6 @@ public class AdjournHearingDelegateTest {
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
 
-    @Ignore("GPE-5480 - getArbitrarySharedResult() no longer compatible with object model ")
     @Test
     public void execute() throws Exception {
         //Given

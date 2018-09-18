@@ -3,6 +3,17 @@ package uk.gov.moj.cpp.hearing.it;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+
+
 @SuppressWarnings({"unchecked", "serial"})
 public class DeleteAttendeeHearingDayIT extends AbstractIT {
 
@@ -44,7 +55,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
                 .withPayload(deleteAttendeeCommand)
                 .executeSuccessfully();
 
-        final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.events.attendee-deleted")
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.events.attendee-deleted")
                 .withFilter(isJson(withJsonPath("$.attendeeId", is(defenceCounsel.getAttendeeId().toString()))));
 
         publicEventTopic.waitFor();
@@ -96,7 +107,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
                 .withPayload(deleteAttendeeCommand)
                 .executeSuccessfully();
 
-        final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.events.attendee-deleted")
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.events.attendee-deleted")
                 .withFilter(isJson(withJsonPath("$.attendeeId", Is.is(defenceCounsel.getAttendeeId().toString()))));
 
         publicEventTopic.waitFor();
@@ -143,7 +154,7 @@ public class DeleteAttendeeHearingDayIT extends AbstractIT {
                 .withPayload(deleteAttendeeCommand)
                 .executeSuccessfully();
 
-        final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.events.attendee-deleted")
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.events.attendee-deleted")
                 .withFilter(isJson(withJsonPath("$.attendeeId", Is.is(defenceCounsel.getAttendeeId().toString()))));
 
         publicEventTopic.waitFor();

@@ -217,7 +217,6 @@ public class ShareResultsCommandHandlerTest {
         final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> HEARING_RESULTS_SHARED_EVENT_NAME.equals(e.metadata().name())).findFirst();
         assertThat("expected:" + HEARING_RESULTS_SHARED_EVENT_NAME, efound.get(), IsNull.notNullValue());
 
-        //structural check only !
         assertThat(asPojo(efound.get(), ResultsShared.class), isBean(ResultsShared.class)
                 .with(ResultsShared::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(targetIn.getHearingId()))
@@ -235,92 +234,5 @@ public class ShareResultsCommandHandlerTest {
                         ))
                 )
         );
-
-        //TODO GPE-5480 - what out of this is important ?
-        /*assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(envelope)
-                                .withName("hearing.results-shared"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", is(shareResultsCommand.getHearingId().toString())),
-                                withJsonPath("$.sharedTime", is(ZonedDateTimes.toString(sharedTime))),
-                                withJsonPath("$.completedResultLines[0].id", is(shareResultsCommand.getCompletedResultLines().get(0).getId().toString())),
-                                withJsonPath("$.completedResultLines[0].defendantId", is(shareResultsCommand.getCompletedResultLines().get(0).getDefendantId().toString())),
-                                withJsonPath("$.completedResultLines[0].offenceId", is(shareResultsCommand.getCompletedResultLines().get(0).getOffenceId().toString())),
-                                withJsonPath("$.completedResultLines[0].orderedDate", is(shareResultsCommand.getCompletedResultLines().get(0).getOrderedDate().toString())),
-                                withJsonPath("$.completedResultLines[0].caseId", is(shareResultsCommand.getCompletedResultLines().get(0).getCaseId().toString())),
-                                withJsonPath("$.completedResultLines[0].level", is(shareResultsCommand.getCompletedResultLines().get(0).getLevel().name())),
-                                withJsonPath("$.completedResultLines[0].resultLabel", is(shareResultsCommand.getCompletedResultLines().get(0).getResultLabel())),
-                                withJsonPath("$.completedResultLines[0].prompts[0].label", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(0).getLabel())),
-                                withJsonPath("$.completedResultLines[0].prompts[0].value", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(0).getValue())),
-                                withJsonPath("$.completedResultLines[0].prompts[1].label", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(1).getLabel())),
-                                withJsonPath("$.completedResultLines[0].prompts[1].value", is(shareResultsCommand.getCompletedResultLines().get(0).getPrompts().get(1).getValue())),
-
-                                withJsonPath("$.cases.[0].caseId", is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
-                                withJsonPath("$.cases.[0].urn", is(initiateHearingCommand.getCases().get(0).getUrn())),
-                                withJsonPath("$.hearing.id", is(initiateHearingCommand.getHearing().getId().toString())),
-                                withJsonPath("$.hearing.type", is(initiateHearingCommand.getHearing().getType())),
-
-                                withJsonPath("$.hearing.courtCentreId", is(initiateHearingCommand.getHearing().getCourtCentreId().toString())),
-                                withJsonPath("$.hearing.courtCentreName", is(initiateHearingCommand.getHearing().getCourtCentreName())),
-
-                                withJsonPath("$.hearing.courtRoomId", is(initiateHearingCommand.getHearing().getCourtRoomId().toString())),
-                                withJsonPath("$.hearing.courtRoomName", is(initiateHearingCommand.getHearing().getCourtRoomName())),
-
-                                withJsonPath("$.hearing.judge.id", is(initiateHearingCommand.getHearing().getJudge().getId().toString())),
-                                withJsonPath("$.hearing.judge.title", is(initiateHearingCommand.getHearing().getJudge().getTitle())),
-                                withJsonPath("$.hearing.judge.firstName", is(initiateHearingCommand.getHearing().getJudge().getFirstName())),
-                                withJsonPath("$.hearing.judge.lastName", is(initiateHearingCommand.getHearing().getJudge().getLastName())),
-
-                                withJsonPath("$.hearing.defendants.[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].personId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getPersonId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].firstName", is(initiateHearingCommand.getHearing().getDefendants().get(0).getFirstName())),
-                                withJsonPath("$.hearing.defendants.[0].lastName", is(initiateHearingCommand.getHearing().getDefendants().get(0).getLastName())),
-                                withJsonPath("$.hearing.defendants.[0].nationality", is(initiateHearingCommand.getHearing().getDefendants().get(0).getNationality())),
-                                withJsonPath("$.hearing.defendants.[0].gender", is(initiateHearingCommand.getHearing().getDefendants().get(0).getGender())),
-
-                                withJsonPath("$.hearing.defendants.[0].address.address1", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress1())),
-                                withJsonPath("$.hearing.defendants.[0].address.address2", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress2())),
-                                withJsonPath("$.hearing.defendants.[0].address.address3", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress3())),
-                                withJsonPath("$.hearing.defendants.[0].address.address4", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getAddress4())),
-                                withJsonPath("$.hearing.defendants.[0].address.postCode", is(initiateHearingCommand.getHearing().getDefendants().get(0).getAddress().getPostCode())),
-                                withJsonPath("$.hearing.defendants.[0].dateOfBirth", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDateOfBirth().toString())),
-                                withJsonPath("$.hearing.defendants.[0].defenceOrganisation", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefenceOrganisation())),
-                                withJsonPath("$.hearing.defendants.[0].interpreter.needed", is(initiateHearingCommand.getHearing().getDefendants().get(0).getInterpreter().isNeeded())),
-                                withJsonPath("$.hearing.defendants.[0].interpreter.language", is(initiateHearingCommand.getHearing().getDefendants().get(0).getInterpreter().getLanguage())),
-
-                                withJsonPath("$.hearing.defendants.[0].defendantCases.[0].caseId", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getCaseId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].defendantCases.[0].bailStatus", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getBailStatus())),
-                                withJsonPath("$.hearing.defendants.[0].defendantCases.[0].custodyTimeLimitDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getDefendantCases().get(0).getCustodyTimeLimitDate().toString())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].id", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getId().toString())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].offenceCode", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getOffenceCode())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].wording", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getWording())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].section", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getSection())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].startDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getStartDate().toString())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].orderIndex", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getOrderIndex())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].count", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getCount())),
-                                withJsonPath("$.hearing.defendants.[0].offences.[0].convictionDate", is(initiateHearingCommand.getHearing().getDefendants().get(0).getOffences().get(0).getConvictionDate().toString())),
-
-                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".hearingId", is(prosecutionCounselUpsert.getHearingId().toString())),
-                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".personId", is(prosecutionCounselUpsert.getPersonId().toString())),
-                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".attendeeId", is(prosecutionCounselUpsert.getAttendeeId().toString())),
-                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".title", is(prosecutionCounselUpsert.getTitle())),
-                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".firstName", is(prosecutionCounselUpsert.getFirstName())),
-                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".lastName", is(prosecutionCounselUpsert.getLastName())),
-                                withJsonPath("$.prosecutionCounsels." + prosecutionCounselUpsert.getAttendeeId() + ".status", is(prosecutionCounselUpsert.getStatus())),
-
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".hearingId", is(defenceCounselUpsert.getHearingId().toString())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".personId", is(defenceCounselUpsert.getPersonId().toString())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".attendeeId", is(defenceCounselUpsert.getAttendeeId().toString())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".title", is(defenceCounselUpsert.getTitle())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".firstName", is(defenceCounselUpsert.getFirstName())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".lastName", is(defenceCounselUpsert.getLastName())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".status", is(defenceCounselUpsert.getStatus())),
-                                withJsonPath("$.defenceCounsels." + defenceCounselUpsert.getAttendeeId() + ".defendantIds.[0]", is(defenceCounselUpsert.getDefendantIds().get(0).toString())),
-                                withJsonPath("$.variantDirectory[0].key.defendantId", is(nowsVariantsSavedEvent.getVariants().get(0).getKey().getDefendantId().toString()))
-
-                        ))
-                )
-        ));*/
     }
 }

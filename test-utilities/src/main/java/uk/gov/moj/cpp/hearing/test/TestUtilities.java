@@ -5,6 +5,9 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class TestUtilities {
@@ -14,7 +17,11 @@ public class TestUtilities {
         return object;
     }
 
-
+    @SafeVarargs
+    @SuppressWarnings("varargs")
+    public static <T> List<T> asList(T... a) {
+        return new ArrayList<>(Arrays.asList(a));
+    }
 
     public static <T> Matcher<T> print() {
         return new BaseMatcher<T>() {

@@ -57,7 +57,7 @@ public class NowsGenerator {
 
         final List<Nows> nows = new ArrayList<>();
 
-        resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream()).collect(toList()).forEach(defendant -> {
+        resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc -> pc.getDefendants().stream()).collect(toList()).forEach(defendant -> {
 
                     if (anyUncompletedResultLinesForDefendant(resultsShared, defendant)) {
                         LOGGER.info("aborting NOWs generation for defendant {} as there are uncompleted result lines", defendant.getId());
@@ -66,7 +66,7 @@ public class NowsGenerator {
 
                     final List<ResultLine> completedResultLines4Defendant = resultsShared.getHearing().getTargets().stream()
                             .filter(target -> target.getDefendantId().equals(defendant.getId()))
-                            .flatMap(target->target.getResultLines().stream())
+                            .flatMap(target -> target.getResultLines().stream())
                             .filter(ResultLine::getIsComplete)
                             .collect(toList());
 
@@ -234,9 +234,9 @@ public class NowsGenerator {
 
     private static boolean anyUncompletedResultLinesForDefendant(final ResultsShared resultsShared, final Defendant defendant) {
         return resultsShared.getHearing().getTargets().stream()
-                   .filter(target -> target.getDefendantId().equals(defendant.getId()))
-                    .flatMap(target->target.getResultLines().stream())
-                    .anyMatch(resultLine->!resultLine.getIsComplete());
+                .filter(target -> target.getDefendantId().equals(defendant.getId()))
+                .flatMap(target -> target.getResultLines().stream())
+                .anyMatch(resultLine -> !resultLine.getIsComplete());
     }
 
     private static boolean anyMandatoryResultLineNotPresent(final Set<UUID> completedResultDefinitionIds, final NowDefinition nowDefinition) {

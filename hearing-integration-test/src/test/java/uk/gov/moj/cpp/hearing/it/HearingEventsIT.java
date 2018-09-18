@@ -14,6 +14,7 @@ import java.text.MessageFormat;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -64,6 +65,7 @@ public class HearingEventsIT extends AbstractIT {
 
         poll(requestParams(getURL("hearing.get-hearing-event-log", hearingOne.getHearingId()),
                 "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                .timeout(30, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         print(),

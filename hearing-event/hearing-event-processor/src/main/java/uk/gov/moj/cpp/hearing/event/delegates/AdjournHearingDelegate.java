@@ -45,7 +45,6 @@ public class AdjournHearingDelegate {
     @Inject
     private Sender sender;
 
-//TODO GPE-5480 restest this as HearingDay structure changed
     public void execute(final ResultsShared resultsShared, final JsonEnvelope jsonEnvelope) {
         final LocalDate orderedDate = resultsShared.getHearing().getHearingDays().stream()
                 .map(HearingDay::getSittingDay)

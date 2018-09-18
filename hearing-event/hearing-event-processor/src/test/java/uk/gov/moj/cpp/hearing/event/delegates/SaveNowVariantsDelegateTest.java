@@ -72,7 +72,6 @@ public class SaveNowVariantsDelegateTest {
     @Mock
     private Nows2VariantTransform nows2VariantTransform;
 
-    @Ignore("GPE-5480 - share results story will address the change in model")
     @Test
     public void saveNowsVariants() {
 
@@ -81,7 +80,7 @@ public class SaveNowVariantsDelegateTest {
         final List<Nows> nows = emptyList();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(resultsShared));
+                objectToJsonObjectConverter.convert(resultsShared.it()));
 
         final List<Variant> variants = singletonList(
                 standardVariantTemplate(randomUUID(), resultsShared.getHearingId(), resultsShared.getFirstDefendant().getId())

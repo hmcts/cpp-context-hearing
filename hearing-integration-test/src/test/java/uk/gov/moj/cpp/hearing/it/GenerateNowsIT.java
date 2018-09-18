@@ -20,8 +20,8 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowsRequestedTemplates.nowsRequestedTemplate;
@@ -35,7 +35,6 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.nows.UpdateNowsMaterialStatusCommand;
 import uk.gov.moj.cpp.hearing.nows.events.MaterialUserGroup;
 import uk.gov.moj.cpp.hearing.nows.events.Now;
-import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
@@ -86,7 +85,7 @@ public class GenerateNowsIT extends AbstractIT {
         NotifyStub.stubNotifications();
         DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
 
-        final TestUtilities.EventListener nowsRequestedEventListener = listenFor("public.hearing.events.nows-requested")
+        final Utilities.EventListener nowsRequestedEventListener = listenFor("public.hearing.events.nows-requested")
                 .withFilter(isJson(withJsonPath("$.hearing.id", is(hearing.getHearingId().toString()))));
 
         makeCommand(requestSpec, "hearing.generate-nows")
@@ -178,7 +177,7 @@ public class GenerateNowsIT extends AbstractIT {
 
         DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
 
-        final TestUtilities.EventListener nowsRequestedEventListener = listenFor("public.hearing.events.nows-requested")
+        final Utilities.EventListener nowsRequestedEventListener = listenFor("public.hearing.events.nows-requested")
                 .withFilter(isJson(withJsonPath("$.hearing.id", is(hearing.getHearingId().toString()))));
 
         makeCommand(requestSpec, "hearing.generate-nows")
@@ -229,7 +228,7 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.nows[0].material[0].id", is(materialId.toString())),
                                 withJsonPath("$.nows[0].material[0].status", is("requested")))));
 
-        final TestUtilities.EventListener nowsMaterialStatusUpdatedEventListener = listenFor("public.hearing.events.nows-material-status-updated")
+        final Utilities.EventListener nowsMaterialStatusUpdatedEventListener = listenFor("public.hearing.events.nows-material-status-updated")
                 .withFilter(isJson(withJsonPath("$.materialId", is(materialId.toString()))));
 
         makeCommand(requestSpec, "hearing.update-nows-material-status")

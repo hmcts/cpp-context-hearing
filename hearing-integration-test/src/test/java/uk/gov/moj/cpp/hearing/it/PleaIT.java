@@ -6,9 +6,10 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.customStructureInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -24,7 +25,7 @@ import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
@@ -169,7 +170,7 @@ public class PleaIT extends AbstractIT {
         );
 
         final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(requestSpec, customStructureInitiateHearingTemplate(
-                toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), toList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
+                toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
         )));
 
         Queries.getHearingPollForMatch(hearingTwo.getHearingId(), 30, isBean(HearingDetailsResponse.class)
@@ -224,7 +225,7 @@ public class PleaIT extends AbstractIT {
         );
 
         final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(requestSpec, customStructureInitiateHearingTemplate(
-                toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), toList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
+                toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
         )));
 
         Queries.getHearingPollForMatch(hearingTwo.getHearingId(), 30, isBean(HearingDetailsResponse.class)

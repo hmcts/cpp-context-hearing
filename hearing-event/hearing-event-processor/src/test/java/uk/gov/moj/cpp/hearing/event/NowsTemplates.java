@@ -33,6 +33,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,9 +76,9 @@ public class NowsTemplates {
 
         UUID completedResultLineId = randomUUID();
 
-        hearingOne.it().getHearing().setTargets(asList(
+        hearingOne.it().getHearing().setTargets(new ArrayList<>(Collections.singletonList(
                 CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
-        ));
+        )));
 
         return ResultsShared.builder()
                 .withHearingId(hearingOne.getHearingId())

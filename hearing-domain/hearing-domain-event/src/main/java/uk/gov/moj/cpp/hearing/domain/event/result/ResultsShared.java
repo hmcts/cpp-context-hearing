@@ -118,6 +118,14 @@ public class ResultsShared implements Serializable {
         return completedResultLinesStatus;
     }
 
+    public void setVariantDirectory(List<Variant> variantDirectory) {
+        this.variantDirectory = variantDirectory;
+    }
+
+    public void setCompletedResultLinesStatus(Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
+        this.completedResultLinesStatus = completedResultLinesStatus;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -181,7 +189,7 @@ public class ResultsShared implements Serializable {
         }
 
         public Builder withCompletedResultLinesStatus(final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
-            this.completedResultLinesStatus = completedResultLinesStatus;
+            this.completedResultLinesStatus = new HashMap<>(completedResultLinesStatus);
             return this;
         }
 

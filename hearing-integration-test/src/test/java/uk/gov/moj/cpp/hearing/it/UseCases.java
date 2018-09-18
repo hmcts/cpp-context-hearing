@@ -12,8 +12,8 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
@@ -22,7 +22,6 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.ReadContext;
-import com.jayway.jsonpath.internal.JsonContext;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
@@ -48,7 +47,7 @@ import uk.gov.moj.cpp.hearing.eventlog.CourtCentre;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventLogged;
-import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -69,7 +68,7 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString()))));
 
         makeCommand(requestSpec, "hearing.initiate")
@@ -241,7 +240,7 @@ public class UseCases {
         final JsonObject payload =
                 Json.createObjectBuilder()
                         .add("hearingEvents", hearingEventsArray).build();
-        final TestUtilities.EventListener publicEventTopic =
+        final Utilities.EventListener publicEventTopic =
                 listenFor("public.hearing.events-updated")
                         .withFilter(isJson(allOf(new BaseMatcher<ReadContext>() {
 
@@ -294,7 +293,7 @@ public class UseCases {
                         .withRecordedLabel(STRING.next())
                 , consumer).build();
 
-        final TestUtilities.EventListener publicEventTopic = listenFor("public.hearing.event-ignored")
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.event-ignored")
                 .withFilter(isJson(allOf(
                         withJsonPath("$.hearingEventId", is(logEvent.getHearingEventId().toString())),
                         withJsonPath("$.hearingId", is(logEvent.getHearingId().toString())),

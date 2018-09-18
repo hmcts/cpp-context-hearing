@@ -42,6 +42,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CommandHelpers {
 
@@ -84,15 +85,16 @@ public class CommandHelpers {
         return new CaseDefendantDetailsHelper(caseDefendantDetails);
     }
 
-    public static UploadSubscriptionsCommandHelper h(UploadSubscriptionsCommand uploadSubscriptionsCommand){
+    public static UploadSubscriptionsCommandHelper h(UploadSubscriptionsCommand uploadSubscriptionsCommand) {
         return new UploadSubscriptionsCommandHelper(uploadSubscriptionsCommand);
     }
+
 
     public static UpdateDefendantAttendanceCommandHelper h(UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand){
         return new UpdateDefendantAttendanceCommandHelper(updateDefendantAttendanceCommand);
     }
 
-    public static NowsHelper h(List<Nows> nows){
+    public static NowsHelper h(List<Nows> nows) {
         return new NowsHelper(nows);
     }
 
@@ -104,27 +106,27 @@ public class CommandHelpers {
             this.nows = nows;
         }
 
-        public List<Nows> it(){
+        public List<Nows> it() {
             return nows;
         }
 
-        public Nows getFirstNow(){
+        public Nows getFirstNow() {
             return nows.get(0);
         }
 
-        public uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material getFirstMaterial(){
+        public uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material getFirstMaterial() {
             return nows.get(0).getMaterials().get(0);
         }
 
-        public NowResult getFirstNowsResult(){
+        public NowResult getFirstNowsResult() {
             return nows.get(0).getMaterials().get(0).getNowResult().get(0);
         }
 
-        public PromptRef getFirstPrompt(){
+        public PromptRef getFirstPrompt() {
             return nows.get(0).getMaterials().get(0).getNowResult().get(0).getPrompts().get(0);
         }
 
-        public UserGroups getFirstUserGroup(){
+        public UserGroups getFirstUserGroup() {
             return nows.get(0).getMaterials().get(0).getUserGroups().get(0);
         }
     }
@@ -311,6 +313,10 @@ public class CommandHelpers {
             return resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
         }
 
+        public uk.gov.justice.json.schemas.core.Defendant getSecondDefendant() {
+            return resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(1);
+        }
+
         public uk.gov.justice.json.schemas.core.Offence getFirstDefendantFirstOffence() {
             return getFirstDefendant().getOffences().get(0);
         }
@@ -333,9 +339,16 @@ public class CommandHelpers {
 
         public ResultLine getFirstCompletedResultLine() {
             return resultsShared.getHearing().getTargets().stream()
-                    .flatMap(target->target.getResultLines().stream())
+                    .flatMap(target -> target.getResultLines().stream())
                     .filter(ResultLine::getIsComplete)
-                    .findFirst().orElse(null);
+                    .collect(Collectors.toList()).get(0);
+        }
+
+        public ResultLine getSecondCompletedResultLine() {
+            return resultsShared.getHearing().getTargets().stream()
+                    .flatMap(target -> target.getResultLines().stream())
+                    .filter(ResultLine::getIsComplete)
+                    .collect(Collectors.toList()).get(1);
         }
 
         public CompletedResultLineStatus getFirstCompletedResultLineStatus() {
@@ -406,7 +419,7 @@ public class CommandHelpers {
             this.uploadSubscriptionsCommand = uploadSubscriptionsCommand;
         }
 
-        public UploadSubscription getFirstSubscription(){
+        public UploadSubscription getFirstSubscription() {
             return uploadSubscriptionsCommand.getSubscriptions().get(0);
         }
     }

@@ -17,7 +17,7 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeRead
 import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
-import uk.gov.moj.cpp.hearing.it.TestUtilities;
+import uk.gov.moj.cpp.hearing.it.Utilities;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -108,7 +108,7 @@ public class ReferenceDataStub {
     private static void stub(Object result, String queryUrl, String mediaType, LocalDate referenceDate) {
         String strPayload;
         try {
-            strPayload = TestUtilities.JsonUtil.toJsonString(result);
+            strPayload = Utilities.JsonUtil.toJsonString(result);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

@@ -95,7 +95,7 @@ public class GenerateNowsDelegateTest {
                 .thenReturn(nowDefinition);
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(resultsShared));
+                objectToJsonObjectConverter.convert(resultsShared.it()));
 
         generateNowsDelegate.generateNows(sender, event, nows.it(), resultsShared.it());
 
@@ -182,7 +182,7 @@ public class GenerateNowsDelegateTest {
                 .thenReturn(nowDefinition);
 
         generateNowsDelegate.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(resultsShared)), nows.it(), resultsShared.it());
+                objectToJsonObjectConverter.convert(resultsShared.it())), nows.it(), resultsShared.it());
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 
@@ -217,7 +217,7 @@ public class GenerateNowsDelegateTest {
                 .thenReturn(nowDefinition);
 
         generateNowsDelegate.generateNows(sender, envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(resultsShared)), nows.it(), resultsShared.it());
+                objectToJsonObjectConverter.convert(resultsShared.it())), nows.it(), resultsShared.it());
 
         verify(sender).send(envelopeArgumentCaptor.capture());
 

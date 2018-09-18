@@ -27,35 +27,34 @@ public class HearingAdjournHelperTest {
         assertEquals(1, HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HTYPE).size());
     }
 
-    @Ignore("GPE-5480 - share results model needs to be updated")
     @Test
     public void getDistinctPromptValue() throws Exception {
-/*        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HDATE)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HEST)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HTIME)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HTYPE)).size());
-*/
+
     }
 
-    @Ignore("GPE-5480 - share results model needs to be updated")
     @Test
     public void getOffencesHaveResultNextHearing() throws Exception {
         //given
         ResultsShared arbitraryResultsShared = getArbitrarySharedResultWithNextHearingResult();
 
         //when and then
-/*        assertEquals(1, HearingAdjournHelper.getOffencesHaveResultNextHearing(
+        assertEquals(1, HearingAdjournHelper.getOffencesHaveResultNextHearing(
                 arbitraryResultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0),
-                arbitraryResultsShared.getCompletedResultLines(),
+                arbitraryResultsShared.getHearing().getTargets(),
+                arbitraryResultsShared.getHearing().getTargets().get(0).getResultLines(),
                 arbitraryNextHearingMetaData()).size());
-*/
+
     }
 
 }

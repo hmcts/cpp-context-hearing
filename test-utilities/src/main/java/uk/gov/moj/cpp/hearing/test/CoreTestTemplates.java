@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
-import static java.util.Arrays.asList;
+
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.Pair.p;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.json.schemas.core.Address;
 import uk.gov.justice.json.schemas.core.AllocationDecision;
@@ -91,7 +92,7 @@ public class CoreTestTemplates {
         private boolean minimumOrganisation;
         private boolean minimumOffence;
 
-        private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), toList(randomUUID())));
+        private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
         public CoreTemplateArguments setJurisdictionType(JurisdictionType jurisdictionType) {
             this.jurisdictionType = jurisdictionType;
@@ -166,11 +167,6 @@ public class CoreTestTemplates {
 
         public static <T, U> Map<T, U> toMap(List<Pair<T, U>> pairs) {
             return pairs.stream().collect(Collectors.toMap(Pair::getK, Pair::getV));
-        }
-
-        @SafeVarargs
-        public static <T> List<T> toList(T... t) {
-            return new ArrayList<>(asList(t)); //want this to be mutable
         }
     }
 
@@ -505,7 +501,7 @@ public class CoreTestTemplates {
                 .withDefendantId(defendantId)
                 .withOffenceId(offenceId)
                 .withDraftResult("json string")
-                .withResultLines(singletonList(ResultLine.resultLine()
+                .withResultLines(asList(ResultLine.resultLine()
                         .withResultDefinitionId(randomUUID())
                         .withResultLineId(resultLineId)
                         .withResultLabel(STRING.next())

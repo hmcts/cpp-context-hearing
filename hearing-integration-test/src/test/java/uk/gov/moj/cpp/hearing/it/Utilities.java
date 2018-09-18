@@ -33,7 +33,7 @@ import javax.json.JsonObject;
 import java.io.StringReader;
 import java.text.MessageFormat;
 
-public class TestUtilities {
+public class Utilities {
 
     public static class EventListener {
 
@@ -43,7 +43,7 @@ public class TestUtilities {
         private long timeout;
 
         public EventListener(final String eventType) {
-            this(eventType, 1000);
+            this(eventType, 10000);
         }
 
         public EventListener(final String eventType, long timeout) {
@@ -217,5 +217,6 @@ public class TestUtilities {
     public static CommandBuilder makeCommand(RequestSpecification requestSpec, String endpoint) {
         return new CommandBuilder(requestSpec, endpoint);
     }
+
 
 }

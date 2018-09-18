@@ -5,13 +5,8 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
@@ -49,7 +44,7 @@ public class HearingAdjournIT extends AbstractIT {
 
         final ArbitraryNextHearingPromptValues arbitraryNextHearingPromptValues = new ArbitraryNextHearingPromptValues("Plea & Trial Preparation", "02/07/2018", "10.30", 59);
 
-        TestUtilities.EventListener publicHearingAdjourned = getPublicHearingAdjournedEventListener(hearingOne, arbitraryNextHearingPromptValues);
+        Utilities.EventListener publicHearingAdjourned = getPublicHearingAdjournedEventListener(hearingOne, arbitraryNextHearingPromptValues);
 
         // share result with addition result next hearing completed result
         UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
@@ -81,7 +76,7 @@ public class HearingAdjournIT extends AbstractIT {
 
     }
 
-    private TestUtilities.EventListener getPublicHearingAdjournedEventListener(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final ArbitraryNextHearingPromptValues arbitraryNextHearingPromptValues) {
+    private Utilities.EventListener getPublicHearingAdjournedEventListener(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final ArbitraryNextHearingPromptValues arbitraryNextHearingPromptValues) {
         return listenFor("public.hearing.adjourned")
                 .withFilter(isJson(CoreMatchers.allOf(
 //                        withJsonPath("$.caseId", is(hearingOne.getFirstCaseId().toString())),
