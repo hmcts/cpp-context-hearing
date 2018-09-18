@@ -1,249 +1,339 @@
 {
   "hearing": {
-    "id": "fbb00f13-e6d0-4f92-8e9c-83af5af6b65a",
-    "hearingType": "Sentencing",
-    "startDateTime": "2016-06-01T10:00:00Z",
-    "hearingDates": [
-      "2016-06-01T10:00:00Z"
-    ],
     "courtCentre": {
-      "courtCentreName": "Liverpool Crown Court",
-      "courtRoomId": "860e25be-2f31-4d18-89fa-4dcca8c52f86",
-      "courtRoomName": "3"
+      "id": "3b72daf1-57f1-4918-bb1c-ba9b116d2901",
+      "name": "ABXOzN94yv",
+      "roomId": "d8deddf9-c647-467b-be13-fee51b061f15",
+      "roomName": "2WcLO4qmdD",
+      "welshName": "uJ9tkfkDNs",
+      "welshRoomName": "z6dfKZ0byk"
     },
-    "attendees": [
-      {
-        "firstName": "Cherie",
-        "lastName": "Blair",
-        "type": "COURTCLERK"
-      },
-      {
-        "firstName": "Nina",
-        "lastName": "Turner",
-        "type": "JUDGE"
-      },
-      {
-        "firstName": "Donald",
-        "lastName": "Smith",
-        "type": "DEFENCEADVOCATE"
-      }
-    ],
-    "defendants": [
-      {
-        "id": "43e811c1-954d-4255-96c6-71886dee9daf",
-        "person": {
-          "id": "a31cc33d-48f3-4edf-a454-2048676f1ea0",
-          "title": "Mr",
-          "firstName": "David",
-          "lastName": "LLOYD",
-          "dateOfBirth": "1980-07-15",
-          "nationality": "England",
-          "gender": "Male",
-          "homeTelephone": "02012345678",
-          "workTelephone": "02012345679",
-          "mobile": "07777777777",
-          "fax": "02011111111",
-          "email": "email@email.com",
+    "defendantReferralReasons": [{
+      "defendantId": "65eff392-e777-4a1f-bbf5-e8a4db2b3cfa",
+      "description": "zuuT1tndzM",
+      "id": "9f525957-f493-40a3-988b-d656e381600c"
+    }],
+    "hasSharedResults": false,
+    "hearingDays": [{
+      "listedDurationMinutes": 1186308803,
+      "listingSequence": 541958646,
+      "sittingDay": "2016-11-13T10:04:58.28Z"
+    }],
+    "id": "4dc97948-83e1-4a9a-8e3b-cbf5a36e02f5",
+    "judiciary": [{
+      "firstName": "kDrg3WFb30",
+      "isBenchChairman": true,
+      "isDeputy": false,
+      "judicialId": "77cfbe6c-5e83-41e2-921c-ed014f41dfe6",
+      "judicialRoleType": "CIRCUIT_JUDGE",
+      "lastName": "U7McG985Hf",
+      "middleName": "fvGqaiRh8R",
+      "title": "WDz37UgN9t"
+    }],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [{
+      "caseStatus": "d9rabZvbST",
+      "defendants": [{
+        "associatedPersons": [{
+          "person": {
+            "additionalNationalityCode": "BWb2oIG3Kb",
+            "additionalNationalityId": "cca72366-4f17-4bbc-9838-27c854952193",
+            "address": {
+              "address1": "e5O7C3YFQS",
+              "address2": "J8s3Bxw9QE",
+              "address3": "rzpshtNxa8",
+              "address4": "kI5EU2fS6W",
+              "address5": "usqiaGGcTo",
+              "postcode": "BN61 7PR"
+            },
+            "contact": {
+              "fax": "1198045329",
+              "home": "186887435",
+              "mobile": "1863268224",
+              "primaryEmail": "dol9b6gdoi@2ulumgwlcl.hvu1qoulyh",
+              "secondaryEmail": "iw2ffbmesm@x0awpjbrix.3ilivrzlmx",
+              "work": "1624064096"
+            },
+            "dateOfBirth": "2015-09-08",
+            "disabilityStatus": "RVUUwnxJD5",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": "dxN0K3c81M",
+            "ethnicityId": "7fd7ec8d-72be-4d4d-aaae-6010b307320d",
+            "firstName": "RAlFNM6FUY",
+            "gender": "NOT_SPECIFIED",
+            "interpreterLanguageNeeds": "ZY6TBU0Hvb",
+            "lastName": "wJglcgkmwr",
+            "middleName": "QyttW10yYn",
+            "nationalInsuranceNumber": "BK430519D",
+            "nationalityCode": "sSaFDEIqrg",
+            "nationalityId": "d6657120-4f63-429e-a0cd-cd1aa02a7547",
+            "occupation": "6oWcz1QHN7",
+            "occupationCode": "404smx62Om",
+            "specificRequirements": "JiczoADayF",
+            "title": "MS"
+          },
+          "role": "BjvCqiKiYO"
+        }],
+        "defenceOrganisation": {
           "address": {
-            "addressId": "ab07e481-bf8d-49cb-872a-506f7a166e05",
-            "address1": "14 Tottenham Court Road",
-            "address2": "London",
-            "address3": "England",
-            "address4": "UK",
-            "postCode": "W1T 1JY"
-          }
+            "address1": "h69vn1Cy2e",
+            "address2": "EpSbR77wZQ",
+            "address3": "T9HdT3O0ra",
+            "address4": "lhkKnzXepP",
+            "address5": "lWyUQySIBA",
+            "postcode": "SV17 8RX"
+          },
+          "contact": {
+            "fax": "2104732217",
+            "home": "1447065504",
+            "mobile": "1622524729",
+            "primaryEmail": "mliqydslxe@lrj5zd1tqa.eq6zdju7pe",
+            "secondaryEmail": "a5dg06wvgd@yejxeasknr.zaaeg68jqm",
+            "work": "220861932"
+          },
+          "id": "6d1d20f5-a29f-440d-a876-da73deb2f3cf",
+          "incorporationNumber": "kZJgwBslxJ",
+          "name": "4l9iDtFR1H",
+          "registeredCharityNumber": "BjGtkTNVmu"
         },
-        "defenceOrganisation": "XYZ Solicitors",
-        "interpreter": {
-          "name": "Robert Carlyle",
-          "language": "English"
+        "id": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+        "numberOfPreviousConvictionsCited": 152468078,
+        "offences": [{
+          "arrestDate": "2014-04-13",
+          "chargeDate": "2017-04-12",
+          "count": 2113164857,
+          "endDate": "2014-08-23",
+          "id": "644e6a75-d645-46e3-8cd6-b34528043f01",
+          "indicatedPlea": {
+            "allocationDecision": {
+              "courtDecision": "CONSENT_SUMMARY_TRIAL",
+              "defendantRepresentation": "CONSENT_SUMMARY_TRIAL",
+              "indicationOfSentence": "xe2vCIlX0p",
+              "prosecutionRepresentation": "ELECT_TRIAL_ON_INDICTMENT"
+            },
+            "indicatedPleaDate": "2014-12-05",
+            "indicatedPleaValue": "INDICATED_GUILTY",
+            "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+            "source": "IN_COURT"
+          },
+          "modeOfTrial": "FQlQ6PGvaZ",
+          "notifiedPlea": {
+            "notifiedPleaDate": "2018-04-16",
+            "notifiedPleaValue": "NO_NOTIFICATION",
+            "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01"
+          },
+          "offenceCode": "lUdsziawR4",
+          "offenceDefinitionId": "86efd8ce-0952-4b45-a0f9-a6cf0d04d747",
+          "offenceFacts": {
+            "alcoholReadingAmount": "PDhA4frAic",
+            "alcoholReadingMethod": "jZPshxabJQ",
+            "vehicleRegistration": "MV67urnMcH"
+          },
+          "offenceLegislation": "bofgMbX8AK",
+          "offenceLegislationWelsh": "GWYcISLUUi",
+          "offenceTitle": "3KpXMANlUi",
+          "offenceTitleWelsh": "lWGFseJwTC",
+          "orderIndex": 574679143,
+          "startDate": "2014-10-11",
+          "wording": "AaBoqNQfGD",
+          "wordingWelsh": "rKN0YI1dAz"
+        }],
+        "personDefendant": {
+          "aliases": ["bBWqytm08d"],
+          "arrestSummonsNumber": "sY6UhoEbv9",
+          "bailStatus": "lssR6uEkQV",
+          "custodyTimeLimit": "2016-02-03",
+          "driverNumber": "3A3O09DuRQ",
+          "employerOrganisation": {
+            "address": {
+              "address1": "5ggkm9ogey",
+              "address2": "wvIoszlBI7",
+              "address3": "GcgahDqzc9",
+              "address4": "tfdFb4zhsR",
+              "address5": "WiO3Oi1p7i",
+              "postcode": "Z04 5RY"
+            },
+            "contact": {
+              "fax": "1886378305",
+              "home": "459620186",
+              "mobile": "839827693",
+              "primaryEmail": "bt5wr8roub@fpcihxkwcb.qk6mqvjzrk",
+              "secondaryEmail": "hq9foqrgv3@zhvhe00yn0.lb5ygdt3ro",
+              "work": "1755875720"
+            },
+            "id": "350c9844-a1aa-42c0-98b4-04fde4aeba16",
+            "incorporationNumber": "ryMOADSlRb",
+            "name": "bkKB7yneiy",
+            "registeredCharityNumber": "gnZw1tZuqO"
+          },
+          "employerPayrollReference": "mze6CFQ5qf",
+          "observedEthnicityCode": "4yXyPCgLM3",
+          "observedEthnicityId": "26bdfa23-262a-4af1-982c-d2620989b56a",
+          "perceivedBirthYear": 2069054740,
+          "personDetails": {
+            "additionalNationalityCode": "oAAvtR5t0D",
+            "additionalNationalityId": "fc00c1b2-4daf-452e-9ec1-630950c33650",
+            "address": {
+              "address1": "MjUJvs5ZuU",
+              "address2": "CFTsIwEgMk",
+              "address3": "MYNwpDHZF5",
+              "address4": "858FoMAUoA",
+              "address5": "XUHJPGHYcP",
+              "postcode": "W9 2TB"
+            },
+            "contact": {
+              "fax": "694930694",
+              "home": "1078351985",
+              "mobile": "1355778193",
+              "primaryEmail": "ujhtgqet32@lcgb500duk.ag19b4ahbp",
+              "secondaryEmail": "w6clehec3x@coh7sf3rlv.pyvyowzczo",
+              "work": "657891467"
+            },
+            "dateOfBirth": "2016-12-29",
+            "disabilityStatus": "riogAxzlye",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": "woTpWFWIrt",
+            "ethnicityId": "49952c6a-4a5c-410d-8258-1cebd742a7d3",
+            "firstName": "8cA8AxQXnY",
+            "gender": "NOT_KNOWN",
+            "interpreterLanguageNeeds": "Yhe3fd2jme",
+            "lastName": "YzNcTuRYVn",
+            "middleName": "Xb6496JUgy",
+            "nationalInsuranceNumber": "MW387790D",
+            "nationalityCode": "u1wju2xKnh",
+            "nationalityId": "f9f3b563-b693-4ef9-b838-9659bdfa8c62",
+            "occupation": "fMi1wizK1s",
+            "occupationCode": "uzjqeRX4kd",
+            "specificRequirements": "GoexM2TKlP",
+            "title": "MR"
+          },
+          "pncId": "DJBure9wQX",
+          "selfDefinedEthnicityCode": "8fxcMOGRF3",
+          "selfDefinedEthnicityId": "1dc9b1a0-88f6-47ed-96f2-79fe40287824"
         },
-        "cases": [
-          {
-            "id": "a2ce22f3-c87f-4038-bab3-21b675db4736",
-            "urn": "URN123452",
-            "bailStatus": "in custody",
-            "custodyTimeLimitDate": "2018-01-30",
-            "offences": [
-              {
-                "id": "c44330f4-2b6c-4472-8f70-7084d1f53a26",
-                "code": "OF61131",
-                "convictionDate": "2017-08-02",
-                "plea": {
-                  "id": "adae0fe6-4b8d-4877-b437-f93a8c1fc64d",
-                  "value": "NOT GUILTY",
-                  "date": "2017-02-02",
-                  "enteredHearingId": "83a3562a-dd34-4d93-b8d0-500501f56cd5"
-                },
-                "verdict": {
-                  "typeId": "7169d509-a568-4f2e-8f1c-839384f34a8c",
-                  "verdictDescription": "Not Guilty, guilty of a lesser or alternative offence",
-                  "verdictCategory": "GUILTY",
-                  "lesserOrAlternativeOffence": {
-                    "offenceTypeId": "43f86d8f-e7c2-4445-8c15-1d9d6c538b4c",
-                    "code": "OF62222",
-                    "convictionDate": "2017-08-01",
-                    "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you did not have a ticket"
-                  },
-                  "numberOfSplitJurors": "9-1",
-                  "verdictDate": "2017-02-02",
-                  "numberOfJurors": 10,
-                  "unanimous": false,
-                  "enteredHearingId": "bdba46f5-1971-4b94-842e-8a30bf4463f2"
-                },
-                "wording": "On 19/01/2016 At wandsworth bridge rd SW6 Being a passenger on a Public Service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares did use in relation to the journey you were taking a ticket which had been issued for use by another person on terms that it is not transferable",
-                "startDate": "2016-06-21",
-                "endDate": "2017-08-01"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "sharedResultLines": [
-      {
-        "id": "54cae487-9a7f-4881-9874-f364b889c00c",
-        "defendantId": "43e811c1-954d-4255-96c6-71886dee9daf",
-        "caseId": "a2ce22f3-c87f-4038-bab3-21b675db4736",
-        "offenceId": "c44330f4-2b6c-4472-8f70-7084d1f53a26",
-        "level": "CASE",
-        "label": "Imprisonment",
-        "rank": 1,
-        "prompts": [
-          {
-            "id": "c61684eb-1a01-4ad1-9d30-076538dd43b2",
-            "label": "Imprisonment Duration",
-            "value": "Imprisonment duration"
-          },
-          {
-            "id": "0803282d-91ad-49c3-9af7-b1d0ab40d77d",
-            "label": "Prison",
-            "value": "Wormwood Scrubs"
-          }
-        ]
+        "prosecutionAuthorityReference": "u99UqtjJpF",
+        "prosecutionCaseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006"
+      }],
+      "id": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+      "initiationCode": "Z",
+      "originatingOrganisation": "Dq3O6Q9hco",
+      "prosecutionCaseIdentifier": {
+        "prosecutionAuthorityCode": "RL45tVFnpB",
+        "prosecutionAuthorityId": "6c021626-73db-45ff-981d-fe39f90b1bf7",
+        "caseURN": "saI7ny8Bl1"
       },
-      {
-        "id": "20f6b4be-622f-4a9f-af4f-8fc9c0e9ba85",
-        "defendantId": "43e811c1-954d-4255-96c6-71886dee9daf",
-        "caseId": "a2ce22f3-c87f-4038-bab3-21b675db4736",
-        "offenceId": "c44330f4-2b6c-4472-8f70-7084d1f53a26",
-        "level": "DEFENDANT",
-        "label": "Imprisonment",
-        "rank": 2,
-        "prompts": [
-          {
-            "id": "49dadb6a-1ee1-4193-8805-eb647aca2cc3",
-            "label": "Imprisonment Duration",
-            "value": "Imprisonment duration"
-          },
-          {
-            "id": "f86d60d4-8c91-42e3-8d52-d893a311ee8c",
-            "label": "Prison",
-            "value": "Wormwood Scrubs"
-          }
-        ]
-      },
-      {
-        "id": "6688538e-3d86-432e-ae08-f080db71588e",
-        "defendantId": "43e811c1-954d-4255-96c6-71886dee9daf",
-        "caseId": "a2ce22f3-c87f-4038-bab3-21b675db4736",
-        "offenceId": "c44330f4-2b6c-4472-8f70-7084d1f53a26",
-        "level": "OFFENCE",
-        "label": "Imprisonment",
-        "rank": 3,
-        "prompts": [
-          {
-            "id": "bdcd9dc4-ef8e-440a-a1df-c8619315b794",
-            "label": "Imprisonment Duration",
-            "value": "Imprisonment duration"
-          },
-          {
-            "id": "ad232f54-a899-457c-8300-2c0146ce8866",
-            "label": "Prison",
-            "value": "Wormwood Scrubs"
-          }
-        ]
-      }
-    ],
-    "nows": [
-      {
-        "id": "821513e7-9782-46c8-a9c8-1c3ffd828e08",
-        "nowsTypeId": "f4ea953a-efbf-4ffd-9e12-713f6110883a",
-        "defendantId": "43e811c1-954d-4255-96c6-71886dee9daf",
-        "material": [
-          {
-            "id": "8a0c4f5b-e6e5-49c6-a142-b14821606510",
-            "nowResult": [
-              {
-                "sharedResultId": "54cae487-9a7f-4881-9874-f364b889c00c",
-                "sequence": 1,
-                "prompts": [
-                  {
-                    "id": "c61684eb-1a01-4ad1-9d30-076538dd43b2",
-                    "label": "Imprisonment Duration"
-                  },
-                  {
-                    "id": "0803282d-91ad-49c3-9af7-b1d0ab40d77d",
-                    "label": "Prison"
-                  }
-                ]
-              },
-              {
-                "sharedResultId": "20f6b4be-622f-4a9f-af4f-8fc9c0e9ba85",
-                "sequence": 2,
-                "prompts": [
-                  {
-                    "id": "49dadb6a-1ee1-4193-8805-eb647aca2cc3",
-                    "label": "Imprisonment Duration"
-                  },
-                  {
-                    "id": "f86d60d4-8c91-42e3-8d52-d893a311ee8c",
-                    "label": "Prison"
-                  }
-                ]
-              },
-              {
-                "sharedResultId": "6688538e-3d86-432e-ae08-f080db71588e",
-                "sequence": 3,
-                "prompts": [
-                  {
-                    "id": "bdcd9dc4-ef8e-440a-a1df-c8619315b794",
-                    "label": "Imprisonment Duration"
-                  },
-                  {
-                    "id": "ad232f54-a899-457c-8300-2c0146ce8866",
-                    "label": "Prison"
-                  }
-                ]
-              }
-            ],
-            "amended": false,
-            "userGroups": [
-              {
-                "group": "COURTCLERK"
-              },
-              {
-                "group": "DEFENCECOUNSEL"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "nowTypes": [
-      {
-        "id": "f4ea953a-efbf-4ffd-9e12-713f6110883a",
-        "templateName": "NoticeOrderWarrants",
-        "description": "Imprisonment Order",
-        "rank": 1,
-        "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment. If you<ul><li>Do not comply with the requirements of this order during the <u>supervision period</u>; or</li><li>Commit any other offence during the <u>operational period</u></li></ul>you may be liable to serve the <u>custodial period</u> in prison.<br/><br/><br/><p>For the duration of the <u>supervision period</u>, you will be supervised by your Probation Officer, and<br/>You must<ul><li>Keep in touch with your Probation Officer as they tell you</li><li>Tell your Probation Officer if you intend to change your address</li><li>Comply with all other requirements</li></ul><p><strong>Requirements</strong> – Please refer only to the requirements that the court has specified in the details of your order, <u>as set out above</u><p><strong>Unpaid Work Requirement</strong><p>You must carry out unpaid work for the hours specified as you are told and by the date specified in the order. Your Probation Officer will tell you who will be responsible for supervising work.<p><strong>Activity Requirement</strong><p>You must present yourself as directed at the time and on the days specified in the order and you must undertake the activity the court has specified for the duration specified in the order in the way you are told by your Probation Officer<p><strong>Programme Requirement</strong><p>You must participate in the programme specified in the order at the location specified and for the number of days specified in the order<p><strong>Prohibited Activity Requirement</strong><p>You must not take part in the activity that the court has prohibited in the order for the number of days the court specified<p><strong>Curfew Requirement</strong><p>You must remain in the place or places the court has specified during the periods specified. The curfew requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Exclusion Requirement</strong><p>You must not enter the place or places the court has specified between the hours specified in the order. The exclusion requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Residence Requirement</strong><p>You must live at the premises the court has specified and obey any rules that apply there for the number of days specified in the order. You may live at ???? with the prior approval of your Probation Officer.<p><strong>Foreign Travel Prohibition Requirement</strong><p>You must not travel to the prohibited location specified in the order during the period the court has specified in the order.<p><strong>Mental Health Treatment Requirement</strong><p>You must have mental health treatment by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Drug Rehabilitation Requirement</strong><p>You must have treatment for drug dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p>To be sure that you do not have any illegal drug in your body, you must provide samples for testing at such times or in such circumstances as your Probation Officer or the person responsible for your treatment will tell you. The results of tests on the samples will be sent to your Probation Officer who will report the results to the court. Your Probation Officer will also tell the court how your order is progressing and the views of your treatment provider.<p>The court will review this order ????. The first review will be on the date and time specified at the court specified.<p>You must / need not attend this review hearing.<p><strong>Alcohol Treatment Requirement</strong><p>You must have treatment for alcohol dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Supervision Requirement</strong><p>You must attend appointments with your Probation Officer or another person at the times and places your Probation Officer says.<p><strong>Attendance Centre Requirement</strong><p>You must attend an attendance centre - see separate sheet for details<p><strong>WARNING</strong><p>If you do not comply with your order, you will be brought back to court. The court may then<ul><li>Change the order by adding extra requirements</li><li>Pass a different sentence for the original offences; or</li><li>Send you to prison</li></ul><p><strong>NOTE</strong><p>Either you or your Probation Officer can ask the court to look again at this order and the court can then change it or cancel it if it feels that is the right thing to do. The court may also pass a different sentence for the original offence(s). If you wish to ask the court to look at your order again you should get in touch with the court at the address above.",
-        "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar. Os ydych <ul> <li> Peidiwch â chydymffurfio â gofynion y gorchymyn hwn yn ystod y cyfnod goruchwylio </u>; neu </li> <li> Ymrwymo unrhyw drosedd arall yn ystod y cyfnod gweithredol </u> </li> </ul> efallai y byddwch yn atebol i wasanaethu'r cyfnod gwarchodaeth </u> yn y carchar. <br/> <br/> <br/> <p> Yn ystod y cyfnod goruchwylio </u>, byddwch chi'n cael eich goruchwylio gan eich Swyddog Prawf, a <br/> Rhaid ichi <ul> < li> Cadwch mewn cysylltiad â'ch Swyddog Prawf wrth iddyn nhw ddweud wrthych </li> <li> Dywedwch wrth eich Swyddog Prawf os ydych yn bwriadu newid eich cyfeiriad </li> <li> Cydymffurfio â'r holl ofynion eraill </li></ul > <p> <strong> Gofynion </strong> - Cyfeiriwch yn unig at y gofynion a nododd y llys yn manylion eich archeb, fel y nodir uchod </u> <p> <strong> Gwaith Di-dāl Gofyniad </strong><p> Rhaid i chi wneud gwaith di-dāl am yr oriau a bennir fel y dywedir wrthych a chi erbyn y dyddiad a bennir yn y gorchymyn. Bydd eich Swyddog Prawf yn dweud wrthych pwy fydd yn gyfrifol am oruchwylio gwaith.<p> <strong> Gweithgaredd Gofyniad </strong> <p> Rhaid i chi gyflwyno eich hun fel y'i cyfarwyddir ar yr amser ac ar y diwrnodau a bennir yn y gorchymyn a rhaid i chi ymgymryd â chi y gweithgaredd y mae'r llys wedi ei nodi ar gyfer y cyfnod a bennir yn y drefn yn y ffordd y dywedir wrth eich Swyddog Prawf <p> <strong> Gofyniad Rhaglen </strong><p> Rhaid i chi gymryd rhan yn y rhaglen a bennir yn y drefn yn y lleoliad a bennir ac am y nifer o ddyddiau a bennir yn y gorchymyn <p> <strong> Gofyniad Gweithgaredd Gwahardd </strong> <p> Rhaid i chi beidio â chymryd rhan yn y gweithgaredd a waharddodd y llys yn y drefn ar gyfer nifer y dyddiau llys penodol <p> <strong> Curfew Requirement </strong> <p> Rhaid i chi aros yn y lle neu lle mae'r llys wedi nodi yn ystod y cyfnodau a bennir. Mae'r gofyniad cyrffyw yn para am y nifer o ddyddiau a bennir yn y<p> Gweler \"Darpariaeth Monitro Electronig\" yn yr orchymyn hwn <p> <strong> Gofyniad Preswyl </strong> <p> Rhaid i chi fyw yn yr adeilad y llys wedi nodi ac ufuddhau i unrhyw reolau sy'n berthnasol yno am y nifer o ddyddiau a bennir yn y gorchymyn. Efallai y byddwch yn byw yn ???? gyda chymeradwyaeth ymlaen llaw eich Swyddog Prawf. <p> <strong> Gofyniad Gwahardd Teithio Tramor </strong> <p> Rhaid i chi beidio â theithio i'r lleoliad gwaharddedig a bennir yn yr orchymyn yn ystod y cyfnod y mae'r llys wedi'i bennu yn y gorchymyn. < p> <strong> Gofyniad Triniaeth Iechyd Meddwl </strong> <p> Rhaid i chi gael triniaeth iechyd meddwl gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y <p> <strong> Angen Adsefydlu Cyffuriau </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar gyffuriau gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am nifer y dyddiau <p> Er mwyn sicrhau nad oes gennych unrhyw gyffur anghyfreithlon yn eich corff, rhaid i chi ddarparu samplau i'w profi ar yr adegau hynny neu mewn amgylchiadau o'r fath y bydd eich Swyddog Prawf neu'r person sy'n gyfrifol am eich triniaeth yn dweud wrthych chi . Anfonir canlyniadau'r profion ar y samplau i'ch Swyddog Prawf a fydd yn adrodd y canlyniadau i'r llys. Bydd eich Swyddog Prawf hefyd yn dweud wrth y llys sut mae'ch gorchymyn yn mynd rhagddo a barn eich darparwr triniaeth. <P> Bydd y llys yn adolygu'r gorchymyn hwn ????. Bydd yr adolygiad cyntaf ar y dyddiad a'r amser a bennir yn y llys a bennir. <P> Rhaid i chi / nid oes angen i chi fynychu'r gwrandawiad hwn. <P> <strong> Gofyniad Trin Alcohol </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar alcohol gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y gorchymyn. <p> <strong> Gofyniad Goruchwylio </strong> <p> Rhaid i chi fynychu penodiadau gyda'ch Swyddog Prawf neu berson arall ar yr adegau a lle mae eich Swyddog Prawf yn dweud. <p> <strong> Gofyniad y Ganolfan Bresennol </strong> <p> Rhaid i chi fynychu canolfan bresenoldeb - <p> <strong> RHYBUDD </strong> <p> Os na fyddwch chi'n cydymffurfio â'ch archeb, fe'ch cewch eich troi'n ôl i'r llys. Gall y llys wedyn <ul> <li> Newid y gorchymyn trwy ychwanegu gofynion ychwanegol </li> <li> Pasiwch frawddeg wahanol ar gyfer y troseddau gwreiddiol; neu </li> <li> Anfonwch chi at y carchar </li> </ul> <p> <strong> NOTE </strong> <p> Naill ai chi neu'ch Swyddog Prawf all ofyn i'r llys edrych eto ar y gorchymyn hwn ac yna gall y llys ei newid neu ei ganslo os yw'n teimlo mai dyna'r peth iawn i'w wneud. Gall y llys hefyd basio brawddeg wahanol ar gyfer y trosedd (wyr) gwreiddiol. Os hoffech ofyn i'r llys edrych ar eich archeb eto dylech gysylltu â'r llys yn y cyfeiriad uchod. ",
-        "priority": "30",
-        "jurisdiction": "B",
-        "welshDescription": "gorchymyn carchar",
-        "bilingualTemplateName": "BilingualNoticeOrderWarrants",
-        "remotePrintingRequired": true
-      }
-    ]
+      "statementOfFacts": "Ov1qWo2i4w",
+      "statementOfFactsWelsh": "c6Bmh96ZpL"
+    }],
+    "reportingRestrictionReason": "8GiHe4kRs2",
+    "type": {
+      "description": "1q2fh2qFLD",
+      "id": "33b44af0-b361-4414-90a3-0ea7d2988ebd"
+    }
+  },
+  "nows": [{
+    "id": "35eda3d8-4f1d-426e-b475-7e7b0b7da02e",
+    "nowsTypeId": "3f8642ff-c000-4cc0-8ec8-7e30799adf3c",
+    "nowsTemplateName": "7kjl5guOQd",
+    "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+    "materials": [{
+      "id": "94f83260-9f37-40ae-b0f2-c167677476e1",
+      "language": "p31jmxGPjl",
+      "nowResult": [{
+        "sharedResultId": "fce71000-a548-4862-a265-8fd4322dbd79",
+        "sequence": 2142205572,
+        "prompts": [{
+          "id": "58acaf80-121f-4679-b41c-c83a6d2fc556",
+          "label": "WLVKZFKqMz",
+          "value": "IiTofXDW7O"
+        }]
+      }, {
+        "sharedResultId": "f21dd0d0-e4de-40b7-8ef7-e834f6377987",
+        "sequence": 1801685530,
+        "prompts": [{
+          "id": "ba2d45a9-dbd9-485a-9e9c-a8b4f546253a",
+          "label": "x5yaqY6cDd",
+          "value": "3WcHEq4nbR"
+        }]
+      }, {
+        "sharedResultId": "3d9ca3ef-1c7c-404b-9265-4a14be8fc4b1",
+        "sequence": 1388686131,
+        "prompts": [{
+          "id": "59902d78-e38a-4615-b066-8eaac47b6156",
+          "label": "fhfVWSlOYO",
+          "value": "QXX5jhqYJs"
+        }]
+      }],
+      "userGroups": [{
+        "group": "courtAdmin"
+      }, {
+        "group": "defence"
+      }],
+      "amended": true
+    }]
+  }],
+  "nowTypes": [{
+    "id": "3f8642ff-c000-4cc0-8ec8-7e30799adf3c",
+    "description": "wamYGceeKu",
+    "templateName": "ej39lEYexe",
+    "rank": 132127886,
+    "staticText": "N2QMLqREP4",
+    "welshStaticText": "XLUIlbKehn",
+    "priority": "1345319323",
+    "jurisdiction": "vbFPxtME1W",
+    "welshDescription": "Fdac2vtPF1",
+    "bilingualTemplateName": "7BQfpWUMxz",
+    "remotePrintingRequired": false
+  }],
+  "sharedResultLines": [{
+    "id": "fce71000-a548-4862-a265-8fd4322dbd79",
+    "caseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+    "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+    "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+    "sharedDate": "2018-02-02T06:12:29.464+02:59:01",
+    "orderedDate": "2015-09-17",
+    "level": "CASE",
+    "label": "rQgGthbhSA",
+    "rank": 1028752537,
+    "prompts": [{
+      "id": "58acaf80-121f-4679-b41c-c83a6d2fc556",
+      "label": "VDiJSFVuTm",
+      "value": "7SEebkjBPm"
+    }]
+  }, {
+    "id": "f21dd0d0-e4de-40b7-8ef7-e834f6377987",
+    "caseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+    "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+    "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+    "sharedDate": "2017-09-13T22:39:08.451-06:46:39",
+    "orderedDate": "2015-01-11",
+    "level": "DEFENDANT",
+    "label": "mVFeRYdLNP",
+    "rank": 1615217970,
+    "prompts": [{
+      "id": "ba2d45a9-dbd9-485a-9e9c-a8b4f546253a",
+      "label": "eOZYszPfXt",
+      "value": "u6F9VyoRd8"
+    }]
+  }, {
+    "id": "3d9ca3ef-1c7c-404b-9265-4a14be8fc4b1",
+    "caseId": "e11c1f07-fd5d-4cbd-8954-ac192fe8f006",
+    "defendantId": "d216f08a-eacb-4b91-b7d5-243aa627f9c3",
+    "offenceId": "644e6a75-d645-46e3-8cd6-b34528043f01",
+    "sharedDate": "2015-04-30T22:23:51.927-02:51:06",
+    "orderedDate": "2016-10-08",
+    "level": "OFFENCE",
+    "label": "IIL53SJ2oK",
+    "rank": 1955723004,
+    "prompts": [{
+      "id": "59902d78-e38a-4615-b066-8eaac47b6156",
+      "label": "v3ZhaAwi6d",
+      "value": "acBpCUgD2m"
+    }]
+  }],
+  "courtClerk": {
+    "firstName": "Prlmwmz14M",
+    "id": "0431d785-b441-4d22-bb38-aec6af4cc16d",
+    "lastName": "5ZLuRVfgUN"
   }
 }
