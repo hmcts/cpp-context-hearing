@@ -358,7 +358,11 @@ public class UseCases {
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
-        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(caseDefendantDetails), JsonObject.class);
+        String payloadAsString = mapper.writeValueAsString(caseDefendantDetails);
+        System.out.println("Public Event Payload: ");
+        System.out.println(payloadAsString);
+
+        final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
         sendMessage(
                 publicEvents.createProducer(),
@@ -377,6 +381,9 @@ public class UseCases {
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
         final String jsonValueAsString = mapper.writeValueAsString(updateOffencesForDefendantCommand);
+
+        System.out.println("Public Event Payload: ");
+        System.out.println(jsonValueAsString);
 
         final JsonObject jsonObject = mapper.readValue(jsonValueAsString, JsonObject.class);
 
