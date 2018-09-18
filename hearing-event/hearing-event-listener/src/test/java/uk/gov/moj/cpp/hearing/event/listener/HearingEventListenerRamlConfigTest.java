@@ -81,7 +81,7 @@ public class HearingEventListenerRamlConfigTest {
                 ProsecutionCounselAddedEventListener.class,
                 NowsRequestedEventListener.class,
                 NowsGeneratedEventListener.class,
-                CaseDefendantDetailsChangedEventListener.class,
+                CaseDefendantDetailsUpdatedEventListener.class,
                 UpdateOffencesForDefendantEventListener.class,
                 ChangeHearingDetailEventListener.class,
                 UpdateOffencesForDefendantEventListener.class,

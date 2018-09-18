@@ -69,7 +69,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 

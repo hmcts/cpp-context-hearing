@@ -47,7 +47,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ChangeCaseDefendantDetailsCommandHandlerTest {
+public class UpdateDefendantCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
@@ -70,7 +70,7 @@ public class ChangeCaseDefendantDetailsCommandHandlerTest {
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @InjectMocks
-    private ChangeCaseDefendantDetailsCommandHandler changeDefendantDetailsCommandHandler;
+    private UpdateDefendantCommandHandler changeDefendantDetailsCommandHandler;
 
     @Before
     public void setup() {
