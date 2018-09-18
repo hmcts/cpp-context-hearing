@@ -1,39 +1,30 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-@ApplicationScoped //TODO Will be covered by GPE-5565 story
+@ApplicationScoped
 public class DefendantAttendanceJPAMapper {
 
-    private DefendantAttendance toJPA(final Hearing hearing, final uk.gov.justice.json.schemas.core.DefendantAttendance pojo) {
+    private DefendantAttendance toJPA(final uk.gov.justice.json.schemas.core.DefendantAttendance pojo) {
         if (null == pojo) {
             return null;
         }
-        final DefendantAttendance defendantAttendance = new DefendantAttendance();
-        defendantAttendance.setHearingId(hearing.getId());
-        return defendantAttendance;
+        return new DefendantAttendance();
     }
 
-    private uk.gov.justice.json.schemas.core.DefendantAttendance fromJPA(final DefendantAttendance entity) {
-        if (null == entity) {
-            return null;
-        }
-        return uk.gov.justice.json.schemas.core.DefendantAttendance.defendantAttendance()
-                .build();
-    }
-
-    public List<DefendantAttendance> toJPA(Hearing hearing,
-                                           List<uk.gov.justice.json.schemas.core.DefendantAttendance> pojos) {
+    public List<DefendantAttendance> toJPA(List<uk.gov.justice.json.schemas.core.DefendantAttendance> pojos) {
         if (null == pojos) {
             return new ArrayList<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(this::toJPA).collect(Collectors.toList());
     }
 
     public List<uk.gov.justice.json.schemas.core.DefendantAttendance> fromJPA(
@@ -41,6 +32,25 @@ public class DefendantAttendanceJPAMapper {
         if (null == entities) {
             return new ArrayList<>();
         }
-        return entities.stream().map(this::fromJPA).collect(Collectors.toList());
+        return entities.stream()
+                .collect(groupingBy(DefendantAttendance::getDefendantId)).entrySet().stream()
+                .map(da -> createDefendantAttendance(da.getKey(), da.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    private uk.gov.justice.json.schemas.core.DefendantAttendance createDefendantAttendance(UUID key, List<DefendantAttendance> value) {
+        return uk.gov.justice.json.schemas.core.DefendantAttendance.defendantAttendance()
+                .withDefendantId(key)
+                .withAttendanceDays(value.stream()
+                        .map(this::createAttendanceDays)
+                        .collect(toList()))
+                .build();
+    }
+
+    private uk.gov.justice.json.schemas.core.AttendanceDay createAttendanceDays(DefendantAttendance v) {
+        return uk.gov.justice.json.schemas.core.AttendanceDay.attendanceDay()
+                .withDay(v.getDay())
+                .withIsInAttendance(v.getInAttendance())
+                .build();
     }
 }

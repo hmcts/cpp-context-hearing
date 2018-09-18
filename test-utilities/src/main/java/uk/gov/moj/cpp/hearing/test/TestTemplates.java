@@ -24,6 +24,7 @@ import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
+import uk.gov.justice.json.schemas.core.AttendanceDay;
 import uk.gov.justice.json.schemas.core.CourtDecision;
 import uk.gov.justice.json.schemas.core.DefendantRepresentation;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
@@ -37,10 +38,10 @@ import uk.gov.justice.json.schemas.core.Source;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
@@ -53,7 +54,6 @@ import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.Level;
 import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
@@ -87,7 +87,6 @@ import uk.gov.moj.cpp.hearing.nows.events.NowType;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.nows.events.Prompt;
 import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -993,5 +992,20 @@ public class TestTemplates {
         defendant.setLegalEntityDefendant(legalEntityDefendant(defaultArguments()).build());
 
         return defendant;
+    }
+
+    public static class UpdateDefendantAttendanceCommandTemplates {
+        private UpdateDefendantAttendanceCommandTemplates() {
+        }
+
+        public static UpdateDefendantAttendanceCommand updateDefendantAttendanceTemplate(final UUID hearingId, final UUID defendantId, final LocalDate attendanceDate, final Boolean isInAttendance) {
+            return UpdateDefendantAttendanceCommand.updateDefendantAttendanceCommand()
+                    .setHearingId(hearingId)
+                    .setDefendantId(defendantId)
+                    .setAttendanceDay(AttendanceDay.attendanceDay()
+                            .withDay(attendanceDate)
+                            .withIsInAttendance(isInAttendance)
+                            .build());
+        }
     }
 }

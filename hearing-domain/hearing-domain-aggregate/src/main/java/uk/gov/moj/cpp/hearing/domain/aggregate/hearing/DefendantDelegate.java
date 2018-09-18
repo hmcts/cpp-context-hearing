@@ -1,10 +1,22 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.justice.json.schemas.core.Defendant;
-import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import static java.util.Objects.nonNull;
 
+import uk.gov.justice.json.schemas.core.AttendanceDay;
+import uk.gov.justice.json.schemas.core.Defendant;
+import uk.gov.justice.json.schemas.core.DefendantAttendance;
+import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefendantDelegate implements Serializable {
@@ -42,6 +54,29 @@ public class DefendantDelegate implements Serializable {
 
     }
 
+    public void handleDefendantAttendanceUpdated(final DefendantAttendanceUpdated defendantAttendanceUpdated) {
+
+        List<DefendantAttendance> defendantAttendances = nonNull(this.momento.getHearing().getDefendantAttendance()) ? this.momento.getHearing().getDefendantAttendance() : new ArrayList<>() ;
+
+        Map<UUID, DefendantAttendance> defendantAttendanceMap = defendantAttendances.stream()
+                .collect(Collectors.toMap(DefendantAttendance::getDefendantId, Function.identity()));
+
+        DefendantAttendance defendantAttendance = defendantAttendanceMap.computeIfAbsent(defendantAttendanceUpdated.getDefendantId(), (id) -> DefendantAttendance.defendantAttendance()
+                .withDefendantId(id)
+                .withAttendanceDays(new ArrayList<>())
+                .build());
+
+        Map<LocalDate, AttendanceDay> localDateAttendanceDayMap = defendantAttendance.getAttendanceDays().stream().collect(Collectors.toMap(AttendanceDay::getDay, Function.identity()));
+
+        AttendanceDay attendanceDay = localDateAttendanceDayMap.computeIfAbsent(defendantAttendanceUpdated.getAttendanceDay().getDay(), (date) -> AttendanceDay.attendanceDay().withDay(date).build());
+
+        attendanceDay.setIsInAttendance(defendantAttendanceUpdated.getAttendanceDay().getIsInAttendance());
+
+        defendantAttendance.setAttendanceDays(new ArrayList<>(localDateAttendanceDayMap.values()));
+
+        this.momento.getHearing().setDefendantAttendance(new ArrayList<>(defendantAttendanceMap.values()));
+    }
+
     public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {
 
         if (!this.momento.isPublished()) {
@@ -51,6 +86,21 @@ public class DefendantDelegate implements Serializable {
             );
         }
 
+        return Stream.empty();
+    }
+
+    public Stream<Object> updateDefendantAttendance(final UpdateDefendantAttendanceCommand command) {
+
+        if (!this.momento.isPublished()) {
+            final AttendanceDay attendanceDay = AttendanceDay.attendanceDay()
+                    .withDay(command.getAttendanceDay().getDay())
+                    .withIsInAttendance(command.getAttendanceDay().getIsInAttendance())
+                    .build();
+            return Stream.of(DefendantAttendanceUpdated.defendantAttendanceUpdated()
+                    .setHearingId(command.getHearingId())
+                    .setDefendantId(command.getDefendantId())
+                    .setAttendanceDay(attendanceDay));
+        }
         return Stream.empty();
     }
 

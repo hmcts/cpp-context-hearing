@@ -33,6 +33,7 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -423,4 +424,15 @@ public class UseCases {
 
         return uploadSubscriptionsCommand;
     }
+
+    public static UpdateDefendantAttendanceCommand updateDefendantAttendance(final RequestSpecification requestSpec, final UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand) {
+
+        makeCommand(requestSpec, "hearing.update-defendant-attendance-on-hearing-day")
+                .ofType("application/vnd.hearing.update-defendant-attendance-on-hearing-day+json")
+                .withPayload(updateDefendantAttendanceCommand)
+                .executeSuccessfully();
+
+        return updateDefendantAttendanceCommand;
+    }
+
 }

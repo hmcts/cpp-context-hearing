@@ -11,6 +11,7 @@ import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
@@ -85,6 +86,10 @@ public class CommandHelpers {
 
     public static UploadSubscriptionsCommandHelper h(UploadSubscriptionsCommand uploadSubscriptionsCommand){
         return new UploadSubscriptionsCommandHelper(uploadSubscriptionsCommand);
+    }
+
+    public static UpdateDefendantAttendanceCommandHelper h(UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand){
+        return new UpdateDefendantAttendanceCommandHelper(updateDefendantAttendanceCommand);
     }
 
     public static NowsHelper h(List<Nows> nows){
@@ -404,5 +409,16 @@ public class CommandHelpers {
         public UploadSubscription getFirstSubscription(){
             return uploadSubscriptionsCommand.getSubscriptions().get(0);
         }
+    }
+
+    @SuppressWarnings("squid:S1068")
+    public static class UpdateDefendantAttendanceCommandHelper {
+
+        private UpdateDefendantAttendanceCommand defendantAttendanceCommand;
+
+        public UpdateDefendantAttendanceCommandHelper(UpdateDefendantAttendanceCommand defendantAttendanceCommand) {
+            this.defendantAttendanceCommand = defendantAttendanceCommand;
+        }
+
     }
 }

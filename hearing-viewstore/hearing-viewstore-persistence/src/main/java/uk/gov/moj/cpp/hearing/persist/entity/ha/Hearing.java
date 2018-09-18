@@ -62,6 +62,9 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private List<Target> targets = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private List<DefendantAttendance> defendantAttendance = new ArrayList<>();
+
     public Hearing() {
         //For JPA
     }
@@ -212,16 +215,13 @@ public class Hearing {
         return new ArrayList<>();
     }
 
-    public void setDefendantAttendance(List<DefendantAttendance> jpa) {
-        // Will be covered by GPE-5565 story
-        // TODO Auto-generated method stub
-        
+    public Hearing setDefendantAttendance(List<DefendantAttendance> defendantAttendance) {
+        this.defendantAttendance = defendantAttendance;
+        return this;
     }
 
     public List<DefendantAttendance> getDefendantAttendance() {
-        // Will be covered by GPE-5565 story
-        // TODO Auto-generated method stub
-        return new ArrayList<>();
+        return defendantAttendance;
     }
 
     public void setProsecutionCounsels(List<ProsecutionCounsel> jpa) {

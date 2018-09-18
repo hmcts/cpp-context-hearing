@@ -149,3 +149,12 @@ rule "Command - API - Action - hearing.upload-subscriptions"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.update-defendant-attendance-on-hearing-day"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-defendant-attendance-on-hearing-day");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
