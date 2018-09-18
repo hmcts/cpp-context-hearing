@@ -19,10 +19,10 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import java.util.UUID;
 
 @ServiceComponent(COMMAND_HANDLER)
-public class ChangeCaseDefendantDetailsCommandHandler extends AbstractCommandHandler {
+public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER =
-            LoggerFactory.getLogger(ChangeCaseDefendantDetailsCommandHandler.class.getName());
+            LoggerFactory.getLogger(UpdateDefendantCommandHandler.class.getName());
 
     @Handles("hearing.update-case-defendant-details")
     public void initiateCaseDefendantDetailsChange(final JsonEnvelope envelope) throws EventStreamException {

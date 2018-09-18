@@ -18,28 +18,11 @@ public class DefendantDelegate implements Serializable {
     }
 
     public void handleDefendantDetailsUpdated(final DefendantDetailsUpdated defendantDetailsUpdated) {
-
-        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().forEach(defendant -> {
-
-            if (matchDefendant(defendant, defendantDetailsUpdated)) {
-
-                final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantIn = defendantDetailsUpdated.getDefendant();
-
-                defendant.setAssociatedPersons(defendantIn.getAssociatedPersons())
-                        .setDefenceOrganisation(defendantIn.getDefenceOrganisation())
-                        .setLegalEntityDefendant(defendantIn.getLegalEntityDefendant())
-                        .setMitigation(defendantIn.getMitigation())
-                        .setMitigationWelsh(defendantIn.getMitigationWelsh())
-                        .setNumberOfPreviousConvictionsCited(defendantIn.getNumberOfPreviousConvictionsCited())
-                        .setPersonDefendant(defendantIn.getPersonDefendant())
-                        .setProsecutionAuthorityReference(defendantIn.getProsecutionAuthorityReference())
-                        .setWitnessStatement(defendantIn.getWitnessStatement())
-                        .setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh())
-                        .setProsecutionCaseId(defendantIn.getProsecutionCaseId());
-            }
-
-        }));
-
+        this.momento.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .filter(defendant -> matchDefendant(defendant, defendantDetailsUpdated))
+                .findFirst()
+                .ifPresent(defendant -> setDefendant(defendant, defendantDetailsUpdated.getDefendant()));
     }
 
     public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {
@@ -57,5 +40,19 @@ public class DefendantDelegate implements Serializable {
     private boolean matchDefendant(final Defendant defendant, final DefendantDetailsUpdated defendantDetailsUpdated) {
         return defendant.getId().equals(defendantDetailsUpdated.getDefendant().getId()) &&
                 defendant.getProsecutionCaseId().equals(defendantDetailsUpdated.getDefendant().getProsecutionCaseId());
+    }
+
+    private void setDefendant(final Defendant defendant, final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantIn) {
+        defendant.setAssociatedPersons(defendantIn.getAssociatedPersons())
+                .setDefenceOrganisation(defendantIn.getDefenceOrganisation())
+                .setLegalEntityDefendant(defendantIn.getLegalEntityDefendant())
+                .setMitigation(defendantIn.getMitigation())
+                .setMitigationWelsh(defendantIn.getMitigationWelsh())
+                .setNumberOfPreviousConvictionsCited(defendantIn.getNumberOfPreviousConvictionsCited())
+                .setPersonDefendant(defendantIn.getPersonDefendant())
+                .setProsecutionAuthorityReference(defendantIn.getProsecutionAuthorityReference())
+                .setWitnessStatement(defendantIn.getWitnessStatement())
+                .setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh())
+                .setProsecutionCaseId(defendantIn.getProsecutionCaseId());
     }
 }

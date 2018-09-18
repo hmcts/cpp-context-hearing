@@ -12,7 +12,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import org.apache.commons.lang3.SerializationException;
@@ -74,6 +74,7 @@ public class HearingAggregateTest {
 
     @Test
     public void initiateHearingOffencePlea() {
+
         final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
                 randomUUID(),
                 randomUUID(),
@@ -87,19 +88,18 @@ public class HearingAggregateTest {
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next()).build()
         );
-        HEARING_AGGREGATE.inheritPlea(command)
-                .map(InheritedPlea.class::cast)
-                .forEach(event -> {
-                    assertThat(event.getCaseId(), is(command.getCaseId()));
-                    assertThat(event.getDefendantId(), is(command.getDefendantId()));
-                    assertThat(event.getHearingId(), is(command.getHearingId()));
-                    assertThat(event.getOffenceId(), is(command.getOffenceId()));
-                    assertThat(event.getPleaDate(), is(command.getPleaDate()));
-                    assertThat(event.getValue(), is(command.getValue()));
-                    assertThat(event.getDelegatedPowers().getUserId(), is(command.getDelegatedPowers().getUserId()));
-                    assertThat(event.getDelegatedPowers().getFirstName(), is(command.getDelegatedPowers().getFirstName()));
-                    assertThat(event.getDelegatedPowers().getLastName(), is(command.getDelegatedPowers().getLastName()));
-                });
+
+        final InheritedPlea event = (InheritedPlea) HEARING_AGGREGATE.inheritPlea(command).collect(Collectors.toList()).get(0);
+
+        assertThat(event.getCaseId(), is(command.getCaseId()));
+        assertThat(event.getDefendantId(), is(command.getDefendantId()));
+        assertThat(event.getHearingId(), is(command.getHearingId()));
+        assertThat(event.getOffenceId(), is(command.getOffenceId()));
+        assertThat(event.getPleaDate(), is(command.getPleaDate()));
+        assertThat(event.getValue(), is(command.getValue()));
+        assertThat(event.getDelegatedPowers().getUserId(), is(command.getDelegatedPowers().getUserId()));
+        assertThat(event.getDelegatedPowers().getFirstName(), is(command.getDelegatedPowers().getFirstName()));
+        assertThat(event.getDelegatedPowers().getLastName(), is(command.getDelegatedPowers().getLastName()));
     }
 
     @Test
@@ -495,12 +495,5 @@ public class HearingAggregateTest {
 
         assertThat(stream.findFirst().orElse(null), is(expected));
 
-    }
-
-    private CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate(final UUID hearingId) {
-
-        return CaseDefendantDetailsWithHearingCommand.caseDefendantDetailsWithHearingCommand()
-                .setHearingId(hearingId)
-                .setDefendant(defendantTemplate());
     }
 }

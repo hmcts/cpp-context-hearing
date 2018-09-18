@@ -40,6 +40,7 @@ import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.external.domain.listing.StatementOfOffence;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
@@ -962,6 +963,13 @@ public class TestTemplates {
                     .setHearing(hearingOne.getHearing());
 
         }
+    }
+
+    public static CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate(final UUID hearingId) {
+
+        return CaseDefendantDetailsWithHearingCommand.caseDefendantDetailsWithHearingCommand()
+                .setHearingId(hearingId)
+                .setDefendant(defendantTemplate());
     }
 
     public static uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantTemplate() {

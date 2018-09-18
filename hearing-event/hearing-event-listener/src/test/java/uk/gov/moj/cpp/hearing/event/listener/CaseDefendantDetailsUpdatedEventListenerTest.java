@@ -32,10 +32,10 @@ import javax.json.JsonObject;
 import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseDefendantDetailsChangedEventListenerTest {
+public class CaseDefendantDetailsUpdatedEventListenerTest {
 
     @InjectMocks
-    private CaseDefendantDetailsChangedEventListener caseDefendantDetailsChangedEventListener;
+    private CaseDefendantDetailsUpdatedEventListener caseDefendantDetailsUpdatedEventListener;
 
     @Mock
     private DefendantRepository defendantRepository;
@@ -75,7 +75,7 @@ public class CaseDefendantDetailsChangedEventListenerTest {
 
         when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
 
-        caseDefendantDetailsChangedEventListener.defendantDetailsUpdated(envelope);
+        caseDefendantDetailsUpdatedEventListener.defendantDetailsUpdated(envelope);
 
         final ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
 
