@@ -10,7 +10,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.repository.HearingOutcomeRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.ResultLineRepository;
 
@@ -19,10 +18,6 @@ import javax.inject.Inject;
 @SuppressWarnings({"squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
-
-    @Inject
-    //TODO remove this
-    private HearingOutcomeRepository hearingOutcomeRepository;
 
     @Inject
     private ResultLineRepository resultLineRepository;
@@ -38,6 +33,7 @@ public class HearingEventListener {
 
     @Handles("hearing.draft-result-saved")
     public void draftResultSaved(final JsonEnvelope event) {
+
         final DraftResultSaved draftResultSaved = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultSaved.class);
 
         final Target targetIn = draftResultSaved.getTarget();

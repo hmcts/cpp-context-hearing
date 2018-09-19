@@ -61,26 +61,11 @@ public class ResultLine {
         //For JPA
     }
 
-    public ResultLine(Builder builder) {
-        this.id = builder.id;
-        this.target = builder.target;
-        this.delegatedPowers = builder.delegatedPowers;
-        this.isComplete = builder.isComplete;
-        this.isModified = builder.isModified;
-        this.level = builder.level;
-        this.orderedDate = builder.orderedDate;
-        this.prompts = builder.prompts;
-        this.resultDefinitionId = builder.resultDefinitionId;
-        this.resultLabel = builder.resultLabel;
-        this.sharedDate = builder.sharedDate;
-
-    }
-
     public UUID getId() {
         return id;
     }
 
-    public ResultLine setId(UUID id) {
+    public ResultLine setId(final UUID id) {
         this.id = id;
         return this;
     }
@@ -89,7 +74,7 @@ public class ResultLine {
         return target;
     }
 
-    public ResultLine setTarget(Target target) {
+    public ResultLine setTarget(final Target target) {
         this.target = target;
         return this;
     }
@@ -98,7 +83,7 @@ public class ResultLine {
         return delegatedPowers;
     }
 
-    public ResultLine setDelegatedPowers(DelegatedPowers delegatedPowers) {
+    public ResultLine setDelegatedPowers(final DelegatedPowers delegatedPowers) {
         this.delegatedPowers = delegatedPowers;
         return this;
     }
@@ -107,7 +92,7 @@ public class ResultLine {
         return isComplete;
     }
 
-    public ResultLine setComplete(Boolean complete) {
+    public ResultLine setComplete(final Boolean complete) {
         isComplete = complete;
         return this;
     }
@@ -116,7 +101,7 @@ public class ResultLine {
         return isModified;
     }
 
-    public ResultLine setModified(Boolean modified) {
+    public ResultLine setModified(final Boolean modified) {
         isModified = modified;
         return this;
     }
@@ -125,7 +110,7 @@ public class ResultLine {
         return level;
     }
 
-    public ResultLine setLevel(Level level) {
+    public ResultLine setLevel(final Level level) {
         this.level = level;
         return this;
     }
@@ -134,7 +119,7 @@ public class ResultLine {
         return orderedDate;
     }
 
-    public ResultLine setOrderedDate(LocalDate orderedDate) {
+    public ResultLine setOrderedDate(final LocalDate orderedDate) {
         this.orderedDate = orderedDate;
         return this;
     }
@@ -143,7 +128,7 @@ public class ResultLine {
         return prompts;
     }
 
-    public ResultLine setPrompts(List<Prompt> prompts) {
+    public ResultLine setPrompts(final List<Prompt> prompts) {
         this.prompts = prompts;
         return this;
     }
@@ -152,7 +137,7 @@ public class ResultLine {
         return resultDefinitionId;
     }
 
-    public ResultLine setResultDefinitionId(UUID resultDefinitionId) {
+    public ResultLine setResultDefinitionId(final UUID resultDefinitionId) {
         this.resultDefinitionId = resultDefinitionId;
         return this;
     }
@@ -161,7 +146,7 @@ public class ResultLine {
         return resultLabel;
     }
 
-    public ResultLine setResultLabel(String resultLabel) {
+    public ResultLine setResultLabel(final String resultLabel) {
         this.resultLabel = resultLabel;
         return this;
     }
@@ -170,7 +155,7 @@ public class ResultLine {
         return sharedDate;
     }
 
-    public ResultLine setSharedDate(LocalDate sharedDate) {
+    public ResultLine setSharedDate(final LocalDate sharedDate) {
         this.sharedDate = sharedDate;
         return this;
     }
@@ -179,84 +164,4 @@ public class ResultLine {
         return new ResultLine();
     }
 
-    //TODO delete this Builder
-    public static class Builder {
-        private UUID id;
-        private Target target;
-        private DelegatedPowers delegatedPowers;
-        private Boolean isComplete;
-        private Boolean isModified;
-        private Level level;
-        private LocalDate orderedDate;
-        private List<Prompt> prompts;
-        private UUID resultDefinitionId;
-        private String resultLabel;
-        private LocalDate sharedDate;
-
-        protected Builder() {
-        }
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withTarget(Target target) {
-            this.target = target;
-            return this;
-        }
-
-        public Builder withDelegatedPowers(DelegatedPowers delegatedPowers) {
-            this.delegatedPowers = delegatedPowers;
-            return this;
-        }
-
-        public Builder withIsComplete(Boolean isComplete) {
-            this.isComplete = isComplete;
-            return this;
-        }
-
-        public Builder withisModified(Boolean isModified) {
-            this.isModified = isModified;
-            return this;
-        }
-
-        public Builder withLevel(Level level) {
-            this.level = level;
-            return this;
-        }
-
-        public Builder withOrderedDate(LocalDate orderedDate) {
-            this.orderedDate = orderedDate;
-            return this;
-        }
-
-        public Builder withPrompts(List<Prompt> prompts) {
-            this.prompts = prompts;
-            return this;
-        }
-
-        public Builder withResultDefinitionId(UUID resultDefinitionId) {
-            this.resultDefinitionId = resultDefinitionId;
-            return this;
-        }
-
-        public Builder withResultLabel(String resultLabel) {
-            this.resultLabel = resultLabel;
-            return this;
-        }
-
-        public Builder withSharedDate(LocalDate sharedDate) {
-            this.sharedDate = sharedDate;
-            return this;
-        }
-
-        public ResultLine build() {
-            return new ResultLine(this);
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
 }

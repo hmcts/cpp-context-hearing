@@ -24,14 +24,12 @@ public class Target {
     @JoinColumn(name = "hearing_id")
     private Hearing hearing;
 
-    //TODO determine whether this reference should be resolved
     @Column(name = "defendant_id")
     private UUID defendantId;
 
     @Column(name = "draft_result")
     private String draftResult;
 
-    //TODO determine whether this reference should be resolved
     @Column(name = "offence_id")
     private UUID offenceId;
 
@@ -40,14 +38,6 @@ public class Target {
 
     public Target() {
         //For JPA
-    }
-
-    public Target(Builder builder) {
-        this.id = builder.id;
-        this.hearing = builder.hearing;
-        this.defendantId = builder.defendantId;
-        this.offenceId = builder.offenceId;
-        this.draftResult = builder.draftResult;
     }
 
     public UUID getId() {
@@ -63,7 +53,7 @@ public class Target {
         return this;
     }
 
-    public Target setHearing(Hearing hearing) {
+    public Target setHearing(final Hearing hearing) {
         this.hearing = hearing;
         return this;
     }
@@ -72,7 +62,7 @@ public class Target {
         return defendantId;
     }
 
-    public Target setDefendantId(UUID defendantId) {
+    public Target setDefendantId(final UUID defendantId) {
         this.defendantId = defendantId;
         return this;
     }
@@ -81,7 +71,7 @@ public class Target {
         return draftResult;
     }
 
-    public Target setDraftResult(String draftResult) {
+    public Target setDraftResult(final String draftResult) {
         this.draftResult = draftResult;
         return this;
     }
@@ -90,7 +80,7 @@ public class Target {
         return offenceId;
     }
 
-    public Target setOffenceId(UUID offenceId) {
+    public Target setOffenceId(final UUID offenceId) {
         this.offenceId = offenceId;
         return this;
     }
@@ -99,58 +89,12 @@ public class Target {
         return resultLines;
     }
 
-    public Target setResultLines(List<ResultLine> resultLines) {
+    public Target setResultLines(final List<ResultLine> resultLines) {
         this.resultLines = resultLines;
         return this;
     }
 
     public static Target target() {
         return new Target();
-    }
-
-    //TODO remove this builder
-    public static class Builder {
-        private UUID id;
-        private Hearing hearing;
-        private UUID defendantId;
-        private String draftResult;
-        private UUID offenceId;
-
-        protected Builder() {
-        }
-
-        public Builder withId(UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withHearing(Hearing hearing) {
-            this.hearing = hearing;
-            return this;
-        }
-
-        public Builder withDefendantId(UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-
-        public Builder withOffenceId(UUID offenceId) {
-            this.offenceId = offenceId;
-            return this;
-        }
-
-        public Builder withDraftResult(String draftResult) {
-            this.draftResult = draftResult;
-            return this;
-        }
-
-        public Target build() {
-            return new Target(this);
-        }
-
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 }

@@ -10,7 +10,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,12 +22,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.Prompt;
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
@@ -34,10 +40,12 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -69,6 +77,9 @@ public class HearingServiceTest {
 
     @Mock
     private HearingDayJPAMapper hearingDayJPAMapper;
+
+    @Mock
+    private TargetJPAMapper targetJPAMapper;
 
     @Mock
     private NowsRepository nowsRepository;
@@ -326,6 +337,79 @@ public class HearingServiceTest {
         final JsonObject response = caseHearingService.getSubscriptions(referenceDate, nowTypeId);
 
         assertThat(response.toString(), is("{\"subscriptions\":[]}"));
+    }
+
+    @Test
+    public void shouldReturnEmptyResponseWhenTargetNotAdded() {
+
+        final Hearing hearing = new Hearing();
+
+        hearing.setId(randomUUID());
+
+        when(hearingRepository.findBy(Mockito.any())).thenReturn(hearing);
+
+        when(targetJPAMapper.fromJPA(Mockito.anyList())).thenReturn(new ArrayList());
+
+        final TargetListResponse targetListResponse = caseHearingService.getTargets(hearing.getId());
+
+        assertThat(targetListResponse.getTargets().isEmpty(), is(true));
+    }
+
+
+    @Test
+    public void shouldReturnResponseWhenTargetIsAdded() {
+
+        final Hearing hearing = new Hearing();
+
+        hearing.setId(randomUUID());
+        hearing.setTargets(asList(new Target()));
+
+        final List<uk.gov.justice.json.schemas.core.Target> targets = asList(
+                targetTemplate(),
+                targetTemplate());
+
+        when(hearingRepository.findBy(Mockito.any())).thenReturn(hearing);
+
+        when(targetJPAMapper.fromJPA(Mockito.anyList())).thenReturn(targets);
+
+        final TargetListResponse targetListResponse = caseHearingService.getTargets(hearing.getId());
+
+        final uk.gov.justice.json.schemas.core.Target targetIn = targets.get(0);
+
+        final ResultLine resultLine = targetIn.getResultLines().get(0);
+
+        final Prompt prompt = resultLine.getPrompts().get(0);
+
+        assertThat(targetListResponse, isBean(TargetListResponse.class)
+                .with(t -> t.getTargets().isEmpty(), is(false))
+                .with(TargetListResponse::getTargets, first(isBean(uk.gov.justice.json.schemas.core.Target.class)
+                        .with(uk.gov.justice.json.schemas.core.Target::getTargetId, is(targetIn.getTargetId()))
+                        .with(uk.gov.justice.json.schemas.core.Target::getDefendantId, is(targetIn.getDefendantId()))
+                        .with(uk.gov.justice.json.schemas.core.Target::getDraftResult, is(targetIn.getDraftResult()))
+                        .with(uk.gov.justice.json.schemas.core.Target::getHearingId, is(targetIn.getHearingId()))
+                        .with(uk.gov.justice.json.schemas.core.Target::getOffenceId, is(targetIn.getOffenceId()))
+                        .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
+                        .with(uk.gov.justice.json.schemas.core.Target::getResultLines, first(isBean(ResultLine.class)
+                                .with(ResultLine::getIsModified, is(resultLine.getIsModified()))
+                                .with(ResultLine::getIsComplete, is(resultLine.getIsComplete()))
+                                .with(ResultLine::getLevel, is(resultLine.getLevel()))
+                                .with(ResultLine::getResultLineId, is(resultLine.getResultLineId()))
+                                .with(ResultLine::getResultLabel, is(resultLine.getResultLabel()))
+                                .with(ResultLine::getSharedDate, is(resultLine.getSharedDate()))
+                                .with(ResultLine::getOrderedDate, is(resultLine.getOrderedDate()))
+                                .with(ResultLine::getDelegatedPowers, isBean(DelegatedPowers.class)
+                                        .with(DelegatedPowers::getUserId, is(resultLine.getDelegatedPowers().getUserId()))
+                                        .with(DelegatedPowers::getFirstName, is(resultLine.getDelegatedPowers().getFirstName()))
+                                        .with(DelegatedPowers::getLastName, is(resultLine.getDelegatedPowers().getLastName())))
+                                .with(r -> r.getPrompts().size(), is(resultLine.getPrompts().size()))
+                                .with(ResultLine::getPrompts, first(isBean(Prompt.class)
+                                        .with(Prompt::getId, is(prompt.getId()))
+                                        .with(Prompt::getLabel, is(prompt.getLabel()))
+                                        .with(Prompt::getFixedListCode, is(prompt.getFixedListCode()))
+                                        .with(Prompt::getValue, is(prompt.getValue()))
+                                        .with(Prompt::getWelshValue, is(prompt.getWelshValue()))
+                                )))))));
+
     }
 
 

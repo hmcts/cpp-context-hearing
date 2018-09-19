@@ -13,6 +13,7 @@ import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
@@ -24,6 +25,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListRes
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseDefendant;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseHearing;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Material;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowResult;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Nows;
@@ -76,6 +78,9 @@ public class HearingService {
 
     @Inject
     private HearingDayJPAMapper hearingDayJPAMapper;
+
+    @Inject
+    private TargetJPAMapper targetJPAMapper;
 
     @Inject
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
@@ -178,6 +183,13 @@ public class HearingService {
 
             return Json.createObjectBuilder().build();
         }
+    }
+
+    @Transactional
+    public TargetListResponse getTargets(UUID hearingId) {
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+        return TargetListResponse.builder()
+                .withTargets(targetJPAMapper.fromJPA(hearing.getTargets())).build();
     }
 
     private List<NowResult> populateNowResult(List<NowsResult> nowResult) {

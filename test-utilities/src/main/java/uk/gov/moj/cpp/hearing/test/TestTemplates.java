@@ -13,6 +13,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
@@ -88,6 +89,7 @@ import uk.gov.moj.cpp.hearing.nows.events.NowType;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.nows.events.Prompt;
 import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -289,6 +291,40 @@ public class TestTemplates {
         return new SaveDraftResultCommand(target, null);
     }
 
+    public static Target targetTemplate() {
+        return Target.target()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withDraftResult(STRING.next())
+                .withOffenceId(randomUUID())
+                .withTargetId(randomUUID())
+                .withResultLines(asList(
+                        ResultLine.resultLine()
+                                .withDelegatedPowers(
+                                        DelegatedPowers.delegatedPowers()
+                                                .withUserId(randomUUID())
+                                                .withLastName(STRING.next())
+                                                .withFirstName(STRING.next())
+                                                .build())
+                                .withIsComplete(BOOLEAN.next())
+                                .withIsModified(BOOLEAN.next())
+                                .withLevel(randomEnum(uk.gov.justice.json.schemas.core.Level.class).next())
+                                .withOrderedDate(PAST_LOCAL_DATE.next())
+                                .withResultLineId(randomUUID())
+                                .withResultLabel(STRING.next())
+                                .withSharedDate(PAST_LOCAL_DATE.next())
+                                .withResultDefinitionId(randomUUID())
+                                .withPrompts(asList(
+                                        uk.gov.justice.json.schemas.core.Prompt.prompt()
+                                                .withFixedListCode(STRING.next())
+                                                .withId(randomUUID())
+                                                .withLabel(STRING.next())
+                                                .withValue(STRING.next())
+                                                .withWelshValue(STRING.next())
+                                                .build()))
+                                .build()))
+                .build();
+    }
     public static class ShareResultsCommandTemplates {
         private ShareResultsCommandTemplates() {
         }

@@ -58,6 +58,7 @@ public class DefendantDelegate implements Serializable {
         defendantAttendance.setAttendanceDays(new ArrayList<>(localDateAttendanceDayMap.values()));
 
         this.momento.getHearing().setDefendantAttendance(new ArrayList<>(defendantAttendanceMap.values()));
+
     }
 
     public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {

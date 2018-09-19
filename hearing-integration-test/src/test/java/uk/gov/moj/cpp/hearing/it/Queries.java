@@ -17,6 +17,7 @@ import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import javax.json.Json;
@@ -80,7 +81,29 @@ public class Queries {
         }
     }
 
-    private static void sleep() {
+    public static void getDraftResultsPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<TargetListResponse> resultMatcher) {
+
+        final RequestParams requestParams = requestParams(getURL("hearing.get-draft-result", hearingId), "application/vnd.hearing.get-draft-result+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
+
+        final LocalDateTime expiryTime = LocalDateTime.now().plusSeconds(timeout);
+
+        ResponseData responseData = makeRequest(requestParams);
+
+        while (!expectedConditions.matches(responseData) && LocalDateTime.now().isBefore(expiryTime)) {
+            sleep();
+            responseData = makeRequest(requestParams);
+        }
+
+        if (!expectedConditions.matches(responseData)) {
+            assertThat(responseData, expectedConditions);
+        }
+
+    }
+        private static void sleep() {
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {

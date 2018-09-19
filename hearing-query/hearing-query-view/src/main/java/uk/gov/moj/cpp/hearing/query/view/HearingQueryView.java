@@ -8,20 +8,16 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome;
-import uk.gov.moj.cpp.hearing.query.view.convertor.HearingOutcomesConverter;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
-import uk.gov.moj.cpp.hearing.query.view.service.HearingOutcomeService;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
+import javax.inject.Inject;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.inject.Inject;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})
@@ -38,13 +34,7 @@ public class HearingQueryView {
     private HearingService hearingService;
 
     @Inject
-    private HearingOutcomeService hearingOutcomeService;
-
-    @Inject
     private Enveloper enveloper;
-
-    @Inject
-    private HearingOutcomesConverter hearingOutcomesConverter;
 
     private static final String FIELD_QUERY = "q";
 
@@ -71,12 +61,9 @@ public class HearingQueryView {
 
     @Handles("hearing.get-draft-result")
     public JsonEnvelope getDraftResult(final JsonEnvelope envelope) {
-        final UUID hearingId = UUID.fromString(envelope
-                .payloadAsJsonObject()
-                .getString(FIELD_HEARING_ID));
-        final List<HearingOutcome> hearingOutcomes =
-                hearingOutcomeService.getHearingOutcomeByHearingId(hearingId);
-        return enveloper.withMetadataFrom(envelope, "hearing.get-draft-result-response").apply(hearingOutcomesConverter.convert(hearingOutcomes));
+        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final TargetListResponse targetListResponse = hearingService.getTargets(hearingId);
+        return enveloper.withMetadataFrom(envelope, "hearing.get-draft-result").apply(targetListResponse);
     }
 
     @Handles("hearing.get.nows")
