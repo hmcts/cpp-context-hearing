@@ -44,6 +44,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
         publicEventTopic.expectNoneWithin(10000);
     }
 
+    //TODO - 5480
     @Test
     public void processSendingSheetComplete_shouldProduceMagsPleaInformation_givenInitiatedHearing() throws IOException {
 

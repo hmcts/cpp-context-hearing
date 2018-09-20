@@ -59,7 +59,6 @@ public class UpdateResultLineStatusDelegateTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Ignore("GPE-5480 - share results story will address this")
     @Test
     public void updateResultLineStatus() {
 

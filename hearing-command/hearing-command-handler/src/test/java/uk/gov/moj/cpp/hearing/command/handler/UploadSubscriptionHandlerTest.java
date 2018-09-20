@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -18,7 +18,15 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -34,19 +42,10 @@ import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.SubscriptionAggregate;
 import uk.gov.moj.cpp.hearing.subscription.events.SubscriptionsUploaded;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UploadSubscriptionHandlerTest {
@@ -104,7 +103,7 @@ public class UploadSubscriptionHandlerTest {
         properties.putIfAbsent(STRING.next(), STRING.next());
         properties.putIfAbsent(STRING.next(), STRING.next());
 
-        final List<UUID> courtCentreIds = Arrays.asList(randomUUID(), randomUUID());
+        final List<UUID> courtCentreIds = asList(randomUUID(), randomUUID());
 
         final List<UUID> nowTypeIds = asList(randomUUID(), randomUUID());
 

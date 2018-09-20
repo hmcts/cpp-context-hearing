@@ -123,7 +123,7 @@ public class ShareResultsCommandHandlerTest {
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
                 .withStatus(STRING.next())
-//TODO:GPE-5363                .withDefendantIds(singletonList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
+//TODO:GPE-5480                .withDefendantIds(singletonList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
                 .build();
         nowsVariantsSavedEvent = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
                 .setHearingId(initiateHearingCommand.getHearing().getId())
@@ -173,12 +173,12 @@ public class ShareResultsCommandHandlerTest {
                         .with(Target::getOffenceId, is(targetIn.getOffenceId()))
                         .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
                         .with(Target::getResultLines, first(isBean(ResultLine.class)
-                                //TODO add more fields
+                                //TODO 5480 add more fields
                                 .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
                                 .with(ResultLine::getOrderedDate, is(resultLineIn.getOrderedDate()))
                                 .with(r -> r.getPrompts().size(), is(resultLineIn.getPrompts().size()))
                                 .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                        //TODO add more fields
+                                        //TODO 5480 add more fields
                                         .with(Prompt::getId, is(promptIn.getId()))
                                         .with(Prompt::getLabel, is(promptIn.getLabel()))
                                 ))

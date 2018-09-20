@@ -31,6 +31,7 @@ public class HearingAdjournIT extends AbstractIT {
     private static final String DD_MM_YYYY = "dd/MM/yyyy";
     private static final String YYYY_MM_DD = "yyyy-MM-dd";
 
+    //TODO - 5480
     @Test
     public void shouldRaiseHearingAdjournedEvent() {
 

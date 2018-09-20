@@ -330,55 +330,17 @@ public class TestTemplates {
 
         public static ShareResultsCommand basicShareResultsCommandTemplate() {
 
-            return ShareResultsCommand.builder()
-                    .withCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
+            return ShareResultsCommand.shareResultsCommand()
+                    .setCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
                             .withId(randomUUID())
                             .withFirstName(STRING.next())
                             .withLastName(STRING.next())
-                            .build())
-                    .build();
+                            .build());
+
         }
 
         public static ShareResultsCommand standardShareResultsCommandTemplate(final UUID hearingId) {
             return basicShareResultsCommandTemplate().setHearingId(hearingId);
-        }
-
-        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId, LocalDate orderedDate) {
-            return completedResultLineTemplate(defendantId, offenceId, caseId, resultLineId, randomUUID(), orderedDate);
-        }
-
-        public static CompletedResultLine completedResultLineTemplate(final UUID defendantId, final UUID offenceId, final UUID caseId, final UUID resultLineId, final UUID resultDefinitionId, LocalDate orderedDate) {
-            return CompletedResultLine.builder()
-                    .withId(resultLineId)
-                    .withResultDefinitionId(resultDefinitionId)
-                    .withDefendantId(defendantId)
-                    .withOffenceId(offenceId)
-                    .withOrderedDate(orderedDate)
-                    .withCaseId(caseId)
-                    .withLevel(values(Level.values()).next())
-                    .withResultLabel(STRING.next())
-                    .withResultPrompts(asList(
-                            resultPromptTemplate(randomUUID(), STRING.next(), STRING.next()),
-                            resultPromptTemplate(randomUUID(), STRING.next(), STRING.next())
-                    ))
-                    .build();
-        }
-
-        public static ResultPrompt resultPromptTemplate(UUID id, String label, String value) {
-            return ResultPrompt.builder()
-                    .withId(id)
-                    .withLabel(label)
-                    .withValue(value)
-                    .build();
-        }
-
-        public static UncompletedResultLine uncompletedResultLineTemplate(final UUID defendantId) {
-            return UncompletedResultLine.builder()
-                    .withId(randomUUID())
-                    .withResultDefinitionId(randomUUID())
-                    .withDefendantId(defendantId)
-                    .withOrderedDate(LocalDate.now())
-                    .build();
         }
     }
 

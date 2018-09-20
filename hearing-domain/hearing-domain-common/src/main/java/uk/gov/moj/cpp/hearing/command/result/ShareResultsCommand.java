@@ -16,6 +16,9 @@ public final class ShareResultsCommand implements Serializable {
 
     private uk.gov.justice.json.schemas.core.CourtClerk courtClerk;
 
+    public ShareResultsCommand() {
+    }
+
     @JsonCreator
     private ShareResultsCommand(
             @JsonProperty("hearingId") final UUID hearingId,
@@ -37,34 +40,12 @@ public final class ShareResultsCommand implements Serializable {
         return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public ShareResultsCommand setHearingId(UUID hearingId) {
         this.hearingId = hearingId;
         return this;
     }
 
-    //TODO GPE-5480 delete this builder
-    public static final class Builder {
-
-        private UUID hearingId;
-
-        private uk.gov.justice.json.schemas.core.CourtClerk courtClerk;
-
-        public Builder withHearingId(final UUID hearingId) {
-            this.hearingId = hearingId;
-            return this;
-        }
-
-        public Builder withCourtClerk(final CourtClerk courtClerk) {
-            this.courtClerk = courtClerk;
-            return this;
-        }
-
-        public ShareResultsCommand build() {
-            return new ShareResultsCommand(hearingId, courtClerk);
-        }
+    public static ShareResultsCommand shareResultsCommand(){
+        return new ShareResultsCommand();
     }
 }
