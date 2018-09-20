@@ -6,14 +6,16 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ResultLineJPAMapper {
 
     private PromptJPAMapper promptJPAMapper;
+
     private DelegatedPowersJPAMapper delegatedPowersJPAMapper;
 
     @Inject
@@ -46,11 +48,11 @@ public class ResultLineJPAMapper {
         return resultLine;
     }
 
-    public List<ResultLine> toJPA(final Target target, final List<uk.gov.justice.json.schemas.core.ResultLine> pojos) {
+    public Set<ResultLine> toJPA(final Target target, final List<uk.gov.justice.json.schemas.core.ResultLine> pojos) {
         if (pojos == null) {
-            return Collections.emptyList();
+            return new HashSet<>();
         } else {
-            return pojos.stream().map(pojo -> toJPA(target, pojo)).collect(Collectors.toList());
+            return pojos.stream().map(pojo -> toJPA(target, pojo)).collect(Collectors.toSet());
         }
     }
 
@@ -72,7 +74,7 @@ public class ResultLineJPAMapper {
                 .build();
     }
 
-    public List<uk.gov.justice.json.schemas.core.ResultLine> fromJPA(List<ResultLine> entities) {
+    public List<uk.gov.justice.json.schemas.core.ResultLine> fromJPA(Set<ResultLine> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

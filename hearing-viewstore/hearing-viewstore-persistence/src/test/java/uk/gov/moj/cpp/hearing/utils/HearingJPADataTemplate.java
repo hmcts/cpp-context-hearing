@@ -63,15 +63,15 @@ public final class HearingJPADataTemplate {
 
                     defendant.setLegalEntityOrganisation(legalEntityOrganisation);
                     defendant.setPersonDefendant(personDefendant);
-                    defendant.setProsecutionCaseId(hearingEntity.getProsecutionCases().get(0).getId().getId());
+                    defendant.setProsecutionCaseId(hearingEntity.getProsecutionCases().iterator().next().getId().getId());
 
-                    hearingEntity.getProsecutionCases().get(0).getDefendants().add(defendant);
+                    hearingEntity.getProsecutionCases().iterator().next().getDefendants().add(defendant);
                 });
         //
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson.class)
                 .forEach(associatedPerson -> {
                     associatedPerson.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
-                    hearingEntity.getProsecutionCases().get(0).getDefendants().get(0).getAssociatedPersons().add(associatedPerson);
+                    hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next().getAssociatedPersons().add(associatedPerson);
                 });
         //
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.Offence.class)
@@ -93,7 +93,7 @@ public final class HearingJPADataTemplate {
 
                     offence.setPlea(plea);
 
-                    hearingEntity.getProsecutionCases().get(0).getDefendants().get(0).getOffences().add(offence);
+                    hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().add(offence);
                 });
         //
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)

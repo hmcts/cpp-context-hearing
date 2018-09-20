@@ -47,24 +47,4 @@ public class DelegatedPowers {
     public static DelegatedPowers delegatedPowers() {
         return new DelegatedPowers();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final DelegatedPowers that = (DelegatedPowers) o;
-        return Objects.equals(delegatedPowersUserId, that.delegatedPowersUserId) &&
-                Objects.equals(delegatedPowersFirstName, that.delegatedPowersFirstName) &&
-                Objects.equals(delegatedPowersLastName, that.delegatedPowersLastName);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(delegatedPowersUserId, delegatedPowersFirstName, delegatedPowersLastName);
-    }
 }

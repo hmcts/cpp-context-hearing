@@ -6,7 +6,9 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -51,14 +53,14 @@ public class TargetJPAMapper {
                 .build();
     }
 
-    public List<Target> toJPA(Hearing hearing, List<uk.gov.justice.json.schemas.core.Target> pojos) {
+    public Set<Target> toJPA(Hearing hearing, List<uk.gov.justice.json.schemas.core.Target> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toSet());
     }
 
-    public List<uk.gov.justice.json.schemas.core.Target> fromJPA(List<Target> entities) {
+    public List<uk.gov.justice.json.schemas.core.Target> fromJPA(Set<Target> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

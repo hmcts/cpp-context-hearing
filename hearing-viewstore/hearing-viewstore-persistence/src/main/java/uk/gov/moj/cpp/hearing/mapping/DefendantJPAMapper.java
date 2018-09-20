@@ -11,7 +11,9 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -73,11 +75,11 @@ public class DefendantJPAMapper {
         return defendant;
     }
 
-    public List<Defendant> toJPA(Hearing hearing, final ProsecutionCase prosecutionCase, final List<uk.gov.justice.json.schemas.core.Defendant> pojos) {
+    public Set<Defendant> toJPA(Hearing hearing, final ProsecutionCase prosecutionCase, final List<uk.gov.justice.json.schemas.core.Defendant> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, prosecutionCase, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, prosecutionCase, pojo)).collect(Collectors.toSet());
     }
 
     uk.gov.justice.json.schemas.core.Defendant fromJPA(final UUID prosecutionCaseId, final Defendant pojo) {
@@ -103,7 +105,7 @@ public class DefendantJPAMapper {
                 .build();
     }
 
-    public List<uk.gov.justice.json.schemas.core.Defendant> fromJPA(final UUID prosecutionCaseId, final List<Defendant> entities) {
+    public List<uk.gov.justice.json.schemas.core.Defendant> fromJPA(final UUID prosecutionCaseId, final Set<Defendant> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

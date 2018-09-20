@@ -9,8 +9,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -34,7 +35,7 @@ public class Target {
     private UUID offenceId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "target", orphanRemoval = true)
-    private List<ResultLine> resultLines = new ArrayList<>();
+    private Set<ResultLine> resultLines = new HashSet<>();
 
     public Target() {
         //For JPA
@@ -85,16 +86,34 @@ public class Target {
         return this;
     }
 
-    public List<ResultLine> getResultLines() {
+    public Set<ResultLine> getResultLines() {
         return resultLines;
     }
 
-    public Target setResultLines(final List<ResultLine> resultLines) {
+    public Target setResultLines(Set<ResultLine> resultLines) {
+
         this.resultLines = resultLines;
         return this;
     }
 
     public static Target target() {
         return new Target();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Target target = (Target) o;
+        return Objects.equals(id, target.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -15,7 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -46,7 +47,7 @@ public class ResultLine {
     private LocalDate orderedDate;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "resultLine", orphanRemoval = true)
-    private List<Prompt> prompts;
+    private Set<Prompt> prompts;
 
     @Column(name = "result_definition_id")
     private UUID resultDefinitionId;
@@ -124,11 +125,11 @@ public class ResultLine {
         return this;
     }
 
-    public List<Prompt> getPrompts() {
+    public Set<Prompt> getPrompts() {
         return prompts;
     }
 
-    public ResultLine setPrompts(final List<Prompt> prompts) {
+    public ResultLine setPrompts(Set<Prompt> prompts) {
         this.prompts = prompts;
         return this;
     }
@@ -164,4 +165,21 @@ public class ResultLine {
         return new ResultLine();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ResultLine that = (ResultLine) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
+    }
 }

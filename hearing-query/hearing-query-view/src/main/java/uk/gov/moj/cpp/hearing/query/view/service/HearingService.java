@@ -46,7 +46,9 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -125,8 +127,8 @@ public class HearingService {
                 .withId(now.getId().toString())
                 .withNowsTypeId(now.getNowsTypeId().toString())
                 .withMaterial(populateMaterial(now.getMaterial()))
-
-                .build()).collect(toList());
+                .build())
+                .collect(toList());
         return NowsResponse.builder().withNows(nowsList).build();
     }
 
@@ -137,7 +139,7 @@ public class HearingService {
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
         NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(UUID.fromString(q));
         if (nowsMaterial != null) {
-            nowsMaterial.getUserGroups().forEach(jsonArrayBuilder::add);
+            nowsMaterial.getUserGroups().stream().sorted().collect(Collectors.toList()).forEach(jsonArrayBuilder::add);
         } else {
             LOGGER.info("No user groups found with materialId='{}'", q);
         }
@@ -192,20 +194,25 @@ public class HearingService {
                 .withTargets(targetJPAMapper.fromJPA(hearing.getTargets())).build();
     }
 
-    private List<NowResult> populateNowResult(List<NowsResult> nowResult) {
-        return nowResult.stream().map(result -> NowResult.builder()
-                .withSequence(result.getSequence())
-                .withSharedResultId(result.getSharedResultId().toString())
-                .build()).collect(toList());
+
+    private List<NowResult> populateNowResult(Set<NowsResult> nowResult) {
+        return nowResult.stream()
+                .sorted(Comparator.comparing(NowsResult::getSequence))
+                .map(result -> NowResult.builder()
+                        .withSequence(result.getSequence())
+                        .withSharedResultId(result.getSharedResultId().toString())
+                        .build()
+                )
+                .collect(toList());
     }
 
-    private List<Material> populateMaterial(List<NowsMaterial> nowsMaterials) {
+    private List<Material> populateMaterial(Set<NowsMaterial> nowsMaterials) {
         return nowsMaterials.stream().map(nowsMaterial -> Material.builder()
                 .withId(nowsMaterial.getId().toString())
                 .withStatus(nowsMaterial.getStatus())
                 .withLanguage(nowsMaterial.getLanguage())
                 .withNowResult(populateNowResult(nowsMaterial.getNowResult()))
-                .withUserGroups(nowsMaterial.getUserGroups()).build()).collect(toList());
+                .withUserGroups(new ArrayList<>(nowsMaterial.getUserGroups())).build()).collect(toList());
     }
 
     private Function<Subscription, uk.gov.moj.cpp.hearing.domain.notification.Subscription> populateHearing() {

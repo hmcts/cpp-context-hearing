@@ -13,6 +13,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOO
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -86,12 +87,12 @@ public class VerdictUpdateEventListenerTest {
         offence.setId(new HearingSnapshotKey(offenceId, hearingId));
 
         final Defendant defendant = new Defendant();
-        defendant.setOffences(singletonList(offence));
+        defendant.setOffences(asSet(offence));
 
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
-        prosecutionCase.setDefendants(singletonList(defendant));
+        prosecutionCase.setDefendants(asSet(defendant));
 
-        hearing.setProsecutionCases(singletonList(prosecutionCase));
+        hearing.setProsecutionCases(asSet(prosecutionCase));
 
         when(this.hearingRepository.findBy(hearingId)).thenReturn(hearing);
 
@@ -100,7 +101,7 @@ public class VerdictUpdateEventListenerTest {
 
         verify(this.hearingRepository).save(hearing);
 
-        final Offence result = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        final Offence result = hearing.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().iterator().next();
 
         assertThat(result.getId().getHearingId(), is(verdictUpsert.getHearingId()));
         assertThat(result.getId().getId(), is(verdictUpsert.getOffenceId()));

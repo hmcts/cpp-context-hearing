@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ha_hearing_event")
@@ -124,7 +124,24 @@ public class HearingEvent {
         return this;
     }
 
-    public static HearingEvent hearingEvent(){
+    public static HearingEvent hearingEvent() {
         return new HearingEvent();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final HearingEvent that = (HearingEvent) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

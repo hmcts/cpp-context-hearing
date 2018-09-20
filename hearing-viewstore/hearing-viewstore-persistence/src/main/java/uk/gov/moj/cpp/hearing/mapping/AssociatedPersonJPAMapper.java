@@ -8,7 +8,9 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,11 +38,11 @@ public class AssociatedPersonJPAMapper {
         return associatedPerson;
     }
 
-    public List<AssociatedPerson> toJPA(final Hearing hearing, final Defendant defendant, final List<uk.gov.justice.json.schemas.core.AssociatedPerson> pojos) {
+    public Set<AssociatedPerson> toJPA(final Hearing hearing, final Defendant defendant, final List<uk.gov.justice.json.schemas.core.AssociatedPerson> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, defendant, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, defendant, pojo)).collect(Collectors.toSet());
     }
 
     uk.gov.justice.json.schemas.core.AssociatedPerson fromJPA(final AssociatedPerson entity) {
@@ -53,7 +55,7 @@ public class AssociatedPersonJPAMapper {
                 .build();
     }
 
-    public List<uk.gov.justice.json.schemas.core.AssociatedPerson> fromJPA(List<AssociatedPerson> entities) {
+    public List<uk.gov.justice.json.schemas.core.AssociatedPerson> fromJPA(Set<AssociatedPerson> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

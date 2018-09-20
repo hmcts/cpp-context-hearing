@@ -6,7 +6,9 @@ import static java.util.stream.Collectors.toList;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -20,15 +22,14 @@ public class DefendantAttendanceJPAMapper {
         return new DefendantAttendance();
     }
 
-    public List<DefendantAttendance> toJPA(List<uk.gov.justice.json.schemas.core.DefendantAttendance> pojos) {
+    public Set<DefendantAttendance> toJPA(List<uk.gov.justice.json.schemas.core.DefendantAttendance> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(this::toJPA).collect(Collectors.toList());
+        return pojos.stream().map(this::toJPA).collect(Collectors.toSet());
     }
 
-    public List<uk.gov.justice.json.schemas.core.DefendantAttendance> fromJPA(
-            List<DefendantAttendance> entities) {
+    public List<uk.gov.justice.json.schemas.core.DefendantAttendance> fromJPA(Set<DefendantAttendance> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

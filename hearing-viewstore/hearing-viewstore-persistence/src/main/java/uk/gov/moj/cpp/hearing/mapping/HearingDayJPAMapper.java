@@ -1,7 +1,10 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,17 +43,17 @@ public class HearingDayJPAMapper {
                 .build();
     }
 
-    public List<HearingDay> toJPA(Hearing hearing, List<uk.gov.justice.json.schemas.core.HearingDay> pojos) {
+    public Set<HearingDay> toJPA(Hearing hearing, List<uk.gov.justice.json.schemas.core.HearingDay> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toSet());
     }
 
-    public List<uk.gov.justice.json.schemas.core.HearingDay> fromJPA(List<HearingDay> entities) {
+    public List<uk.gov.justice.json.schemas.core.HearingDay> fromJPA(Set<HearingDay> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }
-        return entities.stream().map(this::fromJPA).collect(Collectors.toList());
+        return entities.stream().map(this::fromJPA).sorted(Comparator.comparing(uk.gov.justice.json.schemas.core.HearingDay::getSittingDay)).collect(Collectors.toList());
     }
 }

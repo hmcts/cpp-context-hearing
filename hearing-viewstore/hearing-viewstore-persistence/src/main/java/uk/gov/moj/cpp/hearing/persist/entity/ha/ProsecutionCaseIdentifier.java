@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import java.util.Objects;
 import java.util.UUID;
 
 @SuppressWarnings("squid:S1067")
@@ -51,25 +50,5 @@ public class ProsecutionCaseIdentifier {
 
     public void setProsecutionAuthorityReference(String prosecutionAuthorityReference) {
         this.prosecutionAuthorityReference = prosecutionAuthorityReference;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.prosecutionAuthorityCode, this.prosecutionAuthorityId, this.caseURN, this.prosecutionAuthorityReference);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        final ProsecutionCaseIdentifier c = (ProsecutionCaseIdentifier) o;
-        return Objects.equals(this.prosecutionAuthorityCode, c.prosecutionAuthorityCode)
-                && Objects.equals(this.prosecutionAuthorityId, c.prosecutionAuthorityId)
-                && Objects.equals(this.caseURN, c.caseURN)
-                && Objects.equals(this.prosecutionAuthorityReference, c.prosecutionAuthorityReference);
     }
 }

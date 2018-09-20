@@ -5,7 +5,9 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -24,11 +26,11 @@ public class PromptJPAMapper {
                 .setResultLine(resultLine);
     }
 
-    public List<Prompt> toJPA(final ResultLine resultLine, final List<uk.gov.justice.json.schemas.core.Prompt> pojos) {
+    public Set<Prompt> toJPA(final ResultLine resultLine, final List<uk.gov.justice.json.schemas.core.Prompt> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         } else {
-            return pojos.stream().map(pojo -> toJPA(resultLine, pojo)).collect(Collectors.toList());
+            return pojos.stream().map(pojo -> toJPA(resultLine, pojo)).collect(Collectors.toSet());
         }
     }
 
@@ -45,7 +47,7 @@ public class PromptJPAMapper {
                 .build();
     }
 
-    public List<uk.gov.justice.json.schemas.core.Prompt> fromJPA(List<Prompt> entities) {
+    public List<uk.gov.justice.json.schemas.core.Prompt> fromJPA(Set<Prompt> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

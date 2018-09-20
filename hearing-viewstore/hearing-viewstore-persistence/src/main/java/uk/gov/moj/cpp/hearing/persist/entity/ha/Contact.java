@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import java.util.Objects;
 
 @SuppressWarnings("squid:S1067")
 @Embeddable
@@ -24,17 +23,6 @@ public class Contact {
 
     @Column(name = "contact_fax")
     private String fax;
-
-    public Contact() {}
-
-    public Contact(Builder builder) {
-        this.home = builder.home;
-        this.work = builder.work;
-        this.mobile = builder.mobile;
-        this.primaryEmail = builder.primaryEmail;
-        this.secondaryEmail = builder.secondaryEmail;
-        this.fax = builder.fax;
-    }
 
     public String getHome() {
         return home;
@@ -82,77 +70,5 @@ public class Contact {
 
     public void setFax(String fax) {
         this.fax = fax;
-    }
-
-    public static class Builder {
-        private String home;
-        private String work;
-        private String mobile;
-        private String primaryEmail;
-        private String secondaryEmail;
-        private String fax;
-
-        protected Builder() {}
-
-        public Builder withHome(final String home) {
-            this.home = home;
-            return this;
-        }
-
-        public Builder withWork(final String work) {
-            this.work = work;
-            return this;
-        }
-
-        public Builder withMobile(final String mobile) {
-            this.mobile = mobile;
-            return this;
-        }
-
-        public Builder withPrimaryEmail(String primaryEmail) {
-            this.primaryEmail = primaryEmail;
-            return this;
-        }
-
-        public Builder withSecondaryEmail(String secondaryEmail) {
-            this.secondaryEmail = secondaryEmail;
-            return this;
-        }
-
-        public Builder withFax(String fax) {
-            this.fax = fax;
-            return this;
-        }
-
-        public Contact build() {
-            return new Contact(this);
-        }
-
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.home, this.work, this.mobile, this.primaryEmail, this.secondaryEmail, this.fax);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        final Contact c = (Contact) o;
-        return Objects.equals(this.home, c.home)
-                && Objects.equals(this.work, c.work)
-                && Objects.equals(this.mobile, c.mobile)
-                && Objects.equals(this.primaryEmail, c.primaryEmail)
-                && Objects.equals(this.secondaryEmail, c.secondaryEmail)
-                && Objects.equals(this.fax, c.fax);
     }
 }

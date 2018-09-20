@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
 import static java.time.ZonedDateTime.parse;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.at;
 
 import uk.gov.justice.json.schemas.core.Gender;
 import uk.gov.justice.json.schemas.core.HearingLanguage;
@@ -23,11 +25,14 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseDefendant;
+import uk.gov.moj.cpp.hearing.test.TestUtilities;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class HearingTestUtils {
@@ -36,18 +41,18 @@ public class HearingTestUtils {
     public static final ZonedDateTime START_DATE_1 = parse("2018-02-22T10:30:00Z");
     public static final ZonedDateTime END_DATE_1 = parse("2018-02-24T15:45:00Z");
 
-    public static List<Hearing> buildHearingList() {
+    public static Hearing buildHearing() {
         final UUID hearingId = UUID.randomUUID();
         final Defendant defendant1 = buildDefendant1(hearingId);
         final Defendant defendant2 = buildDefendant2(hearingId);
-        final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, Arrays.asList(defendant1, defendant2));
-        final Hearing hearing = buildHearing1(hearingId, START_DATE_1, END_DATE_1, Arrays.asList(prosecutionCase1));
+        final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
+        final Hearing hearing = buildHearing1(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
         final Offence offence1 = buildOffence1(hearing, defendant1);
         defendant1.getOffences().add(offence1);
         final JudicialRole judicialRole = buildJudgeJudicialRole(hearing.getId());
-        hearing.setJudicialRoles(Arrays.asList(judicialRole));
+        hearing.setJudicialRoles(asSet(judicialRole));
         judicialRole.setHearing(hearing);
-        return Arrays.asList(hearing);
+        return hearing;
     }
 
     public static JudicialRole buildJudgeJudicialRole(UUID hearingId) {
@@ -66,7 +71,7 @@ public class HearingTestUtils {
 
     //TODO remove hand coded UUIDs
     public static Hearing buildHearing1(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
-                                        List<ProsecutionCase> cases) {
+                                        Set<ProsecutionCase> cases) {
         Hearing hearing = new Hearing();
         hearing.setId(hearingId);
         hearing.setProsecutionCases(cases);
@@ -78,15 +83,14 @@ public class HearingTestUtils {
         hearing.setJurisdictionType(JurisdictionType.CROWN);
         hearing.setHasSharedResults(true);
 
-        hearing.setHearingDays(Arrays.asList(buildHearingDate(hearingId, startDateTime),
-                        buildHearingDate(hearingId, endDateTime)));
+        hearing.setHearingDays(asSet(buildHearingDate(hearingId, startDateTime), buildHearingDate(hearingId, endDateTime)));
 
         final CourtCentre courtCentre = new CourtCentre();
         courtCentre.setId(UUID.fromString("e8821a38-546d-4b56-9992-ebdd772a561f"));
         courtCentre.setName("Liverpool Crown Court");
         courtCentre.setRoomId(UUID.fromString("e7721a38-546d-4b56-9992-ebdd772a561b"));
         courtCentre.setRoomName("3-1");
-        
+
         hearing.setCourtCentre(courtCentre);
 
         return hearing;
@@ -171,7 +175,7 @@ public class HearingTestUtils {
                 .build();
     }*/
 
-    public static ProsecutionCase buildLegalCase1(final UUID hearingId, final List<Defendant> defendants) {
+    public static ProsecutionCase buildLegalCase1(final UUID hearingId, final Set<Defendant> defendants) {
         // TODO add more fields
         ProsecutionCase prosecutionCase = new ProsecutionCase();
         prosecutionCase.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
@@ -227,5 +231,34 @@ public class HearingTestUtils {
         entity.setProsecutionAuthorityId(UUID.fromString("1dbab0cf-3822-46ff-b3ea-ddcf99e71ab9"));
         entity.setProsecutionAuthorityReference("AUTH REF");
         return entity;
+    }
+
+
+    public static class HearingHelper {
+        Hearing hearing;
+
+        public HearingHelper(Hearing hearing) {
+            this.hearing = hearing;
+        }
+
+        public Hearing it() {
+            return hearing;
+        }
+
+        public ProsecutionCase getFirstProsecutionCase() {
+            return at(hearing.getProsecutionCases(), 0);
+        }
+
+        public Defendant getFirstDefendant(){
+            return at(at(hearing.getProsecutionCases(), 0).getDefendants(),0);
+        }
+
+        public Person getFirstDefendantPersonDetails(){
+            return at(at(hearing.getProsecutionCases(), 0).getDefendants(),0).getPersonDefendant().getPersonDetails();
+        }
+    }
+
+    public static HearingHelper helper(Hearing hearing) {
+        return new HearingHelper(hearing);
     }
 }

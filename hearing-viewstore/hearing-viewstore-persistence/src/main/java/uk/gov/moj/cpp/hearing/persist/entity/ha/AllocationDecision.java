@@ -1,15 +1,13 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
 import uk.gov.justice.json.schemas.core.CourtDecision;
 import uk.gov.justice.json.schemas.core.DefendantRepresentation;
 import uk.gov.justice.json.schemas.core.ProsecutionRepresentation;
 
-import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 @Embeddable
 public class AllocationDecision {
@@ -59,26 +57,5 @@ public class AllocationDecision {
 
     public void setIndicationOfSentence(String indicationOfSentence) {
         this.indicationOfSentence = indicationOfSentence;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final AllocationDecision that = (AllocationDecision) o;
-        return Objects.equals(courtDecision, that.courtDecision) &&
-                Objects.equals(prosecutionRepresentation, that.prosecutionRepresentation) &&
-                Objects.equals(defendantRepresentation, that.defendantRepresentation) &&
-                Objects.equals(indicationOfSentence, that.indicationOfSentence);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(courtDecision, prosecutionRepresentation, defendantRepresentation, indicationOfSentence);
     }
 }

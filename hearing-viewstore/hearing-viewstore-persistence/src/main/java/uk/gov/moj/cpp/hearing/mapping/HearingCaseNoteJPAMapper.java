@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,14 +28,14 @@ public class HearingCaseNoteJPAMapper {
                 .build();
     }
 
-    public List<HearingCaseNote> toJPA(List<uk.gov.justice.json.schemas.core.HearingCaseNote> pojos) {
+    public Set<HearingCaseNote> toJPA(List<uk.gov.justice.json.schemas.core.HearingCaseNote> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(this::toJPA).collect(Collectors.toList());
+        return pojos.stream().map(this::toJPA).collect(Collectors.toSet());
     }
 
-    public List<uk.gov.justice.json.schemas.core.HearingCaseNote> fromJPA(List<HearingCaseNote> entities) {
+    public List<uk.gov.justice.json.schemas.core.HearingCaseNote> fromJPA(Set<HearingCaseNote> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.test;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.json.schemas.core.HearingLanguage.ENGLISH;
 import static uk.gov.justice.json.schemas.core.JurisdictionType.CROWN;
@@ -24,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.legalEntityDefendant
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.json.schemas.core.AttendanceDay;
 import uk.gov.justice.json.schemas.core.CourtDecision;
@@ -205,7 +204,7 @@ public class TestTemplates {
             final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
 
             return HearingUpdateVerdictCommand.hearingUpdateVerdictCommand()
-                    .withVerdicts(singletonList(Verdict.verdict()
+                    .withVerdicts(asList(Verdict.verdict()
                             .setVerdictType(VerdictType.verdictType()
                                     .setId(randomUUID())
                                     .setCategory(STRING.next())
@@ -231,9 +230,9 @@ public class TestTemplates {
     public static SaveDraftResultCommand saveDraftResultCommandTemplate(
             final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
         AllNows allNows = AllNows.allNows()
-                .setNows(singletonList(NowDefinition.now()
+                .setNows(asList(NowDefinition.now()
                         .setId(randomUUID())
-                        .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions()
+                        .setResultDefinitions(asList(ResultDefinitions.resultDefinitions()
                                 .setId(randomUUID())
                                 .setMandatory(true)
                                 .setPrimary(true)
@@ -273,7 +272,7 @@ public class TestTemplates {
                                 .withSharedDate(LocalDate.now())
                                 .withResultDefinitionId(allNows.getNows().get(0).getResultDefinitions().stream()
                                         .filter(ResultDefinitions::getPrimary)
-                                        .findFirst().map(ResultDefinitions::getId ).orElse(null))
+                                        .findFirst().map(ResultDefinitions::getId).orElse(null))
                                 .withPrompts(
                                         asList(
                                                 uk.gov.justice.json.schemas.core.Prompt.prompt()
@@ -475,19 +474,19 @@ public class TestTemplates {
 
         public static UpdateOffencesForDefendantCommand addOffencesForDefendantTemplate(TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
-                    .setAddedOffences(singletonList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToAdd())))
+                    .setAddedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToAdd())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
         public static UpdateOffencesForDefendantCommand updateOffencesForDefendantTemplate(TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
-                    .setUpdatedOffences(singletonList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToUpdate())))
+                    .setUpdatedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToUpdate())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
         public static UpdateOffencesForDefendantCommand deleteOffencesForDefendantTemplate(TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
-                    .setDeletedOffences(singletonList(deletedOffence(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffenceToDelete())))
+                    .setDeletedOffences(asList(deletedOffence(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffenceToDelete())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
@@ -552,7 +551,7 @@ public class TestTemplates {
 
         public static CaseDefendantDetails caseDefendantDetailsChangedCommandTemplate() {
             return CaseDefendantDetails.caseDefendantDetails()
-                    .setDefendants(singletonList(defendantTemplate()));
+                    .setDefendants(asList(defendantTemplate()));
         }
     }
 
@@ -672,7 +671,7 @@ public class TestTemplates {
                                 )
 
                 ))
-                .setNows(singletonList(Nows.nows()
+                .setNows(asList(Nows.nows()
                                 .setId(UUID.randomUUID())
                                 .setNowsTypeId(nowsTypeId)
                                 .setDefendantId(defendantId)
@@ -728,7 +727,7 @@ public class TestTemplates {
 
                         )
                 )
-                .setNowTypes(singletonList(NowTypes.nowTypes()
+                .setNowTypes(asList(NowTypes.nowTypes()
                                 .setId(nowsTypeId)
                                 .setTemplateName("SingleTemplate")
                                 .setDescription("Imprisonment Order")
@@ -759,7 +758,7 @@ public class TestTemplates {
                     .setBilingualTemplateName(STRING.next())
                     .setRemotePrintingRequired(BOOLEAN.next())
                     .setUrgentTimeLimitInMinutes(INTEGER.next())
-                    .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions()
+                    .setResultDefinitions(asList(ResultDefinitions.resultDefinitions()
                             .setId(randomUUID())
                             .setMandatory(true)
                             .setPrimary(true)
@@ -785,7 +784,7 @@ public class TestTemplates {
                     .setValue(VariantValue.variantValue()
                             .setMaterialId(randomUUID())
                             .setStatus(VariantStatus.BUILDING)
-                            .setResultLines(singletonList(ResultLineReference.resultLineReference()
+                            .setResultLines(asList(ResultLineReference.resultLineReference()
                                     .setResultLineId(randomUUID())
                                     .setLastSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                             ))
@@ -888,6 +887,8 @@ public class TestTemplates {
             UUID promptId2 = randomUUID();
             UUID promptId3 = randomUUID();
 
+            int count = 0;
+
             CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
 
             return NowsRequested.nowsRequested()
@@ -922,7 +923,7 @@ public class TestTemplates {
                                     .setUserGroups(asList(MaterialUserGroup.materialUserGroup().setGroup(STRING.next())))
                                     .setNowResult(asList(
                                             uk.gov.moj.cpp.hearing.nows.events.NowResult.nowResult()
-                                                    .setSequence(INTEGER.next())
+                                                    .setSequence(++count)
                                                     .setSharedResultId(sharedResultId1)
                                                     .setPrompts(asList(Prompt.builder()
                                                             .withId(promptId1)
@@ -930,7 +931,7 @@ public class TestTemplates {
                                                             .withValue(STRING.next())
                                                             .build())),
                                             uk.gov.moj.cpp.hearing.nows.events.NowResult.nowResult()
-                                                    .setSequence(INTEGER.next())
+                                                    .setSequence(++count)
                                                     .setSharedResultId(sharedResultId2)
                                                     .setPrompts(asList(Prompt.builder()
                                                             .withId(promptId2)
@@ -938,7 +939,7 @@ public class TestTemplates {
                                                             .withValue(STRING.next())
                                                             .build())),
                                             uk.gov.moj.cpp.hearing.nows.events.NowResult.nowResult()
-                                                    .setSequence(INTEGER.next())
+                                                    .setSequence(++count)
                                                     .setSharedResultId(sharedResultId3)
                                                     .setPrompts(asList(Prompt.builder()
                                                             .withId(promptId3)

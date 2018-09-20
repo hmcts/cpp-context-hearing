@@ -26,6 +26,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowsRequestedTemplates.nowsRequestedTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import com.jayway.awaitility.Awaitility;
@@ -38,6 +39,7 @@ import uk.gov.moj.cpp.hearing.nows.events.Now;
 import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.NotifyStub;
 import uk.gov.moj.cpp.hearing.utils.QueueUtil;
@@ -160,7 +162,7 @@ public class GenerateNowsIT extends AbstractIT {
                                 withJsonPath("$.allowedUserGroups[1]", is("defence"))
                         )));
 
-        NotifyStub.verifyNotification(subscriptions.getFirstSubscription(), Arrays.asList(hearing.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()));
+        NotifyStub.verifyNotification(subscriptions.getFirstSubscription(), asList(hearing.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()));
         DocumentGeneratorStub.verifyCreate(Arrays.asList(materialId.toString()));
 
     }

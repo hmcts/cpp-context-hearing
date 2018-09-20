@@ -5,7 +5,9 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped //TODO Will be covered by GGPE-5825 story
@@ -28,14 +30,14 @@ public class DefenceCounselJPAMapper {
                 .build();
     }
 
-    public List<DefenceCounsel> toJPA(Hearing hearing, List<uk.gov.justice.json.schemas.core.DefenceCounsel> pojos) {
+    public Set<DefenceCounsel> toJPA(Hearing hearing, List<uk.gov.justice.json.schemas.core.DefenceCounsel> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toSet());
     }
 
-    public List<uk.gov.justice.json.schemas.core.DefenceCounsel> fromJPA(List<DefenceCounsel> entities) {
+    public List<uk.gov.justice.json.schemas.core.DefenceCounsel> fromJPA(Set<DefenceCounsel> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

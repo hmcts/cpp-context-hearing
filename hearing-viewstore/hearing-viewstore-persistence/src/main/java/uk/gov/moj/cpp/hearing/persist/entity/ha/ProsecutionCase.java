@@ -14,9 +14,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "ha_case")
@@ -49,7 +49,7 @@ public class ProsecutionCase {
     private String statementOfFactsWelsh;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
-    private List<Defendant> defendants = new ArrayList<>();
+    private Set<Defendant> defendants = new HashSet<>();
 
     public ProsecutionCase() {
         //For JPA
@@ -119,11 +119,11 @@ public class ProsecutionCase {
         this.statementOfFactsWelsh = statementOfFactsWelsh;
     }
 
-    public List<Defendant> getDefendants() {
+    public Set<Defendant> getDefendants() {
         return defendants;
     }
 
-    public void setDefendants(List<Defendant> defendants) {
+    public void setDefendants(Set<Defendant> defendants) {
         this.defendants = defendants;
     }
 

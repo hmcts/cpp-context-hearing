@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import java.util.Objects;
 
 @Embeddable
 public class OffenceFacts {
@@ -38,24 +37,5 @@ public class OffenceFacts {
 
     public void setAlcoholReadingMethod(String alcoholReadingMethod) {
         this.alcoholReadingMethod = alcoholReadingMethod;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final OffenceFacts that = (OffenceFacts) o;
-        return Objects.equals(vehicleRegistration, that.vehicleRegistration) &&
-                Objects.equals(alcoholReadingAmount, that.alcoholReadingAmount) &&
-                Objects.equals(alcoholReadingMethod, that.alcoholReadingMethod);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(vehicleRegistration, alcoholReadingAmount, alcoholReadingMethod);
     }
 }

@@ -4,9 +4,10 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 
-public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
+public class ElementAtListMatcher extends TypeSafeMatcher<Collection<?>> {
 
     private int index;
     private Matcher<?> matcher;
@@ -18,7 +19,7 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
     }
 
     @Override
-    protected boolean matchesSafely(List<?> item) {
+    protected boolean matchesSafely(Collection<?> item) {
 
         if (item == null) {
             this.error = Error.NULL;
@@ -30,7 +31,7 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
             return false;
         }
 
-        if (!this.matcher.matches(item.get(index))) {
+        if (!this.matcher.matches(get(item, index))) {
             this.error = Error.MATCHER_FALSE;
             return false;
         }
@@ -38,11 +39,20 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
         return true;
     }
 
+    private static Object get(Collection<?> item, int index) {
+        final Iterator it = item.iterator();
+        Object o = null;
+        for (int i = 0; i <= index; i++) {
+            o = it.next();
+        }
+        return o;
+    }
+
     @Override
     public void describeTo(Description description) {
         description.appendText("[").appendText(Integer.toString(this.index)).appendText("]");
 
-        if (this.error == Error.NULL){
+        if (this.error == Error.NULL) {
             description.appendText(" is a list object");
         }
 
@@ -55,14 +65,14 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List<?>> {
     }
 
     @Override
-    protected void describeMismatchSafely(List<?> item, Description mismatchDescription) {
+    protected void describeMismatchSafely(Collection<?> item, Description mismatchDescription) {
 
-        if (this.error == Error.NULL){
+        if (this.error == Error.NULL) {
             mismatchDescription.appendText("was null");
         }
 
         if (this.error == Error.MATCHER_FALSE) {
-            this.matcher.describeMismatch(item.get(this.index), mismatchDescription);
+            this.matcher.describeMismatch(get(item, index), mismatchDescription);
         }
 
         if (this.error == Error.INVALID_INDEX) {

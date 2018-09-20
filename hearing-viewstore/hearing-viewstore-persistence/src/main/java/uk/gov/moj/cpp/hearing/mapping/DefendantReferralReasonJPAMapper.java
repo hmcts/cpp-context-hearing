@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -37,14 +39,14 @@ public class DefendantReferralReasonJPAMapper {
                 .build();
     }
 
-    public List<DefendantReferralReason> toJPA(Hearing hearing, List<ReferralReason> pojos) {
+    public Set<DefendantReferralReason> toJPA(Hearing hearing, List<ReferralReason> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toSet());
     }
 
-    public List<ReferralReason> fromJPA(List<DefendantReferralReason> entities) {
+    public List<ReferralReason> fromJPA(Set<DefendantReferralReason> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

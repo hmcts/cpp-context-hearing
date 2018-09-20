@@ -8,7 +8,6 @@ import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
 
 @Embeddable
@@ -57,26 +56,5 @@ public class Plea {
 
     public void setDelegatedPowers(DelegatedPowers delegatedPowers) {
         this.delegatedPowers = delegatedPowers;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final Plea plea = (Plea) o;
-        return Objects.equals(pleaDate, plea.pleaDate) &&
-                Objects.equals(pleaValue, plea.pleaValue) &&
-                Objects.equals(originatingHearingId, plea.originatingHearingId) &&
-                Objects.equals(delegatedPowers, plea.delegatedPowers);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(pleaDate, pleaValue, originatingHearingId, delegatedPowers);
     }
 }

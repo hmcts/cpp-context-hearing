@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import java.util.Objects;
 import java.util.UUID;
 
 @SuppressWarnings("squid:S1067")
@@ -77,27 +76,5 @@ public class CourtCentre {
 
     public void setWelshRoomName(String welshRoomName) {
         this.welshRoomName = welshRoomName;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.id, this.name, this.roomId, this.roomName, this.welshName, this.welshRoomName);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        final CourtCentre a = (CourtCentre) o;
-        return Objects.equals(this.id, a.id)
-                && Objects.equals(this.name, a.name)
-                && Objects.equals(this.roomId, a.roomId)
-                && Objects.equals(this.roomName, a.roomName)
-                && Objects.equals(this.welshName, a.welshName)
-                && Objects.equals(this.welshRoomName, a.welshRoomName);
     }
 }

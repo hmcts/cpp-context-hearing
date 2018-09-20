@@ -8,7 +8,9 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class DefendantAttendanceJPAMapperTest {
@@ -19,7 +21,7 @@ public class DefendantAttendanceJPAMapperTest {
     public void testFromJPA() {
 
         final DefendantAttendance defendantAttendanceEntity1 = createDefendantAttendance(UUID.randomUUID(), UUID.randomUUID(), UUID.fromString("e830fa5a-0a90-4f4a-a68c-3e782d16832c"), LocalDate.of(2018, 8, 9), true);
-        List<uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance> defendantAttendanceEntities = new ArrayList<>();
+        Set<DefendantAttendance> defendantAttendanceEntities = new HashSet<>();
         defendantAttendanceEntities.add(defendantAttendanceEntity1);
 
         List<uk.gov.justice.json.schemas.core.DefendantAttendance> defendantAttendances = mapper.fromJPA(defendantAttendanceEntities);

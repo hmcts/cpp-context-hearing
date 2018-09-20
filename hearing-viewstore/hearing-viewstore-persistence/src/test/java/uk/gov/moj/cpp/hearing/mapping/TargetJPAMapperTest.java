@@ -2,51 +2,89 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
+import java.util.UUID;
 
+@RunWith(MockitoJUnitRunner.class)
 public class TargetJPAMapperTest {
 
-    private TargetJPAMapper mapperUnderTest = new TargetJPAMapper(new ResultLineJPAMapper(new PromptJPAMapper(), new DelegatedPowersJPAMapper()));
+    @Mock
+    private ResultLineJPAMapper resultLineJPAMapper;
 
-    private Target getTestJPATarget() {
-        return aNewHearingJPADataTemplate().getHearing().getTargets().get(0);
-    }
-
-    private uk.gov.justice.json.schemas.core.Target getTestPojoTarget() {
-        return mapperUnderTest.fromJPA(getTestJPATarget());
-    }
+    @InjectMocks
+    private TargetJPAMapper targetJPAMapper;
 
 
     @Test
     public void testFromJPA() {
-        Target targetIn = getTestJPATarget();
-        uk.gov.justice.json.schemas.core.Target targetOut = mapperUnderTest.fromJPA(targetIn);
-        assertThat(targetOut.getDefendantId(), is(targetIn.getDefendantId()));
-        assertThat(targetOut.getDraftResult(), is(targetIn.getDraftResult()));
-        assertThat(targetOut.getHearingId(), is(targetIn.getHearing().getId()));
-        assertThat(targetOut.getOffenceId(), is(targetIn.getOffenceId()));
-        assertThat(targetOut.getTargetId(), is(targetIn.getId()));
-        //NOT testing child relations fully - tested elsewhere
-        assertThat(targetOut.getResultLines().size(), is(targetIn.getResultLines().size()));
-        assertThat(targetOut.getResultLines().get(0).getResultLineId(), is(targetIn.getResultLines().get(0).getId()));
+
+        UUID hearingId = UUID.randomUUID();
+        Hearing hearing = mock(Hearing.class);
+        when(hearing.getId()).thenReturn(hearingId);
+
+        Target target = new Target();
+        target.setId(UUID.randomUUID());
+        target.setHearing(hearing);
+        target.setDefendantId(UUID.randomUUID());
+        target.setOffenceId(UUID.randomUUID());
+        target.setDraftResult(RandomGenerator.STRING.next());
+        target.setResultLines(asSet(mock(ResultLine.class)));
+
+        uk.gov.justice.json.schemas.core.ResultLine resultLineMock = mock(uk.gov.justice.json.schemas.core.ResultLine.class);
+        when(resultLineJPAMapper.fromJPA(target.getResultLines())).thenReturn(asList(resultLineMock));
+
+        assertThat(targetJPAMapper.fromJPA(target), isBean(uk.gov.justice.json.schemas.core.Target.class)
+                .with(uk.gov.justice.json.schemas.core.Target::getTargetId, is(target.getId()))
+                .with(uk.gov.justice.json.schemas.core.Target::getDefendantId, is(target.getDefendantId()))
+                .with(uk.gov.justice.json.schemas.core.Target::getOffenceId, is(target.getOffenceId()))
+                .with(uk.gov.justice.json.schemas.core.Target::getHearingId, is(hearingId))
+                .with(uk.gov.justice.json.schemas.core.Target::getDraftResult, is(target.getDraftResult()))
+                .with(uk.gov.justice.json.schemas.core.Target::getResultLines, first(is(resultLineMock)))
+        );
     }
 
     @Test
     public void testToJPA() {
-        uk.gov.justice.json.schemas.core.Target targetIn = getTestPojoTarget();
-        Hearing hearingIn = (new Hearing().setId(targetIn.getHearingId()));
-        Target targetOut = mapperUnderTest.toJPA(hearingIn, targetIn);
-        assertThat(targetOut.getDefendantId(), is(targetIn.getDefendantId()));
-        assertThat(targetOut.getDraftResult(), is(targetIn.getDraftResult()));
-        assertThat(targetOut.getHearing(), is(hearingIn));
-        assertThat(targetOut.getOffenceId(), is(targetIn.getOffenceId()));
-        //NOT testing child relations fully - tested elsewhere
-        assertThat(targetOut.getResultLines().size(), is(targetIn.getResultLines().size()));
-        assertThat(targetOut.getResultLines().get(0).getId(), is(targetIn.getResultLines().get(0).getResultLineId()));
-    }
 
+        Hearing hearing = mock(Hearing.class);
+
+        uk.gov.justice.json.schemas.core.Target target = uk.gov.justice.json.schemas.core.Target.target()
+                .withTargetId(UUID.randomUUID())
+                .withDefendantId(UUID.randomUUID())
+                .withOffenceId(UUID.randomUUID())
+                .withHearingId(UUID.randomUUID())
+                .withDraftResult(RandomGenerator.STRING.next())
+                .withResultLines(asList(mock(uk.gov.justice.json.schemas.core.ResultLine.class)))
+                .build();
+
+        ResultLine resultLineMock = mock(ResultLine.class);
+        when(resultLineJPAMapper.toJPA(any(), eq(target.getResultLines()))).thenReturn(asSet(resultLineMock));
+
+        assertThat(targetJPAMapper.toJPA(hearing, target), isBean(Target.class)
+                .with(Target::getId, is(target.getTargetId()))
+                .with(Target::getDefendantId, is(target.getDefendantId()))
+                .with(Target::getOffenceId, is(target.getOffenceId()))
+                .with(Target::getHearing, is(hearing))
+                .with(Target::getDraftResult, is(target.getDraftResult()))
+                .with(Target::getResultLines, first(is(resultLineMock)))
+        );
+    }
 }

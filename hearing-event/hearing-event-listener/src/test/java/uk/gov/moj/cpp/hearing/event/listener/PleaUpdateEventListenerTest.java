@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,12 +77,12 @@ public class PleaUpdateEventListenerTest {
         offence.setId(new HearingSnapshotKey(offenceId, hearingId));
 
         final Defendant defendant = new Defendant();
-        defendant.setOffences(singletonList(offence));
+        defendant.setOffences(asSet(offence));
 
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
-        prosecutionCase.setDefendants(singletonList(defendant));
+        prosecutionCase.setDefendants(asSet(defendant));
 
-        hearing.setProsecutionCases(singletonList(prosecutionCase));
+        hearing.setProsecutionCases(asSet(prosecutionCase));
 
         when(this.offenceRepository.findBy(offence.getId())).thenReturn(offence);
 
@@ -124,12 +125,12 @@ public class PleaUpdateEventListenerTest {
         offence.setId(new HearingSnapshotKey(offenceId, hearingId));
 
         final Defendant defendant = new Defendant();
-        defendant.setOffences(singletonList(offence));
+        defendant.setOffences(asSet(offence));
 
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
-        prosecutionCase.setDefendants(singletonList(defendant));
+        prosecutionCase.setDefendants(asSet(defendant));
 
-        hearing.setProsecutionCases(singletonList(prosecutionCase));
+        hearing.setProsecutionCases(asSet(prosecutionCase));
 
         when(this.offenceRepository.findBy(offence.getId())).thenReturn(offence);
 
@@ -138,7 +139,7 @@ public class PleaUpdateEventListenerTest {
 
         verify(this.offenceRepository).save(offence);
 
-        final Offence result = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        final Offence result = hearing.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().iterator().next();
 
         assertThat(result.getId().getId(), is(offencePleaUpdated.getOffenceId()));
         assertThat(result.getId().getHearingId(), is(offencePleaUpdated.getHearingId()));

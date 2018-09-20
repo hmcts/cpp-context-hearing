@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -60,15 +62,14 @@ public class ProsecutionCaseJPAMapper {
                 .build();
     }
 
-    public List<ProsecutionCase> toJPA(Hearing hearing,
-            List<uk.gov.justice.json.schemas.core.ProsecutionCase> pojos) {
+    public Set<ProsecutionCase> toJPA(Hearing hearing, List<uk.gov.justice.json.schemas.core.ProsecutionCase> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toSet());
     }
 
-    public List<uk.gov.justice.json.schemas.core.ProsecutionCase> fromJPA(List<ProsecutionCase> entities) {
+    public List<uk.gov.justice.json.schemas.core.ProsecutionCase> fromJPA(Set<ProsecutionCase> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

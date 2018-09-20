@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
@@ -58,14 +57,14 @@ public class NowsRequestedEventListener {
                     .withHearingId(hearingId)
                     .build();
 
-            nows.setMaterial(now.getMaterials().stream()
+            nows.setMaterials(now.getMaterials().stream()
                     .map(material -> {
 
                         final NowsMaterial nowsMaterial = NowsMaterial.builder()
                                 .withId(material.getId())
                                 .withUserGroups(material.getUserGroups().stream()
                                         .map(MaterialUserGroup::getGroup)
-                                        .collect(Collectors.toList()))
+                                        .collect(Collectors.toSet()))
                                 .withStatus("requested")
                                 .withLanguage(material.getLanguage())
                                 .withNows(nows)
@@ -79,11 +78,11 @@ public class NowsRequestedEventListener {
                                         .withNowsMaterial(nowsMaterial)
                                         .build()
                                 )
-                                .collect(Collectors.toList()));
+                                .collect(Collectors.toSet()));
 
                         return nowsMaterial;
                     })
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toSet()));
 
             nowsRepository.save(nows);
         });

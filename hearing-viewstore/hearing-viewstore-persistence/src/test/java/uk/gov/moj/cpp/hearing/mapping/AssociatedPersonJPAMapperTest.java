@@ -29,7 +29,7 @@ public class AssociatedPersonJPAMapperTest {
     @Test
     public void testToJPA() {
         final Hearing hearingEntity = aNewHearingJPADataTemplate().getHearing();
-        final Defendant defendantEntity = hearingEntity.getProsecutionCases().get(0).getDefendants().get(0);
+        final Defendant defendantEntity = hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next();
         final AssociatedPerson associatedPersonPojo = aNewEnhancedRandom().nextObject(AssociatedPerson.class);
         assertThat(associatedPersonJPAMapper.toJPA(hearingEntity, defendantEntity, associatedPersonPojo), 
                 whenAssociatedPerson(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson.class), associatedPersonPojo));

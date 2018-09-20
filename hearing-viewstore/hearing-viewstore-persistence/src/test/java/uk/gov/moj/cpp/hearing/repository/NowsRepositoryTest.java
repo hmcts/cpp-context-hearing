@@ -19,6 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
 @SuppressWarnings("CdiInjectionPointsInspection")
 @RunWith(CdiTestRunner.class)
@@ -56,7 +57,7 @@ public class NowsRepositoryTest {
         nowsMaterial.setId(nowMaterialId);
         nowsMaterial.setNows(nows);
         nowsMaterial.setStatus("requested");
-        nowsMaterial.setUserGroups(Arrays.asList("LO", "GA"));
+        nowsMaterial.setUserGroups(asSet("LO", "GA"));
         nowsMaterial.setLanguage(language);
         nows.getMaterial().add(nowsMaterial);
 
@@ -78,13 +79,13 @@ public class NowsRepositoryTest {
         assertThat(nows.getHearingId(), is(this.hearingId));
         assertThat(nows.getNowsTypeId(), is(this.nowsTypeId));
 
-        assertThat(nows.getMaterial().get(0).getId(), is(this.nowsMaterial.getId()));
-        assertThat(nows.getMaterial().get(0).getStatus(), is("requested"));
-        assertThat(nows.getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
-        assertThat(nows.getMaterial().get(0).getLanguage(), is(language));
+        assertThat(nows.getMaterial().iterator().next().getId(), is(this.nowsMaterial.getId()));
+        assertThat(nows.getMaterial().iterator().next().getStatus(), is("requested"));
+        assertThat(nows.getMaterial().iterator().next().getUserGroups(), containsInAnyOrder("LO", "GA"));
+        assertThat(nows.getMaterial().iterator().next().getLanguage(), is(language));
 
-        assertThat(nows.getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
-        assertThat(nows.getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
+        assertThat(nows.getMaterial().iterator().next().getNowResult().iterator().next().getSharedResultId(), is(sharedResultId));
+        assertThat(nows.getMaterial().iterator().next().getNowResult().iterator().next().getSequence(), is(1));
 
 
     }
@@ -97,13 +98,13 @@ public class NowsRepositoryTest {
         assertThat(nows.get(0).getHearingId(), is(this.hearingId));
         assertThat(nows.get(0).getNowsTypeId(), is(this.nowsTypeId));
 
-        assertThat(nows.get(0).getMaterial().get(0).getId(), is(this.nowsMaterial.getId()));
-        assertThat(nows.get(0).getMaterial().get(0).getStatus(), is("requested"));
-        assertThat(nows.get(0).getMaterial().get(0).getUserGroups(), containsInAnyOrder("LO", "GA"));
-        assertThat(nows.get(0).getMaterial().get(0).getLanguage(), is(language));
+        assertThat(nows.get(0).getMaterial().iterator().next().getId(), is(this.nowsMaterial.getId()));
+        assertThat(nows.get(0).getMaterial().iterator().next().getStatus(), is("requested"));
+        assertThat(nows.get(0).getMaterial().iterator().next().getUserGroups(), containsInAnyOrder("LO", "GA"));
+        assertThat(nows.get(0).getMaterial().iterator().next().getLanguage(), is(language));
 
-        assertThat(nows.get(0).getMaterial().get(0).getNowResult().get(0).getSharedResultId(), is(sharedResultId));
-        assertThat(nows.get(0).getMaterial().get(0).getNowResult().get(0).getSequence(), is(1));
+        assertThat(nows.get(0).getMaterial().iterator().next().getNowResult().iterator().next().getSharedResultId(), is(sharedResultId));
+        assertThat(nows.get(0).getMaterial().iterator().next().getNowResult().iterator().next().getSequence(), is(1));
     }
 
 }

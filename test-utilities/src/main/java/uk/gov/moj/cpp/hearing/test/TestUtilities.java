@@ -7,7 +7,11 @@ import org.hamcrest.Matcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class TestUtilities {
@@ -21,6 +25,21 @@ public class TestUtilities {
     @SuppressWarnings("varargs")
     public static <T> List<T> asList(T... a) {
         return new ArrayList<>(Arrays.asList(a));
+    }
+
+    public static <T> T at(Collection<T> item, int index) {
+        final Iterator<T> it = item.iterator();
+        T o = null;
+        for (int i = 0; i <= index; i++) {
+            o = it.next();
+        }
+        return o;
+    }
+
+    @SafeVarargs
+    @SuppressWarnings("varargs")
+    public static <T> Set<T> asSet(T... a) {
+        return new HashSet<>(Arrays.asList(a));
     }
 
     public static <T> Matcher<T> print() {

@@ -10,7 +10,6 @@ import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
 
 
@@ -254,21 +253,5 @@ public class Person {
 
     public void setTitle(Title title) {
         this.title = title;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.dateOfBirth);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        return Objects.equals(this.dateOfBirth, ((Person) o).dateOfBirth);
     }
 }

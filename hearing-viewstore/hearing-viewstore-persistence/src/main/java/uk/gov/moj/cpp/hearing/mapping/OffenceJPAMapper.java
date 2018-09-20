@@ -8,7 +8,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -114,14 +116,14 @@ public class OffenceJPAMapper {
                 .build();
     }
 
-    public List<Offence> toJPA(final Hearing hearing, final UUID defendantId, final List<uk.gov.justice.json.schemas.core.Offence> pojos) {
+    public Set<Offence> toJPA(final Hearing hearing, final UUID defendantId, final List<uk.gov.justice.json.schemas.core.Offence> pojos) {
         if (null == pojos) {
-            return new ArrayList<>();
+            return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, defendantId, pojo)).collect(Collectors.toList());
+        return pojos.stream().map(pojo -> toJPA(hearing, defendantId, pojo)).collect(Collectors.toSet());
     }
 
-    public List<uk.gov.justice.json.schemas.core.Offence> fromJPA(final List<Offence> entities) {
+    public List<uk.gov.justice.json.schemas.core.Offence> fromJPA(final Set<Offence> entities) {
         if (null == entities) {
             return new ArrayList<>();
         }

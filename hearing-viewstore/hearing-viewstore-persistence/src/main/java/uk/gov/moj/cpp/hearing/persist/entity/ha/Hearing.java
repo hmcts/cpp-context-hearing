@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import uk.gov.justice.json.schemas.core.HearingLanguage;
+import uk.gov.justice.json.schemas.core.JurisdictionType;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,9 +13,10 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import uk.gov.justice.json.schemas.core.HearingLanguage;
-import uk.gov.justice.json.schemas.core.JurisdictionType;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ha_hearing")
@@ -45,25 +44,25 @@ public class Hearing {
     private HearingLanguage hearingLanguage;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private List<HearingDay> hearingDays = new ArrayList<>();
+    private Set<HearingDay> hearingDays = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private List<ProsecutionCase> prosecutionCases = new ArrayList<>();
+    private Set<ProsecutionCase> prosecutionCases = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private List<DefendantReferralReason> defendantReferralReasons = new ArrayList<>();
+    private Set<DefendantReferralReason> defendantReferralReasons = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private List<JudicialRole> judicialRoles = new ArrayList<>();
+    private Set<JudicialRole> judicialRoles = new HashSet<>();
 
     @Column(name = "has_shared_results")
     private Boolean hasSharedResults;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private List<Target> targets = new ArrayList<>();
+    private Set<Target> targets = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private List<DefendantAttendance> defendantAttendance = new ArrayList<>();
+    private Set<DefendantAttendance> defendantAttendance = new HashSet<>();
 
     public Hearing() {
         //For JPA
@@ -122,38 +121,38 @@ public class Hearing {
         return this;
     }
 
-    public List<HearingDay> getHearingDays() {
+    public Set<HearingDay> getHearingDays() {
         return hearingDays;
     }
 
-    public Hearing setHearingDays(List<HearingDay> hearingDays) {
+    public Hearing setHearingDays(Set<HearingDay> hearingDays) {
         this.hearingDays = hearingDays;
         return this;
     }
 
-    public List<ProsecutionCase> getProsecutionCases() {
+    public Set<ProsecutionCase> getProsecutionCases() {
         return prosecutionCases;
     }
 
-    public Hearing setProsecutionCases(List<ProsecutionCase> prosecutionCases) {
+    public Hearing setProsecutionCases(Set<ProsecutionCase> prosecutionCases) {
         this.prosecutionCases = prosecutionCases;
         return this;
     }
 
-    public List<DefendantReferralReason> getDefendantReferralReasons() {
+    public Set<DefendantReferralReason> getDefendantReferralReasons() {
         return defendantReferralReasons;
     }
 
-    public Hearing setDefendantReferralReasons(List<DefendantReferralReason> defendantReferralReasons) {
+    public Hearing setDefendantReferralReasons(Set<DefendantReferralReason> defendantReferralReasons) {
         this.defendantReferralReasons = defendantReferralReasons;
         return this;
     }
 
-    public List<JudicialRole> getJudicialRoles() {
+    public Set<JudicialRole> getJudicialRoles() {
         return judicialRoles;
     }
 
-    public Hearing setJudicialRoles(List<JudicialRole> judicialRoles) {
+    public Hearing setJudicialRoles(Set<JudicialRole> judicialRoles) {
         this.judicialRoles = judicialRoles;
         return this;
     }
@@ -167,14 +166,56 @@ public class Hearing {
         return this;
     }
 
-    public List<Target> getTargets() {
+    public Set<Target> getTargets() {
         return targets;
     }
 
 
-    public Hearing setTargets(List<Target> targets) {
-        this.targets = new ArrayList<>(targets);
+    public Hearing setTargets(Set<Target> targets) {
+        this.targets = new HashSet<>(targets);
         return this;
+    }
+
+    public void setHearingCaseNotes(Set<HearingCaseNote> jpa) {
+        // Will be covered by GPE-5922 story
+        // TODO Auto-generated method stub
+    }
+
+    public Set<HearingCaseNote> getHearingCaseNotes() {
+        // Will be covered by GPE-5922 story
+        // TODO Auto-generated method stub
+        return new HashSet<>();
+    }
+
+    public void setDefenceCounsels(Set<DefenceCounsel> jpa) {
+        // The story to cover it doesn't exist yet.
+        // TODO Auto-generated method stub
+    }
+
+    public Set<DefenceCounsel> getDefenceCounsels() {
+        // The story to cover it doesn't exist yet.
+        // TODO Auto-generated method stub
+        return new HashSet<>();
+    }
+
+    public Hearing setDefendantAttendance(Set<DefendantAttendance> defendantAttendance) {
+        this.defendantAttendance = defendantAttendance;
+        return this;
+    }
+
+    public Set<DefendantAttendance> getDefendantAttendance() {
+        return defendantAttendance;
+    }
+
+    public void setProsecutionCounsels(Set<ProsecutionCounsel> jpa) {
+        // The story to cover it doesn't exist yet.
+        // TODO Auto-generated method stub
+    }
+
+    public Set<ProsecutionCounsel> getProsecutionCounsels() {
+        // The story to cover it doesn't exist yet.
+        // TODO Auto-generated method stub
+        return new HashSet<>();
     }
 
     @Override
@@ -192,48 +233,4 @@ public class Hearing {
         }
         return Objects.equals(this.id, ((Hearing)o).id);
     }
-
-    public void setHearingCaseNotes(List<HearingCaseNote> jpa) {
-        // Will be covered by GPE-5922 story
-        // TODO Auto-generated method stub
-    }
-
-    public List<HearingCaseNote> getHearingCaseNotes() {
-        // Will be covered by GPE-5922 story
-        // TODO Auto-generated method stub
-        return new ArrayList<>();
-    }
-
-    public void setDefenceCounsels(List<DefenceCounsel> jpa) {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-    }
-
-    public List<DefenceCounsel> getDefenceCounsels() {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-        return new ArrayList<>();
-    }
-
-    public Hearing setDefendantAttendance(List<DefendantAttendance> defendantAttendance) {
-        this.defendantAttendance = defendantAttendance;
-        return this;
-    }
-
-    public List<DefendantAttendance> getDefendantAttendance() {
-        return defendantAttendance;
-    }
-
-    public void setProsecutionCounsels(List<ProsecutionCounsel> jpa) {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-    }
-
-    public List<ProsecutionCounsel> getProsecutionCounsels() {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-        return new ArrayList<>();
-    }
-
-
 }

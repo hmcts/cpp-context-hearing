@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import javax.persistence.Embeddable;
-import java.util.Objects;
 import java.util.UUID;
 
 @SuppressWarnings("squid:S1067")
@@ -70,24 +69,5 @@ public class Organisation {
 
     public void setContact(Contact contact) {
         this.contact = contact;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.name, this.incorporationNumber, this.registeredCharityNumber);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        final Organisation a = (Organisation) o;
-        return Objects.equals(this.name, a.name)
-                && Objects.equals(this.incorporationNumber, a.incorporationNumber)
-                && Objects.equals(this.registeredCharityNumber, a.registeredCharityNumber);
     }
 }

@@ -97,11 +97,11 @@ public class ChangeHearingDetailEventListenerTest {
         assertThat(hearingChangedPayload.getString("type"), equalTo(toBePersisted.getHearingType().getDescription()));
         assertThat(hearingChangedPayload.getString("courtRoomName"), equalTo(toBePersisted.getCourtCentre().getRoomName()));
         assertThat(hearingChangedPayload.getString("courtRoomId"), equalTo(toBePersisted.getCourtCentre().getRoomId().toString()));
-        assertThat(ZonedDateTimes.toString(ZonedDateTimes.fromString(ARBITRARY_HEARING_DAY)), equalTo(ZonedDateTimes.toString(toBePersisted.getHearingDays().get(0).getSittingDay())));
+        assertThat(ZonedDateTimes.toString(ZonedDateTimes.fromString(ARBITRARY_HEARING_DAY)), equalTo(ZonedDateTimes.toString(toBePersisted.getHearingDays().iterator().next().getSittingDay())));
         JsonObject judgeJson = hearingChangedPayload.getJsonObject("judge");
-        assertThat(judgeJson.getString("title"), equalTo(toBePersisted.getJudicialRoles().get(0).getTitle()));
-        assertThat(judgeJson.getString("firstName"), equalTo(toBePersisted.getJudicialRoles().get(0).getFirstName()));
-        assertThat(judgeJson.getString("lastName"), equalTo(toBePersisted.getJudicialRoles().get(0).getLastName()));
+        assertThat(judgeJson.getString("title"), equalTo(toBePersisted.getJudicialRoles().iterator().next().getTitle()));
+        assertThat(judgeJson.getString("firstName"), equalTo(toBePersisted.getJudicialRoles().iterator().next().getFirstName()));
+        assertThat(judgeJson.getString("lastName"), equalTo(toBePersisted.getJudicialRoles().iterator().next().getLastName()));
 
     }
 

@@ -13,9 +13,9 @@ import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -32,10 +32,10 @@ public class Defendant {
     private ProsecutionCase prosecutionCase;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
-    private List<Offence> offences = new ArrayList<>();
+    private Set<Offence> offences = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
-    private List<AssociatedPerson> associatedPersons = new ArrayList<>();
+    private Set<AssociatedPerson> associatedPersons = new HashSet<>();
 
     @AttributeOverrides({
             @AttributeOverride(name = "id", column = @Column(name = "defence_org_id")),
@@ -153,19 +153,19 @@ public class Defendant {
         this.prosecutionCase = prosecutionCase;
     }
 
-    public List<Offence> getOffences() {
+    public Set<Offence> getOffences() {
         return offences;
     }
 
-    public void setOffences(List<Offence> offences) {
+    public void setOffences(Set<Offence> offences) {
         this.offences = offences;
     }
 
-    public List<AssociatedPerson> getAssociatedPersons() {
+    public Set<AssociatedPerson> getAssociatedPersons() {
         return associatedPersons;
     }
 
-    public void setAssociatedPersons(List<AssociatedPerson> associatedPersons) {
+    public void setAssociatedPersons(Set<AssociatedPerson> associatedPersons) {
         this.associatedPersons = associatedPersons;
     }
 

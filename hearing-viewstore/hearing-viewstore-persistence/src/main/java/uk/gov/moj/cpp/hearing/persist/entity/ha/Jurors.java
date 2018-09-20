@@ -38,6 +38,4 @@ public class Jurors {
     public void setUnanimous(Boolean unanimous) {
         this.unanimous = unanimous;
     }
-
-
 }

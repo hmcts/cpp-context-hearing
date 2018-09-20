@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
 
 @SuppressWarnings("squid:S1067")
@@ -162,36 +161,5 @@ public class PersonDefendant {
 
     public void setSelfDefinedEthnicityId(UUID selfDefinedEthnicityId) {
         this.selfDefinedEthnicityId = selfDefinedEthnicityId;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.aliases, this.arrestSummonsNumber, this.bailStatus,
-                this.custodyTimeLimit, this.driverNumber, this.employerPayrollReference, this.observedEthnicityCode
-                , this.observedEthnicityId, this.perceivedBirthYear, this.pncId, this.selfDefinedEthnicityCode
-                , this.selfDefinedEthnicityId);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        final PersonDefendant a = (PersonDefendant) o;
-        return Objects.equals(this.aliases, a.aliases)
-                && Objects.equals(this.arrestSummonsNumber, a.arrestSummonsNumber)
-                && Objects.equals(this.bailStatus, a.bailStatus)
-                && Objects.equals(this.custodyTimeLimit, a.custodyTimeLimit)
-                && Objects.equals(this.driverNumber, a.driverNumber)
-                && Objects.equals(this.employerPayrollReference, a.employerPayrollReference)
-                && Objects.equals(this.observedEthnicityCode, a.observedEthnicityCode)
-                && Objects.equals(this.observedEthnicityId, a.observedEthnicityId)
-                && Objects.equals(this.perceivedBirthYear, a.perceivedBirthYear)
-                && Objects.equals(this.pncId, a.pncId)
-                && Objects.equals(this.selfDefinedEthnicityCode, a.selfDefinedEthnicityCode)
-                && Objects.equals(this.selfDefinedEthnicityId, a.selfDefinedEthnicityId);
     }
 }

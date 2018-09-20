@@ -187,7 +187,7 @@ public class BeanMatcher<T> extends BaseMatcher<T> {
             latch = true;
 
             if ("appendDescriptionOf".equals(method.getName())) {
-                if (!(args[0] instanceof BeanMatcher || args[0] instanceof ElementAtListMatcher)) {
+                if (!(args[0] instanceof BeanMatcher || args[0] instanceof ElementAtListMatcher || args[0] instanceof CollectionSearchMatcher)) {
                     description.appendText(" ");
                 }
                 SelfDescribing selfDescribing = (SelfDescribing) args[0];

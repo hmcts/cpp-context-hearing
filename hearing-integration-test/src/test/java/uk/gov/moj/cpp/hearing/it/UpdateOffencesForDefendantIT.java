@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItem;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -46,7 +47,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                                 .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
                                 .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                         .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
-                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                        .with(Defendant::getOffences, hasItems(isBean(Offence.class)
                                                 .with(Offence::getId, is(hearingOne.getFirstOffenceIdForFirstDefendant()))
                                         ))
                                         .with(Defendant::getOffences, hasItem(isBean(Offence.class)

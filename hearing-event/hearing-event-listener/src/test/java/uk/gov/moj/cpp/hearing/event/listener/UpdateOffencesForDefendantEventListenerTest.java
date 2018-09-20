@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -137,7 +138,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
         final Defendant defendant = new Defendant() {{
             setId(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
-            setOffences(new ArrayList<>(Arrays.asList(offence)));
+            setOffences(asSet(offence));
         }};
 
         when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
@@ -148,7 +149,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
         verify(defendantRepository).saveAndFlush(defendantExArgumentCaptor.capture());
 
-        final Offence offenceOut = defendantExArgumentCaptor.getValue().getOffences().get(0);
+        final Offence offenceOut = defendantExArgumentCaptor.getValue().getOffences().iterator().next();
 
         assertThat(offenceUpdated.getOffence().getId(), is(offenceOut.getId().getId()));
         assertThat(offenceUpdated.getHearingId(), is(offenceOut.getId().getHearingId()));
@@ -163,7 +164,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
         final Defendant defendant = new Defendant();
         defendant.setId(new HearingSnapshotKey(randomUUID(), offenceDeleted.getHearingId()));
-        defendant.setOffences(Collections.emptyList());
+        defendant.setOffences(Collections.emptySet());
 
         final Offence offence = new Offence();
         offence.setId(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()));
