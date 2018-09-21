@@ -1,11 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.stream.Collectors.toSet;
+
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
@@ -15,6 +18,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,6 +49,15 @@ public class ResultsSharedDelegate implements Serializable {
                         .setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
                         .setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
         );
+
+        Set<UUID> resultLineIdsToUpdate = resultLinesStatusUpdated.getSharedResultLines().stream()
+                .map(SharedResultLineId::getSharedResultLineId)
+                .collect(toSet());
+
+        momento.getTargets().values().stream()
+                .flatMap(target -> target.getResultLines().stream())
+                .filter(line -> resultLineIdsToUpdate.contains(line.getResultLineId()))
+                .forEach(resultLine -> resultLine.setIsModified(false));
     }
 
     public void handleDraftResultShared(final DraftResultSaved draftResultSaved) {

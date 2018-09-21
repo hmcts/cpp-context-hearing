@@ -227,67 +227,76 @@ public class TestTemplates {
         }
     }
 
-    public static SaveDraftResultCommand saveDraftResultCommandTemplate(
-            final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
-        AllNows allNows = AllNows.allNows()
-                .setNows(asList(NowDefinition.now()
-                        .setId(randomUUID())
-                        .setResultDefinitions(asList(ResultDefinitions.resultDefinitions()
-                                .setId(randomUUID())
-                                .setMandatory(true)
-                                .setPrimary(true)
-                        ))
-                        .setName(STRING.next())
-                        .setTemplateName(STRING.next())
-                ));
-        return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, allNows);
-    }
+    public static class SaveDraftResultsCommandTemplates {
+        private SaveDraftResultsCommandTemplates() {
+        }
 
-    public static SaveDraftResultCommand saveDraftResultCommandTemplate(
-            final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final AllNows allNows) {
-        final Hearing hearing = initiateHearingCommand.getHearing();
-        final uk.gov.justice.json.schemas.core.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
-        final Offence offence0 = defendant0.getOffences().get(0);
-        final Target target = Target.target()
-                .withHearingId(hearing.getId())
-                .withDefendantId(defendant0.getId())
-                .withDraftResult("draft results content")
-                .withOffenceId(offence0.getId())
-                .withTargetId(UUID.randomUUID())
-                .withResultLines(asList(
-                        ResultLine.resultLine()
-                                .withDelegatedPowers(
-                                        DelegatedPowers.delegatedPowers()
-                                                .withUserId(UUID.randomUUID())
-                                                .withLastName(BOWIE)
-                                                .withFirstName(DAVID)
-                                                .build()
-                                )
-                                .withIsComplete(true)
-                                .withIsModified(true)
-                                .withLevel(uk.gov.justice.json.schemas.core.Level.OFFENCE)
-                                .withOrderedDate(orderedDate)
-                                .withResultLineId(UUID.randomUUID())
-                                .withResultLabel("imprisonment")
-                                .withSharedDate(LocalDate.now())
-                                .withResultDefinitionId(allNows.getNows().get(0).getResultDefinitions().stream()
-                                        .filter(ResultDefinitions::getPrimary)
-                                        .findFirst().map(ResultDefinitions::getId).orElse(null))
-                                .withPrompts(
-                                        asList(
-                                                uk.gov.justice.json.schemas.core.Prompt.prompt()
-                                                        .withFixedListCode("fixedlistcode0")
-                                                        .withId(UUID.randomUUID())
-                                                        .withLabel("imprisonment term")
-                                                        .withValue("6 years")
-                                                        .withWelshValue("6 blynedd")
-                                                        .build()
-                                        )
-                                )
-                                .build()
-                ))
-                .build();
-        return new SaveDraftResultCommand(target, null);
+        public static SaveDraftResultCommand standardSaveDraftTemplate(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
+            return SaveDraftResultCommand.saveDraftResultCommand()
+                    .setTarget(CoreTestTemplates.target(hearingId, defendantId, offenceId, resultLineId).build());
+        }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplate(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
+            AllNows allNows = AllNows.allNows()
+                    .setNows(asList(NowDefinition.now()
+                            .setId(randomUUID())
+                            .setResultDefinitions(asList(ResultDefinitions.resultDefinitions()
+                                    .setId(randomUUID())
+                                    .setMandatory(true)
+                                    .setPrimary(true)
+                            ))
+                            .setName(STRING.next())
+                            .setTemplateName(STRING.next())
+                    ));
+            return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, allNows);
+        }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplate(
+                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final AllNows allNows) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final uk.gov.justice.json.schemas.core.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+            final Offence offence0 = defendant0.getOffences().get(0);
+            final Target target = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult("draft results content")
+                    .withOffenceId(offence0.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withResultLines(asList(
+                            ResultLine.resultLine()
+                                    .withDelegatedPowers(
+                                            DelegatedPowers.delegatedPowers()
+                                                    .withUserId(UUID.randomUUID())
+                                                    .withLastName(BOWIE)
+                                                    .withFirstName(DAVID)
+                                                    .build()
+                                    )
+                                    .withIsComplete(true)
+                                    .withIsModified(true)
+                                    .withLevel(uk.gov.justice.json.schemas.core.Level.OFFENCE)
+                                    .withOrderedDate(orderedDate)
+                                    .withResultLineId(UUID.randomUUID())
+                                    .withResultLabel("imprisonment")
+                                    .withSharedDate(LocalDate.now())
+                                    .withResultDefinitionId(allNows.getNows().get(0).getResultDefinitions().stream()
+                                            .filter(ResultDefinitions::getPrimary)
+                                            .findFirst().map(ResultDefinitions::getId).orElse(null))
+                                    .withPrompts(
+                                            asList(
+                                                    uk.gov.justice.json.schemas.core.Prompt.prompt()
+                                                            .withFixedListCode("fixedlistcode0")
+                                                            .withId(UUID.randomUUID())
+                                                            .withLabel("imprisonment term")
+                                                            .withValue("6 years")
+                                                            .withWelshValue("6 blynedd")
+                                                            .build()
+                                            )
+                                    )
+                                    .build()
+                    ))
+                    .build();
+            return new SaveDraftResultCommand(target, null);
+        }
     }
 
     public static Target targetTemplate() {
@@ -324,6 +333,7 @@ public class TestTemplates {
                                 .build()))
                 .build();
     }
+
     public static class ShareResultsCommandTemplates {
         private ShareResultsCommandTemplates() {
         }

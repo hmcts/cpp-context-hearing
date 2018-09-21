@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
-
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -501,22 +500,25 @@ public class CoreTestTemplates {
                 .withDefendantId(defendantId)
                 .withOffenceId(offenceId)
                 .withDraftResult("json string")
-                .withResultLines(asList(ResultLine.resultLine()
-                        .withResultDefinitionId(randomUUID())
-                        .withResultLineId(resultLineId)
-                        .withResultLabel(STRING.next())
-                        .withLevel(Level.CASE)
-                        .withOrderedDate(PAST_LOCAL_DATE.next())
-                        .withSharedDate(PAST_LOCAL_DATE.next())
-                        .withPrompts(singletonList(Prompt.prompt()
-                                .withId(randomUUID())
-                                .build())
-                        )
-                        .withDelegatedPowers(null)
-                        .withIsComplete(true)
-                        .withIsModified(false)
-                        .build()
-                ));
+                .withResultLines(asList(resultLine(resultLineId)));
+    }
+
+    public static ResultLine resultLine(UUID resultLineId) {
+        return ResultLine.resultLine()
+                .withResultDefinitionId(randomUUID())
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.CASE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .build())
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
+                .build();
     }
 
 }

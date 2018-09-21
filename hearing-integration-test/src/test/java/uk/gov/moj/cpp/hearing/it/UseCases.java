@@ -39,10 +39,12 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
+import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.eventlog.CourtCentre;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEventDefinition;
@@ -316,6 +318,28 @@ public class UseCases {
         return logEvent;
     }
 
+
+    public static SaveDraftResultCommand saveDraftResults(final RequestSpecification requestSpec, SaveDraftResultCommand saveDraftResultCommand) {
+
+        final EventListener publicEventResulted = listenFor("public.hearing.draft-result-saved")
+                .withFilter(convertStringTo(PublicHearingDraftResultSaved.class, isBean(PublicHearingDraftResultSaved.class)
+                        .with(PublicHearingDraftResultSaved::getTargetId, is(saveDraftResultCommand.getTarget().getTargetId()))
+                        .with(PublicHearingDraftResultSaved::getHearingId, is(saveDraftResultCommand.getTarget().getHearingId()))
+                        .with(PublicHearingDraftResultSaved::getDefendantId, is(saveDraftResultCommand.getTarget().getDefendantId()))
+                        .with(PublicHearingDraftResultSaved::getDraftResult, is(saveDraftResultCommand.getTarget().getDraftResult()))
+                        .with(PublicHearingDraftResultSaved::getOffenceId, is(saveDraftResultCommand.getTarget().getOffenceId())
+                        )));
+
+        makeCommand(requestSpec, "hearing.save-draft-result")
+                .ofType("application/vnd.hearing.save-draft-result+json")
+                .withArgs(saveDraftResultCommand.getTarget().getHearingId())
+                .withPayload(saveDraftResultCommand)
+                .executeSuccessfully();
+
+        publicEventResulted.waitFor();
+
+        return saveDraftResultCommand;
+    }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand) {
 

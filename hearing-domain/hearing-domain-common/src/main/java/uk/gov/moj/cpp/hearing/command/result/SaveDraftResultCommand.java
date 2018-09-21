@@ -15,6 +15,9 @@ public final class SaveDraftResultCommand implements Serializable {
     private Target target;
     private UUID hearingId;
 
+    public SaveDraftResultCommand() {
+    }
+
     @JsonCreator
     public SaveDraftResultCommand(@JsonProperty("target") final Target target,
                                   @JsonProperty("hearingId") final UUID hearingId) {
@@ -30,7 +33,17 @@ public final class SaveDraftResultCommand implements Serializable {
         return hearingId;
     }
 
-    public void setHearingId(UUID hearingId) {
+    public SaveDraftResultCommand setHearingId(UUID hearingId) {
         this.hearingId = hearingId;
+        return this;
+    }
+
+    public SaveDraftResultCommand setTarget(Target target) {
+        this.target = target;
+        return this;
+    }
+
+    public static SaveDraftResultCommand saveDraftResultCommand(){
+        return new SaveDraftResultCommand();
     }
 }

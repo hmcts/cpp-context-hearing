@@ -30,11 +30,6 @@ public class HearingAdjournValidator {
     private static final int ZERO = 0;
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAdjournValidator.class);
 
-    private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
-        return resultsShared.getHearing().getTargets().stream().flatMap(target->target.getResultLines().stream()).collect(Collectors.toList());
-    }
-
-
     public boolean validate(final ResultsShared resultsShared, final List<UUID> withdrawnResultDefinitionUuid, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
 
         return checkSharedResultHaveNextHearingResult(resultsShared, withdrawnResultDefinitionUuid, nextHearingResultDefinitions)
@@ -76,7 +71,10 @@ public class HearingAdjournValidator {
         final List<Offence> flatOffences = resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc->pc.getDefendants().stream()).map(Defendant::getOffences).flatMap(List::stream)
                 .collect(Collectors.toList());
 
-        return flatOffences.size() == flatOffences.stream().filter(off -> isSharedResultHaveNextHearingOrWithdrawnResults(resultsShared.getHearing().getTargets(),getCompletedResultLines(resultsShared), off, Stream.concat(withdrawnResultDefinitionUuid.stream(), nextHearingResultDefinitions.keySet().stream()).collect(Collectors.toList()))).count();
+        return flatOffences.size() == flatOffences.stream().filter(off -> isSharedResultHaveNextHearingOrWithdrawnResults(resultsShared.getHearing().getTargets(),
+                getCompletedResultLines(resultsShared), off,
+                Stream.concat(withdrawnResultDefinitionUuid.stream(), nextHearingResultDefinitions.keySet().stream()).collect(Collectors.toList())
+        )).count();
     }
 
     private Target getTargetByResultLine(final List<Target> targets, final ResultLine resultLine) {
@@ -88,6 +86,10 @@ public class HearingAdjournValidator {
                 .filter(completedResultLine -> getTargetByResultLine(targets, completedResultLine).getOffenceId().equals(offence.getId()))
                 .filter(completedResultLine -> nextHearingAndWithdrawnIds.contains(completedResultLine.getResultDefinitionId()))
                 .count() > ZERO;
+    }
+
+    private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
+        return resultsShared.getHearing().getTargets().stream().flatMap(target->target.getResultLines().stream()).collect(Collectors.toList());
     }
 
 }

@@ -6,7 +6,8 @@ import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.HEARING_EVENT_HEARING_
 import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.HEARING_EVENT_HEARING_EVENT_PROCESSOR_SRC_RAML_JSON;
 import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.createObjectMapper;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;

@@ -13,7 +13,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import org.hamcrest.core.IsNull;
@@ -191,7 +191,7 @@ public class ShareResultsCommandHandlerTest {
     @Test
     public void shouldRaiseResultsSharedEvent() throws Exception {
 
-        final SaveDraftResultCommand saveDraftResultCommand = TestTemplates.saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
         final Target targetIn = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetIn.getResultLines().get(0);
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
