@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.command.verdict;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.json.schemas.core.Verdict;
 
 import java.io.Serializable;
 import java.util.List;

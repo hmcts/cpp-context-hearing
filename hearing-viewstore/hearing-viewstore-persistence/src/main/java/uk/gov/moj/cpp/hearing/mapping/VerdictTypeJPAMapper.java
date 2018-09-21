@@ -15,6 +15,8 @@ public class VerdictTypeJPAMapper {
         verdictType.setVerdictCategory(pojo.getCategory());
         verdictType.setVerdictCategoryType(pojo.getCategoryType());
         verdictType.setVerdictTypeId(pojo.getVerdictTypeId());
+        verdictType.setDescription(pojo.getDescription());
+        verdictType.setSequence(pojo.getSequence());
         return verdictType;
     }
 
@@ -26,6 +28,8 @@ public class VerdictTypeJPAMapper {
                 .withCategory(entity.getVerdictCategory())
                 .withCategoryType(entity.getVerdictCategoryType())
                 .withVerdictTypeId(entity.getVerdictTypeId())
+                .withDescription(entity.getDescription())
+                .withSequence(entity.getSequence())
                 .build();
     }
 }

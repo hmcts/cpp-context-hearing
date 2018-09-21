@@ -13,6 +13,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
@@ -76,22 +77,38 @@ public class VerdictUpdateEventProcessorTest {
     public void offencePleaUpdate() {
 
         final boolean unanimous = BOOLEAN.next();
+
         final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
 
         final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
-                .setCaseId(randomUUID())
                 .setHearingId(randomUUID())
-                .setOffenceId(randomUUID())
-                .setCategory(STRING.next())
-                .setCategoryType(STRING.next())
-                .setOffenceDefinitionId(randomUUID())
-                .setOffenceCode(STRING.next())
-                .setTitle(STRING.next())
-                .setLegislation(STRING.next())
-                .setNumberOfJurors(integer(9, 12).next())
-                .setNumberOfSplitJurors(numberOfSplitJurors)
-                .setUnanimous(unanimous)
-                .setVerdictDate(PAST_LOCAL_DATE.next());
+                .setVerdict(uk.gov.justice.json.schemas.core.Verdict.verdict()
+                        .withVerdictDate(PAST_LOCAL_DATE.next())
+                        .withOffenceId(randomUUID())
+                        .withOriginatingHearingId(randomUUID())
+                        .withJurors(
+                                uk.gov.justice.json.schemas.core.Jurors.jurors()
+                                        .withNumberOfJurors(integer(9, 12).next())
+                                        .withNumberOfSplitJurors(numberOfSplitJurors)
+                                        .withUnanimous(unanimous)
+                                        .build())
+                        .withVerdictType(
+                                uk.gov.justice.json.schemas.core.VerdictType.verdictType()
+                                        .withVerdictTypeId(randomUUID())
+                                        .withCategoryType(STRING.next())
+                                        .withCategory(STRING.next())
+                                        .withDescription(STRING.next())
+                                        .withSequence(INTEGER.next())
+                                        .build())
+                        .withLesserOrAlternativeOffence(uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                                .withOffenceLegislationWelsh(STRING.next())
+                                .withOffenceLegislation(STRING.next())
+                                .withOffenceTitleWelsh(STRING.next())
+                                .withOffenceTitle(STRING.next())
+                                .withOffenceCode(STRING.next())
+                                .withOffenceDefinitionId(randomUUID())
+                                .build())
+                        .build());
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.offence-verdict-updated"),
                 objectToJsonObjectConverter.convert(verdictUpsert));

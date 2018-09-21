@@ -4,95 +4,19 @@
   "type": "object",
   "properties": {
     "hearingId": {
-      "type": "string"
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
     },
     "verdicts": {
       "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "offenceId": {
-              "type": "string"
-            },
-            "verdictType": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "category": {
-                  "type": "string"
-                },
-                "categoryType": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "category",
-                "categoryType"
-              ]
-            },
-            "verdictDate": {
-              "type": "string"
-            },
-            "lesserOffence": {
-              "type": "object",
-              "properties": {
-                "offenceDefinitionId": {
-                  "type": "string"
-                },
-                "offenceCode": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "legislation": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "offenceDefinitionId",
-                "offenceCode",
-                "title",
-                "legislation"
-              ]
-            },
-            "jurors": {
-              "type": "object",
-              "properties": {
-                "numberOfJurors": {
-                  "type": "integer"
-                },
-                "numberOfSplitJurors": {
-                  "type": "integer"
-                },
-                "unanimous": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "numberOfJurors",
-                "numberOfSplitJurors",
-                "unanimous"
-              ]
-            }
-          },
-          "required": [
-            "offenceId",
-            "verdictType",
-            "verdictDate",
-            "lesserOffence",
-            "jurors"
-          ]
-        }
-      ]
+      "minItems": 1,
+      "items": {
+        "$ref": "http://justice.gov.uk/json/schemas/core/verdict.json"
+      }
     }
   },
   "required": [
-    "hearingId",
-    "verdicts"
-  ]
+    "verdicts",
+    "hearingId"
+  ],
+  "additionalProperties": false
 }

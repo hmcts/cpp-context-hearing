@@ -4,12 +4,16 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Embeddable
 public class Verdict {
 
     @Column(name = "verdict_date")
     private LocalDate verdictDate;
+
+    @Column(name = "verdict_originating_hearing_id")
+    private UUID originatingHearingId;
 
     @Embedded
     private VerdictType verdictType;
@@ -50,5 +54,13 @@ public class Verdict {
 
     public void setLesserOrAlternativeOffence(LesserOrAlternativeOffence lesserOrAlternativeOffence) {
         this.lesserOrAlternativeOffence = lesserOrAlternativeOffence;
+    }
+
+    public UUID getOriginatingHearingId() {
+        return originatingHearingId;
+    }
+
+    public void setOriginatingHearingId(UUID originatingHearingId) {
+        this.originatingHearingId = originatingHearingId;
     }
 }

@@ -1,9 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,18 +11,11 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
-
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.fourth;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -37,43 +27,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import uk.gov.justice.json.schemas.core.Jurors;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
-import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
-import uk.gov.moj.cpp.hearing.message.shareResults.Address;
-import uk.gov.moj.cpp.hearing.message.shareResults.Attendee;
-import uk.gov.moj.cpp.hearing.message.shareResults.Case;
-import uk.gov.moj.cpp.hearing.message.shareResults.CourtCentre;
-import uk.gov.moj.cpp.hearing.message.shareResults.Defendant;
-import uk.gov.moj.cpp.hearing.message.shareResults.Hearing;
-import uk.gov.moj.cpp.hearing.message.shareResults.Interpreter;
-import uk.gov.moj.cpp.hearing.message.shareResults.Offence;
-import uk.gov.moj.cpp.hearing.message.shareResults.Person;
-import uk.gov.moj.cpp.hearing.message.shareResults.Plea;
-import uk.gov.moj.cpp.hearing.message.shareResults.Prompt;
-import uk.gov.moj.cpp.hearing.message.shareResults.ShareResultsMessage;
-import uk.gov.moj.cpp.hearing.message.shareResults.SharedResultLine;
-import uk.gov.moj.cpp.hearing.message.shareResults.Variant;
-import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public class PublishResultsDelegateTest {
 
@@ -274,9 +239,9 @@ public class PublishResultsDelegateTest {
 */
     }
 
-    private static String formatNumberOfSplitJurors(final VerdictUpsert v) {
-        return v.getNumberOfJurors() != null && v.getNumberOfSplitJurors() != null ?
-                String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors())
+    private static String formatNumberOfSplitJurors(final Jurors jurors) {
+        return jurors.getNumberOfJurors() != null && jurors.getNumberOfSplitJurors() != null ?
+                String.format("%s-%s", jurors.getNumberOfJurors() - jurors.getNumberOfSplitJurors(), jurors.getNumberOfSplitJurors())
                 : null;
     }
 

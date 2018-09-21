@@ -47,6 +47,7 @@ public class VerdictJPAMapper {
         return uk.gov.justice.json.schemas.core.Verdict.verdict()
                 .withOffenceId(offenceId)
                 .withVerdictDate(entity.getVerdictDate())
+                .withOriginatingHearingId(entity.getOriginatingHearingId())
                 .withJurors(jurorsJPAMapper.fromJPA(entity.getJurors()))
                 .withLesserOrAlternativeOffence(lesserOrAlternativeOffenceJPAMapper.fromJPA(entity.getLesserOrAlternativeOffence()))
                 .withVerdictType(verdictTypeJPAMapper.fromJPA(entity.getVerdictType()))

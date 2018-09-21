@@ -433,7 +433,6 @@ public class HearingServiceTest {
 
     }
 
-
     private Document buildDocument() {
 
         final Document document = new Document();

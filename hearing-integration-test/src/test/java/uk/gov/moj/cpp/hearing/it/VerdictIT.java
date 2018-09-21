@@ -35,13 +35,13 @@ import java.time.LocalDate;
 public class VerdictIT extends AbstractIT {
 
     @Test
-    public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryIsGuiltyType_shouldUpdateConvictionDateToVerdictDate() throws Exception {
+    public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryIsGuiltyType_shouldUpdateConvictionDateToVerdictDate() {
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-            h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(null);
-        })));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(
+                UseCases.initiateHearing(requestSpec,
+                        with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(null))));
 
         final EventListener publicEventConvictionDateChangedListener = listenFor(
                 "public.hearing.offence-conviction-date-changed")
@@ -51,7 +51,10 @@ public class VerdictIT extends AbstractIT {
                 )));
 
         final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
-                updateVerdictTemplate(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), TestTemplates.VerdictCategoryType.GUILTY)
+                updateVerdictTemplate(
+                        hearingOne.getHearingId(),
+                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                        TestTemplates.VerdictCategoryType.GUILTY)
         ));
 
         publicEventConvictionDateChangedListener.waitFor();
@@ -67,19 +70,24 @@ public class VerdictIT extends AbstractIT {
                                                         .with(Verdict::getVerdictType, isBean(VerdictType.class)
                                                                 .with(VerdictType::getCategory, is(updateVerdict.getFirstVerdictCategory()))
                                                                 .with(VerdictType::getCategoryType, is(updateVerdict.getFirstVerdictCategoryType().name()))
-                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getId()))
+                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getVerdictTypeId()))
+                                                                .with(VerdictType::getDescription, is(updateVerdict.getFirstVerdict().getVerdictType().getDescription()))
+                                                                .with(VerdictType::getSequence, is(updateVerdict.getFirstVerdict().getVerdictType().getSequence()))
                                                         )
                                                         .with(Verdict::getOffenceId, is(updateVerdict.getFirstVerdict().getOffenceId()))
+                                                        .with(Verdict::getOriginatingHearingId, is(updateVerdict.getFirstVerdict().getOriginatingHearingId()))
                                                         .with(Verdict::getJurors, isBean(Jurors.class)
                                                                 .with(Jurors::getNumberOfJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfJurors()))
                                                                 .with(Jurors::getNumberOfSplitJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfSplitJurors()))
                                                                 .with(Jurors::getUnanimous, is(updateVerdict.getFirstVerdict().getJurors().getUnanimous()))
                                                         )
                                                         .with(Verdict::getLesserOrAlternativeOffence, isBean(LesserOrAlternativeOffence.class)
-                                                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(updateVerdict.getFirstVerdict().getLesserOffence().getOffenceDefinitionId()))
-                                                                .with(LesserOrAlternativeOffence::getOffenceCode, is(updateVerdict.getFirstVerdict().getLesserOffence().getOffenceCode()))
-                                                                .with(LesserOrAlternativeOffence::getDescription, is(updateVerdict.getFirstVerdict().getLesserOffence().getTitle()))
-                                                                .with(LesserOrAlternativeOffence::getLegislation, is(updateVerdict.getFirstVerdict().getLesserOffence().getLegislation()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceDefinitionId()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceCode, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceCode()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitle, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitle()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitleWelsh()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislation, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislation()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislationWelsh()))
                                                         )
                                                         .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
                                                 )
@@ -92,22 +100,24 @@ public class VerdictIT extends AbstractIT {
     }
 
     @Test
-    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() throws Exception {
+    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-            h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next());
-        })));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne =
+                h(UseCases.initiateHearing(requestSpec,
+                        with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next()))));
 
         final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor(
                 "public.hearing.offence-conviction-date-removed")
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
-                        withJsonPath("$.caseId", is(hearingOne.it().getHearing().getProsecutionCases().get(0).getId().toString()))
-                )));
+                        withJsonPath("$.caseId", is(hearingOne.it().getHearing().getProsecutionCases().get(0).getId().toString())))));
 
         final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
-                updateVerdictTemplate(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), TestTemplates.VerdictCategoryType.NOT_GUILTY)
+                updateVerdictTemplate(
+                        hearingOne.getHearingId(),
+                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                        TestTemplates.VerdictCategoryType.NOT_GUILTY)
         ));
 
         publicEventOffenceConvictionDateRemovedListener.waitFor();
@@ -123,19 +133,24 @@ public class VerdictIT extends AbstractIT {
                                                         .with(Verdict::getVerdictType, isBean(VerdictType.class)
                                                                 .with(VerdictType::getCategory, is(updateVerdict.getFirstVerdictCategory()))
                                                                 .with(VerdictType::getCategoryType, is(updateVerdict.getFirstVerdictCategoryType().name()))
-                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getId()))
+                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getVerdictTypeId()))
+                                                                .with(VerdictType::getDescription, is(updateVerdict.getFirstVerdict().getVerdictType().getDescription()))
+                                                                .with(VerdictType::getSequence, is(updateVerdict.getFirstVerdict().getVerdictType().getSequence()))
                                                         )
                                                         .with(Verdict::getOffenceId, is(updateVerdict.getFirstVerdict().getOffenceId()))
+                                                        .with(Verdict::getOriginatingHearingId, is(updateVerdict.getFirstVerdict().getOriginatingHearingId()))
                                                         .with(Verdict::getJurors, isBean(Jurors.class)
                                                                 .with(Jurors::getNumberOfJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfJurors()))
                                                                 .with(Jurors::getNumberOfSplitJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfSplitJurors()))
                                                                 .with(Jurors::getUnanimous, is(updateVerdict.getFirstVerdict().getJurors().getUnanimous()))
                                                         )
                                                         .with(Verdict::getLesserOrAlternativeOffence, isBean(LesserOrAlternativeOffence.class)
-                                                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(updateVerdict.getFirstVerdict().getLesserOffence().getOffenceDefinitionId()))
-                                                                .with(LesserOrAlternativeOffence::getOffenceCode, is(updateVerdict.getFirstVerdict().getLesserOffence().getOffenceCode()))
-                                                                .with(LesserOrAlternativeOffence::getDescription, is(updateVerdict.getFirstVerdict().getLesserOffence().getTitle()))
-                                                                .with(LesserOrAlternativeOffence::getLegislation, is(updateVerdict.getFirstVerdict().getLesserOffence().getLegislation()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceDefinitionId()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceCode, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceCode()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitle, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitle()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitleWelsh()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislation, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislation()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislationWelsh()))
                                                         )
                                                         .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
                                                 )
@@ -160,7 +175,10 @@ public class VerdictIT extends AbstractIT {
         })));
 
         final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
-                with(updateVerdictTemplate(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), TestTemplates.VerdictCategoryType.GUILTY), t -> {
+                with(updateVerdictTemplate(
+                        hearingOne.getHearingId(),
+                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                        TestTemplates.VerdictCategoryType.GUILTY), t -> {
                     h(t).getFirstVerdict().setVerdictDate(currentConvictionDate);
                 })));
 

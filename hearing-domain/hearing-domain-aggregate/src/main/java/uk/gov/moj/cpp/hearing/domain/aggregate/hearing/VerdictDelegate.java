@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
+import uk.gov.justice.json.schemas.core.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
@@ -26,7 +29,9 @@ public class VerdictDelegate implements Serializable {
     }
 
     public void handleVerdictUpsert(VerdictUpsert verdictUpsert) {
-        this.momento.getVerdicts().put(verdictUpsert.getOffenceId(), verdictUpsert);
+        if(nonNull(verdictUpsert.getVerdict())) {
+            this.momento.getVerdicts().put(verdictUpsert.getVerdict().getOffenceId(), verdictUpsert);
+        }
     }
 
     public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {
@@ -49,32 +54,12 @@ public class VerdictDelegate implements Serializable {
                 .orElseThrow(() -> new RuntimeException("Offence id is not present"));
 
         final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
-                .setCaseId(prosecutionCase.getId())
                 .setHearingId(hearingId)
-                .setOffenceId(offence.getId())
-                .setVerdictTypeId(verdict.getVerdictType().getId())
-                .setCategory(verdict.getVerdictType().getCategory())
-                .setCategoryType(verdict.getVerdictType().getCategoryType())
-                .setVerdictDate(verdict.getVerdictDate());
-
-        if (verdict.getLesserOffence() != null) {
-            verdictUpsert
-                    .setOffenceDefinitionId(verdict.getLesserOffence().getOffenceDefinitionId())
-                    .setTitle(verdict.getLesserOffence().getTitle())
-                    .setLegislation(verdict.getLesserOffence().getLegislation())
-                    .setOffenceCode(verdict.getLesserOffence().getOffenceCode());
-        }
-
-        if (verdict.getJurors() != null) {
-            verdictUpsert
-                    .setNumberOfJurors(verdict.getJurors().getNumberOfJurors())
-                    .setNumberOfSplitJurors(verdict.getJurors().getNumberOfSplitJurors())
-                    .setUnanimous(verdict.getJurors().getUnanimous());
-        }
+                .setVerdict(verdict);
 
         events.add(verdictUpsert);
 
-        if (verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && offence.getConvictionDate() == null) {
+        if (verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && isNull(offence.getConvictionDate())) {
             events.add(ConvictionDateAdded.convictionDateAdded()
                     .setCaseId(prosecutionCase.getId())
                     .setHearingId(hearingId)
@@ -83,7 +68,7 @@ public class VerdictDelegate implements Serializable {
             );
         }
 
-        if (!verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && offence.getConvictionDate() != null) {
+        if (!verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && nonNull(offence.getConvictionDate())) {
             events.add(ConvictionDateRemoved.convictionDateRemoved()
                     .setCaseId(prosecutionCase.getId())
                     .setHearingId(hearingId)

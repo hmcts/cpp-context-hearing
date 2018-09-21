@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import static java.util.Objects.nonNull;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
@@ -7,10 +9,11 @@ import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Jurors;
 import uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence;
 import uk.gov.justice.json.schemas.core.Offence;
+import uk.gov.justice.json.schemas.core.Verdict;
+import uk.gov.justice.json.schemas.core.VerdictType;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
 
 @Event("hearing.events.offence-updated")
@@ -79,28 +82,9 @@ public class OffenceUpdated implements Serializable {
         return this;
     }
 
-    public OffenceUpdated withVerdict(final uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert verdict) {
-        if (null != verdict) {
-            this.offence.setVerdict(uk.gov.justice.json.schemas.core.Verdict.verdict()
-                    .withJurors(Jurors.jurors()
-                            .withNumberOfJurors(verdict.getNumberOfJurors())
-                            .withNumberOfSplitJurors(verdict.getNumberOfSplitJurors())
-                            .withUnanimous(verdict.getUnanimous())
-                            .build())
-                    .withLesserOrAlternativeOffence(LesserOrAlternativeOffence.lesserOrAlternativeOffence()
-                            .withDescription(verdict.getTitle())
-                            .withLegislation(verdict.getLegislation())
-                            .withOffenceCode(verdict.getOffenceCode())
-                            .withOffenceDefinitionId(verdict.getOffenceDefinitionId())
-                            .build())
-                    .withOffenceId(verdict.getOffenceId())
-                    .withVerdictDate(verdict.getVerdictDate())
-                    .withVerdictType(uk.gov.justice.json.schemas.core.VerdictType.verdictType()
-                            .withCategory(verdict.getCategory())
-                            .withCategoryType(verdict.getCategoryType())
-                            .withVerdictTypeId(verdict.getVerdictTypeId())
-                            .build())
-                    .build());
+    public OffenceUpdated withVerdict(final uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert verdictUpsert) {
+        if (nonNull(verdictUpsert)) {
+            this.offence.setVerdict(verdictUpsert.getVerdict());
         }
         return this;
     }

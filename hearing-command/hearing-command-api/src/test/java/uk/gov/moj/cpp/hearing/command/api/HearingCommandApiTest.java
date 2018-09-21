@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.command.api;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.stream;
-import static java.util.UUID.randomUUID;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -23,6 +22,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +46,6 @@ import java.lang.reflect.Method;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -54,11 +53,6 @@ public class HearingCommandApiTest {
 
     private static final String PATH_TO_RAML = "src/raml/hearing-command-api.raml";
     private static final String NAME = "name:";
-
-    private static final String FIELD_HEARING_ID = "hearingId";
-    private static final String FIELD_RESULT_LINES = "resultLines";
-
-    private static final UUID HEARING_ID = randomUUID();
 
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
 
@@ -127,7 +121,7 @@ public class HearingCommandApiTest {
     }
 
     @Test
-    public void shouldPassthroughShareResultCommandToCommandHandler() {
+    public void shouldPassThroughShareResultCommandToCommandHandler() {
 
         final JsonObject requestPayload = createObjectBuilder()
                 .add("dummyField", "dummyFieldValue")

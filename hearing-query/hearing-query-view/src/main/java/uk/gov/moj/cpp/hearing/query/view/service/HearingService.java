@@ -194,7 +194,6 @@ public class HearingService {
                 .withTargets(targetJPAMapper.fromJPA(hearing.getTargets())).build();
     }
 
-
     private List<NowResult> populateNowResult(Set<NowsResult> nowResult) {
         return nowResult.stream()
                 .sorted(Comparator.comparing(NowsResult::getSequence))

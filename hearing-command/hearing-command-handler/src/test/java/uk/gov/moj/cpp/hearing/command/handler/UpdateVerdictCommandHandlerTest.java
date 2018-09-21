@@ -2,8 +2,6 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static java.util.Collections.singletonList;
-import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,13 +15,12 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +29,10 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.json.schemas.core.Jurors;
+import uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence;
+import uk.gov.justice.json.schemas.core.Verdict;
+import uk.gov.justice.json.schemas.core.VerdictType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -43,17 +44,13 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.Jurors;
-import uk.gov.moj.cpp.hearing.command.verdict.LesserOffence;
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
-import uk.gov.moj.cpp.hearing.command.verdict.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -105,29 +102,9 @@ public class UpdateVerdictCommandHandlerTest {
 
         final UUID offenceId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
 
-        final boolean unanimous = BOOLEAN.next();
-
-        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
-
-        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.hearingUpdateVerdictCommand()
-                .withHearingId(hearingId)
-                .withVerdicts(singletonList(Verdict.verdict()
-                        .setOffenceId(offenceId)
-                        .setVerdictType(VerdictType.verdictType()
-                                .setId(randomUUID())
-                                .setCategory("GUILTY")
-                                .setCategoryType("GUILTY"))
-                        .setLesserOffence(LesserOffence.lesserOffence()
-                                .setOffenceDefinitionId(randomUUID())
-                                .setOffenceCode("A1")
-                                .setTitle(STRING.next())
-                                .setLegislation(STRING.next()))
-                        .setJurors(Jurors.jurors()
-                                .setNumberOfJurors(integer(9, 12).next())
-                                .setNumberOfSplitJurors(numberOfSplitJurors)
-                                .setUnanimous(unanimous))
-                        .setVerdictDate(PAST_LOCAL_DATE.next())
-                ));
+        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand =
+                TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate(
+                        hearingId, offenceId, TestTemplates.VerdictCategoryType.GUILTY);
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
@@ -135,47 +112,44 @@ public class UpdateVerdictCommandHandlerTest {
 
         setupMockedEventStream(hearingUpdateVerdictCommand.getHearingId(), this.hearingEventStream, hearingAggregate);
 
-        final JsonEnvelope addVerdictCommand = envelopeFrom(metadataWithRandomUUID("hearing.command.update-verdict"),
+        final JsonEnvelope addVerdictCommand = envelopeFrom(
+                metadataWithRandomUUID("hearing.command.update-verdict"),
                 objectToJsonObjectConverter.convert(hearingUpdateVerdictCommand));
 
         this.hearingCommandHandler.updateVerdict(addVerdictCommand);
 
         final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
         final Verdict verdict = hearingUpdateVerdictCommand.getVerdicts().get(0);
 
-        assertThat((JsonEnvelope) events.get(0),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addVerdictCommand)
-                                .withName("hearing.offence-verdict-updated"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.caseId", is(caseId.toString())),
-                                withJsonPath("$.hearingId", is(hearingId.toString())),
-                                withJsonPath("$.offenceId", is(offenceId.toString())),
-                                withJsonPath("$.verdictDate", is(verdict.getVerdictDate().toString())),
-                                withJsonPath("$.verdictTypeId", is(verdict.getVerdictType().getId().toString())),
-                                withJsonPath("$.category", is(verdict.getVerdictType().getCategory())),
-                                withJsonPath("$.categoryType", is(verdict.getVerdictType().getCategoryType())),
-                                withJsonPath("$.offenceDefinitionId", is(verdict.getLesserOffence().getOffenceDefinitionId().toString())),
-                                withJsonPath("$.offenceCode", is(verdict.getLesserOffence().getOffenceCode())),
-                                withJsonPath("$.title", is(verdict.getLesserOffence().getTitle())),
-                                withJsonPath("$.legislation", is(verdict.getLesserOffence().getLegislation())),
-                                withJsonPath("$.numberOfJurors", is(verdict.getJurors().getNumberOfJurors())),
-                                withJsonPath("$.numberOfSplitJurors", is(verdict.getJurors().getNumberOfSplitJurors())),
-                                withJsonPath("$.unanimous", is(verdict.getJurors().getUnanimous()))
-                        )))
-        );
+        assertThat(asPojo((JsonEnvelope) events.get(0), VerdictUpsert.class), isBean(VerdictUpsert.class)
+                .with(VerdictUpsert::getHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
+                .with(VerdictUpsert::getVerdict, isBean(Verdict.class)
+                        .with(Verdict::getOffenceId, is(verdict.getOffenceId()))
+                        .with(Verdict::getOriginatingHearingId, is(verdict.getOriginatingHearingId()))
+                        .with(Verdict::getVerdictDate, is(verdict.getVerdictDate()))
+                        .with(Verdict::getVerdictType, isBean(VerdictType.class)
+                                .with(VerdictType::getVerdictTypeId, is(verdict.getVerdictType().getVerdictTypeId()))
+                                .with(VerdictType::getCategory, is(verdict.getVerdictType().getCategory()))
+                                .with(VerdictType::getCategoryType, is(verdict.getVerdictType().getCategoryType()))
+                                .with(VerdictType::getDescription, is(verdict.getVerdictType().getDescription()))
+                                .with(VerdictType::getSequence, is(verdict.getVerdictType().getSequence())))
+                        .with(Verdict::getLesserOrAlternativeOffence, isBean(LesserOrAlternativeOffence.class)
+                                .with(LesserOrAlternativeOffence::getOffenceCode, is(verdict.getLesserOrAlternativeOffence().getOffenceCode()))
+                                .with(LesserOrAlternativeOffence::getOffenceTitle, is(verdict.getLesserOrAlternativeOffence().getOffenceTitle()))
+                                .with(LesserOrAlternativeOffence::getOffenceLegislation, is(verdict.getLesserOrAlternativeOffence().getOffenceLegislation()))
+                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(verdict.getLesserOrAlternativeOffence().getOffenceDefinitionId()))
+                                .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(verdict.getLesserOrAlternativeOffence().getOffenceTitleWelsh()))
+                                .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(verdict.getLesserOrAlternativeOffence().getOffenceLegislationWelsh())))
+                        .with(Verdict::getJurors, isBean(Jurors.class)
+                                .with(Jurors::getNumberOfJurors, is(verdict.getJurors().getNumberOfJurors()))
+                                .with(Jurors::getNumberOfSplitJurors, is(verdict.getJurors().getNumberOfSplitJurors()))
+                                .with(Jurors::getUnanimous, is(verdict.getJurors().getUnanimous())))));
 
-        assertThat((JsonEnvelope) events.get(1),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addVerdictCommand)
-                                .withName("hearing.conviction-date-added"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.caseId", is(caseId.toString())),
-                                withJsonPath("$.offenceId", equalTo(offenceId.toString())),
-                                withJsonPath("$.convictionDate", equalTo(verdict.getVerdictDate().toString()))
-
-                        )))
-        );
+        assertThat(asPojo((JsonEnvelope) events.get(1), ConvictionDateAdded.class), isBean(ConvictionDateAdded.class)
+                .with(ConvictionDateAdded::getCaseId, is(caseId))
+                .with(ConvictionDateAdded::getOffenceId, is(offenceId))
+                .with(ConvictionDateAdded::getConvictionDate, is(verdict.getVerdictDate())));
     }
 
     @Test
@@ -189,29 +163,9 @@ public class UpdateVerdictCommandHandlerTest {
 
         final UUID offenceId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
 
-        final boolean unanimous = BOOLEAN.next();
-
-        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
-
-        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = HearingUpdateVerdictCommand.hearingUpdateVerdictCommand()
-                .withHearingId(initiateHearingCommand.getHearing().getId())
-                .withVerdicts(Arrays.asList(Verdict.verdict()
-                        .setOffenceId(offenceId)
-                        .setVerdictType(VerdictType.verdictType()
-                                .setId(randomUUID())
-                                .setCategory("Not GUILTY")
-                                .setCategoryType("NOT_GUILTY"))
-                        .setLesserOffence(LesserOffence.lesserOffence()
-                                .setOffenceDefinitionId(randomUUID())
-                                .setOffenceCode("A1")
-                                .setTitle(STRING.next())
-                                .setLegislation(STRING.next()))
-                        .setJurors(Jurors.jurors()
-                                .setNumberOfJurors(integer(9, 12).next())
-                                .setNumberOfSplitJurors(numberOfSplitJurors)
-                                .setUnanimous(unanimous))
-                        .setVerdictDate(PAST_LOCAL_DATE.next())
-                ));
+        final HearingUpdateVerdictCommand hearingUpdateVerdictCommand =
+                TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate(
+                        hearingId, offenceId, TestTemplates.VerdictCategoryType.NOT_GUILTY);
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
@@ -225,41 +179,37 @@ public class UpdateVerdictCommandHandlerTest {
         this.hearingCommandHandler.updateVerdict(addVerdictCommand);
 
         final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
         final Verdict verdict = hearingUpdateVerdictCommand.getVerdicts().get(0);
 
-        assertThat((JsonEnvelope) events.get(0),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addVerdictCommand)
-                                .withName("hearing.offence-verdict-updated"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.caseId", is(caseId.toString())),
-                                withJsonPath("$.hearingId", is(hearingId.toString())),
-                                withJsonPath("$.offenceId", is(offenceId.toString())),
-                                withJsonPath("$.verdictDate", is(verdict.getVerdictDate().toString())),
-                                withJsonPath("$.verdictTypeId", is(verdict.getVerdictType().getId().toString())),
-                                withJsonPath("$.category", is(verdict.getVerdictType().getCategory())),
-                                withJsonPath("$.categoryType", is(verdict.getVerdictType().getCategoryType())),
-                                withJsonPath("$.offenceDefinitionId", is(verdict.getLesserOffence().getOffenceDefinitionId().toString())),
-                                withJsonPath("$.offenceCode", is(verdict.getLesserOffence().getOffenceCode())),
-                                withJsonPath("$.title", is(verdict.getLesserOffence().getTitle())),
-                                withJsonPath("$.legislation", is(verdict.getLesserOffence().getLegislation())),
-                                withJsonPath("$.numberOfJurors", is(verdict.getJurors().getNumberOfJurors())),
-                                withJsonPath("$.numberOfSplitJurors", is(verdict.getJurors().getNumberOfSplitJurors())),
-                                withJsonPath("$.unanimous", is(verdict.getJurors().getUnanimous()))
-                        )))
-        );
+        assertThat(asPojo((JsonEnvelope) events.get(0), VerdictUpsert.class), isBean(VerdictUpsert.class)
+                .with(VerdictUpsert::getHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
+                .with(VerdictUpsert::getVerdict, isBean(Verdict.class)
+                        .with(Verdict::getOffenceId, is(verdict.getOffenceId()))
+                        .with(Verdict::getOriginatingHearingId, is(verdict.getOriginatingHearingId()))
+                        .with(Verdict::getVerdictDate, is(verdict.getVerdictDate()))
+                        .with(Verdict::getVerdictType, isBean(VerdictType.class)
+                                .with(VerdictType::getVerdictTypeId, is(verdict.getVerdictType().getVerdictTypeId()))
+                                .with(VerdictType::getCategory, is(verdict.getVerdictType().getCategory()))
+                                .with(VerdictType::getCategoryType, is(verdict.getVerdictType().getCategoryType()))
+                                .with(VerdictType::getDescription, is(verdict.getVerdictType().getDescription()))
+                                .with(VerdictType::getSequence, is(verdict.getVerdictType().getSequence())))
+                        .with(Verdict::getLesserOrAlternativeOffence, isBean(LesserOrAlternativeOffence.class)
+                                .with(LesserOrAlternativeOffence::getOffenceCode, is(verdict.getLesserOrAlternativeOffence().getOffenceCode()))
+                                .with(LesserOrAlternativeOffence::getOffenceTitle, is(verdict.getLesserOrAlternativeOffence().getOffenceTitle()))
+                                .with(LesserOrAlternativeOffence::getOffenceLegislation, is(verdict.getLesserOrAlternativeOffence().getOffenceLegislation()))
+                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(verdict.getLesserOrAlternativeOffence().getOffenceDefinitionId()))
+                                .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(verdict.getLesserOrAlternativeOffence().getOffenceTitleWelsh()))
+                                .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(verdict.getLesserOrAlternativeOffence().getOffenceLegislationWelsh())))
+                        .with(Verdict::getJurors, isBean(Jurors.class)
+                                .with(Jurors::getNumberOfJurors, is(verdict.getJurors().getNumberOfJurors()))
+                                .with(Jurors::getNumberOfSplitJurors, is(verdict.getJurors().getNumberOfSplitJurors()))
+                                .with(Jurors::getUnanimous, is(verdict.getJurors().getUnanimous())))));
 
-        assertThat((JsonEnvelope) events.get(1),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(addVerdictCommand)
-                                .withName("hearing.conviction-date-removed"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.caseId", is(caseId.toString())),
-                                withJsonPath("$.hearingId", is(hearingId.toString())),
-                                withJsonPath("$.offenceId", is(offenceId.toString())),
-                                withoutJsonPath("$.convictionDate")
-                        )))
-        );
+        assertThat(asPojo((JsonEnvelope) events.get(1), ConvictionDateRemoved.class), isBean(ConvictionDateRemoved.class)
+                .with(ConvictionDateRemoved::getCaseId, is(caseId))
+                .with(ConvictionDateRemoved::getHearingId, is(hearingId))
+                .with(ConvictionDateRemoved::getOffenceId, is(offenceId)));
     }
 
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {

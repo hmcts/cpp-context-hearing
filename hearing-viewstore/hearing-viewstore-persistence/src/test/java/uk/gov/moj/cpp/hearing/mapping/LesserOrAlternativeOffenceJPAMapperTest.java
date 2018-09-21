@@ -28,8 +28,10 @@ public class LesserOrAlternativeOffenceJPAMapperTest {
 
     public static BeanMatcher<LesserOrAlternativeOffence> whenLesserOrAlternativeOffence(final BeanMatcher<LesserOrAlternativeOffence> m,
             final uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence entity) {
-        return m.with(LesserOrAlternativeOffence::getDescription, is(entity.getLesserOffenceTitle()))
-                .with(LesserOrAlternativeOffence::getLegislation, is(entity.getLesserOffenceLegislation()))
+        return m.with(LesserOrAlternativeOffence::getOffenceTitle, is(entity.getLesserOffenceTitle()))
+                .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(entity.getLesserOffenceTitleWelsh()))
+                .with(LesserOrAlternativeOffence::getOffenceLegislation, is(entity.getLesserOffenceLegislation()))
+                .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(entity.getLesserOffenceLegislationWelsh()))
                 .with(LesserOrAlternativeOffence::getOffenceCode, is(entity.getLesserOffenceCode()))
                 .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(entity.getLesserOffenceDefinitionId()));
 
@@ -37,8 +39,10 @@ public class LesserOrAlternativeOffenceJPAMapperTest {
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence> whenLesserOrAlternativeOffence(
             final BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence> m, final LesserOrAlternativeOffence pojo) {
-        return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceTitle, is(pojo.getDescription()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceLegislation, is(pojo.getLegislation()))
+        return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceTitle, is(pojo.getOffenceTitle()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceTitleWelsh, is(pojo.getOffenceTitleWelsh()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceLegislation, is(pojo.getOffenceLegislation()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceLegislationWelsh, is(pojo.getOffenceLegislationWelsh()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceCode, is(pojo.getOffenceCode()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.LesserOrAlternativeOffence::getLesserOffenceDefinitionId, is(pojo.getOffenceDefinitionId()));
     }

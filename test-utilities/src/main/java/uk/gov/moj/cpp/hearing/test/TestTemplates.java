@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.test;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.json.schemas.core.HearingLanguage.ENGLISH;
 import static uk.gov.justice.json.schemas.core.JurisdictionType.CROWN;
@@ -12,7 +13,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
@@ -30,12 +30,16 @@ import uk.gov.justice.json.schemas.core.DefendantRepresentation;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.IndicatedPleaValue;
+import uk.gov.justice.json.schemas.core.Jurors;
+import uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence;
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionRepresentation;
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Source;
 import uk.gov.justice.json.schemas.core.Target;
+import uk.gov.justice.json.schemas.core.Verdict;
+import uk.gov.justice.json.schemas.core.VerdictType;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
@@ -53,20 +57,12 @@ import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffences;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.Level;
-import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
-import uk.gov.moj.cpp.hearing.command.result.UncompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.Jurors;
-import uk.gov.moj.cpp.hearing.command.verdict.LesserOffence;
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
-import uk.gov.moj.cpp.hearing.command.verdict.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
@@ -198,31 +194,41 @@ public class TestTemplates {
         private UpdateVerdictCommandTemplates() {
         }
 
-        public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID offenceId, final VerdictCategoryType verdictCategoryType) {
+        public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID hearingId, final UUID offenceId, final VerdictCategoryType verdictCategoryType) {
 
             final boolean unanimous = BOOLEAN.next();
             final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
 
             return HearingUpdateVerdictCommand.hearingUpdateVerdictCommand()
-                    .withVerdicts(asList(Verdict.verdict()
-                            .setVerdictType(VerdictType.verdictType()
-                                    .setId(randomUUID())
-                                    .setCategory(STRING.next())
-                                    .setCategoryType(verdictCategoryType.name())
+                    .withHearingId(hearingId)
+                    .withVerdicts(singletonList(Verdict.verdict()
+                            .withOriginatingHearingId(randomUUID())
+                            .withVerdictType(VerdictType.verdictType()
+                                    .withVerdictTypeId(randomUUID())
+                                    .withCategory(STRING.next())
+                                    .withCategoryType(verdictCategoryType.name())
+                                    .withDescription(STRING.next())
+                                    .withSequence(INTEGER.next())
+                                    .build()
                             )
-                            .setOffenceId(offenceId)
-                            .setVerdictDate(PAST_LOCAL_DATE.next())
-                            .setLesserOffence(LesserOffence.lesserOffence()
-                                    .setOffenceDefinitionId(randomUUID())
-                                    .setOffenceCode(STRING.next())
-                                    .setTitle(STRING.next())
-                                    .setLegislation(STRING.next())
+                            .withOffenceId(offenceId)
+                            .withVerdictDate(PAST_LOCAL_DATE.next())
+                            .withLesserOrAlternativeOffence(LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                                    .withOffenceDefinitionId(randomUUID())
+                                    .withOffenceCode(STRING.next())
+                                    .withOffenceTitle(STRING.next())
+                                    .withOffenceTitleWelsh(STRING.next())
+                                    .withOffenceLegislation(STRING.next())
+                                    .withOffenceLegislationWelsh(STRING.next())
+                                    .build()
                             )
-                            .setJurors(Jurors.jurors()
-                                    .setNumberOfJurors(integer(9, 12).next())
-                                    .setNumberOfSplitJurors(numberOfSplitJurors)
-                                    .setUnanimous(unanimous)
+                            .withJurors(Jurors.jurors()
+                                    .withNumberOfJurors(integer(9, 12).next())
+                                    .withNumberOfSplitJurors(numberOfSplitJurors)
+                                    .withUnanimous(unanimous)
+                                    .build()
                             )
+                            .build()
                     ));
         }
     }
