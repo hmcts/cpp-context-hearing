@@ -6,71 +6,12 @@
     "hearingId": {
       "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
     },
-    "offenceId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
-    "verdictTypeId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
-    "category": {
-      "type": "string"
-    },
-    "categoryType": {
-      "type": "string"
-    },
-    "offenceDefinitionId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
-    "title": {
-      "type": "string"
-    },
-    "titleWelsh": {
-      "type": "string"
-    },
-    "offenceCode": {
-      "type": "string"
-    },
-    "legislation": {
-      "type": "string"
-    },
-    "legislationWelsh": {
-      "type": "string"
-    },
-    "numberOfJurors": {
-      "type": "integer"
-    },
-    "numberOfSplitJurors": {
-      "type": "integer"
-    },
-    "unanimous": {
-      "type": "boolean"
-    },
-    "verdictDate": {
-      "type":"string"
-    },
-    "description": {
-      "type":"string"
-    },
-    "sequence": {
-      "type": "integer"
-    },
-    "originatingHearingId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    "verdict": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/verdict.json"
     }
   },
   "required": [
     "hearingId",
-    "offenceId",
-    "verdictTypeId",
-    "category",
-    "categoryType",
-    "verdictDate",
-    "originatingHearingId"
-  ],
-  "definitions": {
-    "uuid": {
-      "type": "string",
-      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-    }
-  }
+    "verdict"
+  ]
 }
