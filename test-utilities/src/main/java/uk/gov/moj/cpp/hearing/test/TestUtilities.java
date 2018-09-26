@@ -55,6 +55,7 @@ public class TestUtilities {
 
             @Override
             public void describeTo(Description description) {
+                //not required
             }
         };
 

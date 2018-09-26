@@ -95,7 +95,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
         publicEventTopic.waitFor();
 
         UseCases.initiateHearing(requestSpec, hearingOne.it());
-        
+
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))

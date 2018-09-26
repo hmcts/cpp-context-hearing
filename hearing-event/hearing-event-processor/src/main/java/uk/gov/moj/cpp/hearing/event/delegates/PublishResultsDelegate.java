@@ -1,13 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.moj.cpp.hearing.message.shareResults.Variant.variant;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Prompt;
+import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.json.schemas.core.publichearingresulted.JurisdictionType;
 import uk.gov.justice.json.schemas.core.publichearingresulted.Key;
@@ -22,27 +19,24 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
-
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.inject.Inject;
-import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S1188", "squid:S1612"})
 public class PublishResultsDelegate {
@@ -61,48 +55,84 @@ public class PublishResultsDelegate {
         this.referenceDataService = referenceDataService;
     }
 
-    List<SharedPrompt> mapPrompts(final List<Prompt> prompts) {
+    @SuppressWarnings({"squid:S1135"})
+    private List<SharedPrompt> mapPrompts(final ResultDefinition resultDefinition, final List<Prompt> prompts) {
         return prompts.stream().map(
-                 prompt-> SharedPrompt.sharedPrompt()
-                         .withFixedListCode(prompt.getFixedListCode())
-                         .withId(prompt.getId())
-// GPE-5480 where do therse come from ?
-//                         .withUsergroups(prompt.get)
+                prompt -> {
+                    // TODO GPE-5483 should match prompt defintions on ids but promptdefinition id not available in core data model for Prompt
+                    final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptDefinition = resultDefinition.getPrompts().stream().filter(
+                            promptDef -> promptDef.getLabel().equals(prompt.getLabel()))
+                            .findFirst().orElseThrow(() -> new RuntimeException(String.format("no prompt definition found for prompt label: %s value: %s ", prompt.getLabel(), prompt.getValue())));
+
+                    return SharedPrompt.sharedPrompt()
+                            .withFixedListCode(prompt.getFixedListCode())
+                            .withId(prompt.getId())
+                            .withUsergroups(promptDefinition.getUserGroups())
+                            .withPromptSequence(promptDefinition.getSequence()==null?null:BigDecimal.valueOf(promptDefinition.getSequence()))
+                            // TODO GPE-5483
 //                         .withIsAvailableForCourtExtract(prompt.get)
 //                         .withPromptSequence(prompt.get)
 //                         .withWelshLabel(prompt.getWelshValue())
-                         .withValue(prompt.getValue())
-                         .withLabel(prompt.getLabel())
-                         .build()
-                )
+                            .withValue(prompt.getValue())
+                            .withLabel(prompt.getLabel())
+                            .build();
+                }
+        )
                 .collect(Collectors.toList());
     }
 
-    private Stream<SharedResultLine> extractSharedResultLines(final Target target, final CourtClerk courtClerk) {
+    private CourtClerk getOrDefaultCourtClerk(final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus, final CourtClerk defaultCourtClerk, final UUID resultLineId) {
+        if (completedResultLinesStatus.containsKey(resultLineId)) {
+            return completedResultLinesStatus.get(resultLineId).getCourtClerk();
+        } else {
+            return defaultCourtClerk;
+        }
+    }
+
+    @SuppressWarnings({"squid:S00112", "squid:S1135"})
+    private Stream<SharedResultLine> extractSharedResultLines(final JsonEnvelope context, final Target target, final UUID prosecutionCaseId, final CourtClerk courtClerk, Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
         return target.getResultLines().stream()
-                .map(rl->SharedResultLine.sharedResultLine()
-                        .withDefendantId(target.getDefendantId())
-                        .withCourtClerk(courtClerk)
-                        .withDelegatedPowers(rl.getDelegatedPowers())
-                        .withId(rl.getResultLineId())
- // TODO GPE-5480 where do these come from ?
- //                .withIsAvailableForCourtExtract(rl.get)
-//                        .withProsecutionCaseId(target.get)
-//                        .withRank(rl.get)
-//                        .withWelshLabel(rl.get)
-                        .withLabel(rl.getResultLabel())
-                        .withLevel(rl.getLevel().name())
-                        .withOffenceId(target.getOffenceId())
-                        .withOrderedDate(rl.getOrderedDate())
-                        .withLastSharedDateTime(rl.getSharedDate().toString())
-                        .withPrompts(mapPrompts(rl.getPrompts()))
-                  .build());
+                .map(rl -> {
+                            final ResultDefinition resultDefinition = this.referenceDataService.getResultDefinitionById(context, rl.getOrderedDate(), rl.getResultDefinitionId());
+                            if (resultDefinition == null) {
+                                throw new RuntimeException(String.format("resultDefinition not found for resultLineId: %s, resultDefinitionId: %s, targetId: %s, hearingId: %s ",
+                                        rl.getResultLineId(), rl.getResultDefinitionId(), target.getTargetId(), target.getHearingId()));
+                            }
+                            return SharedResultLine.sharedResultLine()
+                                    .withDefendantId(target.getDefendantId())
+                                    .withCourtClerk(getOrDefaultCourtClerk(completedResultLinesStatus, courtClerk, rl.getResultLineId()))
+                                    .withDelegatedPowers(rl.getDelegatedPowers())
+                                    .withId(rl.getResultLineId())
+                                    // TODO GPE-5483
+                                    //.withIsAvailableForCourtExtract(rl.get)
+                                    //.withWelshLabel(resultDefinition.get)
+                                    .withProsecutionCaseId(prosecutionCaseId)
+                                    .withRank(resultDefinition.getRank()==null?null:BigDecimal.valueOf(resultDefinition.getRank()))
+                                    .withLabel(rl.getResultLabel())
+                                    .withLevel(rl.getLevel().name())
+                                    .withOffenceId(target.getOffenceId())
+                                    .withOrderedDate(rl.getOrderedDate())
+                                    .withLastSharedDateTime(rl.getSharedDate().toString())
+                                    .withPrompts(mapPrompts(resultDefinition, rl.getPrompts()))
+                                    .build();
+                        }
+                );
     }
 
 
-    private List<SharedResultLine> extractSharedResultLines(final List<Target> targets, final CourtClerk courtClerk) {
-        return targets.stream().flatMap(target->extractSharedResultLines(target, courtClerk))
-                 .collect(Collectors.toList());
+    private List<SharedResultLine> extractSharedResultLines(final JsonEnvelope context, final List<Target> targets, final List<ProsecutionCase> prosecutionCases, final CourtClerk courtClerk, final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
+
+        return targets.stream().flatMap(target ->
+                {
+                    final UUID prosecutionCaseId = prosecutionCases.stream().filter(pc -> pc.getDefendants().stream()
+                            .anyMatch(d -> target.getDefendantId().equals(d.getId())))
+                            .findFirst().map(ProsecutionCase::getId).orElseThrow(
+                                    () -> new RuntimeException(String.format("cant find defendant %s in hearing %s for target %s",
+                                            target.getDefendantId(), target.getHearingId(), target.getTargetId())));
+
+                    return extractSharedResultLines(context, target, prosecutionCaseId, courtClerk, completedResultLinesStatus);
+                }
+        ).collect(Collectors.toList());
     }
 
     private JurisdictionType translateJurisdictionType(uk.gov.justice.json.schemas.core.JurisdictionType from) {
@@ -117,25 +147,26 @@ public class PublishResultsDelegate {
         ).collect(toList());
 
         final Hearing hearingIn = resultsShared.getHearing();
+
         final PublicHearingResulted shareResultsMessage = PublicHearingResulted.publicHearingResulted()
                 .setHearing(
-                           SharedHearing.sharedHearing()
-                                   .withId(hearingIn.getId())
-                                   .withType(hearingIn.getType())
-                                   .withJurisdictionType(translateJurisdictionType(hearingIn.getJurisdictionType()))
-                                   .withCourtCentre(hearingIn.getCourtCentre())
-                                   .withDefendantAttendance(hearingIn.getDefendantAttendance())
-                                   .withDefenceCounsels(hearingIn.getDefenceCounsels())
-                                   .withProsecutionCases(hearingIn.getProsecutionCases())
-                                   .withHearingDays(hearingIn.getHearingDays())
-                                   .withHearingLanguage(Optional.ofNullable(hearingIn.getHearingLanguage()).map(hearingLanguage->hearingLanguage.name()).orElse(null))
-                                   .withType(hearingIn.getType())
-                                   .withJudiciary(hearingIn.getJudiciary())
-                                   .withProsecutionCounsels(hearingIn.getProsecutionCounsels())
-                                   .withSharedResultLines(extractSharedResultLines(hearingIn.getTargets(), resultsShared.getCourtClerk()))
-                                   .withDefenceCounsels(hearingIn.getDefenceCounsels())
-                                   .withHasSharedResults(hearingIn.getHasSharedResults())
-                                   .build()
+                        SharedHearing.sharedHearing()
+                                .withId(hearingIn.getId())
+                                .withType(hearingIn.getType())
+                                .withJurisdictionType(translateJurisdictionType(hearingIn.getJurisdictionType()))
+                                .withCourtCentre(hearingIn.getCourtCentre())
+                                .withDefendantAttendance(hearingIn.getDefendantAttendance())
+                                .withDefenceCounsels(hearingIn.getDefenceCounsels())
+                                .withProsecutionCases(hearingIn.getProsecutionCases())
+                                .withHearingDays(hearingIn.getHearingDays())
+                                .withHearingLanguage(Optional.ofNullable(hearingIn.getHearingLanguage()).map(hearingLanguage -> hearingLanguage.name()).orElse(null))
+                                .withType(hearingIn.getType())
+                                .withJudiciary(hearingIn.getJudiciary())
+                                .withProsecutionCounsels(hearingIn.getProsecutionCounsels())
+                                .withSharedResultLines(extractSharedResultLines(context, hearingIn.getTargets(), hearingIn.getProsecutionCases(), resultsShared.getCourtClerk(), resultsShared.getCompletedResultLinesStatus()))
+                                .withDefenceCounsels(hearingIn.getDefenceCounsels())
+                                .withHasSharedResults(hearingIn.getHasSharedResults())
+                                .build()
                 )
                 .setVariants(mapVariantDirectory(context, variants))
                 .setSharedTime(resultsShared.getSharedTime());
@@ -147,12 +178,12 @@ public class PublishResultsDelegate {
     }
 
     Key mapVariantKey(final VariantKey keyIn) {
-       return Key.key()
-               .withDefendantId(keyIn.getDefendantId())
-               .withHearingId(keyIn.getHearingId())
-               .withNowsTypeId(keyIn.getNowsTypeId())
-               .withUsergroups(keyIn.getUsergroups())
-               .build();
+        return Key.key()
+                .withDefendantId(keyIn.getDefendantId())
+                .withHearingId(keyIn.getHearingId())
+                .withNowsTypeId(keyIn.getNowsTypeId())
+                .withUsergroups(keyIn.getUsergroups())
+                .build();
     }
 
     private List<SharedVariant> mapVariantDirectory(JsonEnvelope context, final List<Variant> updatedVariantDirectory) {
@@ -160,7 +191,7 @@ public class PublishResultsDelegate {
                 .map(variant -> {
                             final NowDefinition nowDefinition = referenceDataService.getNowDefinitionById(context, variant.getReferenceDate(), variant.getKey().getNowsTypeId());
                             return SharedVariant.sharedVariant()
-                                    .withKey( mapVariantKey(variant.getKey()))
+                                    .withKey(mapVariantKey(variant.getKey()))
                                     .withStatus(variant.getValue().getStatus().toString())
                                     .withMaterialId(variant.getValue().getMaterialId())
                                     .withDescription(nowDefinition.getName())

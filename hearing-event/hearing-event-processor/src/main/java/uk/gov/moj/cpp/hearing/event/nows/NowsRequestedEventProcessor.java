@@ -61,7 +61,7 @@ public class NowsRequestedEventProcessor {
 
         final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrderToNotificationState = NowsRequestedToOrderConverter.convert(nowsRequested);
         final List<NowsDocumentOrder> nowsDocumentOrdersList = new ArrayList<>(nowsDocumentOrderToNotificationState.keySet());
-        nowsDocumentOrdersList.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriority)).forEach(nowsDocumentOrder -> {
+        nowsDocumentOrdersList.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriorityWithDefault)).forEach(nowsDocumentOrder -> {
             LOGGER.info("Input for docmosis order {}", JSONObjectValueObfuscator.obfuscated(objectToJsonObjectConverter.convert(nowsDocumentOrder)));
 
             nowGeneratorService.generateNow(sender, userId, nowsRequested, hearingId, nowsDocumentOrderToNotificationState, nowsDocumentOrder);

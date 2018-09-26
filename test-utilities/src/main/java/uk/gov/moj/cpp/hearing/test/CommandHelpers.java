@@ -1,11 +1,9 @@
 package uk.gov.moj.cpp.hearing.test;
 
 import static java.util.stream.Collectors.toList;
-
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
-import uk.gov.justice.json.schemas.core.Material;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ResultLine;
@@ -15,11 +13,9 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffences;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
@@ -35,6 +31,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 
@@ -142,6 +139,9 @@ public class CommandHelpers {
             return this.allNows.getNows().get(0);
         }
 
+        public NowDefinition getSecondNowDefinition() {
+            return this.allNows.getNows().get(1);
+        }
         public UUID getFirstNowDefinitionId() {
             return this.allNows.getNows().get(0).getId();
         }
@@ -150,6 +150,13 @@ public class CommandHelpers {
             return this.allNows.getNows().get(0).getResultDefinitions().get(0).getId();
         }
 
+        public UUID getFirstPrimaryResultDefinitionId() {
+            return this.allNows.getNows().get(0).getResultDefinitions().stream()
+                    .filter(ResultDefinitions::getPrimary)
+                    .map(ResultDefinitions::getId)
+                    .findFirst()
+                    .orElse(null);
+        }
 
         public AllNows it() {
             return this.allNows;

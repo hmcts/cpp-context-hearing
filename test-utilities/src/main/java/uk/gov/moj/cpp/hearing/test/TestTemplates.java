@@ -74,7 +74,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Prompts;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.SharedResultLines;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
@@ -89,6 +88,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -243,22 +244,43 @@ public class TestTemplates {
         }
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplate(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
-            AllNows allNows = AllNows.allNows()
-                    .setNows(asList(NowDefinition.now()
-                            .setId(randomUUID())
-                            .setResultDefinitions(asList(ResultDefinitions.resultDefinitions()
-                                    .setId(randomUUID())
-                                    .setMandatory(true)
-                                    .setPrimary(true)
-                            ))
-                            .setName(STRING.next())
-                            .setTemplateName(STRING.next())
-                    ));
-            return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, allNows);
+            return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID());
+        }
+
+        public static ResultLine.Builder standardResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
+            return ResultLine.resultLine()
+                    .withResultLineId(resultLineId)
+                    .withDelegatedPowers(
+                            DelegatedPowers.delegatedPowers()
+                                    .withUserId(UUID.randomUUID())
+                                    .withLastName(BOWIE)
+                                    .withFirstName(DAVID)
+                                    .build()
+                    )
+                    .withIsComplete(true)
+                    .withIsModified(true)
+                    .withLevel(uk.gov.justice.json.schemas.core.Level.OFFENCE)
+                    .withOrderedDate(orderedDate)
+                    .withResultLineId(UUID.randomUUID())
+                    .withResultLabel("imprisonment")
+                    .withSharedDate(LocalDate.now())
+                    .withResultDefinitionId( resultDefinitionId)
+                    .withPrompts(
+                            asList(
+                                    uk.gov.justice.json.schemas.core.Prompt.prompt()
+                                            .withFixedListCode("fixedlistcode0")
+                                            .withId(UUID.randomUUID())
+                                            .withLabel("imprisonment term")
+                                            .withValue("6 years")
+                                            .withWelshValue("6 blynedd")
+                                            .build()
+                            )
+                    );
+
         }
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplate(
-                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final AllNows allNows) {
+                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final UUID resultLineId, final UUID resultDefinitionId) {
             final Hearing hearing = initiateHearingCommand.getHearing();
             final uk.gov.justice.json.schemas.core.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
             final Offence offence0 = defendant0.getOffences().get(0);
@@ -268,38 +290,7 @@ public class TestTemplates {
                     .withDraftResult("draft results content")
                     .withOffenceId(offence0.getId())
                     .withTargetId(UUID.randomUUID())
-                    .withResultLines(asList(
-                            ResultLine.resultLine()
-                                    .withDelegatedPowers(
-                                            DelegatedPowers.delegatedPowers()
-                                                    .withUserId(UUID.randomUUID())
-                                                    .withLastName(BOWIE)
-                                                    .withFirstName(DAVID)
-                                                    .build()
-                                    )
-                                    .withIsComplete(true)
-                                    .withIsModified(true)
-                                    .withLevel(uk.gov.justice.json.schemas.core.Level.OFFENCE)
-                                    .withOrderedDate(orderedDate)
-                                    .withResultLineId(UUID.randomUUID())
-                                    .withResultLabel("imprisonment")
-                                    .withSharedDate(LocalDate.now())
-                                    .withResultDefinitionId(allNows.getNows().get(0).getResultDefinitions().stream()
-                                            .filter(ResultDefinitions::getPrimary)
-                                            .findFirst().map(ResultDefinitions::getId).orElse(null))
-                                    .withPrompts(
-                                            asList(
-                                                    uk.gov.justice.json.schemas.core.Prompt.prompt()
-                                                            .withFixedListCode("fixedlistcode0")
-                                                            .withId(UUID.randomUUID())
-                                                            .withLabel("imprisonment term")
-                                                            .withValue("6 years")
-                                                            .withWelshValue("6 blynedd")
-                                                            .build()
-                                            )
-                                    )
-                                    .build()
-                    ))
+                    .withResultLines(Collections.singletonList( standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate ).build()   ))
                     .build();
             return new SaveDraftResultCommand(target, null);
         }

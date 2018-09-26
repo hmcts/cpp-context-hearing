@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Prompt;
 import uk.gov.justice.json.schemas.core.ResultLine;
@@ -123,7 +124,8 @@ public class ShareResultsCommandHandlerTest {
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
                 .withStatus(STRING.next())
-//TODO:GPE-5480                .withDefendantIds(singletonList(initiateHearingCommand.getHearing().getDefendants().get(0).getId()))
+                .withDefendantIds(singletonList(initiateHearingCommand.getHearing().
+                        getProsecutionCases().get(0).getDefendants().get(0).getId()))
                 .build();
         nowsVariantsSavedEvent = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
                 .setHearingId(initiateHearingCommand.getHearing().getId())
@@ -158,6 +160,7 @@ public class ShareResultsCommandHandlerTest {
 
         final Target targetIn = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetIn.getResultLines().get(0);
+        final DelegatedPowers delegatedPowers = resultLineIn.getDelegatedPowers();
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
         this.shareResultsCommandHandler.saveDraftResult(envelope);
 
@@ -173,14 +176,26 @@ public class ShareResultsCommandHandlerTest {
                         .with(Target::getOffenceId, is(targetIn.getOffenceId()))
                         .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
                         .with(Target::getResultLines, first(isBean(ResultLine.class)
-                                //TODO 5480 add more fields
+                                .with(ResultLine::getResultDefinitionId, is(resultLineIn.getResultDefinitionId()))
                                 .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
                                 .with(ResultLine::getOrderedDate, is(resultLineIn.getOrderedDate()))
+                                .with(ResultLine::getLevel, is(resultLineIn.getLevel()))
+                                .with(ResultLine::getResultLabel, is(resultLineIn.getResultLabel()))
+                                .with(ResultLine::getResultLabel, is(resultLineIn.getResultLabel()))
+                                .with(ResultLine::getIsComplete, is(resultLineIn.getIsComplete()))
+                                .with(ResultLine::getIsModified, is(resultLineIn.getIsModified()))
+                                .with(ResultLine::getSharedDate, is(resultLineIn.getSharedDate()))
                                 .with(r -> r.getPrompts().size(), is(resultLineIn.getPrompts().size()))
+                                .with(ResultLine::getDelegatedPowers, isBean(DelegatedPowers.class)
+                                        .withValue(DelegatedPowers::getFirstName, delegatedPowers.getFirstName())
+                                        .withValue(DelegatedPowers::getLastName, delegatedPowers.getLastName())
+                                        .withValue(DelegatedPowers::getUserId, delegatedPowers.getUserId())
+                                )
                                 .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                        //TODO 5480 add more fields
-                                        .with(Prompt::getId, is(promptIn.getId()))
-                                        .with(Prompt::getLabel, is(promptIn.getLabel()))
+                                        .withValue(Prompt::getId, promptIn.getId())
+                                        .withValue(Prompt::getLabel, promptIn.getLabel())
+                                        .withValue(Prompt::getFixedListCode, promptIn.getFixedListCode())
+                                        .withValue(Prompt::getLabel, promptIn.getLabel())
                                 ))
                         ))
                 )

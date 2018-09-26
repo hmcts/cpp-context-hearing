@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.test.matchers;
 
+import static org.hamcrest.CoreMatchers.is;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import org.hamcrest.BaseMatcher;
@@ -33,6 +34,11 @@ public class BeanMatcher<T> extends BaseMatcher<T> {
 
     public <R> BeanMatcher<T> with(Function<T, R> accessor, Matcher<R> matcher) {
         assertions.add(new Assertion<>(accessor, matcher));
+        return this;
+    }
+
+    public <R> BeanMatcher<T> withValue(final Function<T, R> accessor, final R value) {
+        assertions.add(new Assertion<>(accessor, is(value)));
         return this;
     }
 

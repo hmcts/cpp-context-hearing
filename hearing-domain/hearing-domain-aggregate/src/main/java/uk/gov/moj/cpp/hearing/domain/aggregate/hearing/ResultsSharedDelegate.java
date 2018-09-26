@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.stream.Collectors.toSet;
-
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
@@ -60,20 +59,22 @@ public class ResultsSharedDelegate implements Serializable {
                 .forEach(resultLine -> resultLine.setIsModified(false));
     }
 
-    public void handleDraftResultShared(final DraftResultSaved draftResultSaved) {
+        public void handleDraftResultShared(final DraftResultSaved draftResultSaved) {
         this.momento.getTargets().put(draftResultSaved.getTarget().getTargetId(), draftResultSaved.getTarget());
-        this.momento.getHearing().setTargets(new ArrayList<>(this.momento.getTargets().values()));
 
+        //filter by resultLinesIds in draftResultSaved
 
         momento.getTargets().values().stream()
                 .flatMap(target -> target.getResultLines().stream())
                 .forEach(resultLine -> {
-                    if (resultLine.getIsModified() && this.momento.getCompletedResultLinesStatus().containsKey(resultLine.getResultLineId())){
+                    if (resultLine.getIsModified() &&
+                            this.momento.getCompletedResultLinesStatus().containsKey(resultLine.getResultLineId())) {
                         momento.getCompletedResultLinesStatus().get(resultLine.getResultLineId())
                                 .setLastSharedDateTime(null)
                                 .setCourtClerk(null);
                     }
                 });
+        this.momento.getHearing().setTargets(new ArrayList<>(this.momento.getTargets().values()));
     }
 
     public Stream<Object> saveDraftResult(final Target target) {

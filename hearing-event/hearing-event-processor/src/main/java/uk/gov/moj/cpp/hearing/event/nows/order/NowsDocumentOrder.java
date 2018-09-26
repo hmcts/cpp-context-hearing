@@ -33,6 +33,11 @@ public class NowsDocumentOrder implements Serializable {
         return priority;
     }
 
+    public String getPriorityWithDefault() {
+        return priority==null ?"0":priority;
+    }
+
+
     public void setPriority(String priority) {
         this.priority = priority;
     }
