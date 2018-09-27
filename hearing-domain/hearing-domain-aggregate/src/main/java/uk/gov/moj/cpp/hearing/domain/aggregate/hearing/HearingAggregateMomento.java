@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;

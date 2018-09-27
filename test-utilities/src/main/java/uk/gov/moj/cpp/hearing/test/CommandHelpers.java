@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.test;
 
 import static java.util.stream.Collectors.toList;
+
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ResultLine;
@@ -87,7 +89,7 @@ public class CommandHelpers {
     }
 
 
-    public static UpdateDefendantAttendanceCommandHelper h(UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand){
+    public static UpdateDefendantAttendanceCommandHelper h(UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand) {
         return new UpdateDefendantAttendanceCommandHelper(updateDefendantAttendanceCommand);
     }
 
@@ -142,6 +144,7 @@ public class CommandHelpers {
         public NowDefinition getSecondNowDefinition() {
             return this.allNows.getNows().get(1);
         }
+
         public UUID getFirstNowDefinitionId() {
             return this.allNows.getNows().get(0).getId();
         }
@@ -232,7 +235,7 @@ public class CommandHelpers {
         }
 
         public PleaValue getFirstPleaValue() {
-            return this.hearingUpdatePleaCommand.getPleas().get(0).getValue();
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getPleaValue();
         }
 
         public DelegatedPowers getFirstDelegatePowers() {
@@ -328,7 +331,7 @@ public class CommandHelpers {
             return getFirstDefendant().getOffences().get(0);
         }
 
-        public uk.gov.moj.cpp.hearing.domain.Plea getFirstPlea() {
+        public Plea getFirstPlea() {
             return resultsShared.getPleas().values().stream().findFirst().orElse(null);
         }
 

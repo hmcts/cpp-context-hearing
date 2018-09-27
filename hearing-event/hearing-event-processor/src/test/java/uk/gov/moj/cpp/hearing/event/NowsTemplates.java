@@ -14,10 +14,10 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplate
 
 import com.google.common.collect.ImmutableMap;
 import uk.gov.justice.json.schemas.core.CourtClerk;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
@@ -132,10 +132,11 @@ public class NowsTemplates {
                         .build()
                 ))
                 .withPleas(ImmutableMap.of(randomUUID(), Plea.plea()
-                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                        .setOriginHearingId(hearingOne.getHearingId())
-                        .setPleaDate(PAST_LOCAL_DATE.next())
-                        .setValue(RandomGenerator.values(PleaValue.values()).next())
+                        .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                        .withOriginatingHearingId(hearingOne.getHearingId())
+                        .withPleaDate(PAST_LOCAL_DATE.next())
+                        .withPleaValue(RandomGenerator.values(PleaValue.values()).next())
+                        .build()
                 ))
                 .withVerdicts(ImmutableMap.of(randomUUID(), verdictUpsert))
                 .withCourtClerk(CourtClerk.courtClerk()

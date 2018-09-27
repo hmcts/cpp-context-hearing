@@ -3,38 +3,15 @@
   "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.update-hearing-with-inherited-plea.json",
   "type": "object",
   "properties": {
-    "offenceId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
-    "caseId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
-    "defendantId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
     "hearingId": {
       "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
     },
-    "originHearingId": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
-    "pleaDate": {
-      "type": "string"
-    },
-    "value": {
-      "type": "string"
-    },
-    "delegatedPowers": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/delegatedPowers.json"
+    "plea": {
+      "$ref": "http://justice.gov.uk/json/schemas/core/plea.json"
     }
   },
   "required": [
-    "offenceId",
-    "caseId",
-    "defendantId",
     "hearingId",
-    "originHearingId",
-    "pleaDate",
-    "value"
+    "plea"
   ]
 }

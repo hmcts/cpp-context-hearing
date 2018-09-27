@@ -5,9 +5,8 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Offence;
-import uk.gov.justice.json.schemas.core.PleaValue;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.json.schemas.core.Verdict;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
@@ -15,7 +14,6 @@ import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
@@ -60,7 +58,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -139,13 +136,12 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.initiate(initiateHearingCommand));
     }
 
-    public Stream<Object> updatePlea(final UUID hearingId, final UUID offenceId, final LocalDate pleaDate, final PleaValue pleaValue,
-                                     final DelegatedPowers delegatedPowers) {
-        return apply(pleaDelegate.updatePlea(hearingId, offenceId, pleaDate, pleaValue, delegatedPowers));
+    public Stream<Object> updatePlea(final UUID hearingId, final Plea plea) {
+        return apply(pleaDelegate.updatePlea(hearingId, plea));
     }
 
-    public Stream<Object> inheritPlea(final UpdateHearingWithInheritedPleaCommand command) {
-        return apply(this.pleaDelegate.inheritPlea(command));
+    public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
+        return apply(this.pleaDelegate.inheritPlea(hearingId, plea));
     }
 
     public Stream<Object> logHearingEvent(final LogEventCommand logEventCommand) {

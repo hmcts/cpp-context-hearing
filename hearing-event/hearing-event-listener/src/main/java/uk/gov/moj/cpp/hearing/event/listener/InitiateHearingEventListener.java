@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Optional.ofNullable;
 import static uk.gov.justice.json.schemas.core.PleaValue.GUILTY;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-import static uk.gov.moj.cpp.hearing.Utilities.with;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,18 +15,16 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DelegatedPowers;
+import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.transaction.Transactional;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -47,6 +45,9 @@ public class InitiateHearingEventListener {
 
     @Inject
     private HearingJPAMapper hearingJPAMapper;
+
+    @Inject
+    private PleaJPAMapper pleaJPAMapper;
 
     @Transactional
     @Handles("hearing.events.initiated")
@@ -93,36 +94,29 @@ public class InitiateHearingEventListener {
 
         final InheritedPlea event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InheritedPlea.class);
 
-        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getOffenceId(), event.getHearingId()));
+        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId()));
+
         if (offence != null) {
 
-            offence.setPlea(with(new Plea(), plea -> {
-                plea.setPleaDate(event.getPleaDate());
-                plea.setPleaValue(event.getValue());
-                plea.setOriginatingHearingId(event.getOriginHearingId());
+            final boolean shouldSetPlea = offence.getPlea() == null || isInherited(event, offence);
 
-                if (event.getDelegatedPowers() != null) {
-                    plea.setDelegatedPowers(with(new DelegatedPowers(), delegatedPowers -> {
-                        delegatedPowers.setDelegatedPowersUserId(event.getDelegatedPowers().getUserId());
-                        delegatedPowers.setDelegatedPowersFirstName(event.getDelegatedPowers().getFirstName());
-                        delegatedPowers.setDelegatedPowersLastName(event.getDelegatedPowers().getLastName());
-                    }));
-                }
-
-            }));
-            offence.setConvictionDate(event.getValue() == GUILTY ? event.getPleaDate() : null);
-            offenceRepository.save(offence);
+            if(shouldSetPlea) {
+                offence.setPlea(pleaJPAMapper.toJPA(event.getPlea()));
+                offence.setConvictionDate(event.getPlea().getPleaValue() == GUILTY ? event.getPlea().getPleaDate() : null);
+                offenceRepository.save(offence);
+            }
         }
     }
 
-    private void save(final UUID offenceId, final UUID hearingId,
-                      final Consumer<Offence> consumer) {
-        Optional.ofNullable(offenceRepository
-                .findBy(new HearingSnapshotKey(offenceId, hearingId))).map(o -> {
+    private boolean isInherited(InheritedPlea event, Offence offence) {
+        return !event.getHearingId().equals(offence.getPlea().getOriginatingHearingId());
+    }
+
+    private void save(final UUID offenceId, final UUID hearingId, final Consumer<Offence> consumer) {
+        ofNullable(offenceRepository.findBy(new HearingSnapshotKey(offenceId, hearingId))).map(o -> {
             consumer.accept(o);
             offenceRepository.saveAndFlush(o);
             return o;
-        }).orElseThrow(() -> new RuntimeException(
-                "Offence id is not found on hearing id: " + hearingId));
+        }).orElseThrow(() -> new RuntimeException("Offence id is not found on hearing id: " + hearingId));
     }
 }

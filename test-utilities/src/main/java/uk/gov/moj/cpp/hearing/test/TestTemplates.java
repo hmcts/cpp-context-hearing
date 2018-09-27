@@ -33,6 +33,7 @@ import uk.gov.justice.json.schemas.core.IndicatedPleaValue;
 import uk.gov.justice.json.schemas.core.Jurors;
 import uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence;
 import uk.gov.justice.json.schemas.core.Offence;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionRepresentation;
 import uk.gov.justice.json.schemas.core.ResultLine;
@@ -88,7 +89,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -175,19 +175,17 @@ public class TestTemplates {
         public static UpdatePleaCommand updatePleaTemplate(final UUID originatingHearingId, final UUID offenceId, final PleaValue pleaValue) {
             return UpdatePleaCommand.updatePleaCommand().setPleas(
                     asList(
-                            uk.gov.moj.cpp.hearing.domain.updatepleas.Plea.plea()
-                                    .setOriginatingHearingId(originatingHearingId)
-                                    .setOffenceId(offenceId)
-                                    .setValue(pleaValue)
-                                    .setPleaDate(PAST_LOCAL_DATE.next())
-                                    .setDelegatedPowers(DelegatedPowers.delegatedPowers()
+                            Plea.plea()
+                                    .withOriginatingHearingId(originatingHearingId)
+                                    .withOffenceId(offenceId)
+                                    .withPleaValue(pleaValue)
+                                    .withPleaDate(PAST_LOCAL_DATE.next())
+                                    .withDelegatedPowers(DelegatedPowers.delegatedPowers()
                                             .withFirstName(DAVID)
                                             .withLastName(BOWIE)
                                             .withUserId(UUID.randomUUID())
-                                            .build()
-                                    )
-                    )
-            );
+                                            .build())
+                                    .build()));
         }
     }
 

@@ -10,6 +10,7 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
@@ -64,7 +65,9 @@ public class HearingEventListenerRamlConfigTest {
             NowsVariantsSavedEvent.class.getAnnotation(Event.class).value(),
             HearingAdjourned.class.getAnnotation(Event.class).value(),
             ResultsShared.class.getAnnotation(Event.class).value(),
-            ResultLinesStatusUpdated.class.getAnnotation(Event.class).value()
+            ResultLinesStatusUpdated.class.getAnnotation(Event.class).value(),
+            EnrichUpdatePleaWithAssociatedHearings.class.getAnnotation(Event.class).value()
+
     );
 
     private Map<String, String> handlerNames = new HashMap<>();

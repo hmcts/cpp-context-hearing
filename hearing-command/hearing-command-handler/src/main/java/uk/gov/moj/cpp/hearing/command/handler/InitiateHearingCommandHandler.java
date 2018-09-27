@@ -49,7 +49,7 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.update-hearing-with-inherited-plea event received {}", envelope.toObfuscatedDebugString());
         }
         final UpdateHearingWithInheritedPleaCommand command = convertToObject(envelope, UpdateHearingWithInheritedPleaCommand.class);
-        aggregate(HearingAggregate.class, command.getHearingId(), envelope, a -> a.inheritPlea(command));
+        aggregate(HearingAggregate.class, command.getHearingId(), envelope, a -> a.inheritPlea(command.getHearingId(), command.getPlea()));
     }
 
     @Handles("hearing.command.register-hearing-against-defendant")
