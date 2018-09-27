@@ -4,28 +4,15 @@
   "description": "The prosecution case notes entered at a hearing",
   "type": "object",
   "properties": {
+    "id": {
+      "$ref": "courtsDefinitions.json#/definitions/uuid"
+    },
     "originatingHearingId": {
       "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
     },
     "courtClerk": {
-	  "type": "object",
-	  "properties": {
-		"id": {
-		  "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-		},
-		"firstName": {
-		  "type": "string"
-		},
-		"lastName": {
-		  "type": "string"
-		}
-	  },
-	  "required": [
-		"id",
-		"firstName",
-		"lastName"
-	  ]
-	},
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtClerk.json"
+    },
     "prosecutionCases": {
       "type": "array",
       "minItems": 1,
