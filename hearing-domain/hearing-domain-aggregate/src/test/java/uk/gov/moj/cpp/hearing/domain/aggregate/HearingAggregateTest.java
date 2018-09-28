@@ -22,7 +22,9 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -77,29 +79,27 @@ public class HearingAggregateTest {
 
         final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
                 randomUUID(),
-                randomUUID(),
-                randomUUID(),
-                randomUUID(),
-                randomUUID(),
-                PAST_LOCAL_DATE.next(),
-                PleaValue.GUILTY,
-                uk.gov.justice.json.schemas.core.DelegatedPowers.delegatedPowers()
-                        .withUserId(UUID.randomUUID())
-                        .withFirstName(STRING.next())
-                        .withLastName(STRING.next()).build()
-        );
+                Plea.plea()
+                        .withPleaValue(PleaValue.GUILTY)
+                        .withPleaDate(PAST_LOCAL_DATE.next())
+                        .withOffenceId(randomUUID())
+                        .withOriginatingHearingId(randomUUID())
+                        .withDelegatedPowers(DelegatedPowers.delegatedPowers()
+                                .withUserId(UUID.randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .build());
 
-        final InheritedPlea event = (InheritedPlea) HEARING_AGGREGATE.inheritPlea(command).collect(Collectors.toList()).get(0);
+        final InheritedPlea event = (InheritedPlea) HEARING_AGGREGATE.inheritPlea(command.getHearingId(), command.getPlea()).collect(Collectors.toList()).get(0);
 
-        assertThat(event.getCaseId(), is(command.getCaseId()));
-        assertThat(event.getDefendantId(), is(command.getDefendantId()));
         assertThat(event.getHearingId(), is(command.getHearingId()));
-        assertThat(event.getOffenceId(), is(command.getOffenceId()));
-        assertThat(event.getPleaDate(), is(command.getPleaDate()));
-        assertThat(event.getValue(), is(command.getValue()));
-        assertThat(event.getDelegatedPowers().getUserId(), is(command.getDelegatedPowers().getUserId()));
-        assertThat(event.getDelegatedPowers().getFirstName(), is(command.getDelegatedPowers().getFirstName()));
-        assertThat(event.getDelegatedPowers().getLastName(), is(command.getDelegatedPowers().getLastName()));
+        assertThat(event.getPlea().getOffenceId(), is(command.getPlea().getOffenceId()));
+        assertThat(event.getPlea().getPleaDate(), is(command.getPlea().getPleaDate()));
+        assertThat(event.getPlea().getPleaValue(), is(command.getPlea().getPleaValue()));
+        assertThat(event.getPlea().getDelegatedPowers().getUserId(), is(command.getPlea().getDelegatedPowers().getUserId()));
+        assertThat(event.getPlea().getDelegatedPowers().getFirstName(), is(command.getPlea().getDelegatedPowers().getFirstName()));
+        assertThat(event.getPlea().getDelegatedPowers().getLastName(), is(command.getPlea().getDelegatedPowers().getLastName()));
     }
 
     @Test

@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -37,6 +38,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DelegatedPowers;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -58,6 +60,9 @@ public class InitiateHearingEventListenerTest {
 
     @Mock
     private HearingJPAMapper hearingJPAMapper;
+
+    @Mock
+    private PleaJPAMapper pleaJPAMapper;
 
     @Mock
     private OffenceRepository offenceRepository;
@@ -144,26 +149,41 @@ public class InitiateHearingEventListenerTest {
     @Test
     public void testHearingInitiatedPleaData() {
 
-        final InheritedPlea event = new InheritedPlea()
-                .setOffenceId(randomUUID())
-                .setCaseId(randomUUID())
-                .setDefendantId(randomUUID())
-                .setHearingId(randomUUID())
-                .setOriginHearingId(randomUUID())
-                .setPleaDate(PAST_LOCAL_DATE.next())
-                .setValue(PleaValue.GUILTY)
-                .setDelegatedPowers(
-                        uk.gov.justice.json.schemas.core.DelegatedPowers.delegatedPowers()
-                                .withUserId(randomUUID())
-                                .withFirstName(STRING.next())
-                                .withLastName(STRING.next())
-                                .build());
+        final uk.gov.justice.json.schemas.core.DelegatedPowers delegatedPowersPojo = uk.gov.justice.json.schemas.core.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.json.schemas.core.Plea pleaPojo = uk.gov.justice.json.schemas.core.Plea.plea()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withPleaValue(PleaValue.GUILTY)
+                .withDelegatedPowers(delegatedPowersPojo)
+                .build();
 
-        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getOffenceId(), event.getHearingId());
+        final InheritedPlea event = new InheritedPlea()
+                .setHearingId(randomUUID())
+                .setPlea(pleaPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId());
 
         final Offence offence = new Offence();
         offence.setId(snapshotKey);
         when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final DelegatedPowers delegatedPowers = new DelegatedPowers();
+        delegatedPowers.setDelegatedPowersUserId(delegatedPowersPojo.getUserId());
+        delegatedPowers.setDelegatedPowersLastName(delegatedPowersPojo.getLastName());
+        delegatedPowers.setDelegatedPowersFirstName(delegatedPowersPojo.getFirstName());
+
+        final Plea plea = new Plea();
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setOriginatingHearingId(pleaPojo.getOriginatingHearingId());
+        plea.setDelegatedPowers(delegatedPowers);
+
+        when(pleaJPAMapper.toJPA(Mockito.any())).thenReturn(plea);
 
         initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.initiate-hearing-offence-plead"),
                 objectToJsonObjectConverter.convert(event)));
@@ -173,13 +193,13 @@ public class InitiateHearingEventListenerTest {
         assertThat(offence, isBean(Offence.class)
                 .with(Offence::getId, is(snapshotKey))
                 .with(Offence::getPlea, isBean(Plea.class)
-                        .with(Plea::getOriginatingHearingId, is(event.getOriginHearingId()))
-                        .with(Plea::getPleaDate, is(event.getPleaDate()))
-                        .with(Plea::getPleaValue, is(event.getValue()))
+                        .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
+                        .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))
+                        .with(Plea::getPleaValue, is(event.getPlea().getPleaValue()))
                         .with(Plea::getDelegatedPowers, isBean(DelegatedPowers.class)
-                                .with(DelegatedPowers::getDelegatedPowersUserId, is(event.getDelegatedPowers().getUserId()))
-                                .with(DelegatedPowers::getDelegatedPowersFirstName, is(event.getDelegatedPowers().getFirstName()))
-                                .with(DelegatedPowers::getDelegatedPowersLastName, is(event.getDelegatedPowers().getLastName()))
+                                .with(DelegatedPowers::getDelegatedPowersUserId, is(event.getPlea().getDelegatedPowers().getUserId()))
+                                .with(DelegatedPowers::getDelegatedPowersFirstName, is(event.getPlea().getDelegatedPowers().getFirstName()))
+                                .with(DelegatedPowers::getDelegatedPowersLastName, is(event.getPlea().getDelegatedPowers().getLastName()))
                         )
                 )
         );

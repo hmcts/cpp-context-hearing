@@ -90,9 +90,12 @@ baseUri: message://command/handler/message/hearing
                 application/vnd.hearing.hearing-offence-plea-updated+json:
                     schema: !include json/schema/hearing.hearing-offence-plea-updated.json
                     example: !include json/hearing.hearing-offence-plea-updated.json
-                application/vnd.hearing.offence-plea-updated+json:
-                    schema: !include json/schema/hearing.offence-plea-updated.json
-                    example: !include json/hearing.offence-plea-updated.json
+                application/vnd.hearing.command.update-plea-against-offence+json:
+                    schema: !include json/schema/hearing.command.update-plea-against-offence.json
+                    example: !include json/hearing.command.update-plea-against-offence.json
+                application/vnd.hearing.command.enrich-update-plea-with-associated-hearings+json:
+                    schema: !include json/schema/hearing.command.enrich-update-plea-with-associated-hearings.json
+                    example: !include json/hearing.command.enrich-update-plea-with-associated-hearings.json
 
 
 # Case Defendant Details Update

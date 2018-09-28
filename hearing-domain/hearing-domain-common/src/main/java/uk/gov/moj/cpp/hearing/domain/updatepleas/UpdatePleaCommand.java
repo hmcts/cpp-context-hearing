@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.updatepleas;
 
+import uk.gov.justice.json.schemas.core.Plea;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;

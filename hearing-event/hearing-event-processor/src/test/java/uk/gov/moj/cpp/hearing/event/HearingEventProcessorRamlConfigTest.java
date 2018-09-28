@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -10,10 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 
 public class HearingEventProcessorRamlConfigTest {
 

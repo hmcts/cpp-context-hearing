@@ -5,6 +5,7 @@ import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -83,12 +84,13 @@ public class MagistratesCourtInitiateHearingEventProcessor {
 
                 final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
                         .setHearingId(magsCourtHearingRecorded.getHearingId())
-                        .setOffenceId(offence.getId())
-                        .setPleaDate(offence.getPlea().getPleaDate())
-                        .setValue(PleaValue.valueOf(offence.getPlea().getValue()))
-                        .setDelegatedPowers(null);
+                        .setPlea(Plea.plea()
+                                .withOffenceId(offence.getId())
+                                .withPleaDate(offence.getPlea().getPleaDate())
+                                .withPleaValue(PleaValue.valueOf(offence.getPlea().getValue()))
+                                .build());
 
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.offence-plea-updated")
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-plea-against-offence")
                         .apply(this.objectToJsonValueConverter.convert(pleaUpsert)));
             }
         }

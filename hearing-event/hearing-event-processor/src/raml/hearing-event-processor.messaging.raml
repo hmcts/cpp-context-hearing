@@ -74,6 +74,11 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.hearing-offence-plea-updated.json
             example: !include json/hearing.hearing-offence-plea-updated.json
 
+#enrich Plea
+        application/vnd.hearing.events.enrich-update-plea-with-associated-hearings+json:
+            schema: !include json/schema/hearing.events.enrich-update-plea-with-associated-hearings.json
+            example: !include json/hearing.events.enrich-update-plea-with-associated-hearings.json
+
 # Conviction Date
         application/vnd.hearing.conviction-date-added+json:
             schema: !include json/schema/hearing.conviction-date-added.json

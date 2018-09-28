@@ -25,7 +25,6 @@
     }
   },
   "required": [
-    "originatingHearingId",
     "offenceId",
     "pleaDate",
     "pleaValue"

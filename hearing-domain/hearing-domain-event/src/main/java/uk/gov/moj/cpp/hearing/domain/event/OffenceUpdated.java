@@ -5,12 +5,8 @@ import static java.util.Objects.nonNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.justice.json.schemas.core.DelegatedPowers;
-import uk.gov.justice.json.schemas.core.Jurors;
-import uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence;
 import uk.gov.justice.json.schemas.core.Offence;
-import uk.gov.justice.json.schemas.core.Verdict;
-import uk.gov.justice.json.schemas.core.VerdictType;
+import uk.gov.justice.json.schemas.core.Plea;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -31,8 +27,8 @@ public class OffenceUpdated implements Serializable {
 
     @JsonCreator
     protected OffenceUpdated(@JsonProperty(value = "hearingId", required = true) UUID hearingId,
-            @JsonProperty(value = "defendantId", required = true) UUID defendantId,
-            @JsonProperty(value = "offence", required = true) final Offence offence) {
+                             @JsonProperty(value = "defendantId", required = true) UUID defendantId,
+                             @JsonProperty(value = "offence", required = true) final Offence offence) {
         this.hearingId = hearingId;
         this.defendantId = defendantId;
         this.offence = offence;
@@ -65,20 +61,8 @@ public class OffenceUpdated implements Serializable {
         return this;
     }
 
-    public OffenceUpdated withPlea(final uk.gov.moj.cpp.hearing.domain.Plea plea) {
-        if (null != plea) {
-            this.offence.setPlea(uk.gov.justice.json.schemas.core.Plea.plea()
-                    .withDelegatedPowers(DelegatedPowers.delegatedPowers() //TODO
-                            .withFirstName(null)
-                            .withLastName(null)
-                            .withUserId(null)
-                            .build())
-                    .withOffenceId(plea.getOffenceId())
-                    .withOriginatingHearingId(plea.getOriginHearingId())
-                    .withPleaDate(plea.getPleaDate())
-                    .withPleaValue(plea.getValue())
-                    .build());
-        }
+    public OffenceUpdated withPlea(final Plea plea) {
+        this.offence.setPlea(plea);
         return this;
     }
 

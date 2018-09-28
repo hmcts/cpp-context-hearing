@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import org.slf4j.Logger;
@@ -9,15 +10,13 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DelegatedPowers;
+import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import java.util.List;
 
 @SuppressWarnings({"squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_LISTENER)
@@ -25,15 +24,14 @@ public class PleaUpdateEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PleaUpdateEventListener.class);
 
-    private final OffenceRepository offenceRepository;
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    @Inject
+    private OffenceRepository offenceRepository;
 
     @Inject
-    public PleaUpdateEventListener(final OffenceRepository offenceRepository,
-                                   final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
-        this.offenceRepository = offenceRepository;
-        this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
-    }
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Inject
+    private PleaJPAMapper pleaJpaMapper;
 
     @Transactional
     @Handles("hearing.hearing-offence-plea-updated")
@@ -42,44 +40,12 @@ public class PleaUpdateEventListener {
 
         final PleaUpsert event = convertToObject(envelope);
 
-        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getOffenceId(), event.getHearingId()));
+        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId()));
 
-        if (offence != null) {
-            transferPleaData(event, offence);
+        if (nonNull(offence)) {
+            offence.setPlea(pleaJpaMapper.toJPA(event.getPlea()));
             offenceRepository.save(offence);
-
-            final List<Offence> inheritedOffences = offenceRepository.findByOffenceIdAndOriginatingHearingId(event.getOffenceId(), event.getHearingId());
-            for (Offence inheritedOffence : inheritedOffences) {
-                transferPleaData(event, inheritedOffence);
-                offenceRepository.save(inheritedOffence);
-            }
         }
-    }
-
-    private void transferPleaData(final PleaUpsert event, final Offence offence) {
-        offence.setPlea(buildPlea(event));
-        if (event.getDelegatedPowers() != null) {
-            offence.getPlea().setDelegatedPowers(buildDelegatedPowers(event.getDelegatedPowers()));
-        } else {
-/*            offence.setDelegatedPowersUserId(null);
-            offence.setDelegatedPowersFirstName(null);
-            offence.setDelegatedPowersLastName(null);*/
-        }
-    }
-
-    private DelegatedPowers buildDelegatedPowers(uk.gov.justice.json.schemas.core.DelegatedPowers delegatedPowers) {
-        final DelegatedPowers delegatedPowersDomain = new DelegatedPowers();
-        delegatedPowersDomain.setDelegatedPowersFirstName(delegatedPowers.getFirstName());
-        delegatedPowersDomain.setDelegatedPowersLastName(delegatedPowers.getLastName());
-        delegatedPowersDomain.setDelegatedPowersUserId(delegatedPowers.getUserId());
-        return delegatedPowersDomain;
-    }
-
-    private Plea buildPlea(PleaUpsert event) {
-        final Plea plea = new Plea();
-        plea.setPleaDate(event.getPleaDate());
-        plea.setPleaValue(event.getValue());
-        return plea;
     }
 
     private PleaUpsert convertToObject(final JsonEnvelope envelop) {

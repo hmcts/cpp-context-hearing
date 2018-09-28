@@ -2,117 +2,43 @@ package uk.gov.moj.cpp.hearing.command.initiate;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.justice.json.schemas.core.DelegatedPowers;
-import uk.gov.justice.json.schemas.core.PleaValue;
+import uk.gov.justice.json.schemas.core.Plea;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.UUID;
 
 public class UpdateHearingWithInheritedPleaCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private UUID offenceId;
-    private UUID caseId;
-    private UUID defendantId;
     private UUID hearingId;
-    private UUID originHearingId;
-    private LocalDate pleaDate;
-    private PleaValue value;
-    private DelegatedPowers delegatedPowers;
+    private Plea plea;
 
     public UpdateHearingWithInheritedPleaCommand() {
     }
 
     @JsonCreator
-    public UpdateHearingWithInheritedPleaCommand(@JsonProperty("offenceId") UUID offenceId,
-                                                 @JsonProperty("caseId") UUID caseId,
-                                                 @JsonProperty("defendantId") UUID defendantId,
-                                                 @JsonProperty("hearingId") UUID hearingId,
-                                                 @JsonProperty("originHearingId") UUID originHearingId,
-                                                 @JsonProperty("pleaDate") LocalDate pleaDate,
-                                                 @JsonProperty("value") PleaValue value,
-                                                 @JsonProperty("delegatedPowers") DelegatedPowers delegatedPowers) {
-        this.offenceId = offenceId;
-        this.caseId = caseId;
-        this.defendantId = defendantId;
+    public UpdateHearingWithInheritedPleaCommand(@JsonProperty("hearingId") final UUID hearingId,
+                                                 @JsonProperty("plea") final Plea plea) {
         this.hearingId = hearingId;
-        this.originHearingId = originHearingId;
-        this.pleaDate = pleaDate;
-        this.value = value;
-        this.delegatedPowers = delegatedPowers;
-    }
-
-    public UUID getOffenceId() {
-        return offenceId;
-    }
-
-    public UUID getCaseId() {
-        return caseId;
-    }
-
-    public UUID getDefendantId() {
-        return defendantId;
+        this.plea = plea;
     }
 
     public UUID getHearingId() {
         return hearingId;
     }
 
-    public UUID getOriginHearingId() {
-        return originHearingId;
+    public Plea getPlea() {
+        return plea;
     }
 
-    public LocalDate getPleaDate() {
-        return pleaDate;
-    }
-
-    public PleaValue getValue() {
-        return value;
-    }
-
-    public DelegatedPowers getDelegatedPowers() {
-        return delegatedPowers;
-    }
-
-    public UpdateHearingWithInheritedPleaCommand setOffenceId(UUID offenceId) {
-        this.offenceId = offenceId;
-        return this;
-    }
-
-    public UpdateHearingWithInheritedPleaCommand setCaseId(UUID caseId) {
-        this.caseId = caseId;
-        return this;
-    }
-
-    public UpdateHearingWithInheritedPleaCommand setDefendantId(UUID defendantId) {
-        this.defendantId = defendantId;
-        return this;
-    }
-
-    public UpdateHearingWithInheritedPleaCommand setHearingId(UUID hearingId) {
+    public UpdateHearingWithInheritedPleaCommand setHearingId(final UUID hearingId) {
         this.hearingId = hearingId;
         return this;
     }
 
-    public UpdateHearingWithInheritedPleaCommand setOriginHearingId(UUID originHearingId) {
-        this.originHearingId = originHearingId;
-        return this;
-    }
-
-    public UpdateHearingWithInheritedPleaCommand setPleaDate(LocalDate pleaDate) {
-        this.pleaDate = pleaDate;
-        return this;
-    }
-
-    public UpdateHearingWithInheritedPleaCommand setValue(PleaValue value) {
-        this.value = value;
-        return this;
-    }
-
-    public UpdateHearingWithInheritedPleaCommand setDelegatedPowers(DelegatedPowers delegatedPowers) {
-        this.delegatedPowers = delegatedPowers;
+    public UpdateHearingWithInheritedPleaCommand setPlea(final Plea plea) {
+        this.plea = plea;
         return this;
     }
 

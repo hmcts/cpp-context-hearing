@@ -42,6 +42,7 @@ import uk.gov.justice.json.schemas.core.HearingType;
 import uk.gov.justice.json.schemas.core.JudicialRole;
 import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.justice.json.schemas.core.Offence;
+import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ProsecutionCaseIdentifier;
@@ -139,31 +140,31 @@ public class InitiateHearingCommandHandlerTest {
 
         assertThat(asPojo(jsonEnvelope, HearingInitiated.class), isBean(HearingInitiated.class)
                 .with(HearingInitiated::getHearing, isBean(Hearing.class)
-                                .with(Hearing::getId, is(hearingOne.getHearingId()))
-                                .with(Hearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
-                                .with(Hearing::getHasSharedResults, is(hearing.getHasSharedResults()))
-                                .with(Hearing::getHearingLanguage, is(hearing.getHearingLanguage()))
-                                .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
-                                .with(Hearing::getType, isBean(HearingType.class)
-                                        .with(HearingType::getId, is(hearing.getType().getId()))
-                                        .with(HearingType::getDescription, is(hearing.getType().getDescription())))
-                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
-                                    .with(CourtCentre::getId, is(courtCentre.getId()))
-                                    .with(CourtCentre::getName, is(courtCentre.getName()))
-                                    .with(CourtCentre::getRoomId, is(courtCentre.getRoomId()))
-                                    .with(CourtCentre::getRoomName, is(courtCentre.getRoomName())))
-                                .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
-                                        .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
-                                        .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
-                                .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
-                                        .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
-                                        .with(JudicialRole::getIsBenchChairman, is(judicialRole.getIsBenchChairman()))
-                                        .with(JudicialRole::getIsDeputy, is(judicialRole.getIsDeputy()))
-                                        .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
-                                        .with(JudicialRole::getJudicialRoleType, is(judicialRole.getJudicialRoleType()))
-                                        .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
-                                        .with(JudicialRole::getMiddleName, is(judicialRole.getMiddleName()))
-                                        .with(JudicialRole::getTitle, is(judicialRole.getTitle()))))
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
+                        .with(Hearing::getHasSharedResults, is(hearing.getHasSharedResults()))
+                        .with(Hearing::getHearingLanguage, is(hearing.getHearingLanguage()))
+                        .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
+                        .with(Hearing::getType, isBean(HearingType.class)
+                                .with(HearingType::getId, is(hearing.getType().getId()))
+                                .with(HearingType::getDescription, is(hearing.getType().getDescription())))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getId, is(courtCentre.getId()))
+                                .with(CourtCentre::getName, is(courtCentre.getName()))
+                                .with(CourtCentre::getRoomId, is(courtCentre.getRoomId()))
+                                .with(CourtCentre::getRoomName, is(courtCentre.getRoomName())))
+                        .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
+                                .with(JudicialRole::getIsBenchChairman, is(judicialRole.getIsBenchChairman()))
+                                .with(JudicialRole::getIsDeputy, is(judicialRole.getIsDeputy()))
+                                .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
+                                .with(JudicialRole::getJudicialRoleType, is(judicialRole.getJudicialRoleType()))
+                                .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
+                                .with(JudicialRole::getMiddleName, is(judicialRole.getMiddleName()))
+                                .with(JudicialRole::getTitle, is(judicialRole.getTitle()))))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .with(ProsecutionCase::getId, is(prosecutionCase.getId()))
                                 .with(ProsecutionCase::getCaseStatus, is(prosecutionCase.getCaseStatus()))
@@ -210,7 +211,12 @@ public class InitiateHearingCommandHandlerTest {
                 .build());
 
         final OffenceAggregate offenceAggregate = new OffenceAggregate();
-        offenceAggregate.apply(new OffencePleaUpdated(originHearingId, offenceId, pleaDate, value));
+        offenceAggregate.apply(new OffencePleaUpdated(originHearingId, Plea.plea()
+                .withOffenceId(offenceId)
+                .withPleaDate(pleaDate)
+                .withPleaValue(PleaValue.valueOf(value))
+                .withOriginatingHearingId(originHearingId)
+                .build()));
         setupMockedEventStream(offenceId, this.offenceEventStream, offenceAggregate);
 
         this.hearingCommandHandler.initiateHearingOffence(command);
@@ -232,16 +238,12 @@ public class InitiateHearingCommandHandlerTest {
                         withMetadataEnvelopedFrom(command)
                                 .withName("hearing.events.found-plea-for-hearing-to-inherit"),
                         payloadIsJson(allOf(
-                                withJsonPath("$.offenceId", is(offenceId.toString())),
-                                withJsonPath("$.defendantId", is(defendantId.toString())),
                                 withJsonPath("$.hearingId", is(hearingId.toString())),
-                                withJsonPath("$.caseId", is(caseId.toString())),
-                                withJsonPath("$.originHearingId", is(originHearingId.toString())),
-                                withJsonPath("$.pleaDate", is(pleaDate.toString())),
-                                withJsonPath("$.value", is(value))
+                                withJsonPath("$.plea.originatingHearingId", is(originHearingId.toString())),
+                                withJsonPath("$.plea.pleaDate", is(pleaDate.toString())),
+                                withJsonPath("$.plea.pleaValue", is(value))
                         )))
         );
-
     }
 
     @Test
@@ -251,15 +253,15 @@ public class InitiateHearingCommandHandlerTest {
                 .withUserId(UUID.randomUUID())
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next()).build();
+
         final UpdateHearingWithInheritedPleaCommand input = UpdateHearingWithInheritedPleaCommand.updateHearingWithInheritedPleaCommand()
-                .setCaseId(UUID.randomUUID())
-                .setOffenceId(UUID.randomUUID())
-                .setDefendantId(UUID.randomUUID())
                 .setHearingId(UUID.randomUUID())
-                .setOriginHearingId(UUID.randomUUID())
-                .setPleaDate(PAST_LOCAL_DATE.next())
-                .setValue(PleaValue.GUILTY)
-                .setDelegatedPowers(delegatedPowers);
+                .setPlea(Plea.plea()
+                        .withOffenceId(randomUUID())
+                        .withPleaDate(PAST_LOCAL_DATE.next())
+                        .withPleaValue(PleaValue.GUILTY)
+                        .withDelegatedPowers(delegatedPowers)
+                        .build());
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(input));
 
@@ -274,19 +276,16 @@ public class InitiateHearingCommandHandlerTest {
         assertThat(asPojo(jsonEnvelope, InheritedPlea.class),
                 BeanMatcher.isBean(InheritedPlea.class)
                         .with(InheritedPlea::getHearingId, is(input.getHearingId()))
-                        .with(InheritedPlea::getOffenceId, is(input.getOffenceId()))
-                        .with(InheritedPlea::getDefendantId, is(input.getDefendantId()))
-                        .with(InheritedPlea::getCaseId, is(input.getCaseId()))
-                        .with(InheritedPlea::getOriginHearingId, is(input.getOriginHearingId()))
-                        .with(InheritedPlea::getPleaDate, is(input.getPleaDate()))
-                        .with(InheritedPlea::getValue, is(input.getValue()))
-                        .with(InheritedPlea::getDelegatedPowers, isBean(
+                        .with(InheritedPlea::getPlea, isBean(Plea.class)
+                        .with(Plea::getOffenceId, is(input.getPlea().getOffenceId()))
+                        .with(Plea::getOriginatingHearingId, is(input.getPlea().getOriginatingHearingId()))
+                        .with(Plea::getPleaDate, is(input.getPlea().getPleaDate()))
+                        .with(Plea::getPleaValue, is(input.getPlea().getPleaValue()))
+                        .with(Plea::getDelegatedPowers, isBean(
                                 DelegatedPowers.class)
                                 .with(DelegatedPowers::getUserId, is(delegatedPowers.getUserId()))
                                 .with(DelegatedPowers::getFirstName, is(delegatedPowers.getFirstName()))
-                                .with(DelegatedPowers::getLastName, is(delegatedPowers.getLastName()))
-                        )
-        );
+                                .with(DelegatedPowers::getLastName, is(delegatedPowers.getLastName())))));
 
     }
 

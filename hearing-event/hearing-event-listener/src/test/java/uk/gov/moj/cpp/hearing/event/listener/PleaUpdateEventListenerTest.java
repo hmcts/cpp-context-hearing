@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -16,13 +15,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.Plea;
+import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -36,10 +39,11 @@ import java.util.UUID;
 @RunWith(MockitoJUnitRunner.class)
 public class PleaUpdateEventListenerTest {
 
-    private enum PleaValueType {GUILTY, NOT_GUILTY}
-
     @Mock
     private OffenceRepository offenceRepository;
+
+    @Mock
+    private PleaJPAMapper pleaJpaMapper;
 
     @InjectMocks
     private PleaUpdateEventListener pleaUpdateEventListener;
@@ -57,17 +61,17 @@ public class PleaUpdateEventListenerTest {
     }
 
     @Test
-    public void pleaUpdate_shouldUpdatePlea_toGuilty() throws Exception {
+    public void pleaUpdate_shouldUpdatePlea_toGuilty() {
 
         final UUID hearingId = randomUUID();
-
         final UUID offenceId = randomUUID();
-
-        final OffencePleaUpdated offencePleaUpdated = OffencePleaUpdated.builder()
-                .withHearingId(hearingId)
+        final Plea pleaPojo = Plea.plea()
                 .withOffenceId(offenceId)
                 .withPleaDate(LocalDate.now())
-                .withValue(PleaValueType.GUILTY.name())
+                .withPleaValue(PleaValue.GUILTY).build();
+        final OffencePleaUpdated offencePleaUpdated = OffencePleaUpdated.builder()
+                .withHearingId(hearingId)
+                .withPlea(pleaPojo)
                 .build();
 
         final Hearing hearing = new Hearing();
@@ -83,6 +87,12 @@ public class PleaUpdateEventListenerTest {
         prosecutionCase.setDefendants(asSet(defendant));
 
         hearing.setProsecutionCases(asSet(prosecutionCase));
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Plea plea = new uk.gov.moj.cpp.hearing.persist.entity.ha.Plea();
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setDelegatedPowers(null);
+        when(pleaJpaMapper.toJPA(Mockito.any())).thenReturn(plea);
 
         when(this.offenceRepository.findBy(offence.getId())).thenReturn(offence);
 
@@ -91,31 +101,30 @@ public class PleaUpdateEventListenerTest {
 
         verify(this.offenceRepository).save(offence);
 
-        assertThat(offence.getId().getId(), is(offencePleaUpdated.getOffenceId()));
+        assertThat(offence.getId().getId(), is(offencePleaUpdated.getPlea().getOffenceId()));
         assertThat(offence.getId().getHearingId(), is(offencePleaUpdated.getHearingId()));
-        assertThat(offence.getPlea().getPleaDate(), is(offencePleaUpdated.getPleaDate()));
-        assertThat(offence.getPlea().getPleaValue().toString(), is(offencePleaUpdated.getValue()));
+        assertThat(offence.getPlea().getPleaDate(), is(offencePleaUpdated.getPlea().getPleaDate()));
+        assertThat(offence.getPlea().getPleaValue(), is(offencePleaUpdated.getPlea().getPleaValue()));
     }
 
     @Test
-    public void pleaUpdate_shouldUpdatePlea_toToNotGuilty() throws Exception {
-
+    public void pleaUpdate_shouldUpdatePlea_toToNotGuilty() {
         final UUID hearingId = randomUUID();
-
         final UUID offenceId = randomUUID();
-
         final DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
                 .withUserId(UUID.randomUUID())
                 .withLastName("David")
                 .withFirstName("Bowie")
                 .build();
-
-        final OffencePleaUpdated offencePleaUpdated = OffencePleaUpdated.builder()
-                .withHearingId(hearingId)
+        final Plea pleaPojo = Plea.plea()
                 .withOffenceId(offenceId)
                 .withPleaDate(LocalDate.now())
-                .withValue(PleaValueType.NOT_GUILTY.name())
+                .withPleaValue(PleaValue.GUILTY)
                 .withDelegatedPowers(delegatedPowers)
+                .build();
+        final OffencePleaUpdated offencePleaUpdated = OffencePleaUpdated.builder()
+                .withHearingId(hearingId)
+                .withPlea(pleaPojo)
                 .build();
 
         final Hearing hearing = new Hearing();
@@ -131,6 +140,18 @@ public class PleaUpdateEventListenerTest {
         prosecutionCase.setDefendants(asSet(defendant));
 
         hearing.setProsecutionCases(asSet(prosecutionCase));
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Plea plea = new uk.gov.moj.cpp.hearing.persist.entity.ha.Plea();
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setPleaValue(pleaPojo.getPleaValue());
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.DelegatedPowers delegatedPowersEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.DelegatedPowers();
+        delegatedPowersEntity.setDelegatedPowersFirstName(delegatedPowers.getFirstName());
+        delegatedPowersEntity.setDelegatedPowersLastName(delegatedPowers.getLastName());
+        delegatedPowersEntity.setDelegatedPowersUserId(delegatedPowers.getUserId());
+        plea.setDelegatedPowers(delegatedPowersEntity);
+
+        when(pleaJpaMapper.toJPA(Mockito.any())).thenReturn(plea);
 
         when(this.offenceRepository.findBy(offence.getId())).thenReturn(offence);
 
@@ -141,10 +162,10 @@ public class PleaUpdateEventListenerTest {
 
         final Offence result = hearing.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().iterator().next();
 
-        assertThat(result.getId().getId(), is(offencePleaUpdated.getOffenceId()));
+        assertThat(result.getId().getId(), is(offencePleaUpdated.getPlea().getOffenceId()));
         assertThat(result.getId().getHearingId(), is(offencePleaUpdated.getHearingId()));
-        assertThat(result.getPlea().getPleaDate(), is(offencePleaUpdated.getPleaDate()));
-        assertThat(result.getPlea().getPleaValue().toString(), is(offencePleaUpdated.getValue()));
+        assertThat(result.getPlea().getPleaDate(), is(offencePleaUpdated.getPlea().getPleaDate()));
+        assertThat(result.getPlea().getPleaValue(), is(offencePleaUpdated.getPlea().getPleaValue()));
         assertThat(result.getPlea().getDelegatedPowers().getDelegatedPowersUserId(), is(delegatedPowers.getUserId()));
         assertThat(result.getPlea().getDelegatedPowers().getDelegatedPowersFirstName(), is(delegatedPowers.getFirstName()));
         assertThat(result.getPlea().getDelegatedPowers().getDelegatedPowersLastName(), is(delegatedPowers.getLastName()));
