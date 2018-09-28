@@ -1,35 +1,7 @@
 {
-  "hearingId": "029034d9-0f54-43c5-ba36-e5deadd62474",
-  "courtClerk": {
-    "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
-    "firstName": "David",
-    "lastName": "Walliams"
-  },
-  "uncompletedResultLines": [
-    {
-      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-      "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
-      "defendantId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
-      "orderedDate": "2017-12-21"
-    }
-  ],
-  "completedResultLines": [
-    {
-      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-      "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
-      "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-      "defendantId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
-      "offenceId": "bae56ae5-de09-479f-b48f-d9aae3c6aadd",
-      "level": "CASE",
-      "resultLabel": "Victim Surchange",
-      "orderedDate": "2017-12-21",
-      "prompts": [
-        {
-          "id": "365367db-06e9-4fad-a37f-bc428227f6b8",
-          "label": "Amount",
-          "value": "£60"
-        }
-      ]
-    }
-  ]
+  "courtClerk" : {
+    "firstName" : "GVYtnwSQHL",
+    "id" : "42dc6547-5e1a-474e-b0b9-a44845ca5e75",
+    "lastName" : "yh73jvrd4X"
+  }
 }
