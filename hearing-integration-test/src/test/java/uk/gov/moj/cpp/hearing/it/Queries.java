@@ -61,7 +61,7 @@ public class Queries {
 
     public static void getHearingsByDatePollForMatch(final UUID courtCentreId, final UUID roomId, final String date, final String startTime, final String endTime, final long timeout, final BeanMatcher<HearingListResponse> resultMatcher) {
 
-        final RequestParams requestParams = requestParams(getURL("hearing.get.hearings-by-date", date, startTime, endTime, courtCentreId, roomId), "application/vnd.hearing.get.hearings-by-date+json")
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearings", date, startTime, endTime, courtCentreId, roomId), "application/vnd.hearing.get.hearings+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
                 .build();
 

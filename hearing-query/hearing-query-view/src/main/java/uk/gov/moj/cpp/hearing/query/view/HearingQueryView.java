@@ -38,8 +38,8 @@ public class HearingQueryView {
 
     private static final String FIELD_QUERY = "q";
 
-    @Handles("hearing.get.hearings-by-date")
-    public JsonEnvelope findHearingsByDateV2(final JsonEnvelope envelope) {
+    @Handles("hearing.get.hearings")
+    public JsonEnvelope findHearings(final JsonEnvelope envelope) {
         final LocalDate date = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_DATE));
         final UUID courtCentreId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_COURT_CENTRE_ID));
         final UUID roomId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_ROOM_ID));

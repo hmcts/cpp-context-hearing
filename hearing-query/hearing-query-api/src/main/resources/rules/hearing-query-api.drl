@@ -6,10 +6,10 @@ import java.util.Arrays;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
 
-rule "Query - API - hearing.get.hearings-by-date"
+rule "Query - API - hearing.get.hearings"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.get.hearings-by-date");
+    $action: Action(name == "hearing.get.hearings");
     eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
   then
     $outcome.setSuccess(true);

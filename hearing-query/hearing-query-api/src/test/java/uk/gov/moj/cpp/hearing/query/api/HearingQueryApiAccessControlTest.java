@@ -22,7 +22,7 @@ import org.mockito.Mock;
 public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTest {
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
-    private static final String ACTION_NAME_GET_HEARINGS_BY_DATE = "hearing.get.hearings-by-date";
+    private static final String ACTION_NAME_GET_HEARINGS = "hearing.get.hearings";
     private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
     private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
@@ -47,13 +47,13 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     }
 
     @Test
-    public void shouldAllowUserInAuthorisedGroupToGetHearingsByDateV2() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_DATE, "Listing Officers", "Court Clerks");
+    public void shouldAllowUserInAuthorisedGroupToGetHearings() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByDateV2() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_DATE, "Listing Officers", "Court Clerks");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks");
     }
 
     @Test
