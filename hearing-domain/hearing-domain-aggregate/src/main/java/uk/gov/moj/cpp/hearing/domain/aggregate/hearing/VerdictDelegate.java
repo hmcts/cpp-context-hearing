@@ -8,6 +8,7 @@ import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.io.Serializable;
@@ -28,9 +29,9 @@ public class VerdictDelegate implements Serializable {
         this.momento = momento;
     }
 
-    public void handleVerdictUpsert(VerdictUpsert verdictUpsert) {
-        if(nonNull(verdictUpsert.getVerdict())) {
-            this.momento.getVerdicts().put(verdictUpsert.getVerdict().getOffenceId(), verdictUpsert);
+    public void handleVerdictUpsert(final VerdictUpsert verdictUpsert) {
+        if (nonNull(verdictUpsert.getVerdict())) {
+            this.momento.getVerdicts().put(verdictUpsert.getVerdict().getOffenceId(), verdictUpsert.getVerdict());
         }
     }
 
@@ -41,10 +42,11 @@ public class VerdictDelegate implements Serializable {
         final ProsecutionCase prosecutionCase = this.momento.getHearing().getProsecutionCases().stream()
                 .filter(pc -> pc.getDefendants().stream()
                         .flatMap(de -> de.getOffences().stream())
-                        .anyMatch(o -> o.getId().equals(verdict.getOffenceId()))
-                )
+                        .anyMatch(o -> o.getId().equals(verdict.getOffenceId())))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Offence id is not present"));
+
+        verdict.setOriginatingHearingId(hearingId);
 
         final Offence offence = this.momento.getHearing().getProsecutionCases().stream()
                 .flatMap(pc -> pc.getDefendants().stream())
@@ -64,18 +66,25 @@ public class VerdictDelegate implements Serializable {
                     .setCaseId(prosecutionCase.getId())
                     .setHearingId(hearingId)
                     .setOffenceId(offence.getId())
-                    .setConvictionDate(verdict.getVerdictDate())
-            );
+                    .setConvictionDate(verdict.getVerdictDate()));
         }
 
         if (!verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && nonNull(offence.getConvictionDate())) {
             events.add(ConvictionDateRemoved.convictionDateRemoved()
                     .setCaseId(prosecutionCase.getId())
                     .setHearingId(hearingId)
-                    .setOffenceId(offence.getId())
-            );
+                    .setOffenceId(offence.getId()));
         }
 
         return events.stream();
+    }
+
+    public void handleInheritedVerdict(final InheritedVerdictAdded inheritedVerdict) {
+        this.momento.getVerdicts().computeIfAbsent(inheritedVerdict.getVerdict().getOffenceId(),
+                offenceId -> inheritedVerdict.getVerdict());
+    }
+
+    public Stream<Object> inheritVerdict(UUID hearingId, Verdict verdict) {
+        return Stream.of(new InheritedVerdictAdded(hearingId, verdict));
     }
 }

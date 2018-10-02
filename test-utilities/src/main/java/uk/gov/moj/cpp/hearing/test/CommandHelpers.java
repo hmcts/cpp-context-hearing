@@ -24,7 +24,6 @@ import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.NowResult;
@@ -335,7 +334,7 @@ public class CommandHelpers {
             return resultsShared.getPleas().values().stream().findFirst().orElse(null);
         }
 
-        public VerdictUpsert getFirstVerdict() {
+        public Verdict getFirstVerdict() {
             return resultsShared.getVerdicts().values().stream().findFirst().orElse(null);
         }
 

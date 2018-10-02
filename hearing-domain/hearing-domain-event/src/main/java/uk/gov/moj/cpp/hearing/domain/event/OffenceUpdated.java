@@ -1,12 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import static java.util.Objects.nonNull;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.Plea;
+import uk.gov.justice.json.schemas.core.Verdict;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -66,10 +65,8 @@ public class OffenceUpdated implements Serializable {
         return this;
     }
 
-    public OffenceUpdated withVerdict(final uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert verdictUpsert) {
-        if (nonNull(verdictUpsert)) {
-            this.offence.setVerdict(verdictUpsert.getVerdict());
-        }
+    public OffenceUpdated withVerdict(final Verdict verdict) {
+        this.offence.setVerdict(verdict);
         return this;
     }
 

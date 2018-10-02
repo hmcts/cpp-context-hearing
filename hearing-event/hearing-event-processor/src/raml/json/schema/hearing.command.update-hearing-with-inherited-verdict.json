@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.offence-verdict-updated.json",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.update-hearing-with-inherited-verdict.json",
   "type": "object",
   "properties": {
     "hearingId": {

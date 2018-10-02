@@ -14,9 +14,9 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
@@ -67,12 +67,10 @@ public class InitiateHearingEventProcessor {
                     cases.add(prosecutionCase.getId().toString());
 
                     this.sender.send(this.enveloper
-                            .withMetadataFrom(event, "hearing.command.lookup-plea-on-offence-for-hearing")
-                            .apply(LookupPleaOnOffenceForHearingCommand.lookupPleaOnOffenceForHearingCommand()
+                            .withMetadataFrom(event, "hearing.command.register-hearing-against-offence")
+                            .apply(RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand()
                                     .setHearingId(initiateHearingCommand.getHearing().getId())
-                                    .setDefendantId(defendant.getId())
                                     .setOffenceId(offence.getId())
-                                    .setCaseId(prosecutionCase.getId())
                             ));
                 }
             });
@@ -98,5 +96,13 @@ public class InitiateHearingEventProcessor {
             LOGGER.debug("hearing.events.found-plea-for-hearing-to-inherit event received {}", event.toObfuscatedDebugString());
         }
         this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-plea").apply(event.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.events.found-verdict-for-hearing-to-inherit")
+    public void hearingInitiateOffenceVerdict(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.found-verdict-for-hearing-to-inherit event received {}", event.toObfuscatedDebugString());
+        }
+        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-verdict").apply(event.payloadAsJsonObject()));
     }
 }

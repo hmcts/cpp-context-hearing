@@ -9,7 +9,7 @@ import uk.gov.justice.json.schemas.core.Verdict;
 import java.io.Serializable;
 import java.util.UUID;
 
-@Event("hearing.offence-verdict-updated")
+@Event("hearing.hearing-offence-verdict-updated")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VerdictUpsert implements Serializable {
 

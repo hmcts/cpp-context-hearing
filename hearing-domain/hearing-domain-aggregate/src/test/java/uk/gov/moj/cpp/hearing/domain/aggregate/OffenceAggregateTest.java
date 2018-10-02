@@ -5,18 +5,30 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
+import uk.gov.justice.json.schemas.core.Jurors;
+import uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence;
 import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.PleaValue;
-import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
+import uk.gov.justice.json.schemas.core.Verdict;
+import uk.gov.justice.json.schemas.core.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,7 +37,12 @@ import java.util.stream.Collectors;
 
 public class OffenceAggregateTest {
 
-    OffenceAggregate offenceAggregate = new OffenceAggregate();
+    private OffenceAggregate offenceAggregate;
+
+    @Before
+    public void setUp() {
+        offenceAggregate = new OffenceAggregate();
+    }
 
     @After
     public void teardown() {
@@ -41,36 +58,96 @@ public class OffenceAggregateTest {
     @Test
     public void initiateHearingOffence_withPreviousPlea() {
 
-        LookupPleaOnOffenceForHearingCommand lookupPleaOnOffenceForHearingCommand = new LookupPleaOnOffenceForHearingCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID());
-        LocalDate pleaDate = PAST_LOCAL_DATE.next();
-        String value = PleaValue.GUILTY.toString();
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final PleaValue value = PleaValue.GUILTY;
+
+        final RegisteredHearingAgainstOffence registeredHearingAgainstOffence = RegisteredHearingAgainstOffence.builder()
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId).build();
 
         offenceAggregate.apply(
                 new OffencePleaUpdated(
-                        lookupPleaOnOffenceForHearingCommand.getHearingId(),
+                        registeredHearingAgainstOffence.getHearingId(),
                         Plea.plea()
-                                .withOffenceId(lookupPleaOnOffenceForHearingCommand.getOffenceId())
+                                .withOffenceId(registeredHearingAgainstOffence.getOffenceId())
                                 .withPleaDate(pleaDate)
                                 .withPleaValue(PleaValue.GUILTY)
                                 .build()));
 
-        FoundPleaForHearingToInherit foundPleaForHearingToInherit =
-                (FoundPleaForHearingToInherit) offenceAggregate.lookupPleaForHearing(lookupPleaOnOffenceForHearingCommand)
+        final FoundPleaForHearingToInherit foundPleaForHearingToInherit =
+                (FoundPleaForHearingToInherit) offenceAggregate.lookupOffenceForHearing(
+                        registeredHearingAgainstOffence.getHearingId(),
+                        registeredHearingAgainstOffence.getOffenceId())
                         .collect(Collectors.toList()).get(1);
 
-        assertThat(foundPleaForHearingToInherit.getHearingId(), is(lookupPleaOnOffenceForHearingCommand.getHearingId()));
-        assertThat(foundPleaForHearingToInherit.getPlea().getOffenceId(), is(lookupPleaOnOffenceForHearingCommand.getOffenceId()));
-        assertThat(foundPleaForHearingToInherit.getHearingId(), is(lookupPleaOnOffenceForHearingCommand.getHearingId()));
+        assertThat(foundPleaForHearingToInherit.getHearingId(), is(registeredHearingAgainstOffence.getHearingId()));
+        assertThat(foundPleaForHearingToInherit.getPlea().getOffenceId(), is(registeredHearingAgainstOffence.getOffenceId()));
         assertThat(foundPleaForHearingToInherit.getPlea().getPleaDate(), is(pleaDate));
-        assertThat(foundPleaForHearingToInherit.getPlea().getPleaValue().toString(), is(value));
+        assertThat(foundPleaForHearingToInherit.getPlea().getPleaValue(), is(value));
+    }
+
+    @Test
+    public void initiateHearingOffence_withPreviousVerdict() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final boolean unanimous = BOOLEAN.next();
+        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
+
+        final RegisteredHearingAgainstOffence registeredHearingAgainstOffence = RegisteredHearingAgainstOffence.builder()
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId).build();
+
+        offenceAggregate.apply(
+                new OffenceVerdictUpdated(registeredHearingAgainstOffence.getHearingId(),
+                        Verdict.verdict()
+                                .withVerdictDate(PAST_LOCAL_DATE.next())
+                                .withVerdictType(VerdictType.verdictType()
+                                        .withVerdictTypeId(randomUUID())
+                                        .withCategory(STRING.next())
+                                        .withCategoryType(TestTemplates.VerdictCategoryType.GUILTY.name())
+                                        .withDescription(STRING.next())
+                                        .withSequence(INTEGER.next())
+                                        .build())
+                                .withLesserOrAlternativeOffence(LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                                        .withOffenceDefinitionId(randomUUID())
+                                        .withOffenceCode(STRING.next())
+                                        .withOffenceTitle(STRING.next())
+                                        .withOffenceTitleWelsh(STRING.next())
+                                        .withOffenceLegislation(STRING.next())
+                                        .withOffenceLegislationWelsh(STRING.next())
+                                        .build())
+                                .withJurors(Jurors.jurors()
+                                        .withNumberOfJurors(integer(9, 12).next())
+                                        .withNumberOfSplitJurors(numberOfSplitJurors)
+                                        .withUnanimous(unanimous)
+                                        .build())
+                                .withOffenceId(offenceId)
+                                .withOriginatingHearingId(hearingId)
+                                .build()
+                ));
+
+        final FoundVerdictForHearingToInherit foundVerdictForHearingToInherit =
+                (FoundVerdictForHearingToInherit) offenceAggregate.lookupOffenceForHearing(
+                        registeredHearingAgainstOffence.getHearingId(),
+                        registeredHearingAgainstOffence.getOffenceId())
+                        .collect(Collectors.toList()).get(1);
+
+        assertThat(foundVerdictForHearingToInherit.getHearingId(), is(registeredHearingAgainstOffence.getHearingId()));
+        assertThat(foundVerdictForHearingToInherit.getVerdict().getOffenceId(), is(registeredHearingAgainstOffence.getOffenceId()));
     }
 
     @Test
     public void initiateHearingOffence_withNoPreviousPlea() {
+        final RegisteredHearingAgainstOffence registeredHearingAgainstOffence = RegisteredHearingAgainstOffence.builder()
+                .withHearingId(randomUUID())
+                .withOffenceId(randomUUID()).build();
 
-        LookupPleaOnOffenceForHearingCommand lookupPleaOnOffenceForHearingCommand = new LookupPleaOnOffenceForHearingCommand(randomUUID(), randomUUID(), randomUUID(), randomUUID());
-
-        List<Object> events = offenceAggregate.lookupPleaForHearing(lookupPleaOnOffenceForHearingCommand).collect(Collectors.toList());
+        final List<Object> events = offenceAggregate.lookupOffenceForHearing(
+                registeredHearingAgainstOffence.getHearingId(),
+                registeredHearingAgainstOffence.getOffenceId()).collect(Collectors.toList());
 
         assertThat(events.get(0), not(offenceAggregate.getPlea()));
     }

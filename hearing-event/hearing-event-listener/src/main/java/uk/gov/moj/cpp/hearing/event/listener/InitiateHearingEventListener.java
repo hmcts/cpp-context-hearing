@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.justice.json.schemas.core.PleaValue.GUILTY;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
@@ -14,8 +16,10 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
@@ -48,6 +52,9 @@ public class InitiateHearingEventListener {
 
     @Inject
     private PleaJPAMapper pleaJPAMapper;
+
+    @Inject
+    private VerdictJPAMapper verdictJPAMapper;
 
     @Transactional
     @Handles("hearing.events.initiated")
@@ -96,9 +103,9 @@ public class InitiateHearingEventListener {
 
         final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId()));
 
-        if (offence != null) {
+        if (nonNull(offence)) {
 
-            final boolean shouldSetPlea = offence.getPlea() == null || isInherited(event, offence);
+            final boolean shouldSetPlea = isNull(offence.getPlea()) || isPleaInherited(event, offence);
 
             if(shouldSetPlea) {
                 offence.setPlea(pleaJPAMapper.toJPA(event.getPlea()));
@@ -108,8 +115,35 @@ public class InitiateHearingEventListener {
         }
     }
 
-    private boolean isInherited(InheritedPlea event, Offence offence) {
+    @Transactional
+    @Handles("hearing.events.inherited-verdict-added")
+    public void hearingInitiatedVerdictData(final JsonEnvelope envelop) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.inherited-plea event received {}", envelop.toObfuscatedDebugString());
+        }
+
+        final InheritedVerdictAdded event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InheritedVerdictAdded.class);
+
+        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getVerdict().getOffenceId(), event.getHearingId()));
+
+        if (nonNull(offence)) {
+
+            final boolean shouldSetVerdict = isNull(offence.getVerdict()) || isVerdictInherited(event, offence);
+
+            if(shouldSetVerdict) {
+                offence.setVerdict(verdictJPAMapper.toJPA(event.getVerdict()));
+                offenceRepository.save(offence);
+            }
+        }
+    }
+
+    private boolean isPleaInherited(InheritedPlea event, Offence offence) {
         return !event.getHearingId().equals(offence.getPlea().getOriginatingHearingId());
+    }
+
+    private boolean isVerdictInherited(InheritedVerdictAdded event, Offence offence) {
+        return !event.getHearingId().equals(offence.getVerdict().getOriginatingHearingId());
     }
 
     private void save(final UUID offenceId, final UUID hearingId, final Consumer<Offence> consumer) {

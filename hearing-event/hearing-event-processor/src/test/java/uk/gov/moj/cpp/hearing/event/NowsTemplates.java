@@ -138,7 +138,7 @@ public class NowsTemplates {
                         .withPleaValue(RandomGenerator.values(PleaValue.values()).next())
                         .build()
                 ))
-                .withVerdicts(ImmutableMap.of(randomUUID(), verdictUpsert))
+                .withVerdicts(ImmutableMap.of(randomUUID(), verdictUpsert.getVerdict()))
                 .withCourtClerk(CourtClerk.courtClerk()
                         .withId(randomUUID())
                         .withFirstName(STRING.next())

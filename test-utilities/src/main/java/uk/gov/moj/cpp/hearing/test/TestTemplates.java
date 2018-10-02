@@ -201,7 +201,6 @@ public class TestTemplates {
             return HearingUpdateVerdictCommand.hearingUpdateVerdictCommand()
                     .withHearingId(hearingId)
                     .withVerdicts(singletonList(Verdict.verdict()
-                            .withOriginatingHearingId(randomUUID())
                             .withVerdictType(VerdictType.verdictType()
                                     .withVerdictTypeId(randomUUID())
                                     .withCategory(STRING.next())
@@ -1004,6 +1003,41 @@ public class TestTemplates {
         defendant.setLegalEntityDefendant(legalEntityDefendant(defaultArguments()).build());
 
         return defendant;
+    }
+
+    public static Verdict verdictTemplate(final UUID offenceId, final VerdictCategoryType verdictCategoryType) {
+
+        final boolean unanimous = BOOLEAN.next();
+
+        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
+
+        return Verdict.verdict()
+                .withVerdictType(VerdictType.verdictType()
+                        .withVerdictTypeId(randomUUID())
+                        .withCategory(STRING.next())
+                        .withCategoryType(verdictCategoryType.name())
+                        .withDescription(STRING.next())
+                        .withSequence(INTEGER.next())
+                        .build()
+                )
+                .withOffenceId(offenceId)
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withLesserOrAlternativeOffence(LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                        .withOffenceDefinitionId(randomUUID())
+                        .withOffenceCode(STRING.next())
+                        .withOffenceTitle(STRING.next())
+                        .withOffenceTitleWelsh(STRING.next())
+                        .withOffenceLegislation(STRING.next())
+                        .withOffenceLegislationWelsh(STRING.next())
+                        .build()
+                )
+                .withJurors(Jurors.jurors()
+                        .withNumberOfJurors(integer(9, 12).next())
+                        .withNumberOfSplitJurors(numberOfSplitJurors)
+                        .withUnanimous(unanimous)
+                        .build()
+                )
+                .build();
     }
 
     public static class UpdateDefendantAttendanceCommandTemplates {

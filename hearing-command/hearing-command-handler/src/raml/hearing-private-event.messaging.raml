@@ -76,27 +76,19 @@ baseUri: message://command/handler/message/hearing
                 application/vnd.hearing.results-shared+json:
                     schema: !include json/schema/hearing.results-shared.json
                     example: !include json/hearing.results-shared.json
+
                 application/vnd.hearing.result-lines-status-updated+json:
                     schema: !include json/schema/hearing.result-lines-status-updated.json
                     example: !include json/hearing.result-lines-status-updated.json
 
-# Update Verdict
-                application/vnd.hearing.offence-verdict-updated+json:
-                    schema: !include json/schema/hearing.offence-verdict-updated.json
-                    example: !include json/hearing.offence-verdict-updated.json
-
-
 # Update Plea
-                application/vnd.hearing.hearing-offence-plea-updated+json:
-                    schema: !include json/schema/hearing.hearing-offence-plea-updated.json
-                    example: !include json/hearing.hearing-offence-plea-updated.json
                 application/vnd.hearing.command.update-plea-against-offence+json:
                     schema: !include json/schema/hearing.command.update-plea-against-offence.json
                     example: !include json/hearing.command.update-plea-against-offence.json
+
                 application/vnd.hearing.command.enrich-update-plea-with-associated-hearings+json:
                     schema: !include json/schema/hearing.command.enrich-update-plea-with-associated-hearings.json
                     example: !include json/hearing.command.enrich-update-plea-with-associated-hearings.json
-
 
 # Case Defendant Details Update
                 application/vnd.hearing.update-case-defendant-details-enriched-with-hearing-ids+json:

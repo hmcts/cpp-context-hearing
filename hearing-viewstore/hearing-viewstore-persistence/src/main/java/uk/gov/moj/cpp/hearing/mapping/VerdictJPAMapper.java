@@ -31,7 +31,7 @@ public class VerdictJPAMapper {
             return null;
         }
         final Verdict verdict = new Verdict();
-
+        verdict.setOriginatingHearingId(pojo.getOriginatingHearingId());
         verdict.setVerdictDate(pojo.getVerdictDate());
         verdict.setJurors(jurorsJPAMapper.toJPA(pojo.getJurors()));
         verdict.setLesserOrAlternativeOffence(lesserOrAlternativeOffenceJPAMapper.toJPA(pojo.getLesserOrAlternativeOffence()));

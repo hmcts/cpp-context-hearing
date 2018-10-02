@@ -11,9 +11,9 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.events.initiated.json
             example: !include json/hearing.events.initiated.json
 
-        application/vnd.hearing.command.lookup-plea-on-offence-for-hearing+json:
-            schema: !include json/schema/hearing.command.lookup-plea-on-offence-for-hearing.json
-            example: !include json/hearing.command.lookup-plea-on-offence-for-hearing.json
+        application/vnd.hearing.command.register-hearing-against-offence+json:
+            schema: !include json/schema/hearing.command.register-hearing-against-offence.json
+            example: !include json/hearing.command.register-hearing-against-offence.json
 
         application/vnd.hearing.command.register-hearing-against-defendant+json:
             example: !include json/hearing.command.register-hearing-against-defendant.json
@@ -31,6 +31,16 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.command.update-hearing-with-inherited-plea+json:
             schema: !include json/schema/hearing.command.update-hearing-with-inherited-plea.json
             example: !include json/hearing.command.update-hearing-with-inherited-plea.json
+
+# Inherit verdict after Initiate Hearing
+        application/vnd.hearing.events.found-verdict-for-hearing-to-inherit+json:
+            schema: !include json/schema/hearing.events.found-verdict-for-hearing-to-inherit.json
+            example: !include json/hearing.events.found-verdict-for-hearing-to-inherit.json
+
+        application/vnd.hearing.command.update-hearing-with-inherited-verdict+json:
+            schema: !include json/schema/hearing.command.update-hearing-with-inherited-verdict.json
+            example: !include json/hearing.command.update-hearing-with-inherited-verdict.json
+
 
 # Sending Sheet Complete
         application/vnd.hearing.record-sending-sheet-complete+json:
@@ -79,6 +89,11 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.events.enrich-update-plea-with-associated-hearings.json
             example: !include json/hearing.events.enrich-update-plea-with-associated-hearings.json
 
+#enrich Verdict
+        application/vnd.hearing.events.enrich-update-verdict-with-associated-hearings+json:
+            schema: !include json/schema/hearing.events.enrich-update-verdict-with-associated-hearings.json
+            example: !include json/hearing.events.enrich-update-verdict-with-associated-hearings.json
+
 # Conviction Date
         application/vnd.hearing.conviction-date-added+json:
             schema: !include json/schema/hearing.conviction-date-added.json
@@ -99,9 +114,9 @@ baseUri: message://event/processor/message/hearing
             example: !include json/hearing.draft-result-saved.json
 
 # Update Verdict
-        application/vnd.hearing.offence-verdict-updated+json:
-            schema: !include json/schema/hearing.offence-verdict-updated.json
-            example: !include json/hearing.offence-verdict-updated.json
+        application/vnd.hearing.hearing-offence-verdict-updated+json:
+            schema: !include json/schema/hearing.hearing-offence-verdict-updated.json
+            example: !include json/hearing.hearing-offence-verdict-updated.json
 
 # Case Defendant Details Change
         application/vnd.hearing.update-case-defendant-details-enriched-with-hearing-ids+json:

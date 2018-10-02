@@ -15,15 +15,19 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.events.inherited-plea.json
             example: !include json/hearing.events.inherited-plea.json
 
+        application/vnd.hearing.events.inherited-verdict-added+json:
+            schema: !include json/schema/hearing.events.inherited-verdict-added.json
+            example: !include json/hearing.events.inherited-verdict-added.json
+
+# Update Verdict
+        application/vnd.hearing.hearing-offence-verdict-updated+json:
+            schema: !include json/schema/hearing.hearing-offence-verdict-updated.json
+            example: !include json/hearing.hearing-offence-verdict-updated.json
+
 # Update Plea
         application/vnd.hearing.hearing-offence-plea-updated+json:
             schema: !include json/schema/hearing.hearing-offence-plea-updated.json
             example: !include json/hearing.hearing-offence-plea-updated.json
-
-# Update Verdict
-        application/vnd.hearing.offence-verdict-updated+json:
-            schema: !include json/schema/hearing.offence-verdict-updated.json
-            example: !include json/hearing.offence-verdict-updated.json
 
 # Conviction Date
         application/vnd.hearing.conviction-date-added+json:
@@ -43,7 +47,6 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.newdefence-counsel-added+json:
             schema: !include json/schema/hearing.newdefence-counsel-added.json
             example: !include json/hearing.newdefence-counsel-added.json
-
 
 # Share Results
         application/vnd.hearing.draft-result-saved+json:

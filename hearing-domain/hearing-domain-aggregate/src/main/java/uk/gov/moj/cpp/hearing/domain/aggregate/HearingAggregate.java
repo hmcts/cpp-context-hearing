@@ -45,6 +45,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
@@ -107,6 +108,7 @@ public class HearingAggregate implements Aggregate {
                 when(HearingEventDeleted.class).apply(hearingEventDelegate::handleHearingEventDeleted),
                 when(ResultsShared.class).apply(resultsSharedDelegate::handleResultsShared),
                 when(ResultLinesStatusUpdated.class).apply(resultsSharedDelegate::handleResultLinesStatusUpdated),
+                when(InheritedVerdictAdded.class).apply(verdictDelegate::handleInheritedVerdict),
                 when(VerdictUpsert.class).apply(verdictDelegate::handleVerdictUpsert),
                 when(ConvictionDateAdded.class).apply(convictionDateDelegate::handleConvictionDateAdded),
                 when(ConvictionDateRemoved.class).apply(convictionDateDelegate::handleConvictionDateRemoved),
@@ -218,5 +220,9 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> updateDefendantAttendance(final UpdateDefendantAttendanceCommand command) {
         return apply(this.defendantDelegate.updateDefendantAttendance(command));
+    }
+
+    public Stream<Object> inheritVerdict(UUID hearingId, Verdict verdict) {
+        return apply(this.verdictDelegate.inheritVerdict(hearingId, verdict));
     }
 }

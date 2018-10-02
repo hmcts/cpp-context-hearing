@@ -2,22 +2,22 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class InitiateHearingCommandHandler extends AbstractCommandHandler {
@@ -34,13 +34,13 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
         aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command));
     }
 
-    @Handles("hearing.command.lookup-plea-on-offence-for-hearing")
+    @Handles("hearing.command.register-hearing-against-offence")
     public void initiateHearingOffence(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.lookup-plea-on-offence-for-hearing event received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.register-hearing-against-offence event received {}", envelope.toObfuscatedDebugString());
         }
-        final LookupPleaOnOffenceForHearingCommand command = convertToObject(envelope, LookupPleaOnOffenceForHearingCommand.class);
-        aggregate(OffenceAggregate.class, command.getOffenceId(), envelope, a -> a.lookupPleaForHearing(command));
+        final RegisterHearingAgainstOffenceCommand command = convertToObject(envelope, RegisterHearingAgainstOffenceCommand.class);
+        aggregate(OffenceAggregate.class, command.getOffenceId(), envelope, a -> a.lookupOffenceForHearing(command.getHearingId(), command.getOffenceId()));
     }
 
     @Handles("hearing.command.update-hearing-with-inherited-plea")
@@ -50,6 +50,15 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
         }
         final UpdateHearingWithInheritedPleaCommand command = convertToObject(envelope, UpdateHearingWithInheritedPleaCommand.class);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope, a -> a.inheritPlea(command.getHearingId(), command.getPlea()));
+    }
+
+    @Handles("hearing.command.update-hearing-with-inherited-verdict")
+    public void initiateHearingOffenceVerdict(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-hearing-with-inherited-verdict event received {}", envelope.toObfuscatedDebugString());
+        }
+        final UpdateHearingWithInheritedVerdictCommand command = convertToObject(envelope, UpdateHearingWithInheritedVerdictCommand.class);
+        aggregate(HearingAggregate.class, command.getHearingId(), envelope, a -> a.inheritVerdict(command.getHearingId(), command.getVerdict()));
     }
 
     @Handles("hearing.command.register-hearing-against-defendant")

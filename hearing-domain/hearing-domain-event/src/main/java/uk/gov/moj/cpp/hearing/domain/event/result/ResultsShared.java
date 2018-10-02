@@ -8,11 +8,11 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Plea;
+import uk.gov.justice.json.schemas.core.Verdict;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -40,7 +40,7 @@ public class ResultsShared implements Serializable {
 
     private Map<UUID, DefenceCounselUpsert> defenceCounsels;
 
-    private Map<UUID, VerdictUpsert> verdicts;
+    private Map<UUID, Verdict> verdicts;
 
     private Map<UUID, Plea> pleas;
 
@@ -59,7 +59,7 @@ public class ResultsShared implements Serializable {
                           @JsonProperty("prosecutionCounsels") final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels,
                           @JsonProperty("defenceCounsels") final Map<UUID, DefenceCounselUpsert> defenceCounsels,
                           @JsonProperty("pleas") final Map<UUID, Plea> pleas,
-                          @JsonProperty("verdicts") final Map<UUID, VerdictUpsert> verdicts,
+                          @JsonProperty("verdicts") final Map<UUID, Verdict> verdicts,
                           @JsonProperty("variantDirectory") final List<Variant> variantDirectory,
                           @JsonProperty("completedResultLinesStatus") final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
         this.hearingId = hearingId;
@@ -94,7 +94,7 @@ public class ResultsShared implements Serializable {
         return defenceCounsels;
     }
 
-    public Map<UUID, VerdictUpsert> getVerdicts() {
+    public Map<UUID, Verdict> getVerdicts() {
         return verdicts;
     }
 
@@ -141,7 +141,7 @@ public class ResultsShared implements Serializable {
 
         private Map<UUID, DefenceCounselUpsert> defenceCounsels;
 
-        private Map<UUID, VerdictUpsert> verdicts;
+        private Map<UUID, Verdict> verdicts;
 
         private Map<UUID, Plea> pleas;
 
@@ -179,7 +179,7 @@ public class ResultsShared implements Serializable {
             return this;
         }
 
-        public Builder withVerdicts(final Map<UUID, VerdictUpsert> verdicts) {
+        public Builder withVerdicts(final Map<UUID, Verdict> verdicts) {
             this.verdicts = verdicts;
             return this;
         }

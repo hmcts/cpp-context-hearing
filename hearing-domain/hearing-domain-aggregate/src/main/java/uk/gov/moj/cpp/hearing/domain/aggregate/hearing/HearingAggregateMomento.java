@@ -3,11 +3,11 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.Target;
+import uk.gov.justice.json.schemas.core.Verdict;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -26,7 +26,7 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, ProsecutionCounselUpsert> prosecutionCounsels = new HashMap<>();
     private final Map<UUID, DefenceCounselUpsert> defenceCounsels = new HashMap<>();
     private final Map<UUID, Plea> pleas = new HashMap<>();
-    private final Map<UUID, VerdictUpsert> verdicts = new HashMap<>();
+    private final Map<UUID, Verdict> verdicts = new HashMap<>();
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
@@ -52,7 +52,7 @@ public class HearingAggregateMomento implements Serializable {
         return pleas;
     }
 
-    public Map<UUID, VerdictUpsert> getVerdicts() {
+    public Map<UUID, Verdict> getVerdicts() {
         return verdicts;
     }
 

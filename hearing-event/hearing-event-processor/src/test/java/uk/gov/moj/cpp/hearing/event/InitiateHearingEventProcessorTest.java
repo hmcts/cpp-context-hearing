@@ -116,14 +116,10 @@ public class InitiateHearingEventProcessorTest {
 
         assertThat(
                 envelopes.get(1), jsonEnvelope(
-                        metadata().withName("hearing.command.lookup-plea-on-offence-for-hearing"),
+                        metadata().withName("hearing.command.register-hearing-against-offence"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.offenceId", is(offenceIds.get(0).toString())),
-                                withJsonPath("$.caseId", is(prosecutionCaseIds.get(0).toString())),
-                                withJsonPath("$.defendantId", is(defendantIds.get(0).toString())),
-                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
-                        .thatMatchesSchema()
-        );
+                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))))));
 
 
         assertThat(

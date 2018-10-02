@@ -24,25 +24,18 @@ public class PleaDelegate implements Serializable {
 
     public void handleInheritedPlea(final InheritedPlea inheritedPlea) {
         this.momento.getPleas().computeIfAbsent(inheritedPlea.getPlea().getOffenceId(),
-                offenceId -> Plea.plea()
-                        .withOriginatingHearingId(inheritedPlea.getHearingId())
-                        .withOffenceId(offenceId)
-                        .withPleaValue(inheritedPlea.getPlea().getPleaValue())
-                        .withPleaDate(inheritedPlea.getPlea().getPleaDate())
-                        .build());
+                offenceId -> inheritedPlea.getPlea());
     }
 
     public void handlePleaUpsert(final PleaUpsert pleaUpsert) {
         this.momento.getPleas().put(pleaUpsert.getPlea().getOffenceId(),
-                pleaUpsert.getPlea()
-        );
+                pleaUpsert.getPlea());
     }
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
         return Stream.of(InheritedPlea.inheritedPlea()
                 .setHearingId(hearingId)
-                .setPlea(plea)
-        );
+                .setPlea(plea));
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final uk.gov.justice.json.schemas.core.Plea plea) {
@@ -76,6 +69,5 @@ public class PleaDelegate implements Serializable {
 
         return events.stream();
     }
-
 
 }

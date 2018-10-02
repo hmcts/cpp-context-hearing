@@ -28,16 +28,30 @@ public class VerdictUpdateEventProcessor {
         this.sender = sender;
     }
 
-    @Handles("hearing.offence-verdict-updated")
+    @Handles("hearing.hearing-offence-verdict-updated")
     public void verdictUpdate(final JsonEnvelope envelop) {
+
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.offence-verdict-updated event received {}", envelop.toObfuscatedDebugString());
+            LOGGER.debug("hearing.hearing-offence-verdict-updated event received {}", envelop.toObfuscatedDebugString());
         }
+
+        this.sender.send(this.enveloper.withMetadataFrom(envelop, "hearing.command.update-verdict-against-offence")
+                .apply(envelop.payloadAsJsonObject()));
+
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.verdict-updated")
                 .apply(createObjectBuilder()
                         .add("hearingId", envelop.payloadAsJsonObject().getJsonString("hearingId"))
-                        .build()
-                )
-        );
+                        .build()));
+    }
+
+    @Handles("hearing.events.enrich-update-verdict-with-associated-hearings")
+    public void enrichedUpdatedPlea(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.enrich-update-verdict-with-associated-hearings event received {}", event.toObfuscatedDebugString());
+        }
+
+        this.sender.send(
+                this.enveloper.withMetadataFrom(event, "hearing.command.enrich-update-verdict-with-associated-hearings")
+                .apply(event.payloadAsJsonObject()));
     }
 }

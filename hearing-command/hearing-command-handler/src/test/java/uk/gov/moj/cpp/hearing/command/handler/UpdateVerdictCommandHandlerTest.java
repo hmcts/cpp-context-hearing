@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
@@ -11,16 +9,13 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.verdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,10 +39,16 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.UpdateInheritedVerdictCommand;
+import uk.gov.moj.cpp.hearing.command.verdict.UpdateOffenceVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
@@ -61,6 +62,9 @@ public class UpdateVerdictCommandHandlerTest {
 
     @Mock
     private EventStream hearingEventStream;
+
+    @Mock
+    private EventStream offenceAggregateEventStream;
 
     @Mock
     private EventSource eventSource;
@@ -79,7 +83,10 @@ public class UpdateVerdictCommandHandlerTest {
             HearingInitiated.class,
             VerdictUpsert.class,
             ConvictionDateAdded.class,
-            ConvictionDateRemoved.class
+            ConvictionDateRemoved.class,
+            OffenceVerdictUpdated.class,
+            EnrichUpdateVerdictWithAssociatedHearings.class,
+            InheritedVerdictAdded.class
     );
 
     @InjectMocks
@@ -126,7 +133,7 @@ public class UpdateVerdictCommandHandlerTest {
                 .with(VerdictUpsert::getHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
                 .with(VerdictUpsert::getVerdict, isBean(Verdict.class)
                         .with(Verdict::getOffenceId, is(verdict.getOffenceId()))
-                        .with(Verdict::getOriginatingHearingId, is(verdict.getOriginatingHearingId()))
+                        .with(Verdict::getOriginatingHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
                         .with(Verdict::getVerdictDate, is(verdict.getVerdictDate()))
                         .with(Verdict::getVerdictType, isBean(VerdictType.class)
                                 .with(VerdictType::getVerdictTypeId, is(verdict.getVerdictType().getVerdictTypeId()))
@@ -186,7 +193,7 @@ public class UpdateVerdictCommandHandlerTest {
                 .with(VerdictUpsert::getHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
                 .with(VerdictUpsert::getVerdict, isBean(Verdict.class)
                         .with(Verdict::getOffenceId, is(verdict.getOffenceId()))
-                        .with(Verdict::getOriginatingHearingId, is(verdict.getOriginatingHearingId()))
+                        .with(Verdict::getOriginatingHearingId, is(hearingUpdateVerdictCommand.getHearingId()))
                         .with(Verdict::getVerdictDate, is(verdict.getVerdictDate()))
                         .with(Verdict::getVerdictType, isBean(VerdictType.class)
                                 .with(VerdictType::getVerdictTypeId, is(verdict.getVerdictType().getVerdictTypeId()))
@@ -210,6 +217,52 @@ public class UpdateVerdictCommandHandlerTest {
                 .with(ConvictionDateRemoved::getCaseId, is(caseId))
                 .with(ConvictionDateRemoved::getHearingId, is(hearingId))
                 .with(ConvictionDateRemoved::getOffenceId, is(offenceId)));
+    }
+
+    @Test
+    public void updateOffenceVerdict() throws EventStreamException {
+
+        final UpdateOffenceVerdictCommand command = new UpdateOffenceVerdictCommand();
+        command.setHearingId(randomUUID());
+        command.setVerdict(verdictTemplate(randomUUID(), TestTemplates.VerdictCategoryType.GUILTY));
+
+        final OffenceAggregate aggregate = new OffenceAggregate();
+        aggregate.getHearingIds().add(randomUUID());
+
+        setupMockedEventStream(command.getVerdict().getOffenceId(), this.offenceAggregateEventStream, aggregate);
+
+        final JsonEnvelope updateOffenceVerdictCommand = envelopeFrom(metadataWithRandomUUID("hearing.command.update-verdict-against-offence"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateOffenceVerdict(updateOffenceVerdictCommand);
+
+        final List<?> events = verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream).collect(Collectors.toList());
+
+        assertThat(((JsonEnvelope) events.get(0)).metadata().name(), is("hearing.offence-verdict-updated"));
+
+        assertThat(((JsonEnvelope) events.get(1)).metadata().name(), is("hearing.events.enrich-update-verdict-with-associated-hearings"));
+
+    }
+
+    @Test
+    public void updateInheritVerdict() throws EventStreamException {
+
+        final UUID hearingId = randomUUID();
+
+        final UpdateInheritedVerdictCommand command = new UpdateInheritedVerdictCommand();
+        command.setHearingIds(asList(hearingId));
+        command.setVerdict(verdictTemplate(randomUUID(), TestTemplates.VerdictCategoryType.GUILTY));
+
+        setupMockedEventStream(hearingId, this.hearingEventStream, new HearingAggregate());
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-verdict-with-associated-hearings"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateInheritVerdict(envelope);
+
+        final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
+        assertThat(((JsonEnvelope) events.get(0)).metadata().name(), is("hearing.events.inherited-verdict-added"));
     }
 
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {

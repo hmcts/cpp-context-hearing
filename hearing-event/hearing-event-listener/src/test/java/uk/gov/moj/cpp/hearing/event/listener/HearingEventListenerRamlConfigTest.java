@@ -6,26 +6,35 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import org.apache.commons.io.FileUtils;
+import org.junit.Before;
+import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,21 +43,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-
 public class HearingEventListenerRamlConfigTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";
     private static final String COMMAND_NAME = "hearing";
     private static final String CONTENT_TYPE_PREFIX = "application/vnd.";
     private final List<String> handlerNamesToIgnore = asList(
-
+            FoundVerdictForHearingToInherit.class.getAnnotation(Event.class).value(),
             FoundPleaForHearingToInherit.class.getAnnotation(Event.class).value(),
             OffencePleaUpdated.class.getAnnotation(Event.class).value(),
+            OffenceVerdictUpdated.class.getAnnotation(Event.class).value(),
             DefenceWitnessAdded.class.getAnnotation(Event.class).value(),
             HearingEventIgnored.class.getAnnotation(Event.class).value(),
             HearingVerdictUpdated.class.getAnnotation(Event.class).value(),
@@ -66,7 +69,8 @@ public class HearingEventListenerRamlConfigTest {
             HearingAdjourned.class.getAnnotation(Event.class).value(),
             ResultsShared.class.getAnnotation(Event.class).value(),
             ResultLinesStatusUpdated.class.getAnnotation(Event.class).value(),
-            EnrichUpdatePleaWithAssociatedHearings.class.getAnnotation(Event.class).value()
+            EnrichUpdatePleaWithAssociatedHearings.class.getAnnotation(Event.class).value(),
+            EnrichUpdateVerdictWithAssociatedHearings.class.getAnnotation(Event.class).value()
 
     );
 
@@ -121,7 +125,6 @@ public class HearingEventListenerRamlConfigTest {
                 })
                 .collect(toList());
         eventHandlerNames.removeAll(this.handlerNamesToIgnore);
-
         assertThat(this.ramlActionNames, containsInAnyOrder(eventHandlerNames.toArray()));
     }
 

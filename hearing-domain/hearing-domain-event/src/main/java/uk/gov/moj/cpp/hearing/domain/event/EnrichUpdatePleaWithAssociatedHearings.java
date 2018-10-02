@@ -16,14 +16,12 @@ public class EnrichUpdatePleaWithAssociatedHearings implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Plea plea;
-    private List<UUID> hearingIds;
 
-    private EnrichUpdatePleaWithAssociatedHearings() {
-    }
+    private List<UUID> hearingIds;
 
     @JsonCreator
     public EnrichUpdatePleaWithAssociatedHearings(@JsonProperty("hearingIds") final List<UUID> hearingIds,
-                                          @JsonProperty("plea") final Plea plea) {
+                                                  @JsonProperty("plea") final Plea plea) {
         this.plea = plea;
         this.hearingIds = new ArrayList<>(hearingIds);
     }

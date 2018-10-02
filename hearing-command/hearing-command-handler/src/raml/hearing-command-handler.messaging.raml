@@ -10,13 +10,17 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.initiate.json
             schema:  !include json/schema/hearing.initiate.json
 
-        application/vnd.hearing.command.lookup-plea-on-offence-for-hearing+json:
-            schema: !include json/schema/hearing.command.lookup-plea-on-offence-for-hearing.json
-            example: !include json/hearing.command.lookup-plea-on-offence-for-hearing.json
+        application/vnd.hearing.command.register-hearing-against-offence+json:
+            schema: !include json/schema/hearing.command.register-hearing-against-offence.json
+            example: !include json/hearing.command.register-hearing-against-offence.json
 
         application/vnd.hearing.command.update-hearing-with-inherited-plea+json:
             schema: !include json/schema/hearing.command.update-hearing-with-inherited-plea.json
             example: !include json/hearing.command.update-hearing-with-inherited-plea.json
+
+        application/vnd.hearing.command.update-hearing-with-inherited-verdict+json:
+            schema: !include json/schema/hearing.command.update-hearing-with-inherited-verdict.json
+            example: !include json/hearing.command.update-hearing-with-inherited-verdict.json
 
         application/vnd.hearing.command.register-hearing-against-defendant+json:
             schema: !include json/schema/hearing.command.register-hearing-against-defendant.json
@@ -83,6 +87,14 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.command.update-verdict.json
             schema:  !include json/schema/hearing.command.update-verdict.json
 
+        application/vnd.hearing.command.update-verdict-against-offence+json:
+            example: !include json/hearing.command.update-verdict-against-offence.json
+            schema:  !include json/schema/hearing.command.update-verdict-against-offence.json
+
+        application/vnd.hearing.command.enrich-update-verdict-with-associated-hearings+json:
+            example: !include json/hearing.command.enrich-update-verdict-with-associated-hearings.json
+            schema:  !include json/schema/hearing.command.enrich-update-verdict-with-associated-hearings.json
+
 # Update Defendant Attendance On Hearing Day
         application/vnd.hearing.update-defendant-attendance-on-hearing-day+json:
             example: !include json/hearing.update-defendant-attendance-on-hearing-day.json
@@ -145,12 +157,6 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.adjourn-hearing+json:
                 schema: !include json/schema/hearing.adjourn-hearing.json
                 example: !include json/hearing.adjourn-hearing.json
-
-
-
-
-
-
 
 # notification upload subscriptions
         application/vnd.hearing.command.upload-subscriptions+json:
