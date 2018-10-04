@@ -95,8 +95,9 @@ public class PublishResultsDelegate {
                 .map(rl -> {
                             final ResultDefinition resultDefinition = this.referenceDataService.getResultDefinitionById(context, rl.getOrderedDate(), rl.getResultDefinitionId());
                             if (resultDefinition == null) {
-                                throw new RuntimeException(String.format("resultDefinition not found for resultLineId: %s, resultDefinitionId: %s, targetId: %s, hearingId: %s ",
-                                        rl.getResultLineId(), rl.getResultDefinitionId(), target.getTargetId(), target.getHearingId()));
+                                throw new RuntimeException(String.format(
+                                        "resultDefinition not found for resultLineId: %s, resultDefinitionId: %s, targetId: %s, hearingId: %s orderedDate: %s",
+                                        rl.getResultLineId(), rl.getResultDefinitionId(), target.getTargetId(), target.getHearingId(), rl.getOrderedDate()));
                             }
                             return SharedResultLine.sharedResultLine()
                                     .withDefendantId(target.getDefendantId())
