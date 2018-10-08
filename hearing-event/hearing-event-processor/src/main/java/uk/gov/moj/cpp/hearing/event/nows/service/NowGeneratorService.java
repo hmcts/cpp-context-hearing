@@ -42,7 +42,7 @@ public class NowGeneratorService {
 
     private static final String FAILED = "failed";
     public static final String HEARING_UPDATE_NOWS_MATERIAL_STATUS = "hearing.command.update-nows-material-status";
-    public static final String RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS = "resultinghmps.update-nows-material-status";
+    public static final String RESULTS_UPDATE_NOWS_MATERIAL_STATUS = "results.update-nows-material-status";
 
     private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -84,7 +84,7 @@ public class NowGeneratorService {
         } catch (IOException | RuntimeException e) {
             LOGGER.error("Error while uploading document generation or upload ", e);
             updateStatus(sender, hearingId, nowsDocumentOrder.getMaterialId().toString(), userId.toString(), FAILED, HEARING_UPDATE_NOWS_MATERIAL_STATUS);
-            updateStatus(sender, hearingId, nowsDocumentOrder.getMaterialId().toString(), userId.toString(), FAILED, RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS);
+            updateStatus(sender, hearingId, nowsDocumentOrder.getMaterialId().toString(), userId.toString(), FAILED, RESULTS_UPDATE_NOWS_MATERIAL_STATUS);
         }
     }
 

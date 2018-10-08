@@ -39,7 +39,6 @@ import uk.gov.moj.cpp.hearing.nows.events.Now;
 import uk.gov.moj.cpp.hearing.nows.events.SharedResultLine;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.NotifyStub;
 import uk.gov.moj.cpp.hearing.utils.QueueUtil;

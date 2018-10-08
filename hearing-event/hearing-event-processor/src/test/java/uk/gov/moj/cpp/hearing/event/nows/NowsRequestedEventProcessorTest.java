@@ -21,7 +21,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.HEARING_UPDATE_NOWS_MATERIAL_STATUS;
-import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS;
+import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.RESULTS_UPDATE_NOWS_MATERIAL_STATUS;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowsRequestedTemplates.nowsRequestedTemplate;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -40,7 +40,6 @@ import uk.gov.moj.cpp.hearing.event.nows.service.exception.DocumentGenerationExc
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
-import uk.gov.moj.cpp.hearing.nows.events.Person;
 import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClient;
 import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClientProducer;
 
@@ -206,7 +205,7 @@ public class NowsRequestedEventProcessorTest {
                                 is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
-                metadata().withName(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(RESULTS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
                                 is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));
@@ -251,7 +250,7 @@ public class NowsRequestedEventProcessorTest {
                                 is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
-                metadata().withName(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(RESULTS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
                                 is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));

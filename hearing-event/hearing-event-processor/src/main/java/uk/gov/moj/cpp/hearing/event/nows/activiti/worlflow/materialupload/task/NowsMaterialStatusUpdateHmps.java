@@ -25,12 +25,12 @@ public class NowsMaterialStatusUpdateHmps implements JavaDelegate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsMaterialStatusUpdateHmps.class);
 
-    public static final String RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS = "resultinghmps.update-nows-material-status";
+    public static final String RESULTS_UPDATE_NOWS_MATERIAL_STATUS = "results.update-nows-material-status";
     public static final String generated = "generated";
     @Inject
     private Sender sender;
 
-    @Handles("resultinghmps.update-nows-material-status-dummy")
+    @Handles("results.update-nows-material-status-dummy")
     public void doesNothing(final JsonEnvelope jsonEnvelope) {
         // required by framework
     }
@@ -52,7 +52,7 @@ public class NowsMaterialStatusUpdateHmps implements JavaDelegate {
 
 
         final JsonEnvelope postRequestEnvelope = assembleEnvelopeWithPayloadAndMetaDetails(payload,
-                        RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS, materialId, userId.toString());
+                RESULTS_UPDATE_NOWS_MATERIAL_STATUS, materialId, userId.toString());
 
         sender.send(postRequestEnvelope);
     }
