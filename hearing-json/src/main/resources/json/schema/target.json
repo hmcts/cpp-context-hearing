@@ -29,7 +29,6 @@
   },
   "required": [
     "hearingId",
-    "resultLines",
     "targetId",
     "defendantId",
     "offenceId",
