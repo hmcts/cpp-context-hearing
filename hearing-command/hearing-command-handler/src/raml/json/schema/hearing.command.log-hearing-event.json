@@ -37,5 +37,5 @@
     "eventTime",
     "lastModifiedTime"
   ],
-  "additionalProperties":false
+  "additionalProperties": true
 }
