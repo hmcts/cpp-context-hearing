@@ -7,13 +7,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
-import org.apache.commons.lang3.SerializationException;
-import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
@@ -21,6 +14,14 @@ import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefendantAggregateTest {
@@ -46,7 +47,7 @@ public class DefendantAggregateTest {
                 .withHearingId(randomUUID())
                 .build();
 
-        final RegisteredHearingAgainstDefendant result = (RegisteredHearingAgainstDefendant) defendantAggregate.registerHearing(expected).collect(Collectors.toList()).get(0);
+        final RegisteredHearingAgainstDefendant result = (RegisteredHearingAgainstDefendant) defendantAggregate.registerHearing(expected.getDefendantId(), expected.getHearingId()).collect(Collectors.toList()).get(0);
 
         assertThat(result.getDefendantId(), is(expected.getDefendantId()));
         assertThat(result.getHearingId(), is(expected.getHearingId()));
@@ -68,7 +69,7 @@ public class DefendantAggregateTest {
         defendantAggregate.apply(registerDefendantWithHearingCommand);
 
         final CaseDefendantDetailsWithHearings result =
-                (CaseDefendantDetailsWithHearings) defendantAggregate.enrichCaseDefendantDetailsWithHearingIds(command).collect(Collectors.toList()).get(0);
+                (CaseDefendantDetailsWithHearings) defendantAggregate.enrichCaseDefendantDetailsWithHearingIds(command.getDefendant()).collect(Collectors.toList()).get(0);
 
         assertThat(result.getHearingIds(), hasItems(previousHearingId));
     }

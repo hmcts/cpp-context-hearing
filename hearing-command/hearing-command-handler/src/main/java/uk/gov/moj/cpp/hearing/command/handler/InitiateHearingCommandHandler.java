@@ -2,8 +2,6 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -19,6 +17,11 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ServiceComponent(COMMAND_HANDLER)
 public class InitiateHearingCommandHandler extends AbstractCommandHandler {
 
@@ -31,7 +34,17 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.initiate event received {}", envelope.toObfuscatedDebugString());
         }
         final InitiateHearingCommand command = convertToObject(envelope, InitiateHearingCommand.class);
-        aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command));
+        // initiate Hearing command must not contain verdict and plea
+        command.getHearing().getProsecutionCases().stream()
+                .flatMap(p -> p.getDefendants().stream())
+                .collect(Collectors.toList())
+                .stream()
+                .flatMap(d -> d.getOffences().stream())
+                .forEach(o -> {
+                    o.setVerdict(null);
+                    o.setPlea(null);
+                });
+        aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command.getHearing()));
     }
 
     @Handles("hearing.command.register-hearing-against-offence")
@@ -67,7 +80,7 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.register-hearing-against-defendant event received {}", envelope.toObfuscatedDebugString());
         }
         final RegisterHearingAgainstDefendantCommand command = convertToObject(envelope, RegisterHearingAgainstDefendantCommand.class);
-        aggregate(DefendantAggregate.class, command.getDefendantId(), envelope, defendantAggregate -> defendantAggregate.registerHearing(command));
+        aggregate(DefendantAggregate.class, command.getDefendantId(), envelope, defendantAggregate -> defendantAggregate.registerHearing(command.getDefendantId(), command.getHearingId()));
     }
 
     @Handles("hearing.command.register-hearing-against-case")
@@ -76,6 +89,6 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.register-hearing-against-case event received {}", envelope.toObfuscatedDebugString());
         }
         final RegisterHearingAgainstCaseCommand command = convertToObject(envelope, RegisterHearingAgainstCaseCommand.class);
-        aggregate(CaseAggregate.class, command.getCaseId(), envelope, caseAggregate -> caseAggregate.registerHearingId(command));
+        aggregate(CaseAggregate.class, command.getCaseId(), envelope, caseAggregate -> caseAggregate.registerHearingId(command.getCaseId(), command.getHearingId()));
     }
 }

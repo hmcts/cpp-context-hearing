@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.HearingDay;
 import uk.gov.justice.json.schemas.core.HearingType;
 import uk.gov.justice.json.schemas.core.JudicialRole;
 import uk.gov.justice.json.schemas.core.JudicialRoleType;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -57,18 +57,9 @@ public class HearingDelegate implements Serializable {
         this.momento.getHearing().setType(HearingType.hearingType().withDescription(hearingDetailChanged.getType()).build());
     }
 
-    public Stream<Object> initiate(final InitiateHearingCommand initiateHearingCommand) {
-        // initiate Hearing command must not contain verdict and plea
-        initiateHearingCommand.getHearing().getProsecutionCases().stream()
-                .flatMap(p-> p.getDefendants().stream())
-                .collect(Collectors.toList())
-                .stream()
-                .flatMap(d -> d.getOffences().stream())
-                .forEach(o -> {
-                    o.setVerdict(null);
-                    o.setPlea(null);
-                });
-        return Stream.of(new HearingInitiated(initiateHearingCommand.getHearing()));
+    public Stream<Object> initiate(final Hearing hearing) {
+
+        return Stream.of(new HearingInitiated(hearing));
     }
 
     public Stream<Object> updateHearingDetails(final UUID id, final String type, final UUID courtRoomId, final String courtRoomName, final uk.gov.moj.cpp.hearing.command.hearingDetails.Judge judge, final List<ZonedDateTime> hearingDays) {

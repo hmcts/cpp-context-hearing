@@ -1,14 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.stream.Collectors.toSet;
+
 import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
-import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -59,7 +58,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .forEach(resultLine -> resultLine.setIsModified(false));
     }
 
-        public void handleDraftResultShared(final DraftResultSaved draftResultSaved) {
+    public void handleDraftResultShared(final DraftResultSaved draftResultSaved) {
         this.momento.getTargets().put(draftResultSaved.getTarget().getTargetId(), draftResultSaved.getTarget());
 
         //filter by resultLinesIds in draftResultSaved
@@ -81,12 +80,12 @@ public class ResultsSharedDelegate implements Serializable {
         return Stream.of(new DraftResultSaved(target));
     }
 
-    public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
+    public Stream<Object> shareResults(final UUID hearingId, final uk.gov.justice.json.schemas.core.CourtClerk courtClerk, final ZonedDateTime sharedTime) {
 
         return Stream.of(ResultsShared.builder()
-                .withHearingId(command.getHearingId())
+                .withHearingId(hearingId)
                 .withSharedTime(sharedTime)
-                .withCourtClerk(command.getCourtClerk())
+                .withCourtClerk(courtClerk)
                 .withVariantDirectory(calculateNewVariants())
 
                 .withHearing(this.momento.getHearing())
@@ -98,12 +97,12 @@ public class ResultsSharedDelegate implements Serializable {
                 .build());
     }
 
-    public Stream<Object> updateResultLinesStatus(final UpdateResultLinesStatusCommand command) {
+    public Stream<Object> updateResultLinesStatus(final UUID hearingId, final uk.gov.justice.json.schemas.core.CourtClerk courtClerk, final ZonedDateTime lastSharedDateTime, final List<SharedResultLineId> sharedResultLines) {
         return Stream.of(ResultLinesStatusUpdated.builder()
-                .withHearingId(command.getHearingId())
-                .withLastSharedDateTime(command.getLastSharedDateTime())
-                .withSharedResultLines(command.getSharedResultLines())
-                .withCourtClerk(command.getCourtClerk())
+                .withHearingId(hearingId)
+                .withLastSharedDateTime(lastSharedDateTime)
+                .withSharedResultLines(sharedResultLines)
+                .withCourtClerk(courtClerk)
                 .build());
     }
 

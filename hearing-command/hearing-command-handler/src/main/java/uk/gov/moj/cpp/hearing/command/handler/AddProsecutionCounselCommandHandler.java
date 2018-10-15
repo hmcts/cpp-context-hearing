@@ -25,8 +25,13 @@ public class AddProsecutionCounselCommandHandler extends AbstractCommandHandler 
         }
 
         final AddProsecutionCounselCommand addProsecutionCounselCommand = convertToObject(envelope, AddProsecutionCounselCommand.class);
-
         aggregate(HearingAggregate.class, addProsecutionCounselCommand.getHearingId(), envelope,
-                (hearingAggregate) -> hearingAggregate.addProsecutionCounsel(addProsecutionCounselCommand));
+                hearingAggregate -> hearingAggregate.addProsecutionCounsel(addProsecutionCounselCommand.getPersonId(),
+                        addProsecutionCounselCommand.getAttendeeId(),
+                        addProsecutionCounselCommand.getHearingId(),
+                        addProsecutionCounselCommand.getStatus(),
+                        addProsecutionCounselCommand.getFirstName(),
+                        addProsecutionCounselCommand.getLastName(),
+                        addProsecutionCounselCommand.getTitle()));
     }
 }

@@ -5,22 +5,17 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.json.schemas.core.AttendanceDay;
+import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.Plea;
+import uk.gov.justice.json.schemas.core.ResultLine;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.json.schemas.core.Verdict;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
-import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
-import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsCommand;
-import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
-import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
-import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ConvictionDateDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefenceCounselDelegate;
@@ -56,6 +51,7 @@ import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
@@ -126,16 +122,16 @@ public class HearingAggregate implements Aggregate {
 
     }
 
-    public Stream<Object> addProsecutionCounsel(final AddProsecutionCounselCommand prosecutionCounselCommand) {
-        return apply(prosecutionCounselDelegate.addProsecutionCounsel(prosecutionCounselCommand));
+    public Stream<Object> addProsecutionCounsel(final UUID personId, final UUID attendeeId, final UUID hearingId, final String status, final String firstName, final String lastName, final String title) {
+        return apply(prosecutionCounselDelegate.addProsecutionCounsel(personId, attendeeId, hearingId, status, firstName, lastName, title));
     }
 
-    public Stream<Object> addDefenceCounsel(final AddDefenceCounselCommand defenceCounselCommand) {
-        return apply(defenceCounselDelegate.addDefenceCounsel(defenceCounselCommand));
+    public Stream<Object> addDefenceCounsel(final DefenceCounselUpsert defenceCounselUpsert) {
+        return apply(defenceCounselDelegate.addDefenceCounsel(defenceCounselUpsert));
     }
 
-    public Stream<Object> initiate(final InitiateHearingCommand initiateHearingCommand) {
-        return apply(this.hearingDelegate.initiate(initiateHearingCommand));
+    public Stream<Object> initiate(final Hearing hearing) {
+        return apply(this.hearingDelegate.initiate(hearing));
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final Plea plea) {
@@ -146,24 +142,19 @@ public class HearingAggregate implements Aggregate {
         return apply(this.pleaDelegate.inheritPlea(hearingId, plea));
     }
 
-    public Stream<Object> logHearingEvent(final LogEventCommand logEventCommand) {
-        return apply(this.hearingEventDelegate.logHearingEvent(logEventCommand));
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent) {
+        return apply(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
     }
 
-    public Stream<Object> updateHearingEvents(final UpdateHearingEventsCommand updateHearingEventsCommand) {
-        return this.apply(this.hearingEventDelegate.updateHearingEvents(updateHearingEventsCommand));
+    public Stream<Object> updateHearingEvents(final UUID hearingId, List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents) {
+        return this.apply(this.hearingEventDelegate.updateHearingEvents(hearingId, hearingEvents));
     }
 
-    public Stream<Object> correctHearingEvent(final CorrectLogEventCommand logEventCommand) {
-        return apply(this.hearingEventDelegate.correctHearingEvent(logEventCommand));
+    public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent) {
+        return apply(this.hearingEventDelegate.correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
     }
 
-    public Stream<Object> updateHearingDetails(final UUID id,
-                                               final String type,
-                                               final UUID courtRoomId,
-                                               final String courtRoomName,
-                                               final uk.gov.moj.cpp.hearing.command.hearingDetails.Judge judge,
-                                               final List<ZonedDateTime> hearingDays) {
+    public Stream<Object> updateHearingDetails(final UUID id, final String type, final UUID courtRoomId, final String courtRoomName, final uk.gov.moj.cpp.hearing.command.hearingDetails.Judge judge, final List<ZonedDateTime> hearingDays) {
         return apply(this.hearingDelegate.updateHearingDetails(id, type, courtRoomId, courtRoomName, judge, hearingDays));
     }
 
@@ -171,20 +162,20 @@ public class HearingAggregate implements Aggregate {
         return apply(this.verdictDelegate.updateVerdict(hearingId, verdict));
     }
 
-    public Stream<Object> shareResults(final ShareResultsCommand command, final ZonedDateTime sharedTime) {
-        return apply(resultsSharedDelegate.shareResults(command, sharedTime));
+    public Stream<Object> shareResults(final UUID hearingId, final uk.gov.justice.json.schemas.core.CourtClerk courtClerk, final ZonedDateTime sharedTime) {
+        return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime));
     }
 
-    public Stream<Object> saveDraftResults(final Target target) {
-        return apply(resultsSharedDelegate.saveDraftResult(target));
+    public Stream<Object> saveDraftResults(final UUID targetId, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {
+        return apply(resultsSharedDelegate.saveDraftResult(new Target(defendantId, draftResult, hearingId, offenceId, resultLines, targetId)));
     }
 
-    public Stream<Object> updateResultLinesStatus(final UpdateResultLinesStatusCommand command) {
-        return apply(resultsSharedDelegate.updateResultLinesStatus(command));
+    public Stream<Object> updateResultLinesStatus(final UUID hearingId, final uk.gov.justice.json.schemas.core.CourtClerk courtClerk, final ZonedDateTime lastSharedDateTime, final List<SharedResultLineId> sharedResultLines) {
+        return apply(resultsSharedDelegate.updateResultLinesStatus(hearingId, courtClerk, lastSharedDateTime, sharedResultLines));
     }
 
-    public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {
-        return apply(this.defendantDelegate.updateDefendantDetails(command));
+    public Stream<Object> updateDefendantDetails(final UUID hearingId, final Defendant defendant) {
+        return apply(this.defendantDelegate.updateDefendantDetails(hearingId, defendant));
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
@@ -207,10 +198,10 @@ public class HearingAggregate implements Aggregate {
         return apply(Stream.of(nowsRequested));
     }
 
-    public Stream<Object> saveNowsVariants(final SaveNowsVariantsCommand command) {
+    public Stream<Object> saveNowsVariants(final UUID hearingId, final List<Variant> variants) {
         final NowsVariantsSavedEvent event = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
-                .setHearingId(command.getHearingId())
-                .setVariants(command.getVariants());
+                .setHearingId(hearingId)
+                .setVariants(variants);
         return apply(Stream.of(event));
     }
 
@@ -218,8 +209,8 @@ public class HearingAggregate implements Aggregate {
         return apply(Stream.of(nowsRequested));
     }
 
-    public Stream<Object> updateDefendantAttendance(final UpdateDefendantAttendanceCommand command) {
-        return apply(this.defendantDelegate.updateDefendantAttendance(command));
+    public Stream<Object> updateDefendantAttendance(final UUID hearingId, final UUID defendantId, final AttendanceDay attendanceDay) {
+        return apply(this.defendantDelegate.updateDefendantAttendance(hearingId, defendantId, attendanceDay));
     }
 
     public Stream<Object> inheritVerdict(UUID hearingId, Verdict verdict) {

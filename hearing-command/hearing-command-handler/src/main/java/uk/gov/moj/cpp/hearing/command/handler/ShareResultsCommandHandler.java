@@ -2,8 +2,6 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -16,6 +14,9 @@ import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class ShareResultsCommandHandler extends AbstractCommandHandler {
@@ -31,12 +32,11 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.save-draft-result event received {}", envelope.toObfuscatedDebugString());
         }
-        final SaveDraftResultCommand command = convertToObject(envelope, SaveDraftResultCommand.class);
-        final Target target =command.getTarget();
-
-        aggregate(HearingAggregate.class, target.getHearingId(), envelope,
-                aggregate -> aggregate.saveDraftResults(target));
-
+        final Target target = convertToObject(envelope, SaveDraftResultCommand.class).getTarget();
+        if (target != null) {
+            aggregate(HearingAggregate.class, target.getHearingId(), envelope,
+                    aggregate -> aggregate.saveDraftResults(target.getTargetId(), target.getDefendantId(), target.getHearingId(), target.getOffenceId(), target.getDraftResult(),target.getResultLines()));
+        }
     }
 
     @Handles("hearing.command.share-results")
@@ -46,7 +46,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final ShareResultsCommand command = convertToObject(envelope, ShareResultsCommand.class);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                aggregate -> aggregate.shareResults(command, clock.now()));
+                aggregate -> aggregate.shareResults(command.getHearingId(), command.getCourtClerk(), clock.now()));
     }
 
     @Handles("hearing.command.update-result-lines-status")
@@ -56,6 +56,6 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final UpdateResultLinesStatusCommand command = convertToObject(envelope, UpdateResultLinesStatusCommand.class);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                aggregate -> aggregate.updateResultLinesStatus(command));
+                aggregate -> aggregate.updateResultLinesStatus(command.getHearingId(), command.getCourtClerk(), command.getLastSharedDateTime(), command.getSharedResultLines()));
     }
 }

@@ -6,8 +6,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.json.schemas.core.Offence;
-import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
+import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
@@ -34,21 +33,21 @@ public class DefendantAggregate implements Aggregate {
                 );
     }
 
-    public Stream<Object> registerHearing(RegisterHearingAgainstDefendantCommand command) {
+    public Stream<Object> registerHearing(final UUID defendantId, final UUID hearingId) {
         return apply(Stream.of(
                 RegisteredHearingAgainstDefendant.builder()
-                        .withDefendantId(command.getDefendantId())
-                        .withHearingId(command.getHearingId())
+                        .withDefendantId(defendantId)
+                        .withHearingId(hearingId)
                         .build()
         ));
     }
 
-    public Stream<Object> enrichCaseDefendantDetailsWithHearingIds(CaseDefendantDetailsCommand caseDefendantDetails) {
+    public Stream<Object> enrichCaseDefendantDetailsWithHearingIds(final Defendant defendant) {
 
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings =
                 CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
-                .setDefendant(caseDefendantDetails.getDefendant())
-                .setHearingIds(hearingIds);
+                        .setDefendant(defendant)
+                        .setHearingIds(hearingIds);
 
         return apply(Stream.of(caseDefendantDetailsWithHearings));
     }

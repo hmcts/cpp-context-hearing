@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.services.core.annotation.Handles;
@@ -36,7 +35,7 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.save-nows-variants event received {}", envelope.toObfuscatedDebugString());
         }
         final SaveNowsVariantsCommand saveNowsVariantsCommand = convertToObject(envelope, SaveNowsVariantsCommand.class);
-        aggregate(HearingAggregate.class, saveNowsVariantsCommand.getHearingId(), envelope, a -> a.saveNowsVariants(saveNowsVariantsCommand));
+        aggregate(HearingAggregate.class, saveNowsVariantsCommand.getHearingId(), envelope, a -> a.saveNowsVariants(saveNowsVariantsCommand.getHearingId(), saveNowsVariantsCommand.getVariants()));
     }
 
     @Handles("hearing.command.update-nows-material-status")

@@ -42,7 +42,7 @@ public class SubscriptionAggregateTest {
 
         final UploadSubscriptionsCommand uploadSubscriptionsCommand = buildUploadSubscriptionsCommand();
 
-        subscriptionAggregate.initiateUploadSubscriptions(uploadSubscriptionsCommand);
+        subscriptionAggregate.initiateUploadSubscriptions(uploadSubscriptionsCommand.getId(), uploadSubscriptionsCommand.getSubscriptions(), uploadSubscriptionsCommand.getReferenceDate());
     }
 
     private UploadSubscriptionsCommand buildUploadSubscriptionsCommand() {

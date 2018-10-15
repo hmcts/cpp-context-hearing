@@ -5,10 +5,9 @@ import static java.util.Objects.nonNull;
 import uk.gov.justice.json.schemas.core.AttendanceDay;
 import uk.gov.justice.json.schemas.core.Defendant;
 import uk.gov.justice.json.schemas.core.DefendantAttendance;
-import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
-import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class DefendantDelegate implements Serializable {
 
     public void handleDefendantAttendanceUpdated(final DefendantAttendanceUpdated defendantAttendanceUpdated) {
 
-        List<DefendantAttendance> defendantAttendances = nonNull(this.momento.getHearing().getDefendantAttendance()) ? this.momento.getHearing().getDefendantAttendance() : new ArrayList<>() ;
+        List<DefendantAttendance> defendantAttendances = nonNull(this.momento.getHearing().getDefendantAttendance()) ? this.momento.getHearing().getDefendantAttendance() : new ArrayList<>();
 
         Map<UUID, DefendantAttendance> defendantAttendanceMap = defendantAttendances.stream()
                 .collect(Collectors.toMap(DefendantAttendance::getDefendantId, Function.identity()));
@@ -61,28 +60,28 @@ public class DefendantDelegate implements Serializable {
 
     }
 
-    public Stream<Object> updateDefendantDetails(final CaseDefendantDetailsWithHearingCommand command) {
+    public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant) {
 
         if (!this.momento.isPublished()) {
             return Stream.of(DefendantDetailsUpdated.defendantDetailsUpdated()
-                    .setHearingId(command.getHearingId())
-                    .setDefendant(command.getDefendant())
+                    .setHearingId(hearingId)
+                    .setDefendant(defendant)
             );
         }
 
         return Stream.empty();
     }
 
-    public Stream<Object> updateDefendantAttendance(final UpdateDefendantAttendanceCommand command) {
+    public Stream<Object> updateDefendantAttendance(final UUID hearingId, final UUID defendantId, final AttendanceDay attendanceDayP) {
 
         if (!this.momento.isPublished()) {
             final AttendanceDay attendanceDay = AttendanceDay.attendanceDay()
-                    .withDay(command.getAttendanceDay().getDay())
-                    .withIsInAttendance(command.getAttendanceDay().getIsInAttendance())
+                    .withDay(attendanceDayP.getDay())
+                    .withIsInAttendance(attendanceDayP.getIsInAttendance())
                     .build();
             return Stream.of(DefendantAttendanceUpdated.defendantAttendanceUpdated()
-                    .setHearingId(command.getHearingId())
-                    .setDefendantId(command.getDefendantId())
+                    .setHearingId(hearingId)
+                    .setDefendantId(defendantId)
                     .setAttendanceDay(attendanceDay));
         }
         return Stream.empty();

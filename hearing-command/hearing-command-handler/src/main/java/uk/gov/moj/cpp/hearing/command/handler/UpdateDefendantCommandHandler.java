@@ -2,8 +2,6 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -17,6 +15,9 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
@@ -39,7 +40,7 @@ public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
             aggregate(DefendantAggregate.class,
                     defendant.getId(),
                     envelope,
-                    defendantAggregate -> defendantAggregate.enrichCaseDefendantDetailsWithHearingIds(caseDefendantDetailsCommand));
+                    defendantAggregate -> defendantAggregate.enrichCaseDefendantDetailsWithHearingIds(caseDefendantDetailsCommand.getDefendant()));
         }
     }
 
@@ -59,7 +60,7 @@ public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
                             .setDefendant(caseDefendantDetailsWithHearings.getDefendant());
 
             aggregate(HearingAggregate.class, hearingId, envelope,
-                    hearingAggregate -> hearingAggregate.updateDefendantDetails(defendantWithHearingCommand));
+                    hearingAggregate -> hearingAggregate.updateDefendantDetails(defendantWithHearingCommand.getHearingId(), defendantWithHearingCommand.getDefendant()));
 
         }
     }

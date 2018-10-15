@@ -5,10 +5,11 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.subscription.events.SubscriptionUploaded;
 import uk.gov.moj.cpp.hearing.subscription.events.SubscriptionsUploaded;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,13 +24,13 @@ public class SubscriptionAggregate implements Aggregate {
         );
     }
 
-    public Stream<Object> initiateUploadSubscriptions(final UploadSubscriptionsCommand uploadSubscriptionsCommand) {
+    public Stream<Object> initiateUploadSubscriptions(final UUID id, final List<UploadSubscription> subscriptions, final String referenceDate) {
         final SubscriptionsUploaded subscriptionsUploaded = new SubscriptionsUploaded(
-                uploadSubscriptionsCommand.getId(),
-                uploadSubscriptionsCommand.getSubscriptions().stream()
+                id,
+                subscriptions.stream()
                         .map(this::convert)
                         .collect(Collectors.toList()),
-                uploadSubscriptionsCommand.getReferenceDate());
+                referenceDate);
 
         return apply(Stream.of(subscriptionsUploaded));
     }
