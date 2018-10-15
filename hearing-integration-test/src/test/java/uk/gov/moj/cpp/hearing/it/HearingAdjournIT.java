@@ -30,7 +30,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -184,7 +183,7 @@ public class HearingAdjournIT extends AbstractIT {
         final String userGroup1 = "DefenseCounsel";
 
         List<Prompt> promptDefs = asList(DATE_OF_HEARING_LABEL, HEARING_TYPE_LABEL, ESTIMATED_DURATION_LABEL, REMAND_STATUS_LABEL, TIME_OF_HEARING_LABEL).stream()
-                .map(label->Prompt.prompt()
+                .map(label -> Prompt.prompt()
                         .setMandatory(false)
                         .setId(UUID.randomUUID())
                         .setLabel(label)

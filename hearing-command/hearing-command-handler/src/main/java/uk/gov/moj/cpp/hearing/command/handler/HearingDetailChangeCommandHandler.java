@@ -28,10 +28,12 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
         aggregate(HearingAggregate.class, hearingDetailsUpdateCommand.getHearing().getId(), envelope, a -> a.updateHearingDetails(
                 hearingDetailsUpdateCommand.getHearing().getId(),
                 hearingDetailsUpdateCommand.getHearing().getType(),
-                hearingDetailsUpdateCommand.getHearing().getCourtRoomId(),
-                hearingDetailsUpdateCommand.getHearing().getCourtRoomName(),
-                hearingDetailsUpdateCommand.getHearing().getJudge(),
-                hearingDetailsUpdateCommand.getHearing().getHearingDays()
+                hearingDetailsUpdateCommand.getHearing().getCourtCentre(),
+                hearingDetailsUpdateCommand.getHearing().getJurisdictionType(),
+                hearingDetailsUpdateCommand.getHearing().getReportingRestrictionReason(),
+                hearingDetailsUpdateCommand.getHearing().getHearingLanguage(),
+                hearingDetailsUpdateCommand.getHearing().getHearingDays(),
+                hearingDetailsUpdateCommand.getHearing().getJudiciary()
         ));
     }
 }

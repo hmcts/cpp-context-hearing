@@ -1,8 +1,12 @@
 package uk.gov.moj.cpp.hearing.command.hearingDetails;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-
-import java.time.ZonedDateTime;
+import uk.gov.justice.json.schemas.core.CourtCentre;
+import uk.gov.justice.json.schemas.core.HearingDay;
+import uk.gov.justice.json.schemas.core.HearingLanguage;
+import uk.gov.justice.json.schemas.core.HearingType;
+import uk.gov.justice.json.schemas.core.JudicialRole;
+import uk.gov.justice.json.schemas.core.JurisdictionType;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,27 +14,32 @@ public class Hearing {
 
     private UUID id;
 
-    private String type;
+    private HearingType type;
 
-    private UUID courtRoomId;
+    private CourtCentre courtCentre;
 
-    private String courtRoomName;
+    private JurisdictionType jurisdictionType;
 
-    private Judge judge;
+    private String reportingRestrictionReason;
 
-    private List<ZonedDateTime> hearingDays;
+    private HearingLanguage hearingLanguage;
+
+    private List<HearingDay> hearingDays;
+
+    private List<JudicialRole> judiciary;
 
     public Hearing() {
     }
 
     @JsonCreator
-    public Hearing(UUID id, String type, UUID courtRoomId, String courtRoomName, Judge judge, List<ZonedDateTime> hearingDays) {
+    public Hearing(UUID id, HearingType type, CourtCentre courtCentre, JurisdictionType jurisdictionType, String reportingRestrictionReason, List<HearingDay> hearingDays, List<JudicialRole> judiciary) {
         this.id = id;
         this.type = type;
-        this.courtRoomId = courtRoomId;
-        this.courtRoomName = courtRoomName;
-        this.judge = judge;
+        this.courtCentre = courtCentre;
+        this.jurisdictionType = jurisdictionType;
+        this.reportingRestrictionReason = reportingRestrictionReason;
         this.hearingDays = hearingDays;
+        this.judiciary = judiciary;
     }
 
     public UUID getId() {
@@ -42,54 +51,70 @@ public class Hearing {
         return this;
     }
 
-    public String getType() {
+    public HearingType getType() {
         return type;
     }
 
-    public Hearing setType(String type) {
+    public Hearing setType(HearingType type) {
         this.type = type;
         return this;
     }
 
-    public UUID getCourtRoomId() {
-        return courtRoomId;
+    public CourtCentre getCourtCentre() {
+        return courtCentre;
     }
 
-    public Hearing setCourtRoomId(UUID courtRoomId) {
-        this.courtRoomId = courtRoomId;
+    public Hearing setCourtCentre(CourtCentre courtCentre) {
+        this.courtCentre = courtCentre;
         return this;
     }
 
-    public String getCourtRoomName() {
-        return courtRoomName;
+    public JurisdictionType getJurisdictionType() {
+        return jurisdictionType;
     }
 
-    public Hearing setCourtRoomName(String courtRoomName) {
-        this.courtRoomName = courtRoomName;
+    public Hearing setJurisdictionType(JurisdictionType jurisdictionType) {
+        this.jurisdictionType = jurisdictionType;
         return this;
     }
 
-    public Judge getJudge() {
-        return judge;
+    public String getReportingRestrictionReason() {
+        return reportingRestrictionReason;
     }
 
-    public Hearing setJudge(Judge judge) {
-        this.judge = judge;
+    public Hearing setReportingRestrictionReason(String reportingRestrictionReason) {
+        this.reportingRestrictionReason = reportingRestrictionReason;
         return this;
     }
 
-    public List<ZonedDateTime> getHearingDays() {
+    public HearingLanguage getHearingLanguage() {
+        return hearingLanguage;
+    }
+
+    public Hearing setHearingLanguage(HearingLanguage hearingLanguage) {
+        this.hearingLanguage = hearingLanguage;
+        return this;
+    }
+
+    public List<JudicialRole> getJudiciary() {
+        return judiciary;
+    }
+
+    public Hearing setJudiciary(List<JudicialRole> judiciary) {
+        this.judiciary = judiciary;
+        return this;
+    }
+
+    public List<HearingDay> getHearingDays() {
         return hearingDays;
     }
 
-    public Hearing setHearingDays(List<ZonedDateTime> hearingDays) {
+    public Hearing setHearingDays(List<HearingDay> hearingDays) {
         this.hearingDays = hearingDays;
         return this;
     }
 
-    public static Hearing hearing(){
+    public static Hearing hearing() {
         return new Hearing();
     }
 }
-
-

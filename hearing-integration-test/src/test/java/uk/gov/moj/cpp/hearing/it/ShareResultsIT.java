@@ -28,6 +28,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.justice.json.schemas.core.CourtCentre;
@@ -62,7 +63,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -150,7 +150,7 @@ public class ShareResultsIT extends AbstractIT {
         makeCommand(requestSpec, "hearing.save-draft-result")
                 .ofType("application/vnd.hearing.save-draft-result+json")
                 .withArgs(saveDraftResultCommand.getTarget().getHearingId())
-                .withPayload(saveDraftResultCommand.getTarget())
+                .withPayload(saveDraftResultCommand)
                 .executeSuccessfully();
 
         publicEventResulted.waitFor();
@@ -177,8 +177,8 @@ public class ShareResultsIT extends AbstractIT {
                 refDataHelper1.it().getResultDefinitions().stream()
                         .filter(rd -> rd.getId().equals(allNows.getFirstPrimaryResultDefinitionId()))
                         .findFirst()
-                        .orElseThrow( () -> new RuntimeException("invalid test data")
-                );
+                        .orElseThrow(() -> new RuntimeException("invalid test data")
+                        );
 
         final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt now1MandatoryResultDefinitionPrompt = now1MandatoryResultDefinition.getPrompts().get(0);
 

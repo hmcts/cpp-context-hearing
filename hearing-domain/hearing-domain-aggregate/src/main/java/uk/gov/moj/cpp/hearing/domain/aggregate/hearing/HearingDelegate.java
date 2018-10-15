@@ -1,21 +1,22 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.justice.json.schemas.core.CourtCentre;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.HearingDay;
+import uk.gov.justice.json.schemas.core.HearingLanguage;
 import uk.gov.justice.json.schemas.core.HearingType;
 import uk.gov.justice.json.schemas.core.JudicialRole;
-import uk.gov.justice.json.schemas.core.JudicialRoleType;
+import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("squid:S00107")
 public class HearingDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -30,31 +31,16 @@ public class HearingDelegate implements Serializable {
         this.momento.setHearing(hearingInitiated.getHearing());
     }
 
-    public void handleHearingInitiated(HearingDetailChanged hearingDetailChanged) {
+    public void handleHearingDetailChanged(HearingDetailChanged hearingDetailChanged) {
 
-        if (hearingDetailChanged.getJudge() != null) {
-            final JudicialRole judge = this.momento.getHearing().getJudiciary().stream().filter(j ->
-                    j.getJudicialRoleType() == JudicialRoleType.DISTRICT_JUDGE || j.getJudicialRoleType() == JudicialRoleType.CIRCUIT_JUDGE
-            )
-                    .findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("No judge found"));
+        this.momento.getHearing().setJudiciary(new ArrayList<>(hearingDetailChanged.getJudiciary()));
+        this.momento.getHearing().setHearingDays(new ArrayList<>(hearingDetailChanged.getHearingDays()));
+        this.momento.getHearing().setCourtCentre(hearingDetailChanged.getCourtCentre());
+        this.momento.getHearing().setHearingLanguage(hearingDetailChanged.getHearingLanguage());
+        this.momento.getHearing().setJurisdictionType(hearingDetailChanged.getJurisdictionType());
+        this.momento.getHearing().setReportingRestrictionReason(hearingDetailChanged.getReportingRestrictionReason());
+        this.momento.getHearing().setType(hearingDetailChanged.getType());
 
-            judge.setFirstName(hearingDetailChanged.getJudge().getFirstName());
-            judge.setLastName(hearingDetailChanged.getJudge().getLastName());
-            judge.setTitle(hearingDetailChanged.getJudge().getTitle());
-            judge.setJudicialId(hearingDetailChanged.getJudge().getId());
-        }
-
-        if (!hearingDetailChanged.getHearingDays().isEmpty()) {
-            this.momento.getHearing().setHearingDays(hearingDetailChanged.getHearingDays().stream()
-                    .map(zdt -> HearingDay.hearingDay().withSittingDay(zdt).build())
-                    .collect(Collectors.toList())
-            );
-        }
-
-        this.momento.getHearing().getCourtCentre().setRoomId(hearingDetailChanged.getCourtRoomId());
-        this.momento.getHearing().getCourtCentre().setRoomName(hearingDetailChanged.getCourtRoomName());
-        this.momento.getHearing().setType(HearingType.hearingType().withDescription(hearingDetailChanged.getType()).build());
     }
 
     public Stream<Object> initiate(final Hearing hearing) {
@@ -62,13 +48,20 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingInitiated(hearing));
     }
 
-    public Stream<Object> updateHearingDetails(final UUID id, final String type, final UUID courtRoomId, final String courtRoomName, final uk.gov.moj.cpp.hearing.command.hearingDetails.Judge judge, final List<ZonedDateTime> hearingDays) {
+    public Stream<Object> updateHearingDetails(final UUID id,
+                                               final HearingType type,
+                                               final CourtCentre courtCentre,
+                                               final JurisdictionType jurisdictionType,
+                                               final String reportingRestrictionReason,
+                                               final HearingLanguage hearingLanguage,
+                                               final List<HearingDay> hearingDays,
+                                               final List<JudicialRole> judiciary) {
 
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.change-hearing-detail' event as hearing not found", id));
         }
 
-        return Stream.of(new HearingDetailChanged(id, type, courtRoomId, courtRoomName, judge, hearingDays));
+        return Stream.of(new HearingDetailChanged(id, type, courtCentre, jurisdictionType, reportingRestrictionReason, hearingLanguage, hearingDays, judiciary));
     }
 
     private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {

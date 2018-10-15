@@ -6,7 +6,13 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.json.schemas.core.AttendanceDay;
+import uk.gov.justice.json.schemas.core.CourtCentre;
 import uk.gov.justice.json.schemas.core.Hearing;
+import uk.gov.justice.json.schemas.core.HearingDay;
+import uk.gov.justice.json.schemas.core.HearingLanguage;
+import uk.gov.justice.json.schemas.core.HearingType;
+import uk.gov.justice.json.schemas.core.JudicialRole;
+import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.justice.json.schemas.core.Offence;
 import uk.gov.justice.json.schemas.core.Plea;
 import uk.gov.justice.json.schemas.core.ResultLine;
@@ -95,7 +101,7 @@ public class HearingAggregate implements Aggregate {
     public Object apply(final Object event) {
         return match(event).with(
                 when(HearingInitiated.class).apply(hearingDelegate::handleHearingInitiated),
-                when(HearingDetailChanged.class).apply(hearingDelegate::handleHearingInitiated),
+                when(HearingDetailChanged.class).apply(hearingDelegate::handleHearingDetailChanged),
                 when(InheritedPlea.class).apply(pleaDelegate::handleInheritedPlea),
                 when(PleaUpsert.class).apply(pleaDelegate::handlePleaUpsert),
                 when(ProsecutionCounselUpsert.class).apply(prosecutionCounselDelegate::handleProsecutionCounselUpsert),
@@ -154,8 +160,15 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingEventDelegate.correctHearingEvent(latestHearingEventId, hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
     }
 
-    public Stream<Object> updateHearingDetails(final UUID id, final String type, final UUID courtRoomId, final String courtRoomName, final uk.gov.moj.cpp.hearing.command.hearingDetails.Judge judge, final List<ZonedDateTime> hearingDays) {
-        return apply(this.hearingDelegate.updateHearingDetails(id, type, courtRoomId, courtRoomName, judge, hearingDays));
+    public Stream<Object> updateHearingDetails(final UUID id,
+                                               final HearingType type,
+                                               final CourtCentre courtCentre,
+                                               final JurisdictionType jurisdictionType,
+                                               final String reportingRestrictionReason,
+                                               final HearingLanguage hearingLanguage,
+                                               final List<HearingDay> hearingDays,
+                                               final List<JudicialRole> judiciary) {
+        return apply(this.hearingDelegate.updateHearingDetails(id, type, courtCentre, jurisdictionType, reportingRestrictionReason, hearingLanguage, hearingDays, judiciary));
     }
 
     public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {
