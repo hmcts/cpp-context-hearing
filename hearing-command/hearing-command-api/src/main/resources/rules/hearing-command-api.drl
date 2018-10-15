@@ -10,7 +10,7 @@ rule "Command - API - Action - hearing.initiate"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.initiate");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -19,7 +19,7 @@ rule "Command - API - Action - hearing.add-prosecution-counsel"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.add-prosecution-counsel");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -28,7 +28,7 @@ rule "Command - API - Action - hearing.save-draft-result"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.save-draft-result");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -37,7 +37,7 @@ rule "Command - API - Action - hearing.add-defence-counsel"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.add-defence-counsel");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -46,7 +46,7 @@ rule "Command - API - Action - hearing.share-results"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.share-results");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -55,7 +55,7 @@ rule "Command - API - Action - hearing.create-hearing-event-definitions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.create-hearing-event-definitions");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "System Users"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "System Users"));
   then
     $outcome.setSuccess(true);
 end
@@ -64,7 +64,7 @@ rule "Command - API - Action - hearing.log-hearing-event"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.log-hearing-event");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -73,7 +73,7 @@ rule "Command - API - Action - hearing.update-hearing-events"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.update-hearing-events");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -82,7 +82,7 @@ rule "Command - API - Action - hearing.correct-hearing-event"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.correct-hearing-event");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -91,7 +91,7 @@ rule "Command - API - Action - hearing.update-plea"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.update-plea");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -100,7 +100,7 @@ rule "Command - API - Action - hearing.update-verdict"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.update-verdict");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -109,7 +109,7 @@ rule "Command - API - Action - hearing.add-update-witness"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.add-update-witness");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -118,7 +118,7 @@ rule "Command - API - Action - hearing.generate-nows"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.generate-nows");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -127,7 +127,7 @@ rule "Command - API - Action - hearing.update-nows-material-status"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.update-nows-material-status");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -136,7 +136,7 @@ rule "Command - API - Action - hearing.delete-attendee"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.delete-attendee");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -145,7 +145,7 @@ rule "Command - API - Action - hearing.upload-subscriptions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.upload-subscriptions");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "System Users"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "System Users"));
   then
     $outcome.setSuccess(true);
 end
@@ -154,7 +154,7 @@ rule "Command - API - Action - hearing.update-defendant-attendance-on-hearing-da
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.update-defendant-attendance-on-hearing-day");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
