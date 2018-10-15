@@ -16,15 +16,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import org.hamcrest.core.IsNull;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Prompt;
@@ -61,46 +53,46 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.hamcrest.core.IsNull;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
 @SuppressWarnings({"serial", "unchecked"})
 @RunWith(MockitoJUnitRunner.class)
 public class ShareResultsCommandHandlerTest {
 
-    final static String DRAFT_RESULT_SAVED_EVENT_NAME = "hearing.draft-result-saved";
     public static final String HEARING_RESULTS_SHARED_EVENT_NAME = "hearing.results-shared";
-
-    @InjectMocks
-    private ShareResultsCommandHandler shareResultsCommandHandler;
-
-    @Mock
-    private EventStream caseEventStream;
-
-    @Mock
-    private EventStream hearingEventStream;
-
-    @Mock
-    private EventSource eventSource;
-
-    @Mock
-    private AggregateService aggregateService;
-
-    @Mock
-    private Clock clock;
-
-    @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
-    @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class);
-
+    final static String DRAFT_RESULT_SAVED_EVENT_NAME = "hearing.draft-result-saved";
     private static InitiateHearingCommand initiateHearingCommand;
     private static ProsecutionCounselUpsert prosecutionCounselUpsert;
     private static DefenceCounselUpsert defenceCounselUpsert;
     private static uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent nowsVariantsSavedEvent;
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
+    @Spy
+    private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class);
+    @InjectMocks
+    private ShareResultsCommandHandler shareResultsCommandHandler;
+    @Mock
+    private EventStream caseEventStream;
+    @Mock
+    private EventStream hearingEventStream;
+    @Mock
+    private EventSource eventSource;
+    @Mock
+    private AggregateService aggregateService;
+    @Mock
+    private Clock clock;
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @BeforeClass
     public static void init() {
@@ -155,10 +147,10 @@ public class ShareResultsCommandHandlerTest {
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
 
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
-
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(saveDraftResultCommand));
-
         final Target targetIn = saveDraftResultCommand.getTarget();
+
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(targetIn));
+
         final ResultLine resultLineIn = targetIn.getResultLines().get(0);
         final DelegatedPowers delegatedPowers = resultLineIn.getDelegatedPowers();
         final Prompt promptIn = resultLineIn.getPrompts().get(0);

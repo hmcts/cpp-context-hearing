@@ -333,7 +333,7 @@ public class UseCases {
         makeCommand(requestSpec, "hearing.save-draft-result")
                 .ofType("application/vnd.hearing.save-draft-result+json")
                 .withArgs(saveDraftResultCommand.getTarget().getHearingId())
-                .withPayload(saveDraftResultCommand)
+                .withPayload(saveDraftResultCommand.getTarget())
                 .executeSuccessfully();
 
         publicEventResulted.waitFor();
