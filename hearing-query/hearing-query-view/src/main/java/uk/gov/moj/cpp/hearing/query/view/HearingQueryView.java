@@ -15,6 +15,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,12 +41,12 @@ public class HearingQueryView {
 
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope envelope) {
-        final LocalDate date = LocalDates.from(envelope.payloadAsJsonObject().getString(FIELD_DATE));
-        final UUID courtCentreId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_COURT_CENTRE_ID));
-        final UUID roomId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_ROOM_ID));
-        final String startTime = Optional.ofNullable(envelope.payloadAsJsonObject().getString(FIELD_START_TIME)).orElse("00:00");
-        final String endTime = Optional.ofNullable(envelope.payloadAsJsonObject().getString(FIELD_END_TIME)).orElse("23:59");
-
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
+        final UUID courtCentreId = UUID.fromString(payload.getString(FIELD_COURT_CENTRE_ID));
+        final UUID roomId = UUID.fromString(payload.getString(FIELD_ROOM_ID));
+        final String startTime = payload.containsKey(FIELD_START_TIME) ? payload.getString(FIELD_START_TIME) : "00:00";
+        final String endTime = payload.containsKey(FIELD_END_TIME) ? payload.getString(FIELD_END_TIME) : "23:59";
         final HearingListResponse hearingListResponse = hearingService.getHearingByDateV2(date, startTime, endTime, courtCentreId, roomId);
         return enveloper.withMetadataFrom(envelope, "hearing.get.hearings")
                 .apply(hearingListResponse);
