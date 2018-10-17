@@ -64,7 +64,7 @@ public class HearingJPAMapper {
         hearing.setDefendantAttendance(defendantAttendanceJPAMapper.toJPA(pojo.getDefendantAttendance()));
         hearing.setDefendantReferralReasons(defendantReferralReasonsJPAMapper.toJPA(hearing, pojo.getDefendantReferralReasons()));
         hearing.setHasSharedResults(pojo.getHasSharedResults());
-        hearing.setHearingCaseNotes(hearingCaseNoteJPAMapper.toJPA(pojo.getHearingCaseNotes()));
+        hearing.setHearingCaseNotes(hearingCaseNoteJPAMapper.toJPA(hearing, pojo.getHearingCaseNotes()));
         hearing.setHearingDays(hearingDayJPAMapper.toJPA(hearing, pojo.getHearingDays()));
         hearing.setHearingLanguage(ofNullable(pojo.getHearingLanguage()).orElse(HearingLanguage.ENGLISH));
         hearing.setJudicialRoles(judicialRoleJPAMapper.toJPA(hearing, pojo.getJudiciary()));

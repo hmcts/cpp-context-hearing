@@ -158,3 +158,12 @@ rule "Command - API - Action - hearing.update-defendant-attendance-on-hearing-da
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.save-hearing-case-note"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.save-hearing-case-note");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end

@@ -158,6 +158,12 @@ baseUri:  message://command/handler/message/hearing
                 schema: !include json/schema/hearing.adjourn-hearing.json
                 example: !include json/hearing.adjourn-hearing.json
 
+# Hearing note
+        application/vnd.hearing.command.save-hearing-case-note+json:
+                schema: !include json/schema/hearing.command.save-hearing-case-note.json
+                example: !include json/hearing.command.save-hearing-case-note.json
+
+
 # notification upload subscriptions
         application/vnd.hearing.command.upload-subscriptions+json:
                 schema: !include json/schema/hearing.command.upload-subscriptions.json

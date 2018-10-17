@@ -58,7 +58,7 @@ public class HearingCommandApiTest {
 
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
-            "addProsecutionCounsel", "initiateHearing", "saveDraftResult",
+            "addProsecutionCounsel", "initiateHearing", "saveDraftResult", "saveHearingCaseNote",
             "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance");
 
     private Map<String, String> apiMethodsToHandlerNames;

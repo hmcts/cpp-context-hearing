@@ -7,13 +7,14 @@ import static uk.gov.moj.cpp.hearing.mapping.PersonJPAMapperTest.whenPerson;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
 
-import org.junit.Test;
 import uk.gov.justice.json.schemas.core.AssociatedPerson;
 import uk.gov.justice.json.schemas.core.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
+
+import org.junit.Test;
 
 public class AssociatedPersonJPAMapperTest {
 
@@ -27,7 +28,7 @@ public class AssociatedPersonJPAMapperTest {
     }
 
     @Test
-    public void testToJPA() {
+    public void testToJPA() throws Exception {
         final Hearing hearingEntity = aNewHearingJPADataTemplate().getHearing();
         final Defendant defendantEntity = hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next();
         final AssociatedPerson associatedPersonPojo = aNewEnhancedRandom().nextObject(AssociatedPerson.class);

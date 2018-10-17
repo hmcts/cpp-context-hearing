@@ -63,6 +63,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.update-nows-material-status+json
             name: hearing.update-nows-material-status
+        (mapping):
+            requestType: application/vnd.hearing.save-hearing-case-note+json
+            name: hearing.save-hearing-case-note
         ...
       body:
         application/vnd.hearing.save-draft-result+json:
@@ -93,7 +96,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.update-nows-material-status+json:
             example: !include json/hearing.update-nows-material-status.json
             schema: !include json/schema/hearing.update-nows-material-status.json
-
+        application/vnd.hearing.save-hearing-case-note+json:
+            example: !include json/hearing.save-hearing-case-note.json
+            schema: !include json/schema/hearing.save-hearing-case-note.json
       responses:
             202:
                 description: OK

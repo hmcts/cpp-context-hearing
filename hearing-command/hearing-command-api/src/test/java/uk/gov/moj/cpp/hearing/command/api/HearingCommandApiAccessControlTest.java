@@ -26,6 +26,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_GENERATE_NOWS = "hearing.generate-nows";
     private static final String ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS = "hearing.update-nows-material-status";
     private static final String ACTION_NAME_DELETE_ATTENDEE = "hearing.delete-attendee";
+    private static final String ACTION_NAME_SAVE_HEARING_CASE_NOTE = "hearing.save-hearing-case-note";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -228,6 +229,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToDeleteAtendee() {
         final Action action = createActionFor(ACTION_NAME_DELETE_ATTENDEE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToSaveHearingCaseNote() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_HEARING_CASE_NOTE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToSaveHearingCaseNote() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_HEARING_CASE_NOTE);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

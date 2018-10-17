@@ -51,15 +51,25 @@ import uk.gov.moj.cpp.hearing.eventlog.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventLogged;
 import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.ReadContext;
+import com.jayway.restassured.response.Header;
+import com.jayway.restassured.response.Response;
+import com.jayway.restassured.specification.RequestSpecification;
+import org.apache.http.HttpStatus;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 
 public class UseCases {
 
@@ -350,6 +360,17 @@ public class UseCases {
                 .executeSuccessfully();
 
         return shareResultsCommand;
+    }
+
+    public static JsonObject saveHearingCaseNote(final RequestSpecification requestSpec, final UUID hearingId, final JsonObject hearingCaseNote) {
+
+        makeCommand(requestSpec, "hearing.save-hearing-case-note")
+                .ofType("application/vnd.hearing.save-hearing-case-note+json")
+                .withArgs(hearingId)
+                .withPayload(hearingCaseNote)
+                .executeSuccessfully();
+
+        return hearingCaseNote;
     }
 
     public static AddDefenceCounselCommand addDefenceCounsel(final RequestSpecification requestSpec, final UUID hearingId,

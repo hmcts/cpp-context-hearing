@@ -3,11 +3,6 @@ package uk.gov.moj.cpp.hearing.utils;
 import static io.github.benas.randombeans.EnhancedRandomBuilder.aNewEnhancedRandom;
 import static io.github.benas.randombeans.api.EnhancedRandom.randomStreamOf;
 
-import java.util.UUID;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import uk.gov.justice.json.schemas.core.HearingLanguage;
 import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
@@ -21,6 +16,12 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
+
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class HearingJPADataTemplate {
 
@@ -42,6 +43,14 @@ public final class HearingJPADataTemplate {
                     hearingDay.setHearing(hearingEntity);
                     hearingEntity.getHearingDays().add(hearingDay);
                 });
+        //
+        Stream.generate(() -> new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote()).limit(1)
+                .forEach(hearingCaseNote -> {
+                    hearingCaseNote.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingEntity.getId()));
+                    hearingCaseNote.setHearing(hearingEntity);
+                    hearingEntity.getHearingCaseNotes().add(hearingCaseNote);
+                });
+
         //
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase.class)
                 .forEach(prosecutionCase -> {
@@ -137,11 +146,6 @@ public final class HearingJPADataTemplate {
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance.class)
         .forEach(defendantAttendance -> {
             hearingEntity.getDefendantAttendance().add(defendantAttendance);
-        });
-        // Will be covered by GPE-5922 story
-        randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)
-        .forEach(hearingCaseNote -> {
-            hearingEntity.getHearingCaseNotes().add(hearingCaseNote);
         });
         // Will be covered by GGPE-5825 story
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCounsel.class)

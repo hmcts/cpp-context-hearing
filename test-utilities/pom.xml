@@ -23,6 +23,12 @@
             <version>${project.version}</version>
         </dependency>-->
 
+        <!-- this is for the metadata builder -->
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-domain-event</artifactId>

@@ -57,6 +57,11 @@ baseUri: message://command/handler/message/hearing
                     schema:  !include json/schema/hearing.hearing-event-definitions-deleted.json
                     example: !include json/hearing.hearing-event-definitions-deleted.json
 
+# Hearing case note added
+                application/vnd-hearing.hearing-case-note-saved+json:
+                    schema: !include json/schema/hearing.hearing-case-note-saved.json
+                    example: !include json/hearing.hearing-case-note-saved.json
+
 # Draft Results
                 application/vnd.hearing.draft-result-saved+json:
                     schema: !include json/schema/hearing.draft-result-saved.json

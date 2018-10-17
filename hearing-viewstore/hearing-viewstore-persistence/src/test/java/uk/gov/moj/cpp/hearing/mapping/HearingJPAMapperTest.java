@@ -25,6 +25,7 @@ import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.json.schemas.core.ReferralReason;
 import uk.gov.justice.json.schemas.core.Target;
+import uk.gov.justice.json.schemas.core.HearingCaseNote;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantReferralReason;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
@@ -80,6 +81,7 @@ public class HearingJPAMapperTest {
         hearingEntity.setTargets(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)));
         hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
         hearingEntity.setDefendantAttendance(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance.class)));
+        hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
 
         CourtCentre courtCentreMock = mock(CourtCentre.class);
         when(courtCentreJPAMapper.fromJPA(hearingEntity.getCourtCentre())).thenReturn(courtCentreMock);
@@ -105,6 +107,9 @@ public class HearingJPAMapperTest {
         DefendantAttendance defendantAttendanceMock = mock(DefendantAttendance.class);
         when(defendantAttendanceJPAMapper.fromJPA(hearingEntity.getDefendantAttendance())).thenReturn(asList(defendantAttendanceMock));
 
+        HearingCaseNote hearingCaseNoteMock = mock(HearingCaseNote.class);
+        when(hearingCaseNoteJPAMapper.fromJPA(hearingEntity.getHearingCaseNotes())).thenReturn(asList(hearingCaseNoteMock));
+
         assertThat(hearingJPAMapper.fromJPA(hearingEntity), isBean(Hearing.class)
                 .with(Hearing::getId, is(hearingEntity.getId()))
                 .with(Hearing::getCourtCentre, is(courtCentreMock))
@@ -119,6 +124,7 @@ public class HearingJPAMapperTest {
                 .with(Hearing::getTargets, first(is(targetMock)))
                 .with(Hearing::getType, is(hearingTypeMock))
                 .with(Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
+                .with(Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
         );
     }
 
@@ -140,6 +146,7 @@ public class HearingJPAMapperTest {
                 .withTargets(asList(mock(Target.class)))
                 .withType(mock(HearingType.class))
                 .withDefendantAttendance(asList(mock(DefendantAttendance.class)))
+                .withHearingCaseNotes(asList(mock(HearingCaseNote.class)))
                 .build();
 
 
@@ -167,6 +174,9 @@ public class HearingJPAMapperTest {
         uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance defendantAttendanceMock = mock(uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance.class);
         when(defendantAttendanceJPAMapper.toJPA(hearing.getDefendantAttendance())).thenReturn(asSet(defendantAttendanceMock));
 
+        uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote hearingCaseNoteMock = mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class);
+        when(hearingCaseNoteJPAMapper.toJPA(any(), eq(hearing.getHearingCaseNotes()))).thenReturn(asSet(hearingCaseNoteMock));
+
         assertThat(hearingJPAMapper.toJPA(hearing), isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing.class)
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getId, is(hearing.getId()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getCourtCentre, is(courtCentreMock))
@@ -180,6 +190,7 @@ public class HearingJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getTargets, first(is(targetMock)))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getHearingType, is(hearingTypeMock))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
         );
     }
 

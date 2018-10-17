@@ -64,6 +64,9 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<DefendantAttendance> defendantAttendance = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingCaseNote> hearingCaseNotes = new HashSet<>();
+
     public Hearing() {
         //For JPA
     }
@@ -176,15 +179,13 @@ public class Hearing {
         return this;
     }
 
-    public void setHearingCaseNotes(Set<HearingCaseNote> jpa) {
-        // Will be covered by GPE-5922 story
-        // TODO Auto-generated method stub
+    public Hearing setHearingCaseNotes(Set<HearingCaseNote> hearingCaseNotes) {
+        this.hearingCaseNotes = hearingCaseNotes;
+        return this;
     }
 
     public Set<HearingCaseNote> getHearingCaseNotes() {
-        // Will be covered by GPE-5922 story
-        // TODO Auto-generated method stub
-        return new HashSet<>();
+        return hearingCaseNotes;
     }
 
     public void setDefenceCounsels(Set<DefenceCounsel> jpa) {
