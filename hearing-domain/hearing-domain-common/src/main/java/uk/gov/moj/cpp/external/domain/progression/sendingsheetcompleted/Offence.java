@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties({"title", "legislation","orderIndex"})
 public class Offence  implements Serializable {
 
     private static final long serialVersionUID = 1L;
