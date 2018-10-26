@@ -58,11 +58,7 @@ import uk.gov.justice.json.schemas.core.Source;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.json.schemas.core.Title;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -475,6 +471,7 @@ public class CoreTestTemplates {
         return Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
+                .withHearingLanguage(HearingLanguage.ENGLISH)
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
                 .withHearingDays(asList(hearingDay().build()))

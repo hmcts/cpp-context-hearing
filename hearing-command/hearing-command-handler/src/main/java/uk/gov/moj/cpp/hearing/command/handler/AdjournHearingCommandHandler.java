@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -9,15 +11,11 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @ServiceComponent(COMMAND_HANDLER)
 public class AdjournHearingCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(AdjournHearingCommandHandler.class.getName());
-
 
     @Handles("hearing.adjourn-hearing")
     public void adjournHearing(final JsonEnvelope envelope) throws EventStreamException {
@@ -26,8 +24,7 @@ public class AdjournHearingCommandHandler extends AbstractCommandHandler {
         }
 
         final AdjournHearing adjournHearing = convertToObject(envelope, AdjournHearing.class);
-        aggregate(HearingAggregate.class, adjournHearing.getRequestedByHearingId(), envelope, a -> a.adjournHearing(adjournHearing));
+        aggregate(HearingAggregate.class, adjournHearing.getAdjournedHearing(), envelope, a -> a.adjournHearing(adjournHearing));
     }
-
 }
 

@@ -231,7 +231,7 @@ public class ShareResultsIT extends AbstractIT {
                                         .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                         .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))
                                 ))
-                                .with(SharedHearing::getHearingLanguage, is(hearing.getHearingLanguage()))
+                                .with(SharedHearing::getHearingLanguage, is(hearing.getHearingLanguage().toString()))
                                 .with(sh -> sh.getJudiciary().size(), is(hearing.getJudiciary().size()))
                                 .with(SharedHearing::getJudiciary, first(isBean(JudicialRole.class)
                                         .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))

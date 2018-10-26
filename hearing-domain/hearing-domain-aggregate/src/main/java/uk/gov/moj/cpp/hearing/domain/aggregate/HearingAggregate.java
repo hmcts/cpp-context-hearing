@@ -40,7 +40,6 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
@@ -60,7 +59,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
-
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -120,7 +118,6 @@ public class HearingAggregate implements Aggregate {
                 when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),
                 when(NowsVariantsSavedEvent.class).apply(variantDirectoryDelegate::handleNowsVariantsSavedEvent),
                 when(NowsMaterialStatusUpdated.class).apply(variantDirectoryDelegate::handleNowsMaterialStatusUpdatedEvent),
-                when(HearingAdjourned.class).apply(adjournHearingDelegate::handleHearingAdjournedEvent),
                 when(DraftResultSaved.class).apply(resultsSharedDelegate::handleDraftResultShared),
                 when(DefendantAttendanceUpdated.class).apply(defendantDelegate::handleDefendantAttendanceUpdated),
                 otherwiseDoNothing()
