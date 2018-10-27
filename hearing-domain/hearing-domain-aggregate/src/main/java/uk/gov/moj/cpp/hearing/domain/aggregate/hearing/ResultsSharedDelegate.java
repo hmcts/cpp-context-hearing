@@ -48,7 +48,7 @@ public class ResultsSharedDelegate implements Serializable {
                         .setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
         );
 
-        Set<UUID> resultLineIdsToUpdate = resultLinesStatusUpdated.getSharedResultLines().stream()
+        final Set<UUID> resultLineIdsToUpdate = resultLinesStatusUpdated.getSharedResultLines().stream()
                 .map(SharedResultLineId::getSharedResultLineId)
                 .collect(toSet());
 
@@ -64,6 +64,7 @@ public class ResultsSharedDelegate implements Serializable {
         //filter by resultLinesIds in draftResultSaved
 
         momento.getTargets().values().stream()
+                .filter(target -> target.getResultLines() != null)
                 .flatMap(target -> target.getResultLines().stream())
                 .forEach(resultLine -> {
                     if (resultLine.getIsModified() &&

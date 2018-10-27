@@ -11,7 +11,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-import org.junit.Test;
 import uk.gov.justice.json.schemas.core.Address;
 import uk.gov.justice.json.schemas.core.AllocationDecision;
 import uk.gov.justice.json.schemas.core.AssociatedPerson;
@@ -43,6 +42,8 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.ZoneId;
 
+import org.junit.Test;
+
 @SuppressWarnings("unchecked")
 public class InitiateHearingIT extends AbstractIT {
 
@@ -68,6 +69,7 @@ public class InitiateHearingIT extends AbstractIT {
                                 .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))
                         .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
                                 .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
                                 .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))

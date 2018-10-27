@@ -24,8 +24,13 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ServiceComponent(EVENT_LISTENER)
 public class HearingCaseNoteSavedEventListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingCaseNoteSavedEventListener.class.getName());
 
     @Inject
     private HearingRepository hearingRepository;
@@ -53,7 +58,7 @@ public class HearingCaseNoteSavedEventListener {
                         .withProsecutionCases(caseNote
                                 .getJsonArray("prosecutionCases")
                                 .stream()
-                                .map(e -> UUID.fromString(((JsonString)e).getString()))
+                                .map(e -> UUID.fromString(((JsonString) e).getString()))
                                 .collect(Collectors.toList()))
                         .withOriginatingHearingId(UUID.fromString(caseNote.getString("originatingHearingId")))
                         .withCourtClerk(CourtClerk.courtClerk()
@@ -68,9 +73,18 @@ public class HearingCaseNoteSavedEventListener {
 
         final Hearing hearing = hearingRepository.findBy(hearingCaseNote.getOriginatingHearingId());
 
-        final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote hearingCaseNoteEntity = hearingCaseNoteJPAMapper.toJPA(hearing, hearingCaseNote);
-        hearingCaseNoteEntity.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
 
-        hearingCaseNoteRepository.save(hearingCaseNoteEntity);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("payload {} , caseNoteSaved {}", payloadAsJsonObject, caseNoteSaved);
+        }
+
+        if (hearing == null) {
+            LOGGER.error("Hearing not found");
+        } else {
+            final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote hearingCaseNoteEntity = hearingCaseNoteJPAMapper.toJPA(hearing, hearingCaseNote);
+            hearingCaseNoteEntity.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
+            hearingCaseNoteRepository.save(hearingCaseNoteEntity);
+        }
+
     }
 }
