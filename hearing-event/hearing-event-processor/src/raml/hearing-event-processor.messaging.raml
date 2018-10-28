@@ -179,6 +179,10 @@ baseUri: message://event/processor/message/hearing
                 schema: !include json/schema/hearing.event.hearing-adjourned.json
                 example: !include json/hearing.event.hearing-adjourned.json
 
+# Update Defendant Attendance
+        application/vnd.hearing.defendant-attendance-updated+json:
+            schema: !include json/schema/hearing.defendant-attendance-updated.json
+            example: !include json/hearing.defendant-attendance-updated.json
 
 /public.event:
   post:
