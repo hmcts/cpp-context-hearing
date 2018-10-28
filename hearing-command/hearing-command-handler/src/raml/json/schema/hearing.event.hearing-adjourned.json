@@ -1,101 +1,152 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://justice.gov.uk/json/schemas/hearing/hearing.event.hearing-adjourned.json",
-  "type": "object",
-  "properties": {
-    "caseId": {
-      "$ref": "#/definitions/uuidPattern"
+  "definitions": {
+    "hearing": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/hearingType.json"
+        },
+        "jurisdictionType": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/jurisdictionType"
+        },
+        "reportingRestrictionReason": {
+          "type": "string"
+        },
+        "hearingLanguage": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/hearingLanguage"
+        },
+        "earliestStartDateTime": {
+          "description": "The date before which a hearing must NOT be listed",
+          "type": "string",
+          "format": "date-time"
+        },
+        "estimatedMinutes": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/positiveInteger"
+        },
+        "courtCentre": {
+          "$ref": "#/definitions/courtCentre"
+        },
+        "judiciary": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/judicialRole"
+          }
+        },
+        "prosecutionCases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/prosecutionCase"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "jurisdictionType",
+        "prosecutionCases"
+      ],
+      "additionalProperties": false
     },
-    "urn": {
-      "type": "string",
-      "maxLength": 15
-    },
-    "hearings": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
+    "prosecutionCase": {
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "#/definitions/uuidPattern"
-        },
-        "courtCentreId": {
-          "$ref": "#/definitions/uuidPattern"
-        },
-        "type": {
-          "type": "string"
-        },
-        "startDate": {
-          "type": "string",
-          "format": "date"
-        },
-        "estimateMinutes": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "startTime": {
-          "type": "string",
-          "format": "time"
-        },
-        "judgeId": {
-          "$ref": "#/definitions/uuidPattern"
-        },
-        "courtRoomId": {
-          "$ref": "#/definitions/uuidPattern"
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
         },
         "defendants": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "$ref": "#/definitions/uuidPattern"
-              },
-              "offences": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "$ref": "#/definitions/uuidPattern"
-                    }
-                  },
-                  "required": [
-                    "id"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "offences"
-            ]
+            "$ref": "#/definitions/defendant"
           }
         }
       },
       "required": [
-        "id",
-        "courtCentreId",
-        "type",
-        "startDate",
-        "estimateMinutes",
-        "defendants"
+        "id", "defendants"
       ]
+    },
+    "courtCentre": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+        },
+        "roomId": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+        }
+      },
+      "required": [
+        "id",
+        "roomId"
+      ],
+      "additionalProperties": false
+    },
+    "judicialRole": {
+      "type": "object",
+      "properties": {
+        "judicialId": {
+          "description": "The reference data identify for the judicial role.",
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+        },
+        "judicialRoleType": {
+          "description": "The classification of the judicial role by way of reference data",
+          "type": "string"
+        }
+      },
+      "required": [
+        "judicialId",
+        "judicialRoleType"
+      ]
+    },
+    "defendant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+        },
+        "offences": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/offence"
+          }
+        }
+      },
+      "required": [
+        "id", "offences"
+      ]
+    },
+    "offence": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "adjournedHearing":
+    {
+      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    },
+    "nextHearings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/hearing"
       }
     }
   },
   "required": [
-    "caseId",
-    "urn",
-    "hearings"
+    "nextHearings"
   ],
-  "additionalProperties": false,
-  "definitions": {
-    "uuidPattern": {
-      "type": "string",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-    }
-  }
+  "additionalProperties": false
 }

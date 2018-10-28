@@ -1,8 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
@@ -17,10 +14,18 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandT
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import uk.gov.justice.json.schemas.core.HearingLanguage;
+import uk.gov.justice.json.schemas.core.HearingType;
+import uk.gov.moj.cpp.external.domain.progression.relist.Hearing;
+import uk.gov.moj.cpp.external.domain.progression.relist.Offence;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
@@ -31,7 +36,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,9 +60,9 @@ public class HearingAdjournIT extends AbstractIT {
         DocumentGeneratorStub.stubDocumentCreate("N/A");
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        hearingOne.getHearing().setHearingLanguage(HearingLanguage.ENGLISH);
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
-
 
         SaveDraftResultCommand saveDraftResultCommand = UseCases.saveDraftResults(requestSpec, with(standardSaveDraftTemplate(hearingOne.getHearingId(),
                 hearingOne.getFirstDefendantForFirstCase().getId(),
@@ -98,18 +102,34 @@ public class HearingAdjournIT extends AbstractIT {
 
         }));
 
-        Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned")
-                .withFilter(isJson(CoreMatchers.allOf(
-                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))/*,
-                        withJsonPath("$.urn", is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getCaseURN())),
-                        withJsonPath("$.hearings[0].type", is("Plea & Trial Preparation")),
-                        withJsonPath("$.hearings[0].startDate", is(convertDate("02/07/2018"))),
-                        withJsonPath("$.hearings[0].startTime", is("10.30")),
-                        withJsonPath("$.hearings[0].estimateMinutes", is(59))*/
-                )));
+        hearingOne.getHearing();
+        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", 30000)
+                .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
+                        .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
+                        .with(HearingAdjourned::getNextHearings, first(isBean(Hearing.class)
+                                .with(Hearing::getType, isBean(HearingType.class)
+                                        .with(HearingType::getDescription, is("Plea & Trial Preparation")))
+                                .with(Hearing::getJurisdictionType, is(hearingOne.getHearing().getJurisdictionType()))
+                                .with(Hearing::getReportingRestrictionReason, is(hearingOne.getHearing().getReportingRestrictionReason()))
+                                .with(Hearing::getHearingLanguage, is(hearingOne.getHearing().getHearingLanguage()))
+                                .with(Hearing::getEstimatedMinutes, is(59))
+                                .with(Hearing::getCourtCentre, isBean(uk.gov.moj.cpp.external.domain.progression.relist.CourtCentre.class)
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.CourtCentre::getId, is(hearingOne.getHearing().getCourtCentre().getId()))
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.CourtCentre::getRoomId, is(hearingOne.getHearing().getCourtCentre().getRoomId())))
+                                .with(Hearing::getJudiciary, first(isBean(uk.gov.moj.cpp.external.domain.progression.relist.JudicialRole.class)
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.JudicialRole::getJudicialId, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialId()))
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.JudicialRole::getJudicialRoleType, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialRoleType()))))
+                                .with(Hearing::getProsecutionCases, first(isBean(uk.gov.moj.cpp.external.domain.progression.relist.ProsecutionCase.class)
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.ProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.ProsecutionCase::getDefendants, first(isBean(uk.gov.moj.cpp.external.domain.progression.relist.Defendant.class)
+                                                .with(uk.gov.moj.cpp.external.domain.progression.relist.Defendant::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()))
+                                                .with(uk.gov.moj.cpp.external.domain.progression.relist.Defendant::getOffences, first(isBean(Offence.class)
+                                                        .with(Offence::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId()))))))))
+                        ))));
 
+        ShareResultsCommand shareResultsCommand = standardShareResultsCommandTemplate(hearingOne.getHearingId());
 
-        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()));
+        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), shareResultsCommand);
 
         publicHearingAdjourned.waitFor();
 
@@ -148,15 +168,30 @@ public class HearingAdjournIT extends AbstractIT {
 
         }));
 
-        Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned")
-                .withFilter(isJson(CoreMatchers.allOf(
-                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())),
-                        withJsonPath("$.urn", is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getCaseURN())),
-                        withJsonPath("$.hearings[0].type", is("Sentencing")),
-                        withJsonPath("$.hearings[0].startDate", is(convertDate("02/08/2018"))),
-                        withJsonPath("$.hearings[0].startTime", is("11.30")),
-                        withJsonPath("$.hearings[0].estimateMinutes", is(30))
-                )));
+        final Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned", 30000)
+                .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
+                        .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
+                        .with(HearingAdjourned::getNextHearings, first(isBean(Hearing.class)
+                                .with(Hearing::getType, isBean(HearingType.class)
+                                        .with(HearingType::getDescription, is("Sentencing")))
+                                .with(Hearing::getJurisdictionType, is(hearingOne.getHearing().getJurisdictionType()))
+                                .with(Hearing::getReportingRestrictionReason, is(hearingOne.getHearing().getReportingRestrictionReason()))
+                                .with(Hearing::getHearingLanguage, is(hearingOne.getHearing().getHearingLanguage()))
+                                .with(Hearing::getEstimatedMinutes, is(30))
+                                .with(Hearing::getCourtCentre, isBean(uk.gov.moj.cpp.external.domain.progression.relist.CourtCentre.class)
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.CourtCentre::getId, is(hearingOne.getHearing().getCourtCentre().getId()))
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.CourtCentre::getRoomId, is(hearingOne.getHearing().getCourtCentre().getRoomId())))
+                                .with(Hearing::getJudiciary, first(isBean(uk.gov.moj.cpp.external.domain.progression.relist.JudicialRole.class)
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.JudicialRole::getJudicialId, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialId()))
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.JudicialRole::getJudicialRoleType, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialRoleType()))))
+                                .with(Hearing::getProsecutionCases, first(isBean(uk.gov.moj.cpp.external.domain.progression.relist.ProsecutionCase.class)
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.ProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
+                                        .with(uk.gov.moj.cpp.external.domain.progression.relist.ProsecutionCase::getDefendants, first(isBean(uk.gov.moj.cpp.external.domain.progression.relist.Defendant.class)
+                                                .with(uk.gov.moj.cpp.external.domain.progression.relist.Defendant::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()))
+                                                .with(uk.gov.moj.cpp.external.domain.progression.relist.Defendant::getOffences, first(isBean(Offence.class)
+                                                        .with(Offence::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId()))))))))
+                        ))));
+
 
         UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()));
 
@@ -201,11 +236,5 @@ public class HearingAdjournIT extends AbstractIT {
 
         ReferenceDataStub.stubGetAllResultDefinitions(referenceDate, allResultDefinitions);
         ReferenceDataStub.stubRelistReferenceDataResults();
-    }
-
-    private String convertDate(final String date) {
-        DateTimeFormatter from = DateTimeFormatter.ofPattern(DD_MM_YYYY);
-        DateTimeFormatter to = DateTimeFormatter.ofPattern(YYYY_MM_DD);
-        return LocalDate.parse(date, from).format(to);
     }
 }
