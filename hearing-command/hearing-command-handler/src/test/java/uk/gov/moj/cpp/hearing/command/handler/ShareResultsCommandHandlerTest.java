@@ -16,7 +16,16 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-
+import org.hamcrest.core.IsNull;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.json.schemas.core.CourtClerk;
 import uk.gov.justice.json.schemas.core.DelegatedPowers;
 import uk.gov.justice.json.schemas.core.Hearing;
 import uk.gov.justice.json.schemas.core.Prompt;
@@ -38,6 +47,8 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -49,19 +60,11 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.hamcrest.core.IsNull;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @SuppressWarnings({"serial", "unchecked"})
 @RunWith(MockitoJUnitRunner.class)
@@ -166,30 +169,6 @@ public class ShareResultsCommandHandlerTest {
                         .with(Target::getDraftResult, is(targetIn.getDraftResult()))
                         .with(Target::getHearingId, is(targetIn.getHearingId()))
                         .with(Target::getOffenceId, is(targetIn.getOffenceId()))
-                        .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
-                        .with(Target::getResultLines, first(isBean(ResultLine.class)
-                                .with(ResultLine::getResultDefinitionId, is(resultLineIn.getResultDefinitionId()))
-                                .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
-                                .with(ResultLine::getOrderedDate, is(resultLineIn.getOrderedDate()))
-                                .with(ResultLine::getLevel, is(resultLineIn.getLevel()))
-                                .with(ResultLine::getResultLabel, is(resultLineIn.getResultLabel()))
-                                .with(ResultLine::getResultLabel, is(resultLineIn.getResultLabel()))
-                                .with(ResultLine::getIsComplete, is(resultLineIn.getIsComplete()))
-                                .with(ResultLine::getIsModified, is(resultLineIn.getIsModified()))
-                                .with(ResultLine::getSharedDate, is(resultLineIn.getSharedDate()))
-                                .with(r -> r.getPrompts().size(), is(resultLineIn.getPrompts().size()))
-                                .with(ResultLine::getDelegatedPowers, isBean(DelegatedPowers.class)
-                                        .withValue(DelegatedPowers::getFirstName, delegatedPowers.getFirstName())
-                                        .withValue(DelegatedPowers::getLastName, delegatedPowers.getLastName())
-                                        .withValue(DelegatedPowers::getUserId, delegatedPowers.getUserId())
-                                )
-                                .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                        .withValue(Prompt::getId, promptIn.getId())
-                                        .withValue(Prompt::getLabel, promptIn.getLabel())
-                                        .withValue(Prompt::getFixedListCode, promptIn.getFixedListCode())
-                                        .withValue(Prompt::getLabel, promptIn.getLabel())
-                                ))
-                        ))
                 )
         );
 
@@ -199,10 +178,11 @@ public class ShareResultsCommandHandlerTest {
     public void shouldRaiseResultsSharedEvent() throws Exception {
 
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
-        final Target targetIn = saveDraftResultCommand.getTarget();
-        final ResultLine resultLineIn = targetIn.getResultLines().get(0);
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
-        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetIn));
+        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft));
 
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
@@ -217,6 +197,30 @@ public class ShareResultsCommandHandlerTest {
         final ShareResultsCommand shareResultsCommand =
                 TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate(initiateHearingCommand.getHearing().getId());
 
+        shareResultsCommand.setCourtClerk(CourtClerk.courtClerk()
+                .withFirstName("test")
+                .withLastName("testington")
+                .withId(UUID.randomUUID())
+                .build());
+
+        shareResultsCommand.setResultLines(Arrays.asList(
+                new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                        resultLineIn.getOrderedDate(),
+                        resultLineIn.getSharedDate(),
+                        resultLineIn.getResultLineId(),
+                        targetDraft.getTargetId(),
+                        targetDraft.getOffenceId(),
+                        targetDraft.getDefendantId(),
+                        resultLineIn.getResultDefinitionId(),
+                        resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue())).collect(Collectors.toList()),
+                        resultLineIn.getResultLabel(),
+                        resultLineIn.getLevel().name(),
+                        resultLineIn.getIsModified(),
+                        resultLineIn.getIsComplete()
+                )
+        ));
+
         final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
 
         this.shareResultsCommandHandler.shareResult(envelope);
@@ -224,13 +228,15 @@ public class ShareResultsCommandHandlerTest {
         final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> HEARING_RESULTS_SHARED_EVENT_NAME.equals(e.metadata().name())).findFirst();
         assertThat("expected:" + HEARING_RESULTS_SHARED_EVENT_NAME, efound.get(), IsNull.notNullValue());
 
-        assertThat(asPojo(efound.get(), ResultsShared.class), isBean(ResultsShared.class)
+        final ResultsShared resultsShared = jsonObjectToObjectConverter.convert(efound.get().payloadAsJsonObject(), ResultsShared.class);
+
+        assertThat(resultsShared, isBean(ResultsShared.class)
                 .with(ResultsShared::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, is(targetIn.getHearingId()))
+                        .with(Hearing::getId, is(targetDraft.getHearingId()))
                         .with(h -> h.getTargets().size(), is(1))
                         .with(Hearing::getTargets, first(isBean(Target.class)
-                                .with(Target::getTargetId, is(targetIn.getTargetId()))
-                                .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
+                                .with(Target::getTargetId, is(targetDraft.getTargetId()))
+                                .with(t -> t.getResultLines().size(), is(shareResultsCommand.getResultLines().size()))
                                 .with(Target::getResultLines, first(isBean(ResultLine.class)
                                         .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
                                         .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))

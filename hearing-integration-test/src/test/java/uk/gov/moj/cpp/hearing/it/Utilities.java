@@ -49,7 +49,7 @@ public class Utilities {
         public EventListener(final String eventType, long timeout) {
             this.eventType = eventType;
             this.messageConsumer = publicEvents.createConsumer(eventType);
-            this.timeout=timeout;
+            this.timeout = timeout;
         }
 
         public void expectNoneWithin(long timeout) {

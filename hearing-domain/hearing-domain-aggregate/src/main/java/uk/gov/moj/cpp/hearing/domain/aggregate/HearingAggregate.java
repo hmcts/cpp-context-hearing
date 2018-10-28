@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.json.schemas.core.AttendanceDay;
 import uk.gov.justice.json.schemas.core.CourtCentre;
@@ -22,6 +21,7 @@ import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ConvictionDateDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefenceCounselDelegate;
@@ -118,7 +118,7 @@ public class HearingAggregate implements Aggregate {
                 when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),
                 when(NowsVariantsSavedEvent.class).apply(variantDirectoryDelegate::handleNowsVariantsSavedEvent),
                 when(NowsMaterialStatusUpdated.class).apply(variantDirectoryDelegate::handleNowsMaterialStatusUpdatedEvent),
-                when(DraftResultSaved.class).apply(resultsSharedDelegate::handleDraftResultShared),
+                when(DraftResultSaved.class).apply(resultsSharedDelegate::handleDraftResultSaved),
                 when(DefendantAttendanceUpdated.class).apply(defendantDelegate::handleDefendantAttendanceUpdated),
                 otherwiseDoNothing()
         );
@@ -172,8 +172,8 @@ public class HearingAggregate implements Aggregate {
         return apply(this.verdictDelegate.updateVerdict(hearingId, verdict));
     }
 
-    public Stream<Object> shareResults(final UUID hearingId, final uk.gov.justice.json.schemas.core.CourtClerk courtClerk, final ZonedDateTime sharedTime) {
-        return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime));
+    public Stream<Object> shareResults(final UUID hearingId, final uk.gov.justice.json.schemas.core.CourtClerk courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines) {
+        return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines));
     }
 
     public Stream<Object> saveDraftResults(final UUID targetId, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {

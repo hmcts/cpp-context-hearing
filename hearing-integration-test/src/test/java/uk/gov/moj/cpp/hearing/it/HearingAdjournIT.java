@@ -14,11 +14,13 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandT
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import org.hamcrest.CoreMatchers;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 
 import org.junit.Test;
+import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.json.schemas.core.HearingLanguage;
 import uk.gov.justice.json.schemas.core.HearingType;
 import uk.gov.moj.cpp.external.domain.progression.relist.Hearing;
@@ -35,7 +37,10 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
+
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -64,6 +69,8 @@ public class HearingAdjournIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
+        final List<Target> targets = new ArrayList<>();
+
         SaveDraftResultCommand saveDraftResultCommand = UseCases.saveDraftResults(requestSpec, with(standardSaveDraftTemplate(hearingOne.getHearingId(),
                 hearingOne.getFirstDefendantForFirstCase().getId(),
                 hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
@@ -73,33 +80,39 @@ public class HearingAdjournIT extends AbstractIT {
             saveDraftCommand.getTarget()
 
                     .setResultLines(asList(with(resultLine(resultLineId), resultLine -> {
-                        resultLine.setResultLabel("Next Hearing")
-                                .setResultDefinitionId(primaryResultDefinitionId)
-                                .setOrderedDate(orderedDate)
-                                .setPrompts(asList(
-                                        prompt().withId(UUID.fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283"))
-                                                .withLabel(DATE_OF_HEARING_LABEL)
-                                                .withValue("02/07/2018")
-                                                .build(),
-                                        prompt().withId(UUID.fromString("c1116d12-dd35-4171-807a-2cb845357d22"))
-                                                .withLabel(HEARING_TYPE_LABEL)
-                                                .withValue("Plea & Trial Preparation")
-                                                .build(),
-                                        prompt().withId(UUID.fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac"))
-                                                .withLabel(ESTIMATED_DURATION_LABEL)
-                                                .withValue("59 Minutes")
-                                                .build(),
-                                        prompt().withId(UUID.fromString("9403f0d7-90b5-4377-84b4-f06a77811362"))
-                                                .withLabel(REMAND_STATUS_LABEL)
-                                                .withValue("remand in custody")
-                                                .build(),
-                                        prompt().withId(UUID.fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d"))
-                                                .withLabel(TIME_OF_HEARING_LABEL)
-                                                .withValue("10.30")
-                                                .build()
-                                ));
-                    })));
-
+                                resultLine.setResultLabel("Next Hearing")
+                                        .setResultDefinitionId(primaryResultDefinitionId)
+                                        .setOrderedDate(orderedDate)
+                                        .setPrompts(asList(
+                                                prompt().withId(UUID.fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283"))
+                                                        .withLabel(DATE_OF_HEARING_LABEL)
+                                                        .withValue("02/07/2018")
+                                                        .withWelshValue("02/07/2018")
+                                                        .build(),
+                                                prompt().withId(UUID.fromString("c1116d12-dd35-4171-807a-2cb845357d22"))
+                                                        .withLabel(HEARING_TYPE_LABEL)
+                                                        .withValue("Plea & Trial Preparation")
+                                                        .withWelshValue("WPlea & Trial Preparation")
+                                                        .build(),
+                                                prompt().withId(UUID.fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac"))
+                                                        .withLabel(ESTIMATED_DURATION_LABEL)
+                                                        .withValue("59 Minutes")
+                                                        .withWelshValue("W59 Minutes")
+                                                        .build(),
+                                                prompt().withId(UUID.fromString("9403f0d7-90b5-4377-84b4-f06a77811362"))
+                                                        .withLabel(REMAND_STATUS_LABEL)
+                                                        .withValue("remand in custody")
+                                                        .withWelshValue("remand in custody")
+                                                        .build(),
+                                                prompt().withId(UUID.fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d"))
+                                                        .withLabel(TIME_OF_HEARING_LABEL)
+                                                        .withValue("10.30")
+                                                        .withWelshValue("10.30")
+                                                        .build()
+                                        ));
+                            }
+                    )));
+            targets.add(saveDraftCommand.getTarget());
         }));
 
         hearingOne.getHearing();
@@ -129,7 +142,7 @@ public class HearingAdjournIT extends AbstractIT {
 
         ShareResultsCommand shareResultsCommand = standardShareResultsCommandTemplate(hearingOne.getHearingId());
 
-        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), shareResultsCommand);
+        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
 
         publicHearingAdjourned.waitFor();
 
@@ -146,22 +159,27 @@ public class HearingAdjournIT extends AbstractIT {
                                         prompt().withId(UUID.fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283"))
                                                 .withLabel(DATE_OF_HEARING_LABEL)
                                                 .withValue("02/08/2018")
+                                                .withWelshValue("02/08/2018")
                                                 .build(),
                                         prompt().withId(UUID.fromString("c1116d12-dd35-4171-807a-2cb845357d22"))
                                                 .withLabel(HEARING_TYPE_LABEL)
                                                 .withValue("Sentencing")
+                                                .withWelshValue("WSentencing")
                                                 .build(),
                                         prompt().withId(UUID.fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac"))
                                                 .withLabel(ESTIMATED_DURATION_LABEL)
                                                 .withValue("30 Minutes")
+                                                .withWelshValue("30 Minutes")
                                                 .build(),
                                         prompt().withId(UUID.fromString("9403f0d7-90b5-4377-84b4-f06a77811362"))
                                                 .withLabel(REMAND_STATUS_LABEL)
                                                 .withValue("remand in custody")
+                                                .withWelshValue("remand in custody")
                                                 .build(),
                                         prompt().withId(UUID.fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d"))
                                                 .withLabel(TIME_OF_HEARING_LABEL)
                                                 .withValue("11.30")
+                                                .withWelshValue("11.30")
                                                 .build()
                                 ));
                     })));
@@ -193,7 +211,7 @@ public class HearingAdjournIT extends AbstractIT {
                         ))));
 
 
-        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()));
+        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
 
         publicHearingAdjourned2.waitFor();
     }

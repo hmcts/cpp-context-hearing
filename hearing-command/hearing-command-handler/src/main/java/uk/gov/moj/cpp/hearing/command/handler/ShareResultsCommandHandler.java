@@ -1,7 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -13,9 +14,6 @@ import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class ShareResultsCommandHandler extends AbstractCommandHandler {
@@ -34,7 +32,8 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final Target target = convertToObject(envelope, Target.class);
         if (target != null) {
             aggregate(HearingAggregate.class, target.getHearingId(), envelope,
-                    aggregate -> aggregate.saveDraftResults(target.getTargetId(), target.getDefendantId(), target.getHearingId(), target.getOffenceId(), target.getDraftResult(), target.getResultLines()));
+                    aggregate -> aggregate.saveDraftResults(target.getTargetId(), target.getDefendantId(), target.getHearingId(),
+                            target.getOffenceId(), target.getDraftResult(), target.getResultLines()));
         }
     }
 
@@ -45,7 +44,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final ShareResultsCommand command = convertToObject(envelope, ShareResultsCommand.class);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                aggregate -> aggregate.shareResults(command.getHearingId(), command.getCourtClerk(), clock.now()));
+                aggregate -> aggregate.shareResults(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines()));
     }
 
     @Handles("hearing.command.update-result-lines-status")

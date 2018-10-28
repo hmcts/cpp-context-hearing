@@ -28,7 +28,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.justice.json.schemas.core.CourtCentre;
@@ -63,6 +62,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,24 +93,15 @@ public class ShareResultsIT extends AbstractIT {
     }
 
 
-    private BeanMatcher<Target> matcher(final Target target) {
-        ResultLine resultLine = target.getResultLines().get(0);
-        Prompt prompt = resultLine.getPrompts().get(0);
+    private BeanMatcher<Target> draftTargetMatcher(final Target target) {
+        final ResultLine resultLine = target.getResultLines().get(0);
+        final Prompt prompt = resultLine.getPrompts().get(0);
         return isBean(Target.class)
                 .with(Target::getDefendantId, is(target.getDefendantId()))
                 .with(Target::getDraftResult, is(target.getDraftResult()))
                 .with(Target::getHearingId, is(target.getHearingId()))
                 .with(Target::getOffenceId, is(target.getOffenceId()))
-                .withValue(t -> t.getResultLines().size(), target.getResultLines().size())
-                .with(Target::getResultLines, hasItem(isBean(ResultLine.class)
-                        .with(ResultLine::getIsComplete, is(resultLine.getIsComplete()))
-                        .with(ResultLine::getLevel, is(resultLine.getLevel()))
-                        .with(ResultLine::getResultLabel, is(resultLine.getResultLabel()))
-                        .with(ResultLine::getResultDefinitionId, is(resultLine.getResultDefinitionId()))
-                        .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                .with(uk.gov.justice.json.schemas.core.Prompt::getId, is(prompt.getId()))
-                        ))
-                ));
+                ;
     }
 
     private void checkHearingQueryTargets(final uk.gov.justice.json.schemas.core.Hearing hearing, final List<Target> targets) {
@@ -123,7 +114,7 @@ public class ShareResultsIT extends AbstractIT {
 
 
         for (int index = 0; index < targets.size(); index++) {
-            hearingBeanMatcher.with(Hearing::getTargets, hasItem(matcher(targets.get(index))));
+            hearingBeanMatcher.with(Hearing::getTargets, hasItem(draftTargetMatcher(targets.get(index))));
         }
 
         Queries.getHearingPollForMatch(hearing.getId(), 30,
@@ -135,12 +126,16 @@ public class ShareResultsIT extends AbstractIT {
     private void testSaveDraftResult(final SaveDraftResultCommand saveDraftResultCommand, final uk.gov.justice.json.schemas.core.Hearing hearing, final List<Target> previousTargets) {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
+        final Target target = saveDraftResultCommand.getTarget();
+        final List<ResultLine> resultLines = target.getResultLines();
+        // currently not sending result lines in draft
+        target.setResultLines(null);
         final BeanMatcher beanMatcher = BeanMatcher.isBean(PublicHearingDraftResultSaved.class)
-                .with(PublicHearingDraftResultSaved::getTargetId, is(saveDraftResultCommand.getTarget().getTargetId()))
-                .with(PublicHearingDraftResultSaved::getHearingId, is(saveDraftResultCommand.getTarget().getHearingId()))
-                .with(PublicHearingDraftResultSaved::getDefendantId, is(saveDraftResultCommand.getTarget().getDefendantId()))
-                .with(PublicHearingDraftResultSaved::getDraftResult, is(saveDraftResultCommand.getTarget().getDraftResult()))
-                .with(PublicHearingDraftResultSaved::getOffenceId, is(saveDraftResultCommand.getTarget().getOffenceId()));
+                .with(PublicHearingDraftResultSaved::getTargetId, is(target.getTargetId()))
+                .with(PublicHearingDraftResultSaved::getHearingId, is(target.getHearingId()))
+                .with(PublicHearingDraftResultSaved::getDefendantId, is(target.getDefendantId()))
+                .with(PublicHearingDraftResultSaved::getDraftResult, is(target.getDraftResult()))
+                .with(PublicHearingDraftResultSaved::getOffenceId, is(target.getOffenceId()));
 
         final String expectedMetaDataContextUser = USER_ID_VALUE.toString();
         final String expectedMetaDataName = "public.hearing.draft-result-saved";
@@ -154,6 +149,7 @@ public class ShareResultsIT extends AbstractIT {
                 .executeSuccessfully();
 
         publicEventResulted.waitFor();
+        target.setResultLines(resultLines);
 
         final List<Target> targets = new ArrayList<>();
         targets.addAll(previousTargets);
@@ -186,14 +182,19 @@ public class ShareResultsIT extends AbstractIT {
 
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate);
 
+        final List<Target> targets = new ArrayList<>();
+
         saveDraftResultCommand.getTarget().getResultLines().get(0).setPrompts(
                 singletonList(Prompt.prompt()
                         .withLabel(now1MandatoryResultDefinitionPrompt.getLabel())
                         .withFixedListCode("fixedListCode")
                         .withValue("value1")
+                        .withWelshValue("wvalue1")
                         .withId(UUID.randomUUID())
                         .build())
         );
+        targets.add(saveDraftResultCommand.getTarget());
+        //TODO GPE-6699 saveDraftCommand.setTarget(null)
 
         final ResultLine resultLine1 = saveDraftResultCommand.getTarget().getResultLines().get(0);
         resultLine1.setResultLineId(UUID.randomUUID());
@@ -272,7 +273,7 @@ public class ShareResultsIT extends AbstractIT {
                 command -> {
                     command.setCourtClerk(courtClerk1);
                 }
-        ));
+        ), targets);
 
         publicEventResulted.waitFor();
 
@@ -315,20 +316,26 @@ public class ShareResultsIT extends AbstractIT {
 
         saveDraftResultCommand2.getTarget().setResultLines(asList(
                 standardResultLineTemplate(UUID.randomUUID(), firstNowNonMandatoryResultDefinitionId, orderedDate2).withPrompts(
-                        singletonList(Prompt.prompt().withId(UUID.randomUUID()).withValue("val0")
+                        singletonList(Prompt.prompt().withId(UUID.randomUUID()).withValue("val0").withWelshValue("wval0")
                                 .withFixedListCode("fixedList0").withLabel(firstNowNonMandatoryPrompt.getLabel()).build())
                 ).build(),
                 standardResultLineTemplate(UUID.randomUUID(), secondNowPrimaryResultDefinitionId, orderedDate2).withPrompts(
-                        singletonList(Prompt.prompt().withId(UUID.randomUUID()).withValue("val1")
+                        singletonList(Prompt.prompt().withId(UUID.randomUUID()).withValue("val1").withWelshValue("wval1")
                                 .withFixedListCode("fixedList1").withLabel(secondNowPrimaryPrompt.getLabel()).build())
                 ).build()
         ));
+
+        targets.add(saveDraftResultCommand2.getTarget());
 
         testSaveDraftResult(saveDraftResultCommand2, hearing, asList(saveDraftResultCommand.getTarget()));
 
         final CourtClerk courtClerk2 = CourtClerk.courtClerk()
                 .withFirstName("Siouxsie").withLastName("Sioux")
                 .withId(UUID.randomUUID()).build();
+
+
+        System.out.println(String.format("orderedDate: %s courtclerk %s %s %s ", orderedDate, courtClerk1.getFirstName(), courtClerk1.getLastName(), courtClerk1.getId()));
+        System.out.println(String.format("orderedDate2: %s courtclerk2 %s %s %s ", orderedDate2, courtClerk2.getFirstName(), courtClerk2.getLastName(), courtClerk2.getId()));
 
         final EventListener publicEventResulted2 = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
@@ -386,7 +393,7 @@ public class ShareResultsIT extends AbstractIT {
         UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
                 basicShareResultsCommandTemplate(),
                 command -> command.setCourtClerk(courtClerk2)
-        ));
+        ), targets);
 
         publicEventResulted2.waitFor();
 

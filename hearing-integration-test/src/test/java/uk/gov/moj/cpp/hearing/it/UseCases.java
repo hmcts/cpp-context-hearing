@@ -19,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.ReadContext;
 import com.jayway.restassured.response.Header;
@@ -28,6 +27,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import uk.gov.justice.json.schemas.core.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -41,6 +41,8 @@ import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
@@ -51,25 +53,17 @@ import uk.gov.moj.cpp.hearing.eventlog.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventLogged;
 import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.ReadContext;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.Response;
-import com.jayway.restassured.specification.RequestSpecification;
-import org.apache.http.HttpStatus;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UseCases {
 
@@ -351,7 +345,31 @@ public class UseCases {
         return saveDraftResultCommand;
     }
 
-    public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand) {
+    private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target) {
+        return target.getResultLines().stream().map(resultLineIn ->
+                new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                        resultLineIn.getOrderedDate(),
+                        resultLineIn.getSharedDate(),
+                        resultLineIn.getResultLineId(),
+                        target.getTargetId(),
+                        target.getOffenceId(),
+                        target.getDefendantId(),
+                        resultLineIn.getResultDefinitionId(),
+                        resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue())).collect(Collectors.toList()),
+                        resultLineIn.getResultLabel(),
+                        resultLineIn.getLevel().name(),
+                        resultLineIn.getIsModified(),
+                        resultLineIn.getIsComplete()
+                ));
+    }
+
+    public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
+
+        // TODO GPE-6699
+        shareResultsCommand.setResultLines(
+                targets.stream().flatMap(target -> sharedResultsCommandResultLineStream(target)).collect(Collectors.toList())
+        );
 
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")

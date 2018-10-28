@@ -30,8 +30,7 @@
     "hearingId",
     "targetId",
     "defendantId",
-    "offenceId",
-    "draftResult"
+    "offenceId"
   ]
 ,
   "additionalProperties": false
