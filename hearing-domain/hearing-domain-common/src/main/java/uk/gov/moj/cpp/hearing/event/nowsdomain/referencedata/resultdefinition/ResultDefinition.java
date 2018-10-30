@@ -15,8 +15,6 @@ public class ResultDefinition {
 
     private String level;
 
-    private String welshLabel;
-
     private Integer rank;
 
     private List<WordGroups> wordGroups;
@@ -30,8 +28,6 @@ public class ResultDefinition {
     private Date endDate;
 
     private String version;
-
-    private boolean isAvailableForCourtExtract;
 
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
@@ -133,24 +129,6 @@ public class ResultDefinition {
 
     public ResultDefinition setVersion(String version) {
         this.version = version;
-        return this;
-    }
-
-    public String getWelshLabel() {
-        return welshLabel;
-    }
-
-    public ResultDefinition setWelshLabel(String welshLabel) {
-        this.welshLabel = welshLabel;
-        return this;
-    }
-
-    public boolean getIsAvailableForCourtExtract() {
-        return isAvailableForCourtExtract;
-    }
-
-    public ResultDefinition setIsAvailableForCourtExtract(boolean availableForCourtExtract) {
-        isAvailableForCourtExtract = availableForCourtExtract;
         return this;
     }
 }
