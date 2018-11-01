@@ -23,13 +23,9 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.UUID;
 
 import javax.json.JsonValue;
 
@@ -69,32 +65,7 @@ public class NowsReferenceDataLoaderTest {
 
 
     @Test
-    public void testLoadAllResultDefinitionData() {
-
-        LocalDate referenceDate = PAST_LOCAL_DATE.next();
-
-        AllResultDefinitions allResultDefinitionsIn = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
-                Arrays.asList(ResultDefinition.resultDefinition().setId(UUID.randomUUID()).setWelshLabel("Idris").setIsAvailableForCourtExtract(true))
-        );
-
-        final JsonEnvelope resultEnvelope = envelopeFrom(metadataWithRandomUUID("something"), objectToJsonObjectConverter.convert(allResultDefinitionsIn));
-
-
-        when(requester.request(any())).thenReturn(resultEnvelope);
-
-        AllResultDefinitions actual = target.loadAllResultDefinitions(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
-
-        assertThat(actual.getResultDefinitions().get(0), BeanMatcher.isBean(ResultDefinition.class)
-                .with(ResultDefinition::getId, is(actual.getResultDefinitions().get(0).getId()))
-                .with(ResultDefinition::getWelshLabel, is(actual.getResultDefinitions().get(0).getWelshLabel()))
-                .with(ResultDefinition::getIsAvailableForCourtExtract, is(actual.getResultDefinitions().get(0).getIsAvailableForCourtExtract()))
-
-        );
-    }
-
-
-    @Test
-    public void testLoadAllNowsData() {
+    public void testLoadAllData() {
 
         LocalDate referenceDate = PAST_LOCAL_DATE.next();
 
@@ -110,7 +81,6 @@ public class NowsReferenceDataLoaderTest {
                         .setTemplateName(STRING.next())
                 ));
 
-
         final JsonEnvelope resultEnvelope = envelopeFrom(metadataWithRandomUUID("something"), objectToJsonObjectConverter.convert(data));
 
         when(requester.request(any())).thenReturn(resultEnvelope);
@@ -121,9 +91,6 @@ public class NowsReferenceDataLoaderTest {
                 .with(NowDefinition::getId, is(data.getNows().get(0).getId()))
                 .with(NowDefinition::getReferenceDate, is(referenceDate))
         );
-
-
-
     }
 
 }
