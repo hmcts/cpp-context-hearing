@@ -19,12 +19,12 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
 
     private final UUID hearingId;
     private final ZonedDateTime lastSharedDateTime;
-    private final uk.gov.justice.json.schemas.core.CourtClerk courtClerk;
+    private final CourtClerk courtClerk;
     private final List<SharedResultLineId> sharedResultLines;
 
     @JsonCreator
     protected UpdateResultLinesStatusCommand( @JsonProperty("hearingId") final UUID hearingId,
-                                              @JsonProperty("courtClerk") final uk.gov.justice.json.schemas.core.CourtClerk courtClerk,
+                                              @JsonProperty("courtClerk") final CourtClerk courtClerk,
                                               @JsonProperty("lastSharedDateTime") final ZonedDateTime lastSharedDateTime,
                                               @JsonProperty("sharedResultLines") final List<SharedResultLineId> sharedResultLines)  {
         this.hearingId = hearingId;
@@ -41,7 +41,7 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
         return lastSharedDateTime;
     }
 
-    public uk.gov.justice.json.schemas.core.CourtClerk getCourtClerk() {
+    public CourtClerk getCourtClerk() {
         return courtClerk;
     }
 
@@ -58,7 +58,7 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
 
         private UUID hearingId;
         private ZonedDateTime lastSharedDateTime;
-        private uk.gov.justice.json.schemas.core.CourtClerk courtClerk;
+        private CourtClerk courtClerk;
         private List<SharedResultLineId> sharedResultLines;
 
         public Builder withHearingId(final UUID hearingId) {
@@ -76,7 +76,7 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
             return this;
         }
 
-        public Builder withCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk courtClerk){
+        public Builder withCourtClerk(CourtClerk courtClerk){
             this.courtClerk = courtClerk;
             return this;
         }

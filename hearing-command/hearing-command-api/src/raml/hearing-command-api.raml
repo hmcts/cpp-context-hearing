@@ -13,9 +13,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.generate-nows+json
             name: hearing.generate-nows
-        (mapping):
-            requestType: application/vnd.hearing.update-defendant-attendance-on-hearing-day+json
-            name: hearing.update-defendant-attendance-on-hearing-day
         ...
       body:
         application/vnd.hearing.initiate+json:
@@ -28,11 +25,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.generate-nows.json
             schema:
              !include json/schema/hearing.generate-nows.json
-        application/vnd.hearing.update-defendant-attendance-on-hearing-day+json:
-            example:
-             !include json/hearing.update-defendant-attendance-on-hearing-day.json
-            schema:
-             !include json/schema/hearing.update-defendant-attendance-on-hearing-day.json
       responses:
             202:
                 description: OK
@@ -63,9 +55,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.update-nows-material-status+json
             name: hearing.update-nows-material-status
-        (mapping):
-            requestType: application/vnd.hearing.save-hearing-case-note+json
-            name: hearing.save-hearing-case-note
         ...
       body:
         application/vnd.hearing.save-draft-result+json:
@@ -93,12 +82,15 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.update-verdict.json
             schema:
              !include json/schema/hearing.update-verdict.json
+        application/vnd.hearing.add-update-witness+json:
+            example:
+             !include json/hearing.add-update-witness.json
+            schema:
+             !include json/schema/hearing.add-update-witness.json
         application/vnd.hearing.update-nows-material-status+json:
             example: !include json/hearing.update-nows-material-status.json
             schema: !include json/schema/hearing.update-nows-material-status.json
-        application/vnd.hearing.save-hearing-case-note+json:
-            example: !include json/hearing.save-hearing-case-note.json
-            schema: !include json/schema/hearing.save-hearing-case-note.json
+
       responses:
             202:
                 description: OK
@@ -181,6 +173,23 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.share-results+json:
             example: !include json/hearing.share-results.json
             schema: !include json/schema/hearing.share-results.json
+      responses:
+            202:
+                description: OK
+
+/hearings/{hearingId}/attendees/{attendeeId}:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.delete-attendee+json
+            name: hearing.delete-attendee
+        ...
+
+      body:
+        application/vnd.hearing.delete-attendee+json:
+            example: !include json/hearing.delete-attendee.json
+            schema: !include json/schema/hearing.delete-attendee.json
       responses:
             202:
                 description: OK

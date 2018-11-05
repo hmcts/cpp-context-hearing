@@ -24,10 +24,12 @@ import org.slf4j.LoggerFactory;
 public class UploadSubscriptionsCommandHandler extends AbstractCommandHandler {
 
     private static final String STREAM_ID = "03136e43-566d-48f5-96f1-38a4c75cca71";
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(UploadSubscriptionsCommandHandler.class.getName());
+
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(UploadSubscriptionsCommandHandler.class.getName());
 
     @Handles("hearing.command.upload-subscriptions")
     public void uploadSubscriptions(final JsonEnvelope envelope) throws EventStreamException {
@@ -50,7 +52,7 @@ public class UploadSubscriptionsCommandHandler extends AbstractCommandHandler {
         aggregate(SubscriptionAggregate.class,
                 UUID.fromString(STREAM_ID),
                 envelope,
-                aggregate -> aggregate.initiateUploadSubscriptions(uploadSubscriptionsCommand.getId(), uploadSubscriptionsCommand.getSubscriptions(), uploadSubscriptionsCommand.getReferenceDate()));
+                aggregate -> aggregate.initiateUploadSubscriptions(uploadSubscriptionsCommand));
     }
 
     private boolean isValidReferenceDate(final String referenceDate) {

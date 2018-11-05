@@ -1,28 +1,20 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import uk.gov.justice.json.schemas.core.Plea;
-import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -33,6 +25,16 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 
 public class PleaUpdateEventProcessorTest {
@@ -73,13 +75,15 @@ public class PleaUpdateEventProcessorTest {
 
     @Test
     public void offencePleaUpdate() {
-        final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
-                .setHearingId(randomUUID())
-                .setPlea(Plea.plea()
-                        .withOffenceId(randomUUID())
-                        .withPleaDate(PAST_LOCAL_DATE.next())
-                        .withPleaValue(PleaValue.GUILTY)
-                        .build());
+
+
+        PleaUpsert pleaUpsert = PleaUpsert.builder()
+                .withHearingId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withValue("GUILTY")
+                .build();
+
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
                 objectToJsonObjectConverter.convert(pleaUpsert));
@@ -90,16 +94,30 @@ public class PleaUpdateEventProcessorTest {
 
         List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
-        assertThat(events.get(0).metadata().name(), is("hearing.command.update-plea-against-offence"));
-        assertThat(asPojo(events.get(0), PleaUpsert.class), isBean(PleaUpsert.class)
-                .with(PleaUpsert::getHearingId, is(pleaUpsert.getHearingId()))
-                .with(PleaUpsert::getPlea, isBean(Plea.class)
-                        .with(Plea::getOffenceId, is(pleaUpsert.getPlea().getOffenceId()))
-                        .with(Plea::getPleaDate, is(pleaUpsert.getPlea().getPleaDate()))
-                        .with(Plea::getPleaValue, is(pleaUpsert.getPlea().getPleaValue()))));
+        assertThat(
+                events.get(0), jsonEnvelope(
+                        metadata().withName("hearing.offence-plea-updated"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", is(pleaUpsert.getHearingId().toString())),
+                                withJsonPath("$.offenceId", is(pleaUpsert.getOffenceId().toString())),
+                                withJsonPath("$.pleaDate", is(pleaUpsert.getPleaDate().toString())),
+                                withJsonPath("$.value", is(pleaUpsert.getValue()))
 
-        assertThat(events.get(1).metadata().name(), is("public.hearing.plea-updated"));
-        assertThat(asPojo(events.get(1), Plea.class), isBean(Plea.class)
-                .with(Plea::getOffenceId, is(pleaUpsert.getPlea().getOffenceId())));
+                                )
+                        )
+                )
+        );
+
+        assertThat(
+                events.get(1), jsonEnvelope(
+                        metadata().withName("public.hearing.plea-updated"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.offenceId", is(pleaUpsert.getOffenceId().toString()))
+
+                                )
+                        )
+                )
+        );
+
     }
 }

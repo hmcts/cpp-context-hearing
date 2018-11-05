@@ -1,82 +1,26 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.subscriptions-uploaded.json",
-  "$ref": "#/definitions/Document",
-  "definitions": {
-    "Document": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/uuid"
-        },
-        "referenceDate": {
-          "type": "string"
-        },
-        "subscriptions": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Subscription"
-          }
-        }
+  "referenceDate": "01012018",
+  "subscriptions": [
+    {
+      "channel": "email",
+      "channelProperties": {
+        "PH7quSm1L2": "r436rWQBav",
+        "S4C21B8pqf": "oZ0Ga8ymOy",
+        "98dMlFCe0T": "DKO1xuFiJV"
       },
-      "required": [
-        "id",
-        "referenceDate",
-        "subscriptions"
+      "userGroups": [
+        "9xpzRWgCXI",
+        "JFQhtMh5EC"
+      ],
+      "destination": "aiXczNlehM",
+      "courtCentreIds": [
+        "50650a25-4991-4d15-8a30-83b7ef6d846f",
+        "3fc8076d-b0f0-44cd-a8ef-1b8fd41a6570"
+      ],
+      "nowTypeIds": [
+        "8b55852a-756b-431b-ac53-e542493ec5b7",
+        "5d1e5d47-dda1-468d-9d39-023f7b9d79a5"
       ]
-    },
-    "Subscription": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "$ref": "#/definitions/uuid"
-        },
-        "channel": {
-          "type": "string"
-        },
-        "channelProperties": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          }
-        },
-        "userGroups": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "destination": {
-          "type": "string"
-        },
-        "courtCentreIds": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/uuid"
-          }
-        },
-        "nowTypeIds": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/uuid"
-          }
-        }
-      },
-      "required": [
-        "id",
-        "channel",
-        "channelProperties",
-        "courtCentreIds",
-        "destination",
-        "nowTypeIds",
-        "userGroups"
-      ]
-    },
-    "uuid": {
-      "type": "string",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
-  }
+  ]
 }

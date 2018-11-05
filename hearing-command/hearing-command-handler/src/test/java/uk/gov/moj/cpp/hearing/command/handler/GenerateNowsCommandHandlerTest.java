@@ -1,12 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.UUID.fromString;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
@@ -14,22 +15,9 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowsRequestedTemplates.nowsRequestedTemplate;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.justice.json.schemas.core.Hearing;
-import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -43,15 +31,24 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.SaveNowsVariantsComman
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
+import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GenerateNowsCommandHandlerTest {
@@ -84,26 +81,26 @@ public class GenerateNowsCommandHandlerTest {
     @Test
     public void generateNowsTest() throws Throwable {
 
-        NowsRequested nowsRequestedCommand = nowsRequestedTemplate();
+        final InputStream is = GenerateNowsCommandHandlerTest.class.getResourceAsStream("/hearing.command.generate-nows.json");
+        final NowsRequested nowsRequestedCommand = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
-        final UUID hearingId = nowsRequestedCommand.getHearing().getId();
+        final UUID hearingId = fromString(nowsRequestedCommand.getHearing().getId());
 
-        setupMockedEventStream(hearingId, this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingId, this.hearingEventStream, new NewModelHearingAggregate());
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.generate-nows"), objectToJsonObjectConverter.convert(nowsRequestedCommand));
 
-        this.generateNowsCommandHandler.generateNows(command);
+        this.generateNowsCommandHandler.genarateNows(command);
 
-        final JsonEnvelope jsonEnvelope = verifyAppendAndGetArgumentFrom(this.hearingEventStream).findAny().get();
-
-        assertThat(asPojo(jsonEnvelope, NowsRequested.class), isBean(NowsRequested.class)
-                .with(NowsRequested::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, is(nowsRequestedCommand.getHearing().getId()))
-                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
-                                .with(ProsecutionCase::getId, is(nowsRequestedCommand.getHearing().getProsecutionCases().get(0).getId()))
-                        ))
-                )
-        );
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(
+                        withMetadataEnvelopedFrom(command)
+                                .withName("hearing.events.nows-requested"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearing.id", equalTo(hearingId.toString())),
+                                withJsonPath("$.hearing.defendants.[0].defenceOrganisation", is(nowsRequestedCommand.getHearing().getDefendants().get(0).getDefenceOrganisation()))
+                        )))
+        ));
     }
 
     @Test
@@ -111,7 +108,7 @@ public class GenerateNowsCommandHandlerTest {
 
         final SaveNowsVariantsCommand command = createSampleNowsVariantsCommand();
 
-        setupMockedEventStream(command.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(command.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
 
         final JsonEnvelope commandEnvelope = envelopeFrom(metadataWithRandomUUID("hearing.command.save-nows-variants"), objectToJsonObjectConverter.convert(command));
 
@@ -135,7 +132,7 @@ public class GenerateNowsCommandHandlerTest {
 
         final NowsMaterialStatusUpdated nowsMaterialStatusUpdated = new NowsMaterialStatusUpdated(UUID.randomUUID(), UUID.randomUUID(), "generated");
 
-        setupMockedEventStream(nowsMaterialStatusUpdated.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(nowsMaterialStatusUpdated.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-nows-material-status"), objectToJsonObjectConverter.convert(nowsMaterialStatusUpdated));
 

@@ -21,8 +21,6 @@ public class Judge {
         this.lastName = lastName;
     }
 
-    public Judge() {
-    }
 
     private Judge(final Builder builder) {
         this.id = builder.id;

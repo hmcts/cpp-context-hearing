@@ -15,26 +15,22 @@ public class ConvictionDateDelegate implements Serializable {
         this.momento = momento;
     }
 
-    public void handleConvictionDateAdded(final ConvictionDateAdded convictionDateAdded) {
-        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
-                prosecutionCase.getDefendants().stream()
-                        .flatMap(d -> d.getOffences().stream())
-                        .filter(o -> o.getId().equals(convictionDateAdded.getOffenceId()))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Invalid offence id on conviction date message"))
-                        .setConvictionDate(convictionDateAdded.getConvictionDate()));
-        this.momento.getConvictionDates().computeIfAbsent(
-                convictionDateAdded.getOffenceId(), offenceId -> convictionDateAdded.getConvictionDate());
+    public void handleConvictionDateAdded(ConvictionDateAdded convictionDateAdded) {
+        this.momento.getHearing().getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> o.getId().equals(convictionDateAdded.getOffenceId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Invalid offence id on conviction date message"))
+                .setConvictionDate(convictionDateAdded.getConvictionDate());
     }
 
-    public void handleConvictionDateRemoved(final ConvictionDateRemoved convictionDateRemoved) {
-        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase ->
-                prosecutionCase.getDefendants().stream()
-                        .flatMap(d -> d.getOffences().stream())
-                        .filter(o -> o.getId().equals(convictionDateRemoved.getOffenceId()))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Invalid offence id on conviction date message"))
-                        .setConvictionDate(null));
-        this.momento.getConvictionDates().remove(convictionDateRemoved.getOffenceId());
+    public void handleConvictionDateRemoved(ConvictionDateRemoved convictionDateRemoved) {
+        this.momento.getHearing().getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> o.getId().equals(convictionDateRemoved.getOffenceId()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Invalid offence id on conviction date message"))
+                .setConvictionDate(null);
     }
+
 }

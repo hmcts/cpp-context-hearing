@@ -1,13 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nows.order;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 
 public class OrderDefendant implements Serializable {
-    private final static long serialVersionUID = 2L;
-
+    private final static long serialVersionUID = 8453916860863213534L;
     private String name;
-    private LocalDate dateOfBirth;
+    private String dateOfBirth;
     private Address address;
 
     public String getName() {
@@ -18,11 +16,11 @@ public class OrderDefendant implements Serializable {
         this.name = name;
     }
 
-    public LocalDate getDateOfBirth() {
+    public String getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -39,7 +37,7 @@ public class OrderDefendant implements Serializable {
     }
     public static final class Builder {
         private String name;
-        private LocalDate dateOfBirth;
+        private String dateOfBirth;
 
         private Address address;
 
@@ -51,7 +49,7 @@ public class OrderDefendant implements Serializable {
             return this;
         }
 
-        public Builder withDateOfBirth(LocalDate dateOfBirth) {
+        public Builder withDateOfBirth(String dateOfBirth) {
             this.dateOfBirth = dateOfBirth;
             return this;
         }

@@ -34,7 +34,7 @@ import org.apache.http.HttpStatus;
 public class WireMockStubUtils {
 
     public static final String MATERIAL_STATUS_UPLOAD_COMMAND =
-                    "/results-service/command/api/rest/results/hearings/.*/nowsmaterial/.*";
+                    "/resultinghmps-service/command/api/rest/resultinghmps/hearings/.*/nowsmaterial/.*";
     public static final String MATERIAL_UPLOAD_COMMAND =
                     "/material-service/command/api/rest/material/material";
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");

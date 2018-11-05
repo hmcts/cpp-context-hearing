@@ -8,21 +8,33 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.AttendeeHearingDate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.repository.AttendeeHearingDateRespository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-@SuppressWarnings({"squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_LISTENER)
+@SuppressWarnings("squid:S1188")
 public class DefenceCounselAddedEventListener {
 
     private final HearingRepository hearingRepository;
+    private final AttendeeHearingDateRespository attendeeHearingDateRespository;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Inject
-    public DefenceCounselAddedEventListener(final HearingRepository hearingRepository, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
+    public DefenceCounselAddedEventListener(final HearingRepository hearingRepository,
+            final AttendeeHearingDateRespository attendeeHearingDateRespository, final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
         this.hearingRepository = hearingRepository;
+        this.attendeeHearingDateRespository = attendeeHearingDateRespository;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
     }
 
@@ -36,7 +48,7 @@ public class DefenceCounselAddedEventListener {
 
         if (hearing != null) {
 
-            /*final DefenceAdvocate defenceAdvocate = hearing.getAttendees().stream()
+            final DefenceAdvocate defenceAdvocate = hearing.getAttendees().stream()
                     .filter(a -> a instanceof DefenceAdvocate && a.getId().getId().equals(defenceCounselUpsert.getAttendeeId()))
                     .map(DefenceAdvocate.class::cast)
                     .findFirst()
@@ -46,25 +58,25 @@ public class DefenceCounselAddedEventListener {
                                 .build();
                         hearing.getAttendees().add(defenceCounselor);
                         return defenceCounselor;
-                    });*/
+                    });
 
-            /*defenceAdvocate
+            defenceAdvocate
                     .setStatus(defenceCounselUpsert.getStatus())
                     .setPersonId(defenceCounselUpsert.getPersonId())
                     .setTitle(defenceCounselUpsert.getTitle())
                     .setFirstName(defenceCounselUpsert.getFirstName())
-                    .setLastName(defenceCounselUpsert.getLastName());*/
+                    .setLastName(defenceCounselUpsert.getLastName());
 
-//            final List<Defendant> defendantsToRemove = new ArrayList<>();
-//            for (Defendant defendant : defenceAdvocate.getDefendants()) {
-//
-//                if (!defenceCounselUpsert.getDefendantIds().contains(defendant.getId())) {
-//                    defendantsToRemove.add(defendant);
-//                }
-//            }
-//            defenceAdvocate.getDefendants().removeAll(defendantsToRemove);
+            final List<Defendant> defendantsToRemove = new ArrayList<>();
+            for (Defendant defendant : defenceAdvocate.getDefendants()) {
 
-/*  TODO review defence counsel missin from db model
+                if (!defenceCounselUpsert.getDefendantIds().contains(defendant.getId().getId())) {
+                    defendantsToRemove.add(defendant);
+                    defendant.getDefenceAdvocates().removeIf(da -> da.getId().getId().equals(defenceAdvocate.getId().getId()));
+                }
+            }
+            defenceAdvocate.getDefendants().removeAll(defendantsToRemove);
+
             defenceCounselUpsert.getDefendantIds().forEach(
                     defendantId -> {
                         Defendant defendant = hearing.getDefendants().stream()
@@ -89,8 +101,18 @@ public class DefenceCounselAddedEventListener {
                         }
                     }
             );
-*/
+
             this.hearingRepository.saveAndFlush(hearing);
+
+            hearing.getHearingDays().forEach(hearingDay ->
+                    this.attendeeHearingDateRespository.saveAndFlush(
+                            AttendeeHearingDate.builder()
+                                    .withId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()))
+                                    .withAttendeeId(defenceAdvocate.getId().getId())
+                                    .withHearingDateId(hearingDay.getId().getId())
+                                    .build()
+                    )
+            );
         }
     }
 }

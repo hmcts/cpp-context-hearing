@@ -1,10 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static org.junit.Assert.fail;
-
-import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsDeleted;
@@ -14,14 +17,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.SerializationException;
-import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static org.junit.Assert.fail;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventDefinitionAggregateTest {
@@ -49,8 +47,7 @@ public class HearingEventDefinitionAggregateTest {
     @Test
     public void testHearingEventDefinition() throws Exception {
         final UUID hearingEventDefinitionId = randomUUID();
-        CreateHearingEventDefinitionsCommand createHearingEventDefinitionsCommand = new CreateHearingEventDefinitionsCommand(hearingEventDefinitionId, hearingDefinitions());
-        final Stream<Object> events = hearingEventDefinitionAggregate.createEventDefinitions(createHearingEventDefinitionsCommand.getId(), createHearingEventDefinitionsCommand.getEventDefinitions());
+        final Stream<Object> events = hearingEventDefinitionAggregate.createEventDefinitions(hearingEventDefinitionId, hearingDefinitions());
         final List<Object> lEvents = events.collect(Collectors.toList());
 
 

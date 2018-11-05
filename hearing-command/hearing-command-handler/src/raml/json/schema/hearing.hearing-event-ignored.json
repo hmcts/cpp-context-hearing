@@ -1,19 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.hearing-event-ignored.json",
   "type": "object",
   "properties": {
     "hearingEventId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "#/definitions/uuid"
     },
     "hearingEventDefinitionId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "#/definitions/uuid"
     },
     "recordedLabel": {
       "type": "string"
     },
     "hearingId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "#/definitions/uuid"
     },
     "eventTime": {
       "type": "string",
@@ -26,6 +25,7 @@
       "type": "boolean"
     }
   },
+  "additionalProperties": false,
   "required": [
     "hearingEventId",
     "hearingEventDefinitionId",
@@ -35,5 +35,10 @@
     "reason",
     "alterable"
   ],
-  "additionalProperties": false
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }

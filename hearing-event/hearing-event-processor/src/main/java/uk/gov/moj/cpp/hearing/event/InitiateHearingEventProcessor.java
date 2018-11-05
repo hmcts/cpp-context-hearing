@@ -4,29 +4,31 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.justice.json.schemas.core.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
+import uk.gov.moj.cpp.hearing.command.initiate.DefendantCase;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.Offence;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
-import java.util.List;
 
-@SuppressWarnings({"squid:S1188"})
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ServiceComponent(EVENT_PROCESSOR)
 public class InitiateHearingEventProcessor {
 
     private static final String HEARING_ID = "hearingId";
+    private static final String DEFENDANT_ID = "defendantId";
 
     @Inject
     private Enveloper enveloper;
@@ -49,40 +51,45 @@ public class InitiateHearingEventProcessor {
 
         final JsonArrayBuilder cases = createArrayBuilder();
 
-        final List<ProsecutionCase> prosecutionCases = initiateHearingCommand.getHearing().getProsecutionCases();
+        for (final Defendant defendant : initiateHearingCommand.getHearing().getDefendants()) {
 
-        prosecutionCases.forEach(prosecutionCase -> {
+            this.sender.send(this.enveloper
+                    .withMetadataFrom(event, "hearing.command.register-hearing-against-defendant")
+                    .apply(RegisterHearingAgainstDefendantCommand.builder()
+                            .withDefendantId(defendant.getId())
+                            .withHearingId(initiateHearingCommand.getHearing().getId())
+                            .build()));
 
-            prosecutionCase.getDefendants().forEach(defendant -> {
+            for (Offence offence : defendant.getOffences()) {
+                cases.add(offence.getCaseId().toString());
 
                 this.sender.send(this.enveloper
-                        .withMetadataFrom(event, "hearing.command.register-hearing-against-defendant")
-                        .apply(RegisterHearingAgainstDefendantCommand.builder()
-                                .withDefendantId(defendant.getId())
-                                .withHearingId(initiateHearingCommand.getHearing().getId())
-                                .build()));
+                        .withMetadataFrom(event, "hearing.command.lookup-plea-on-offence-for-hearing")
+                        .apply(LookupPleaOnOffenceForHearingCommand.lookupPleaOnOffenceForHearingCommand()
+                                .setHearingId(initiateHearingCommand.getHearing().getId())
+                                .setDefendantId(defendant.getId())
+                                .setOffenceId(offence.getId())
+                                .setCaseId(offence.getCaseId())
+                        ));
+            }
 
-                for (final uk.gov.justice.json.schemas.core.Offence offence : defendant.getOffences()) {
+            this.sender.send(this.enveloper.withMetadataFrom(event,
+                    "hearing.command.lookup-witnesses-on-defendant-for-hearing")
+                    .apply(createObjectBuilder().add(HEARING_ID, initiateHearingCommand.getHearing().getId().toString())
+                            .add(DEFENDANT_ID, defendant.getId().toString())
+                            .build()));
 
-                    cases.add(prosecutionCase.getId().toString());
+            for (DefendantCase defendantCase : defendant.getDefendantCases()) {
 
-                    this.sender.send(this.enveloper
-                            .withMetadataFrom(event, "hearing.command.register-hearing-against-offence")
-                            .apply(RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand()
-                                    .setHearingId(initiateHearingCommand.getHearing().getId())
-                                    .setOffenceId(offence.getId())
-                            ));
-                }
-            });
+                final RegisterHearingAgainstCaseCommand registerHearingAgainstCaseCommand = RegisterHearingAgainstCaseCommand.builder()
+                        .withCaseId(defendantCase.getCaseId())
+                        .withHearingId(initiateHearingCommand.getHearing().getId())
+                        .build();
 
-            final RegisterHearingAgainstCaseCommand registerHearingAgainstCaseCommand = RegisterHearingAgainstCaseCommand.builder()
-                    .withCaseId(prosecutionCase.getId())
-                    .withHearingId(initiateHearingCommand.getHearing().getId())
-                    .build();
-
-            this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-case")
-                    .apply(registerHearingAgainstCaseCommand));
-        });
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-case")
+                        .apply(registerHearingAgainstCaseCommand));
+            }
+        }
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.initiated").apply(createObjectBuilder()
                 .add(HEARING_ID, initiateHearingCommand.getHearing().getId().toString())
@@ -96,13 +103,5 @@ public class InitiateHearingEventProcessor {
             LOGGER.debug("hearing.events.found-plea-for-hearing-to-inherit event received {}", event.toObfuscatedDebugString());
         }
         this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-plea").apply(event.payloadAsJsonObject()));
-    }
-
-    @Handles("hearing.events.found-verdict-for-hearing-to-inherit")
-    public void hearingInitiateOffenceVerdict(final JsonEnvelope event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.events.found-verdict-for-hearing-to-inherit event received {}", event.toObfuscatedDebugString());
-        }
-        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-verdict").apply(event.payloadAsJsonObject()));
     }
 }

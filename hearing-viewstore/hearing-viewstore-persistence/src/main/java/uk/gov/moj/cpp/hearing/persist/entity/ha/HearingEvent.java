@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
+import java.time.ZonedDateTime;
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.time.ZonedDateTime;
-import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ha_hearing_event")
@@ -36,8 +36,11 @@ public class HearingEvent {
     @Column(name = "deleted")
     private boolean deleted;
 
-    @Column(name = "defence_counsel_id")
-    private UUID defenceCounselId;
+    @Column(name = "witnessid")
+    private UUID witnessId;
+
+    @Column(name = "counselId")
+    private UUID counselId;
 
     public HearingEvent() {
         // for JPA
@@ -73,6 +76,10 @@ public class HearingEvent {
 
     public UUID getHearingEventDefinitionId() {
         return hearingEventDefinitionId;
+    }
+
+    public UUID getWitnessId() {
+        return witnessId;
     }
 
     public HearingEvent setId(final UUID id) {
@@ -115,33 +122,21 @@ public class HearingEvent {
         return this;
     }
 
-    public UUID getDefenceCounselId() {
-        return defenceCounselId;
-    }
-
-    public HearingEvent setDefenceCounselId(final UUID counselId) {
-        this.defenceCounselId = counselId;
+    public HearingEvent setWitnessId(final UUID witnessId) {
+        this.witnessId = witnessId;
         return this;
     }
 
-    public static HearingEvent hearingEvent() {
+    public UUID getCounselId() {
+        return counselId;
+    }
+
+    public HearingEvent setCounselId(final UUID counselId) {
+        this.counselId = counselId;
+        return this;
+    }
+
+    public static HearingEvent hearingEvent(){
         return new HearingEvent();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final HearingEvent that = (HearingEvent) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

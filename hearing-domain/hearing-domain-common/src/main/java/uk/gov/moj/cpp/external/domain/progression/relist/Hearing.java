@@ -1,137 +1,68 @@
 package uk.gov.moj.cpp.external.domain.progression.relist;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.justice.json.schemas.core.HearingLanguage;
-import uk.gov.justice.json.schemas.core.HearingType;
-import uk.gov.justice.json.schemas.core.JurisdictionType;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @JsonInclude(value = Include.NON_NULL)
 public class Hearing implements Serializable {
 
     private static final long serialVersionUID = -7393868029752131025L;
-
-    private HearingType type;
-    private JurisdictionType jurisdictionType;
-    private String reportingRestrictionReason;
-    private HearingLanguage hearingLanguage;
-    private LocalDateTime earliestStartDateTime;
-    private int estimatedMinutes;
-    private CourtCentre courtCentre;
-    private List<JudicialRole> judiciary;
-    private List<ProsecutionCase> prosecutionCases;
-
-    public Hearing() {
-    }
+    private final UUID id;
+    private final String courtCentreId;
+    private final String type;
+    private final String startDate;
+    private final String startTime;
+    private final int estimateMinutes;
+    private final List<Defendant> defendants;
 
     @JsonCreator
-    public Hearing(@JsonProperty(value = "type") final HearingType type,
-                   @JsonProperty(value = "jurisdictionType") final JurisdictionType jurisdictionType,
-                   @JsonProperty(value = "reportingRestrictionReason") final String reportingRestrictionReason,
-                   @JsonProperty(value = "hearingLanguage") final HearingLanguage hearingLanguage,
-                   @JsonProperty(value = "earliestStartDateTime") final LocalDateTime earliestStartDateTime,
-                   @JsonProperty(value = "estimatedMinutes") final int estimatedMinutes,
-                   @JsonProperty(value = "courtCentre") final CourtCentre courtCentre,
-                   @JsonProperty(value = "judiciary") final List<JudicialRole> judiciary,
-                   @JsonProperty(value = "prosecutionCases") final List<ProsecutionCase> prosecutionCases) {
+    public Hearing(@JsonProperty(value = "id") final UUID id,
+                   @JsonProperty(value = "courtCentreId") final String courtCentreId,
+                   @JsonProperty(value = "type") final String type,
+                   @JsonProperty(value = "startDate") final String startDate,
+                   @JsonProperty(value = "startTime") final String startTime,
+                   @JsonProperty(value = "estimateMinutes") final int estimateMinutes,
+                   @JsonProperty(value = "defendants") final List<Defendant> defendants) {
+        this.id = id;
+        this.courtCentreId = courtCentreId;
         this.type = type;
-        this.jurisdictionType = jurisdictionType;
-        this.reportingRestrictionReason = reportingRestrictionReason;
-        this.hearingLanguage = hearingLanguage;
-        this.earliestStartDateTime = earliestStartDateTime;
-        this.estimatedMinutes = estimatedMinutes;
-        this.courtCentre = courtCentre;
-        this.judiciary = judiciary;
-        this.prosecutionCases = prosecutionCases;
+        this.startDate = startDate;
+        this.startTime = startTime;
+        this.estimateMinutes = estimateMinutes;
+        this.defendants = defendants;
     }
 
-    public HearingType getType() {
+    public UUID getId() {
+        return id;
+    }
+
+    public String getCourtCentreId() {
+        return courtCentreId;
+    }
+
+    public String getType() {
         return type;
     }
 
-    public Hearing setType(HearingType type) {
-        this.type = type;
-        return this;
+    public String getStartDate() {
+        return startDate;
     }
 
-    public JurisdictionType getJurisdictionType() {
-        return jurisdictionType;
+    public String getStartTime() {
+        return startTime;
     }
 
-    public Hearing setJurisdictionType(JurisdictionType jurisdictionType) {
-        this.jurisdictionType = jurisdictionType;
-        return this;
+    public int getEstimateMinutes() {
+        return estimateMinutes;
     }
 
-    public String getReportingRestrictionReason() {
-        return reportingRestrictionReason;
-    }
-
-    public Hearing setReportingRestrictionReason(String reportingRestrictionReason) {
-        this.reportingRestrictionReason = reportingRestrictionReason;
-        return this;
-    }
-
-    public HearingLanguage getHearingLanguage() {
-        return hearingLanguage;
-    }
-
-    public Hearing setHearingLanguage(HearingLanguage hearingLanguage) {
-        this.hearingLanguage = hearingLanguage;
-        return this;
-    }
-
-    public LocalDateTime getEarliestStartDateTime() {
-        return earliestStartDateTime;
-    }
-
-    public Hearing setEarliestStartDateTime(LocalDateTime earliestStartDateTime) {
-        this.earliestStartDateTime = earliestStartDateTime;
-        return this;
-    }
-
-    public int getEstimatedMinutes() {
-        return estimatedMinutes;
-    }
-
-    public Hearing setEstimatedMinutes(int estimatedMinutes) {
-        this.estimatedMinutes = estimatedMinutes;
-        return this;
-    }
-
-    public CourtCentre getCourtCentre() {
-        return courtCentre;
-    }
-
-    public Hearing setCourtCentre(CourtCentre courtCentre) {
-        this.courtCentre = courtCentre;
-        return this;
-    }
-
-    public List<JudicialRole> getJudiciary() {
-        return judiciary;
-    }
-
-    public Hearing setJudiciary(List<JudicialRole> judiciary) {
-        this.judiciary = judiciary;
-        return this;
-    }
-
-    public List<ProsecutionCase> getProsecutionCases() {
-        return prosecutionCases;
-    }
-
-    public Hearing setProsecutionCases(List<ProsecutionCase> prosecutionCases) {
-        this.prosecutionCases = prosecutionCases;
-        return this;
-    }
-
-    public static Hearing hearing() {
-        return new Hearing();
+    public List<Defendant> getDefendants() {
+        return defendants;
     }
 }

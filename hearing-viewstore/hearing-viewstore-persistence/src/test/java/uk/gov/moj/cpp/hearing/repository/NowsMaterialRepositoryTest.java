@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.repository;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -40,26 +39,26 @@ public class NowsMaterialRepositoryTest {
     @Before
     public void setup() {
         final Nows nows = Nows.builder()
-                .withId(nowsId)
-                .withDefendantId(defendantId)
-                .withHearingId(hearingId)
-                .withNowsTypeId(nowsTypeId)
-                .withMaterial(asSet(NowsMaterial.builder()
-                        .withId(materialId)
-                        .withStatus("requested")
-                        .withUserGroups(asSet("LO", "GA"))
-                        .withLanguage(language)
-                        .withNowResult(asSet(NowsResult.builder()
-                                .withId(randomUUID())
-                                .withSequence(1)
-                                .withSharedResultId(sharedResultId)
-                                .build()))
-                        .build()))
+            .withId(nowsId)
+            .withDefendantId(defendantId)
+            .withHearingId(hearingId)
+            .withNowsTypeId(nowsTypeId)
+            .withMaterial(Arrays.asList(NowsMaterial.builder()
+                    .withId(materialId)
+                    .withStatus("requested")
+                    .withUserGroups(Arrays.asList("LO", "GA"))
+                    .withLanguage(language)
+                    .withNowResult(Arrays.asList(NowsResult.builder()
+                            .withId(randomUUID())
+                            .withSequence(1)
+                            .withSharedResultId(sharedResultId)
+                            .build()))
+                    .build()))
 
-                .build();
+            .build();
 
-        nows.getMaterial().iterator().next().setNows(nows);
-        nows.getMaterial().iterator().next().getNowResult().iterator().next().setNowsMaterial(nows.getMaterial().iterator().next());
+        nows.getMaterial().get(0).setNows(nows);
+        nows.getMaterial().get(0).getNowResult().get(0).setNowsMaterial(nows.getMaterial().get(0));
 
         this.nowsRepository.save(nows);
     }

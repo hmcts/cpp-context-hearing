@@ -6,15 +6,16 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -34,7 +35,7 @@ public class NowsMaterial {
             joinColumns = @JoinColumn(name = "material_id")
     )
     @Column(name = "user_groups", nullable = false)
-    private Set<String> userGroups = new HashSet<>();
+    private List<String> userGroups = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "nows_id", nullable = false)
@@ -42,7 +43,7 @@ public class NowsMaterial {
 
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nowsMaterial", orphanRemoval = true)
-    private Set<NowsResult> nowResult = new HashSet<>();
+    private List<NowsResult> nowResult = new ArrayList<>();
 
 
     @Column(name = "language")
@@ -64,11 +65,11 @@ public class NowsMaterial {
         this.status = status;
     }
 
-    public Set<String> getUserGroups() {
+    public List<String> getUserGroups() {
         return userGroups;
     }
 
-    public void setUserGroups(Set<String> userGroups) {
+    public void setUserGroups(List<String> userGroups) {
         this.userGroups = userGroups;
     }
 
@@ -80,11 +81,11 @@ public class NowsMaterial {
         this.nows = nows;
     }
 
-    public Set<NowsResult> getNowResult() {
+    public List<NowsResult> getNowResult() {
         return nowResult;
     }
 
-    public void setNowResult(Set<NowsResult> nowResult) {
+    public void setNowResult(List<NowsResult> nowResult) {
         this.nowResult = nowResult;
     }
 
@@ -97,7 +98,7 @@ public class NowsMaterial {
     }
 
 
-    public static Builder builder() {
+    public static Builder  builder() {
         return new Builder();
     }
 
@@ -105,12 +106,13 @@ public class NowsMaterial {
         Nows nows;
         private UUID id;
         private String status;
-        private Set<String> userGroups = new HashSet<>();
-        private Set<NowsResult> nowResult = new HashSet<>();
+        private List<String> userGroups = new ArrayList<>();
+        private List<NowsResult> nowResult = new ArrayList<>();
         private String language;
 
         private Builder() {
         }
+
 
         public Builder withId(UUID id) {
             this.id = id;
@@ -122,7 +124,7 @@ public class NowsMaterial {
             return this;
         }
 
-        public Builder withUserGroups(Set<String> userGroups) {
+        public Builder withUserGroups(List<String> userGroups) {
             this.userGroups = userGroups;
             return this;
         }
@@ -132,7 +134,7 @@ public class NowsMaterial {
             return this;
         }
 
-        public Builder withNowResult(Set<NowsResult> nowResult) {
+        public Builder withNowResult(List<NowsResult> nowResult) {
             this.nowResult = nowResult;
             return this;
         }
@@ -152,23 +154,5 @@ public class NowsMaterial {
             nowsMaterial.setLanguage(language);
             return nowsMaterial;
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        NowsMaterial that = (NowsMaterial) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(id);
     }
 }

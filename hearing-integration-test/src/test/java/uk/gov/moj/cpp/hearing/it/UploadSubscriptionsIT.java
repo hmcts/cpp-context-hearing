@@ -10,7 +10,7 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.it.TestUtilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;

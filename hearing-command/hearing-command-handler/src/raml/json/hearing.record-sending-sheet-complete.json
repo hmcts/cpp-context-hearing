@@ -46,9 +46,6 @@
             "reason": "xyz reason",
             "description": "description",
             "category": "category",
-            "title": "Public service vehicle - passenger use altered / defaced ticket",
-            "legislation": "legislation",
-            "orderIndex":1,
             "startDate": "2016-06-21",
             "endDate": "2017-08-01"
           },{
@@ -65,9 +62,6 @@
             "reason": "xyz reason",
             "description": "description",
             "category": "category",
-            "title": "Public service vehicle - passenger use altered / defaced ticket",
-            "legislation": "legislation",
-            "orderIndex":2,
             "startDate": "2016-06-21",
             "endDate": "2017-08-01"
           }

@@ -1,10 +1,9 @@
 {
    "$schema":"http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.hearing-events-updated.json",
    "type":"object",
    "properties":{
       "hearingId":{
-         "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+         "$ref":"#/definitions/uuid"
       },
       "hearingEvents":{
          "type":"array",
@@ -14,11 +13,19 @@
          }
       }
    },
+   "required":[
+      "hearingId",
+      "hearingEvents"
+   ],
    "definitions":{
+      "uuid":{
+         "type":"string",
+         "pattern":"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      },
       "hearingEvent":{
          "properties":{
             "hearingEventId":{
-               "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+               "$ref":"#/definitions/uuid"
             },
             "recordedLabel":{
                "type":"string"
@@ -27,13 +34,7 @@
          "required":[
             "hearingEventId",
             "recordedLabel"
-         ],
-         "additionalProperties": false
+         ]
       }
-   },
-   "required":[
-      "hearingId",
-      "hearingEvents"
-   ],
-  "additionalProperties": false
+   }
 }

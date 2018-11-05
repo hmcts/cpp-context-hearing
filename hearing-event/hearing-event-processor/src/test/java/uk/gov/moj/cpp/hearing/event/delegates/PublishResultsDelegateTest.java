@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.Collections.singletonList;
-import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -19,7 +21,40 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.fourth;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertToEnvelopeMatcher;
+
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.message.shareResults.Address;
+import uk.gov.moj.cpp.hearing.message.shareResults.Attendee;
+import uk.gov.moj.cpp.hearing.message.shareResults.Case;
+import uk.gov.moj.cpp.hearing.message.shareResults.CourtCentre;
+import uk.gov.moj.cpp.hearing.message.shareResults.Defendant;
+import uk.gov.moj.cpp.hearing.message.shareResults.Hearing;
+import uk.gov.moj.cpp.hearing.message.shareResults.Interpreter;
+import uk.gov.moj.cpp.hearing.message.shareResults.Offence;
+import uk.gov.moj.cpp.hearing.message.shareResults.Person;
+import uk.gov.moj.cpp.hearing.message.shareResults.Plea;
+import uk.gov.moj.cpp.hearing.message.shareResults.Prompt;
+import uk.gov.moj.cpp.hearing.message.shareResults.ShareResultsMessage;
+import uk.gov.moj.cpp.hearing.message.shareResults.SharedResultLine;
+import uk.gov.moj.cpp.hearing.message.shareResults.Variant;
+import uk.gov.moj.cpp.hearing.message.shareResults.Verdict;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -30,38 +65,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import uk.gov.justice.json.schemas.core.CourtCentre;
-import uk.gov.justice.json.schemas.core.CourtClerk;
-import uk.gov.justice.json.schemas.core.DefenceCounsel;
-import uk.gov.justice.json.schemas.core.DefendantAttendance;
-import uk.gov.justice.json.schemas.core.DelegatedPowers;
-import uk.gov.justice.json.schemas.core.Hearing;
-import uk.gov.justice.json.schemas.core.HearingDay;
-import uk.gov.justice.json.schemas.core.JudicialRole;
-import uk.gov.justice.json.schemas.core.Prompt;
-import uk.gov.justice.json.schemas.core.ProsecutionCase;
-import uk.gov.justice.json.schemas.core.ResultLine;
-import uk.gov.justice.json.schemas.core.publichearingresulted.Key;
-import uk.gov.justice.json.schemas.core.publichearingresulted.SharedHearing;
-import uk.gov.justice.json.schemas.core.publichearingresulted.SharedPrompt;
-import uk.gov.justice.json.schemas.core.publichearingresulted.SharedResultLine;
-import uk.gov.justice.json.schemas.core.publichearingresulted.SharedVariant;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
-import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 public class PublishResultsDelegateTest {
 
@@ -76,12 +79,7 @@ public class PublishResultsDelegateTest {
 
     @Spy
     @InjectMocks
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
-
-    @Spy
-    @InjectMocks
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
-
 
     @Mock
     private Sender sender;
@@ -102,51 +100,20 @@ public class PublishResultsDelegateTest {
 
         final NowDefinition nowDefinition = standardNowDefinition();
 
-        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptReferenceData =
-                uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
-                        .setId(UUID.randomUUID())
-                        .setLabel("promptReferenceData0")
-                        .setUserGroups(Arrays.asList("usergroup0", "usergroup1"));
-
-        final Prompt prompt0 = Prompt.prompt()
-                .withLabel(promptReferenceData.getLabel())
-                .withValue("promptValue0")
-                .withId(UUID.randomUUID())
-                .withFixedListCode("fixedListCode0")
-                .build();
-
         final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(resultsSharedTemplate(), r -> {
             r.getVariantDirectory().get(0).getKey().setNowsTypeId(nowDefinition.getId());
-            r.getHearing().getTargets().get(0).getResultLines().get(0).setPrompts(singletonList(prompt0));
-            r.getHearing().setDefenceCounsels(
-                    singletonList(DefenceCounsel.defenceCounsel().withId(UUID.randomUUID()).build()));
-            r.getHearing().setDefendantAttendance(
-                    singletonList(DefendantAttendance.defendantAttendance().withDefendantId(UUID.randomUUID()).build()));
         }));
 
         final List<uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant> newVariants = singletonList(
                 standardVariantTemplate(nowDefinition.getId(), resultsShared.getHearingId(), resultsShared.getFirstDefendant().getId()).setReferenceDate(LocalDate.now())
         );
 
-        final LocalDate referenceDate = newVariants.get(0).getReferenceDate();
         when(referenceDataService.getNowDefinitionById(
-                null, referenceDate,
+                null, newVariants.get(0).getReferenceDate(),
                 nowDefinition.getId())).thenReturn(nowDefinition);
 
-        final ResultLine resultLine = resultsShared.getFirstTarget().getResultLines().get(0);
-
-        resultLine.setDelegatedPowers(
-                DelegatedPowers.delegatedPowers().withUserId(UUID.randomUUID()).build()
-        );
-
-        final ResultDefinition resultLineDefinition = ResultDefinition.resultDefinition()
-                .setPrompts(Arrays.asList(promptReferenceData))
-                .setId(resultLine.getResultDefinitionId());
-        when(referenceDataService.getResultDefinitionById(null, resultLine.getOrderedDate(), resultLineDefinition.getId())).thenReturn(resultLineDefinition);
-
-        //the actual test !!!
         publishResultsDelegate.shareResults(null, sender,
-                envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared.it())),
+                envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared)),
                 resultsShared.it(), newVariants);
 
         verify(sender).send(envelopeArgumentCaptor.capture());
@@ -155,103 +122,150 @@ public class PublishResultsDelegateTest {
 
         assertThat(sharedResultsMessage, jsonEnvelope(metadata().withName("public.hearing.resulted"), payloadIsJson(print())));
 
-        final PublicHearingResulted publicHearingResulted = jsonObjectToObjectConverter.convert(sharedResultsMessage.payloadAsJsonObject(), PublicHearingResulted.class);
-
-        final Hearing hearingIn = resultsShared.getHearing();
-
-        final CourtClerk expectedCourtClerk0 = resultsShared.it().getCompletedResultLinesStatus().get(resultLine.getResultLineId()).getCourtClerk();
-
-        assertThat(publicHearingResulted, isBean(PublicHearingResulted.class)
-                .withValue(PublicHearingResulted::getSharedTime, resultsShared.it().getSharedTime())
-                .with(PublicHearingResulted::getHearing, isBean(SharedHearing.class)
-                        .withValue(SharedHearing::getId, hearingIn.getId())
-                        .withValue(sh -> sh.getJurisdictionType().name(), hearingIn.getJurisdictionType().name())
-                        .withValue(sh -> sh.getHearingDays().size(), hearingIn.getHearingDays().size())
-                        .with(SharedHearing::getHearingDays, first(isBean(HearingDay.class)))
-                        .with(SharedHearing::getCourtCentre, isBean(CourtCentre.class)
-                                .withValue(CourtCentre::getId, hearingIn.getCourtCentre().getId())
-                                .withValue(CourtCentre::getName, hearingIn.getCourtCentre().getName())
-                                .withValue(CourtCentre::getRoomId, hearingIn.getCourtCentre().getRoomId())
-                                .withValue(CourtCentre::getRoomName, hearingIn.getCourtCentre().getRoomName())
+        assertThat(sharedResultsMessage, convertToEnvelopeMatcher(ShareResultsMessage.class, isBean(ShareResultsMessage.class)
+                .with(ShareResultsMessage::getSharedTime, is(resultsShared.it().getSharedTime()))
+                .with(ShareResultsMessage::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(resultsShared.getHearing().getId()))
+                        .with(Hearing::getHearingType, is(resultsShared.getHearing().getType()))
+                        .with(Hearing::getStartDateTime, is(resultsShared.getHearing().getHearingDays().get(0)))
+                        .with(Hearing::getHearingDates, containsInAnyOrder(resultsShared.getHearing().getHearingDays().toArray()))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getCourtCentreId, is(resultsShared.getHearing().getCourtCentreId()))
+                                .with(CourtCentre::getCourtCentreName, is(resultsShared.getHearing().getCourtCentreName()))
+                                .with(CourtCentre::getCourtRoomId, is(resultsShared.getHearing().getCourtRoomId()))
+                                .with(CourtCentre::getCourtRoomName, is(resultsShared.getHearing().getCourtRoomName()))
                         )
-                        // no nested or detailed check because shareResults just copies the array references
-                        .withValue(sh -> sh.getJudiciary().size(), hearingIn.getJudiciary().size())
-                        .with(SharedHearing::getJudiciary, first(isBean(JudicialRole.class)
-                                .withValue(JudicialRole::getJudicialId, hearingIn.getJudiciary().get(0).getJudicialId())
+                        .with(Hearing::getAttendees, first(isBean(Attendee.class)
+                                .with(Attendee::getPersonId, is(resultsShared.getCourtClerk().getId()))
+                                .with(Attendee::getFirstName, is(resultsShared.getCourtClerk().getFirstName()))
+                                .with(Attendee::getLastName, is(resultsShared.getCourtClerk().getLastName()))
+                                .with(Attendee::getType, is("COURTCLERK"))
                         ))
-                        // no nested or detailed check because shareResults just copies the array references
-                        .withValue(sh -> sh.getDefenceCounsels().size(), hearingIn.getDefenceCounsels().size())
-                        .with(SharedHearing::getDefenceCounsels, first(isBean(DefenceCounsel.class)
-                                .withValue(DefenceCounsel::getId, hearingIn.getDefenceCounsels().get(0).getId())
+                        .with(Hearing::getAttendees, second(isBean(Attendee.class)
+                                .with(Attendee::getPersonId, is(resultsShared.getHearing().getJudge().getId()))
+                                .with(Attendee::getTitle, is(resultsShared.getHearing().getJudge().getTitle()))
+                                .with(Attendee::getFirstName, is(resultsShared.getHearing().getJudge().getFirstName()))
+                                .with(Attendee::getLastName, is(resultsShared.getHearing().getJudge().getLastName()))
+                                .with(Attendee::getType, is("JUDGE"))
                         ))
-                        // no nested or detailed check because shareResults just copies the array references
-                        .withValue(sh -> sh.getProsecutionCases().size(), hearingIn.getProsecutionCases().size())
-                        .with(SharedHearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
-                                .withValue(ProsecutionCase::getId, hearingIn.getProsecutionCases().get(0).getId())
+                        .with(Hearing::getAttendees, third(isBean(Attendee.class)
+                                .with(Attendee::getPersonId, is(resultsShared.getFirstDefenseCounsel().getPersonId()))
+                                .with(Attendee::getFirstName, is(resultsShared.getFirstDefenseCounsel().getFirstName()))
+                                .with(Attendee::getLastName, is(resultsShared.getFirstDefenseCounsel().getLastName()))
+                                .with(Attendee::getStatus, is(resultsShared.getFirstDefenseCounsel().getStatus()))
+                                .with(Attendee::getTitle, is(resultsShared.getFirstDefenseCounsel().getTitle()))
+                                .with(Attendee::getType, is("DEFENCEADVOCATE"))
+                                .with(Attendee::getDefendantIds, containsInAnyOrder(resultsShared.getFirstDefenseCounsel().getDefendantIds().toArray()))
                         ))
-                        .withValue(sh -> sh.getDefendantAttendance().size(), hearingIn.getDefendantAttendance().size())
-                        .with(SharedHearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
-                                .withValue(DefendantAttendance::getDefendantId, hearingIn.getDefendantAttendance().get(0).getDefendantId())
+                        .with(Hearing::getAttendees, fourth(isBean((Attendee.class))
+                                .with(Attendee::getPersonId, is(resultsShared.getFirstProsecutionCounsel().getPersonId()))
+                                .with(Attendee::getFirstName, is(resultsShared.getFirstProsecutionCounsel().getFirstName()))
+                                .with(Attendee::getLastName, is(resultsShared.getFirstProsecutionCounsel().getLastName()))
+                                .with(Attendee::getStatus, is(resultsShared.getFirstProsecutionCounsel().getStatus()))
+                                .with(Attendee::getTitle, is(resultsShared.getFirstProsecutionCounsel().getTitle()))
+                                .with(Attendee::getType, is("PROSECUTIONADVOCATE"))
+                                .with(Attendee::getCaseIds, containsInAnyOrder(resultsShared.getCaseIds().toArray()))
                         ))
-                        .withValue(sh -> sh.getSharedResultLines().size(), 1)
-                        .with(SharedHearing::getSharedResultLines, first(isBean(SharedResultLine.class)
-                                .withValue(SharedResultLine::getId, resultLine.getResultLineId())
-                                //.withValue(SharedResultLine::getCourtClerk, resultLine.getResultLineId())
-                                .withValue(SharedResultLine::getDefendantId, resultsShared.getFirstDefendant().getId())
-                                .withValue(SharedResultLine::getLabel, resultLine.getResultLabel())
-                                .withValue(SharedResultLine::getLevel, resultLine.getLevel().name())
-                                //TODO GPE-5483
-                                //  .withValue(SharedResultLine::getIsAvailableForCourtExtract, resultLineDefinition.get)
-                                //.withValue(SharedResultLine::getWelshLabel, resultLine.getW)
-                                .withValue(SharedResultLine::getLastSharedDateTime, resultLine.getSharedDate().toString())
-                                .with(SharedResultLine::getCourtClerk, isBean(CourtClerk.class)
-                                        .withValue(CourtClerk::getFirstName, expectedCourtClerk0.getFirstName())
-                                        .withValue(CourtClerk::getLastName, expectedCourtClerk0.getLastName())
-                                        .withValue(CourtClerk::getId, expectedCourtClerk0.getId())
+                        .with(Hearing::getDefendants, first(isBean(Defendant.class)
+                                .with(Defendant::getId, is(resultsShared.getFirstDefendant().getId()))
+                                .with(Defendant::getDefenceOrganisation, is(resultsShared.getFirstDefendant().getDefenceOrganisation()))
+                                .with(Defendant::getInterpreter, isBean(Interpreter.class)
+                                        .with(Interpreter::getLanguage, is(resultsShared.getFirstDefendant().getInterpreter().getLanguage()))
                                 )
-                                .withValue(rl -> rl.getDelegatedPowers().getUserId(), resultLine.getDelegatedPowers().getUserId())
-                                .withValue(rl -> rl.getPrompts().size(), 1)
-                                .with(SharedResultLine::getPrompts, first(isBean(SharedPrompt.class)
-                                        .withValue(SharedPrompt::getFixedListCode, prompt0.getFixedListCode())
-                                        .withValue(SharedPrompt::getId, prompt0.getId())
-                                        .withValue(SharedPrompt::getLabel, prompt0.getLabel())
-                                        .withValue(SharedPrompt::getValue, prompt0.getValue())
-                                        .withValue(SharedPrompt::getFixedListCode, prompt0.getFixedListCode())
-                                        //TODO GPE-5483
-                                        //.withValue(SharedPrompt::getIsAvailableForCourtExtract, prompt0.get())
-                                        //.withValue(SharedPrompt::getWelshLabel, prompt0.get())
-                                        //.withValue(SharedPrompt::getWelshValue, prompt0.get())
-                                        //.withValue(SharedPrompt::getIsAvailableForCourtExtract, prompt0.get())
-                                        .withValue(SharedPrompt::getPromptSequence, promptReferenceData.getSequence())
-                                        .withValue(SharedPrompt::getUsergroups, promptReferenceData.getUserGroups())
+                                .with(Defendant::getPerson, isBean(Person.class)
+                                        .with(Person::getId, is(resultsShared.getFirstDefendant().getPersonId()))
+                                        .with(Person::getDateOfBirth, is(resultsShared.getFirstDefendant().getDateOfBirth()))
+                                        .with(Person::getNationality, is(resultsShared.getFirstDefendant().getNationality()))
+                                        .with(Person::getGender, is(resultsShared.getFirstDefendant().getGender()))
+                                        .with(Person::getFirstName, is(resultsShared.getFirstDefendant().getFirstName()))
+                                        .with(Person::getLastName, is(resultsShared.getFirstDefendant().getLastName()))
+                                        .with(Person::getAddress, isBean(Address.class)
+                                                .with(Address::getAddress1, is(resultsShared.getFirstDefendant().getAddress().getAddress1()))
+                                                .with(Address::getAddress2, is(resultsShared.getFirstDefendant().getAddress().getAddress2()))
+                                                .with(Address::getAddress3, is(resultsShared.getFirstDefendant().getAddress().getAddress3()))
+                                                .with(Address::getAddress4, is(resultsShared.getFirstDefendant().getAddress().getAddress4()))
+                                                .with(Address::getPostCode, is(resultsShared.getFirstDefendant().getAddress().getPostCode()))
+                                        )
+                                )
+                                .with(Defendant::getCases, first(isBean(Case.class)
+                                        .with(Case::getId, is(resultsShared.getFirstDefendantCase().getCaseId()))
+                                        .with(Case::getUrn, is(resultsShared.getFirstCase().getUrn()))
+                                        .with(Case::getBailStatus, is(resultsShared.getFirstDefendantCase().getBailStatus()))
+                                        .with(Case::getCustodyTimeLimitDate, is(resultsShared.getFirstDefendantCase().getCustodyTimeLimitDate()))
+                                        .with(Case::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(resultsShared.getFirstDefendantFirstOffence().getId()))
+                                                .with(Offence::getCode, is(resultsShared.getFirstDefendantFirstOffence().getOffenceCode()))
+                                                .with(Offence::getStartDate, is(resultsShared.getFirstDefendantFirstOffence().getStartDate()))
+                                                .with(Offence::getEndDate, is(resultsShared.getFirstDefendantFirstOffence().getEndDate()))
+                                                .with(Offence::getWording, is(resultsShared.getFirstDefendantFirstOffence().getWording()))
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getId, is(resultsShared.getFirstPlea().getOffenceId()))
+                                                        .with(Plea::getDate, is(resultsShared.getFirstPlea().getPleaDate()))
+                                                        .with(Plea::getEnteredHearingId, is(resultsShared.getFirstPlea().getOriginHearingId()))
+                                                        .with(Plea::getValue, is(resultsShared.getFirstPlea().getValue()))
+                                                )
+                                                .with(Offence::getVerdict, isBean(Verdict.class)
+                                                        .with(Verdict::getTypeId, is(resultsShared.getFirstVerdict().getVerdictTypeId()))
+                                                        .with(Verdict::getEnteredHearingId, is(resultsShared.getFirstVerdict().getHearingId()))
+                                                        .with(Verdict::getVerdictDate, is(resultsShared.getFirstVerdict().getVerdictDate()))
+                                                        .with(Verdict::getNumberOfJurors, is(resultsShared.getFirstVerdict().getNumberOfJurors()))
+                                                        .with(Verdict::getNumberOfSplitJurors, is(formatNumberOfSplitJurors(resultsShared.getFirstVerdict())))
+                                                        .with(Verdict::getVerdictCategory, is(resultsShared.getFirstVerdict().getCategory()))
+                                                        .with(Verdict::getUnanimous, is(resultsShared.getFirstVerdict().getUnanimous()))
+                                                        .with(Verdict::getVerdictDescription, is(resultsShared.getFirstVerdict().getDescription()))
+                                                )
+                                        ))
                                 ))
                         ))
-                )
-                .withValue(phr -> phr.getVariants().size(), 2)
-                .with(PublicHearingResulted::getVariants, first(isBean(SharedVariant.class)
-                        .with(SharedVariant::getKey, isBean(Key.class)
-                                .withValue(Key::getDefendantId, resultsShared.getFirstVariant().getKey().getDefendantId())
-                                .withValue(Key::getNowsTypeId, resultsShared.getFirstVariant().getKey().getNowsTypeId())
-                                .with(Key::getUsergroups, containsInAnyOrder(resultsShared.getFirstVariant().getKey().getUsergroups().toArray()))
-                                .withValue(Key::getHearingId, resultsShared.getFirstVariant().getKey().getHearingId())
-                        )
-                        .withValue(SharedVariant::getMaterialId, resultsShared.getFirstVariant().getValue().getMaterialId())
-                        .withValue(SharedVariant::getDescription, nowDefinition.getName())
-                        .withValue(SharedVariant::getTemplateName, nowDefinition.getTemplateName())
-                ))
-                .with(PublicHearingResulted::getVariants, second(isBean(SharedVariant.class)
-                        .with(SharedVariant::getKey, isBean(Key.class)
-                                .withValue(Key::getDefendantId, newVariants.get(0).getKey().getDefendantId())
-                                .withValue(Key::getNowsTypeId, newVariants.get(0).getKey().getNowsTypeId())
-                                .with(Key::getUsergroups, containsInAnyOrder(newVariants.get(0).getKey().getUsergroups().toArray()))
-                                .withValue(Key::getHearingId, newVariants.get(0).getKey().getHearingId())
-                        )
-                        .withValue(SharedVariant::getMaterialId, newVariants.get(0).getValue().getMaterialId())
-                        .withValue(SharedVariant::getDescription, nowDefinition.getName())
-                        .withValue(SharedVariant::getTemplateName, nowDefinition.getTemplateName())
-                ))
-        );
+                        .with(Hearing::getSharedResultLines, first(isBean(SharedResultLine.class)
+                                .with(SharedResultLine::getId, is(resultsShared.getFirstCompletedResultLine().getId()))
+                                .with(SharedResultLine::getCaseId, is(resultsShared.getFirstCompletedResultLine().getCaseId()))
+                                .with(SharedResultLine::getDefendantId, is(resultsShared.getFirstCompletedResultLine().getDefendantId()))
+                                .with(SharedResultLine::getOffenceId, is(resultsShared.getFirstCompletedResultLine().getOffenceId()))
+                                .with(SharedResultLine::getLabel, is(resultsShared.getFirstCompletedResultLine().getResultLabel()))
+                                .with(SharedResultLine::getLevel, is(resultsShared.getFirstCompletedResultLine().getLevel().toString()))
+                                .with(SharedResultLine::getCourtClerk, isBean(CourtClerk.class)
+                                        .with(CourtClerk::getId, is(resultsShared.getFirstCompletedResultLineStatus().getCourtClerk().getId()))
+                                        .with(CourtClerk::getFirstName, is(resultsShared.getFirstCompletedResultLineStatus().getCourtClerk().getFirstName()))
+                                        .with(CourtClerk::getLastName, is(resultsShared.getFirstCompletedResultLineStatus().getCourtClerk().getLastName()))
+                                )
+                                .with(SharedResultLine::getPrompts, first(isBean(Prompt.class)
+                                        .with(Prompt::getId, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getId()))
+                                        .with(Prompt::getLabel, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getLabel()))
+                                        .with(Prompt::getValue, is(resultsShared.getFirstCompletedResultLineFirstPrompt().getValue()))
 
+                                ))
+                                .with(SharedResultLine::getLastSharedDateTime, is(resultsShared.getFirstCompletedResultLineStatus().getLastSharedDateTime()))
+                        ))
+                )
+                .with(ShareResultsMessage::getVariants, first(isBean(Variant.class)
+                        .with(Variant::getKey, isBean(VariantKey.class)
+                                .with(VariantKey::getDefendantId, is(resultsShared.getFirstVariant().getKey().getDefendantId()))
+                                .with(VariantKey::getNowsTypeId, is(resultsShared.getFirstVariant().getKey().getNowsTypeId()))
+                                .with(VariantKey::getUsergroups, containsInAnyOrder(resultsShared.getFirstVariant().getKey().getUsergroups().toArray()))
+                                .with(VariantKey::getHearingId, is(resultsShared.getFirstVariant().getKey().getHearingId()))
+                        )
+                        .with(Variant::getMaterialId, is(resultsShared.getFirstVariant().getValue().getMaterialId()))
+                        .with(Variant::getDescription, is(nowDefinition.getName()))
+                        .with(Variant::getTemplateName, is(nowDefinition.getTemplateName()))
+                ))
+                .with(ShareResultsMessage::getVariants, second(isBean(Variant.class)
+                        .with(Variant::getKey, isBean(VariantKey.class)
+                                .with(VariantKey::getDefendantId, is(newVariants.get(0).getKey().getDefendantId()))
+                                .with(VariantKey::getNowsTypeId, is(newVariants.get(0).getKey().getNowsTypeId()))
+                                .with(VariantKey::getUsergroups, containsInAnyOrder(newVariants.get(0).getKey().getUsergroups().toArray()))
+                                .with(VariantKey::getHearingId, is(newVariants.get(0).getKey().getHearingId()))
+                        )
+                        .with(Variant::getMaterialId, is(newVariants.get(0).getValue().getMaterialId()))
+                        .with(Variant::getDescription, is(nowDefinition.getName()))
+                        .with(Variant::getTemplateName, is(nowDefinition.getTemplateName()))
+                ))
+        ));
     }
 
+    private static String formatNumberOfSplitJurors(final VerdictUpsert v) {
+        return v.getNumberOfJurors() != null && v.getNumberOfSplitJurors() != null ?
+                String.format("%s-%s", v.getNumberOfJurors() - v.getNumberOfSplitJurors(), v.getNumberOfSplitJurors())
+                : null;
+    }
 }

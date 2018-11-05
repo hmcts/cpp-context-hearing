@@ -98,10 +98,7 @@
         "offenceCode" : "offenceCode",
         "reason" : "Reason",
         "section" : "section",
-        "wording" : "wording",
-        "title": "Public service vehicle - passenger use altered / defaced ticket",
-        "legislation": "legislation",
-        "orderIndex":3
+        "wording" : "wording"
       }, {
         "category" : "category",
         "description" : "testOffence",
@@ -111,10 +108,7 @@
         "offenceCode" : "offenceCode",
         "reason" : "Reason",
         "section" : "section",
-        "wording" : "wording",
-        "title": "Public service vehicle - passenger use altered / defaced ticket",
-        "legislation": "legislation",
-        "orderIndex":2
+        "wording" : "wording"
       }, {
         "category" : "category",
         "description" : "testOffence",

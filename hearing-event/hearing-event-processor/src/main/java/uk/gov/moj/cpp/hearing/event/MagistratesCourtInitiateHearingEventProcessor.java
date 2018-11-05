@@ -3,10 +3,7 @@ package uk.gov.moj.cpp.hearing.event;
 
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.justice.json.schemas.core.Plea;
-import uk.gov.justice.json.schemas.core.PleaValue;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -22,6 +19,9 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class MagistratesCourtInitiateHearingEventProcessor {
@@ -82,15 +82,14 @@ public class MagistratesCourtInitiateHearingEventProcessor {
                     continue;
                 }
 
-                final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
-                        .setHearingId(magsCourtHearingRecorded.getHearingId())
-                        .setPlea(Plea.plea()
-                                .withOffenceId(offence.getId())
-                                .withPleaDate(offence.getPlea().getPleaDate())
-                                .withPleaValue(PleaValue.valueOf(offence.getPlea().getValue()))
-                                .build());
+                final PleaUpsert pleaUpsert = PleaUpsert.builder()
+                        .withHearingId(magsCourtHearingRecorded.getHearingId())
+                        .withOffenceId(offence.getId())
+                        .withPleaDate(offence.getPlea().getPleaDate())
+                        .withValue(offence.getPlea().getValue())
+                        .build();
 
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-plea-against-offence")
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.offence-plea-updated")
                         .apply(this.objectToJsonValueConverter.convert(pleaUpsert)));
             }
         }

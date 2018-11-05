@@ -1,0 +1,197 @@
+{
+   "hearingId":"23ef34ec-63e5-422e-8071-9b3753008c10",
+   "startDate":"2018-02-22",
+   "startTime":"10:30:00",
+   "roomName":"3-1",
+   "hearingType":"TRIAL",
+   "courtCentreName":"Liverpool Crown Court",
+   "judge":{
+      "id":"a38d0d5f-a26c-436b-9b5e-4dc58f28878d",
+      "title":"HHJ",
+      "firstName":"Alan",
+      "lastName":"Mathison Turing"
+   },
+   "hearingDays":["2016-06-01T10:00:00Z"],
+   "roomId":"e7721a38-546d-4b56-9992-ebdd772a561b",
+   "courtCentreId":"e8821a38-546d-4b56-9992-ebdd772a561f",
+   "attendees":{
+      "prosecutionCounsels":[
+         {
+            "attendeeId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
+            "title":"MR",
+            "status":"QC",
+            "firstName":"Brian J.",
+            "lastName":"Fox",
+            "hearingDates": [ "2018-02-22" ]
+         }
+      ],
+      "defenceCounsels":[
+         {
+            "attendeeId":"743d333a-b270-4de6-a598-61abb64a8027",
+            "defendantId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
+            "status":"QC",
+            "title":"MR",
+            "firstName":"Mark",
+            "lastName":"Zuckerberg",
+            "hearingDates": [ "2018-02-22" ]
+         },
+         {
+            "attendeeId":"cdc14b89-6b4d-4e98-9641-826c355c51b8",
+            "defendantId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
+            "status":"QC",
+            "title":"MR",
+            "firstName":"Sean",
+            "lastName":"Parker",
+            "hearingDates": [ "2018-02-22" ]
+         }
+      ]
+   },
+   "cases":[
+      {
+         "caseId":"9b70743c-69b3-4ac2-a362-8c720b32e45b",
+         "caseUrn":"8C720B32E45B",
+         "defendants":[
+            {
+               "defendantId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
+               "personId":"5a6e2001-91ed-4af2-99af-f30ddc9ef5af",
+               "firstName":"Ken",
+               "lastName":"Thompson",
+               "homeTelephone":"02070101010",
+               "mobile":"07422263910",
+               "fax":"021111111",
+               "email":"ken.thompson@acme.me",
+               "address":{
+                  "formattedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
+                  "address1":"222 Furze Road Exeter",
+                  "address2":"Lorem Ipsum",
+                  "address3":"Solor",
+                  "address4":"Porro Quisquam",
+                  "postCode":"CR0 1XG"
+               },
+               "dateOfBirth":"1943-02-04",
+               "offences":[
+                  {
+                     "id":"4b1318e4-1517-4e4f-a89d-6af0eafa5058",
+                     "wording":"on 01/08/2009 at the County public house, unlawfully and maliciously wounded, John Smith",
+                     "count":1,
+                     "title":"Wound / inflict grievous bodily harm without intent",
+                     "legislation":"Contrary to section 20 of the Offences Against the Person Act 1861.",
+                     "convictionDate":"1983-02-04",
+                     "plea":{
+                        "pleaId":"0161a828-cfd1-4608-8616-d92870baba3d",
+                        "pleaDate":"2016-06-08",
+                        "value":"GUILTY"
+                     },
+                     "verdict":{
+                        "verdictId":"0161a828-cfd1-4608-8616-d92870bada3d",
+                        "value":{
+                           "id":"0161a828-cfd1-4608-8616-d92870bada3d",
+                           "category":"Guilty",
+                           "categoryType":"GUILTY",
+                           "verdictTypeId":"7baecac5-222b-402d-9047-84803679edab",
+                           "lesserOffence":"Obstruction to Police Officer",
+                           "code":"A1",
+                           "description":"Guilty By Jury On Judges Direction"
+                        },
+                        "verdictDate":"2018-02-21",
+                        "numberOfSplitJurors":2,
+                        "numberOfJurors":10,
+                        "unanimous":false
+                     }
+                  }
+               ]
+            },
+            {
+               "defendantId":"3739b4e3-1f81-4d12-a99d-ad27ae672566",
+               "personId":"98583be4-8d4a-4552-9252-ceccd61d32db",
+               "firstName":"William Nelson",
+               "lastName":"Joy",
+               "homeTelephone":"02070101010",
+               "mobile":"07422263910",
+               "fax":"021111111",
+               "email":"william-nelson.joy@acme.me",
+               "address":{
+                  "formattedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
+                  "address1":"222 Furze Road Exeter",
+                  "address2":"Lorem Ipsum",
+                  "address3":"Solor",
+                  "address4":"Porro Quisquam",
+                  "postCode":"CR0 1XG"
+               },
+               "dateOfBirth":"1954-11-08",
+               "offences":[
+                  {
+                     "id":"4b1318e4-1517-4e4f-a89d-6af0eafa5058",
+                     "wording":"on 01/08/2009 at the County public house, unlawfully and maliciously wounded, John Smith",
+                     "count":1,
+                     "title":"Wound / inflict grievous bodily harm without intent",
+                     "legislation":"Contrary to section 20 of the Offences Against the Person Act 1861.",
+                     "plea":{
+                        "pleaId":"0161a828-cfd1-4608-8616-d92870baba3d",
+                        "pleaDate":"2016-06-08",
+                        "value":"GUILTY"
+                     },
+                     "verdict":{
+                        "verdictId":"0161a828-cfd1-4608-8616-d92870bada3d",
+                        "value":{
+                           "id":"0161a828-cfd1-4608-8616-d92870bada3d",
+                           "category":"GUILTY",
+                           "code":"A1",
+                           "description":"Guilty By Jury On Judges Direction"
+                        },
+                        "verdictDate":"2018-02-21",
+                        "numberOfSplitJurors":2,
+                        "numberOfJurors":10,
+                        "unanimous":false
+                     }
+                  }
+               ]
+            }
+         ],
+         "witnesses": [
+            {
+               "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
+               "type":"Prosecution",
+               "classification": "Professional",
+               "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
+               "title": "Mr",
+               "firstName": "David",
+               "lastName": "LLOYD",
+               "dateOfBirth": "1980-07-15",
+               "nationality": "England",
+               "gender": "Male",
+               "homeTelephone": "02012345678",
+               "workTelephone": "02012345679",
+               "mobile": "07777777777",
+               "fax": "02011111111",
+               "email": "email@email.com"
+            }
+         ]
+      }
+   ],
+   "defenceWitnesses": [
+      {
+         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb491",
+         "type": "Defence",
+         "classification": "Expert",
+         "title": "Mr",
+         "firstName": "Barack",
+         "lastName": "OBAMA",
+         "defendants": [
+            {
+               "defendantId": "3739b4e3-1f81-4d12-a99d-ad27ae672566"
+            }
+         ]
+      }
+   ],
+   "resultLines": [
+      {
+         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb491",
+         "lastSharedDateTime" : "2018-02-21 10:30:00"
+      },
+      {
+         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb492",
+         "lastSharedDateTime" : "2018-02-20 10:30:00"
+      }
+   ]
+}

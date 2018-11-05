@@ -1,6 +1,6 @@
 # Instructions for running the performance tests
 
-1.  The maven plugin for jmeter should handle most things and it is possible to run jmeter with:
+1. The maven plugin for jmeter should handle most things and it is possible to run jmeter with:
 	cd cpp.context.hearing/hearing-performance-test
 	mvn clean verify -Pscheduling-performance-test
 	

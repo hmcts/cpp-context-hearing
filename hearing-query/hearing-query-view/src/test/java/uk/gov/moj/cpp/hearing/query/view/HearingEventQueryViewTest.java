@@ -55,7 +55,8 @@ public class HearingEventQueryViewTest {
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
-    private static final String FIELD_DEFENCE_COUNSEL_ID = "defenceCounselId";
+    private static final String FIELD_WITNESS_ID = "witnessId";
+    private static final String FIELD_COUNSEL_ID = "counselId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
     private static final String FIELD_EVENT_TIME = "eventTime";
     private static final String FIELD_LAST_MODIFIED_TIME = "lastModifiedTime";
@@ -77,7 +78,7 @@ public class HearingEventQueryViewTest {
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final UUID WITNESS_ID = randomUUID();
-    private static final UUID DEFENCE_COUNSEL_ID = randomUUID();
+    private static final UUID COUNSEL_ID = randomUUID();
     private static final UUID HEARING_EVENT_DEFINITION_ID = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next();
@@ -135,7 +136,6 @@ public class HearingEventQueryViewTest {
                 createObjectBuilder().add(FIELD_HEARING_ID, HEARING_ID.toString()).build());
 
         final JsonEnvelope actualHearingEventLog = hearingEventQueryView.getHearingEventLog(query);
-
         assertThat(actualHearingEventLog, is(jsonEnvelope(
                 withMetadataEnvelopedFrom(query)
                         .withName(RESPONSE_NAME_HEARING_EVENT_LOG),
@@ -149,7 +149,10 @@ public class HearingEventQueryViewTest {
                         withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_EVENT_TIME), equalTo(ZonedDateTimes.toString(EVENT_TIME))),
                         withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_LAST_MODIFIED_TIME), equalTo(ZonedDateTimes.toString(LAST_MODIFIED_TIME))),
                         withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_ALTERABLE), equalTo(ALTERABLE)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_DEFENCE_COUNSEL_ID), equalTo(DEFENCE_COUNSEL_ID.toString())),
+                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_WITNESS_ID), equalTo(WITNESS_ID.toString())),
+                                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS,
+                                                        FIELD_COUNSEL_ID),
+                                                        equalTo(COUNSEL_ID.toString())),
 
                         withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_2.toString())),
                         withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_DEFINITION_ID), equalTo(HEARING_EVENT_DEFINITION_ID_2.toString())),
@@ -341,14 +344,15 @@ public class HearingEventQueryViewTest {
         final List<HearingEvent> hearingEvents = new ArrayList<>();
         hearingEvents.add(
                 HearingEvent.hearingEvent()
-                    .setId(HEARING_EVENT_ID)
-                    .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
-                    .setHearingId(HEARING_ID)
-                    .setRecordedLabel(RECORDED_LABEL)
-                    .setEventTime(EVENT_TIME)
-                    .setLastModifiedTime(LAST_MODIFIED_TIME)
-                    .setAlterable(ALTERABLE)
-                    .setDefenceCounselId(DEFENCE_COUNSEL_ID)
+                .setId(HEARING_EVENT_ID)
+                .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                .setHearingId(HEARING_ID)
+                .setRecordedLabel(RECORDED_LABEL)
+                .setEventTime(EVENT_TIME)
+                .setLastModifiedTime(LAST_MODIFIED_TIME)
+                .setAlterable(ALTERABLE)
+                .setWitnessId(WITNESS_ID)
+                                        .setCounselId(COUNSEL_ID)
         );
         hearingEvents.add(
                 HearingEvent.hearingEvent()
@@ -359,7 +363,8 @@ public class HearingEventQueryViewTest {
                         .setEventTime(EVENT_TIME_2)
                         .setLastModifiedTime(LAST_MODIFIED_TIME_2)
                         .setAlterable(ALTERABLE_2)
-                        .setDefenceCounselId(DEFENCE_COUNSEL_ID)
+                        .setWitnessId(WITNESS_ID)
+                                        .setCounselId(COUNSEL_ID)
         );
 
         return hearingEvents;

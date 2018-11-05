@@ -42,14 +42,14 @@ public class HearingCommandHandlerRamlConfigTest {
                 AddProsecutionCounselCommandHandler.class,
                 MagistratesCourtInitiateHearingCommandHandler.class,
                 HearingEventCommandHandler.class,
+                AddWitnessCommandHandler.class,
                 GenerateNowsCommandHandler.class,
-                UpdateOffencesForDefendantCommandHandler.class,
-                UpdateDefendantCommandHandler.class,
+                ChangeCaseDefendantDetailsCommandHandler.class,
+                ChangeCaseDefendantOffencesCommandHandler.class,
+                DeleteAtendeeCommandHandler.class,
                 HearingDetailChangeCommandHandler.class,
                 UploadSubscriptionsCommandHandler.class,
-                AdjournHearingCommandHandler.class,
-                UpdateDefendantAttendanceCommandHandler.class,
-                SaveHearingCaseNoteCommandHandler.class
+                AdjournHearingCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));
@@ -61,6 +61,7 @@ public class HearingCommandHandlerRamlConfigTest {
                 .filter(m -> m.getAnnotation(Handles.class) != null)
                 .map(m -> m.getAnnotation(Handles.class).value())
                 .collect(Collectors.toList());
+
     }
 
     @Test
@@ -91,6 +92,8 @@ public class HearingCommandHandlerRamlConfigTest {
         filesThatArePresent.removeAll(privateEventSchemas);
 
         assertThat(filesThatArePresent, empty());
+
+
     }
 
     @Test
@@ -99,8 +102,8 @@ public class HearingCommandHandlerRamlConfigTest {
         List<String> filesThatArePresent =
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json").listFiles()))
                         .map(File::getName)
+                        .filter(name -> !name.equals("schema"))
                         .map(name -> "json/" + name)
-                        .filter(name -> !name.equals("json/schema"))
                         .collect(Collectors.toList());
 
         Collections.sort(filesThatArePresent);

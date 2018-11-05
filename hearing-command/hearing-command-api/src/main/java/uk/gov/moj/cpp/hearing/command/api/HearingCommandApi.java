@@ -28,8 +28,8 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.save-draft-result")
-    public void saveDraftResult(final JsonEnvelope command) {
-        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.save-draft-result").apply(command.payloadAsJsonObject()));
+    public void saveDraftResult(final JsonEnvelope envelope) {
+        this.sender.send(envelope);
     }
 
     @Handles("hearing.add-prosecution-counsel")
@@ -67,18 +67,14 @@ public class HearingCommandApi {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-nows-material-status").apply(command.payloadAsJsonObject()));
     }
 
+
     @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.share-results").apply(envelope.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.update-defendant-attendance-on-hearing-day")
-    public void updateDefendantAttendance(final JsonEnvelope envelope) {
-        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.update-defendant-attendance-on-hearing-day").apply(envelope.payloadAsJsonObject()));
-    }
-
-    @Handles("hearing.save-hearing-case-note")
-    public void saveHearingCaseNote(final JsonEnvelope envelope) {
-        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.save-hearing-case-note").apply(envelope.payloadAsJsonObject()));
+    @Handles("hearing.delete-attendee")
+    public void deleteAttendee(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.delete-attendee").apply(envelope.payloadAsJsonObject()));
     }
 }

@@ -114,36 +114,20 @@ protocols: [ HTTP, HTTPS ]
       description: |
         ...
         (mapping):
-            responseType: application/vnd.hearing.get.hearings+json
-            name: hearing.get.hearings
+            responseType: application/vnd.hearing.get.hearings-by-date+json
+            name: hearing.get.hearings-by-date
         ...
       queryParameters:
         date:
           description: date of hearing
           type: string
-          required: true
-        startTime:
-          description: start time
-          type: string
           required: false
-        endTime:
-          description: end time
-          type: string
-          required: false
-        courtCentreId:
-          description: court centre id
-          type: string
-          required: true
-        roomId:
-          description: room id
-          type: string
-          required: true
 
       responses:
             200:
                 description: OK
                 body:
-                  application/vnd.hearing.get.hearings+json:
+                  application/vnd.hearing.get.hearings-by-date+json:
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
 

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.logEvent;
 
+
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
@@ -16,17 +17,20 @@ public class LogEventCommand {
     private final ZonedDateTime eventTime;
     private final ZonedDateTime lastModifiedTime;
     private final Boolean alterable;
-    private final UUID defenceCounselId;
+    private final UUID witnessId;
+    private final UUID counselId;
 
     @JsonCreator
     public LogEventCommand(@JsonProperty("hearingEventId") final UUID hearingEventId,
-            @JsonProperty("hearingId") final UUID hearingId,
-            @JsonProperty("hearingEventDefinitionId") final UUID hearingEventDefinitionId,
-            @JsonProperty("recordedLabel") final String recordedLabel,
-            @JsonProperty("eventTime") final ZonedDateTime eventTime,
-            @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
-            @JsonProperty("alterable") final Boolean alterable,
-            @JsonProperty("defenceCounselId") final UUID defenceCounselId) {
+                           @JsonProperty("hearingId") final UUID hearingId,
+                           @JsonProperty("hearingEventDefinitionId") final UUID hearingEventDefinitionId,
+                           @JsonProperty("recordedLabel") final String recordedLabel,
+                           @JsonProperty("eventTime") final ZonedDateTime eventTime,
+                           @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
+                           @JsonProperty("alterable") final Boolean alterable,
+                           @JsonProperty("witnessId") final UUID witnessId,
+                    @JsonProperty("counselId") final UUID counselId) {
+
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
         this.hearingEventDefinitionId = hearingEventDefinitionId;
@@ -34,7 +38,8 @@ public class LogEventCommand {
         this.eventTime = eventTime;
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
-        this.defenceCounselId = defenceCounselId;
+        this.witnessId=witnessId;
+        this.counselId = counselId;
     }
 
     public UUID getHearingEventId() {
@@ -67,8 +72,12 @@ public class LogEventCommand {
     }
 
 
-    public UUID getDefenceCounselId() {
-        return defenceCounselId;
+    public UUID getCounselId() {
+        return counselId;
+    }
+
+    public UUID getWitnessId() {
+        return witnessId;
     }
 
     public static class Builder {
@@ -79,7 +88,8 @@ public class LogEventCommand {
         private ZonedDateTime eventTime;
         private ZonedDateTime lastModifiedTime;
         private Boolean alterable;
-        private UUID defenceCounselId;
+        private UUID witnessId;
+        private UUID counselId;
 
         public Builder withHearingEventId(final UUID hearingEventId) {
             this.hearingEventId = hearingEventId;
@@ -116,14 +126,20 @@ public class LogEventCommand {
             return this;
         }
 
-        public Builder withDefenceCounselId(final UUID defenceCounselId) {
-            this.defenceCounselId = defenceCounselId;
+        public Builder withWitnessId(final UUID witnessId) {
+            this.witnessId = witnessId;
+            return this;
+        }
+
+        public Builder withCounselId(final UUID counselId) {
+            this.counselId = counselId;
             return this;
         }
 
         public LogEventCommand build() {
             return new LogEventCommand(hearingEventId, hearingId, hearingEventDefinitionId,
-                            recordedLabel, eventTime, lastModifiedTime, alterable, defenceCounselId);
+                            recordedLabel, eventTime, lastModifiedTime, alterable, witnessId,
+                            counselId);
         }
     }
 

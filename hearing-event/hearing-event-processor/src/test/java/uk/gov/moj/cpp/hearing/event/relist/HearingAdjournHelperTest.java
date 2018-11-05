@@ -8,7 +8,6 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTIME;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
 
-import org.junit.Ignore;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import org.junit.Test;
@@ -29,16 +28,16 @@ public class HearingAdjournHelperTest {
 
     @Test
     public void getDistinctPromptValue() throws Exception {
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HDATE)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HEST)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HTIME)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HTYPE)).size());
 
     }
@@ -50,9 +49,8 @@ public class HearingAdjournHelperTest {
 
         //when and then
         assertEquals(1, HearingAdjournHelper.getOffencesHaveResultNextHearing(
-                arbitraryResultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0),
-                arbitraryResultsShared.getHearing().getTargets(),
-                arbitraryResultsShared.getHearing().getTargets().get(0).getResultLines(),
+                arbitraryResultsShared.getHearing().getDefendants().get(0),
+                arbitraryResultsShared.getCompletedResultLines(),
                 arbitraryNextHearingMetaData()).size());
 
     }

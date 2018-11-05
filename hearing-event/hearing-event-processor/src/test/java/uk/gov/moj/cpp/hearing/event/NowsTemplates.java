@@ -3,21 +3,20 @@ package uk.gov.moj.cpp.hearing.event;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
-import com.google.common.collect.ImmutableMap;
-import uk.gov.justice.json.schemas.core.CourtClerk;
-import uk.gov.justice.json.schemas.core.Plea;
-import uk.gov.justice.json.schemas.core.PleaValue;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+import uk.gov.moj.cpp.hearing.command.result.Level;
+import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
+import uk.gov.moj.cpp.hearing.domain.Plea;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
@@ -28,13 +27,14 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PromptRef;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import com.google.common.collect.ImmutableMap;
 
 public class NowsTemplates {
 
@@ -69,47 +69,12 @@ public class NowsTemplates {
     public static ResultsShared resultsSharedTemplate() {
 
         InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
-
         UUID completedResultLineId = randomUUID();
-
-        hearingOne.it().getHearing().setTargets(new ArrayList<>(Collections.singletonList(
-                CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
-        )));
-
-        final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
-                .setHearingId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                .setVerdict(uk.gov.justice.json.schemas.core.Verdict.verdict()
-                        .withVerdictDate(PAST_LOCAL_DATE.next())
-                        .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                        .withOriginatingHearingId(randomUUID())
-                        .withJurors(
-                                uk.gov.justice.json.schemas.core.Jurors.jurors()
-                                        .withNumberOfJurors(integer(9, 12).next())
-                                        .withNumberOfSplitJurors(integer(0, 3).next())
-                                        .withUnanimous(BOOLEAN.next())
-                                        .build())
-                        .withVerdictType(
-                                uk.gov.justice.json.schemas.core.VerdictType.verdictType()
-                                        .withVerdictTypeId(randomUUID())
-                                        .withCategoryType(STRING.next())
-                                        .withCategory(STRING.next())
-                                        .withDescription(STRING.next())
-                                        .withSequence(INTEGER.next())
-                                        .build())
-                        .withLesserOrAlternativeOffence(uk.gov.justice.json.schemas.core.LesserOrAlternativeOffence.lesserOrAlternativeOffence()
-                                .withOffenceLegislationWelsh(STRING.next())
-                                .withOffenceLegislation(STRING.next())
-                                .withOffenceTitleWelsh(STRING.next())
-                                .withOffenceTitle(STRING.next())
-                                .withOffenceCode(STRING.next())
-                                .withOffenceDefinitionId(randomUUID())
-                                .build())
-                        .build());
-
         return ResultsShared.builder()
                 .withHearingId(hearingOne.getHearingId())
                 .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
-                .withHearing(hearingOne.getHearing())
+                .withHearing(hearingOne.it().getHearing())
+                .withCases(hearingOne.it().getCases())
                 .withDefenceCounsels(ImmutableMap.of(randomUUID(), DefenceCounselUpsert.builder()
                         .withHearingId(hearingOne.getHearingId())
                         .withPersonId(randomUUID())
@@ -132,20 +97,48 @@ public class NowsTemplates {
                         .build()
                 ))
                 .withPleas(ImmutableMap.of(randomUUID(), Plea.plea()
-                        .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
-                        .withOriginatingHearingId(hearingOne.getHearingId())
-                        .withPleaDate(PAST_LOCAL_DATE.next())
-                        .withPleaValue(RandomGenerator.values(PleaValue.values()).next())
-                        .build()
+                        .setOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                        .setOriginHearingId(hearingOne.getHearingId())
+                        .setPleaDate(PAST_LOCAL_DATE.next())
+                        .setValue(STRING.next())
                 ))
-                .withVerdicts(ImmutableMap.of(randomUUID(), verdictUpsert.getVerdict()))
-                .withCourtClerk(CourtClerk.courtClerk()
+                .withVerdicts(ImmutableMap.of(randomUUID(), VerdictUpsert.builder()
+                        .withVerdictId(randomUUID())
+                        .withCategory(STRING.next())
+                        .withCode(STRING.next())
+                        .withDescription(STRING.next())
+                        .withNumberOfJurors(RandomGenerator.integer(9, 12).next())
+                        .withNumberOfSplitJurors(RandomGenerator.integer(0, 3).next())
+                        .withVerdictDate(PAST_LOCAL_DATE.next())
+                        .withVerdictValueId(randomUUID())
+                        .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                        .withUnanimous(BOOLEAN.next())
+                        .withHearingId(hearingOne.getHearingId())
+                        .build()))
+                .withCourtClerk(CourtClerk.builder()
                         .withId(randomUUID())
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next())
                         .build())
+                .withCompletedResultLines(new ArrayList<>(singletonList(
+                        CompletedResultLine.builder()
+                                .withId(completedResultLineId)
+                                .withCaseId(hearingOne.getFirstCaseId())
+                                .withDefendantId(hearingOne.getFirstDefendantId())
+                                .withOffenceId(hearingOne.getFirstOffenceIdForFirstDefendant())
+                                .withLevel(Level.CASE)
+                                .withResultDefinitionId(randomUUID())
+                                .withResultLabel(STRING.next())
+                                .withOrderedDate(LocalDate.now())
+                                .withResultPrompts(singletonList(ResultPrompt.builder()
+                                        .withId(randomUUID())
+                                        .withLabel(STRING.next())
+                                        .withValue(STRING.next())
+                                        .build()))
+                                .build()
+                )))
                 .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
-                        .withCourtClerk(uk.gov.justice.json.schemas.core.CourtClerk.courtClerk()
+                        .withCourtClerk(CourtClerk.builder()
                                 .withId(randomUUID())
                                 .withFirstName(STRING.next())
                                 .withLastName(STRING.next())
@@ -155,7 +148,7 @@ public class NowsTemplates {
                         .build()
                 ))
                 .withVariantDirectory(singletonList(
-                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
+                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantId())
                 ))
                 .build();
     }

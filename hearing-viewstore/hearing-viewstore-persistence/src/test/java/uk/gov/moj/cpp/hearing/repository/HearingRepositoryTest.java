@@ -1,23 +1,17 @@
 package uk.gov.moj.cpp.hearing.repository;
 
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCaseTest.buildLegalCase1;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.LegalCase;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -32,85 +26,58 @@ import org.junit.runner.RunWith;
 @RunWith(CdiTestRunner.class)
 public class HearingRepositoryTest {
 
-    private static final List<uk.gov.justice.json.schemas.core.Hearing> hearings = new ArrayList<>();
+    private static final List<Hearing> hearings = new ArrayList<>();
+    private static final LegalCase legalCase1 = buildLegalCase1();
 
     @Inject
     private HearingRepository hearingRepository;
-
     @Inject
-    private HearingCaseNoteRepository hearingCaseNoteRepository;
-
-    @Inject
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    @Inject
-    private HearingJPAMapper hearingJPAMapper;
-
+    private LegalCaseRepository legalCaseRepository;
+    
     @BeforeClass
     public static void create() {
-
-        final InitiateHearingCommand initiateHearingCommand = minimumInitiateHearingTemplate();
-
-        hearings.add(initiateHearingCommand.getHearing());
+        hearings.add(HearingRepositoryTestUtils.buildHearing(legalCase1));
     }
 
     @Before
     public void setup() {
-
-        hearings.forEach(hearing -> {
-
-            Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
-
-            hearingRepository.save(hearingEntity);
-        });
+        legalCaseRepository.save(legalCase1);
+        hearings.forEach(hearing -> hearingRepository.save(hearing));
     }
 
     @After
     public void teardown() {
         hearings.forEach(hearing -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearing.getId())));
+        legalCaseRepository.attachAndRemove(legalCaseRepository.findBy(legalCase1.getId()));
+    }
+
+
+    private ZonedDateTime atStartOfDay(ZonedDateTime zdt) {
+        return zdt.toLocalDate().atStartOfDay(zdt.getZone());
     }
 
     @Test
-    @Ignore("because of issues with hearing case note jsonb column")
-    public void shouldFindByStartDate() {
-        assertEquals(1, hearingRepository.findByFilters(hearings.get(0).getHearingDays().get(0).getSittingDay().toLocalDate(), hearings.get(0).getCourtCentre().getId(), hearings.get(0).getCourtCentre().getRoomId()).size());
+    public void shouldFindByStartDate() throws Exception {
+        final ZonedDateTime localTime = atStartOfDay(HearingRepositoryTestUtils.START_DATE_1);
+        assertEquals(1, hearingRepository.findByDate(localTime.toLocalDate()).size());
+
     }
 
     @Test
-    public void shouldFindAll() {
+    public void shouldFindAll() throws Exception {
         assertEquals(hearings.size(), hearingRepository.findAll().size());
     }
 
     @Test
-    public void shouldFindByHearingId() {
-
-        final UUID hearingId = hearings.get(0).getId();
-
-        final Hearing hearingEntityRetrieved = hearingRepository.findBy(hearingId);
-
-        assertNotNull(hearingEntityRetrieved);
+    public void shouldFindByHearingId() throws Exception {
+        final Hearing hearing = hearingRepository.findById(HearingRepositoryTestUtils.HEARING_ID_1);
+        assertNotNull(hearing);
+        assertEquals(HearingRepositoryTestUtils.HEARING_ID_1, hearing.getId());
+        assertEquals(HearingRepositoryTestUtils.START_DATE_1, (hearing.getHearingDays().get(0)).getDateTime());
     }
 
     @Test
-    @Ignore("because of issues with hearing case note jsonb column")
-    public void shouldFindAssociatedCaseNote() {
-        final UUID hearingId = hearings.get(0).getId();
-        final Hearing hearing = hearingRepository.findBy(hearingId);
-
-        final HearingCaseNote hearingCaseNote = new HearingCaseNote();
-        hearingCaseNote.setHearing(hearing);
-        hearingCaseNote.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
-        hearingCaseNoteRepository.save(hearingCaseNote);
-
-        final Hearing hearingEntityRetrieved = hearingRepository.findBy(hearingId);
-
-        assertNotNull(hearingEntityRetrieved.getHearingCaseNotes());
-        assertThat(hearingEntityRetrieved.getHearingCaseNotes().size(), is(1));
-    }
-
-    @Test
-    @Ignore("because of issues with hearing case note jsonb column")
-    public void shouldNotFindByHearingId() {
-        assertNull(hearingRepository.findBy(randomUUID()));
+    public void shouldNotFindByHearingId() throws Exception {
+        assertNull(hearingRepository.findById(randomUUID()));
     }
 }

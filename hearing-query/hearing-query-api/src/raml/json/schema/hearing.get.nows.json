@@ -1,5 +1,5 @@
 {
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.get.nows.json",
+  "$id": "http://example.com/example.json",
   "type": "object",
   "definitions": {},
   "$schema": "http://json-schema.org/draft-04/schema#",

@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
 
 import java.io.Serializable;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class ProsecutionCounselDelegate implements Serializable {
@@ -18,22 +18,16 @@ public class ProsecutionCounselDelegate implements Serializable {
         this.momento.getProsecutionCounsels().put(prosecutionCounselUpsert.getAttendeeId(), prosecutionCounselUpsert);
     }
 
-    public Stream<Object> addProsecutionCounsel(final UUID personId,
-                                                final UUID attendeeId,
-                                                final UUID hearingId,
-                                                final String status,
-                                                final String firstName,
-                                                final String lastName,
-                                                final String title) {
+    public Stream<Object> addProsecutionCounsel(AddProsecutionCounselCommand prosecutionCounselCommand) {
         return Stream.of(
                 ProsecutionCounselUpsert.builder()
-                        .withHearingId(hearingId)
-                        .withAttendeeId(attendeeId)
-                        .withPersonId(personId)
-                        .withFirstName(firstName)
-                        .withLastName(lastName)
-                        .withStatus(status)
-                        .withTitle(title)
+                        .withHearingId(prosecutionCounselCommand.getHearingId())
+                        .withAttendeeId(prosecutionCounselCommand.getAttendeeId())
+                        .withPersonId(prosecutionCounselCommand.getPersonId())
+                        .withFirstName(prosecutionCounselCommand.getFirstName())
+                        .withLastName(prosecutionCounselCommand.getLastName())
+                        .withStatus(prosecutionCounselCommand.getStatus())
+                        .withTitle(prosecutionCounselCommand.getTitle())
                         .build()
         );
     }

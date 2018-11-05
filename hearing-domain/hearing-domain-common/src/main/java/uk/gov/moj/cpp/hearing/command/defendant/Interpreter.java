@@ -15,16 +15,33 @@ public class Interpreter implements Serializable {
         this.language = language;
     }
 
+    public static Builder builder() {
+        return new Interpreter.Builder();
+    }
+
+    public static Builder builder(String language) {
+        return Interpreter.builder()
+                .withLanguage(language);
+    }
+
     public String getLanguage() {
         return language;
     }
 
-    public Interpreter setLanguage(String language) {
-        this.language = language;
-        return this;
-    }
+    public static class Builder {
 
-    public static Interpreter interpreter() {
-        return new Interpreter();
+        private String language;
+
+        private Builder() {
+        }
+
+        public Builder withLanguage(final String language) {
+            this.language = language;
+            return this;
+        }
+
+        public Interpreter build() {
+            return new Interpreter(language);
+        }
     }
 }

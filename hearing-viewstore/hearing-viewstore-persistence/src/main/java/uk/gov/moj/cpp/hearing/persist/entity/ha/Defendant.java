@@ -1,252 +1,290 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ha_defendant")
 public class Defendant {
 
-    @Id
+    @EmbeddedId
     private HearingSnapshotKey id;
 
     @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name = "prosecution_case_id", insertable = false, updatable = false, referencedColumnName = "id"),
-            @JoinColumn(name = "hearing_id", insertable = false, updatable = false, referencedColumnName = "hearing_id")})
-    private ProsecutionCase prosecutionCase;
+    @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
+    private Hearing hearing;
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "ha_attendee_defendant",
+            joinColumns = {
+                    @JoinColumn(name = "defendant_id", referencedColumnName = "id"),
+                    @JoinColumn(name = "hearing_id", referencedColumnName = "hearing_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "attendee_id", referencedColumnName = "id"),
+                    @JoinColumn(name = "attendee_hearing_id", referencedColumnName = "hearing_id")
+            }
+    )
+    private List<DefenceAdvocate> defenceAdvocates = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "ha_defendant_witnesses",
+            joinColumns = {
+                    @JoinColumn(name = "defendant_id", referencedColumnName = "id"),
+                    @JoinColumn(name = "hearing_id", referencedColumnName = "hearing_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "witness_id", referencedColumnName = "id"),
+                    @JoinColumn(name = "witness_hearing_id", referencedColumnName = "hearing_id")
+            }
+    )
+    private List<Witness> defendantWitnesses = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
-    private Set<Offence> offences = new HashSet<>();
+    private List<Offence> offences = new ArrayList<>();
+
+    @Column(name = "person_id")
+    private java.util.UUID personId;
+
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
+
+    @Column(name = "date_of_birth")
+    private java.time.LocalDate dateOfBirth;
+
+    @Column(name = "nationality")
+    private String nationality;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "work_telephone")
+    private String workTelephone;
+
+    @Column(name = "home_telephone")
+    private String homeTelephone;
+
+    @Column(name = "mobile_telephone")
+    private String mobileTelephone;
+
+    @Column(name = "fax")
+    private String fax;
+
+    @Column(name = "email")
+    private String email;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
-    private Set<AssociatedPerson> associatedPersons = new HashSet<>();
+    private List<DefendantCase> defendantCases = new ArrayList<>();
 
-    @AttributeOverrides({
-            @AttributeOverride(name = "id", column = @Column(name = "defence_org_id")),
-            @AttributeOverride(name = "name", column = @Column(name = "defence_org_name")),
-            @AttributeOverride(name = "incorporationNumber", column = @Column(name = "defence_org_inc_no")),
-            @AttributeOverride(name = "registeredCharityNumber", column = @Column(name = "defence_org_reg_charity_no")),
-            @AttributeOverride(name = "address.address1", column = @Column(name = "defence_org_address_1")),
-            @AttributeOverride(name = "address.address2", column = @Column(name = "defence_org_address_2")),
-            @AttributeOverride(name = "address.address3", column = @Column(name = "defence_org_address_3")),
-            @AttributeOverride(name = "address.address4", column = @Column(name = "defence_org_address_4")),
-            @AttributeOverride(name = "address.address5", column = @Column(name = "defence_org_address_5")),
-            @AttributeOverride(name = "address.postCode", column = @Column(name = "defence_org_post_code")),
-            @AttributeOverride(name = "contact.home", column = @Column(name = "defence_org_contact_home")),
-            @AttributeOverride(name = "contact.work", column = @Column(name = "defence_org_contact_work")),
-            @AttributeOverride(name = "contact.mobile", column = @Column(name = "defence_org_contact_mobile")),
-            @AttributeOverride(name = "contact.primaryEmail", column = @Column(name = "defence_org_contact_primary_email")),
-            @AttributeOverride(name = "contact.secondaryEmail", column = @Column(name = "defence_org_contact_secondary_email")),
-            @AttributeOverride(name = "contact.fax", column = @Column(name = "defence_org_contact_fax")),
-    })
+    @Column(name = "defence_solicitor_firm")
+    private String defenceSolicitorFirm;
+
+    @Column(name = "interpreter_name")
+    private String interpreterName;
+
+    @Column(name = "interpreter_language")
+    private String interpreterLanguage;
+
     @Embedded
-    private Organisation defenceOrganisation;
-
-    @AttributeOverrides({
-            @AttributeOverride(name = "id", column = @Column(name = "leg_ent_org_id")),
-            @AttributeOverride(name = "name", column = @Column(name = "leg_ent_org_name")),
-            @AttributeOverride(name = "incorporationNumber", column = @Column(name = "leg_ent_org_inc_no")),
-            @AttributeOverride(name = "registeredCharityNumber", column = @Column(name = "leg_ent_org_reg_charity_no")),
-            @AttributeOverride(name = "address.address1", column = @Column(name = "leg_ent_address_1")),
-            @AttributeOverride(name = "address.address2", column = @Column(name = "leg_ent_address_2")),
-            @AttributeOverride(name = "address.address3", column = @Column(name = "leg_ent_address_3")),
-            @AttributeOverride(name = "address.address4", column = @Column(name = "leg_ent_address_4")),
-            @AttributeOverride(name = "address.address5", column = @Column(name = "leg_ent_address_5")),
-            @AttributeOverride(name = "address.postCode", column = @Column(name = "leg_ent_post_code")),
-            @AttributeOverride(name = "contact.home", column = @Column(name = "leg_ent_contact_home")),
-            @AttributeOverride(name = "contact.work", column = @Column(name = "leg_ent_contact_work")),
-            @AttributeOverride(name = "contact.mobile", column = @Column(name = "leg_ent_contact_mobile")),
-            @AttributeOverride(name = "contact.primaryEmail", column = @Column(name = "leg_ent_contact_primary_email")),
-            @AttributeOverride(name = "contact.secondaryEmail", column = @Column(name = "leg_ent_contact_secondary_email")),
-            @AttributeOverride(name = "contact.fax", column = @Column(name = "leg_ent_contact_fax")),
-    })
-    @Embedded
-    private Organisation legalEntityOrganisation;
-
-    @AttributeOverrides({
-            @AttributeOverride(name = "employerOrganisation.id", column = @Column(name = "emp_org_id")),
-            @AttributeOverride(name = "employerOrganisation.name", column = @Column(name = "emp_org_name")),
-            @AttributeOverride(name = "employerOrganisation.incorporationNumber", column = @Column(name = "emp_org_inc_no")),
-            @AttributeOverride(name = "employerOrganisation.registeredCharityNumber", column = @Column(name = "emp_org_reg_charity_no")),
-            @AttributeOverride(name = "employerOrganisation.address.address1", column = @Column(name = "emp_org_address_1")),
-            @AttributeOverride(name = "employerOrganisation.address.address2", column = @Column(name = "emp_org_address_2")),
-            @AttributeOverride(name = "employerOrganisation.address.address3", column = @Column(name = "emp_org_address_3")),
-            @AttributeOverride(name = "employerOrganisation.address.address4", column = @Column(name = "emp_org_address_4")),
-            @AttributeOverride(name = "employerOrganisation.address.address5", column = @Column(name = "emp_org_address_5")),
-            @AttributeOverride(name = "employerOrganisation.address.postCode", column = @Column(name = "emp_org_post_code")),
-            @AttributeOverride(name = "employerOrganisation.contact.home", column = @Column(name = "emp_org_contact_home")),
-            @AttributeOverride(name = "employerOrganisation.contact.work", column = @Column(name = "emp_org_contact_work")),
-            @AttributeOverride(name = "employerOrganisation.contact.mobile", column = @Column(name = "emp_org_contact_mobile")),
-            @AttributeOverride(name = "employerOrganisation.contact.primaryEmail", column = @Column(name = "emp_org_contact_primary_email")),
-            @AttributeOverride(name = "employerOrganisation.contact.secondaryEmail", column = @Column(name = "emp_org_contact_secondary_email")),
-            @AttributeOverride(name = "employerOrganisation.contact.fax", column = @Column(name = "emp_org_contact_fax")),
-            @AttributeOverride(name = "personDetails.address.address1", column = @Column(name = "defendant_address_1")),
-            @AttributeOverride(name = "personDetails.address.address2", column = @Column(name = "defendant_address_2")),
-            @AttributeOverride(name = "personDetails.address.address3", column = @Column(name = "defendant_address_3")),
-            @AttributeOverride(name = "personDetails.address.address4", column = @Column(name = "defendant_address_4")),
-            @AttributeOverride(name = "personDetails.address.address5", column = @Column(name = "defendant_address_5")),
-            @AttributeOverride(name = "personDetails.address.postCode", column = @Column(name = "defendant_post_code")),
-            @AttributeOverride(name = "personDetails.contact.home", column = @Column(name = "defendant_contact_home")),
-            @AttributeOverride(name = "personDetails.contact.work", column = @Column(name = "defendant_contact_work")),
-            @AttributeOverride(name = "personDetails.contact.mobile", column = @Column(name = "defendant_contact_mobile")),
-            @AttributeOverride(name = "personDetails.contact.primaryEmail", column = @Column(name = "defendant_contact_primary_email")),
-            @AttributeOverride(name = "personDetails.contact.secondaryEmail", column = @Column(name = "defendant_contact_secondary_email")),
-            @AttributeOverride(name = "personDetails.contact.fax", column = @Column(name = "defendant_contact_fax"))
-    })
-    @Embedded
-    private PersonDefendant personDefendant;
-
-    @Column(name = "prosecution_case_id")
-    private UUID prosecutionCaseId;
-
-    @Column(name = "number_of_previous_convictions_cited")
-    private Integer numberOfPreviousConvictionsCited;
-
-    @Column(name = "prosecution_authority_reference")
-    private String prosecutionAuthorityReference;
-
-    @Column(name = "witness_statement")
-    private String witnessStatement;
-
-    @Column(name = "witness_statement_welsh")
-    private String witnessStatementWelsh;
-
-    @Column(name = "mitigation")
-    private String mitigation;
-
-    @Column(name = "mitigation_welsh")
-    private String mitigationWelsh;
+    private Address address;
 
     public Defendant() {
-        //For JPA
+
+    }
+
+    public Defendant(Builder builder) {
+        this.id = builder.id;
+        this.hearing = builder.hearing;
+        this.personId = builder.personId;
+        this.firstName = builder.firstName;
+        this.lastName = builder.lastName;
+        this.dateOfBirth = builder.dateOfBirth;
+        this.nationality = builder.nationality;
+        this.gender = builder.gender;
+        this.address = builder.address;
+        this.workTelephone = builder.workTelephone;
+        this.homeTelephone = builder.homeTelephone;
+        this.mobileTelephone = builder.mobileTelephone;
+        this.fax = builder.fax;
+        this.email = builder.email;
+        this.defenceSolicitorFirm = builder.defenceSolicitorFirm;
+        this.interpreterName = builder.interpreterName;
+        this.interpreterLanguage = builder.interpreterLanguage;
+        this.offences = builder.offences;
+        this.defenceAdvocates = builder.defenceAdvocates;
+        this.defendantCases = builder.defendantCases;
+        this.defendantWitnesses = builder.defendantWitnesses;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public List<Offence> getOffences() {
+        return offences;
+    }
+
+    public void setOffences(List<Offence> offences) {
+        this.offences = offences;
     }
 
     public HearingSnapshotKey getId() {
         return id;
     }
 
-    public void setId(HearingSnapshotKey id) {
-        this.id = id;
+    public Hearing getHearing() {
+        return hearing;
     }
 
-    public ProsecutionCase getProsecutionCase() {
-        return prosecutionCase;
+    public java.util.UUID getPersonId() {
+        return personId;
     }
 
-    public void setProsecutionCase(ProsecutionCase prosecutionCase) {
-        this.prosecutionCase = prosecutionCase;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public Set<Offence> getOffences() {
-        return offences;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public void setOffences(Set<Offence> offences) {
-        this.offences = offences;
+    public String getLastName() {
+        return lastName;
     }
 
-    public Set<AssociatedPerson> getAssociatedPersons() {
-        return associatedPersons;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public void setAssociatedPersons(Set<AssociatedPerson> associatedPersons) {
-        this.associatedPersons = associatedPersons;
+    public java.time.LocalDate getDateOfBirth() {
+        return dateOfBirth;
     }
 
-    public Organisation getDefenceOrganisation() {
-        return defenceOrganisation;
+    public void setDateOfBirth(java.time.LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
-    public void setDefenceOrganisation(Organisation defenceOrganisation) {
-        this.defenceOrganisation = defenceOrganisation;
+    public String getNationality() {
+        return nationality;
     }
 
-    public Organisation getLegalEntityOrganisation() {
-        return legalEntityOrganisation;
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
     }
 
-    public void setLegalEntityOrganisation(Organisation legalEntityOrganisation) {
-        this.legalEntityOrganisation = legalEntityOrganisation;
+    public String getGender() {
+        return gender;
     }
 
-    public PersonDefendant getPersonDefendant() {
-        return personDefendant;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
-    public void setPersonDefendant(PersonDefendant personDefendant) {
-        this.personDefendant = personDefendant;
+    public Address getAddress() {
+        return address;
     }
 
-    public UUID getProsecutionCaseId() {
-        return prosecutionCaseId;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
-    public void setProsecutionCaseId(UUID prosecutionCaseId) {
-        this.prosecutionCaseId = prosecutionCaseId;
+    public String getWorkTelephone() {
+        return workTelephone;
     }
 
-    public Integer getNumberOfPreviousConvictionsCited() {
-        return numberOfPreviousConvictionsCited;
+    public void setWorkTelephone(String workTelephone) {
+        this.workTelephone = workTelephone;
     }
 
-    public void setNumberOfPreviousConvictionsCited(Integer numberOfPreviousConvictionsCited) {
-        this.numberOfPreviousConvictionsCited = numberOfPreviousConvictionsCited;
+    public void setHomeTelephone(String homeTelephone) {
+        this.homeTelephone = homeTelephone;
     }
 
-    public String getProsecutionAuthorityReference() {
-        return prosecutionAuthorityReference;
+    public void setMobileTelephone(String mobileTelephone) {
+        this.mobileTelephone = mobileTelephone;
     }
 
-    public void setProsecutionAuthorityReference(String prosecutionAuthorityReference) {
-        this.prosecutionAuthorityReference = prosecutionAuthorityReference;
+    public void setFax(String fax) {
+        this.fax = fax;
     }
 
-    public String getWitnessStatement() {
-        return witnessStatement;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setWitnessStatement(String witnessStatement) {
-        this.witnessStatement = witnessStatement;
+    public String getHomeTelephone() {
+        return homeTelephone;
     }
 
-    public String getWitnessStatementWelsh() {
-        return witnessStatementWelsh;
+    public String getMobileTelephone() {
+        return mobileTelephone;
     }
 
-    public void setWitnessStatementWelsh(String witnessStatementWelsh) {
-        this.witnessStatementWelsh = witnessStatementWelsh;
+    public String getFax() {
+        return fax;
     }
 
-    public String getMitigation() {
-        return mitigation;
+    public String getEmail() {
+        return email;
     }
 
-    public void setMitigation(String mitigation) {
-        this.mitigation = mitigation;
+    public List<DefendantCase> getDefendantCases() {
+        return defendantCases;
     }
 
-    public String getMitigationWelsh() {
-        return mitigationWelsh;
+    public void setDefendantCases(List<DefendantCase> defendantCases) {
+        this.defendantCases = defendantCases;
     }
 
-    public void setMitigationWelsh(String mitigationWelsh) {
-        this.mitigationWelsh = mitigationWelsh;
+    public String getDefenceSolicitorFirm() {
+        return defenceSolicitorFirm;
+    }
+
+    public void setDefenceSolicitorFirm(String defenceSolicitorFirm) {
+        this.defenceSolicitorFirm = defenceSolicitorFirm;
+    }
+
+    public String getInterpreterLanguage() {
+        return interpreterLanguage;
+    }
+
+    public void setInterpreterLanguage(String interpreterLanguage) {
+        this.interpreterLanguage = interpreterLanguage;
+    }
+
+    /**
+     * there appears to be a bug in jpa preventing a column in the join table being used in both sides og the realtionship
+     * hence the redundant column attendee_hearing_id which holds the same value as hearing_id
+     */
+    public List<DefenceAdvocate> getDefenceAdvocates() {
+        return defenceAdvocates;
+    }
+
+    public String getInterpreterName() {
+        return interpreterName;
+    }
+
+    public List<Witness> getDefendantWitnesses() {
+        if (defendantWitnesses == null) {
+            defendantWitnesses = new ArrayList<>();
+        }
+        return defendantWitnesses;
     }
 
     @Override
@@ -265,4 +303,160 @@ public class Defendant {
         return Objects.equals(this.id, ((Defendant) o).id);
     }
 
+    public static class Builder {
+
+        private HearingSnapshotKey id;
+
+        private Hearing hearing;
+
+        private java.util.UUID personId;
+
+        private String firstName;
+
+        private String lastName;
+
+        private java.time.LocalDate dateOfBirth;
+
+        private String nationality;
+
+        private String gender;
+
+        private Address address;
+
+        private String workTelephone;
+
+        private String homeTelephone;
+
+        private String mobileTelephone;
+
+        private String fax;
+
+        private String email;
+
+        private List<DefendantCase> defendantCases = new ArrayList<>();
+
+        private String defenceSolicitorFirm;
+
+        private String interpreterName;
+
+        private String interpreterLanguage;
+
+        private List<Offence> offences;
+
+        private List<DefenceAdvocate> defenceAdvocates = new ArrayList<>();
+
+        private List<Witness> defendantWitnesses = new ArrayList<>();
+
+        protected Builder() {
+        }
+
+        public Builder withId(final HearingSnapshotKey id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withDefenceAdvocates(final List<DefenceAdvocate> defenceAdvocates) {
+            this.defenceAdvocates = defenceAdvocates;
+            return this;
+        }
+
+        public Builder withHearing(final Hearing hearing) {
+            this.hearing = hearing;
+            return this;
+        }
+
+        public Builder withPersonId(final java.util.UUID personId) {
+            this.personId = personId;
+            return this;
+        }
+
+        public Builder withFirstName(final String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder withLastName(final String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public Builder withDateOfBirth(final java.time.LocalDate dateOfBirth) {
+            this.dateOfBirth = dateOfBirth;
+            return this;
+        }
+
+        public Builder withNationality(final String nationality) {
+            this.nationality = nationality;
+            return this;
+        }
+
+        public Builder withGender(final String gender) {
+            this.gender = gender;
+            return this;
+        }
+
+        public Builder withAddress(final Address address) {
+            this.address = address;
+            return this;
+        }
+
+        public Builder withWorkTelephone(final String workTelephone) {
+            this.workTelephone = workTelephone;
+            return this;
+        }
+
+        public Builder withHomeTelephone(final String homeTelephone) {
+            this.homeTelephone = homeTelephone;
+            return this;
+        }
+
+        public Builder withMobileTelephone(final String mobileTelephone) {
+            this.mobileTelephone = mobileTelephone;
+            return this;
+        }
+
+        public Builder withFax(final String fax) {
+            this.fax = fax;
+            return this;
+        }
+
+        public Builder withEmail(final String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder withDefendantCases(List<DefendantCase> defendantCases) {
+            this.defendantCases = defendantCases;
+            return this;
+        }
+
+        public Builder withDefenceSolicitorFirm(final String defenceSolicitorFirm) {
+            this.defenceSolicitorFirm = defenceSolicitorFirm;
+            return this;
+        }
+
+        public Builder withInterpreterName(final String interpreterName) {
+            this.interpreterName = interpreterName;
+            return this;
+        }
+
+        public Builder withInterpreterLanguage(final String interpreterLanguage) {
+            this.interpreterLanguage = interpreterLanguage;
+            return this;
+        }
+
+        public Builder withOffences(final List<Offence> offences) {
+            this.offences = offences;
+            return this;
+        }
+
+        public Builder withDefendantWitnesses(final List<Witness> defendantWitnesses) {
+            this.defendantWitnesses = defendantWitnesses;
+            return this;
+        }
+
+        public Defendant build() {
+            return new Defendant(this);
+        }
+    }
 }

@@ -1,41 +1,50 @@
 {
-  "$schema":"http://json-schema.org/draft-04/schema#",
-  "type":"object",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.log-hearing-event.json",
-  "properties":{
-    "hearingEventId":{
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "hearingEventId": {
+      "$ref": "#/definitions/uuid"
     },
-    "hearingId":{
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
     },
-    "hearingEventDefinitionId":{
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    "hearingEventDefinitionId": {
+      "$ref": "#/definitions/uuid"
     },
-    "defenceCounselId":{
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    "witnessId": {
+      "$ref": "#/definitions/uuid"
     },
-    "recordedLabel":{
-      "type":"string"
+    "counselId": {
+      "$ref": "#/definitions/uuid"
+    },	
+    "recordedLabel": {
+      "type": "string"
     },
-    "eventTime":{
-      "type":"string",
-      "format":"date-time"
+    "eventTime": {
+      "type": "string",
+      "format": "date-time"
     },
-    "lastModifiedTime":{
-      "type":"string",
-      "format":"date-time"
+    "lastModifiedTime": {
+      "type": "string",
+      "format": "date-time"
     },
-    "alterable":{
-      "type":"boolean"
+    "alterable": {
+      "type": "boolean"
     }
   },
-  "required":[
+  "additionalProperties": false,
+  "required": [
     "hearingEventId",
+    "hearingId",
     "hearingEventDefinitionId",
     "recordedLabel",
     "eventTime",
     "lastModifiedTime"
   ],
-  "additionalProperties": true
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }

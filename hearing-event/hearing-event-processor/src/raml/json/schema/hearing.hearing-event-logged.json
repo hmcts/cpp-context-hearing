@@ -1,22 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.hearing-event-logged.json",
   "type": "object",
   "properties": {
     "hearingEventId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "#/definitions/uuid"
     },
     "lastHearingEventId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "#/definitions/uuid"
     },
     "hearingId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "#/definitions/uuid"
+    },
+    "witnessId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "counselId": {
+      "$ref": "#/definitions/uuid"
     },
     "hearingEventDefinitionId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-    },
-    "defenceCounselId": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "#/definitions/uuid"
     },
     "recordedLabel": {
       "type": "string"
@@ -32,16 +34,29 @@
     "alterable": {
       "type": "boolean"
     },
-    "courtCentre": {
-      "$ref":"http://justice.gov.uk/json/schemas/core/courtCentre.json"
+    "caseId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "caseUrn": {
+      "type": "string"
+    },
+    "courtCentreId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "courtCentreName": {
+      "type": "string"
+    },
+    "courtRoomId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "courtRoomName": {
+      "type": "string"
     },
     "hearingType": {
-      "$ref": "http://justice.gov.uk/json/schemas/core/hearingType.json"
-    },
-    "caseURN": {
       "type": "string"
     }
   },
+  "additionalProperties": false,
   "required": [
     "hearingEventId",
     "hearingId",
@@ -50,9 +65,18 @@
     "eventTime",
     "lastModifiedTime",
     "alterable",
-    "courtCentre",
-    "hearingType",
-    "caseURN"
+    "caseId",
+    "caseUrn",
+    "courtCentreId",
+    "courtCentreName",
+    "courtRoomId",
+    "courtRoomName",
+    "hearingType"
   ],
-  "additionalProperties": false
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }

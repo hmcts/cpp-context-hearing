@@ -213,7 +213,27 @@ public class AbstractIT {
         };
     }
 
+    public static <T> Matcher<ResponseData> jsonPayloadMatchesBean(Class<T> theClass, BeanMatcher<T> beanMatcher) {
+        final BaseMatcher<JsonObject> jsonObjectMatcher = convertTo(theClass, beanMatcher);
+        return new BaseMatcher<ResponseData>() {
+            @Override
+            public boolean matches(final Object o) {
+                if (o instanceof ResponseData) {
+                    final ResponseData responseData = (ResponseData) o;
+                    if (responseData.getPayload() != null) {
+                        JsonObject jsonObject = Json.createReader(new StringReader(responseData.getPayload())).readObject();
+                        return jsonObjectMatcher.matches(jsonObject);
+                    }
+                }
+                return false;
+            }
 
+            @Override
+            public void describeTo(final Description description) {
+                jsonObjectMatcher.describeTo(description);
+            }
+        };
+    }
 
     protected static RequestParams requestParameters(final String url, final String contentType) {
         return requestParams(url, contentType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build();

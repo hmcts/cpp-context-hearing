@@ -1,11 +1,15 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.lang.String.format;
 import static java.util.Arrays.stream;
+import static java.util.UUID.randomUUID;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -22,6 +26,25 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+
+import uk.gov.justice.services.common.util.Clock;
+import uk.gov.justice.services.core.annotation.Handles;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
@@ -33,20 +56,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.services.common.util.Clock;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
-
-import javax.json.JsonObject;
-import java.io.File;
-import java.lang.reflect.Method;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingCommandApiTest {
@@ -54,12 +63,41 @@ public class HearingCommandApiTest {
     private static final String PATH_TO_RAML = "src/raml/hearing-command-api.raml";
     private static final String NAME = "name:";
 
+    private static final String FIELD_GENERIC_ID = "id";
+
+    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_RESULT_LINES = "resultLines";
+    private static final String FIELD_RESULT_LEVEL = "level";
+    private static final String FIELD_RESULT_LABEL = "resultLabel";
+    private static final String FIELD_RESULT_PROMPTS = "prompts";
+    private static final String FIELD_LABEL = "label";
+    private static final String FIELD_VALUE = "value";
+
+    private static final String FIELD_PERSON_ID = "personId";
+    private static final String FIELD_CASE_ID = "caseId";
+    private static final String FIELD_OFFENCE_ID = "offenceId";
+    private static final String FIELD_SHARED_TIME = "sharedTime";
+
+    private static final UUID HEARING_ID = randomUUID();
+    private static final UUID HEARING_RESULT_ID = randomUUID();
+    private static final UUID HEARING_RESULT_ID_2 = randomUUID();
+    private static final UUID PERSON_ID = randomUUID();
+    private static final UUID OFFENCE_ID = randomUUID();
+    private static final UUID OFFENCE_ID_2 = randomUUID();
+    private static final UUID CASE_ID = randomUUID();
+    private static final String RESULT_LEVEL = "OFFENCE";
+    private static final String RESULT_LEVEL_2 = "DEFENDANT";
+    private static final String RESULT_LABEL = STRING.next();
+    private static final String RESULT_LABEL_2 = STRING.next();
+    private static final String LABEL = STRING.next();
+    private static final String VALUE = STRING.next();
+
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
 
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
-            "addProsecutionCounsel", "initiateHearing", "saveDraftResult", "saveHearingCaseNote",
-            "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance");
+            "addProsecutionCounsel", "initiateHearing", "saveDraftResult",
+            "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants");
 
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
@@ -121,26 +159,53 @@ public class HearingCommandApiTest {
     }
 
     @Test
-    public void shouldPassThroughShareResultCommandToCommandHandler() {
+    public void shouldUpdateWithSharedTimeWhenResultsAreShared() {
+        final JsonEnvelope command = prepareShareResultsCommand();
 
-        final JsonObject requestPayload = createObjectBuilder()
-                .add("dummyField", "dummyFieldValue")
-                .build();
-
-        JsonEnvelope commandJsonEnvelope = envelopeFrom(metadataWithRandomUUIDAndName(), requestPayload);
-
-        hearingCommandApi.shareResults(commandJsonEnvelope);
+        hearingCommandApi.shareResults(command);
 
         verify(sender).send(senderArgumentCaptor.capture());
-
-        final JsonEnvelope jsonEnvelopOut = senderArgumentCaptor.getValue();
-        //check that payload was passed through and meta data name was changed
-        assertThat(jsonEnvelopOut, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(commandJsonEnvelope).withName(COMMAND_SHARE_RESULTS),
+        assertThat(senderArgumentCaptor.getValue(), is(jsonEnvelope(
+                withMetadataEnvelopedFrom(command).withName(COMMAND_SHARE_RESULTS),
                 payloadIsJson(allOf(
-                        withJsonPath("dummyField", equalTo("dummyFieldValue")
-                        )))
-        )));
+                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_RESULT_LINES), hasSize(2))
+                )))
+        ));
+    }
+
+    private JsonEnvelope prepareShareResultsCommand() {
+        final JsonArrayBuilder resultLinesJson = createArrayBuilder()
+                .add(createObjectBuilder()
+                        .add(FIELD_GENERIC_ID, HEARING_RESULT_ID.toString())
+                        .add(FIELD_OFFENCE_ID, OFFENCE_ID.toString())
+                        .add(FIELD_CASE_ID, CASE_ID.toString())
+                        .add(FIELD_PERSON_ID, PERSON_ID.toString())
+                        .add(FIELD_RESULT_LEVEL, RESULT_LEVEL)
+                        .add(FIELD_RESULT_LABEL, RESULT_LABEL)
+                        .add(FIELD_RESULT_PROMPTS, createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add(FIELD_LABEL, LABEL)
+                                        .add(FIELD_VALUE, VALUE)
+                                )))
+                .add(createObjectBuilder()
+                        .add(FIELD_GENERIC_ID, HEARING_RESULT_ID_2.toString())
+                        .add(FIELD_OFFENCE_ID, OFFENCE_ID_2.toString())
+                        .add(FIELD_CASE_ID, CASE_ID.toString())
+                        .add(FIELD_PERSON_ID, PERSON_ID.toString())
+                        .add(FIELD_RESULT_LEVEL, RESULT_LEVEL_2)
+                        .add(FIELD_RESULT_LABEL, RESULT_LABEL_2)
+                        .add(FIELD_RESULT_PROMPTS, createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add(FIELD_LABEL, LABEL)
+                                        .add(FIELD_VALUE, VALUE)
+                                )));
+
+        final JsonObjectBuilder requestPayload = createObjectBuilder()
+                .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                .add(FIELD_RESULT_LINES, resultLinesJson);
+
+        return envelopeFrom(metadataWithRandomUUIDAndName(), requestPayload.build());
     }
 
     private <T> void assertHandlerMethodsArePassThrough(final Class<T> commandApiClass, final Map<String, String> methodsToHandlerNamesMap) {

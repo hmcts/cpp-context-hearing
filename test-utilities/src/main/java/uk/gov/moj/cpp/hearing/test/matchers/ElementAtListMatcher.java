@@ -4,10 +4,9 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.List;
 
-public class ElementAtListMatcher extends TypeSafeMatcher<Collection<?>> {
+public class ElementAtListMatcher extends TypeSafeMatcher<List> {
 
     private int index;
     private Matcher<?> matcher;
@@ -19,19 +18,14 @@ public class ElementAtListMatcher extends TypeSafeMatcher<Collection<?>> {
     }
 
     @Override
-    protected boolean matchesSafely(Collection<?> item) {
-
-        if (item == null) {
-            this.error = Error.NULL;
-            return false;
-        }
+    protected boolean matchesSafely(List item) {
 
         if (this.index < 0 || this.index >= item.size()) {
             this.error = Error.INVALID_INDEX;
             return false;
         }
 
-        if (!this.matcher.matches(get(item, index))) {
+        if (!this.matcher.matches(item.get(index))) {
             this.error = Error.MATCHER_FALSE;
             return false;
         }
@@ -39,24 +33,12 @@ public class ElementAtListMatcher extends TypeSafeMatcher<Collection<?>> {
         return true;
     }
 
-    private static Object get(Collection<?> item, int index) {
-        final Iterator it = item.iterator();
-        Object o = null;
-        for (int i = 0; i <= index; i++) {
-            o = it.next();
-        }
-        return o;
-    }
-
     @Override
     public void describeTo(Description description) {
         description.appendText("[").appendText(Integer.toString(this.index)).appendText("]");
 
-        if (this.error == Error.NULL) {
-            description.appendText(" is a list object");
-        }
-
         if (this.error == Error.MATCHER_FALSE) {
+
             description.appendDescriptionOf(this.matcher);
         }
         if (this.error == Error.INVALID_INDEX) {
@@ -65,14 +47,9 @@ public class ElementAtListMatcher extends TypeSafeMatcher<Collection<?>> {
     }
 
     @Override
-    protected void describeMismatchSafely(Collection<?> item, Description mismatchDescription) {
-
-        if (this.error == Error.NULL) {
-            mismatchDescription.appendText("was null");
-        }
-
+    protected void describeMismatchSafely(List item, Description mismatchDescription) {
         if (this.error == Error.MATCHER_FALSE) {
-            this.matcher.describeMismatch(get(item, index), mismatchDescription);
+            this.matcher.describeMismatch(item.get(this.index), mismatchDescription);
         }
 
         if (this.error == Error.INVALID_INDEX) {
@@ -81,7 +58,7 @@ public class ElementAtListMatcher extends TypeSafeMatcher<Collection<?>> {
     }
 
     private enum Error {
-        NULL, INVALID_INDEX, MATCHER_FALSE
+        INVALID_INDEX, MATCHER_FALSE
     }
 
     public static ElementAtListMatcher first(Matcher<?> matcher) {

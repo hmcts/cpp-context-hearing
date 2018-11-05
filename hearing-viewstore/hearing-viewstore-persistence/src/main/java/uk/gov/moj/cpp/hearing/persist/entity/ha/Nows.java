@@ -8,8 +8,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -30,7 +30,8 @@ public class Nows {
     private UUID nowsTypeId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nows", orphanRemoval = true)
-    private Set<NowsMaterial> material = new HashSet<>();
+    private List<NowsMaterial> material = new ArrayList<>();
+
 
     public UUID getId() {
         return id;
@@ -64,13 +65,15 @@ public class Nows {
         this.nowsTypeId = nowsTypeId;
     }
 
-    public Set<NowsMaterial> getMaterial() {
+    public List<NowsMaterial> getMaterial() {
         return material;
     }
 
-    public void setMaterials(Set<NowsMaterial> material) {
+    public void setMaterial(List<NowsMaterial> material) {
         this.material = material;
     }
+
+
 
     public static Builder builder() {
         return new Builder();
@@ -81,7 +84,7 @@ public class Nows {
         private UUID defendantId;
         private UUID hearingId;
         private UUID nowsTypeId;
-        Set<NowsMaterial> materials = new HashSet<>();
+        List<NowsMaterial> material = new ArrayList<>();
 
         private Builder() {
         }
@@ -106,8 +109,8 @@ public class Nows {
             return this;
         }
 
-        public Builder withMaterial(Set<NowsMaterial> material) {
-            this.materials = material;
+        public Builder withMaterial(List<NowsMaterial> material) {
+            this.material = material;
             return this;
         }
 
@@ -118,7 +121,7 @@ public class Nows {
             nows.setNowsTypeId(nowsTypeId);
             nows.setDefendantId(defendantId);
             nows.setHearingId(hearingId);
-            nows.setMaterials(materials);
+            nows.setMaterial(material);
             return nows;
         }
     }

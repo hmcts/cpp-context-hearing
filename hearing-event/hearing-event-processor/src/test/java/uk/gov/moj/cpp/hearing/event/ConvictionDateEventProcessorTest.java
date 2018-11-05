@@ -74,10 +74,9 @@ public class ConvictionDateEventProcessorTest {
     @Test
     public void publishOffenceConvictionDateChangedPublicEvent() {
 
-        ConvictionDateAdded convictionDateAdded = ConvictionDateAdded.convictionDateAdded()
-                .setHearingId(randomUUID())
-                .setCaseId(randomUUID())
-                .setOffenceId(randomUUID()).setConvictionDate(PAST_LOCAL_DATE.next());
+        ConvictionDateAdded convictionDateAdded = ConvictionDateAdded.builder().withHearingId(randomUUID())
+                .withCaseId(randomUUID()).withOffenceId(randomUUID()).withConvictionDate(PAST_LOCAL_DATE.next())
+                .build();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
                 objectToJsonObjectConverter.convert(convictionDateAdded));
@@ -96,10 +95,8 @@ public class ConvictionDateEventProcessorTest {
     @Test
     public void publishOffenceConvictionDateRemovedPublicEvent() {
 
-        ConvictionDateRemoved convictionDateRemoved = ConvictionDateRemoved.convictionDateRemoved()
-                .setHearingId(randomUUID())
-                .setCaseId(randomUUID())
-                .setOffenceId(randomUUID());
+        ConvictionDateRemoved convictionDateRemoved = ConvictionDateRemoved.builder().withHearingId(randomUUID())
+                .withCaseId(randomUUID()).withOffenceId(randomUUID()).build();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
                 objectToJsonObjectConverter.convert(convictionDateRemoved));

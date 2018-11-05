@@ -1,222 +1,216 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import uk.gov.justice.json.schemas.core.HearingLanguage;
-import uk.gov.justice.json.schemas.core.JurisdictionType;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ha_hearing")
 public class Hearing {
 
-    @Embedded
-    private CourtCentre courtCentre;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private List<Defendant> defendants = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private List<Witness> witnesses = new ArrayList<>();
 
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
 
-    @Embedded
-    private HearingType hearingType;
-
-    @Column(name = "jurisdiction_type")
-    @Enumerated(EnumType.STRING)
-    private JurisdictionType jurisdictionType;
-
-    @Column(name = "reporting_restriction_reason")
-    private String reportingRestrictionReason;
-
-    @Column(name = "hearing_language")
-    @Enumerated(EnumType.STRING)
-    private HearingLanguage hearingLanguage;
+    @Column(name = "hearing_type")
+    private String hearingType;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private Set<HearingDay> hearingDays = new HashSet<>();
+    private List<HearingDate> hearingDays = new ArrayList<>();
+
+    @Column(name = "court_centre_id")
+    private UUID courtCentreId;
+
+    @Column(name = "court_centre_name")
+    private String courtCentreName;
+
+    @Column(name = "room_id")
+    private UUID roomId;
+
+    @Column(name = "room_name")
+    private String roomName;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private Set<ProsecutionCase> prosecutionCases = new HashSet<>();
+    private List<Attendee> attendees = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private Set<DefendantReferralReason> defendantReferralReasons = new HashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private Set<JudicialRole> judicialRoles = new HashSet<>();
-
-    @Column(name = "has_shared_results")
-    private Boolean hasSharedResults;
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private Set<Target> targets = new HashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private Set<DefendantAttendance> defendantAttendance = new HashSet<>();
-
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
-    private Set<HearingCaseNote> hearingCaseNotes = new HashSet<>();
+    private List<ResultLine> resultLines = new ArrayList<>();
 
     public Hearing() {
-        //For JPA
     }
 
-    public CourtCentre getCourtCentre() {
-        return courtCentre;
+    public Hearing(Builder builder) {
+        this.id = builder.id;
+        this.hearingType = builder.hearingType;
+        this.hearingDays = builder.hearingDays;
+        this.courtCentreId = builder.courtCentreId;
+        this.courtCentreName = builder.courtCentreName;
+        this.roomId = builder.roomId;
+        this.roomName = builder.roomName;
+        this.setDefendants(builder.defendants);
+        this.setWitnesses(builder.witnesses);
+        this.hearingDays = builder.hearingDays;
+        this.attendees = builder.attendees;
+        if (builder.judgeBuilder != null) {
+            this.attendees.add(builder.judgeBuilder.build());
+        }
+        this.resultLines = builder.resultLines;
     }
 
-    public Hearing setCourtCentre(CourtCentre courtCentre) {
-        this.courtCentre = courtCentre;
-        return this;
+    public void setDefendants(List<Defendant> defendants) {
+        this.defendants = defendants;
+    }
+
+    public List<Defendant> getDefendants() {
+        return defendants;
+    }
+
+    public List<Witness> getWitnesses() {
+        return witnesses;
+    }
+
+    public void setWitnesses(List<Witness> witnesses) {
+        this.witnesses = witnesses;
+    }
+
+    public void setAttendees(List<Attendee> attendees) {
+        this.attendees = attendees;
+    }
+
+    public List<Attendee> getAttendees() {
+        return attendees;
     }
 
     public UUID getId() {
         return id;
     }
 
-    public Hearing setId(UUID id) {
-        this.id = id;
-        return this;
-    }
-
-    public HearingType getHearingType() {
+    public String getHearingType() {
         return hearingType;
     }
 
-    public Hearing setHearingType(HearingType hearingType) {
-        this.hearingType = hearingType;
-        return this;
-    }
-
-    public JurisdictionType getJurisdictionType() {
-        return jurisdictionType;
-    }
-
-    public Hearing setJurisdictionType(JurisdictionType jurisdictionType2) {
-        this.jurisdictionType = jurisdictionType2;
-        return this;
-    }
-
-    public String getReportingRestrictionReason() {
-        return reportingRestrictionReason;
-    }
-
-    public void setReportingRestrictionReason(String reportingRestrictionReason) {
-        this.reportingRestrictionReason = reportingRestrictionReason;
-    }
-
-    public HearingLanguage getHearingLanguage() {
-        return hearingLanguage;
-    }
-
-    public Hearing setHearingLanguage(HearingLanguage hearingLanguage2) {
-        this.hearingLanguage = hearingLanguage2;
-        return this;
-    }
-
-    public Set<HearingDay> getHearingDays() {
+    public List<HearingDate> getHearingDays() {
         return hearingDays;
     }
 
-    public Hearing setHearingDays(Set<HearingDay> hearingDays) {
-        this.hearingDays = hearingDays;
-        return this;
+    public UUID getCourtCentreId() {
+        return courtCentreId;
     }
 
-    public Set<ProsecutionCase> getProsecutionCases() {
-        return prosecutionCases;
+    public String getCourtCentreName() {
+        return courtCentreName;
     }
 
-    public Hearing setProsecutionCases(Set<ProsecutionCase> prosecutionCases) {
-        this.prosecutionCases = prosecutionCases;
-        return this;
+    public UUID getRoomId() {
+        return roomId;
     }
 
-    public Set<DefendantReferralReason> getDefendantReferralReasons() {
-        return defendantReferralReasons;
+    public String getRoomName() {
+        return roomName;
     }
 
-    public Hearing setDefendantReferralReasons(Set<DefendantReferralReason> defendantReferralReasons) {
-        this.defendantReferralReasons = defendantReferralReasons;
-        return this;
+    public List<ResultLine> getResultLines() {
+        return resultLines;
     }
 
-    public Set<JudicialRole> getJudicialRoles() {
-        return judicialRoles;
+    public static class Builder {
+        private UUID id;
+        private List<Defendant> defendants = new ArrayList<>();
+        private String hearingType;
+        private List<HearingDate> hearingDays = new ArrayList<>();
+        private UUID courtCentreId;
+        private String courtCentreName;
+        private UUID roomId;
+        private String roomName;
+        private Judge.Builder judgeBuilder;
+        private List<Witness> witnesses = new ArrayList<>();
+        private List<Attendee> attendees = new ArrayList<>();
+        private List<ResultLine> resultLines = new ArrayList<>();
+
+        protected Builder() {}
+        public Builder withId(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withDefendants(List<Defendant> defendants) {
+            this.defendants = defendants;
+            return this;
+        }
+
+        public Builder withWitnesses(List<Witness> witnesses){
+            this.witnesses = witnesses;
+            return this;
+        }
+
+        public Builder withJudge(Judge.Builder builder) {
+            this.judgeBuilder = builder;
+            return this;
+        }
+
+        public Builder withHearingType(String hearingType) {
+            this.hearingType = hearingType;
+            return this;
+        }
+
+        public Builder withHearingDays(List<HearingDate> hearingDays) {
+            this.hearingDays = hearingDays;
+            return this;
+        }
+
+        public Builder withCourtCentreId(UUID courtCentreId) {
+            this.courtCentreId = courtCentreId;
+            return this;
+        }
+
+        public Builder withCourtCentreName(String courtCentreName) {
+            this.courtCentreName = courtCentreName;
+            return this;
+        }
+
+        public Builder withRoomId(UUID roomId) {
+            this.roomId = roomId;
+            return this;
+        }
+
+        public Builder withRoomName(String roomName) {
+            this.roomName = roomName;
+            return this;
+        }
+
+        public Builder addAttendee(Attendee attendee){
+            this.attendees.add(attendee);
+            return this;
+        }
+
+        public Builder withResultLines(List<ResultLine> resultLines) {
+            this.resultLines = resultLines;
+            return this;
+        }
+
+        public Hearing build() {
+            return new Hearing(this);
+        }
+
     }
 
-    public Hearing setJudicialRoles(Set<JudicialRole> judicialRoles) {
-        this.judicialRoles = judicialRoles;
-        return this;
-    }
-
-    public Boolean getHasSharedResults() {
-        return hasSharedResults;
-    }
-
-    public Hearing setHasSharedResults(Boolean hasSharedResults) {
-        this.hasSharedResults = hasSharedResults;
-        return this;
-    }
-
-    public Set<Target> getTargets() {
-        return targets;
-    }
-
-
-    public Hearing setTargets(Set<Target> targets) {
-        this.targets = new HashSet<>(targets);
-        return this;
-    }
-
-    public Hearing setHearingCaseNotes(Set<HearingCaseNote> hearingCaseNotes) {
-        this.hearingCaseNotes = hearingCaseNotes;
-        return this;
-    }
-
-    public Set<HearingCaseNote> getHearingCaseNotes() {
-        return hearingCaseNotes;
-    }
-
-    public void setDefenceCounsels(Set<DefenceCounsel> jpa) {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-    }
-
-    public Set<DefenceCounsel> getDefenceCounsels() {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-        return new HashSet<>();
-    }
-
-    public Hearing setDefendantAttendance(Set<DefendantAttendance> defendantAttendance) {
-        this.defendantAttendance = defendantAttendance;
-        return this;
-    }
-
-    public Set<DefendantAttendance> getDefendantAttendance() {
-        return defendantAttendance;
-    }
-
-    public void setProsecutionCounsels(Set<ProsecutionCounsel> jpa) {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-    }
-
-    public Set<ProsecutionCounsel> getProsecutionCounsels() {
-        // The story to cover it doesn't exist yet.
-        // TODO Auto-generated method stub
-        return new HashSet<>();
+    public static Builder builder() {
+        return new Builder();
     }
 
     @Override

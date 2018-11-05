@@ -52,6 +52,11 @@ baseUri: message://event/processor/message/hearing
                       schema: !include json/schema/public.hearing.verdict-updated.json
                       example: !include json/public.hearing.verdict-updated.json
 
+# Witness-added
+                  application/vnd.public.hearing.events.witness-added-updated+json:
+                      schema: !include json/schema/public.hearing.events.witness-added-updated.json
+                      example: !include json/public.hearing.events.witness-added-updated.json
+
 # Conviction Date
                   application/vnd.public.hearing.offence-conviction-date-changed+json:
                       schema: !include json/schema/public.hearing.offence-conviction-date-changed.json
@@ -80,8 +85,3 @@ baseUri: message://event/processor/message/hearing
                   application/vnd.public.hearing.adjourned+json:
                       schema: !include json/schema/public.hearing.adjourned.json
                       example: !include json/public.hearing.adjourned.json
-
-# Hearing Adjourned
-                  application/vnd.public.hearing.defendant-attendance-updated+json:
-                      schema: !include json/schema/public.hearing.defendant-attendance-updated.json
-                      example: !include json/public.hearing.defendant-attendance-updated.json

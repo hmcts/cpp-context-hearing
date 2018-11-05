@@ -198,12 +198,12 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
 
         Offence offence = magsCourtHearingRecorded.getOriginatingHearing().getDefendants().get(0).getOffences().get(0);
         assertThat(events.get(1), jsonEnvelope(
-                metadata().withName("hearing.command.update-plea-against-offence"),
+                metadata().withName("hearing.offence-plea-updated"),
                 payloadIsJson(allOf(
                         withJsonPath("$.hearingId", is(magsCourtHearingRecorded.getHearingId().toString())),
-                        withJsonPath("$.plea.offenceId", is(offence.getId().toString())),
-                        withJsonPath("$.plea.pleaDate", is(offence.getPlea().getPleaDate().toString())),
-                        withJsonPath("$.plea.pleaValue", is(offence.getPlea().getValue()))
+                        withJsonPath("$.offenceId", is(offence.getId().toString())),
+                        withJsonPath("$.pleaDate", is(offence.getPlea().getPleaDate().toString())),
+                        withJsonPath("$.value", is(offence.getPlea().getValue()))
                 ))
                 )
         );

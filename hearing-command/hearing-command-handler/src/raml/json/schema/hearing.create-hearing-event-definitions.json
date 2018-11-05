@@ -1,57 +1,63 @@
 {
-  "$schema":"http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.create-hearing-event-definitions.json",
-  "type":"object",
-  "properties":{
-    "id":{
-      "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/definitions/uuid"
     },
-    "eventDefinitions":{
-      "type":"array",
-      "items":{
-        "type":"object",
-        "properties":{
-          "id":{
-            "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+    "eventDefinitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuid"
           },
-          "groupLabel":{
-            "type":"string"
+          "groupLabel": {
+            "type": "string"
           },
-          "actionLabel":{
-            "type":"string"
+          "actionLabel": {
+            "type": "string"
           },
-          "actionLabelExtension":{
-            "type":"string"
+          "actionLabelExtension": {
+            "type": "string"
           },
-          "recordedLabel":{
-            "type":"string"
+          "recordedLabel": {
+            "type": "string"
           },
-          "sequence":{
-            "type":"integer"
+          "sequence": {
+            "type": "integer"
           },
-          "sequenceType":{
-            "type":"string"
+          "sequenceType": {
+            "type": "string"
           },
-          "caseAttribute":{
-            "type":"string"
+          "caseAttribute": {
+            "type": "string"
           },
-          "alterable":{
-            "type":"boolean"
+          "alterable": {
+            "type": "boolean"
           }
         },
-        "required":[
+        "additionalProperties": false,
+        "required": [
           "id",
           "recordedLabel",
           "actionLabel",
           "alterable"
-        ],
-        "additionalProperties":false
+        ]
       }
     }
   },
-  "required":[
+  "required": [
     "id",
     "eventDefinitions"
   ],
-  "additionalProperties":false
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
 }
+

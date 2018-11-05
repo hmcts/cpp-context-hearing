@@ -1,279 +1,67 @@
 {
+  "cases": [{
+    "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
+    "urn": "87GD9945217"
+  }],
   "hearing": {
-    "id": "00000000-0000-0000-0000-000000000000",
-    "type": {
-      "id": "00000000-0000-0000-0000-000000000000",
-      "description": "a"
+    "id": "f6541c25-825c-6a98-1764-caee654c763a",
+    "type": "TRIAL",
+    "courtCentreId": "e8821a38-546d-4b56-9992-ebdd772a561f",
+    "courtCentreName": "Liverpool Crown Court",
+    "courtRoomId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
+    "courtRoomName": "3",
+    "judge": {
+      "id": "1daefec3-2f76-8109-82d9-2e60544a6c01",
+      "title": "HHJ",
+      "firstName": "Neil",
+      "lastName": "Flewitt"
     },
-    "jurisdictionType": "MAGISTRATES",
-    "hasReportingRestrictions": true,
-    "hearingLanguage": "ENGLISH",
-    "hearingDays": [
+    "hearingDays":["2016-06-01T10:00:00Z"],
+    "defendants": [
       {
-        "sittingDay": "a",
-        "listingSequence": 0
-      }
-    ],
-    "courtCentre": {
-      "id": "00000000-0000-0000-0000-000000000000",
-      "name": "a",
-      "welshName": "a",
-      "roomId": "00000000-0000-0000-0000-000000000000",
-      "roomName": "a",
-      "welshRoomName": "a"
-    },
-    "judiciary": [
-      {
-        "judicialId": "00000000-0000-0000-0000-000000000000",
-        "title": "a",
-        "firstName": "a",
-        "middleName": "a",
-        "lastName": "a",
-        "judicialRoleType": "RECORDER",
-        "isDeputy": true,
-        "isBenchChairman": true
-      }
-    ],
-    "prosecutionCases": [
-      {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "prosecutionCaseIdentifier": {
-          "prosecutionAuthorityId": "00000000-0000-0000-0000-000000000000",
-          "prosecutionAuthorityCode": "a",
-          "caseURN": "a"
+        "id": "0baecac5-222b-402d-9047-84803679edac",
+        "personId": "0baecac5-222b-402d-9047-84803679edad",
+        "firstName": "David",
+        "lastName": "Lloyd",
+        "nationality": "British",
+        "gender": "Male",
+        "address": {
+          "address1": "222 Furze Road",
+          "address2": "Exeter",
+          "address3": "England",
+          "address4": "UK",
+          "postCode": "W1T 1JY"
         },
-        "originatingOrganisation": "a",
-        "initiationCode": "J",
-        "caseStatus": "a",
-        "defendants": [
+        "dateOfBirth": "1995-03-23",
+        "defenceOrganisation": "Solicitor XYZ",
+        "interpreter": {
+          "needed": false,
+          "language": "English"
+        },
+        "defendantCases": [
           {
-            "id": "00000000-0000-0000-0000-000000000000",
-            "prosecutionCaseId": "00000000-0000-0000-0000-000000000000",
-            "numberOfPreviousConvictionsCited": 0,
-            "prosecutionAuthorityReference": "a",
-            "offences": [
-              {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "offenceDefinitionId": "00000000-0000-0000-0000-000000000000",
-                "offenceCode": "a",
-                "offenceTitle": "a",
-                "offenceLegislation": "a",
-                "wording": "a",
-                "offenceWordingWelsh": "a",
-                "statementOfFacts": "a",
-                "statementOfFactsWelsh": "a",
-                "startDate": "0000-01-01",
-                "endDate": "0000-01-01",
-                "arrestDate": "0000-01-01",
-                "chargeDate": "0000-01-01",
-                "orderIndex": 0,
-                "count": 0,
-                "convictionDate": "0000-01-01",
-                "notifiedPlea": {
-                  "offenceId": "00000000-0000-0000-0000-000000000000",
-                  "notifiedPleaDate": "0000-01-01",
-                  "value": "NOTIFIED_GUILTY"
-                },
-                "indicatedPlea": {
-                  "offenceId": "00000000-0000-0000-0000-000000000000",
-                  "indicatedPleaDate": "0000-01-01",
-                  "value": "INDICATED_GUILTY",
-                  "source": "ONLINE",
-                  "allocationDecision": {
-                    "courtDecision": "CONSENT_SUMMARY_TRIAL",
-                    "prosecutionRepresentation": "CONSENT_SUMMARY_TRIAL",
-                    "defendantRepresentation": "CONSENT_SUMMARY_TRIAL",
-                    "indicationOfSentence": "a"
-                  }
-                },
-                "plea": {
-                  "originatingHearingId": "00000000-0000-0000-0000-000000000000",
-                  "delegatedPowers": {
-                    "userId": "00000000-0000-0000-0000-000000000000",
-                    "firstName": "a",
-                    "lastName": "a"
-                  },
-                  "offenceId": "00000000-0000-0000-0000-000000000000",
-                  "pleaDate": "0000-01-01",
-                  "value": "GUILTY"
-                },
-                "offenceFacts": {
-                  "vehicleRegistration": "a",
-                  "prosecutionFacts": "a",
-                  "witnessStatement": "a",
-                  "mitigation": "a",
-                  "alcoholReadingAmount": "a",
-                  "alcoholReadingMethod": "a"
-                }
-              }
-            ],
-            "associatedPersons": [
-              {
-                "person": {
-                  "title": "MR",
-                  "firstName": "a",
-                  "middleName": "a",
-                  "lastName": "a",
-                  "dateOfBirth": "0000-01-01",
-                  "nationalityId": "00000000-0000-0000-0000-000000000000",
-                  "nationalityCode": "a",
-                  "additionalNationalityId": "00000000-0000-0000-0000-000000000000",
-                  "additionalNationalityCode": "a",
-                  "disabilityStatus": "a",
-                  "ethnicityId": "00000000-0000-0000-0000-000000000000",
-                  "ethnicity": "a",
-                  "gender": "MALE",
-                  "interpreterLanguageNeeds": "a",
-                  "documentationLanguageNeeds": "ENGLISH",
-                  "nationalInsuranceNumber": "NH111111B",
-                  "occupation": "a",
-                  "occupationCode": "a",
-                  "specificRequirements": "a",
-                  "address": {
-                    "address1": "a",
-                    "address2": "a",
-                    "address3": "a",
-                    "address4": "a",
-                    "address5": "a",
-                    "postcode": "GIR 0AA"
-                  },
-                  "contact": {
-                    "home": " ",
-                    "work": "a",
-                    "mobile": " ",
-                    "primaryEmail": "!.!@00.00",
-                    "secondaryEmail": "!.!@00.00",
-                    "fax": "a"
-                  }
-                },
-                "role": "a"
-              }
-            ],
-            "defenceOrganisation": {
-              "id": "00000000-0000-0000-0000-000000000000",
-              "name": "a",
-              "incorporationNumber": "a",
-              "registeredCharityNumber": "a",
-              "address": {
-                "address1": "a",
-                "address2": "a",
-                "address3": "a",
-                "address4": "a",
-                "address5": "a",
-                "postcode": "GIR 0AA"
-              },
-              "contact": {
-                "home": " ",
-                "work": "a",
-                "mobile": " ",
-                "primaryEmail": "!.!@00.00",
-                "secondaryEmail": "!.!@00.00",
-                "fax": "a"
-              }
-            },
-            "personDefendant": {
-              "personDetails": {
-                "title": "MR",
-                "firstName": "a",
-                "middleName": "a",
-                "lastName": "a",
-                "dateOfBirth": "0000-01-01",
-                "nationalityId": "00000000-0000-0000-0000-000000000000",
-                "nationalityCode": "a",
-                "additionalNationalityId": "00000000-0000-0000-0000-000000000000",
-                "additionalNationalityCode": "a",
-                "disabilityStatus": "a",
-                "ethnicityId": "00000000-0000-0000-0000-000000000000",
-                "ethnicity": "a",
-                "gender": "MALE",
-                "interpreterLanguageNeeds": "a",
-                "documentationLanguageNeeds": "ENGLISH",
-                "nationalInsuranceNumber": "NH111111B",
-                "occupation": "a",
-                "occupationCode": "a",
-                "specificRequirements": "a",
-                "address": {
-                  "address1": "a",
-                  "address2": "a",
-                  "address3": "a",
-                  "address4": "a",
-                  "address5": "a",
-                  "postcode": "GIR 0AA"
-                },
-                "contact": {
-                  "home": " ",
-                  "work": "a",
-                  "mobile": " ",
-                  "primaryEmail": "!.!@00.00",
-                  "secondaryEmail": "!.!@00.00",
-                  "fax": "a"
-                }
-              },
-              "bailStatus": "a",
-              "custodyTimeLimit": "0000-01-01",
-              "perceivedBirthYear": 0,
-              "observedEthnicityId": "00000000-0000-0000-0000-000000000000",
-              "observedEthnicityCode": "a",
-              "selfDefinedEthnicityId": "00000000-0000-0000-0000-000000000000",
-              "selfDefinedEthnicityCode": "a",
-              "driverNumber": "a",
-              "pNCId": "a",
-              "arrestSummonsNumber": "a",
-              "aliases": [
-                "a"
-              ],
-              "employerOrganisation": {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "name": "a",
-                "incorporationNumber": "a",
-                "registeredCharityNumber": "a",
-                "address": {
-                  "address1": "a",
-                  "address2": "a",
-                  "address3": "a",
-                  "address4": "a",
-                  "address5": "a",
-                  "postcode": "GIR 0AA"
-                },
-                "contact": {
-                  "home": " ",
-                  "work": "a",
-                  "mobile": " ",
-                  "primaryEmail": "!.!@00.00",
-                  "secondaryEmail": "!.!@00.00",
-                  "fax": "a"
-                }
-              },
-              "employerPayrollReference": "a"
-            },
-            "legalEntityDefendant": {
-              "organisation": {
-                "id": "00000000-0000-0000-0000-000000000000",
-                "name": "a",
-                "incorporationNumber": "a",
-                "registeredCharityNumber": "a",
-                "address": {
-                  "address1": "a",
-                  "address2": "a",
-                  "address3": "a",
-                  "address4": "a",
-                  "address5": "a",
-                  "postcode": "GIR 0AA"
-                },
-                "contact": {
-                  "home": " ",
-                  "work": "a",
-                  "mobile": " ",
-                  "primaryEmail": "!.!@00.00",
-                  "secondaryEmail": "!.!@00.00",
-                  "fax": "a"
-                }
-              }
-            }
+            "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
+            "bailStatus": "bailed",
+            "custodyTimeLimitDate": "2018-01-30"
+          }
+        ],
+        "offences": [
+          {
+            "id": "7e2f843e-d639-40b3-8611-8015f3a18958",
+            "caseId": "7e2f843e-d639-40b3-8611-8015f3a18950",
+            "offenceCode": "H8198",
+            "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
+            "section": "Section 51",
+            "startDate": "2010-08-01",
+            "endDate": "2011-08-01",
+            "orderIndex": 1,
+            "count": 1,
+            "convictionDate": "2017-08-01",
+            "title": "Wounding with intent",
+            "legislation": "legislation"
           }
         ]
       }
-    ],
-    "hasSharedResults": true
+    ]
   }
 }

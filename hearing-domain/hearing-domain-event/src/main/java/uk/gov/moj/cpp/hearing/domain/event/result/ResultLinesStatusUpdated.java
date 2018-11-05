@@ -1,11 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.event.result;
 
-import static java.util.Optional.ofNullable;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.justice.json.schemas.core.CourtClerk;
+import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 
 import java.io.Serializable;
@@ -13,6 +11,8 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static java.util.Optional.ofNullable;
 
 @Event("hearing.result-lines-status-updated")
 public final class ResultLinesStatusUpdated implements Serializable {

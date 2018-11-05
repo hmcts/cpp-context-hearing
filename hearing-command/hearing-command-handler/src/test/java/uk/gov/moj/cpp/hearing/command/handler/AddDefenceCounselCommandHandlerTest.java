@@ -29,7 +29,7 @@ import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamEx
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
-import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
 
 import java.util.UUID;
@@ -88,7 +88,7 @@ public class AddDefenceCounselCommandHandlerTest {
                 .addDefendantId(DefendantId.builder().withDefendantId(randomUUID()))
                 .build();
 
-        setupMockedEventStream(addDefenceCounselCommand.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(addDefenceCounselCommand.getHearingId(), this.hearingEventStream, new NewModelHearingAggregate());
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.add-defence-counsel"),
                 objectToJsonObjectConverter.convert(addDefenceCounselCommand));

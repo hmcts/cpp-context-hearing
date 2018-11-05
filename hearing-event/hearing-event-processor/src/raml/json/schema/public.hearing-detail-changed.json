@@ -1,6 +1,5 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/public.hearing-detail-changed.json",
   "type": "object",
   "properties": {
     "hearing": {
@@ -13,52 +12,66 @@
   "required": [
     "hearing"
   ],
+  "additionalProperties": true,
   "definitions": {
     "hearing": {
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+          "$ref": "#/definitions/uuid"
         },
         "type": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/hearingType.json"
-        },
-        "jurisdictionType": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/jurisdictionType"
-        },
-        "reportingRestrictionReason": {
           "type": "string"
         },
-        "hearingLanguage": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/hearingLanguage"
+        "courtRoomId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "courtRoomName": {
+          "type": "string"
+        },
+        "judge": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/uuid"
+            },
+            "title": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "firstName",
+            "lastName"
+          ]
         },
         "hearingDays": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "http://justice.gov.uk/json/schemas/core/hearingDay.json"
-          }
-        },
-        "courtCentre": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtCentre.json"
-        },
-        "judiciary": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "http://justice.gov.uk/json/schemas/core/judicialRole.json"
+            "type": "string"
           }
         }
       },
       "required": [
         "id",
         "type",
-        "jurisdictionType",
-        "courtCentre",
-        "hearingLanguage",
+        "courtRoomId",
+        "judgeId",
         "hearingDays"
       ],
-      "additionalProperties": false
+      "additionalProperties": true
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   }
 }

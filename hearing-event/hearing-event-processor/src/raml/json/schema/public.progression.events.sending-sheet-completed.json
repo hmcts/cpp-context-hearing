@@ -1,6 +1,5 @@
 {
   "$schema":"http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/public.progression.events.sending-sheet-completed.json",
   "type":"object",
   "required": [
     "hearing",
@@ -219,15 +218,6 @@
                     },
                     "category":{
                       "type":"string"
-                    },
-                    "title":{
-                      "type":"string"
-                    },
-                    "legislation":{
-                      "type":"string"
-                    },
-                    "orderIndex":{
-                      "type":"integer"
                     },
                     "startDate":{
                       "$ref":"#/definitions/datePattern"

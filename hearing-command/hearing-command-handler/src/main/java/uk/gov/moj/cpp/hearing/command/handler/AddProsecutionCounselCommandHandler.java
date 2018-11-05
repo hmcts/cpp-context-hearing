@@ -7,7 +7,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +25,8 @@ public class AddProsecutionCounselCommandHandler extends AbstractCommandHandler 
         }
 
         final AddProsecutionCounselCommand addProsecutionCounselCommand = convertToObject(envelope, AddProsecutionCounselCommand.class);
-        aggregate(HearingAggregate.class, addProsecutionCounselCommand.getHearingId(), envelope,
-                hearingAggregate -> hearingAggregate.addProsecutionCounsel(addProsecutionCounselCommand.getPersonId(),
-                        addProsecutionCounselCommand.getAttendeeId(),
-                        addProsecutionCounselCommand.getHearingId(),
-                        addProsecutionCounselCommand.getStatus(),
-                        addProsecutionCounselCommand.getFirstName(),
-                        addProsecutionCounselCommand.getLastName(),
-                        addProsecutionCounselCommand.getTitle()));
+
+        aggregate(NewModelHearingAggregate.class, addProsecutionCounselCommand.getHearingId(), envelope,
+                (hearingAggregate) -> hearingAggregate.addProsecutionCounsel(addProsecutionCounselCommand));
     }
 }

@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
@@ -24,7 +23,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 @SuppressWarnings("unchecked")
 public class ProsecutionCounselIT extends AbstractIT {
 
-    @Ignore("GPE-5825 - upcoming story to address prosecution counsel etc")
     @Test
     public void addProsecutionCounsel_shouldAdd() throws Exception {
 
@@ -70,7 +68,6 @@ public class ProsecutionCounselIT extends AbstractIT {
                         )));
     }
 
-    @Ignore("GPE-5825 - upcoming story to address prosecution counsel etc")
     @Test
     public void addProsecutionCounsel_shouldEdit() throws Exception {
 

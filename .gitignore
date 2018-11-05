@@ -1,8 +1,5 @@
 target/
+.settings/
 .classpath
 .project
-.settings
-.idea
 *.iml
-**/.DS_Store
-lightning-jenkins.properties

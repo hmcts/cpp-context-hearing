@@ -1,7 +1,6 @@
 {  "type": "object",
   "definitions": {},
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/public.hearing.events.nows-requested.json",
   "properties": {
     "hearing": {
       "$id": "/properties/hearing",
@@ -506,8 +505,8 @@
                 "$id": "/properties/hearing/properties/nowTypes/items/properties/staticText",
                 "type": "string"
               },
-              "welshStaticText": {
-                "$id": "/properties/hearing/properties/nowTypes/items/properties/welshStaticText",
+              "staticTextWelsh": {
+                "$id": "/properties/hearing/properties/nowTypes/items/properties/staticTextWelsh",
                 "type": "string"
               },
               "priority": {

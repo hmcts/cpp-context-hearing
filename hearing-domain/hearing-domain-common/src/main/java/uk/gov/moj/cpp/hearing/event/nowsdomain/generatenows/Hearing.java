@@ -1,7 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
-import uk.gov.justice.json.schemas.core.CourtCentre;
-
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -20,13 +18,17 @@ public class Hearing implements Serializable {
 
     private List<ZonedDateTime> hearingDates;
 
-    private uk.gov.justice.json.schemas.core.CourtCentre courtCentre;
+    private CourtCentre courtCentre;
 
     private List<Attendees> attendees;
 
     private List<Defendants> defendants;
 
     private List<SharedResultLines> sharedResultLines;
+
+    private List<Nows> nows;
+
+    private List<NowTypes> nowTypes;
 
     public static Hearing hearing() {
         return new Hearing();
@@ -72,7 +74,7 @@ public class Hearing implements Serializable {
         return this.courtCentre;
     }
 
-    public Hearing setCourtCentre(uk.gov.justice.json.schemas.core.CourtCentre courtCentre) {
+    public Hearing setCourtCentre(CourtCentre courtCentre) {
         this.courtCentre = courtCentre;
         return this;
     }
@@ -101,6 +103,24 @@ public class Hearing implements Serializable {
 
     public Hearing setSharedResultLines(List<SharedResultLines> sharedResultLines) {
         this.sharedResultLines = new ArrayList<>(sharedResultLines);
+        return this;
+    }
+
+    public List<Nows> getNows() {
+        return this.nows;
+    }
+
+    public Hearing setNows(List<Nows> nows) {
+        this.nows = new ArrayList<>(nows);
+        return this;
+    }
+
+    public List<NowTypes> getNowTypes() {
+        return this.nowTypes;
+    }
+
+    public Hearing setNowTypes(List<NowTypes> nowTypes) {
+        this.nowTypes = new ArrayList<>(nowTypes);
         return this;
     }
 }

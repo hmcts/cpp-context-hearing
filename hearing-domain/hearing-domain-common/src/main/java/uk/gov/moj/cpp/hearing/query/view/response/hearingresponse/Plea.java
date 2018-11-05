@@ -2,31 +2,26 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.justice.json.schemas.core.DelegatedPowers;
 
-public class Plea {
+public final class Plea {
 
-    private String pleaId;
-    private String pleaDate;
-    private String value;
-    private DelegatedPowers delegatedPowers;
+    private final String pleaId;
+    private final String pleaDate;
+    private final String value;
 
     @JsonCreator
-    public Plea(@JsonProperty("pleaId") final String pleaId,
+    private Plea(@JsonProperty("pleaId") final String pleaId,
                  @JsonProperty("pleaDate") final String pleaDate,
-                 @JsonProperty("value") final String value,
-                 @JsonProperty("delegatedPowers") final DelegatedPowers delegatedPowers) {
+                 @JsonProperty("value") final String value) {
         this.pleaId = pleaId;
         this.pleaDate = pleaDate;
         this.value = value;
-        this.delegatedPowers = delegatedPowers;
     }
 
     private Plea(final Builder builder) {
         this.pleaId = builder.pleaId;
         this.pleaDate = builder.pleaDate;
         this.value = builder.value;
-        this.delegatedPowers = builder.delegatedPowers;
     }
 
     public static Builder builder() {
@@ -45,16 +40,11 @@ public class Plea {
         return value;
     }
 
-    public DelegatedPowers getDelegatedPowers() {
-        return delegatedPowers;
-    }
-
     public static final class Builder {
 
         private String pleaId;
         private String pleaDate;
         private String value;
-        private DelegatedPowers delegatedPowers;
 
         public Builder withPleaId(String pleaId) {
             this.pleaId = pleaId;
@@ -68,11 +58,6 @@ public class Plea {
 
         public Builder withValue(String value) {
             this.value = value;
-            return this;
-        }
-
-        public Builder withDelegatedPowers(DelegatedPowers delegatedPowers) {
-            this.delegatedPowers = delegatedPowers;
             return this;
         }
 

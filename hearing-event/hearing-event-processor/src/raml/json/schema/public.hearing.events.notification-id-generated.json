@@ -1,6 +1,5 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/public.hearing.events.notification-id-generated.json",
   "type": "object",
   "properties": {
     "notificationId": {

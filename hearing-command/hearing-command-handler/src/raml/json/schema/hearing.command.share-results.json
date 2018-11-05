@@ -1,15 +1,27 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/hearing/courts/hearing.command.share-results.json",
   "type": "object",
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+     "datePattern":{
+      "type":"string",
+      "pattern":"^((([\\+-]?\\d{4}(?!\\d{2}\\b))\\-(0[13578]|1[02])\\-(0[1-9]|[12]\\d|3[01]))|(([\\+-]?\\d{4}(?!\\d{2}\\b))\\-(0[13456789]|1[012])\\-(0[1-9]|[12]\\d|30))|(([\\+-]?\\d{4}(?!\\d{2}\\b))\\-02\\-(0[1-9]|1\\d|2[0-8]))|(((1[6-9]|[2-9]\\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))\\-02\\-29))$"
+    }
+  },
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
   "properties": {
+    "hearingId":{
+      "$ref":"#/definitions/uuid"
+    },
     "courtClerk": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
         "id": {
-          "description": "The identifier of teh court clerk sharing the results",
-          "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+          "$ref": "#/definitions/uuid"
         },
         "firstName": {
           "type": "string"
@@ -24,103 +36,112 @@
         "lastName"
       ]
     },
-    "resultLines": {
+    "completedResultLines": {
       "type": "array",
-      "minItems": 1,
+      "additionalItems": false,
       "items": {
-        "$ref": "#/definitions/resultLine"
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuid"
+          },
+          "resultDefinitionId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "caseId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "defendantId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "offenceId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "orderedDate":{
+             "$ref":"#/definitions/datePattern"
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "DEFENDANT",
+              "CASE",
+              "OFFENCE"
+            ]
+          },
+          "resultLabel": {
+            "type": "string"
+          },
+          "prompts": {
+            "type": "array",
+            "additionalItems": false,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "$ref": "#/definitions/uuid"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "value"
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "resultDefinitionId",
+          "caseId",
+          "defendantId",
+          "offenceId",
+          "level",
+          "resultLabel",
+          "orderedDate",
+          "prompts"
+        ]
+      }
+    },
+    "uncompletedResultLines": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuid"
+          },
+          "resultDefinitionId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "defendantId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "orderedDate":{
+           "$ref":"#/definitions/datePattern"
+          }
+        },
+        "required": [
+          "id",
+          "resultDefinitionId",
+          "defendantId",
+          "orderedDate"
+        ]
       }
     }
   },
   "required": [
-    "courtClerk", "resultLines"
-  ],
-  "definitions": {
-    "resultLine": {
-      "type": "object",
-      "properties": {
-        "delegatedPowers": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/delegatedPowers.json"
-        },
-        "orderedDate": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
-        },
-        "sharedDate": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/datePattern"
-        },
-        "resultLineId": {
-          "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-        },
-        "targetId": {
-          "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-        },
-        "offenceId": {
-          "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-        },
-        "defendantId": {
-          "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-        },
-        "resultDefinitionId": {
-          "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
-          "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-        },
-        "level": {
-          "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
-          "type": "string",
-          "enum": [
-            "DEFENDANT",
-            "CASE",
-            "OFFENCE"
-          ]
-        },
-        "resultLabel": {
-          "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
-          "type": "string"
-        },
-        "prompts": {
-          "description": "Available when the UI has resolved the result with the notepad parsing service i.e. is expected when result line isComplete is true",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "$ref":"http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-              },
-              "label": {
-                "type": "string"
-              },
-              "fixedListCode": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              },
-              "welshValue": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "label",
-              "value",
-              "welshValue"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "isModified": {
-          "type": "boolean"
-        },
-        "isComplete": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "orderedDate",
-        "resultLineId",
-        "isModified",
-        "isComplete"
-      ]
-    }
-  }
+    "hearingId",
+    "courtClerk",
+    "completedResultLines"
+  ]
 }

@@ -11,7 +11,6 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResult;
 
-import org.junit.Ignore;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -57,8 +56,8 @@ public class AdjournHearingDelegateTest {
     public void execute() throws Exception {
         //Given
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.adjourn-hearing"), Json.createObjectBuilder().build());
-        when(relistReferenceDataService.getNextHearingResultDefinitions(any(), eq(getArbitrarySharedResult().getHearing().getHearingDays().get(0).getSittingDay().toLocalDate()))).thenReturn(emptyMap());
-        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(), eq(getArbitrarySharedResult().getHearing().getHearingDays().get(0).getSittingDay().toLocalDate()))).thenReturn(emptyList());
+        when(relistReferenceDataService.getNextHearingResultDefinitions(any(), eq(getArbitrarySharedResult().getHearing().getHearingDays().get(0).toLocalDate()))).thenReturn(emptyMap());
+        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(), eq(getArbitrarySharedResult().getHearing().getHearingDays().get(0).toLocalDate()))).thenReturn(emptyList());
         when(hearingAdjournValidator.validate(any(), any(), any())).thenReturn(true);
 
         //when

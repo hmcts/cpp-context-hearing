@@ -12,11 +12,15 @@ public class HearingEventDefinitionsDeleted implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
+    private UUID id;
 
     @JsonCreator
     public HearingEventDefinitionsDeleted(@JsonProperty("id") final UUID id) {
         this.id = id;
+    }
+
+    public HearingEventDefinitionsDeleted() {
+        // default constructor for Jackson serialisation
     }
 
     public UUID getId() {

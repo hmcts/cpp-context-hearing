@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.USER_ID;
-import static uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.NowsMaterialStatusUpdateHmps.RESULTS_UPDATE_NOWS_MATERIAL_STATUS;
+import static uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.NowsMaterialStatusUpdateHmps.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS;
 
 import java.util.UUID;
 
@@ -73,7 +73,7 @@ public class NowsMaterialStatusUpdateHmpsTest {
 
         assertThat(envelope.metadata().userId().get(), equalTo(userId.toString()));
         assertThat(envelope.metadata().name(),
-                equalTo(RESULTS_UPDATE_NOWS_MATERIAL_STATUS));
+                equalTo(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS));
 
     }
 }

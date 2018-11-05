@@ -1,12 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/hearing/courts/get-hearings.json",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "hearings": {
       "type": "array",
-      "minItems": 1,
       "items": {
         "$ref": "#/definitions/hearing"
       }
@@ -19,89 +17,125 @@
     "hearing": {
       "type": "object",
       "properties": {
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "hearingType": {
+          "type": "string"
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/case"
+          }
+        },
+        "defendants": {
+          "type": "array",
+          "$ref": "#/definitions/defendant"
+        },
+        "witnesses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/witness"
+          }
+        }
+      },
+      "required": [
+        "hearingId",
+        "hearingType",
+        "cases",
+        "defendants"
+      ]
+    },
+    "case": {
+      "type": "object",
+      "properties": {
         "id": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
+          "$ref": "#/definitions/uuid"
+        },
+        "urn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "urn"
+      ]
+    },
+    "defendant": {
+      "type": "array",
+      "properties": {
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "firstName",
+        "lastName"
+      ]
+    },
+    "witness": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/definitions/uuid"
         },
         "type": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/hearingType.json"
-        },
-        "jurisdictionType": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/jurisdictionType"
-        },
-        "reportingRestrictionReason": {
           "type": "string"
         },
-        "hearingLanguage": {
+        "classification": {
           "type": "string"
         },
-        "hearingDays": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "http://justice.gov.uk/json/schemas/core/hearingDay.json"
-          }
+        "personId": {
+          "$ref": "#/definitions/uuid"
         },
-        "prosecutionCases": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "#/definitions/prosecutionCase"
-          }
+        "title": {
+          "type": "string"
         },
-        "hasSharedResults": {
-          "description": "Indicates that the hearing has at least one result shared",
-          "type": "boolean"
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "type": "string"
+        },
+        "nationality": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "homeTelephone": {
+          "type": "string"
+        },
+        "workTelephone": {
+          "type": "string"
+        },
+        "mobile": {
+          "type": "string"
+        },
+        "fax": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
         }
       },
       "required": [
         "id",
         "type",
-        "jurisdictionType",
-        "prosecutionCases"
-      ],
-      "additionalProperties": false
+        "classification",
+        "personId"
+      ]
     },
-    "prosecutionCase": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-        },
-        "prosecutionCaseIdentifier": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/prosecutionCaseIdentifier.json"
-        },
-        "defendants": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "$ref": "#/definitions/defendant"
-          }
-        }
-      },
-      "required": [
-        "id",
-        "prosecutionCaseIdentifier",
-        "defendants"
-      ],
-      "additionalProperties": false
-    },
-    "defendant": {
-      "type": "object",
-      "description": "The defendant for an individual prosecution case.  Defendant details are NOT associated to multiple prosecution cases.  HMCTS business does not have authority to merge defendant details or recognise a single view of defendant",
-      "properties": {
-        "id": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/uuid"
-        },
-        "name": {
-          "description": "The formatted name of the defendant.  If the defendant is a person, this will be firstName || middleName || lastName. If the defendant is a legal entity, this will be organisation.Name",
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "name"
-      ],
-      "additionalProperties": false
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   }
 }

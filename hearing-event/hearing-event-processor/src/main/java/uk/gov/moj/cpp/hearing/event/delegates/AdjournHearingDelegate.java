@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import uk.gov.justice.json.schemas.core.HearingDay;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -45,9 +44,9 @@ public class AdjournHearingDelegate {
     @Inject
     private Sender sender;
 
+
     public void execute(final ResultsShared resultsShared, final JsonEnvelope jsonEnvelope) {
         final LocalDate orderedDate = resultsShared.getHearing().getHearingDays().stream()
-                .map(HearingDay::getSittingDay)
                 .map(ZonedDateTime::toLocalDate)
                 .min(Comparator.comparing(LocalDate::toEpochDay))
                 .orElse(LocalDate.now());

@@ -1,6 +1,5 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/material.material-added.json",
   "type": "object",
   "properties": {
     "materialId": {

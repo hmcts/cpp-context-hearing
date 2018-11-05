@@ -2,37 +2,41 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.justice.json.schemas.core.JurisdictionType;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
-import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Advocate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.AttendeeHearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
+import uk.gov.moj.cpp.hearing.query.view.convertor.HearingDetailsResponseConverter;
+import uk.gov.moj.cpp.hearing.query.view.convertor.HearingListResponseConverter;
+import uk.gov.moj.cpp.hearing.query.view.response.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseDefendant;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseHearing;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Material;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowResult;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Nows;
 import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowsResponse;
+import uk.gov.moj.cpp.hearing.repository.AttendeeHearingDateRespository;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -40,18 +44,9 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.transaction.Transactional;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HearingService {
 
@@ -67,54 +62,48 @@ public class HearingService {
     private NowsMaterialRepository nowsMaterialRepository;
 
     @Inject
+    private AttendeeHearingDateRespository attendeeHearingDateRespository;
+
+    @Inject
     private DocumentRepository documentRepository;
 
     @Inject
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
-    @Inject
-    private HearingJPAMapper hearingJPAMapper;
-
-    @Inject
-    private HearingTypeJPAMapper hearingTypeJPAMapper;
-
-    @Inject
-    private HearingDayJPAMapper hearingDayJPAMapper;
-
-    @Inject
-    private TargetJPAMapper targetJPAMapper;
-
-    @Inject
-    private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
-
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
 
     @Transactional
-    public HearingListResponse getHearingByDateV2(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
-
-        if (null == date || null == courtCentreId || null == roomId) {
+    public HearingListResponse getHearingByDateV2(final LocalDate date) {
+        if (null == date) {
             return new HearingListResponse();
         }
-        final List<Hearing> source = hearingRepository.findByFilters(date, courtCentreId, roomId);
-        if (CollectionUtils.isEmpty(source)) {
-            return new HearingListResponse();
-        }
-
-        final LocalDateTime from = getDateWithTime(date, startTime);
-        final LocalDateTime to = getDateWithTime(date, endTime);
-        final List<Hearing> filteredHearings = filterHearings(source, from, to);
-
-        return HearingListResponse.builder()
-                .withHearings(filteredHearings.stream().map(this::populateHearing).collect(toList()))
-                .build();
+        return new HearingListResponseConverter().convert(hearingRepository.findByDate(date));
     }
 
     @Transactional
-    public HearingDetailsResponse getHearingById(final UUID hearingId) {
+    public HearingDetailsResponse getHearingByIdV2(final UUID hearingId) {
         if (null == hearingId) {
             return new HearingDetailsResponse();
         }
-        return new HearingDetailsResponse(hearingJPAMapper.fromJPA(hearingRepository.findBy(hearingId)));
+        final Hearing hearing = hearingRepository.findById(hearingId);
+        if (null != hearing) {
+            final Map<UUID, LocalDate> hearingDaysMap = hearing.getHearingDays().stream().collect(toMap(h -> h.getId().getId(), HearingDate::getDate));
+            if (!hearingDaysMap.isEmpty()) {
+                hearing.getAttendees().stream()
+                        .filter(attendee -> attendee instanceof Advocate)
+                        .map(Advocate.class::cast)
+                        .forEach(attendee -> {
+                            final List<AttendeeHearingDate> attendeDays = findAttendeeDates(attendee.getId().getId(), hearing.getId());
+                            attendeDays.forEach(attendeDay -> attendee.addHearingDate(hearingDaysMap.get(attendeDay.getHearingDateId())));
+                        });
+            }
+        }
+        return new HearingDetailsResponseConverter().convert(hearing);
+    }
+
+    @Transactional
+    public List<AttendeeHearingDate> findAttendeeDates(final UUID attendeeId, final UUID hearingID) {
+        return this.attendeeHearingDateRespository.findByAttendeeIdAndHearingId(attendeeId, hearingID);
     }
 
     @Transactional
@@ -127,8 +116,8 @@ public class HearingService {
                 .withId(now.getId().toString())
                 .withNowsTypeId(now.getNowsTypeId().toString())
                 .withMaterial(populateMaterial(now.getMaterial()))
-                .build())
-                .collect(toList());
+
+                .build()).collect(toList());
         return NowsResponse.builder().withNows(nowsList).build();
     }
 
@@ -139,7 +128,7 @@ public class HearingService {
         JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
         NowsMaterial nowsMaterial = nowsMaterialRepository.findBy(UUID.fromString(q));
         if (nowsMaterial != null) {
-            nowsMaterial.getUserGroups().stream().sorted().collect(Collectors.toList()).forEach(jsonArrayBuilder::add);
+            nowsMaterial.getUserGroups().forEach(s -> jsonArrayBuilder.add(s));
         } else {
             LOGGER.info("No user groups found with materialId='{}'", q);
         }
@@ -175,7 +164,7 @@ public class HearingService {
             })));
 
             final Subscriptions subscriptions = new Subscriptions();
-            subscriptions.setSubscriptions(subscriptionList.stream().map(populateHearing()).collect(Collectors.toList()));
+            subscriptions.setSubscriptions(subscriptionList.stream().map(convert()).collect(Collectors.toList()));
 
             return objectToJsonObjectConverter.convert(subscriptions);
 
@@ -187,34 +176,23 @@ public class HearingService {
         }
     }
 
-    @Transactional
-    public TargetListResponse getTargets(UUID hearingId) {
-        final Hearing hearing = hearingRepository.findBy(hearingId);
-        return TargetListResponse.builder()
-                .withTargets(targetJPAMapper.fromJPA(hearing.getTargets())).build();
+    private List<NowResult> populateNowResult(List<NowsResult> nowResult) {
+        return nowResult.stream().map(result -> NowResult.builder()
+                .withSequence(result.getSequence())
+                .withSharedResultId(result.getSharedResultId().toString())
+                .build()).collect(toList());
     }
 
-    private List<NowResult> populateNowResult(Set<NowsResult> nowResult) {
-        return nowResult.stream()
-                .sorted(Comparator.comparing(NowsResult::getSequence))
-                .map(result -> NowResult.builder()
-                        .withSequence(result.getSequence())
-                        .withSharedResultId(result.getSharedResultId().toString())
-                        .build()
-                )
-                .collect(toList());
-    }
-
-    private List<Material> populateMaterial(Set<NowsMaterial> nowsMaterials) {
+    private List<Material> populateMaterial(List<NowsMaterial> nowsMaterials) {
         return nowsMaterials.stream().map(nowsMaterial -> Material.builder()
                 .withId(nowsMaterial.getId().toString())
                 .withStatus(nowsMaterial.getStatus())
                 .withLanguage(nowsMaterial.getLanguage())
                 .withNowResult(populateNowResult(nowsMaterial.getNowResult()))
-                .withUserGroups(new ArrayList<>(nowsMaterial.getUserGroups())).build()).collect(toList());
+                .withUserGroups(nowsMaterial.getUserGroups()).build()).collect(toList());
     }
 
-    private Function<Subscription, uk.gov.moj.cpp.hearing.domain.notification.Subscription> populateHearing() {
+    private Function<Subscription, uk.gov.moj.cpp.hearing.domain.notification.Subscription> convert() {
         return s -> {
             final uk.gov.moj.cpp.hearing.domain.notification.Subscription subscription = new uk.gov.moj.cpp.hearing.domain.notification.Subscription();
             subscription.setChannel(s.getChannel());
@@ -225,52 +203,5 @@ public class HearingService {
             subscription.setNowTypeIds(s.getNowTypeIds());
             return subscription;
         };
-    }
-
-    private HearingListResponseHearing populateHearing(final Hearing source) {
-        if (null == source || null == source.getId()) {
-            return null;
-        }
-
-        final List<ProsecutionCase> prosecutionCases = source.getProsecutionCases().stream()
-                .map(prosecutionCase -> ProsecutionCase.builder()
-                        .withId(prosecutionCase.getId().getId())
-                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifierJPAMapper.fromJPA(prosecutionCase.getProsecutionCaseIdentifier()))
-                        .withDefendants(prosecutionCase.getDefendants().stream()
-                                .map(defendant -> HearingListResponseDefendant.builder()
-                                        .withId(defendant.getId().getId())
-                                        .withName(defendant.getPersonDefendant().getPersonDetails().getFirstName()
-                                                + " " + defendant.getPersonDefendant().getPersonDetails().getMiddleName()
-                                                + " " + defendant.getPersonDefendant().getPersonDetails().getLastName()).build()).collect(toList()))
-                        .build()).collect(toList());
-
-        return HearingListResponseHearing.builder()
-                .withId(source.getId())
-                .withType(hearingTypeJPAMapper.fromJPA(source.getHearingType()))
-                .withJurisdictionType(JurisdictionType.valueOf(source.getJurisdictionType().name()))
-                .withReportingRestrictionReason(source.getReportingRestrictionReason())
-                .withHearingLanguage(source.getHearingLanguage().name())
-                .withHearingDays(hearingDayJPAMapper.fromJPA(source.getHearingDays()))
-                .withProsecutionCases(prosecutionCases)
-                .withHasSharedResults(source.getHasSharedResults())
-                .build();
-    }
-
-    private LocalDateTime getDateWithTime(final LocalDate date, final String time) {
-        final String[] times = time.split(":");
-        final LocalTime localTime = LocalTime.of(Integer.parseInt(times[0]), Integer.parseInt(times[1]));
-        return LocalDateTime.of(date, localTime);
-    }
-
-    private List<Hearing> filterHearings(final List<Hearing> hearings, final LocalDateTime from, final LocalDateTime to) {
-        return hearings.stream().filter(hearing -> hasHearingDayMatched(hearing, from, to)).collect(Collectors.toList());
-    }
-
-    private boolean hasHearingDayMatched(final Hearing hearing, final LocalDateTime from, final LocalDateTime to) {
-        return hearing.getHearingDays().stream().anyMatch(hearingDay -> isBetween(hearingDay.getDateTime(), from, to));
-    }
-
-    private boolean isBetween(final LocalDateTime sittingDay, final LocalDateTime from, final LocalDateTime to) {
-        return sittingDay.isAfter(from) && sittingDay.isBefore(to);
     }
 }

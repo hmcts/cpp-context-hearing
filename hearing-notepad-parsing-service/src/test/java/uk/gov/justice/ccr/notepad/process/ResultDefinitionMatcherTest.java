@@ -4,18 +4,11 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.CONTAINS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.EQUALS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.SHORT_CODE;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.UNKNOWN;
 
-import com.google.common.cache.LoadingCache;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.ccr.notepad.result.cache.CacheFactory;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
@@ -28,6 +21,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+
+import com.google.common.cache.LoadingCache;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResultDefinitionMatcherTest {
@@ -253,6 +256,7 @@ public class ResultDefinitionMatcherTest {
                 , is(SHORT_CODE)
         );
     }
+   
 
     @Test
     public void match7() throws Exception {

@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 import uk.gov.moj.cpp.hearing.command.defenceCounsel.AddDefenceCounselCommand;
@@ -15,16 +14,17 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.standardAddDefenceCounselCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.defendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 @SuppressWarnings("unchecked")
 public class DefenceCounselIT extends AbstractIT {
 
-    @Ignore("GPE-5825 - there is another story that addresses many issues around adding counselors - so we are suspending this until we play that.")
     @Test
     public void addDefenceCounsel_shouldAdd() throws Exception {
 
-        /*final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate())
         );
 
@@ -67,14 +67,14 @@ public class DefenceCounselIT extends AbstractIT {
                                 withJsonPath("$.attendees.defenceCounsels.[1].firstName", is(secondDefenceCounsel.getFirstName())),
                                 withJsonPath("$.attendees.defenceCounsels.[1].lastName", is(secondDefenceCounsel.getLastName())),
                                 withJsonPath("$.attendees.defenceCounsels.[1].title", is(secondDefenceCounsel.getTitle()))
-                        )));*/
+                        )));
     }
 
-    @Ignore("GPE-5825 - there is another story that addresses many issues around adding counselors - so we are suspending this until we play that.")
+
     @Test
     public void addDefenceCounsel_shouldEdit() throws Exception {
 
-        /*final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(
                 UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
                     i.getHearing().getDefendants().add(defendantTemplate(i.getCases().get(0).getCaseId()));
                 }))
@@ -113,6 +113,6 @@ public class DefenceCounselIT extends AbstractIT {
                                 withJsonPath("$.attendees.defenceCounsels.[0].firstName", is(firstDefenceCounsel.getFirstName())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].lastName", is(firstDefenceCounsel.getLastName())),
                                 withJsonPath("$.attendees.defenceCounsels.[0].title", is(firstDefenceCounsel.getTitle()))
-                        )));*/
+                        )));
     }
 }

@@ -6,7 +6,6 @@ import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.arbitraryNext
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResult;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResultWithNextHearingResult;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -14,56 +13,57 @@ public class HearingAdjournValidatorTest {
 
     HearingAdjournValidator testObj = new HearingAdjournValidator();
 
-
     @Test
     public void validate_when_next_hearing_result_provided() throws Exception {
         assertEquals(true, testObj.checkSharedResultHaveNextHearingResult(getArbitrarySharedResultWithNextHearingResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
     }
-
     @Test
     public void validate_when_next_hearing_result_not_provided() throws Exception {
         assertEquals(false, testObj.checkSharedResultHaveNextHearingResult(getArbitrarySharedResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
     }
-
     @Test
     public void checkNextHearingEstimatedDurationIsSameForAllOffences_when_next_hearing_result_provided() throws Exception {
-        assertEquals(true, testObj.checkNextHearingEstimatedDurationIsSameForAllOffences(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines(), arbitraryNextHearingMetaData()));
+        assertEquals(true, testObj.checkNextHearingEstimatedDurationIsSameForAllOffences(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines(), arbitraryNextHearingMetaData()));
     }
 
     @Test
     public void checkNextHearingEstimatedDurationIsSameForAllOffences_when_next_hearing_result_not_provided() throws Exception {
-        assertEquals(false, testObj.checkNextHearingEstimatedDurationIsSameForAllOffences(getArbitrarySharedResult().getHearing().getTargets().get(0).getResultLines(), arbitraryNextHearingMetaData()));
+        assertEquals(false, testObj.checkNextHearingEstimatedDurationIsSameForAllOffences(getArbitrarySharedResult().getCompletedResultLines(), arbitraryNextHearingMetaData()));
     }
 
     @Test
     public void checkNextHearingTypeIsSameForAllOffences_when_next_hearing_result_provided() throws Exception {
-        assertEquals(true, testObj.checkNextHearingTypeIsSameForAllOffences(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines(), arbitraryNextHearingMetaData()));
+        assertEquals(true, testObj.checkNextHearingTypeIsSameForAllOffences(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines(), arbitraryNextHearingMetaData()));
 
     }
 
     @Test
     public void checkNextHearingTypeIsSameForAllOffences_when_next_hearing_result_not_provided() throws Exception {
-        assertEquals(false, testObj.checkNextHearingTypeIsSameForAllOffences(getArbitrarySharedResult().getHearing().getTargets().get(0).getResultLines(), arbitraryNextHearingMetaData()));
+        assertEquals(false, testObj.checkNextHearingTypeIsSameForAllOffences(getArbitrarySharedResult().getCompletedResultLines(), arbitraryNextHearingMetaData()));
     }
 
     @Test
     public void checkNextHearingDateOfHearingIsSameForAllOffences_when_next_hearing_result_provided() throws Exception {
-        assertEquals(true, testObj.checkNextHearingDateOfHearingIsSameForAllOffences(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines(), arbitraryNextHearingMetaData()));
+        assertEquals(true, testObj.checkNextHearingDateOfHearingIsSameForAllOffences(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines(), arbitraryNextHearingMetaData()));
+
     }
 
     @Test
     public void checkNextHearingDateOfHearingIsSameForAllOffences_when_next_hearing_result_not_provided() throws Exception {
-        assertEquals(false, testObj.checkNextHearingDateOfHearingIsSameForAllOffences(getArbitrarySharedResult().getHearing().getTargets().get(0).getResultLines(), arbitraryNextHearingMetaData()));
+        assertEquals(false, testObj.checkNextHearingDateOfHearingIsSameForAllOffences(getArbitrarySharedResult().getCompletedResultLines(), arbitraryNextHearingMetaData()));
+
     }
 
     @Test
     public void checkSharedResultHaveNextHearingResult_when_next_hearing_result_provided() throws Exception {
         assertEquals(true, testObj.checkSharedResultHaveNextHearingResult(getArbitrarySharedResultWithNextHearingResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+
     }
 
     @Test
     public void checkSharedResultHaveNextHearingResult_when_next_hearing_result_not_provided() throws Exception {
         assertEquals(false, testObj.checkSharedResultHaveNextHearingResult(getArbitrarySharedResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+
     }
 
 }

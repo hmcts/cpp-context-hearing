@@ -3,64 +3,54 @@ package uk.gov.moj.cpp.hearing.nows.events;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 
 public class Now implements Serializable {
 
-    private final static long serialVersionUID = 2L;
-    private UUID id;
-    private UUID nowsTypeId;
+    private final static long serialVersionUID = 7806708017927251823L;
+    private String id;
+    private String nowsTypeId;
     private String nowsTemplateName;
-    private UUID defendantId;
+    private String defendantId;
     private List<Material> materials = new ArrayList<Material>();
 
-    public UUID getNowsTypeId() {
+    public String getNowsTypeId() {
         return nowsTypeId;
     }
 
-    public Now setNowsTypeId(UUID nowsTypeId) {
+    public void setNowsTypeId(String nowsTypeId) {
         this.nowsTypeId = nowsTypeId;
-        return this;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public Now setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
-        return this;
     }
 
     public String getNowsTemplateName() {
         return nowsTemplateName;
     }
 
-    public Now setNowsTemplateName(String nowsTemplateName) {
+    public void setNowsTemplateName(String nowsTemplateName) {
         this.nowsTemplateName = nowsTemplateName;
-        return this;
     }
 
-    public UUID getDefendantId() {
+    public String getDefendantId() {
         return defendantId;
     }
 
-    public Now setDefendantId(UUID defendantId) {
+    public void setDefendantId(String defendantId) {
         this.defendantId = defendantId;
-        return this;
     }
 
     public List<Material> getMaterials() {
         return materials;
     }
 
-    public Now setMaterials(List<Material> materials) {
+    public void setMaterials(List<Material> materials) {
         this.materials = materials;
-        return this;
-    }
-
-    public static Now now(){
-        return new Now();
     }
 }

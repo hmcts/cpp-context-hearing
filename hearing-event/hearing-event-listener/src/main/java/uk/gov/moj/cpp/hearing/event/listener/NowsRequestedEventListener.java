@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
@@ -38,7 +39,7 @@ public class NowsRequestedEventListener {
         final JsonObject payload = event.payloadAsJsonObject();
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(payload, NowsRequested.class);
 
-        UUID hearingId = nowsRequested.getHearing().getId();
+        UUID hearingId = fromString(nowsRequested.getHearing().getId());
 
         List<Nows> nowsList = nowsRepository.findByHearingId(hearingId);
 
@@ -46,25 +47,25 @@ public class NowsRequestedEventListener {
             nowsList.forEach(nows -> nowsRepository.remove(nows));
         }
 
-        nowsRequested.getNows().forEach(now -> {
+        nowsRequested.getHearing().getNows().forEach(now -> {
 
-            UUID typeId = now.getNowsTypeId() == null ? randomUUID() : now.getNowsTypeId();
+            UUID typeId = now.getNowsTypeId() == null ? randomUUID() : fromString(now.getNowsTypeId());
 
             final Nows nows = Nows.builder()
-                    .withId(now.getId())
+                    .withId(fromString(now.getId()))
                     .withNowsTypeId(typeId)
-                    .withDefendantId(now.getDefendantId())
+                    .withDefendantId(fromString(now.getDefendantId()))
                     .withHearingId(hearingId)
                     .build();
 
-            nows.setMaterials(now.getMaterials().stream()
+            nows.setMaterial(now.getMaterials().stream()
                     .map(material -> {
 
                         final NowsMaterial nowsMaterial = NowsMaterial.builder()
-                                .withId(material.getId())
+                                .withId(fromString(material.getId()))
                                 .withUserGroups(material.getUserGroups().stream()
                                         .map(MaterialUserGroup::getGroup)
-                                        .collect(Collectors.toSet()))
+                                        .collect(Collectors.toList()))
                                 .withStatus("requested")
                                 .withLanguage(material.getLanguage())
                                 .withNows(nows)
@@ -73,16 +74,16 @@ public class NowsRequestedEventListener {
                         nowsMaterial.setNowResult(material.getNowResult().stream()
                                 .map(result -> NowsResult.builder()
                                         .withId(randomUUID())
-                                        .withSharedResultId(result.getSharedResultId())
+                                        .withSharedResultId(fromString(result.getSharedResultId()))
                                         .withSequence(result.getSequence())
                                         .withNowsMaterial(nowsMaterial)
                                         .build()
                                 )
-                                .collect(Collectors.toSet()));
+                                .collect(Collectors.toList()));
 
                         return nowsMaterial;
                     })
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toList()));
 
             nowsRepository.save(nows);
         });

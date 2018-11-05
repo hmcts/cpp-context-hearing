@@ -14,8 +14,8 @@ public class HearingQueryApi {
     @Inject
     private Requester requester;
 
-    @Handles("hearing.get.hearings")
-    public JsonEnvelope findHearings(final JsonEnvelope query) {
+    @Handles("hearing.get.hearings-by-date")
+    public JsonEnvelope findHearingsByDate(final JsonEnvelope query) {
         return this.requester.request(query);
     }
 

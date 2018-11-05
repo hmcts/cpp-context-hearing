@@ -12,17 +12,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelopeFrom;
 import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.HEARING_UPDATE_NOWS_MATERIAL_STATUS;
-import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.RESULTS_UPDATE_NOWS_MATERIAL_STATUS;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowsRequestedTemplates.nowsRequestedTemplate;
+import static uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -40,6 +37,7 @@ import uk.gov.moj.cpp.hearing.event.nows.service.exception.DocumentGenerationExc
 import uk.gov.moj.cpp.hearing.event.nows.service.exception.FileUploadException;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
+import uk.gov.moj.cpp.hearing.nows.events.Person;
 import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClient;
 import uk.gov.moj.cpp.system.documentgenerator.client.DocumentGeneratorClientProducer;
 
@@ -129,7 +127,7 @@ public class NowsRequestedEventProcessorTest {
         MockitoAnnotations.initMocks(this);
         nowsRequestedEventProcessor = new NowsRequestedEventProcessor(this.enveloper,
                 this.sender,
-                new NowGeneratorService(this.systemUserProvider, this.documentGeneratorClientProducer,
+                new NowGeneratorService(this. systemUserProvider, this.documentGeneratorClientProducer,
                         this.objectToJsonObjectConverter, this.fileStorer, this.uploadMaterialService),
                 this.jsonObjectToObjectConverter,
                 this.objectToJsonObjectConverter
@@ -142,46 +140,43 @@ public class NowsRequestedEventProcessorTest {
     @Test
     public void shouldGenerateNowAndStoreInFileStore() throws IOException, FileServiceException {
 
-        UUID systemUserid = UUID.randomUUID();
-        NowsRequested nowsRequested = nowsRequestedTemplate();
+        final InputStream is = NowsRequestedEventProcessorTest.class
+                .getResourceAsStream("/data/hearing.events.nows-requested.json");
+        final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
 
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
+                objectToJsonObjectConverter.convert(nowsRequested));
 
         final byte[] bytesIn = new byte[2];
         when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
         when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenReturn(bytesIn);
-
+        UUID systemUserid = UUID.randomUUID();
         when(systemUserProvider.getContextSystemUserId()).thenReturn(Optional.of(systemUserid));
         when(fileStorer.store(Mockito.any(JsonObject.class), Mockito.any(InputStream.class)))
                 .thenReturn(fileId);
-        this.nowsRequestedEventProcessor.processNowsRequested(
-                envelopeFrom(
-                        metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
-                        objectToJsonObjectConverter.convert(nowsRequested)
-                )
-        );
+        this.nowsRequestedEventProcessor.processNowsRequested(event);
 
         verify(this.documentGeneratorClient).generatePdfDocument(any(), any(), eq(systemUserid));
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
         verify(this.uploadMaterialService).uploadFile(
                 eq(UUID.fromString(USER_ID)),
-                eq(nowsRequested.getHearing().getId()),
-                eq(nowsRequested.getNows().get(0).getMaterials().get(0).getId()),
+                eq(UUID.fromString(nowsRequested.getHearing().getId())),
+                eq(UUID.fromString(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId())),
                 eq(fileId),
                 nowsNotificationDocumentStateArgumentCaptor.capture());
         verify(this.fileStorer).store(jsonObjectArgumentCaptor.capture(), inputStreamArgumentCaptor.capture());
 
         assertThat(envelopeArgumentCaptor.getValue(), jsonEnvelope(
                 metadata().withName("public.hearing.events.nows-requested"),
-                payloadIsJson(allOf(withJsonPath("$.hearing.id", is(nowsRequested.getHearing().getId().toString())),
-                        withJsonPath("$.hearing.type.id", is(nowsRequested.getHearing().getType().getId().toString()))
-                ))
-        ));
+                payloadIsJson(allOf(withJsonPath("$.hearing.id", is(nowsRequested.getHearing().getId())),
+                        withJsonPath("$.hearing.hearingType",
+                                is(nowsRequested.getHearing().getHearingType()))))));
 
         assertThat(jsonObjectArgumentCaptor.getValue().getString("fileName"),
-                is(startsWith(nowsRequested.getNowTypes().get(0).getDescription())));
+                is(startsWith(nowsRequested.getHearing().getNowTypes().get(0).getDescription())));
         assertThat(inputStreamArgumentCaptor.getValue().read(new byte[2]), is(bytesIn.length));
         final NowsNotificationDocumentState nowsNotificationDocumentState = nowsNotificationDocumentStateArgumentCaptor.getValue();
-        final uk.gov.justice.json.schemas.core.Person personIn = nowsRequested.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails();
+        final Person personIn = nowsRequested.getHearing().getDefendants().get(0).getPerson();
         final String defendantName = personIn.getTitle() + " " + personIn.getFirstName() + " " + personIn.getLastName();
         assertThat(normalizeName(nowsNotificationDocumentState.getDefendantName()), is(normalizeName(defendantName)));
     }
@@ -189,12 +184,16 @@ public class NowsRequestedEventProcessorTest {
     @Test
     public void shouldNotGenerateNowOnDocumentGenerationException() throws IOException, FileServiceException {
 
-        NowsRequested nowsRequested = nowsRequestedTemplate();
+        final InputStream is = NowsRequestedEventProcessorTest.class
+                .getResourceAsStream("/data/hearing.events.nows-requested.json");
+        final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
+                objectToJsonObjectConverter.convert(nowsRequested));
 
         when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
         when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenThrow(new DocumentGenerationException());
-        this.nowsRequestedEventProcessor.processNowsRequested(envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
-                objectToJsonObjectConverter.convert(nowsRequested)));
+        this.nowsRequestedEventProcessor.processNowsRequested(event);
 
         verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
@@ -202,18 +201,19 @@ public class NowsRequestedEventProcessorTest {
                 metadata().withName(HEARING_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
-                metadata().withName(RESULTS_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(2), jsonEnvelope(
                 metadata().withName("public.hearing.events.nows-requested"),
                 payloadIsJson(allOf(withJsonPath("$.hearing.id", is(nowsRequested.getHearing().getId().toString())),
-                        withJsonPath("$.hearing.type.id", is(nowsRequested.getHearing().getType().getId().toString()))))));
+                        withJsonPath("$.hearing.hearingType",
+                                is(nowsRequested.getHearing().getHearingType().toString()))))));
 
         verifyNoMoreInteractions(this.fileStorer);
         verifyNoMoreInteractions(this.uploadMaterialService);
@@ -223,7 +223,12 @@ public class NowsRequestedEventProcessorTest {
     @Test
     public void shouldNotGenerateNowOnFileUploadException() throws IOException, FileServiceException {
 
-        NowsRequested nowsRequested = nowsRequestedTemplate();
+        final InputStream is = NowsRequestedEventProcessorTest.class
+                .getResourceAsStream("/data/hearing.events.nows-requested.json");
+        final NowsRequested nowsRequested = new ObjectMapperProducer().objectMapper().readValue(is, NowsRequested.class);
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
+                objectToJsonObjectConverter.convert(nowsRequested));
 
         final byte[] bytesIn = new byte[2];
         when(documentGeneratorClientProducer.documentGeneratorClient()).thenReturn(documentGeneratorClient);
@@ -231,10 +236,7 @@ public class NowsRequestedEventProcessorTest {
         when(systemUserProvider.getContextSystemUserId()).thenReturn(Optional.of(systemUserId));
         when(documentGeneratorClient.generatePdfDocument(any(), any(), any())).thenReturn(bytesIn);
         doThrow(new FileUploadException()).when(fileStorer).store(any(), any());
-        this.nowsRequestedEventProcessor.processNowsRequested(envelopeFrom(
-                metadataWithRandomUUID("hearing.events.nows-requested").withUserId(USER_ID),
-                objectToJsonObjectConverter.convert(nowsRequested)
-        ));
+        this.nowsRequestedEventProcessor.processNowsRequested(event);
 
         verify(this.documentGeneratorClient).generatePdfDocument(any(), any(), eq(systemUserId));
         verify(this.fileStorer).store(jsonObjectArgumentCaptor.capture(), inputStreamArgumentCaptor.capture());
@@ -247,18 +249,19 @@ public class NowsRequestedEventProcessorTest {
                 metadata().withName(HEARING_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(1), jsonEnvelope(
-                metadata().withName(RESULTS_UPDATE_NOWS_MATERIAL_STATUS),
+                metadata().withName(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS),
                 payloadIsJson(allOf(withJsonPath("$.hearingId", is(nowsRequested.getHearing().getId().toString())),
                         withJsonPath("$.materialId",
-                                is(nowsRequested.getNows().get(0).getMaterials().get(0).getId().toString()))))));
+                                is(nowsRequested.getHearing().getNows().get(0).getMaterials().get(0).getId()))))));
 
         assertThat(envelopeArgumentCaptor.getAllValues().get(2), jsonEnvelope(
                 metadata().withName("public.hearing.events.nows-requested"),
                 payloadIsJson(allOf(withJsonPath("$.hearing.id", is(nowsRequested.getHearing().getId().toString())),
-                        withJsonPath("$.hearing.type.id", is(nowsRequested.getHearing().getType().getId().toString()))))));
+                        withJsonPath("$.hearing.hearingType",
+                                is(nowsRequested.getHearing().getHearingType().toString()))))));
 
         verifyNoMoreInteractions(this.uploadMaterialService);
     }

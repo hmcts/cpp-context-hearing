@@ -1,23 +1,21 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 
-import uk.gov.justice.json.schemas.core.Offence;
-import uk.gov.justice.json.schemas.core.ProsecutionCase;
-import uk.gov.justice.json.schemas.core.Verdict;
+import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class VerdictDelegate implements Serializable {
+public class VerdictDelegate  implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,66 +23,55 @@ public class VerdictDelegate implements Serializable {
 
     private final HearingAggregateMomento momento;
 
-    public VerdictDelegate(final HearingAggregateMomento momento) {
+    public VerdictDelegate(final HearingAggregateMomento momento){
         this.momento = momento;
     }
 
-    public void handleVerdictUpsert(final VerdictUpsert verdictUpsert) {
-        if (nonNull(verdictUpsert.getVerdict())) {
-            this.momento.getVerdicts().put(verdictUpsert.getVerdict().getOffenceId(), verdictUpsert.getVerdict());
-        }
+    public void handleVerdictUpsert(VerdictUpsert verdictUpsert){
+        this.momento.getVerdicts().put(verdictUpsert.getOffenceId(), verdictUpsert);
     }
 
-    public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {
+    public Stream<Object> updateVerdict(final UUID hearingId, final UUID caseId, final UUID offenceId, final Verdict verdict) {
 
         final List<Object> events = new ArrayList<>();
 
-        final ProsecutionCase prosecutionCase = this.momento.getHearing().getProsecutionCases().stream()
-                .filter(pc -> pc.getDefendants().stream()
-                        .flatMap(de -> de.getOffences().stream())
-                        .anyMatch(o -> o.getId().equals(verdict.getOffenceId())))
+        events.add(VerdictUpsert.builder()
+                .withCaseId(caseId)
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId)
+                .withVerdictId(verdict.getId())
+                .withVerdictValueId(verdict.getValue().getId())
+                .withVerdictTypeId(verdict.getValue().getVerdictTypeId())
+                .withCategory(verdict.getValue().getCategory())
+                .withCategoryType(verdict.getValue().getCategoryType())
+                .withLesserOffence(Optional.ofNullable(verdict.getValue().getLesserOffence()).orElse(null))
+                .withCode(verdict.getValue().getCode())
+                .withDescription(verdict.getValue().getDescription())
+                .withNumberOfJurors(Optional.ofNullable(verdict.getNumberOfJurors()).orElse(null))
+                .withNumberOfSplitJurors(Optional.ofNullable(verdict.getNumberOfSplitJurors()).orElse(null))
+                .withUnanimous(Optional.ofNullable(verdict.getUnanimous()).orElse(null))
+                .withVerdictDate(verdict.getVerdictDate())
+                .build()
+        );
+
+        final String categoryType = ofNullable(verdict.getValue().getCategoryType()).orElse("");
+
+        final LocalDate offenceConvictionDate = this.momento.getHearing().getDefendants().stream()
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> offenceId.equals(o.getId()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Offence id is not present"));
+                .orElseThrow(() -> new RuntimeException("Offence id is not present"))
+                .getConvictionDate();
 
-        verdict.setOriginatingHearingId(hearingId);
-
-        final Offence offence = this.momento.getHearing().getProsecutionCases().stream()
-                .flatMap(pc -> pc.getDefendants().stream())
-                .flatMap(de -> de.getOffences().stream())
-                .filter(o -> o.getId().equals(verdict.getOffenceId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Offence id is not present"));
-
-        final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
-                .setHearingId(hearingId)
-                .setVerdict(verdict);
-
-        events.add(verdictUpsert);
-
-        if (verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && isNull(offence.getConvictionDate())) {
-            events.add(ConvictionDateAdded.convictionDateAdded()
-                    .setCaseId(prosecutionCase.getId())
-                    .setHearingId(hearingId)
-                    .setOffenceId(offence.getId())
-                    .setConvictionDate(verdict.getVerdictDate()));
+        if (categoryType.startsWith(GUILTY)) {
+            if (offenceConvictionDate == null) {
+                events.add(new ConvictionDateAdded(caseId, hearingId, offenceId, verdict.getVerdictDate()));
+            }
+        } else {
+            if (offenceConvictionDate != null) {
+                events.add(new ConvictionDateRemoved(caseId, hearingId, offenceId));
+            }
         }
-
-        if (!verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && nonNull(offence.getConvictionDate())) {
-            events.add(ConvictionDateRemoved.convictionDateRemoved()
-                    .setCaseId(prosecutionCase.getId())
-                    .setHearingId(hearingId)
-                    .setOffenceId(offence.getId()));
-        }
-
         return events.stream();
-    }
-
-    public void handleInheritedVerdict(final InheritedVerdictAdded inheritedVerdict) {
-        this.momento.getVerdicts().computeIfAbsent(inheritedVerdict.getVerdict().getOffenceId(),
-                offenceId -> inheritedVerdict.getVerdict());
-    }
-
-    public Stream<Object> inheritVerdict(UUID hearingId, Verdict verdict) {
-        return Stream.of(new InheritedVerdictAdded(hearingId, verdict));
     }
 }

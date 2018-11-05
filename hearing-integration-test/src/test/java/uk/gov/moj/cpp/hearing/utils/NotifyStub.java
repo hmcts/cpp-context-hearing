@@ -14,7 +14,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.ACCEPTED;
 
 import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class NotifyStub {
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)));
     }
 
-    public static void verifyNotification(final UploadSubscription subscription, List<String> expectedValues) {
+    public static void verifyNotification(final UploadSubscriptionCommand subscription, List<String> expectedValues) {
 
         RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlPathMatching(COMMAND_URL + ".*"))
                 .withRequestBody(containing(subscription.getDestination()));
