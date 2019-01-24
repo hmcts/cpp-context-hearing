@@ -28,8 +28,8 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
+                <artifactId>generator-plugin</artifactId>
+                <groupId>uk.gov.justice.maven.generator</groupId>
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.staging.enforcement</groupId>
@@ -48,18 +48,36 @@
                         <artifactId>notificationnotify-command-api</artifactId>
                         <version>${notification.notify.version}</version>
                         <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
+                            </exclusion>
+                        </exclusions>
                     </dependency>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
                         <artifactId>hearing-query-api</artifactId>
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
+                            </exclusion>
+                        </exclusions>
                     </dependency>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
                         <artifactId>hearing-command-handler</artifactId>
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
+                            </exclusion>
+                        </exclusions>
                     </dependency>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.material</groupId>

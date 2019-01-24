@@ -48,8 +48,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>uk.gov.justice.maven</groupId>
-                <artifactId>raml-maven-plugin</artifactId>
+                <groupId>uk.gov.justice.maven.generator</groupId>
+                <artifactId>generator-plugin</artifactId>
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.referencedata</groupId>
