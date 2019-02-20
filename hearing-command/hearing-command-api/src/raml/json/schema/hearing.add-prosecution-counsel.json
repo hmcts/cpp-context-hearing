@@ -1,41 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.add-prosecution-counsel.json",
   "type": "object",
   "properties": {
-    "attendeeId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "personId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "status": {
-      "type": "string"
-    },
-    "firstName": {
-      "type": "string"
-    },
-    "lastName": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
-    "hearingDates": {
-      "type": "array",
-      "item": {
-        "type": "string"
-      }
+    "prosecutionCounsel": {
+      "$ref": "http://justice.gov.uk/core/courts/prosecutionCounsel.json"
     }
   },
   "required": [
-    "attendeeId",
-    "personId",
-    "status"
+    "prosecutionCounsel"
   ],
-  "definitions": {
-    "uuid": {
-      "type": "string",
-      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-    }
-  }
+  "additionalProperties": false
 }

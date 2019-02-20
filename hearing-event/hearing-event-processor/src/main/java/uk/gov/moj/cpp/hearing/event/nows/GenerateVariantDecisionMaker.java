@@ -2,9 +2,9 @@ package uk.gov.moj.cpp.hearing.event.nows;
 
 import static java.util.stream.Collectors.toSet;
 
+import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 
 import java.util.ArrayList;
@@ -24,11 +24,11 @@ public class GenerateVariantDecisionMaker {
 
     private List<Variant> variantDirectory;
     private Map<UUID, CompletedResultLineStatus> completedResultLineStatuses;
-    private List<CompletedResultLine> completedResultLines;
+    private List<ResultLine> completedResultLines;
 
     public GenerateVariantDecisionMaker(List<Variant> variantDirectory,
                                         Map<UUID, CompletedResultLineStatus> completedResultLineStatuses,
-                                        List<CompletedResultLine> completedResultLines) {
+                                        List<ResultLine> completedResultLines) {
 
         this.variantDirectory = new ArrayList<>(variantDirectory);
         this.completedResultLineStatuses = completedResultLineStatuses;
@@ -49,8 +49,8 @@ public class GenerateVariantDecisionMaker {
 
             final Set<ResultLineReference> newResultLinesReferences = completedResultLines.stream()
                     .map(l -> ResultLineReference.resultLineReference()
-                            .setResultLineId(l.getId())
-                            .setLastSharedTime(Optional.ofNullable(completedResultLineStatuses.get(l.getId()))
+                            .setResultLineId(l.getResultLineId())
+                            .setLastSharedTime(Optional.ofNullable(completedResultLineStatuses.get(l.getResultLineId()))
                                     .map(CompletedResultLineStatus::getLastSharedDateTime)
                                     .orElse(null)
                             ))

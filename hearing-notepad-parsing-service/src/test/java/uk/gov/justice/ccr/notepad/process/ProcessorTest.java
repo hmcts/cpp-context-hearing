@@ -52,13 +52,6 @@ public class ProcessorTest {
     ResultCache resultCache = new ResultCache();
 
     ResultPromptMatcher resultPromptMatcher = new ResultPromptMatcher();
-
-    @Mock
-    private CacheFactory cacheFactory;
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
     @Spy
     ResultDefinitionMatcher resultDefinitionMatcher = new ResultDefinitionMatcher();
     @Spy
@@ -79,6 +72,10 @@ public class ProcessorTest {
     GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
     Time24HoursMatcher time24HoursMatcher = new Time24HoursMatcher();
     DateMatcher dateMatcher = new DateMatcher();
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void init() throws ExecutionException {
@@ -310,6 +307,7 @@ public class ProcessorTest {
                 , is(BOOLEAN)
         );
     }
+
     @Test
     public void processResultPrompt1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("imp sus");

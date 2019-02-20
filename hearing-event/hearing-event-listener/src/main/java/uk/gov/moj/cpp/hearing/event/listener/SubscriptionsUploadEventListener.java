@@ -23,16 +23,15 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+@SuppressWarnings("squid:S3864")
 @ServiceComponent(EVENT_LISTENER)
 public class SubscriptionsUploadEventListener {
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Inject
     private DocumentRepository documentRepository;
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
 
     @Transactional
     @Handles("hearing.subscriptions-uploaded")

@@ -1,6 +1,6 @@
 {
-  "hearingId":"96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
-  "sharedTime":"2018-04-30T18:32:04.238Z",
+  "hearingId": "96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
+  "sharedTime": "2018-04-30T18:32:04.238Z",
   "courtClerk": {
     "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
     "firstName": "David",
@@ -10,171 +10,171 @@
     {
       "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
       "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
-      "defendantId":"ed24255c-1665-4fbe-ad7a-968a9b4f11c3",
+      "defendantId": "ed24255c-1665-4fbe-ad7a-968a9b4f11c3",
       "orderedDate": "2017-12-21"
     }
   ],
   "completedResultLines": [
     {
-      "id":"f0fc2f65-861a-4771-9ce3-83717be9b7db",
-      "resultDefinitionId":"d02383bc-248d-4681-a36d-21255bd5ca4a",
-      "caseId":"61ef1976-44fe-4796-83c5-d78d44a8d9c7",
-      "defendantId":"ed24255c-1665-4fbe-ad7a-968a9b4f11c3",
-      "offenceId":"6c3e1949-56b6-455e-b71d-561b9098e581",
-      "level":"DEFENDANT",
-      "resultLabel":"BYplqrmzDe",
+      "id": "f0fc2f65-861a-4771-9ce3-83717be9b7db",
+      "resultDefinitionId": "d02383bc-248d-4681-a36d-21255bd5ca4a",
+      "caseId": "61ef1976-44fe-4796-83c5-d78d44a8d9c7",
+      "defendantId": "ed24255c-1665-4fbe-ad7a-968a9b4f11c3",
+      "offenceId": "6c3e1949-56b6-455e-b71d-561b9098e581",
+      "level": "DEFENDANT",
+      "resultLabel": "BYplqrmzDe",
       "orderedDate": "2017-12-21",
-      "prompts":[
+      "prompts": [
         {
-          "id":"e01df1c0-acde-4b60-a184-66948911ac4b",
-          "label":"7Kogixij1j",
-          "value":"QtHjiBzBVZ"
+          "id": "e01df1c0-acde-4b60-a184-66948911ac4b",
+          "label": "7Kogixij1j",
+          "value": "QtHjiBzBVZ"
         },
         {
-          "id":"e01df1c0-acde-4b60-a184-66948911ac4c",
-          "label":"4nNv7kr1of",
-          "value":"m5CeaoJTq1"
+          "id": "e01df1c0-acde-4b60-a184-66948911ac4c",
+          "label": "4nNv7kr1of",
+          "value": "m5CeaoJTq1"
         }
       ]
     }
   ],
-  "hearing":{
-    "id":"96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
-    "type":"TvuBDTxH7C",
-    "courtCentreId":"d81ff331-bf0f-4f62-a50a-03ece2fdab52",
-    "courtCentreName":"LJ7jui3fQO",
-    "courtRoomId":"bbd119ba-931a-4d1e-a949-044c1f9c0afa",
-    "courtRoomName":"duDNrDnenn",
-    "judge":{
-      "id":"79816a31-094e-4afd-a4fe-c1aa15012bd9",
-      "title":"KZhQ81Bt7j",
-      "firstName":"eUKe0K00Og",
-      "lastName":"lPvebVMp5p"
+  "hearing": {
+    "id": "96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
+    "type": "TvuBDTxH7C",
+    "courtCentreId": "d81ff331-bf0f-4f62-a50a-03ece2fdab52",
+    "courtCentreName": "LJ7jui3fQO",
+    "courtRoomId": "bbd119ba-931a-4d1e-a949-044c1f9c0afa",
+    "courtRoomName": "duDNrDnenn",
+    "judge": {
+      "id": "79816a31-094e-4afd-a4fe-c1aa15012bd9",
+      "title": "KZhQ81Bt7j",
+      "firstName": "eUKe0K00Og",
+      "lastName": "lPvebVMp5p"
     },
-    "startDateTime":"2018-06-17T07:31:01.685Z",
-    "hearingDays":[
+    "startDateTime": "2018-06-17T07:31:01.685Z",
+    "hearingDays": [
       "2018-06-17T07:31:01.685Z"
     ],
-    "defendants":[
+    "defendants": [
       {
-        "id":"e6f8d295-b3b7-4822-8228-8c907366935d",
-        "personId":"ed24255c-1665-4fbe-ad7a-968a9b4f11c3",
-        "firstName":"NQ4BFxm6tu",
-        "lastName":"QHDUAlfPmv",
-        "nationality":"0mAuVqOMup",
-        "gender":"fsPDZrrpI2",
-        "address":{
-          "address1":"nZ9XZ43y5t",
-          "address2":"wgAVsiVXQC",
-          "address3":"iAlwWWjU6Z",
-          "address4":"paKVGvLfzI",
-          "postCode":"x3SItArkIB"
+        "id": "e6f8d295-b3b7-4822-8228-8c907366935d",
+        "personId": "ed24255c-1665-4fbe-ad7a-968a9b4f11c3",
+        "firstName": "NQ4BFxm6tu",
+        "lastName": "QHDUAlfPmv",
+        "nationality": "0mAuVqOMup",
+        "gender": "fsPDZrrpI2",
+        "address": {
+          "address1": "nZ9XZ43y5t",
+          "address2": "wgAVsiVXQC",
+          "address3": "iAlwWWjU6Z",
+          "address4": "paKVGvLfzI",
+          "postCode": "x3SItArkIB"
         },
-        "dateOfBirth":"2014-05-19",
-        "defenceOrganisation":"AmToPKlPco",
-        "interpreter":{
-          "needed":false,
-          "language":"B4SlNQrG9m"
+        "dateOfBirth": "2014-05-19",
+        "defenceOrganisation": "AmToPKlPco",
+        "interpreter": {
+          "needed": false,
+          "language": "B4SlNQrG9m"
         },
-        "defendantCases":[
+        "defendantCases": [
           {
-            "caseId":"61ef1976-44fe-4796-83c5-d78d44a8d9c7",
-            "bailStatus":"QCON9NWLUi",
-            "custodyTimeLimitDate":"2022-08-24T01:46:36.068Z"
+            "caseId": "61ef1976-44fe-4796-83c5-d78d44a8d9c7",
+            "bailStatus": "QCON9NWLUi",
+            "custodyTimeLimitDate": "2022-08-24T01:46:36.068Z"
           }
         ],
-        "offences":[
+        "offences": [
           {
-            "id":"6c3e1949-56b6-455e-b71d-561b9098e581",
-            "caseId":"61ef1976-44fe-4796-83c5-d78d44a8d9c7",
-            "offenceCode":"zhbpdGTiSN",
-            "wording":"XggnCfa9vF",
-            "section":"nwv0SzeuTx",
-            "startDate":"2015-05-30",
-            "endDate":"2017-01-20",
-            "orderIndex":1588233717,
-            "count":1463203944,
-            "convictionDate":"2014-02-03",
-            "title":"J3SOZE6BMr",
-            "legislation":"OBv9D1UCfb"
+            "id": "6c3e1949-56b6-455e-b71d-561b9098e581",
+            "caseId": "61ef1976-44fe-4796-83c5-d78d44a8d9c7",
+            "offenceCode": "zhbpdGTiSN",
+            "wording": "XggnCfa9vF",
+            "section": "nwv0SzeuTx",
+            "startDate": "2015-05-30",
+            "endDate": "2017-01-20",
+            "orderIndex": 1588233717,
+            "count": 1463203944,
+            "convictionDate": "2014-02-03",
+            "title": "J3SOZE6BMr",
+            "legislation": "OBv9D1UCfb"
           }
         ]
       }
     ],
-    "witnesses":[
+    "witnesses": [
       {
-        "id":"f370fd93-48c4-4a23-8743-11104d254f7e",
-        "caseId":"61ef1976-44fe-4796-83c5-d78d44a8d9c7",
-        "type":"Prosecution",
-        "classification":"Expert",
-        "personId":"905e051d-d473-4e60-a75d-056fd7c56064",
-        "title":"JJmhI2I9vI",
-        "firstName":"yfCSkavYy4",
-        "lastName":"n0Nd4HnLaU",
-        "nationality":"ga7Hgvz8BN",
-        "gender":"KuYVpfw8g0",
-        "dateOfBirth":"2014-03-15",
-        "homeTelephone":"lNKzdq9rQj",
-        "workTelephone":"bRQ8eMefFb",
-        "mobile":"SEpljvcX6V",
-        "fax":"ECWTD04INe",
-        "email":"0yPcitj7F9"
+        "id": "f370fd93-48c4-4a23-8743-11104d254f7e",
+        "caseId": "61ef1976-44fe-4796-83c5-d78d44a8d9c7",
+        "type": "Prosecution",
+        "classification": "Expert",
+        "personId": "905e051d-d473-4e60-a75d-056fd7c56064",
+        "title": "JJmhI2I9vI",
+        "firstName": "yfCSkavYy4",
+        "lastName": "n0Nd4HnLaU",
+        "nationality": "ga7Hgvz8BN",
+        "gender": "KuYVpfw8g0",
+        "dateOfBirth": "2014-03-15",
+        "homeTelephone": "lNKzdq9rQj",
+        "workTelephone": "bRQ8eMefFb",
+        "mobile": "SEpljvcX6V",
+        "fax": "ECWTD04INe",
+        "email": "0yPcitj7F9"
       }
     ]
   },
-  "cases":[
+  "cases": [
     {
-      "caseId":"61ef1976-44fe-4796-83c5-d78d44a8d9c7",
-      "urn":"mz86TUOJk6"
+      "caseId": "61ef1976-44fe-4796-83c5-d78d44a8d9c7",
+      "urn": "mz86TUOJk6"
     }
   ],
-  "prosecutionCounsels":{
-    "2b85ad5c-6e85-4f67-934e-2724e0f8e833":{
-      "personId":"e4638a21-89d5-47ab-b2a7-3ad5d4f0062c",
-      "attendeeId":"2b85ad5c-6e85-4f67-934e-2724e0f8e833",
-      "hearingId":"96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
-      "status":"unUxHEaCM4",
-      "title":"AcztpLHILs",
-      "firstName":"Nx3VmhIEU8",
-      "lastName":"5dayAeIcax"
+  "prosecutionCounsels": {
+    "2b85ad5c-6e85-4f67-934e-2724e0f8e833": {
+      "personId": "e4638a21-89d5-47ab-b2a7-3ad5d4f0062c",
+      "attendeeId": "2b85ad5c-6e85-4f67-934e-2724e0f8e833",
+      "hearingId": "96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
+      "status": "unUxHEaCM4",
+      "title": "AcztpLHILs",
+      "firstName": "Nx3VmhIEU8",
+      "lastName": "5dayAeIcax"
     }
   },
-  "defenceCounsels":{
-    "baaae4bb-ec9d-4ec9-bbd6-80a08f7074b4":{
-      "personId":"84a953d1-0b51-4001-9c3f-7eac84f8c46f",
-      "attendeeId":"baaae4bb-ec9d-4ec9-bbd6-80a08f7074b4",
-      "defendantIds":[
+  "defenceCounsels": {
+    "baaae4bb-ec9d-4ec9-bbd6-80a08f7074b4": {
+      "personId": "84a953d1-0b51-4001-9c3f-7eac84f8c46f",
+      "attendeeId": "baaae4bb-ec9d-4ec9-bbd6-80a08f7074b4",
+      "defendantIds": [
         "e6f8d295-b3b7-4822-8228-8c907366935d"
       ],
-      "hearingId":"96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
-      "status":"VwlFafq5em",
-      "title":"Y5EZALHMK8",
-      "firstName":"wOjNg7lfmr",
-      "lastName":"25dBvZX2gv"
+      "hearingId": "96171f9a-a59a-4ebc-b782-d6b4f573e0f1",
+      "status": "VwlFafq5em",
+      "title": "Y5EZALHMK8",
+      "firstName": "wOjNg7lfmr",
+      "lastName": "25dBvZX2gv"
     }
   },
-  "pleas":{
-    "28ce356f-a068-4e17-938a-df15824664df":{
-      "originHearingId":"84a953d1-0b51-4001-9c3f-7eac84f8c451",
-      "offenceId":"baaae4bb-ec9d-4ec9-bbd6-80a08f7074c5",
-      "pleaDate":"2014-02-03",
-      "value":"25dBvZX2gv"
+  "pleas": {
+    "28ce356f-a068-4e17-938a-df15824664df": {
+      "originHearingId": "84a953d1-0b51-4001-9c3f-7eac84f8c451",
+      "offenceId": "baaae4bb-ec9d-4ec9-bbd6-80a08f7074c5",
+      "pleaDate": "2014-02-03",
+      "value": "25dBvZX2gv"
     }
   },
-  "verdicts":{
-    "28ce356f-a068-4e17-938a-df158246644e":{
-      "caseId":"e4638a21-89d5-47ab-b2a7-3ad5d4f0062c",
-      "hearingId":"84a953d1-0b51-4001-9c3f-7eac84f8c451",
-      "offenceId":"baaae4bb-ec9d-4ec9-bbd6-80a08f7074c5",
-      "verdictId":"e4638a21-89d5-47ab-b2a7-3ad5d4f0060f",
-      "verdictValueId":"e4638a21-89d5-47ab-b2a7-3ad5d4f0061b",
-      "category":"25dBvZX2gv",
-      "code":"wOjNg7lfmr",
-      "description":"5dayAeIcax",
-      "numberOfJurors":10,
-      "numberOfSplitJurors":2,
-      "unanimous":false,
-      "verdictDate":"2014-02-03"
+  "verdicts": {
+    "28ce356f-a068-4e17-938a-df158246644e": {
+      "caseId": "e4638a21-89d5-47ab-b2a7-3ad5d4f0062c",
+      "hearingId": "84a953d1-0b51-4001-9c3f-7eac84f8c451",
+      "offenceId": "baaae4bb-ec9d-4ec9-bbd6-80a08f7074c5",
+      "verdictId": "e4638a21-89d5-47ab-b2a7-3ad5d4f0060f",
+      "verdictValueId": "e4638a21-89d5-47ab-b2a7-3ad5d4f0061b",
+      "category": "25dBvZX2gv",
+      "code": "wOjNg7lfmr",
+      "description": "5dayAeIcax",
+      "numberOfJurors": 10,
+      "numberOfSplitJurors": 2,
+      "unanimous": false,
+      "verdictDate": "2014-02-03"
     }
   }
 }

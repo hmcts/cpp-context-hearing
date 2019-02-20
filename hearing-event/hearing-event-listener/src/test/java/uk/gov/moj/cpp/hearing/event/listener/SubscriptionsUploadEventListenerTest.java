@@ -43,22 +43,17 @@ import org.mockito.junit.MockitoRule;
 
 public class SubscriptionsUploadEventListenerTest {
 
-    @InjectMocks
-    private SubscriptionsUploadEventListener subscriptionsUploadEventListener;
-
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
-
+    @InjectMocks
+    private SubscriptionsUploadEventListener subscriptionsUploadEventListener;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
     @Mock
     private DocumentRepository documentRepository;
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
 
     @Before
     public void setup() {

@@ -96,8 +96,6 @@ public class QueueUtil {
                 LOGGER.error("No message retrieved using consumer with selector {}", consumer.getMessageSelector());
                 return null;
             }
-            System.out.println("public queue:");
-            System.out.println(message.getText());
             return new JsonPath(message.getText());
         } catch (final JMSException e) {
             throw new RuntimeException(e);

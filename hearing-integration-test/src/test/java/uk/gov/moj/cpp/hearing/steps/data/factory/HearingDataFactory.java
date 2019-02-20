@@ -6,11 +6,11 @@ import static java.util.stream.Collectors.toMap;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.utils.RandomPersonNameGenerator.personName;
 
+import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
 
 public class HearingDataFactory {
 

@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
 @Embeddable
 public class HearingSnapshotKey implements Serializable {

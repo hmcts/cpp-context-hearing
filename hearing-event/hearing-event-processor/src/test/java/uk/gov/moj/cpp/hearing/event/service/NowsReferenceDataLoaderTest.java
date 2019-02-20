@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
@@ -12,6 +13,8 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -22,10 +25,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import javax.json.JsonValue;
 
@@ -44,18 +50,14 @@ public class NowsReferenceDataLoaderTest {
     private final Enveloper enveloper = createEnveloperWithEvents(
             HearingInitiated.class
     );
-
-    @Mock
-    private Requester requester;
-
-    @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
-    @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
     @InjectMocks
     NowsReferenceDataLoader target;
+    @Mock
+    private Requester requester;
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @Before
     public void setup() {
@@ -65,14 +67,50 @@ public class NowsReferenceDataLoaderTest {
 
 
     @Test
-    public void testLoadAllData() {
+    public void testLoadAllResultDefinitionData() {
+
+        LocalDate referenceDate = PAST_LOCAL_DATE.next();
+
+        AllResultDefinitions allResultDefinitionsIn = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
+                asList(ResultDefinition.resultDefinition()
+                        .setId(UUID.randomUUID()).setWelshLabel("Idris")
+                        .setIsAvailableForCourtExtract(true)
+                        .setUserGroups(asList("   Court Admin "))
+                        .setPrompts(asList(Prompt.prompt()
+                                .setUserGroups(asList("   Court Admin "))
+                        ))
+
+                )
+
+        );
+
+        final JsonEnvelope resultEnvelope = envelopeFrom(metadataWithRandomUUID("something"), objectToJsonObjectConverter.convert(allResultDefinitionsIn));
+
+        when(requester.request(any())).thenReturn(resultEnvelope);
+
+        AllResultDefinitions actual = target.loadAllResultDefinitions(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
+
+        assertThat(actual.getResultDefinitions().get(0), isBean(ResultDefinition.class)
+                .withValue(ResultDefinition::getId, actual.getResultDefinitions().get(0).getId())
+                .withValue(ResultDefinition::getWelshLabel, actual.getResultDefinitions().get(0).getWelshLabel())
+                .withValue(ResultDefinition::getIsAvailableForCourtExtract, actual.getResultDefinitions().get(0).getIsAvailableForCourtExtract())
+                .withValue(rd->rd.getUserGroups().get(0), "Court Admin")
+                .with(ResultDefinition::getPrompts, first(isBean(Prompt.class)
+                        .withValue(p -> p.getUserGroups().get(0), "Court Admin")
+                ))
+        );
+    }
+
+
+    @Test
+    public void testLoadAllNowsData() {
 
         LocalDate referenceDate = PAST_LOCAL_DATE.next();
 
         AllNows data = AllNows.allNows()
                 .setNows(singletonList(NowDefinition.now()
                         .setId(randomUUID())
-                        .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions()
+                        .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions()
                                 .setId(randomUUID())
                                 .setMandatory(true)
                                 .setPrimary(true)
@@ -81,16 +119,19 @@ public class NowsReferenceDataLoaderTest {
                         .setTemplateName(STRING.next())
                 ));
 
+
         final JsonEnvelope resultEnvelope = envelopeFrom(metadataWithRandomUUID("something"), objectToJsonObjectConverter.convert(data));
 
         when(requester.request(any())).thenReturn(resultEnvelope);
 
         AllNows actual = target.loadAllNowsReference(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
 
-        assertThat(actual.getNows().get(0), BeanMatcher.isBean(NowDefinition.class)
+        assertThat(actual.getNows().get(0), isBean(NowDefinition.class)
                 .with(NowDefinition::getId, is(data.getNows().get(0).getId()))
                 .with(NowDefinition::getReferenceDate, is(referenceDate))
         );
+
+
     }
 
 }

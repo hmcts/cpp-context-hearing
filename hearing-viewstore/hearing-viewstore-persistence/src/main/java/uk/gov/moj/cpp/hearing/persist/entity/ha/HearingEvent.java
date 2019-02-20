@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -36,50 +37,19 @@ public class HearingEvent {
     @Column(name = "deleted")
     private boolean deleted;
 
-    @Column(name = "witnessid")
-    private UUID witnessId;
-
-    @Column(name = "counselId")
-    private UUID counselId;
+    @Column(name = "defence_counsel_id")
+    private UUID defenceCounselId;
 
     public HearingEvent() {
         // for JPA
     }
 
+    public static HearingEvent hearingEvent() {
+        return new HearingEvent();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public UUID getHearingId() {
-        return hearingId;
-    }
-
-    public String getRecordedLabel() {
-        return recordedLabel;
-    }
-
-    public ZonedDateTime getEventTime() {
-        return eventTime;
-    }
-
-    public ZonedDateTime getLastModifiedTime() {
-        return lastModifiedTime;
-    }
-
-    public boolean isAlterable() {
-        return alterable;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public UUID getHearingEventDefinitionId() {
-        return hearingEventDefinitionId;
-    }
-
-    public UUID getWitnessId() {
-        return witnessId;
     }
 
     public HearingEvent setId(final UUID id) {
@@ -87,9 +57,8 @@ public class HearingEvent {
         return this;
     }
 
-    public HearingEvent setHearingEventDefinitionId(final UUID hearingEventDefinitionId) {
-        this.hearingEventDefinitionId = hearingEventDefinitionId;
-        return this;
+    public UUID getHearingId() {
+        return hearingId;
     }
 
     public HearingEvent setHearingId(final UUID hearingId) {
@@ -97,9 +66,17 @@ public class HearingEvent {
         return this;
     }
 
+    public String getRecordedLabel() {
+        return recordedLabel;
+    }
+
     public HearingEvent setRecordedLabel(final String recordedLabel) {
         this.recordedLabel = recordedLabel;
         return this;
+    }
+
+    public ZonedDateTime getEventTime() {
+        return eventTime;
     }
 
     public HearingEvent setEventTime(final ZonedDateTime eventTime) {
@@ -107,9 +84,17 @@ public class HearingEvent {
         return this;
     }
 
+    public ZonedDateTime getLastModifiedTime() {
+        return lastModifiedTime;
+    }
+
     public HearingEvent setLastModifiedTime(final ZonedDateTime lastModifiedTime) {
         this.lastModifiedTime = lastModifiedTime;
         return this;
+    }
+
+    public boolean isAlterable() {
+        return alterable;
     }
 
     public HearingEvent setAlterable(final boolean alterable) {
@@ -117,26 +102,47 @@ public class HearingEvent {
         return this;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
     public HearingEvent setDeleted(final boolean deleted) {
         this.deleted = deleted;
         return this;
     }
 
-    public HearingEvent setWitnessId(final UUID witnessId) {
-        this.witnessId = witnessId;
+    public UUID getHearingEventDefinitionId() {
+        return hearingEventDefinitionId;
+    }
+
+    public HearingEvent setHearingEventDefinitionId(final UUID hearingEventDefinitionId) {
+        this.hearingEventDefinitionId = hearingEventDefinitionId;
         return this;
     }
 
-    public UUID getCounselId() {
-        return counselId;
+    public UUID getDefenceCounselId() {
+        return defenceCounselId;
     }
 
-    public HearingEvent setCounselId(final UUID counselId) {
-        this.counselId = counselId;
+    public HearingEvent setDefenceCounselId(final UUID counselId) {
+        this.defenceCounselId = counselId;
         return this;
     }
 
-    public static HearingEvent hearingEvent(){
-        return new HearingEvent();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final HearingEvent that = (HearingEvent) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

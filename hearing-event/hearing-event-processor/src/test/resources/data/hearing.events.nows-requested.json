@@ -335,7 +335,7 @@
     "nows": [
       {
         "id": "4005807c9-004c-4b75-9cfd-29757fd4fd78",
-        "nowsTypeId" :"448da731-b85d-40be-8a0f-e4e5b8eeef63",
+        "nowsTypeId": "448da731-b85d-40be-8a0f-e4e5b8eeef63",
         "nowsTemplateName": "SingleTemplate",
         "defendantId": "3005807c9-004c-4b75-9cfd-29757fd4fd78",
         "materials": [
@@ -350,7 +350,6 @@
                     "label": "Shared result CASE prompt 1 label"
                   }
                 ]
-
               },
               {
                 "sharedResultId": "2079fde7-6dfc-4466-95df-36e584bbc3b0",
@@ -370,7 +369,6 @@
                   }
                 ]
               }
-
             ],
             "userGroups": [
               {
@@ -386,22 +384,22 @@
     ],
     "nowTypes": [
       {
-        "id" :"448da731-b85d-40be-8a0f-e4e5b8eeef63",
+        "id": "448da731-b85d-40be-8a0f-e4e5b8eeef63",
         "templateName": "SingleTemplate",
         "description": "Imprisonment Order",
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
-        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
         "priority": "0.5 hours",
         "jurisdiction": "B"
       },
       {
-        "id" :"525807c9-004c-4b75-9cfd-29757fd4fd78",
+        "id": "525807c9-004c-4b75-9cfd-29757fd4fd78",
         "templateName": "NotSingleTemplate",
         "description": "Fine Order",
         "rank": 1,
         "staticText": "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment.<p>",
-        "staticTextWelsh": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
+        "welshStaticText": "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar.<p>",
         "priority": "1.0 hours",
         "jurisdiction": "B"
       }

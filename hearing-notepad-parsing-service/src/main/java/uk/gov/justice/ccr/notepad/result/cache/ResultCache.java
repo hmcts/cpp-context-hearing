@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -32,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Startup
-@ApplicationScoped
+@Singleton
 public class ResultCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultCache.class);
@@ -54,9 +55,12 @@ public class ResultCache {
 
     private LoadingCache<String, Object> cache;
 
-    public void lazyLoad(final JsonEnvelope envelope, final LocalDate orderedDate) {
+    @PostConstruct
+    public void setUp() {
         cache = cacheFactory.build();
+    }
 
+    public void lazyLoad(final JsonEnvelope envelope, final LocalDate orderedDate) {
         if (!cache.asMap().containsKey(getKey(orderedDate, RESULT_DEFINITION_KEY))) {
             synchronized (this) {
                 //Double protection to stop multiple cache loads
@@ -108,7 +112,7 @@ public class ResultCache {
                         });
 
                     });
-                 });
+                });
         return resultPromptsIndexByKeyWord;
     }
 
@@ -206,7 +210,7 @@ public class ResultCache {
 
     private List<ResultPromptSynonym> getCachedResultPromptSynonym(final LocalDate orderedDate) {
 
-        return (List<ResultPromptSynonym>)  cache.asMap().get(getKey(orderedDate, RESULT_PROMPT_SYNONYM_KEY));
+        return (List<ResultPromptSynonym>) cache.asMap().get(getKey(orderedDate, RESULT_PROMPT_SYNONYM_KEY));
     }
 
     public void reload() {

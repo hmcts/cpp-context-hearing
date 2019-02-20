@@ -1,27 +1,27 @@
 {
   "resultDefinitions": [
     {
-      "id":"eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8",
+      "id": "eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8",
       "version": "2018-03-01T10:57:19.931Z",
-      "label":"Withdrawn",
-      "shortCode":"WDRN",
+      "label": "Withdrawn",
+      "shortCode": "WDRN",
       "level": "O",
       "rank": 1,
-      "wordGroups":[
+      "wordGroups": [
         {
-          "wordGroup":[
+          "wordGroup": [
             "WDRN"
           ]
         }
       ],
-      "prompts":[
+      "prompts": [
         {
-          "id":"c95ba750-39e2-4046-b462-a4a216568638",
-          "label":"Reasons",
-          "mandatory":false,
-          "type":"TXT",
-          "sequence":1,
-          "userGroups":[
+          "id": "c95ba750-39e2-4046-b462-a4a216568638",
+          "label": "Reasons",
+          "mandatory": false,
+          "type": "TXT",
+          "sequence": 1,
+          "userGroups": [
             "Court Clerks",
             "Prison Admin",
             "Probation Admin",

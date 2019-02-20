@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+//TODO GPE-6313 remove
+@SuppressWarnings({"squid:S1135"})
 public class Defendants implements Serializable {
 
     private static final long serialVersionUID = 1L;

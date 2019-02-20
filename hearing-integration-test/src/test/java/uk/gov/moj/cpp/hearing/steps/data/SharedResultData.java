@@ -1,9 +1,10 @@
 package uk.gov.moj.cpp.hearing.steps.data;
 
-import java.util.Random;
-import java.util.UUID;
 import static java.util.UUID.randomUUID;
+
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+
+import java.util.UUID;
 
 public class SharedResultData {
 
@@ -19,7 +20,6 @@ public class SharedResultData {
     private final String resultLabel = "Imprisonment";
     private final String promptValue = "1 year 6 months";
     private final String promptLabel = "Duration";
-
 
 
     public SharedResultData() {

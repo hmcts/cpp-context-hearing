@@ -30,15 +30,15 @@
           "id": "5b5418a6-47d0-4370-9661-c23b9d619c34",
           "firstName": "David",
           "lastName": "LLOYD",
-          "title":"Mr",
+          "title": "Mr",
           "dateOfBirth": "1980-10-12",
           "nationality": "British",
-          "address":{
-            "address1":"Flat 50",
-            "address2":"Croydon Road",
-            "address3":"UK",
-            "address4":"",
-            "postCode":"CR1 2BD"
+          "address": {
+            "address1": "Flat 50",
+            "address2": "Croydon Road",
+            "address3": "UK",
+            "address4": "",
+            "postCode": "CR1 2BD"
           }
         },
         "interpreter": {},
@@ -83,12 +83,12 @@
           "lastName": "Ormsby",
           "dateOfBirth": "1983-05-23",
           "nationality": "British",
-          "address":{
-            "address1":"Flat 50",
-            "address2":"Croydon Road",
-            "address3":"UK",
-            "address4":"",
-            "postCode":"CR1 2BD"
+          "address": {
+            "address1": "Flat 50",
+            "address2": "Croydon Road",
+            "address3": "UK",
+            "address4": "",
+            "postCode": "CR1 2BD"
           }
         },
         "interpreter": {},
@@ -856,7 +856,7 @@
         "templateName": "Single template",
         "rank": 1,
         "staticText": "Static Text N/A",
-        "staticTextWelsh": "Welsh Static Text N/A",
+        "welshStaticText": "Welsh Static Text N/A",
         "priority": "30",
         "jurisdiction": "B"
       },
@@ -866,7 +866,7 @@
         "templateName": "Single template",
         "rank": 3,
         "staticText": "Static Text N/A",
-        "staticTextWelsh": "Welsh Static Text N/A",
+        "welshStaticText": "Welsh Static Text N/A",
         "priority": "0",
         "jurisdiction": "B"
       },
@@ -876,7 +876,7 @@
         "templateName": "Single template",
         "rank": 6,
         "staticText": "Static Text N/A",
-        "staticTextWelsh": "Welsh Static Text N/A",
+        "welshStaticText": "Welsh Static Text N/A",
         "priority": "0",
         "jurisdiction": "B"
       }

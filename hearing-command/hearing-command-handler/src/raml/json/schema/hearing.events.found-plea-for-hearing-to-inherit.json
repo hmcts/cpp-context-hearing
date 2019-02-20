@@ -1,42 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.events.found-plea-for-hearing-to-inherit.json",
   "type": "object",
   "properties": {
-    "offenceId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "caseId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "defendantId": {
-      "$ref": "#/definitions/uuid"
-    },
     "hearingId": {
-      "$ref": "#/definitions/uuid"
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
-    "originHearingId": {
-      "$ref": "#/definitions/uuid"
-    },
-    "pleaDate": {
-      "type": "string"
-    },
-    "value": {
-      "type": "string"
+    "plea": {
+      "$ref": "http://justice.gov.uk/core/courts/plea.json"
     }
   },
   "required": [
-    "offenceId",
-    "caseId",
-    "defendantId",
     "hearingId",
-    "originHearingId",
-    "pleaDate",
-    "value"
-  ],
-  "definitions": {
-    "uuid": {
-      "type": "string",
-      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-    }
-  }
+    "plea"
+  ]
 }

@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.get-hearing-event-log.json",
   "type": "object",
   "properties": {
     "hearingId": {
@@ -27,10 +28,7 @@
         "hearingEventDefinitionId": {
           "$ref": "#/definitions/uuid"
         },
-        "witnessId": {
-          "$ref": "#/definitions/uuid"
-        },
-        "counselId": {
+        "defenceCounselId": {
           "$ref": "#/definitions/uuid"
         },
         "recordedLabel": {

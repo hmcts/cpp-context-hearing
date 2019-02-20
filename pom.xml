@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -8,10 +10,10 @@
         <version>6.2.0</version>
     </parent>
 
-	<groupId>uk.gov.moj.cpp.hearing</groupId>
-	<artifactId>hearing-parent</artifactId>
-	<version>2.0.128-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>uk.gov.moj.cpp.hearing</groupId>
+    <artifactId>hearing-parent</artifactId>
+    <version>2.0.128-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
     <description>A applications for hearing service.</description>
@@ -37,63 +39,79 @@
         <module>hearing-notepad-parsing-service</module>
         <module>hearing-service</module>
         <module>test-utilities</module>
+        <module>hearing-json</module>
+        <module>pojo-plugin</module>
     </modules>
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <fork>true</fork>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                            <arg>-Xlint:all,-options,-path</arg>
+                            <arg>-verbose</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>external.atlassian.jgitflow</groupId>
                     <artifactId>jgitflow-maven-plugin</artifactId>
                 </plugin>
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>
-                	<groupId>org.eclipse.m2e</groupId>
-                	<artifactId>lifecycle-mapping</artifactId>
-                	<version>1.0.0</version>
-                	<configuration>
-                		<lifecycleMappingMetadata>
-                			<pluginExecutions>
-                				<pluginExecution>
-                					<pluginExecutionFilter>
-                						<groupId>
-                							uk.gov.justice.maven
-                						</groupId>
-                						<artifactId>
-                							raml-maven-plugin
-                						</artifactId>
-                						<versionRange>
-                							[1.5.0,)
-                						</versionRange>
-                						<goals>
-                							<goal>check-syntax</goal>
-                						</goals>
-                					</pluginExecutionFilter>
-                					<action>
-                						<ignore />
-                					</action>
-                				</pluginExecution>
-                				<pluginExecution>
-                					<pluginExecutionFilter>
-                						<groupId>
-                							org.apache.maven.plugins
-                						</groupId>
-                						<artifactId>
-                							maven-remote-resources-plugin
-                						</artifactId>
-                						<versionRange>
-                							[1.5,)
-                						</versionRange>
-                						<goals>
-                							<goal>process</goal>
-                						</goals>
-                					</pluginExecutionFilter>
-                					<action>
-                						<ignore />
-                					</action>
-                				</pluginExecution>
-                			</pluginExecutions>
-                		</lifecycleMappingMetadata>
-                	</configuration>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            uk.gov.justice.maven
+                                        </groupId>
+                                        <artifactId>
+                                            raml-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.5.0,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>check-syntax</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-remote-resources-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.5,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>process</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore/>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -123,6 +141,7 @@
                     <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

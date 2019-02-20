@@ -14,6 +14,14 @@ import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL
 import static uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.listener.HmpsMaterialStatusUpdatedListener.PUBLIC_RESULTINGHMPS_EVENT_NOWS_MATERIAL_STATUS_UPDATED;
 import static uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.listener.HmpsMaterialStatusUpdatedListener.RECEIVE_STATUS_UPDATE_CONFIRMATION_HMPS;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+import uk.gov.moj.cpp.hearing.activiti.common.JsonHelper;
+import uk.gov.moj.cpp.hearing.activiti.service.ActivitiService;
+import uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.listener.HmpsMaterialStatusUpdatedListener;
+
 import java.util.UUID;
 
 import javax.json.Json;
@@ -24,14 +32,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-import uk.gov.moj.cpp.hearing.activiti.common.JsonHelper;
-import uk.gov.moj.cpp.hearing.activiti.service.ActivitiService;
-import uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.listener.HmpsMaterialStatusUpdatedListener;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -77,11 +77,12 @@ public class HmpsMaterialStatusUpdatedListenerTest {
         //then
         verify(activitiService, never()).signalProcessByActivitiIdAndFieldName(any(), any(), any());
     }
+
     private Metadata getMetedata() {
         return metadataFrom(Json.createObjectBuilder()
-                        .add(JsonHelper.ORIGINATOR, JsonHelper.ORIGINATOR_VALUE)
-                        .add(ID, randomUUID().toString())
-                        .add(NAME, RandomGenerator.STRING.next())
-                        .build()).build();
+                .add(JsonHelper.ORIGINATOR, JsonHelper.ORIGINATOR_VALUE)
+                .add(ID, randomUUID().toString())
+                .add(NAME, RandomGenerator.STRING.next())
+                .build()).build();
     }
 }

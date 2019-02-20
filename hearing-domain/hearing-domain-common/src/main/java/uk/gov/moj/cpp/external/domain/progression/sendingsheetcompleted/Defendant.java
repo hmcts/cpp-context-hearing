@@ -35,6 +35,14 @@ public class Defendant implements Serializable {
 
     private UUID personId;
 
+    public static Builder defendants() {
+        return new Defendant.Builder();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public Address getAddress() {
         return address;
     }
@@ -85,10 +93,6 @@ public class Defendant implements Serializable {
 
     public UUID getPersonId() {
         return personId;
-    }
-
-    public static Builder defendants() {
-        return new Defendant.Builder();
     }
 
     public static class Builder {
@@ -200,8 +204,5 @@ public class Defendant implements Serializable {
             defendants.personId = personId;
             return defendants;
         }
-    }
-    public static Builder builder(){
-        return new Builder();
     }
 }

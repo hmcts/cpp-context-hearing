@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
@@ -20,7 +22,7 @@
         <target.jdbc.url>jdbc:postgresql://localhost:5432/postgres</target.jdbc.url>
         <target.jdbc.username>postgres</target.jdbc.username>
         <target.jdbc.password>postgres</target.jdbc.password>
-        <target.jdbc.settingsKey />
+        <target.jdbc.settingsKey/>
 
         <jmeter.test.file>*.jmx</jmeter.test.file>
         <!-- Performance tests don't need compilation -->
@@ -51,46 +53,48 @@
             </properties>
             <build>
                 <plugins>
-                       <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>dbunit-maven-plugin</artifactId>
-                            <version>${dbunit-maven-plugin.version}</version>
-                            <configuration>
-                                <driver>org.postgresql.Driver</driver>
-                                <dataTypeFactoryName>org.dbunit.ext.postgresql.PostgresqlDataTypeFactory</dataTypeFactoryName>
-                                <format>csv</format>
-                                <password>${target.jdbc.password}</password>
-                                <settingsKey>${target.jdbc.settingsKey}</settingsKey>
-                               <!-- <src>src/test/data</src>-->
-                                <type>CLEAN_INSERT</type>
-                                <url>${target.jdbc.url}</url>
-                                <username>${target.jdbc.username}</username>
-                                <src>src/test/data</src>
-                            </configuration>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>dbunit-maven-plugin</artifactId>
+                        <version>${dbunit-maven-plugin.version}</version>
+                        <configuration>
+                            <driver>org.postgresql.Driver</driver>
+                            <dataTypeFactoryName>
+                                org.dbunit.ext.postgresql.PostgresqlDataTypeFactory
+                            </dataTypeFactoryName>
+                            <format>csv</format>
+                            <password>${target.jdbc.password}</password>
+                            <settingsKey>${target.jdbc.settingsKey}</settingsKey>
+                            <!-- <src>src/test/data</src>-->
+                            <type>CLEAN_INSERT</type>
+                            <url>${target.jdbc.url}</url>
+                            <username>${target.jdbc.username}</username>
+                            <src>src/test/data</src>
+                        </configuration>
 
-                            <executions>
-                                <execution>
-                                    <id>clean-insert</id>
-                                    <phase>pre-integration-test</phase>
-                                    <goals>
-                                        <goal>operation</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <dependencies>
-                                <dependency>
-                                    <groupId>org.dbunit</groupId>
-                                    <artifactId>dbunit</artifactId>
-                                    <version>${dbunit.version}</version>
-                                </dependency>
-                                <dependency>
-                                    <groupId>org.postgresql</groupId>
-                                    <artifactId>postgresql</artifactId>
-                                    <version>${postgresql.driver.version}</version>
-                                </dependency>
-                            </dependencies>
-                        </plugin>
-                  <plugin>
+                        <executions>
+                            <execution>
+                                <id>clean-insert</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>operation</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.dbunit</groupId>
+                                <artifactId>dbunit</artifactId>
+                                <version>${dbunit.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.driver.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                    <plugin>
                         <groupId>com.lazerycode.jmeter</groupId>
                         <artifactId>jmeter-maven-plugin</artifactId>
                         <version>${jmeter-maven-plugin.version}</version>
@@ -113,11 +117,17 @@
                                     <propertiesJMeter>
                                         <server>${target.host}</server>
                                         <port>${target.port}</port>
-                                        <jmeter.get.usergroup.by.usertoken.test.threads>${jmeter.get.usergroup.by.usertoken.test.threads}</jmeter.get.usergroup.by.usertoken.test.threads>
-                                        <jmeter.save.saveservice.print_field_names>true</jmeter.save.saveservice.print_field_names>
-                                        <jmeter.save.saveservice.successful>true</jmeter.save.saveservice.successful>
-                                        <jmeter.save.saveservice.label>true</jmeter.save.saveservice.label>
-                                        <jmeter.save.saveservice.time>true</jmeter.save.saveservice.time>
+                                        <jmeter.get.usergroup.by.usertoken.test.threads>
+                                            ${jmeter.get.usergroup.by.usertoken.test.threads}
+                                        </jmeter.get.usergroup.by.usertoken.test.threads>
+                                        <jmeter.save.saveservice.print_field_names>true
+                                        </jmeter.save.saveservice.print_field_names>
+                                        <jmeter.save.saveservice.successful>true
+                                        </jmeter.save.saveservice.successful>
+                                        <jmeter.save.saveservice.label>true
+                                        </jmeter.save.saveservice.label>
+                                        <jmeter.save.saveservice.time>true
+                                        </jmeter.save.saveservice.time>
                                     </propertiesJMeter>
                                     <testFilesIncluded>
                                         <jMeterTestFile>${jmeter.test.file}</jMeterTestFile>

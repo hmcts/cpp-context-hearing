@@ -8,17 +8,21 @@ public class LegalCase {
 
     private String urn;
 
+    public LegalCase(Builder builder) {
+        this.id = builder.id;
+        this.urn = builder.urn;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getId() {
         return id;
     }
 
     public String getUrn() {
         return urn;
-    }
-
-    public LegalCase(Builder builder) {
-        this.id = builder.id;
-        this.urn = builder.urn;
     }
 
     public static class Builder {
@@ -41,10 +45,6 @@ public class LegalCase {
         public LegalCase build() {
             return new LegalCase(this);
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
 }

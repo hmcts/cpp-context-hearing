@@ -1,5 +1,8 @@
 {
-  "allowedUserGroups": [ "courtAdmin","defence" ]
+  "allowedUserGroups": [
+    "courtAdmin",
+    "defence"
+  ]
 }
 
 

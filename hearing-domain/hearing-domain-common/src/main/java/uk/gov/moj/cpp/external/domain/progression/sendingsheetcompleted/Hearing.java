@@ -1,12 +1,12 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Hearing implements Serializable {
 
@@ -47,6 +47,14 @@ public class Hearing implements Serializable {
         this.type = type;
     }
 
+    public static Builder hearing() {
+        return new Hearing.Builder();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getCaseId() {
         return caseId;
     }
@@ -73,10 +81,6 @@ public class Hearing implements Serializable {
 
     public String getType() {
         return type;
-    }
-
-    public static Builder hearing() {
-        return new Hearing.Builder();
     }
 
     public static class Builder {
@@ -132,10 +136,6 @@ public class Hearing implements Serializable {
         public Hearing build() {
             return new Hearing(caseId, caseUrn, courtCentreId, courtCentreName, defendants, sendingCommittalDate, type);
         }
-    }
-
-    public static Builder builder(){
-        return new Builder();
     }
 
 }

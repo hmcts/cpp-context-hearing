@@ -33,7 +33,7 @@ public class HmpsMaterialStatusUpdatedListener {
         LOGGER.info("Received public.resultinghmps.event.nows-material-status-updated {}",
                 jsonEnvelope.payloadAsJsonObject());
         final Optional<String> originator =
-                        getOriginatorValueFromJsonMetadata(jsonEnvelope.metadata().asJsonObject());
+                getOriginatorValueFromJsonMetadata(jsonEnvelope.metadata().asJsonObject());
         if (originator.isPresent() && ORIGINATOR_VALUE.equalsIgnoreCase(originator.get())) {
             findAndNudgeActivity(jsonEnvelope);
         }
@@ -43,12 +43,12 @@ public class HmpsMaterialStatusUpdatedListener {
         if (jsonEnvelope.payloadAsJsonObject().containsKey(MATERIAL_ID)) {
             final String materialId = jsonEnvelope.payloadAsJsonObject().getString(MATERIAL_ID);
             activitiService.signalProcessByActivitiIdAndFieldName(
-                            RECEIVE_STATUS_UPDATE_CONFIRMATION_HMPS, MATERIAL_ID, materialId);
+                    RECEIVE_STATUS_UPDATE_CONFIRMATION_HMPS, MATERIAL_ID, materialId);
         } else {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("Event Received without materialId : metadata {} payload {}",
-                                jsonEnvelope.metadata(),
-                                jsonEnvelope.toObfuscatedDebugString());
+                        jsonEnvelope.metadata(),
+                        jsonEnvelope.toObfuscatedDebugString());
             }
         }
     }

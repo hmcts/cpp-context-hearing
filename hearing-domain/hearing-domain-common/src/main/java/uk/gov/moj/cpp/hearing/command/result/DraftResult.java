@@ -28,14 +28,14 @@ public final class DraftResult implements Serializable {
     private final List<Result> results;
 
     @JsonCreator
-    public DraftResult(@JsonProperty("targetId") final UUID targetId, 
-            @JsonProperty("caseId") final UUID caseId, 
-            @JsonProperty("defendantId") final UUID defendantId, 
-            @JsonProperty("offenceId") final UUID offenceId, 
-            @JsonProperty("offenceNum") final Integer offenceNum,
-            @JsonProperty("showDefendantName") final Boolean showDefendantName, 
-            @JsonProperty("addMoreResults") final Boolean addMoreResults, 
-            @JsonProperty("results") final List<Result> results) {
+    public DraftResult(@JsonProperty("targetId") final UUID targetId,
+                       @JsonProperty("caseId") final UUID caseId,
+                       @JsonProperty("defendantId") final UUID defendantId,
+                       @JsonProperty("offenceId") final UUID offenceId,
+                       @JsonProperty("offenceNum") final Integer offenceNum,
+                       @JsonProperty("showDefendantName") final Boolean showDefendantName,
+                       @JsonProperty("addMoreResults") final Boolean addMoreResults,
+                       @JsonProperty("results") final List<Result> results) {
         this.targetId = targetId;
         this.caseId = caseId;
         this.defendantId = defendantId;
@@ -56,6 +56,10 @@ public final class DraftResult implements Serializable {
         this.showDefendantName = builder.showDefendantName;
         this.addMoreResults = builder.addMoreResults;
         this.results = unmodifiableList(ofNullable(builder.results).orElseGet(ArrayList::new));
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public UUID getTargetId() {
@@ -113,10 +117,6 @@ public final class DraftResult implements Serializable {
                 this.showDefendantName, this.addMoreResults, this.results);
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static final class Builder {
 
         private UUID targetId;
@@ -167,7 +167,7 @@ public final class DraftResult implements Serializable {
             this.results = results;
             return this;
         }
-        
+
         public DraftResult build() {
             return new DraftResult(this);
         }

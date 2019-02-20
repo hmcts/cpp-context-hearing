@@ -1,11 +1,16 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.Verdict;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.events.offence-updated")
 @SuppressWarnings("squid:S00107")
@@ -13,140 +18,65 @@ public class OffenceUpdated implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
+    private UUID hearingId;
+    private UUID defendantId;
+    private Offence offence;
 
-    private final UUID hearingId;
-
-    private final String offenceCode;
-
-    private final String wording;
-
-    private final LocalDate startDate;
-
-    private final LocalDate endDate;
-
-    private final Integer count;
-
-    private final LocalDate convictionDate;
-
-    private OffenceUpdated(@JsonProperty("id") final UUID id,
-                           @JsonProperty("hearingId") final UUID hearingId,
-                           @JsonProperty("offenceCode") final String offenceCode,
-                           @JsonProperty("wording") final String wording,
-                           @JsonProperty("startDate") final LocalDate startDate,
-                           @JsonProperty("endDate") final LocalDate endDate,
-                           @JsonProperty("count") final Integer count,
-                           @JsonProperty("convictionDate") final LocalDate convictionDate) {
-        this.id = id;
-        this.hearingId = hearingId;
-        this.offenceCode = offenceCode;
-        this.wording = wording;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.count = count;
-        this.convictionDate = convictionDate;
+    private OffenceUpdated() {
     }
 
-    public UUID getId() {
-        return id;
+    @JsonCreator
+    protected OffenceUpdated(@JsonProperty(value = "hearingId", required = true) UUID hearingId,
+                             @JsonProperty(value = "defendantId", required = true) UUID defendantId,
+                             @JsonProperty(value = "offence", required = true) final Offence offence) {
+        this.hearingId = hearingId;
+        this.defendantId = defendantId;
+        this.offence = offence;
+    }
+
+    public static OffenceUpdated offenceUpdated() {
+        return new OffenceUpdated();
     }
 
     public UUID getHearingId() {
         return hearingId;
     }
 
-    public String getOffenceCode() {
-        return offenceCode;
+    public UUID getDefendantId() {
+        return defendantId;
     }
 
-    public String getWording() {
-        return wording;
+    public Offence getOffence() {
+        return offence;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public OffenceUpdated withHearingId(final UUID hearingId) {
+        this.hearingId = hearingId;
+        return this;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
+    public OffenceUpdated withDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
+        return this;
     }
 
-    public Integer getCount() {
-        return count;
+    public OffenceUpdated withOffence(final Offence offence) {
+        this.offence = offence;
+        return this;
     }
 
-    public LocalDate getConvictionDate() {
-        return convictionDate;
+    public OffenceUpdated withPlea(final Plea plea) {
+        this.offence.setPlea(plea);
+        return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public OffenceUpdated withVerdict(final Verdict verdict) {
+        this.offence.setVerdict(verdict);
+        return this;
     }
 
-    public static class Builder {
-
-        private UUID id;
-
-        private UUID hearingId;
-
-        private String offenceCode;
-
-        private String wording;
-
-        private LocalDate startDate;
-
-        private LocalDate endDate;
-
-        private Integer count;
-
-        private LocalDate convictionDate;
-
-        private Builder() {
-        }
-
-        public Builder withId(final UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withHearingId(final UUID hearingId) {
-            this.hearingId = hearingId;
-            return this;
-        }
-
-        public Builder withOffenceCode(final String offenceCode) {
-            this.offenceCode = offenceCode;
-            return this;
-        }
-
-        public Builder withWording(final String wording) {
-            this.wording = wording;
-            return this;
-        }
-
-        public Builder withStartDate(final LocalDate startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder withEndDate(final LocalDate endDate) {
-            this.endDate = endDate;
-            return this;
-        }
-
-        public Builder withCount(final Integer count) {
-            this.count = count;
-            return this;
-        }
-
-        public Builder withConvictionDate(final LocalDate convictionDate) {
-            this.convictionDate = convictionDate;
-            return this;
-        }
-
-        public OffenceUpdated build() {
-            return new OffenceUpdated(id, hearingId, offenceCode, wording, startDate, endDate, count, convictionDate);
-        }
-
+    public OffenceUpdated withConvictionDate(final LocalDate convictionDate) {
+        offence.setConvictionDate(convictionDate);
+        return this;
     }
 }

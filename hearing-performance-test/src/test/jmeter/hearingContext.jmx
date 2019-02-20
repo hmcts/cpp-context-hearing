@@ -206,7 +206,7 @@
   &quot;defendants&quot;: [&#xd;
     {&#xd;
       &quot;id&quot;: &quot;${defendantIds_1}&quot;,&#xd;
-      &quot;personId&quot;: &quot;${defPersonIds_1}&quot;,&#xd;
+      &quot;id&quot;: &quot;${defPersonIds_1}&quot;,&#xd;
       &quot;offences&quot;: [&#xd;
         {&#xd;
           &quot;id&quot;: &quot;${offenceIds_1}&quot;,&#xd;
@@ -228,7 +228,7 @@
     },&#xd;
     {&#xd;
       &quot;id&quot;: &quot;${defendantIds_2}&quot;,&#xd;
-      &quot;personId&quot;: &quot;${defPersonIds_2}&quot;,&#xd;
+      &quot;id&quot;: &quot;${defPersonIds_2}&quot;,&#xd;
       &quot;offences&quot;: [&#xd;
         {&#xd;
           &quot;id&quot;: &quot;${offenceIds_3}&quot;,&#xd;

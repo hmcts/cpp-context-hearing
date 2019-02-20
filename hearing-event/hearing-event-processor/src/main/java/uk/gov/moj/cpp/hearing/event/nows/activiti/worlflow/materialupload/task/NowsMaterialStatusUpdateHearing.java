@@ -4,10 +4,6 @@ import static uk.gov.moj.cpp.hearing.activiti.common.JsonHelper.assembleEnvelope
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
 
-import org.activiti.engine.delegate.DelegateExecution;
-import org.activiti.engine.delegate.JavaDelegate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -17,21 +13,26 @@ import uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant;
 import uk.gov.moj.cpp.hearing.event.nows.NowsNotificationDocumentState;
 import uk.gov.moj.cpp.hearing.event.nows.VariantSubscriptionProcessor;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.json.Json;
 import javax.json.JsonObject;
-import java.util.UUID;
+
+import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(Component.EVENT_PROCESSOR)
 @Named
+// GPE-6752 remove this
 public class NowsMaterialStatusUpdateHearing implements JavaDelegate {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NowsMaterialStatusUpdateHearing.class);
 
     public static final String HEARING_UPDATE_NOWS_MATERIAL_STATUS = "hearing.command.update-nows-material-status";
     public static final String GENERATED = "generated";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(NowsMaterialStatusUpdateHearing.class);
     @Inject
     private Sender sender;
 

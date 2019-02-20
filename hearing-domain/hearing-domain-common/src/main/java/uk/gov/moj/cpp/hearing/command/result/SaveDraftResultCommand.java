@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
+import uk.gov.justice.core.courts.Target;
+
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -11,88 +13,38 @@ public final class SaveDraftResultCommand implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private  UUID hearingId;
-    private final UUID targetId;
-    private final UUID defendantId;
-    private final UUID offenceId;
-    private final String draftResult;
+    private Target target;
+    private UUID hearingId;
+
+    public SaveDraftResultCommand() {
+    }
 
     @JsonCreator
-    protected SaveDraftResultCommand(@JsonProperty("hearingId") final UUID hearingId,
-            @JsonProperty("targetId") final UUID targetId,
-            @JsonProperty("defendantId") final UUID defendantId, 
-            @JsonProperty("offenceId") final UUID offenceId, 
-            @JsonProperty("draftResult") final String draftResult) {
+    public SaveDraftResultCommand(@JsonProperty("target") final Target target,
+                                  @JsonProperty("hearingId") final UUID hearingId) {
+        this.target = target;
         this.hearingId = hearingId;
-        this.targetId = targetId;
-        this.defendantId = defendantId;
-        this.offenceId = offenceId;
-        this.draftResult = draftResult;
+    }
+
+    public static SaveDraftResultCommand saveDraftResultCommand() {
+        return new SaveDraftResultCommand();
+    }
+
+    public Target getTarget() {
+        return target;
+    }
+
+    public SaveDraftResultCommand setTarget(Target target) {
+        this.target = target;
+        return this;
     }
 
     public UUID getHearingId() {
         return hearingId;
     }
 
-    public void setHearingId(UUID hearingId) {
+    public SaveDraftResultCommand setHearingId(UUID hearingId) {
         this.hearingId = hearingId;
-    }
-
-    public UUID getTargetId() {
-        return targetId;
-    }
-
-    public UUID getDefendantId() {
-        return defendantId;
-    }
-
-    public UUID getOffenceId() {
-        return offenceId;
-    }
-
-    public String getDraftResult() {
-        return draftResult;
-    }
-    
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static final class Builder {
-
-        private UUID hearingId;
-        private UUID targetId;
-        private UUID defendantId;
-        private UUID offenceId;
-        private String draftResult;
-
-        public Builder withHearingId(final UUID hearingId) {
-            this.hearingId = hearingId;
-            return this;
-        }
-
-        public Builder withTargetId(final UUID targetId) {
-            this.targetId = targetId;
-            return this;
-        }
-
-        public Builder withDefendantId(final UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-
-        public Builder withOffenceId(final UUID offenceId) {
-            this.offenceId = offenceId;
-            return this;
-        }
-
-        public Builder withDraftResult(final String draftResult) {
-            this.draftResult = draftResult;
-            return this;
-        }
-
-        public SaveDraftResultCommand build() {
-            return new SaveDraftResultCommand(this.hearingId, this.targetId, this.defendantId, this.offenceId, this.draftResult);
-        }
+        return this;
     }
 }

@@ -8,14 +8,12 @@ public class Prompt {
     private String label;
     private String value;
 
-    public UUID getId() { return id; }
-
-    public String getLabel() {
-        return label;
+    public static Prompt prompt() {
+        return new Prompt();
     }
 
-    public String getValue() {
-        return value;
+    public UUID getId() {
+        return id;
     }
 
     public Prompt setId(final UUID id) {
@@ -23,17 +21,21 @@ public class Prompt {
         return this;
     }
 
+    public String getLabel() {
+        return label;
+    }
+
     public Prompt setLabel(String label) {
         this.label = label;
         return this;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     public Prompt setValue(String value) {
         this.value = value;
         return this;
-    }
-
-    public static Prompt prompt() {
-        return new Prompt();
     }
 }

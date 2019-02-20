@@ -6,6 +6,5 @@
   "recordedLabel": "Hearing Started",
   "eventTime": "2016-11-12T09:25:00Z",
   "alterable": false,
-  "witnessId":"d06f6539-2a7c-4bc8-bca3-A1e5a225471a"
-  "counselId":"d06f6539-2a7c-4bc8-bca3-A1e5a225471a"
+  "defenceCounselId": "d06f6539-2a7c-4bc8-bca3-A1e5a225471a"
 }

@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class IndicatedPlea implements Serializable {
 
@@ -30,6 +30,10 @@ public class IndicatedPlea implements Serializable {
         this.value = value;
     }
 
+    public static Builder indicatedPlea() {
+        return new IndicatedPlea.Builder();
+    }
+
     public AllocationDecision getAllocationDecision() {
         return allocationDecision;
     }
@@ -40,10 +44,6 @@ public class IndicatedPlea implements Serializable {
 
     public IndicatedPleaValue getValue() {
         return value;
-    }
-
-    public static Builder indicatedPlea() {
-        return new IndicatedPlea.Builder();
     }
 
     public static class Builder {

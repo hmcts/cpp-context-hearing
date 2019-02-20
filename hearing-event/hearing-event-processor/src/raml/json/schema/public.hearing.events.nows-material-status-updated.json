@@ -1,19 +1,20 @@
 {
-  "$schema":"http://json-schema.org/draft-04/schema#",
-  "type":"object",
-  "properties":{
-    "materialId":{
-      "$ref":"#/definitions/uuidPattern"
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/public.hearing.events.nows-material-status-updated.json",
+  "type": "object",
+  "properties": {
+    "materialId": {
+      "$ref": "#/definitions/uuidPattern"
     }
   },
-  "additionalProperties":false,
-  "required":[
+  "additionalProperties": false,
+  "required": [
     "materialId"
   ],
-  "definitions":{
-    "uuidPattern":{
-      "type":"string",
-      "pattern":"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+  "definitions": {
+    "uuidPattern": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   }
 }

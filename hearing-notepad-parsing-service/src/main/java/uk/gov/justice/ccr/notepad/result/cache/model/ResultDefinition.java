@@ -2,7 +2,11 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 
 import static java.util.stream.Collectors.toCollection;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ResultDefinition {
     private String id;

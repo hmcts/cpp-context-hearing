@@ -10,20 +10,12 @@ public class LesserOrAlternativeOffence {
     private LocalDate convictionDate;
     private String wording;
 
+    public static LesserOrAlternativeOffence lesserOrAlternativeOffence() {
+        return new LesserOrAlternativeOffence();
+    }
+
     public UUID getOffenceTypeId() {
         return offenceTypeId;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public LocalDate getConvictionDate() {
-        return convictionDate;
-    }
-
-    public String getWording() {
-        return wording;
     }
 
     public LesserOrAlternativeOffence setOffenceTypeId(UUID offenceTypeId) {
@@ -31,9 +23,17 @@ public class LesserOrAlternativeOffence {
         return this;
     }
 
+    public String getCode() {
+        return code;
+    }
+
     public LesserOrAlternativeOffence setCode(String code) {
         this.code = code;
         return this;
+    }
+
+    public LocalDate getConvictionDate() {
+        return convictionDate;
     }
 
     public LesserOrAlternativeOffence setConvictionDate(LocalDate convictionDate) {
@@ -41,12 +41,12 @@ public class LesserOrAlternativeOffence {
         return this;
     }
 
+    public String getWording() {
+        return wording;
+    }
+
     public LesserOrAlternativeOffence setWording(String wording) {
         this.wording = wording;
         return this;
-    }
-
-    public static LesserOrAlternativeOffence lesserOrAlternativeOffence() {
-        return new LesserOrAlternativeOffence();
     }
 }

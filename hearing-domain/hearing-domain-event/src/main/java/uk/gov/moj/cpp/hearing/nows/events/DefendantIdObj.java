@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.nows.events;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
 
 
 public class DefendantIdObj implements Serializable {

@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.steps;
 
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
 
 import java.util.UUID;
-
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
 @SuppressWarnings("unchecked")
 public class HearingStepDefinitions extends AbstractIT {

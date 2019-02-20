@@ -5,94 +5,127 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.moj.cpp.hearing.command.initiate.LookupPleaOnOffenceForHearingCommand;
-import uk.gov.moj.cpp.hearing.command.offence.BaseDefendantOffence;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OffenceAggregate implements Aggregate {
 
     private static final long serialVersionUID = 1L;
 
-    private OffencePleaUpdated plea;
+    private OffencePleaUpdated offencePleaUpdated;
+
+    private OffenceVerdictUpdated offenceVerdictUpdated;
 
     private List<UUID> hearingIds = new ArrayList<>();
 
+    public List<UUID> getHearingIds() {
+        return this.hearingIds;
+    }
+
     @Override
-    public Object apply(Object event) {
+    public Object apply(final Object event) {
         return match(event).with(
-                when(OffencePleaUpdated.class).apply((offencePleaUpdated) -> this.plea = offencePleaUpdated),
+                when(OffencePleaUpdated.class).apply(plea -> this.offencePleaUpdated = plea),
+                when(OffenceVerdictUpdated.class).apply(verdict -> this.offenceVerdictUpdated = verdict),
                 when(RegisteredHearingAgainstOffence.class).apply(offence -> hearingIds.add(offence.getHearingId())),
                 otherwiseDoNothing()
         );
     }
 
-    public Stream<Object> lookupPleaForHearing(LookupPleaOnOffenceForHearingCommand lookupPleaOnOffenceForHearingCommand) {
+    public Stream<Object> lookupOffenceForHearing(final UUID hearingId, final UUID offenceId) {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
         streamBuilder.add(RegisteredHearingAgainstOffence.builder()
-                .withOffenceId(lookupPleaOnOffenceForHearingCommand.getOffenceId())
-                .withHearingId(lookupPleaOnOffenceForHearingCommand.getHearingId())
+                .withOffenceId(offenceId)
+                .withHearingId(hearingId)
                 .build());
 
-        if (this.plea != null) {
+        if (this.offencePleaUpdated != null) {
             streamBuilder.add(new FoundPleaForHearingToInherit(
-                    lookupPleaOnOffenceForHearingCommand.getOffenceId(),
-                    lookupPleaOnOffenceForHearingCommand.getCaseId(),
-                    lookupPleaOnOffenceForHearingCommand.getDefendantId(),
-                    lookupPleaOnOffenceForHearingCommand.getHearingId(),
-                    plea.getHearingId(),
-                    plea.getPleaDate(),
-                    plea.getValue()
+                    hearingId,
+                    offencePleaUpdated.getPlea()
+            ));
+        }
+
+        if (this.offenceVerdictUpdated != null) {
+            streamBuilder.add(new FoundVerdictForHearingToInherit(
+                    hearingId,
+                    offenceVerdictUpdated.getVerdict()
             ));
         }
 
         return apply(streamBuilder.build());
     }
 
-    public Stream<Object> updatePlea(final UUID originHearingId, final UUID offenceId, final LocalDate pleaDate, final String pleaValue) {
-        return apply(Stream.of(OffencePleaUpdated.builder()
-                .withHearingId(originHearingId)
-                .withOffenceId(offenceId)
-                .withPleaDate(pleaDate)
-                .withValue(pleaValue)
-                .build()));
+    public Stream<Object> updatePlea(final UUID hearingId, final Plea plea) {
+
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
+
+        streamBuilder.add(OffencePleaUpdated.builder().withHearingId(hearingId).withPlea(plea).build());
+
+        final List<UUID> connectedHearingIds = hearingIds.stream()
+                .filter(id -> !id.equals(hearingId))
+                .collect(Collectors.toList());
+
+        if (!connectedHearingIds.isEmpty()) {
+            streamBuilder.add(new EnrichUpdatePleaWithAssociatedHearings(connectedHearingIds, plea));
+        }
+
+        return apply(streamBuilder.build());
     }
 
     public OffencePleaUpdated getPlea() {
-        return plea;
+        return offencePleaUpdated;
     }
 
-    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final BaseDefendantOffence offence) {
+    public OffenceVerdictUpdated getVerdict() {
+        return offenceVerdictUpdated;
+    }
 
-        return apply(Stream.of(FoundHearingsForEditOffence.builder()
-                .withId(offence.getId())
-                .withOffenceCode(offence.getOffenceCode())
-                .withWording(offence.getWording())
-                .withStartDate(offence.getStartDate())
-                .withEndDate(offence.getEndDate())
-                .withCount(offence.getCount())
-                .withConvictionDate(offence.getConvictionDate())
+    public Stream<Object> lookupHearingsForEditOffenceOnOffence(final UUID defendantId, final Offence offence) {
+        return apply(Stream.of(FoundHearingsForEditOffence.foundHearingsForEditOffence()
                 .withHearingIds(hearingIds)
-                .build()));
-
+                .withDefendantId(defendantId)
+                .withOffence(offence)));
     }
 
     public Stream<Object> lookupHearingsForDeleteOffenceOnOffence(final UUID offenceId) {
-
         return apply(Stream.of(FoundHearingsForDeleteOffence.builder()
                 .withId(offenceId)
                 .withHearingIds(hearingIds)
                 .build()));
+    }
+
+    public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
+
+        streamBuilder.add(new OffenceVerdictUpdated(hearingId, verdict));
+
+        final List<UUID> connectedHearingIds = hearingIds.stream()
+                .filter(id -> !id.equals(hearingId))
+                .collect(Collectors.toList());
+
+        if (!connectedHearingIds.isEmpty()) {
+            streamBuilder.add(new EnrichUpdateVerdictWithAssociatedHearings(connectedHearingIds, verdict));
+        }
+
+        return apply(streamBuilder.build());
     }
 }

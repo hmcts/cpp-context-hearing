@@ -33,27 +33,21 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class EmailNowNotificationChannelTest {
 
+    @Mock
+    JsonEnvelope event;
     private String destination;
     private String replyToAddress;
     private Map<String, String> properties;
     private NowsNotificationDocumentState nowsNotificationDocumentState;
     private UUID templateId = UUID.randomUUID();
-
     @InjectMocks
     private EmailNowNotificationChannel target;
-
     @Mock
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
     @Mock
     private Enveloper enveloper;
-
     @Mock
     private Sender sender;
-
-    @Mock
-    JsonEnvelope event;
-
     @Captor
     private ArgumentCaptor<Object> requestPayloads;
 
@@ -71,6 +65,7 @@ public class EmailNowNotificationChannelTest {
         nowsNotificationDocumentState.setDefendantName("David Bowie");
         nowsNotificationDocumentState.setCourtClerkName("Iggy Pop");
         nowsNotificationDocumentState.setCaseUrns(Arrays.asList("C123", "C124"));
+        nowsNotificationDocumentState.setMaterialId(UUID.randomUUID());
     }
 
 

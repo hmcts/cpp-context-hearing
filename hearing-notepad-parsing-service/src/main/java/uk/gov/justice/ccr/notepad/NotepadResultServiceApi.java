@@ -51,8 +51,8 @@ public class NotepadResultServiceApi {
         List<Part> parts = new PartsResolver().getParts(originalText);
         final Knowledge knowledge = parsingFacade.processParts(parts, orderedDate);
         return enveloper.withMetadataFrom(envelope, "hearing.notepad.parse-result-definition-response")
-                        .apply(objectToJsonObjectConverter.convert(buildResultDefinitionView(
-                                        originalText, orderedDate.toString(), parts, knowledge)));
+                .apply(objectToJsonObjectConverter.convert(buildResultDefinitionView(
+                        originalText, orderedDate.toString(), parts, knowledge)));
     }
 
     @Handles("hearing.notepad.parse-result-prompt")
@@ -72,7 +72,7 @@ public class NotepadResultServiceApi {
     }
 
     ResultDefinitionView buildResultDefinitionView(final String originalText,
-                    final String orderedDate, final List<Part> parts, final Knowledge knowledge) {
+                                                   final String orderedDate, final List<Part> parts, final Knowledge knowledge) {
         final ResultDefinitionView buildFromKnowledge = resultDefinitionViewBuilder.buildFromKnowledge(parts, knowledge);
         buildFromKnowledge.setOriginalText(originalText);
         buildFromKnowledge.setOrderedDate(orderedDate);

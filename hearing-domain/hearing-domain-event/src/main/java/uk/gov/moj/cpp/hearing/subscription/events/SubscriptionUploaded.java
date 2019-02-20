@@ -15,18 +15,12 @@ public final class SubscriptionUploaded implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID id;
-
-    private String channel;
-
     private final Map<String, String> channelProperties;
-
     private final List<String> userGroups;
-
     private final String destination;
-
     private final List<UUID> courtCentreIds;
-
     private final List<UUID> nowTypeIds;
+    private String channel;
 
     public SubscriptionUploaded(@JsonProperty("id") final UUID id,
                                 @JsonProperty("channel") final String channel,

@@ -5,7 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
-import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionCommand;
+import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscription;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class SubscriptionAggregateTest {
 
         final UploadSubscriptionsCommand uploadSubscriptionsCommand = buildUploadSubscriptionsCommand();
 
-        subscriptionAggregate.initiateUploadSubscriptions(uploadSubscriptionsCommand);
+        subscriptionAggregate.initiateUploadSubscriptions(uploadSubscriptionsCommand.getId(), uploadSubscriptionsCommand.getSubscriptions(), uploadSubscriptionsCommand.getReferenceDate());
     }
 
     private UploadSubscriptionsCommand buildUploadSubscriptionsCommand() {
@@ -56,7 +56,7 @@ public class SubscriptionAggregateTest {
 
         final List<UUID> nowTypeIds = asList(randomUUID(), randomUUID());
 
-        final UploadSubscriptionCommand command = new UploadSubscriptionCommand();
+        final UploadSubscription command = new UploadSubscription();
         command.setChannel(STRING.next());
         command.setChannelProperties(properties);
         command.setDestination(STRING.next());

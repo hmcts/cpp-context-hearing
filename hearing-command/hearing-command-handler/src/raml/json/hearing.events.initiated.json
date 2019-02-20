@@ -1,8 +1,10 @@
 {
-  "cases": [{
-    "caseId": "000000-0000-0000-000000000000",
-    "urn": "87GD9945217"
-  }],
+  "cases": [
+    {
+      "caseId": "000000-0000-0000-000000000000",
+      "urn": "87GD9945217"
+    }
+  ],
   "hearing": {
     "id": "f6541c25-825c-6a98-1764-caee654c763a",
     "type": "TRIAL",
@@ -16,7 +18,9 @@
       "firstName": "Neil",
       "lastName": "Flewitt"
     },
-    "hearingDays":["2016-06-01T10:00:00Z"],
+    "hearingDays": [
+      "2016-06-01T10:00:00Z"
+    ],
     "defendants": [
       {
         "id": "0baecac5-222b-402d-9047-84803679edac",

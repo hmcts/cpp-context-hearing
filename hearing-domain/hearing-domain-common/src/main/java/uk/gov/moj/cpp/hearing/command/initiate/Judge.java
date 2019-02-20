@@ -1,11 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
+import java.io.Serializable;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
-import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Judge implements Serializable {
@@ -31,20 +31,12 @@ public class Judge implements Serializable {
         this.lastName = lastName;
     }
 
+    public static Judge judge() {
+        return new Judge();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
     }
 
     public Judge setId(UUID id) {
@@ -52,9 +44,17 @@ public class Judge implements Serializable {
         return this;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public Judge setTitle(String title) {
         this.title = title;
         return this;
+    }
+
+    public String getFirstName() {
+        return firstName;
     }
 
     public Judge setFirstName(String firstName) {
@@ -62,12 +62,12 @@ public class Judge implements Serializable {
         return this;
     }
 
+    public String getLastName() {
+        return lastName;
+    }
+
     public Judge setLastName(String lastName) {
         this.lastName = lastName;
         return this;
-    }
-
-    public static Judge judge() {
-        return new Judge();
     }
 }

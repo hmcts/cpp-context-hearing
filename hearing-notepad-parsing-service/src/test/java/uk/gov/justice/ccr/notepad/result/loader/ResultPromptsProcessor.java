@@ -22,10 +22,10 @@ public class ResultPromptsProcessor {
     }
 
     public Map<String, List<ResultPrompt>> groupByResultDefinition(List<String> lines) {
-      List<ResultPrompt> rps=  lines.stream()
+        List<ResultPrompt> rps = lines.stream()
                 .map(resultPromptConverter::convert).filter(Objects::nonNull).collect(toList());
 
-      return rps.stream().collect(groupingBy(prompt -> prompt.getResultDefinitionId().toString(), LinkedHashMap::new, toList()));
+        return rps.stream().collect(groupingBy(prompt -> prompt.getResultDefinitionId().toString(), LinkedHashMap::new, toList()));
     }
 
     public Map<String, List<ResultPrompt>> order(Map<String, List<ResultPrompt>> resultPromptsByResultDefinition) {
@@ -36,7 +36,7 @@ public class ResultPromptsProcessor {
                         elem -> IntStream.range(0, elem.getValue().size())
                                 .mapToObj(i -> {
                                     ResultPrompt rp = elem.getValue().get(i);
-                                    rp.setPromptOrder(i+1);
+                                    rp.setPromptOrder(i + 1);
                                     return rp;
                                 }).collect(toList())));
     }

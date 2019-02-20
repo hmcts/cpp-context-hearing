@@ -31,6 +31,10 @@ public class DefendantCase implements Serializable {
         this.custodyTimeLimitDate = custodyTimeLimitDate;
     }
 
+    public static DefendantCase defendantCase() {
+        return new DefendantCase();
+    }
+
     public UUID getCaseId() {
         return caseId;
     }
@@ -44,21 +48,17 @@ public class DefendantCase implements Serializable {
         return bailStatus;
     }
 
-    public LocalDate getCustodyTimeLimitDate() {
-        return custodyTimeLimitDate;
-    }
-
     public DefendantCase setBailStatus(String bailStatus) {
         this.bailStatus = bailStatus;
         return this;
     }
 
+    public LocalDate getCustodyTimeLimitDate() {
+        return custodyTimeLimitDate;
+    }
+
     public DefendantCase setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
         this.custodyTimeLimitDate = custodyTimeLimitDate;
         return this;
-    }
-
-    public static DefendantCase defendantCase() {
-        return new DefendantCase();
     }
 }

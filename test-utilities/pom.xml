@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>test-utilities</artifactId>
@@ -16,9 +18,21 @@
             <artifactId>hearing-domain-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-viewstore-persistence</artifactId>
+            <version>${project.version}</version>
+        </dependency>-->
+
+        <!-- this is for the metadata builder -->
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-domain-event</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

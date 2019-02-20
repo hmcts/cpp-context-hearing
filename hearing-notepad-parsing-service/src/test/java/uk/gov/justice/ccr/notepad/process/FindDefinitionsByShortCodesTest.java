@@ -35,14 +35,12 @@ public class FindDefinitionsByShortCodesTest {
     ResultCache resultCache = new ResultCache();
     @Spy
     FileResultLoader fileResultLoader = new FileResultLoader();
-    @Mock
-    private CacheFactory cacheFactory;
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
     @InjectMocks
     FindDefinitionsByShortCodes testObj;
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void init() throws ExecutionException {
@@ -63,7 +61,7 @@ public class FindDefinitionsByShortCodesTest {
                 , is(5)
         );
         assertThat(
-                Arrays.asList("imp", "parp","pr","shope", "stimp").containsAll(resultDefinitions.stream().map(ResultDefinition::getShortCode).collect(toList()))
+                Arrays.asList("imp", "parp", "pr", "shope", "stimp").containsAll(resultDefinitions.stream().map(ResultDefinition::getShortCode).collect(toList()))
                 , is(true)
         );
 

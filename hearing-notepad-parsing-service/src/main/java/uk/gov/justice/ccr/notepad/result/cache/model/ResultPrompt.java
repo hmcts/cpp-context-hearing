@@ -3,7 +3,12 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 
 import static java.util.stream.Collectors.toCollection;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 @SuppressWarnings({"squid:S00107"})
 public class ResultPrompt {
@@ -107,12 +112,12 @@ public class ResultPrompt {
         }
     }
 
-    public final void setFixedList(Set<String> fixedList) {
-        this.fixedList = fixedList;
-    }
-
     public Set<String> getFixedList() {
         return fixedList;
+    }
+
+    public final void setFixedList(Set<String> fixedList) {
+        this.fixedList = fixedList;
     }
 
     public Integer getPromptOrder() {

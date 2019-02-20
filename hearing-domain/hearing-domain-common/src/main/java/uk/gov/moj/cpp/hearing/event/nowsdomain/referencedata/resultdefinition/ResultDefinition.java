@@ -5,8 +5,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ResultDefinition {
 
+    public static final String YES = "Y";
     private UUID id;
 
     private String label;
@@ -21,13 +25,19 @@ public class ResultDefinition {
 
     private List<String> userGroups = new ArrayList<>();
 
+    private String version;
+
     private List<Prompt> prompts = new ArrayList<>();
 
     private Date startDate;
 
     private Date endDate;
 
-    private String version;
+    private String welshLabel;
+
+    private Boolean isAvailableForCourtExtract;
+
+    private String financial;
 
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
@@ -129,6 +139,33 @@ public class ResultDefinition {
 
     public ResultDefinition setVersion(String version) {
         this.version = version;
+        return this;
+    }
+
+    public boolean isFinancial() {
+        return financial != null && financial.equalsIgnoreCase(YES);
+    }
+
+    public ResultDefinition setFinancial(final String financial) {
+        this.financial = financial;
+        return this;
+    }
+
+    public Boolean getIsAvailableForCourtExtract() {
+        return isAvailableForCourtExtract;
+    }
+
+    public ResultDefinition setIsAvailableForCourtExtract(final Boolean isAvailableForCourtExtract) {
+        this.isAvailableForCourtExtract = isAvailableForCourtExtract;
+        return this;
+    }
+
+    public String getWelshLabel() {
+        return welshLabel;
+    }
+
+    public ResultDefinition setWelshLabel(String welshLabel) {
+        this.welshLabel = welshLabel;
         return this;
     }
 }

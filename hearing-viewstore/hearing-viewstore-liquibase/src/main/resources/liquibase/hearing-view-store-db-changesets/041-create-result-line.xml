@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
-        <changeSet id="41" author="CCR" logicalFilePath="041-create-result-line"  >
+    <changeSet id="41" author="CCR" logicalFilePath="041-create-result-line">
 
-            <createTable tableName="result_line">
-                <column name="id" type="uuid">
-                    <constraints nullable="false"/>
-                </column>
-                <column name="hearing_id" type="uuid">
-                    <constraints nullable="false"/>
-                </column>
-                <column name="last_shared_date_time" type="DATETIME TZ">
-                    <constraints nullable="false"/>
-                </column>
-            </createTable>
+        <createTable tableName="result_line">
+            <column name="id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_shared_date_time" type="DATETIME TZ">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
 
-            <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_result_line" tableName="result_line"/>
-            <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="result_line"
-                                     constraintName="fk_hearing_result_line" referencedColumnNames="id"
-                                     referencedTableName="ha_hearing"/>
-        </changeSet>
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_result_line"
+                       tableName="result_line"/>
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="result_line"
+                                 constraintName="fk_hearing_result_line" referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+    </changeSet>
 </databaseChangeLog>

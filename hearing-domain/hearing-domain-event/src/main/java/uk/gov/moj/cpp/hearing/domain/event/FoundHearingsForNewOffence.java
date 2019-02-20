@@ -1,14 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.events.found-hearings-for-new-offence")
 @SuppressWarnings("squid:S00107")
@@ -16,170 +16,62 @@ public class FoundHearingsForNewOffence implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID id;
+    private UUID defendantId;
+    private UUID prosecutionCaseId;
+    private uk.gov.justice.core.courts.Offence offence;
+    private List<UUID> hearingIds;
 
-    private final UUID defendantId;
-
-    private final UUID caseId;
-
-    private final String offenceCode;
-
-    private final String wording;
-
-    private final LocalDate startDate;
-
-    private final LocalDate endDate;
-
-    private final Integer count;
-
-    private final LocalDate convictionDate;
-
-    private final List<UUID> hearingIds;
+    private FoundHearingsForNewOffence() {
+    }
 
     @JsonCreator
-    private FoundHearingsForNewOffence(@JsonProperty("id") final UUID id,
-                                       @JsonProperty("defendantId") final UUID defendantId,
-                                       @JsonProperty("caseId") final UUID caseId,
-                                       @JsonProperty("offenceCode") final String offenceCode,
-                                       @JsonProperty("wording") final String wording,
-                                       @JsonProperty("startDate") final LocalDate startDate,
-                                       @JsonProperty("endDate") final LocalDate endDate,
-                                       @JsonProperty("count") final Integer count,
-                                       @JsonProperty("convictionDate") final LocalDate convictionDate,
-                                       @JsonProperty("hearingIds") final List<UUID> hearingIds) {
-        this.id = id;
+    protected FoundHearingsForNewOffence(@JsonProperty("defendantId") final UUID defendantId,
+                                         @JsonProperty("prosecutionCaseId") final UUID prosecutionCaseId,
+                                         @JsonProperty("offence") final uk.gov.justice.core.courts.Offence offence,
+                                         @JsonProperty("hearingIds") final List<UUID> hearingIds) {
         this.defendantId = defendantId;
-        this.caseId = caseId;
-        this.offenceCode = offenceCode;
-        this.wording = wording;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.count = count;
-        this.convictionDate = convictionDate;
+        this.prosecutionCaseId = prosecutionCaseId;
+        this.offence = offence;
         this.hearingIds = new ArrayList<>(hearingIds);
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public List<UUID> getHearingIds() {
-        return new ArrayList<>(hearingIds);
+    public static FoundHearingsForNewOffence foundHearingsForNewOffence() {
+        return new FoundHearingsForNewOffence();
     }
 
     public UUID getDefendantId() {
         return defendantId;
     }
 
-    public UUID getCaseId() {
-        return caseId;
+    public UUID getProsecutionCaseId() {
+        return prosecutionCaseId;
     }
 
-    public String getOffenceCode() {
-        return offenceCode;
+    public uk.gov.justice.core.courts.Offence getOffence() {
+        return offence;
     }
 
-    public String getWording() {
-        return wording;
+    public List<UUID> getHearingIds() {
+        return hearingIds;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public FoundHearingsForNewOffence withDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
+        return this;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
+    public FoundHearingsForNewOffence withProsecutionCaseId(UUID prosecutionCaseId) {
+        this.prosecutionCaseId = prosecutionCaseId;
+        return this;
     }
 
-    public Integer getCount() {
-        return count;
+    public FoundHearingsForNewOffence withOffence(uk.gov.justice.core.courts.Offence offence) {
+        this.offence = offence;
+        return this;
     }
 
-    public LocalDate getConvictionDate() {
-        return convictionDate;
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private UUID id;
-
-        private UUID defendantId;
-
-        private UUID caseId;
-
-        private String offenceCode;
-
-        private String wording;
-
-        private LocalDate startDate;
-
-        private LocalDate endDate;
-
-        private Integer count;
-
-        private LocalDate convictionDate;
-
-        private List<UUID> hearingIds;
-
-        private Builder() {
-        }
-
-        public Builder withId(final UUID id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder withHearingIds(final List<UUID> hearingIds) {
-            this.hearingIds = new ArrayList<>(hearingIds);
-            return this;
-        }
-
-        public Builder withDefendantId(final UUID defendantId) {
-            this.defendantId = defendantId;
-            return this;
-        }
-
-        public Builder withCaseId(final UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-
-        public Builder withOffenceCode(final String offenceCode) {
-            this.offenceCode = offenceCode;
-            return this;
-        }
-
-        public Builder withWording(final String wording) {
-            this.wording = wording;
-            return this;
-        }
-
-        public Builder withStartDate(final LocalDate startDate) {
-            this.startDate = startDate;
-            return this;
-        }
-
-        public Builder withEndDate(final LocalDate endDate) {
-            this.endDate = endDate;
-            return this;
-        }
-
-        public Builder withCount(final Integer count) {
-            this.count = count;
-            return this;
-        }
-
-        public Builder withConvictionDate(final LocalDate convictionDate) {
-            this.convictionDate = convictionDate;
-            return this;
-        }
-
-        public FoundHearingsForNewOffence build() {
-            return new FoundHearingsForNewOffence(id, defendantId, caseId, offenceCode, wording, startDate, endDate, count, convictionDate, hearingIds);
-        }
+    public FoundHearingsForNewOffence withHearingIds(List<UUID> hearingIds) {
+        this.hearingIds = hearingIds;
+        return this;
     }
 }

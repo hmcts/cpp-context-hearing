@@ -1,34 +1,35 @@
 {
   "courtClerk": {
-    "id": "ab746921-d839-4867-bcf9-b41db8ebc852",
-    "firstName": "David",
-    "lastName": "Walliams"
+    "firstName": "Andrew",
+    "id": "05683290-f82a-456f-8017-12d9717b703a",
+    "lastName": "Eldritch"
   },
-  "uncompletedResultLines": [
+  "resultLines": [
     {
-      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-      "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
-      "defendantId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
-      "orderedDate": "2017-12-21"
-    }
-  ],
-  "completedResultLines": [
-    {
-      "id": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-      "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7",
-      "caseId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-      "defendantId": "ebd6d7ba-d040-4fe1-94bf-b300946f2391",
-      "offenceId": "bae56ae5-de09-479f-b48f-d9aae3c6aadd",
-      "orderedDate": "2017-12-21",
-      "level": "CASE",
-      "resultLabel": "Victim Surchange",
+      "delegatedPowers": {
+        "firstName": "David",
+        "lastName": "Bowie",
+        "userId": "50604f62-9b55-46f1-9437-eabbb0e22553"
+      },
+      "orderedDate": "2017-06-26",
+      "sharedDate": "2018-10-29",
+      "resultLineId": "0d8b8e7c-e803-4ba5-96df-1917eccaaf9d",
+      "targetId": "7c2f3051-feff-4acd-ad10-49b3e0bd8958",
+      "offenceId": "601d6448-8287-4d91-918f-1446a202231a",
+      "defendantId": "d3b948b6-0a3e-4530-99a8-8b8eff8fc1a7",
+      "resultDefinitionId": "db4ac13f-9791-4796-8a8e-7c01d84a3893",
       "prompts": [
         {
-          "id": "365367db-06e9-4fad-a37f-bc428227f6b8",
-          "label": "Amount",
-          "value": "£60"
+          "id": "c5eb3552-79ec-4d94-8949-c000c0cce546",
+          "label": "rdLFeuh6tj",
+          "fixedListCode": "fixedListCode",
+          "value": "value1",
+          "welshValue": "wvalue1"
         }
-      ]
+      ],
+      "level": "OFFENCE",
+      "isModified": true,
+      "isComplete": true
     }
   ]
 }

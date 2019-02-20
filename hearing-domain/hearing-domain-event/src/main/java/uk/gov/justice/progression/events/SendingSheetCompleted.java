@@ -19,16 +19,20 @@ public class SendingSheetCompleted {
         this.hearing = hearing;
     }
 
+    public static Builder sendingSheetCompleted() {
+        return new Builder();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public CrownCourtHearing getCrownCourtHearing() {
         return crownCourtHearing;
     }
 
     public Hearing getHearing() {
         return hearing;
-    }
-
-    public static Builder sendingSheetCompleted() {
-        return new Builder();
     }
 
     public static class Builder {
@@ -49,9 +53,5 @@ public class SendingSheetCompleted {
         public SendingSheetCompleted build() {
             return new SendingSheetCompleted(crownCourtHearing, hearing);
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 }

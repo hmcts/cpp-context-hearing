@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
-        <changeSet id="40" author="CCR" logicalFilePath="040_alter-hearingdate-date"  >
-            
-            <modifyDataType tableName="ha_hearing_date" newDataType="DATE" columnName="date" />
-            
-            <addColumn tableName="ha_hearing_date">
-                <column name="date_time" type="DATETIME TZ"></column>
-            </addColumn>
-            
-            <dropColumn tableName="ha_hearing" columnName="start_date_time"/>
-            
-            <createIndex tableName="ha_hearing_date" indexName="hearing_date_idx">
-                <column name="date"/>
-            </createIndex>
+    <changeSet id="40" author="CCR" logicalFilePath="040_alter-hearingdate-date">
 
-        </changeSet>
+        <modifyDataType tableName="ha_hearing_date" newDataType="DATE" columnName="date"/>
+
+        <addColumn tableName="ha_hearing_date">
+            <column name="date_time" type="DATETIME TZ"></column>
+        </addColumn>
+
+        <dropColumn tableName="ha_hearing" columnName="start_date_time"/>
+
+        <createIndex tableName="ha_hearing_date" indexName="hearing_date_idx">
+            <column name="date"/>
+        </createIndex>
+
+    </changeSet>
 </databaseChangeLog>

@@ -1,53 +1,52 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ha_nows_material")
 public class NowsMaterial {
 
+    @ManyToOne
+    @JoinColumn(name = "nows_id", nullable = false)
+    Nows nows;
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
-
     @Column(name = "status", nullable = false)
     private String status;
-
     @ElementCollection
     @CollectionTable(
             name = "ha_nows_material_usergroups",
             joinColumns = @JoinColumn(name = "material_id")
     )
     @Column(name = "user_groups", nullable = false)
-    private List<String> userGroups = new ArrayList<>();
-
-    @ManyToOne
-    @JoinColumn(name = "nows_id", nullable = false)
-    Nows nows;
-
-
+    private Set<String> userGroups = new HashSet<>();
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "nowsMaterial", orphanRemoval = true)
-    private List<NowsResult> nowResult = new ArrayList<>();
+    private Set<NowsResult> nowResult = new HashSet<>();
 
 
     @Column(name = "language")
     private String language;
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public UUID getId() {
         return id;
@@ -65,11 +64,11 @@ public class NowsMaterial {
         this.status = status;
     }
 
-    public List<String> getUserGroups() {
+    public Set<String> getUserGroups() {
         return userGroups;
     }
 
-    public void setUserGroups(List<String> userGroups) {
+    public void setUserGroups(Set<String> userGroups) {
         this.userGroups = userGroups;
     }
 
@@ -81,11 +80,11 @@ public class NowsMaterial {
         this.nows = nows;
     }
 
-    public List<NowsResult> getNowResult() {
+    public Set<NowsResult> getNowResult() {
         return nowResult;
     }
 
-    public void setNowResult(List<NowsResult> nowResult) {
+    public void setNowResult(Set<NowsResult> nowResult) {
         this.nowResult = nowResult;
     }
 
@@ -97,22 +96,34 @@ public class NowsMaterial {
         this.language = language;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        NowsMaterial that = (NowsMaterial) o;
+        return Objects.equals(id, that.id);
+    }
 
-    public static Builder  builder() {
-        return new Builder();
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
     }
 
     public static final class Builder {
         Nows nows;
         private UUID id;
         private String status;
-        private List<String> userGroups = new ArrayList<>();
-        private List<NowsResult> nowResult = new ArrayList<>();
+        private Set<String> userGroups = new HashSet<>();
+        private Set<NowsResult> nowResult = new HashSet<>();
         private String language;
 
         private Builder() {
         }
-
 
         public Builder withId(UUID id) {
             this.id = id;
@@ -124,7 +135,7 @@ public class NowsMaterial {
             return this;
         }
 
-        public Builder withUserGroups(List<String> userGroups) {
+        public Builder withUserGroups(Set<String> userGroups) {
             this.userGroups = userGroups;
             return this;
         }
@@ -134,7 +145,7 @@ public class NowsMaterial {
             return this;
         }
 
-        public Builder withNowResult(List<NowsResult> nowResult) {
+        public Builder withNowResult(Set<NowsResult> nowResult) {
             this.nowResult = nowResult;
             return this;
         }

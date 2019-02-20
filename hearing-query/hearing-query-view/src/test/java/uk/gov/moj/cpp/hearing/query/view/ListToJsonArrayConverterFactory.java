@@ -10,8 +10,6 @@ import java.lang.reflect.Field;
 /**
  * ToDo: this class needs to be moved to framework as it's a common utility and instead of
  * reflection an implementation similar to {@link EnveloperFactory} needs to be used
- *
- * @param <T>
  */
 public class ListToJsonArrayConverterFactory<T> {
 

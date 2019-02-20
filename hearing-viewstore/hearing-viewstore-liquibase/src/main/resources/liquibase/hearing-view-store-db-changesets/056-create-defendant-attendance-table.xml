@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="56" author="hearing" logicalFilePath="056-create-defendant-attendance-table.xml">
+        <createTable tableName="ha_defendant_attendance">
+            <column name="id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defendant_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="day" type="date"/>
+            <column name="is_in_attendance" type="boolean"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

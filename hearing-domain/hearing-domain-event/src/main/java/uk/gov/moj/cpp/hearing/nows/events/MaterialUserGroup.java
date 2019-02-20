@@ -7,12 +7,17 @@ public class MaterialUserGroup implements Serializable {
     private final static long serialVersionUID = 7735855598855790581L;
     private String group;
 
+    public static MaterialUserGroup materialUserGroup() {
+        return new MaterialUserGroup();
+    }
+
     public String getGroup() {
         return group;
     }
 
-    public void setGroup(String group) {
+    public MaterialUserGroup setGroup(String group) {
         this.group = group;
+        return this;
     }
 
 }

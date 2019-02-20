@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="63" author="hearing" logicalFilePath="063-drop-ha_attendes">
+
+        <dropForeignKeyConstraint baseTableName="ha_attendee_hearing_date"
+                                  constraintName="fk_attendee_hearing_date_attendee"/>
+
+        <dropTable tableName="ha_attendee"/>
+        <dropTable tableName="ha_attendee_case"/>
+        <dropTable tableName="ha_attendee_defendant"/>
+        <dropTable tableName="ha_attendee_hearing_date"/>
+    </changeSet>
+</databaseChangeLog>

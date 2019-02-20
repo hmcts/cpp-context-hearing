@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.plea;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Collections.unmodifiableList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -9,7 +8,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class Defendant implements Serializable {
 
@@ -27,6 +27,20 @@ public final class Defendant implements Serializable {
         this.personId = personId;
         this.offences = (null == offences) ? new ArrayList<>() : new ArrayList<>(offences);
 
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static Builder from(Defendant defendant) {
+        Builder builder = builder()
+                .withId(defendant.getId())
+                .withPersonId(defendant.getPersonId());
+
+        defendant.getOffences().forEach(offence -> builder.addOffence(Offence.from(offence)));
+
+        return builder;
     }
 
     public UUID getPersonId() {
@@ -83,19 +97,5 @@ public final class Defendant implements Serializable {
             return new Defendant(id, personId,
                     unmodifiableList(offences.stream().map(Offence.Builder::build).collect(Collectors.toList())));
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static Builder from(Defendant defendant) {
-        Builder builder = builder()
-                .withId(defendant.getId())
-                .withPersonId(defendant.getPersonId());
-
-        defendant.getOffences().forEach(offence -> builder.addOffence(Offence.from(offence)));
-
-        return builder;
     }
 }

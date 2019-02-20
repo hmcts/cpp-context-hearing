@@ -23,24 +23,19 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationRouterTest {
 
+    @Mock
+    JsonEnvelope event;
     private String destination;
     private String replyToAddress;
     private String channelType;
     private Map<String, String> properties;
     private NowsNotificationDocumentState nowsNotificationDocumentState;
-
     @InjectMocks
     private NotificationRouter target;
-
     @Mock
     private EmailNowNotificationChannel emailNowNotificationChannel;
-
     @Mock
     private Sender sender;
-
-    @Mock
-    JsonEnvelope event;
-
     @Captor
     private ArgumentCaptor<Sender> senderCapture;
 

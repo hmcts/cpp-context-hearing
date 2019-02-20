@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="24" author="CCR" logicalFilePath="024_createviewtables.xml">
@@ -41,7 +41,8 @@
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_hearing_event"
-                                 constraintName="fk_hearingex_event_hearing" referencedColumnNames="id"
+                                 constraintName="fk_hearingex_event_hearing"
+                                 referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
 
         <createTable tableName="a_attendee">
@@ -59,7 +60,8 @@
             <column name="title" type="TEXT"/>
         </createTable>
 
-        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_attendee" tableName="a_attendee"/>
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_attendee"
+                       tableName="a_attendee"/>
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_attendee"
                                  constraintName="fk_attendee_hearing" referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
@@ -73,7 +75,8 @@
             <column name="date" type="DATETIME"/>
         </createTable>
 
-        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_hearing_date" tableName="a_hearing_date"/>
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_hearing_date"
+                       tableName="a_hearing_date"/>
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_hearing_date"
                                  constraintName="fk_hearingdate_hearing" referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
@@ -96,12 +99,16 @@
         <addPrimaryKey columnNames="id,hearing_id" constraintName="pk_attendee_hearing_date"
                        tableName="a_attendee_hearing_date"/>
 
-        <addForeignKeyConstraint baseColumnNames="hearing_date_id,hearing_id" baseTableName="a_attendee_hearing_date"
+        <addForeignKeyConstraint baseColumnNames="hearing_date_id,hearing_id"
+                                 baseTableName="a_attendee_hearing_date"
                                  constraintName="fk_attendee_hearing_date_hearing_date"
-                                 referencedColumnNames="id,hearing_id" referencedTableName="a_hearing_date"/>
-        <addForeignKeyConstraint baseColumnNames="attendee_id,hearing_id" baseTableName="a_attendee_hearing_date"
+                                 referencedColumnNames="id,hearing_id"
+                                 referencedTableName="a_hearing_date"/>
+        <addForeignKeyConstraint baseColumnNames="attendee_id,hearing_id"
+                                 baseTableName="a_attendee_hearing_date"
                                  constraintName="fk_attendee_hearing_date_attendee"
-                                 referencedColumnNames="id,hearing_id" referencedTableName="a_attendee"/>
+                                 referencedColumnNames="id,hearing_id"
+                                 referencedTableName="a_attendee"/>
 
 
         <createTable tableName="a_defendant">
@@ -134,7 +141,8 @@
             <column name="interpreter_language" type="TEXT"/>
         </createTable>
 
-        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_defendant" tableName="a_defendant"/>
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_defendant"
+                       tableName="a_defendant"/>
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_defendant"
                                  constraintName="fk_defendant_hearing" referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
@@ -183,15 +191,18 @@
             <column name="unanimous" type="boolean"/>
         </createTable>
 
-        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_offence" tableName="a_offence"/>
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_offence"
+                       tableName="a_offence"/>
         <addForeignKeyConstraint baseColumnNames="case_id" baseTableName="a_offence"
                                  constraintName="fk_offence_case" referencedColumnNames="id"
                                  referencedTableName="a_case"/>
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_offence"
                                  constraintName="fk_offence_hearing" referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
-        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id" baseTableName="a_offence"
-                                 constraintName="fk_offence_defendant" referencedColumnNames="id, hearing_id"
+        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id"
+                                 baseTableName="a_offence"
+                                 constraintName="fk_offence_defendant"
+                                 referencedColumnNames="id, hearing_id"
                                  referencedTableName="a_defendant"/>
 
 
@@ -212,13 +223,17 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="attendee_id, hearing_id, defendant_id" constraintName="pk_attendee_defendant"
+        <addPrimaryKey columnNames="attendee_id, hearing_id, defendant_id"
+                       constraintName="pk_attendee_defendant"
                        tableName="a_attendee_defendant"/>
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_attendee_defendant"
-                                 constraintName="fk_attendee_defendant_hearing" referencedColumnNames="id"
+                                 constraintName="fk_attendee_defendant_hearing"
+                                 referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
-        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id" baseTableName="a_attendee_defendant"
-                                 constraintName="fk_attendee_defendant_defendant" referencedColumnNames="id, hearing_id"
+        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id"
+                                 baseTableName="a_attendee_defendant"
+                                 constraintName="fk_attendee_defendant_defendant"
+                                 referencedColumnNames="id, hearing_id"
                                  referencedTableName="a_defendant"/>
 
         <createTable tableName="a_attendee_case">
@@ -232,10 +247,12 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <addPrimaryKey columnNames="attendee_id, hearing_id, case_id" constraintName="pk_attendee_case"
+        <addPrimaryKey columnNames="attendee_id, hearing_id, case_id"
+                       constraintName="pk_attendee_case"
                        tableName="a_attendee_case"/>
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_attendee_case"
-                                 constraintName="fk_attendee_case_hearing" referencedColumnNames="id"
+                                 constraintName="fk_attendee_case_hearing"
+                                 referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
         <addForeignKeyConstraint baseColumnNames="case_id" baseTableName="a_attendee_case"
                                  constraintName="fk_attendee_case_case" referencedColumnNames="id"

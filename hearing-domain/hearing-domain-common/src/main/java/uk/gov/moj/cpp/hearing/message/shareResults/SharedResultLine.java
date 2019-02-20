@@ -23,44 +23,98 @@ public class SharedResultLine {
 
     private List<Prompt> prompts = new ArrayList<>();
 
+    public static SharedResultLine sharedResultLine() {
+        return new SharedResultLine();
+    }
+
     public UUID getId() {
         return id;
+    }
+
+    public SharedResultLine setId(final UUID id) {
+        this.id = id;
+        return this;
     }
 
     public ZonedDateTime getLastSharedDateTime() {
         return lastSharedDateTime;
     }
 
+    public SharedResultLine setLastSharedDateTime(final ZonedDateTime lastSharedDateTime) {
+        this.lastSharedDateTime = lastSharedDateTime;
+        return this;
+    }
+
     public UUID getCaseId() {
         return caseId;
+    }
+
+    public SharedResultLine setCaseId(final UUID caseId) {
+        this.caseId = caseId;
+        return this;
     }
 
     public UUID getDefendantId() {
         return defendantId;
     }
 
+    public SharedResultLine setDefendantId(final UUID defendantId) {
+        this.defendantId = defendantId;
+        return this;
+    }
+
     public UUID getOffenceId() {
         return offenceId;
+    }
+
+    public SharedResultLine setOffenceId(final UUID offenceId) {
+        this.offenceId = offenceId;
+        return this;
     }
 
     public String getLevel() {
         return level;
     }
 
+    public SharedResultLine setLevel(final String level) {
+        this.level = level;
+        return this;
+    }
+
     public String getLabel() {
         return label;
+    }
+
+    public SharedResultLine setLabel(final String label) {
+        this.label = label;
+        return this;
     }
 
     public Integer getRank() {
         return rank;
     }
 
+    public SharedResultLine setRank(final Integer rank) {
+        this.rank = rank;
+        return this;
+    }
+
     public List<Prompt> getPrompts() {
         return prompts;
     }
 
+    public SharedResultLine setPrompts(final List<Prompt> prompts) {
+        this.prompts = prompts;
+        return this;
+    }
+
     public CourtClerk getCourtClerk() {
         return courtClerk;
+    }
+
+    public SharedResultLine setCourtClerk(final CourtClerk courtClerk) {
+        this.courtClerk = courtClerk;
+        return this;
     }
 
     public LocalDate getOrderedDate() {
@@ -70,59 +124,6 @@ public class SharedResultLine {
     public SharedResultLine setOrderedDate(final LocalDate orderedDate) {
         this.orderedDate = orderedDate;
         return this;
-    }
-    public SharedResultLine setId(final UUID id) {
-        this.id = id;
-        return this;
-    }
-
-    public SharedResultLine setLastSharedDateTime(final ZonedDateTime lastSharedDateTime) {
-        this.lastSharedDateTime = lastSharedDateTime;
-        return this;
-    }
-
-    public SharedResultLine setCaseId(final UUID caseId) {
-        this.caseId = caseId;
-        return this;
-    }
-
-    public SharedResultLine setDefendantId(final UUID defendantId) {
-        this.defendantId = defendantId;
-        return this;
-    }
-
-    public SharedResultLine setOffenceId(final UUID offenceId) {
-        this.offenceId = offenceId;
-        return this;
-    }
-
-    public SharedResultLine setLevel(final String level) {
-        this.level = level;
-        return this;
-    }
-
-    public SharedResultLine setLabel(final String label) {
-        this.label = label;
-        return this;
-    }
-
-    public SharedResultLine setRank(final Integer rank) {
-        this.rank = rank;
-        return this;
-    }
-
-    public SharedResultLine setPrompts(final List<Prompt> prompts) {
-        this.prompts = prompts;
-        return this;
-    }
-
-    public SharedResultLine setCourtClerk(final CourtClerk courtClerk) {
-        this.courtClerk = courtClerk;
-        return this;
-    }
-
-    public static SharedResultLine sharedResultLine() {
-        return new SharedResultLine();
     }
 }
 

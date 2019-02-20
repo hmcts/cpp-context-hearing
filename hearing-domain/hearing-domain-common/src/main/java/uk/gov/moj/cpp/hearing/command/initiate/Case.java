@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Case implements Serializable {
 
@@ -13,7 +13,8 @@ public class Case implements Serializable {
     private UUID caseId;
     private String urn;
 
-    public Case(){}
+    public Case() {
+    }
 
     @JsonCreator
     public Case(@JsonProperty("caseId") UUID caseId, @JsonProperty("urn") String urn) {
@@ -21,12 +22,12 @@ public class Case implements Serializable {
         this.urn = urn;
     }
 
-    public UUID getCaseId() {
-        return caseId;
+    public static Case legalCase() {
+        return new Case();
     }
 
-    public String getUrn() {
-        return urn;
+    public UUID getCaseId() {
+        return caseId;
     }
 
     public Case setCaseId(UUID caseId) {
@@ -34,12 +35,12 @@ public class Case implements Serializable {
         return this;
     }
 
+    public String getUrn() {
+        return urn;
+    }
+
     public Case setUrn(String urn) {
         this.urn = urn;
         return this;
-    }
-
-    public static Case legalCase(){
-        return new Case();
     }
 }

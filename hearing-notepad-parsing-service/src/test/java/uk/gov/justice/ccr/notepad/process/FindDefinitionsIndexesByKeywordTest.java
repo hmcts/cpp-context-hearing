@@ -34,15 +34,12 @@ public class FindDefinitionsIndexesByKeywordTest {
 
     @Spy
     FileResultLoader fileResultLoader = new FileResultLoader();
-
-    @Mock
-    private CacheFactory cacheFactory;
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
     @InjectMocks
     FindDefinitionsIndexesByKeyword testObj;
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void init() throws ExecutionException {
@@ -64,10 +61,10 @@ public class FindDefinitionsIndexesByKeywordTest {
         );
         resultDefinitionsIndex.forEach(resultDefinition -> {
 //            try {
-                assertThat(
-                        resultCache.getResultDefinitions(LocalDate.now()).get(resultDefinition.intValue()).getKeywords().toString(),
-                        AnyOf.anyOf(containsString("rehabilitation"), containsString("imprisonment"), containsString("suspended"))
-                );
+            assertThat(
+                    resultCache.getResultDefinitions(LocalDate.now()).get(resultDefinition.intValue()).getKeywords().toString(),
+                    AnyOf.anyOf(containsString("rehabilitation"), containsString("imprisonment"), containsString("suspended"))
+            );
 //            } catch (ExecutionException e) {
 //                e.printStackTrace();
 //            }

@@ -7,12 +7,11 @@ import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import com.google.common.base.Strings;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.runtime.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
 
 @Startup
 @Singleton
@@ -32,15 +31,15 @@ public class ActivitiService {
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public boolean signalProcessByActivitiIdAndFieldName(final String activityId,
-                    final String fieldName, final Object businessKey) {
+                                                         final String fieldName, final Object businessKey) {
         final Execution execution = runtimeService.createExecutionQuery().activityId(activityId)
-                        .variableValueEquals(fieldName, businessKey).singleResult();
+                .variableValueEquals(fieldName, businessKey).singleResult();
         if (execution != null && !Strings.isNullOrEmpty(execution.getId())) {
             LOGGER.info("Nudging process: Step Name {}, Process Id {}, BusinessKey {}", activityId,
-                            execution.getId(), businessKey);
+                    execution.getId(), businessKey);
             runtimeService.signal(execution.getId());
             return true;
-        } 
-            return false;
+        }
+        return false;
     }
 }

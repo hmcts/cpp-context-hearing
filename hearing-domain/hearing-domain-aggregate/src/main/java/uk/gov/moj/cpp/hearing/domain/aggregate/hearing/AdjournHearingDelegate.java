@@ -1,14 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 
+import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 
 import java.io.Serializable;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("squid:S1068")
 public class AdjournHearingDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -20,22 +20,19 @@ public class AdjournHearingDelegate implements Serializable {
 
     }
 
-    public void handleHearingAdjournedEvent(final HearingAdjourned hearingAdjourned) {
-        momento.setAdjournedHearingIds(hearingAdjourned.getHearings().stream().map(uk.gov.moj.cpp.external.domain.progression.relist.Hearing::getId).collect(Collectors.toList()));
-    }
-
     public Stream<Object> adjournHearing(final AdjournHearing adjournHearing) {
-
-        return Stream.of(
-                new HearingAdjourned(adjournHearing.getCaseId(), adjournHearing.getUrn(), adjournHearing.getHearings().stream().map(hearing -> new uk.gov.moj.cpp.external.domain.progression.relist.Hearing(
-                        momento.getAdjournedHearingIds().stream().findFirst().orElse(UUID.randomUUID()),
-                        hearing.getCourtCentreId(),
-                        hearing.getType(),
-                        hearing.getStartDate(),
-                        hearing.getStartTime(),
-                        hearing.getEstimateMinutes(),
-                        hearing.getDefendants()
-                )).collect(Collectors.toList())));
+        // Start - This is a hack and this snippet of code will be removed and hearing language will be set in HearingAdjournTransformer once the language is made mandatory in initiate hearing..
+        adjournHearing.getNextHearings().forEach(hearing -> {
+            if (this.momento.getHearing().getHearingLanguage() == null) {
+                hearing.setHearingLanguage(HearingLanguage.ENGLISH);
+            }
+            hearing.setHearingLanguage(this.momento.getHearing().getHearingLanguage());
+        });
+        // End - This is a hack and this snippet of code will be removed and hearing language will be set in HearingAdjournTransformer once the language is made mandatory in initiate hearing..
+        HearingAdjourned hearingAdjourned = new HearingAdjourned(adjournHearing.getAdjournedHearing(), adjournHearing.getNextHearings());
+        //TODO remove this bodge and update listing json schema
+        hearingAdjourned.getNextHearings().forEach(hearing->hearing.getCourtCentre().setAddress(null));
+        return Stream.of(hearingAdjourned);
 
     }
 }

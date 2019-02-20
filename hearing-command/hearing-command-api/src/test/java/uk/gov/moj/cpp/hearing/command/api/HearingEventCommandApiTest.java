@@ -140,7 +140,7 @@ public class HearingEventCommandApiTest {
         assertThat(senderArgumentCaptor.getValue(), is(jsonEnvelope(
                 withMetadataEnvelopedFrom(command)
                         .withName("dummy")
-                .withCausationIds(),
+                        .withCausationIds(),
                 payloadIsJson(allOf(
                         withoutJsonPath(format("$.%s", FIELD_ALTERABLE))
                 )))

@@ -1,11 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.core.courts.CourtClerk;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class CompletedResultLineStatus implements Serializable {
 
@@ -13,7 +15,7 @@ public final class CompletedResultLineStatus implements Serializable {
 
     private final UUID id;
 
-    private CourtClerk courtClerk;
+    private uk.gov.justice.core.courts.CourtClerk courtClerk;
 
     private ZonedDateTime lastSharedDateTime;
 
@@ -21,10 +23,14 @@ public final class CompletedResultLineStatus implements Serializable {
     @JsonCreator
     private CompletedResultLineStatus(@JsonProperty("id") final UUID id,
                                       @JsonProperty("lastSharedDateTime") final ZonedDateTime lastSharedDateTime,
-                                      @JsonProperty("courtClerk") final CourtClerk courtClerk) {
+                                      @JsonProperty("courtClerk") final uk.gov.justice.core.courts.CourtClerk courtClerk) {
         this.id = id;
         this.lastSharedDateTime = lastSharedDateTime;
         this.courtClerk = courtClerk;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public UUID getId() {
@@ -35,22 +41,18 @@ public final class CompletedResultLineStatus implements Serializable {
         return lastSharedDateTime;
     }
 
-    public CourtClerk getCourtClerk() {
-        return courtClerk;
-    }
-
-    public CompletedResultLineStatus setCourtClerk(final CourtClerk courtClerk) {
-        this.courtClerk = courtClerk;
-        return this;
-    }
-
     public CompletedResultLineStatus setLastSharedDateTime(final ZonedDateTime lastSharedDateTime) {
         this.lastSharedDateTime = lastSharedDateTime;
         return this;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public uk.gov.justice.core.courts.CourtClerk getCourtClerk() {
+        return courtClerk;
+    }
+
+    public CompletedResultLineStatus setCourtClerk(final uk.gov.justice.core.courts.CourtClerk courtClerk) {
+        this.courtClerk = courtClerk;
+        return this;
     }
 
     public static final class Builder {
@@ -59,7 +61,7 @@ public final class CompletedResultLineStatus implements Serializable {
 
         private ZonedDateTime lastSharedDateTime;
 
-        private CourtClerk courtClerk;
+        private uk.gov.justice.core.courts.CourtClerk courtClerk;
 
         public Builder withId(final UUID id) {
             this.id = id;

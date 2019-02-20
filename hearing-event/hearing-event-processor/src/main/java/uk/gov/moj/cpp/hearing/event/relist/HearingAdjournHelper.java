@@ -1,9 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.relist;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Defendant;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
-import uk.gov.moj.cpp.hearing.command.result.ResultPrompt;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPrompt;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingResultDefinition;
@@ -27,22 +28,25 @@ public final class HearingAdjournHelper {
                 .map(NextHearingPrompt::getId).collect(Collectors.toList());
     }
 
-    public static Set<String> getDistinctPromptValue(final List<CompletedResultLine> completedResultLines, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions, final List<UUID> dateOfHearingPromptIds) {
+    public static Set<String> getDistinctPromptValue(final List<ResultLine> completedResultLines, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions, final List<UUID> dateOfHearingPromptIds) {
         return completedResultLines.stream().filter(completedResultLine -> nextHearingResultDefinitions.containsKey(completedResultLine.getResultDefinitionId()))
-                .map(CompletedResultLine::getPrompts).flatMap(List::stream)
+                .map(ResultLine::getPrompts).flatMap(List::stream)
                 .filter(resultPrompt -> dateOfHearingPromptIds.contains(resultPrompt.getId()))
-                .map(ResultPrompt::getValue)
+                .map(Prompt::getValue)
                 .collect(Collectors.toSet());
     }
 
-    public static List<Offence> getOffencesHaveResultNextHearing(final Defendant defendant, final List<CompletedResultLine> completedResultLines, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
-        return defendant.getOffences().stream().filter(off -> isSharedResultHaveNextHearingResults(completedResultLines, off, nextHearingResultDefinitions.keySet())).collect(Collectors.toList());
+    public static List<Offence> getOffencesHaveResultNextHearing(final Defendant defendant, final List<Target> targets, final List<ResultLine> completedResultLines, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
+        return defendant.getOffences().stream().filter(off -> isSharedResultHaveNextHearingResults(targets, completedResultLines, off, nextHearingResultDefinitions.keySet())).collect(Collectors.toList());
     }
 
+    private static Target findTargetByResultLine(final List<Target> targets, final ResultLine resultLine) {
+        return targets.stream().filter(target -> target.getResultLines().contains(resultLine)).findFirst().orElse(null);
+    }
 
-    private static boolean isSharedResultHaveNextHearingResults(final List<CompletedResultLine> completedResultLines, final Offence offence, final Set<UUID> nextHearingResultIds) {
+    private static boolean isSharedResultHaveNextHearingResults(final List<Target> targets, final List<ResultLine> completedResultLines, final Offence offence, final Set<UUID> nextHearingResultIds) {
         return completedResultLines.stream()
-                .filter(completedResultLine -> completedResultLine.getOffenceId().equals(offence.getId()))
+                .filter(completedResultLine -> findTargetByResultLine(targets, completedResultLine).getOffenceId().equals(offence.getId()))
                 .filter(completedResultLine -> nextHearingResultIds.contains(completedResultLine.getResultDefinitionId()))
                 .count() > 0;
     }

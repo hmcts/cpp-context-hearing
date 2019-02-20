@@ -1,10 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.conviction-date-added.json",
   "type": "object",
   "properties": {
     "caseId": {
       "$ref": "#/definitions/uuid"
-    },  
+    },
     "hearingId": {
       "$ref": "#/definitions/uuid"
     },
@@ -16,7 +17,7 @@
     }
   },
   "required": [
-    "caseId",  
+    "caseId",
     "hearingId",
     "offenceId",
     "convictionDate"

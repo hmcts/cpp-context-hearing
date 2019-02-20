@@ -24,12 +24,12 @@ public class Interpreter implements Serializable {
         this.language = language;
     }
 
-    public boolean isNeeded() {
-        return needed;
+    public static Interpreter interpreter() {
+        return new Interpreter();
     }
 
-    public String getLanguage() {
-        return language;
+    public boolean isNeeded() {
+        return needed;
     }
 
     public Interpreter setNeeded(boolean needed) {
@@ -37,12 +37,12 @@ public class Interpreter implements Serializable {
         return this;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
     public Interpreter setLanguage(String language) {
         this.language = language;
         return this;
-    }
-
-    public static Interpreter interpreter() {
-        return new Interpreter();
     }
 }

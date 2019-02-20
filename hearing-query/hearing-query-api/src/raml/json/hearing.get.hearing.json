@@ -1,200 +1,254 @@
 {
-   "hearingId":"23ef34ec-63e5-422e-8071-9b3753008c10",
-   "startDate":"2018-02-22",
-   "startTime":"10:30:00",
-   "roomName":"3-1",
-   "hearingType":"TRIAL",
-   "courtCentreName":"Liverpool Crown Court",
-   "judge":{
-      "id":"a38d0d5f-a26c-436b-9b5e-4dc58f28878d",
-      "title":"HHJ",
-      "firstName":"Alan",
-      "lastName":"Mathison Turing"
-   },
-   "hearingDays":["2018-02-22"],
-   "roomId":"e7721a38-546d-4b56-9992-ebdd772a561b",
-   "courtCentreId":"e8821a38-546d-4b56-9992-ebdd772a561f",
-   "attendees":{
-      "prosecutionCounsels":[
-         {
-            "attendeeId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
-            "title":"MR",
-            "status":"QC",
-            "firstName":"Brian J.",
-            "lastName":"Fox",
-            "hearingDates": [ "2018-02-22" ]
-         }
-      ],
-      "defenceCounsels":[
-         {
-            "attendeeId":"743d333a-b270-4de6-a598-61abb64a8027",
-            "defendantId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
-            "status":"QC",
-            "title":"MR",
-            "firstName":"Mark",
-            "lastName":"Zuckerberg",
-            "hearingDates": [ "2018-02-22" ]
-         },
-         {
-            "attendeeId":"cdc14b89-6b4d-4e98-9641-826c355c51b8",
-            "defendantId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
-            "status":"QC",
-            "title":"MR",
-            "firstName":"Sean",
-            "lastName":"Parker",
-            "hearingDates": [ "2018-02-22" ]
-         }
-      ]
-   },
-   "cases":[
+  "hearing": {
+    "courtCentre": {
+      "id": "89b10041-b44d-43c8-9b1e-d1b9fee15c93",
+      "name": "00ObpXuu51",
+      "roomId": "d7020fe0-cd97-4ce0-84c2-fd00ff0bc48a",
+      "roomName": "JK2Y7hu0Tc",
+      "welshName": "3IpJDfdfhS",
+      "welshRoomName": "hm60SAXokc"
+    },
+    "defenceCounsels": [],
+    "defendantAttendance": [],
+    "defendantReferralReasons": [
       {
-         "caseId":"9b70743c-69b3-4ac2-a362-8c720b32e45b",
-         "caseUrn":"8C720B32E45B",
-         "defendants":[
-            {
-               "defendantId":"841164f6-13bc-46ff-8634-63cf9ae85d36",
-               "personId":"5a6e2001-91ed-4af2-99af-f30ddc9ef5af",
-               "firstName":"Ken",
-               "lastName":"Thompson",
-               "homeTelephone":"02070101010",
-               "mobile":"07422263910",
-               "fax":"021111111",
-               "email":"ken.thompson@acme.me",
-               "address":{
-                  "formattedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
-                  "address1":"222 Furze Road Exeter",
-                  "address2":"Lorem Ipsum",
-                  "address3":"Solor",
-                  "address4":"Porro Quisquam",
-                  "postCode":"CR0 1XG"
-               },
-               "dateOfBirth":"1943-02-04",
-               "offences":[
-                  {
-                     "id":"4b1318e4-1517-4e4f-a89d-6af0eafa5058",
-                     "wording":"on 01/08/2009 at the County public house, unlawfully and maliciously wounded, John Smith",
-                     "count":1,
-                     "title":"Wound / inflict grievous bodily harm without intent",
-                     "legislation":"Contrary to section 20 of the Offences Against the Person Act 1861.",
-                     "plea":{
-                        "pleaId":"0161a828-cfd1-4608-8616-d92870baba3d",
-                        "pleaDate":"2016-06-08",
-                        "value":"GUILTY"
-                     },
-                     "verdict":{
-                        "verdictId":"0161a828-cfd1-4608-8616-d92870bada3d",
-                        "value":{
-                           "id":"0161a828-cfd1-4608-8616-d92870bada3d",
-                           "category":"Guilty",
-                           "categoryType":"GUILTY",
-                           "verdictTypeId":"4baecac5-222b-402d-9047-84803679edab",
-                           "lesserOffence":"Obstructing the Police Officer",
-                           "code":"A1",
-                           "description":"Guilty By Jury On Judges Direction"
-                        },
-                        "verdictDate":"2018-02-21",
-                        "numberOfSplitJurors":2,
-                        "numberOfJurors":10,
-                        "unanimous":false
-                     }
-                  }
-               ]
+        "defendantId": "0a4e0114-90ec-4158-a518-0e42b5a33f57",
+        "description": "xeeXGtrkBb",
+        "id": "e58210d7-4850-412d-9d23-0750279ad608"
+      }
+    ],
+    "hasSharedResults": false,
+    "hearingCaseNotes": [],
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 1531791578,
+        "listingSequence": 810249414,
+        "sittingDay": "2015-01-12T05:27:17.210Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "88705e62-383d-4fc4-bba9-922448849f3d",
+    "judiciary": [
+      {
+        "firstName": "2frEDcDru6",
+        "isBenchChairman": false,
+        "isDeputy": false,
+        "judicialId": "07e9cd55-0eff-4eb3-961f-0d83e259e415",
+        "judicialRoleType": "CIRCUIT_JUDGE",
+        "lastName": "5NtwlWTnVK",
+        "middleName": "HjOi40bTgB",
+        "title": "yuGUsdFwZ0"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [
+      {
+        "caseStatus": "7IViOaQKKm",
+        "defendants": [
+          {
+            "associatedPersons": [
+              {
+                "person": {
+                  "additionalNationalityCode": "85UggNgCoF",
+                  "additionalNationalityId": "bb2f2c13-23f7-474d-a6de-79f44d089723",
+                  "address": {
+                    "address1": "K9k9i5w2LU",
+                    "address2": "JrafvauIzp",
+                    "address3": "bXizBQod33",
+                    "address4": "V4Iu3YKR7Z",
+                    "address5": "tRGVIIKPwX",
+                    "postcode": "GU36 7LX"
+                  },
+                  "contact": {
+                    "fax": "1206129671",
+                    "home": "466210102",
+                    "mobile": "788398905",
+                    "primaryEmail": "wvll48ur2y@oo7uauou2g.mz4sbeoqlk",
+                    "secondaryEmail": "rkub43lm11@qjxgda0lht.e9ue0gxf8z",
+                    "work": "1491750270"
+                  },
+                  "dateOfBirth": "2014-05-17",
+                  "disabilityStatus": "A6Tdsoei5X",
+                  "ethnicity": "mRXpgcog0c",
+                  "ethnicityId": "90e69074-12d4-45b3-8e9f-acfa7dd90372",
+                  "firstName": "oGBHlj6Tl6",
+                  "gender": "NOT_SPECIFIED",
+                  "interpreterLanguageNeeds": "ukgD76f0Y1",
+                  "lastName": "U0kJSCrSFF",
+                  "middleName": "qSQVWtBuMD",
+                  "nationalInsuranceNumber": "EL530424B",
+                  "nationalityCode": "5yp2IYkPLD",
+                  "nationalityId": "80e99009-2443-439c-85fc-36665c5844a2",
+                  "nationalityDescription":"BRITISH",
+                  "occupation": "qOQL0h4a52",
+                  "occupationCode": "bUWcUAqLz9",
+                  "specificRequirements": "yhzFIyxBTd",
+                  "title": "MS"
+                },
+                "role": "Xz9LewXKcO"
+              }
+            ],
+            "defenceOrganisation": {
+              "address": {
+                "address1": "l8ei6WcVOs",
+                "address2": "UVVSIrzHJb",
+                "address3": "LIu7UXbpkf",
+                "address4": "Rwt0ezrwZU",
+                "address5": "HYNUgN3nuD",
+                "postcode": "S18 8PT"
+              },
+              "contact": {
+                "fax": "977730054",
+                "home": "943766255",
+                "mobile": "1104876325",
+                "primaryEmail": "ub1dxaku3j@g5vf01m25u.gkqlob82il",
+                "secondaryEmail": "2vs4hw49lf@f7gzcwvgzz.ohbv0jiozt",
+                "work": "1414951978"
+              },
+              "id": "a785b0d1-c48b-4782-996c-ffdbf99edfef",
+              "incorporationNumber": "Yqx3w48WOk",
+              "name": "gJaKWFC4hH",
+              "registeredCharityNumber": "v4WFZS9i8i"
             },
-            {
-               "defendantId":"3739b4e3-1f81-4d12-a99d-ad27ae672566",
-               "personId":"98583be4-8d4a-4552-9252-ceccd61d32db",
-               "firstName":"William Nelson",
-               "lastName":"Joy",
-               "homeTelephone":"02070101010",
-               "mobile":"07422263910",
-               "fax":"021111111",
-               "email":"william-nelson.joy@acme.me",
-               "address":{
-                  "formattedAddress":"222 Furze Road Exeter Lorem Ipsum Solor Porro Quisquam CR0 1XG",
-                  "address1":"222 Furze Road Exeter",
-                  "address2":"Lorem Ipsum",
-                  "address3":"Solor",
-                  "address4":"Porro Quisquam",
-                  "postCode":"CR0 1XG"
-               },
-               "dateOfBirth":"1954-11-08",
-               "offences":[
-                  {
-                     "id":"4b1318e4-1517-4e4f-a89d-6af0eafa5058",
-                     "wording":"on 01/08/2009 at the County public house, unlawfully and maliciously wounded, John Smith",
-                     "count":1,
-                     "title":"Wound / inflict grievous bodily harm without intent",
-                     "legislation":"Contrary to section 20 of the Offences Against the Person Act 1861.",
-                     "convictionDate":"1983-02-04",
-                     "plea":{
-                        "pleaId":"0161a828-cfd1-4608-8616-d92870baba3d",
-                        "pleaDate":"2016-06-08",
-                        "value":"GUILTY"
-                     },
-                     "verdict":{
-                        "verdictId":"0161a828-cfd1-4608-8616-d92870bada3d",
-                        "value":{
-                           "id":"0161a828-cfd1-4608-8616-d92870bada3d",
-                           "category":"Guilty",
-                           "categoryType":"GUILTY",
-                           "verdictTypeId":"7baecac5-222b-402d-9047-84803679edab",
-                           "lesserOffence":"Obstructing the Police Officer",
-                           "code":"A1",
-                           "description":"Guilty By Jury On Judges Direction"
-                        },
-                        "verdictDate":"2018-02-21",
-                        "numberOfSplitJurors":2,
-                        "numberOfJurors":10,
-                        "unanimous":false
-                     }
-                  }
-               ]
-            }
-         ],
-         "witnesses": [
-            {
-               "id": "ab746921-d839-4867-bcf9-b41db8ebc850",
-               "type":"Prosecution",
-               "classification": "Professional",
-               "personId": "ab746921-d839-4867-bcf9-b41db8ebc852",
-               "title": "Mr",
-               "firstName": "David",
-               "lastName": "LLOYD",
-               "dateOfBirth": "1980-07-15",
-               "nationality": "England",
-               "gender": "Male",
-               "homeTelephone": "02012345678",
-               "workTelephone": "02012345679",
-               "mobile": "07777777777",
-               "fax": "02011111111",
-               "email": "email@email.com"
-            }
-         ]
+            "id": "5bdab12c-dfa5-4a7a-b302-21ca74652a96",
+            "legalEntityDefendant": {},
+            "numberOfPreviousConvictionsCited": 428806766,
+            "offences": [
+              {
+                "arrestDate": "2014-03-10",
+                "chargeDate": "2015-12-31",
+                "count": 1765202532,
+                "endDate": "2015-04-25",
+                "id": "f57b65bf-41ca-4183-80b5-ba94f67029a5",
+                "indicatedPlea": {
+                  "allocationDecision": {
+                    "courtDecision": "CONSENT_SUMMARY_TRIAL",
+                    "defendantRepresentation": "ELECT_TRIAL_ON_INDICTMENT",
+                    "indicationOfSentence": "gzMlJkwIou",
+                    "prosecutionRepresentation": "ELECT_TRIAL_ON_INDICTMENT"
+                  },
+                  "indicatedPleaDate": "2018-01-15",
+                  "indicatedPleaValue": "INDICATED_GUILTY",
+                  "offenceId": "f57b65bf-41ca-4183-80b5-ba94f67029a5",
+                  "source": "ONLINE"
+                },
+                "modeOfTrial": "Pt3tIfWbDy",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2015-03-19",
+                  "notifiedPleaValue": "NOTIFIED_GUILTY",
+                  "offenceId": "f57b65bf-41ca-4183-80b5-ba94f67029a5"
+                },
+                "offenceCode": "4FgKFGNIbM",
+                "offenceDefinitionId": "247f5b9c-ba13-4b58-93a2-a041de3b50af",
+                "offenceFacts": {
+                  "alcoholReadingAmount": "Rw22wyDXYM",
+                  "alcoholReadingMethod": "ceXwHAURVN",
+                  "vehicleRegistration": "jaRtw80obX"
+                },
+                "offenceLegislation": "ahC8IM7NrC",
+                "offenceLegislationWelsh": "TYmTOIFDy3",
+                "offenceTitle": "smfYFtRu58",
+                "offenceTitleWelsh": "dxN0XRy8m4",
+                "orderIndex": 1793570826,
+                "startDate": "2014-12-14",
+                "wording": "SLRgn6LQux",
+                "wordingWelsh": "FaLfFvMML5"
+              }
+            ],
+            "personDefendant": {
+              "aliases": [
+                "thiCkgAF3H"
+              ],
+              "arrestSummonsNumber": "YZwdeeyp07",
+              "bailStatus": "uWY0sqRmJq",
+              "custodyTimeLimit": "2017-02-15",
+              "driverNumber": "ZijvcF1kJw",
+              "employerOrganisation": {
+                "address": {
+                  "address1": "sEkB4NJXe8",
+                  "address2": "iN84fhI2eb",
+                  "address3": "WQzsPhBuJs",
+                  "address4": "DtvRTB8aVf",
+                  "address5": "sgTR0ekCgK",
+                  "postcode": "LO33 3AF"
+                },
+                "contact": {
+                  "fax": "721479747",
+                  "home": "594477468",
+                  "mobile": "1198645354",
+                  "primaryEmail": "tg5dvi27ye@c0zvplcopu.rrss7zsphs",
+                  "secondaryEmail": "muhbjnl1vt@oa0vtuuyqb.ux8jrsbu2a",
+                  "work": "1537341309"
+                },
+                "id": "704bfdd2-827e-49e7-ae7e-307088456cb9",
+                "incorporationNumber": "u5z4iYH6wX",
+                "name": "nQhvrzHrqx",
+                "registeredCharityNumber": "4VVlrpZ4FA"
+              },
+              "employerPayrollReference": "vlODUIHJWz",
+              "observedEthnicityCode": "sCS4WXzps5",
+              "observedEthnicityId": "56144e2a-8760-4687-a903-86cf5d6c87a4",
+              "perceivedBirthYear": 503786770,
+              "personDetails": {
+                "additionalNationalityCode": "7aVq7JQdo3",
+                "additionalNationalityId": "713dc8bb-3c5e-4677-9bd1-d9c417a3ba94",
+                "address": {
+                  "address1": "WlTNuIMmP0",
+                  "address2": "troD3Widrx",
+                  "address3": "TuOkXHxnip",
+                  "address4": "q5OZK7WOxf",
+                  "address5": "pFDCAPcE8q",
+                  "postcode": "I4 6NF"
+                },
+                "contact": {
+                  "fax": "760028931",
+                  "home": "30670674",
+                  "mobile": "1584681916",
+                  "primaryEmail": "horoc1xi55@bi73vdk3nv.2lhpcdlxzc",
+                  "secondaryEmail": "bw2btmyryh@mlscsbdtoq.9ddk8bzu8o",
+                  "work": "863489699"
+                },
+                "dateOfBirth": "2016-06-22",
+                "disabilityStatus": "C9KpEqrcOb",
+                "ethnicity": "hzHRAa6Fpm",
+                "ethnicityId": "45b02316-71c6-4ba1-9f27-e2d3cb7174cc",
+                "firstName": "JquMYcAJxw",
+                "gender": "MALE",
+                "interpreterLanguageNeeds": "lK7c66ca8W",
+                "lastName": "6tyOhRMREc",
+                "middleName": "3YAWVaBXGj",
+                "nationalInsuranceNumber": "BL454177A",
+                "nationalityCode": "NwRIgLSrep",
+                "nationalityId": "2ee40a57-d1fe-4fed-a183-c5065e767c46",
+                "occupation": "j0RGyZd909",
+                "occupationCode": "JTyEMdCd1h",
+                "specificRequirements": "Whc9oa7nIm",
+                "title": "MRS"
+              },
+              "pncId": "P28SOJqYm1",
+              "selfDefinedEthnicityCode": "bBSl7qisON",
+              "selfDefinedEthnicityId": "32ec0167-fbe4-4562-b5e7-c6fb8a96298f"
+            },
+            "prosecutionAuthorityReference": "aAQbmh1txe",
+            "prosecutionCaseId": "9f035918-5dd6-4771-a6bb-9b05fa92f129"
+          }
+        ],
+        "id": "9f035918-5dd6-4771-a6bb-9b05fa92f129",
+        "initiationCode": "S",
+        "originatingOrganisation": "UbPX2hL87k",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "4ZKOPhuyh5",
+          "prosecutionAuthorityId": "e677b61a-3360-48b0-8eee-649911475106",
+          "caseURN": "qriGUBZKR5"
+        }
       }
-   ],
-   "defenceWitnesses": [
-      {
-         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb491",
-         "type": "Defence",
-         "classification": "Expert",
-         "title": "Mr",
-         "firstName": "Barack",
-         "lastName": "OBAMA",
-         "defendants": [
-            {
-               "defendantId": "3739b4e3-1f81-4d12-a99d-ad27ae672566"
-            }
-         ]
-      }
-   ],
-   "resultLines": [
-      {
-         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb491",
-         "lastSharedDateTime" : "2018-02-21 10:30:00"
-      },
-      {
-         "id": "cd6856d4-e2e3-43e4-bd4d-8638af8eb492",
-         "lastSharedDateTime" : "2018-02-20 10:30:00"
-      }
-   ]
+    ],
+    "prosecutionCounsels": [],
+    "reportingRestrictionReason": "0bxiILwsNy",
+    "targets": [],
+    "type": {
+      "description": "qm1rJUZb0f",
+      "id": "9623a7ac-25bb-43f8-b219-2ae4cd8b05db"
+    }
+  }
 }

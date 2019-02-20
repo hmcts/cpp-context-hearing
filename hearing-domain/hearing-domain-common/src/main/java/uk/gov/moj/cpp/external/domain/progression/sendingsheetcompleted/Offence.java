@@ -4,7 +4,10 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public class Offence  implements Serializable {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties({"title", "legislation", "orderIndex"})
+public class Offence implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,107 +32,110 @@ public class Offence  implements Serializable {
     private String section;
 
     private LocalDate startDate;
-
-    private void setCategory(final String category) {
-        this.category = category;
-    }
-
-    private void setConvictionDate(final LocalDate convictionDate) {
-        this.convictionDate = convictionDate;
-    }
-
-    private void setDescription(final String description) {
-        this.description = description;
-    }
-
-    private void setEndDate(final LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    private void setId(final UUID id) {
-        this.id = id;
-    }
-
-    private void setIndicatedPlea(final IndicatedPlea indicatedPlea) {
-        this.indicatedPlea = indicatedPlea;
-    }
-
-    private void setOffenceCode(final String offenceCode) {
-        this.offenceCode = offenceCode;
-    }
-
-    private void setPlea(final Plea plea) {
-        this.plea = plea;
-    }
-
-    private void setReason(final String reason) {
-        this.reason = reason;
-    }
-
-    private void setSection(final String section) {
-        this.section = section;
-    }
-
-    private void setStartDate(final LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    private void setWording(final String wording) {
-        this.wording = wording;
-    }
-
     private String wording;
+
+    public static Builder offences() {
+        return new Offence.Builder();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public String getCategory() {
         return category;
+    }
+
+    private void setCategory(final String category) {
+        this.category = category;
     }
 
     public LocalDate getConvictionDate() {
         return convictionDate;
     }
 
+    private void setConvictionDate(final LocalDate convictionDate) {
+        this.convictionDate = convictionDate;
+    }
+
     public String getDescription() {
         return description;
+    }
+
+    private void setDescription(final String description) {
+        this.description = description;
     }
 
     public LocalDate getEndDate() {
         return endDate;
     }
 
+    private void setEndDate(final LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
     public UUID getId() {
         return id;
+    }
+
+    private void setId(final UUID id) {
+        this.id = id;
     }
 
     public IndicatedPlea getIndicatedPlea() {
         return indicatedPlea;
     }
 
+    private void setIndicatedPlea(final IndicatedPlea indicatedPlea) {
+        this.indicatedPlea = indicatedPlea;
+    }
+
     public String getOffenceCode() {
         return offenceCode;
+    }
+
+    private void setOffenceCode(final String offenceCode) {
+        this.offenceCode = offenceCode;
     }
 
     public Plea getPlea() {
         return plea;
     }
 
+    private void setPlea(final Plea plea) {
+        this.plea = plea;
+    }
+
     public String getReason() {
         return reason;
+    }
+
+    private void setReason(final String reason) {
+        this.reason = reason;
     }
 
     public String getSection() {
         return section;
     }
 
+    private void setSection(final String section) {
+        this.section = section;
+    }
+
     public LocalDate getStartDate() {
         return startDate;
+    }
+
+    private void setStartDate(final LocalDate startDate) {
+        this.startDate = startDate;
     }
 
     public String getWording() {
         return wording;
     }
 
-    public static Builder offences() {
-        return new Offence.Builder();
+    private void setWording(final String wording) {
+        this.wording = wording;
     }
 
     public static class Builder {
@@ -235,9 +241,5 @@ public class Offence  implements Serializable {
 
             return offence;
         }
-    }
-
-    public static Builder builder(){
-        return new Builder();
     }
 }

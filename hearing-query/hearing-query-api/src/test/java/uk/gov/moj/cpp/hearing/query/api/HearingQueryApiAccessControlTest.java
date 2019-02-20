@@ -22,12 +22,11 @@ import org.mockito.Mock;
 public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTest {
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
-    private static final String ACTION_NAME_GET_HEARINGS_BY_DATE = "hearing.get.hearings-by-date";
+    private static final String ACTION_NAME_GET_HEARINGS = "hearing.get.hearings";
     private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
     private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
-    private static final String ACTION_NAME_GET_NOWS = "hearing.get.nows";
     private static final String HEARING_QUERY_SEARCH_BY_MATERIAL_ID = "hearing.query.search-by-material-id";
 
     @Mock
@@ -38,73 +37,64 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearing() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "System Users");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearing() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "System Users");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users");
     }
 
     @Test
-    public void shouldAllowUserInAuthorisedGroupToGetHearingsByDateV2() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_DATE, "Listing Officers", "Court Clerks");
+    public void shouldAllowUserInAuthorisedGroupToGetHearings() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByDateV2() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_BY_DATE, "Listing Officers", "Court Clerks");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetDraftResult() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Court Clerks");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetDraftResult() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Court Clerks");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearingEventLog() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_LOG, "Listing Officers", "Court Clerks");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_LOG, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventLog() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_LOG, "Listing Officers", "Court Clerks");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_LOG, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearingEventDefinitions() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinitions() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearingEventDefinition() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinition() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers");
     }
 
-    @Test
-    public void shouldAllowUserInAuthorisedGroupToGetNows() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_NOWS, "Listing Officers", "Court Clerks","System Users");
-    }
-
-    @Test
-    public void shouldNotAllowUserInUnauthorisedGroupToGetNows() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_NOWS, "Listing Officers", "Court Clerks","System Users");
-    }
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToSearchByMaterialId() {

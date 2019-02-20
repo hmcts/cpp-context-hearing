@@ -1,18 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.ResultDefinitions;
-
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -26,7 +13,37 @@ import static uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant.variant
 import static uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey.variantKey;
 import static uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue.variantValue;
 
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Target;
+import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.Test;
+
 public class GenerateVariantDecisionMakerTest {
+
+    private List<Target> createTargets(final UUID defendantId, final UUID resultLineId, final UUID resultDefinitionId) {
+        return singletonList(
+                Target.target()
+                        .withDefendantId(defendantId)
+                        .withTargetId(UUID.randomUUID())
+                        .withResultLines(singletonList(
+                                ResultLine.resultLine()
+                                        .withResultLineId(resultLineId)
+                                        .withResultDefinitionId(resultDefinitionId)
+                                        .withIsComplete(true)
+                                        .build()
+                        )).build()
+        );
+    }
 
     @Test
     public void decide_toNotGenerateTheVariantBecauseNoResultLinesHaveChangedSinceLast() {
@@ -35,20 +52,15 @@ public class GenerateVariantDecisionMakerTest {
 
         NowDefinition nowDefinition = NowDefinition.now()
                 .setId(randomUUID())
-                .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions().setId(randomUUID())));
+                .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions().setId(randomUUID())));
 
 
         ZonedDateTime lastSharedTime = PAST_ZONED_DATE_TIME.next();
         List<String> usergroups = asList("Listing Officer", "Court Clerk");
 
         GenerateVariantDecisionMaker generateVariantDecisionMaker = new GenerateVariantDecisionMakerFactory()
-                .setCompletedResultLines(singletonList(
-                        CompletedResultLine.builder()
-                                .withId(resultLineId)
-                                .withDefendantId(defendantId)
-                                .withResultDefinitionId(nowDefinition.getResultDefinitions().get(0).getId())
-                                .build()
-                        )
+                .setTargets(
+                        createTargets(defendantId, resultLineId, nowDefinition.getResultDefinitions().get(0).getId())
                 )
                 .setCompletedResultLineStatuses(
                         Stream.of(
@@ -88,20 +100,15 @@ public class GenerateVariantDecisionMakerTest {
 
         NowDefinition nowDefinition = NowDefinition.now()
                 .setId(randomUUID())
-                .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions().setId(randomUUID())));
+                .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions().setId(randomUUID())));
 
 
         ZonedDateTime lastSharedTime = PAST_ZONED_DATE_TIME.next();
         List<String> usergroups = asList("Listing Officer", "Court Clerk");
 
         GenerateVariantDecisionMaker generateVariantDecisionMaker = new GenerateVariantDecisionMakerFactory()
-                .setCompletedResultLines(singletonList(
-                        CompletedResultLine.builder()
-                                .withId(resultLineId)
-                                .withDefendantId(defendantId)
-                                .withResultDefinitionId(nowDefinition.getResultDefinitions().get(0).getId())
-                                .build()
-                        )
+                .setTargets(
+                        createTargets(defendantId, resultLineId, nowDefinition.getResultDefinitions().get(0).getId())
                 )
                 .setCompletedResultLineStatuses(
                         Stream.of(
@@ -128,18 +135,13 @@ public class GenerateVariantDecisionMakerTest {
 
         NowDefinition nowDefinition = NowDefinition.now()
                 .setId(randomUUID())
-                .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions().setId(randomUUID())));
+                .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions().setId(randomUUID())));
 
         List<String> usergroups = asList("Listing Officer", "Court Clerk");
 
         GenerateVariantDecisionMaker generateVariantDecisionMaker = new GenerateVariantDecisionMakerFactory()
-                .setCompletedResultLines(singletonList(
-                        CompletedResultLine.builder()
-                                .withId(resultLineId)
-                                .withDefendantId(defendantId)
-                                .withResultDefinitionId(nowDefinition.getResultDefinitions().get(0).getId())
-                                .build()
-                        )
+                .setTargets(
+                        createTargets(defendantId, resultLineId, nowDefinition.getResultDefinitions().get(0).getId())
                 )
                 .setCompletedResultLineStatuses(
                         Stream.of(
@@ -179,18 +181,13 @@ public class GenerateVariantDecisionMakerTest {
 
         NowDefinition nowDefinition = NowDefinition.now()
                 .setId(randomUUID())
-                .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions().setId(randomUUID())));
+                .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions().setId(randomUUID())));
 
         List<String> usergroups = asList("Listing Officer", "Court Clerk");
 
         GenerateVariantDecisionMaker generateVariantDecisionMaker = new GenerateVariantDecisionMakerFactory()
-                .setCompletedResultLines(singletonList(
-                        CompletedResultLine.builder()
-                                .withId(resultLineId)
-                                .withDefendantId(defendantId)
-                                .withResultDefinitionId(nowDefinition.getResultDefinitions().get(0).getId())
-                                .build()
-                        )
+                .setTargets(
+                        createTargets(defendantId, resultLineId, nowDefinition.getResultDefinitions().get(0).getId())
                 )
                 .setCompletedResultLineStatuses(emptyMap())
                 .setVariantDirectory(emptyList())
@@ -209,18 +206,13 @@ public class GenerateVariantDecisionMakerTest {
 
         NowDefinition nowDefinition = NowDefinition.now()
                 .setId(randomUUID())
-                .setResultDefinitions(singletonList(ResultDefinitions.resultDefinitions().setId(randomUUID())));
+                .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions().setId(randomUUID())));
 
         List<String> usergroups = asList("Listing Officer", "Court Clerk");
 
         GenerateVariantDecisionMaker generateVariantDecisionMaker = new GenerateVariantDecisionMakerFactory()
-                .setCompletedResultLines(singletonList(
-                        CompletedResultLine.builder()
-                                .withId(resultLineId)
-                                .withDefendantId(defendantId)
-                                .withResultDefinitionId(nowDefinition.getResultDefinitions().get(0).getId())
-                                .build()
-                        )
+                .setTargets(
+                        createTargets(defendantId, resultLineId, nowDefinition.getResultDefinitions().get(0).getId())
                 )
                 .setCompletedResultLineStatuses(emptyMap())
                 .setVariantDirectory(singletonList(variant()

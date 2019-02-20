@@ -1,9 +1,10 @@
 package uk.gov.moj.cpp.hearing.command;
 
+import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class RecordMagsCourtHearingCommand {

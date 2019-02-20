@@ -31,7 +31,7 @@ public class VariantSubscriptionProcessor {
 
         final List<Subscription> subscriptions = subscriptionClient.getAll(context, nowsNotificationDocumentState.getNowsTypeId(), LocalDate.now()).getSubscriptions();
 
-        if(subscriptions.isEmpty()) {
+        if (subscriptions.isEmpty()) {
             LOGGER.error("No subscription retrieved for nowTypeId - {}", nowsNotificationDocumentState.getNowsTypeId());
         } else {
             LOGGER.info("Displaying subscription for nowTypeId - {}", nowsNotificationDocumentState.getNowsTypeId());

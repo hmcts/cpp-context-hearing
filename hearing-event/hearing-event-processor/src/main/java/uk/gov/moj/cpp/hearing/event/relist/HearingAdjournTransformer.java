@@ -1,22 +1,46 @@
 package uk.gov.moj.cpp.hearing.event.relist;
 
+import static java.util.Arrays.asList;
 import static uk.gov.moj.cpp.hearing.event.relist.HearingAdjournHelper.getAllPromptUuidsByPromptReference;
 import static uk.gov.moj.cpp.hearing.event.relist.HearingAdjournHelper.getDistinctPromptValue;
 import static uk.gov.moj.cpp.hearing.event.relist.HearingAdjournHelper.getOffencesHaveResultNextHearing;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HCHOUSE;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HCROOM;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HDATE;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HEST;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTIME;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
 
-import uk.gov.moj.cpp.hearing.command.initiate.Case;
-import uk.gov.moj.cpp.hearing.command.initiate.Offence;
-import uk.gov.moj.cpp.hearing.command.result.CompletedResultLine;
+import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.NextHearing;
+import uk.gov.justice.core.courts.NextHearingDefendant;
+import uk.gov.justice.core.courts.NextHearingOffence;
+import uk.gov.justice.core.courts.NextHearingProsecutionCase;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
+import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingResultDefinition;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
+import uk.gov.moj.cpp.hearing.event.service.HearingTypeReverseLookup;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,90 +49,135 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import javax.inject.Inject;
 
 import com.google.common.base.CharMatcher;
 import org.apache.commons.lang3.StringUtils;
 
+@SuppressWarnings({"squid:S1188", "squid:S00112", "squid:S1166", "squid:S2259"})
 public class HearingAdjournTransformer {
 
     private static final int FIVE = 5;
     private static final int SIX = 6;
-    private static final int MINUTE = 60;
-    private static final int DAY = SIX * MINUTE;
+    private static final int MINUTES_IN_HOUR = 60;
+    private static final int DAY = SIX * MINUTES_IN_HOUR;
     private static final String COMMA_REGEX = "\\s*,\\s*";
-    private static final String EMPTY_STRING = "";
-    private static final String DD_MM_YYYY = "dd/MM/yyyy";
-    private static final String YYYY_MM_DD = "yyyy-MM-dd";
-    private static final String ID = "id";
-    private static final String OFFENCES = "offences";
-    private static final String COURT_CENTRE_ID = "courtCentreId";
-    private static final String TYPE = "type";
-    private static final String START_DATE = "startDate";
-    private static final String START_TIME = "startTime";
-    private static final String ESTIMATE_MINUTES = "estimateMinutes";
-    private static final String DEFENDANTS = "defendants";
-    private static final String CASE_ID = "caseId";
-    private static final String URN = "urn";
-    private static final String REQUESTED_BY_HEARING_ID = "requestedByHearingId";
-    private static final String HEARINGS = "hearings";
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String TIME_FORMAT = "HH:mm";
+    public static final String DEFAULT_TIME = "10:00";
+    private static final String ALTERNATE_DATE_FORMAT = "dd/MM/yyyy";
 
+    @Inject
+    private HearingTypeReverseLookup hearingTypeReverseLookup;
 
-    public JsonObject transform(final ResultsShared resultsShared, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
-        final Case firstCase = resultsShared.getCases().get(0);//Hardcoded 0 as we are not handling mutiple cases yet, should be removed when services handle multi case hearing
-        final List<CompletedResultLine> completedResultLines = resultsShared.getCompletedResultLines();
+    @Inject
+    private CourtHouseReverseLookup courtHouseReverseLookup;
 
-        final JsonArrayBuilder defendants = Json.createArrayBuilder();
-        resultsShared.getHearing().getDefendants().forEach(defendant -> {
-            final List<Offence> offences = getOffencesHaveResultNextHearing(defendant, completedResultLines, nextHearingResultDefinitions);
-            if (!offences.isEmpty()) {
-                final JsonArrayBuilder jsonOffences = Json.createArrayBuilder();
-                offences.forEach(offence -> {
-                    final JsonObject offenceJson = Json.createObjectBuilder()
-                            .add(ID, offence.getId().toString())
+    public HearingAdjourned transform2Adjournment(final JsonEnvelope context, final ResultsShared resultsShared, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
+        final Hearing hearing = resultsShared.getHearing();
+        final List<NextHearingProsecutionCase> nextProsecutionCases = new ArrayList<>();
+        final List<ResultLine> completedResultLines = getCompletedResultLines(resultsShared);
+        for (final ProsecutionCase prosecutionCase : hearing.getProsecutionCases()) {
+            final List<NextHearingDefendant> nextDefendants = new ArrayList<>();
+            final NextHearingProsecutionCase nextCase = NextHearingProsecutionCase.nextHearingProsecutionCase()
+                    .withId(prosecutionCase.getId())
+                    .withDefendants(nextDefendants)
+                    .build();
+            nextProsecutionCases.add(nextCase);
+            for (final Defendant defendant : prosecutionCase.getDefendants()) {
+                final List<Offence> offences = getOffencesHaveResultNextHearing(defendant, resultsShared.getHearing().getTargets(), completedResultLines, nextHearingResultDefinitions);
+                if (!offences.isEmpty()) {
+                    final NextHearingDefendant nextHearingDefendant = NextHearingDefendant.nextHearingDefendant()
+                            .withId(defendant.getId())
+                            .withOffences(offences.stream().map(offence ->
+                                    NextHearingOffence.nextHearingOffence().withId(offence.getId())
+                                            .build())
+                                    .collect(Collectors.toList())
+                            )
                             .build();
-                    jsonOffences.add(offenceJson);
-                });
-                final JsonObject defendantJson = Json.createObjectBuilder()
-                        .add(ID, defendant.getId().toString())
-                        .add(OFFENCES, jsonOffences.build())
-                        .build();
-                defendants.add(defendantJson);
+                    nextDefendants.add(nextHearingDefendant);
+                }
             }
-        });
+        }
 
-        final JsonObjectBuilder hearing = Json.createObjectBuilder();
+        final NextHearing.Builder nextHearingBuilder = NextHearing.nextHearing()
+                .withNextHearingProsecutionCases(nextProsecutionCases);
 
-        hearing.add(COURT_CENTRE_ID, resultsShared.getHearing().getCourtCentreId().toString());
         getFirst(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HTYPE)))
-                .ifPresent(value -> hearing.add(TYPE, value));
-        getFirst(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HDATE)))
-                .ifPresent(value -> hearing.add(START_DATE, convertDate(value)));
-        getFirst(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HTIME)))
-                .ifPresent(value -> hearing.add(START_TIME, value));
-        hearing.add(ESTIMATE_MINUTES, convertDurationIntoMinutes(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HEST))));
-        hearing.add(DEFENDANTS, defendants.build());
+                .ifPresent(value ->
+                        {
+                            final HearingType hearingType = hearingTypeReverseLookup.getHearingTypeByName(context, value);
+                            if (hearingType==null) {
+                                throw new RuntimeException(String.format("invalid hearing type %s for adjournment of hearing %s", value, hearing.getId()));
+                            }
+                            nextHearingBuilder.withType(hearingType);
+                        }
 
-        return Json.createObjectBuilder()
-                .add(CASE_ID, firstCase.getCaseId().toString())
-                .add(URN, firstCase.getUrn())
-                .add(REQUESTED_BY_HEARING_ID, resultsShared.getHearing().getId().toString())
-                .add(HEARINGS, Json.createArrayBuilder()
-                        .add(hearing.build())
-                        .build())
-                .build();
+                );
+
+        nextHearingBuilder.withJurisdictionType(resultsShared.getHearing().getJurisdictionType());
+        nextHearingBuilder.withReportingRestrictionReason(resultsShared.getHearing().getReportingRestrictionReason());
+        nextHearingBuilder.withEstimatedMinutes(convertDurationIntoMinutes(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HEST))));
+        nextHearingBuilder.withCourtCentre(hearing.getCourtCentre());
+        if (hearing.getJudiciary() != null && !hearing.getJudiciary().isEmpty()) {
+            nextHearingBuilder.withJudiciary(hearing.getJudiciary());
+        }
+        final Set<String> strEarliestStartDates = getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HDATE));
+        final Set<String> strEarliestStartTimes = getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HTIME));
+        final String strEarliestStartDate = strEarliestStartDates.isEmpty()?null:strEarliestStartDates.iterator().next();
+        final String strEarliestStartTime = strEarliestStartTimes.isEmpty()?null:strEarliestStartTimes.iterator().next();
+        if (strEarliestStartDate == null) {
+            throw new RuntimeException(String.format("cant find earliest starttime (%s) prompt to adjourn hearing %s ", HDATE.name(), hearing.getId()));
+        }
+        nextHearingBuilder.withEarliestStartDateTime(convertDateTime(strEarliestStartDate, strEarliestStartTime));
+
+        final Set<String> strCourthouse =
+                getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HCHOUSE));
+        final Set<String> strCourtRoom =
+                getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HCROOM));
+
+        final CourtCentre courtCentre = extractCourtCentre(context, strCourthouse, strCourtRoom);
+
+        nextHearingBuilder.withCourtCentre(courtCentre);
+
+        return new HearingAdjourned(hearing.getId(), asList(nextHearingBuilder.build()));
     }
 
-    private String convertDate(final String date) {
-        if (!StringUtils.isEmpty(date)) {
-            final DateTimeFormatter from = DateTimeFormatter.ofPattern(DD_MM_YYYY);
-            final DateTimeFormatter to = DateTimeFormatter.ofPattern(YYYY_MM_DD);
-            return LocalDate.parse(date, from).format(to);
+    private CourtCentre extractCourtCentre(final JsonEnvelope context, final Set<String> courtHouse, final Set<String> strCourtRoom) {
+        if (courtHouse.isEmpty()) {
+            return null;
         }
-        return EMPTY_STRING;
+        final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional = courtHouseReverseLookup.getCourtCentreByName(context, courtHouse.iterator().next());
+        if (!courtCentreOrgOptional.isPresent()) {
+            return null;
+        }
+        final CourtCentreOrganisationUnit courtCentreOrg = courtCentreOrgOptional.get();
+        final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
+                .withName(courtCentreOrg.getOucodeL3Name())
+                .withWelshName(courtCentreOrg.getOucodeL3WelshName())
+                .withAddress(Address.address()
+                        .withPostcode(courtCentreOrg.getPostcode())
+                        .withAddress1(courtCentreOrg.getAddress1())
+                        .withAddress2(courtCentreOrg.getAddress2())
+                        .withAddress3(courtCentreOrg.getAddress3())
+                        .withAddress4(courtCentreOrg.getAddress4())
+                        .withAddress5(courtCentreOrg.getAddress5())
+                        .build())
+                .withId(UUID.fromString(courtCentreOrg.getId()));
+        if (!strCourtRoom.isEmpty()) {
+            final Optional<Courtrooms> courtRoom = courtHouseReverseLookup.getCourtRoomByRoomName(courtCentreOrg, strCourtRoom.iterator().next());
+            if (courtRoom.isPresent()) {
+                courtCentreBuilder
+                        .withRoomId(courtRoom.get().getId())
+                        .withRoomName(courtRoom.get().getCourtroomName())
+                        .withWelshRoomName(courtRoom.get().getWelshCourtroomName());
+            }
+        }
+        return courtCentreBuilder.build();
+    }
+
+    private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
+        return resultsShared.getHearing().getTargets().stream().flatMap(target -> target.getResultLines().stream()).collect(Collectors.toList());
     }
 
     int convertDurationIntoMinutes(final Set<String> distinctValueSize) {
@@ -122,7 +191,7 @@ public class HearingAdjournTransformer {
                 } else if (durationElement.contains(DurationElements.DAYS.name().toLowerCase())) {
                     estimateMinutes[0] += Integer.parseInt(CharMatcher.DIGIT.retainFrom(durationElement)) * DAY;
                 } else if (durationElement.contains(DurationElements.HOURS.name().toLowerCase())) {
-                    estimateMinutes[0] += Long.parseLong(CharMatcher.DIGIT.retainFrom(durationElement)) * MINUTE;
+                    estimateMinutes[0] += Long.parseLong(CharMatcher.DIGIT.retainFrom(durationElement)) * MINUTES_IN_HOUR;
                 } else if (durationElement.contains(DurationElements.MINUTES.name().toLowerCase())) {
                     estimateMinutes[0] += Long.parseLong(CharMatcher.DIGIT.retainFrom(durationElement));
                 }
@@ -135,5 +204,27 @@ public class HearingAdjournTransformer {
     private Optional<String> getFirst(Set<String> value) {
         return value.stream().findFirst();
     }
+
+
+    private ZonedDateTime convertDateTime(String date, String time) {
+        time = time.trim().replaceAll(" ", "");
+        date = date.trim().replaceAll(" ", "");
+
+        if (!StringUtils.isEmpty(date)) {
+            LocalTime localTime = LocalTime.parse(time, DateTimeFormatter.ofPattern(TIME_FORMAT));
+            LocalDate localDate = null;
+            try {
+                localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern(DATE_FORMAT));
+            } catch (DateTimeParseException dtp) {
+                localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern(ALTERNATE_DATE_FORMAT));
+            }
+            return ZonedDateTime.of(localDate,  localTime, ZoneId.systemDefault());
+        }
+
+        return null;
+    }
+
+
+
 }
 

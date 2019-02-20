@@ -1,13 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import org.apache.commons.lang3.SerializationException;
-import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.Assert.fail;
+
 import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Address;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
@@ -26,7 +20,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.fail;
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseAggregateTest {

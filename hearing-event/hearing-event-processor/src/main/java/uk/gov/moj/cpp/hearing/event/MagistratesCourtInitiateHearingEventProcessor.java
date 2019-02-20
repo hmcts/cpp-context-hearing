@@ -4,6 +4,8 @@ package uk.gov.moj.cpp.hearing.event;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -26,19 +28,15 @@ import org.slf4j.LoggerFactory;
 @ServiceComponent(EVENT_PROCESSOR)
 public class MagistratesCourtInitiateHearingEventProcessor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MagistratesCourtInitiateHearingEventProcessor.class);
     @Inject
     private Enveloper enveloper;
-
     @Inject
     private Sender sender;
-
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Inject
     private ObjectToJsonValueConverter objectToJsonValueConverter;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MagistratesCourtInitiateHearingEventProcessor.class);
 
     @Handles("public.progression.events.sending-sheet-completed")
     public void recordSendSheetCompleted(final JsonEnvelope event) {
@@ -82,14 +80,16 @@ public class MagistratesCourtInitiateHearingEventProcessor {
                     continue;
                 }
 
-                final PleaUpsert pleaUpsert = PleaUpsert.builder()
-                        .withHearingId(magsCourtHearingRecorded.getHearingId())
-                        .withOffenceId(offence.getId())
-                        .withPleaDate(offence.getPlea().getPleaDate())
-                        .withValue(offence.getPlea().getValue())
-                        .build();
+                final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
+                        .setHearingId(magsCourtHearingRecorded.getHearingId())
+                        .setPlea(Plea.plea()
+                                .withOriginatingHearingId(magsCourtHearingRecorded.getHearingId())
+                                .withOffenceId(offence.getId())
+                                .withPleaDate(offence.getPlea().getPleaDate())
+                                .withPleaValue(PleaValue.valueOf(offence.getPlea().getValue()))
+                                .build());
 
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.offence-plea-updated")
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-plea-against-offence")
                         .apply(this.objectToJsonValueConverter.convert(pleaUpsert)));
             }
         }

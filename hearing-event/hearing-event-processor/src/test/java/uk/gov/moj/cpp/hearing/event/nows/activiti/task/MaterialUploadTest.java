@@ -9,6 +9,10 @@ import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.FILE_SER
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.USER_ID;
 
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.MaterialUpload;
+
 import java.util.UUID;
 
 import org.activiti.engine.delegate.DelegateExecution;
@@ -18,10 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.MaterialUpload;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,7 +45,7 @@ public class MaterialUploadTest {
         final UUID fileServiceId = UUID.randomUUID();
 
         when(delegateExecution.getVariable(MATERIAL_ID, String.class))
-                        .thenReturn(materialId.toString());
+                .thenReturn(materialId.toString());
         when(delegateExecution.getVariable(FILE_SERVICE_ID, UUID.class)).thenReturn(fileServiceId);
         when(delegateExecution.getVariable(USER_ID, UUID.class)).thenReturn(userId);
 

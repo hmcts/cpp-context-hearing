@@ -34,10 +34,10 @@ public class DateMatcherTest {
     }
 
     private List<String> validDateProvider() {
-        return Arrays.asList("01/03/1980","12/12/9999","1-1-9999","1.1.9999","1/1/1600","29/2/1600");
+        return Arrays.asList("01/03/1980", "12/12/9999", "1-1-9999", "1.1.9999", "1/1/1600", "29/2/1600");
     }
 
     private List<String> invalidDateProvider() {
-        return Arrays.asList("13/13/1980","29/2/2017","1/1/1599","1.1.10000","32/01/1980","0/01/1980","01/0/1980","01/01/999");
+        return Arrays.asList("13/13/1980", "29/2/2017", "1/1/1599", "1.1.10000", "32/01/1980", "0/01/1980", "01/0/1980", "01/01/999");
     }
 }

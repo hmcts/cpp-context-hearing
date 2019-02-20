@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RegisterHearingAgainstCaseCommand implements Serializable {
 
@@ -20,16 +20,16 @@ public class RegisterHearingAgainstCaseCommand implements Serializable {
         this.hearingId = hearingId;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getCaseId() {
         return caseId;
     }
 
     public UUID getHearingId() {
         return hearingId;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static class Builder {

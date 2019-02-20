@@ -8,7 +8,12 @@ import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.HEARING_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.USER_ID;
-import static uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.NowsMaterialStatusUpdateHmps.RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS;
+import static uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.NowsMaterialStatusUpdateHmps.RESULTS_UPDATE_NOWS_MATERIAL_STATUS;
+
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.NowsMaterialStatusUpdateHmps;
 
 import java.util.UUID;
 
@@ -21,11 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nows.activiti.worlflow.materialupload.task.NowsMaterialStatusUpdateHmps;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,7 +55,7 @@ public class NowsMaterialStatusUpdateHmpsTest {
         final UUID hearingId = UUID.randomUUID();
 
         when(delegateExecution.getVariable(MATERIAL_ID, String.class))
-                        .thenReturn(materialId.toString());
+                .thenReturn(materialId.toString());
         when(delegateExecution.getVariable(HEARING_ID, UUID.class)).thenReturn(hearingId);
         when(delegateExecution.getVariable(USER_ID, UUID.class)).thenReturn(userId);
 
@@ -73,7 +73,7 @@ public class NowsMaterialStatusUpdateHmpsTest {
 
         assertThat(envelope.metadata().userId().get(), equalTo(userId.toString()));
         assertThat(envelope.metadata().name(),
-                equalTo(RESULTINGHMPS_UPDATE_NOWS_MATERIAL_STATUS));
+                equalTo(RESULTS_UPDATE_NOWS_MATERIAL_STATUS));
 
     }
 }

@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.UUID;
 
 public class LookupWitnessesOnDefendantForHearingCommand {
 
@@ -22,12 +22,12 @@ public class LookupWitnessesOnDefendantForHearingCommand {
         this.defendantId = defendantId;
     }
 
-    public UUID getHearingId() {
-        return hearingId;
+    public static LookupWitnessesOnDefendantForHearingCommand lookupWitnessesOnDefendantForHearingCommand() {
+        return new LookupWitnessesOnDefendantForHearingCommand();
     }
 
-    public UUID getDefendantId() {
-        return defendantId;
+    public UUID getHearingId() {
+        return hearingId;
     }
 
     public LookupWitnessesOnDefendantForHearingCommand setHearingId(UUID hearingId) {
@@ -35,12 +35,12 @@ public class LookupWitnessesOnDefendantForHearingCommand {
         return this;
     }
 
+    public UUID getDefendantId() {
+        return defendantId;
+    }
+
     public LookupWitnessesOnDefendantForHearingCommand setDefendantId(UUID defendantId) {
         this.defendantId = defendantId;
         return this;
-    }
-
-    public static LookupWitnessesOnDefendantForHearingCommand lookupWitnessesOnDefendantForHearingCommand(){
-        return new LookupWitnessesOnDefendantForHearingCommand();
     }
 }

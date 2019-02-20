@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <property name="uuid_function" value="md5(random()::text || clock_timestamp()::text)::uuid" dbms="postgresql"/>
+    <property name="uuid_function" value="md5(random()::text || clock_timestamp()::text)::uuid"
+              dbms="postgresql"/>
 
-    <changeSet id="1" author="CCR" logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
+    <changeSet id="1" author="CCR"
+               logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
 
         <addColumn tableName="hearing_event_definition">
             <column name="deleted" type="boolean" defaultValue="false">
-                <constraints nullable="false" />
+                <constraints nullable="false"/>
             </column>
         </addColumn>
 
     </changeSet>
 
-    <changeSet id="2" author="CCR" logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
+    <changeSet id="2" author="CCR"
+               logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
 
         <addColumn tableName="hearing_event_definition">
             <column name="id" type="UUID" defaultValueComputed="${uuid_function}">
@@ -25,19 +28,22 @@
 
     </changeSet>
 
-    <changeSet id="3" author="CCR" logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
+    <changeSet id="3" author="CCR"
+               logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
 
         <dropPrimaryKey tableName="hearing_event_definition"/>
 
     </changeSet>
 
-    <changeSet id="4" author="CCR" logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
+    <changeSet id="4" author="CCR"
+               logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
 
         <addPrimaryKey tableName="hearing_event_definition" columnNames="id"/>
 
     </changeSet>
 
-    <changeSet id="5" author="CCR" logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
+    <changeSet id="5" author="CCR"
+               logicalFilePath="016-logical-deletion-capability-on-hearing-event-definition-table.xml">
 
         <dropDefaultValue tableName="hearing_event_definition" columnName="id"/>
 

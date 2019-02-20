@@ -1,11 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.prosecutionCounsel;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
-import java.util.UUID;
 
 public class AddProsecutionCounselCommand {
 
@@ -49,6 +49,10 @@ public class AddProsecutionCounselCommand {
         this.title = builder.title;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getHearingId() {
         return hearingId;
     }
@@ -65,16 +69,36 @@ public class AddProsecutionCounselCommand {
         return status;
     }
 
+    public AddProsecutionCounselCommand setStatus(String status) {
+        this.status = status;
+        return this;
+    }
+
     public String getFirstName() {
         return firstName;
+    }
+
+    public AddProsecutionCounselCommand setFirstName(String firstName) {
+        this.firstName = firstName;
+        return this;
     }
 
     public String getLastName() {
         return lastName;
     }
 
+    public AddProsecutionCounselCommand setLastName(String lastName) {
+        this.lastName = lastName;
+        return this;
+    }
+
     public String getTitle() {
         return title;
+    }
+
+    public AddProsecutionCounselCommand setTitle(String title) {
+        this.title = title;
+        return this;
     }
 
     public List<String> getHearingDates() {
@@ -83,26 +107,6 @@ public class AddProsecutionCounselCommand {
 
     public void setHearingDates(List<String> hearingDates) {
         this.hearingDates = hearingDates;
-    }
-
-    public AddProsecutionCounselCommand setStatus(String status) {
-        this.status = status;
-        return this;
-    }
-
-    public AddProsecutionCounselCommand setFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
-    public AddProsecutionCounselCommand setLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
-    }
-
-    public AddProsecutionCounselCommand setTitle(String title) {
-        this.title = title;
-        return this;
     }
 
     public static class Builder {
@@ -152,10 +156,6 @@ public class AddProsecutionCounselCommand {
         public AddProsecutionCounselCommand build() {
             return new AddProsecutionCounselCommand(this);
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
 }

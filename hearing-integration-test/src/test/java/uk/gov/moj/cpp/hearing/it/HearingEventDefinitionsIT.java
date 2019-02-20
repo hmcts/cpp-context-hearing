@@ -1,10 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
-
-import java.util.UUID;
-
 import static java.util.UUID.randomUUID;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.thenHearingEventDefinitionsAreRecorded;
@@ -12,11 +7,16 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithOnlyNonSequencedEvents;
-import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithOnlySequencedEvents;
 import static uk.gov.moj.cpp.hearing.steps.data.factory.HearingEventDataFactory.hearingEventDefinitionsWithPauseAndResumeEvents;
 
+import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
+
+import java.util.UUID;
+
+import org.junit.Test;
+
 public class HearingEventDefinitionsIT extends AbstractIT {
-    
+
     private final UUID userId = randomUUID();
 
     @Test

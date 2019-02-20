@@ -1,104 +1,118 @@
-
 package uk.gov.moj.cpp.hearing.nows.events;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class SharedResultLine implements Serializable
-{
-    private final static long serialVersionUID = 8585645764887938325L;
+public class SharedResultLine implements Serializable {
+    private final static long serialVersionUID = 2L;
 
-    private String id;
-    private String caseId;
-    private String defendantId;
-    private String offenceId;
-    private String sharedDate;
-    private String orderedDate;
+    private UUID id;
+    private UUID caseId;
+    private UUID defendantId;
+    private UUID offenceId;
+    private ZonedDateTime sharedDate;
+    private LocalDate orderedDate;
     private String level;
     private String label;
     private Integer rank;
     private List<Prompt> prompts = new ArrayList<Prompt>();
 
-    public String getId() {
+    public static SharedResultLine sharedResultLine() {
+        return new SharedResultLine();
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public String getSharedDate() {
+    public SharedResultLine setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public ZonedDateTime getSharedDate() {
         return sharedDate;
     }
 
-    public void setSharedDate(String sharedDate) {
+    public SharedResultLine setSharedDate(ZonedDateTime sharedDate) {
         this.sharedDate = sharedDate;
+        return this;
     }
 
-    public String getOrderedDate() {
-
+    public LocalDate getOrderedDate() {
         return orderedDate;
     }
 
-    public void setOrderedDate(String orderedDate) {
+    public SharedResultLine setOrderedDate(LocalDate orderedDate) {
         this.orderedDate = orderedDate;
+        return this;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getCaseId() {
+    public UUID getCaseId() {
         return caseId;
     }
 
-    public void setCaseId(String caseId) {
+    public SharedResultLine setCaseId(UUID caseId) {
         this.caseId = caseId;
+        return this;
     }
 
-    public String getDefendantId() {
+    public UUID getDefendantId() {
         return defendantId;
     }
 
-    public void setDefendantId(String defendantId) {
+    public SharedResultLine setDefendantId(UUID defendantId) {
         this.defendantId = defendantId;
+        return this;
     }
 
-    public String getOffenceId() {
+    public UUID getOffenceId() {
         return offenceId;
     }
 
-    public void setOffenceId(String offenceId) {
+    public SharedResultLine setOffenceId(UUID offenceId) {
         this.offenceId = offenceId;
+        return this;
     }
 
     public String getLevel() {
         return level;
     }
 
-    public void setLevel(String level) {
+    public SharedResultLine setLevel(String level) {
         this.level = level;
+        return this;
     }
 
     public String getLabel() {
         return label;
     }
 
-    public void setLabel(String label) {
+    public SharedResultLine setLabel(String label) {
         this.label = label;
+        return this;
     }
 
     public Integer getRank() {
         return rank;
     }
 
-    public void setRank(Integer rank) {
+    public SharedResultLine setRank(Integer rank) {
         this.rank = rank;
+        return this;
     }
 
     public List<Prompt> getPrompts() {
         return prompts;
     }
 
-    public void setPrompts(List<Prompt> prompts) {
+    public SharedResultLine setPrompts(List<Prompt> prompts) {
         this.prompts = prompts;
+        return this;
     }
 
 }

@@ -1,8 +1,8 @@
 {
   "attendeeId": "$attendeeId",
   "personId": "$personId",
-  "status" : "$status",
-  "firstName" : "$firstName",
-  "lastName" : "$lastName",
-  "title" : "$title"
+  "status": "$status",
+  "firstName": "$firstName",
+  "lastName": "$lastName",
+  "title": "$title"
 }

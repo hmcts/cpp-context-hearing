@@ -1,7 +1,7 @@
- {
+{
   "convictionDate": "2017-05-19",
   "hearingId": "0baecac5-222b-402d-9047-84803679edad",
-   "originatingHearing": {
+  "originatingHearing": {
     "courtCentreName": "Warwick Justice Centre",
     "courtCentreId": "1234",
     "type": "MAGS Sending Hearing",
@@ -35,10 +35,10 @@
           {
             "id": "0baecac5-222b-402d-9047-84803679edad",
             "offenceCode": "OF61131",
-            "plea" : {
-              "id" : "01b3d966-fb95-41ef-8f8c-6741f11f89b3",
-              "pleaDate" : "2017-11-10",
-              "value" : "GUILTY"
+            "plea": {
+              "id": "01b3d966-fb95-41ef-8f8c-6741f11f89b3",
+              "pleaDate": "2017-11-10",
+              "value": "GUILTY"
             },
             "indicatedPlea": "",
             "section": "Section 51",

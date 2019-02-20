@@ -5,10 +5,6 @@ import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.FILE_SER
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.MATERIAL_ID;
 import static uk.gov.moj.cpp.hearing.activiti.common.ProcessMapConstant.USER_ID;
 
-import org.activiti.engine.delegate.DelegateExecution;
-import org.activiti.engine.delegate.JavaDelegate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -16,20 +12,25 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.json.Json;
 import javax.json.JsonObject;
-import java.util.UUID;
+
+import org.activiti.engine.delegate.DelegateExecution;
+import org.activiti.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(Component.EVENT_PROCESSOR)
 @Named
 public class MaterialUpload implements JavaDelegate {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MaterialUpload.class);
-
     public static final String
             MATERIAL_COMMAND_UPLOAD_FILE = "material.command.upload-file";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MaterialUpload.class);
     @Inject
     private Sender sender;
 

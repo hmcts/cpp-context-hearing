@@ -1,0 +1,18 @@
+{
+  "hearingCaseNote": {
+    "id": "d8756d94-b5a5-4b61-9b3b-50ad9b3a7d0f",
+    "originatingHearingId": "f404ac65-5d49-4af2-8580-8277e0e8a6e2",
+    "courtClerk": {
+      "id": "69d9d8a9-b22f-4eec-8957-b207584fdfcb",
+      "firstName": "Van",
+      "lastName": "Sherman"
+    },
+    "prosecutionCases": [
+      "269ed300-a814-468f-b151-eac47698b61e",
+      "dc279ce9-d2d2-4589-af68-9e389502a940"
+    ],
+    "noteDateTime": "2011-07-14T19:43:37+0100",
+    "noteType": "HMCTS",
+    "note": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent ultricies ligula augue, ac mollis ex molestie in. Ut nulla sapien, laoreet vel nisl in, elementum cursus erat. Nunc bibendum neque leo, ac vestibulum lacus malesuada sed. Fusce quis mi leo."
+  }
+}

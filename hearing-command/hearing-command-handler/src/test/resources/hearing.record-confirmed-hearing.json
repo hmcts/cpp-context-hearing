@@ -8,8 +8,7 @@
     "courtCentreName": "RANDOM_COURT_CENTRE_NAME",
     "courtRoomId": "RANDOM_COURT_ROOM_ID",
     "courtRoomName": "RANDOM_COURT_ROOM_NAME",
-    "judge":
-    {
+    "judge": {
       "id": "0baecac5-222b-402d-9047-84803679edad",
       "title": "Mr",
       "firstName": "Jason",

@@ -39,17 +39,17 @@ public class HearingCommandHandlerRamlConfigTest {
                 UpdatePleaCommandHandler.class,
                 UpdateVerdictCommandHandler.class,
                 AddDefenceCounselCommandHandler.class,
-                AddProsecutionCounselCommandHandler.class,
+                ProsecutionCounselCommandHandler.class,
                 MagistratesCourtInitiateHearingCommandHandler.class,
                 HearingEventCommandHandler.class,
-                AddWitnessCommandHandler.class,
                 GenerateNowsCommandHandler.class,
-                ChangeCaseDefendantDetailsCommandHandler.class,
-                ChangeCaseDefendantOffencesCommandHandler.class,
-                DeleteAtendeeCommandHandler.class,
+                UpdateOffencesForDefendantCommandHandler.class,
+                UpdateDefendantCommandHandler.class,
                 HearingDetailChangeCommandHandler.class,
                 UploadSubscriptionsCommandHandler.class,
-                AdjournHearingCommandHandler.class
+                AdjournHearingCommandHandler.class,
+                UpdateDefendantAttendanceCommandHandler.class,
+                SaveHearingCaseNoteCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));
@@ -61,7 +61,6 @@ public class HearingCommandHandlerRamlConfigTest {
                 .filter(m -> m.getAnnotation(Handles.class) != null)
                 .map(m -> m.getAnnotation(Handles.class).value())
                 .collect(Collectors.toList());
-
     }
 
     @Test
@@ -92,8 +91,6 @@ public class HearingCommandHandlerRamlConfigTest {
         filesThatArePresent.removeAll(privateEventSchemas);
 
         assertThat(filesThatArePresent, empty());
-
-
     }
 
     @Test
@@ -102,8 +99,8 @@ public class HearingCommandHandlerRamlConfigTest {
         List<String> filesThatArePresent =
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json").listFiles()))
                         .map(File::getName)
-                        .filter(name -> !name.equals("schema"))
                         .map(name -> "json/" + name)
+                        .filter(name -> !name.equals("json/schema"))
                         .collect(Collectors.toList());
 
         Collections.sort(filesThatArePresent);
@@ -122,7 +119,8 @@ public class HearingCommandHandlerRamlConfigTest {
 
         filesThatArePresent.removeAll(commandHandlerSchemas);
         filesThatArePresent.removeAll(privateEventSchemas);
-
+        //removing mac "json/.DS_Store" as it's not required
+        filesThatArePresent.remove("json/.DS_Store");
         assertThat(filesThatArePresent, empty());
     }
 

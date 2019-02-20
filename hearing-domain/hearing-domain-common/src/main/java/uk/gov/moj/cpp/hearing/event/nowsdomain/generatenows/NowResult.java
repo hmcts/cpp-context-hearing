@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-@SuppressWarnings("squid:S2384")
+//TODO GPE-6313 remove
+
+@SuppressWarnings({"squid:S2384", "squid:S1135"})
 public class NowResult implements Serializable {
 
     private static final long serialVersionUID = 1L;

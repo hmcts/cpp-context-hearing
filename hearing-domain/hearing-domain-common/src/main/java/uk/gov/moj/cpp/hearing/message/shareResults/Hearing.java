@@ -15,36 +15,12 @@ public class Hearing {
     private List<Defendant> defendants;
     private List<SharedResultLine> sharedResultLines;
 
+    public static Hearing hearing() {
+        return new Hearing();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public String getHearingType() {
-        return hearingType;
-    }
-
-    public ZonedDateTime getStartDateTime() {
-        return startDateTime;
-    }
-
-    public List<ZonedDateTime> getHearingDates() {
-        return hearingDates;
-    }
-
-    public CourtCentre getCourtCentre() {
-        return courtCentre;
-    }
-
-    public List<Attendee> getAttendees() {
-        return attendees;
-    }
-
-    public List<Defendant> getDefendants() {
-        return defendants;
-    }
-
-    public List<SharedResultLine> getSharedResultLines() {
-        return sharedResultLines;
     }
 
     public Hearing setId(UUID id) {
@@ -52,9 +28,17 @@ public class Hearing {
         return this;
     }
 
+    public String getHearingType() {
+        return hearingType;
+    }
+
     public Hearing setHearingType(String hearingType) {
         this.hearingType = hearingType;
         return this;
+    }
+
+    public ZonedDateTime getStartDateTime() {
+        return startDateTime;
     }
 
     public Hearing setStartDateTime(ZonedDateTime startDateTime) {
@@ -62,9 +46,17 @@ public class Hearing {
         return this;
     }
 
+    public List<ZonedDateTime> getHearingDates() {
+        return hearingDates;
+    }
+
     public Hearing setHearingDates(List<ZonedDateTime> hearingDates) {
         this.hearingDates = hearingDates;
         return this;
+    }
+
+    public CourtCentre getCourtCentre() {
+        return courtCentre;
     }
 
     public Hearing setCourtCentre(CourtCentre courtCentre) {
@@ -72,9 +64,17 @@ public class Hearing {
         return this;
     }
 
+    public List<Attendee> getAttendees() {
+        return attendees;
+    }
+
     public Hearing setAttendees(List<Attendee> attendees) {
         this.attendees = attendees;
         return this;
+    }
+
+    public List<Defendant> getDefendants() {
+        return defendants;
     }
 
     public Hearing setDefendants(List<Defendant> defendants) {
@@ -82,12 +82,12 @@ public class Hearing {
         return this;
     }
 
+    public List<SharedResultLine> getSharedResultLines() {
+        return sharedResultLines;
+    }
+
     public Hearing setSharedResultLines(List<SharedResultLine> sharedResultLines) {
         this.sharedResultLines = sharedResultLines;
         return this;
-    }
-
-    public static Hearing hearing() {
-        return new Hearing();
     }
 }

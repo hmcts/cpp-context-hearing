@@ -22,12 +22,17 @@ public class Variant implements Serializable {
         return this.key;
     }
 
+    public Variant setKey(final VariantKey key) {
+        this.key = key;
+        return this;
+    }
+
     public LocalDate getReferenceDate() {
         return referenceDate;
     }
 
-    public Variant setKey(final VariantKey key) {
-        this.key = key;
+    public Variant setReferenceDate(final LocalDate referenceDate) {
+        this.referenceDate = referenceDate;
         return this;
     }
 
@@ -40,10 +45,6 @@ public class Variant implements Serializable {
         return this;
     }
 
-    public Variant setReferenceDate(final LocalDate referenceDate) {
-        this.referenceDate = referenceDate;
-        return this;
-    }
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

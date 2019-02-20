@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
@@ -24,12 +24,15 @@
             </column>
         </createTable>
 
-        <addPrimaryKey columnNames="id" constraintName="nows_material_pkey" tableName="nows_material"/>
+        <addPrimaryKey columnNames="id" constraintName="nows_material_pkey"
+                       tableName="nows_material"/>
 
-        <addForeignKeyConstraint baseColumnNames="material_id" baseTableName="nows_material_usersgroups"
+        <addForeignKeyConstraint baseColumnNames="material_id"
+                                 baseTableName="nows_material_usersgroups"
                                  constraintName="fk_user_group_nows_material" deferrable="false"
                                  initiallyDeferred="false"
-                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
                                  referencedTableName="nows_material"/>
 
 

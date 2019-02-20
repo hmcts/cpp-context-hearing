@@ -37,21 +37,16 @@ public class CompareDefinitionKeywordsUsingIndexesTest {
     @Spy
     @InjectMocks
     ResultCache resultCache = new ResultCache();
-
-    @Spy
-    private ResultLoader resultLoader = new FileResultLoader();
-
     @Spy
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
-
-    @Mock
-    private CacheFactory cacheFactory;
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
     @InjectMocks
     CompareDefinitionKeywordsUsingIndexes testObj;
+    @Spy
+    private ResultLoader resultLoader = new FileResultLoader();
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void init() throws ExecutionException {
@@ -115,7 +110,7 @@ public class CompareDefinitionKeywordsUsingIndexesTest {
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words, LocalDate.now());
         GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
         Map<Long, Long> outPut = groupResultByIndex.run(resultDefinitions);
-        Set<Long> indexes = outPut.entrySet().stream().filter(v -> v.getValue() == 3).collect(Collectors.toMap(Entry::getKey,Entry::getValue)).keySet();
+        Set<Long> indexes = outPut.entrySet().stream().filter(v -> v.getValue() == 3).collect(Collectors.toMap(Entry::getKey, Entry::getValue)).keySet();
         Map<Set<String>, Set<Long>> input = Maps.newHashMap();
         input.putIfAbsent(newHashSet(), indexes);
 

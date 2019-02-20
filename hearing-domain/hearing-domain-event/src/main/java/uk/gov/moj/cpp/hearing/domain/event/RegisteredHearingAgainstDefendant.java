@@ -1,11 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.events.registered-hearing-against-defendant")
 public final class RegisteredHearingAgainstDefendant implements Serializable {

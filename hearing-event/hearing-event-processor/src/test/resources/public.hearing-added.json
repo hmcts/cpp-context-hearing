@@ -8,8 +8,7 @@
     "courtCentreName": "Liverpool Crown Court",
     "courtRoomId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
     "courtRoomName": "3",
-    "judge":
-    {
+    "judge": {
       "id": "0baecac5-222b-402d-9047-84803679edad",
       "title": "Mr",
       "firstName": "Jason",

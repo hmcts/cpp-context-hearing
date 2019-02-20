@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet author="CCR" id="1" logicalFilePath="004-add-hearing-prosecution-counsel.xml">
         <createTable tableName="hearing_prosecution_counsel">
             <column name="id" type="UUID">
-                <constraints primaryKey="true" nullable="false" />
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="hearingid" type="UUID"/>
             <column name="personid" type="UUID"/>
             <column name="status" type="VARCHAR(255)"/>
         </createTable>
 
-        <createIndex tableName="hearing_prosecution_counsel" indexName="prosecution_counsel_hearing_idx">
+        <createIndex tableName="hearing_prosecution_counsel"
+                     indexName="prosecution_counsel_hearing_idx">
             <column name="hearingid"/>
         </createIndex>
 

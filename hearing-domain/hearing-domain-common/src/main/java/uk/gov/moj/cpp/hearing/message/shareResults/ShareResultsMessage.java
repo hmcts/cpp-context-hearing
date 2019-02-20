@@ -13,26 +13,12 @@ public class ShareResultsMessage {
 
     private List<Variant> variants;
 
+    public static ShareResultsMessage shareResultsMessage() {
+        return new ShareResultsMessage();
+    }
+
     public List<Variant> getVariants() {
         return variants;
-    }
-
-    public Hearing getHearing() {
-        return hearing;
-    }
-
-    public ZonedDateTime getSharedTime() {
-        return sharedTime;
-    }
-
-    public ShareResultsMessage setHearing(Hearing hearing) {
-        this.hearing = hearing;
-        return this;
-    }
-
-    public ShareResultsMessage setSharedTime(ZonedDateTime sharedTime) {
-        this.sharedTime = sharedTime;
-        return this;
     }
 
     public ShareResultsMessage setVariants(final List<Variant> variants) {
@@ -40,7 +26,21 @@ public class ShareResultsMessage {
         return this;
     }
 
-    public static ShareResultsMessage shareResultsMessage(){
-        return new ShareResultsMessage();
+    public Hearing getHearing() {
+        return hearing;
+    }
+
+    public ShareResultsMessage setHearing(Hearing hearing) {
+        this.hearing = hearing;
+        return this;
+    }
+
+    public ZonedDateTime getSharedTime() {
+        return sharedTime;
+    }
+
+    public ShareResultsMessage setSharedTime(ZonedDateTime sharedTime) {
+        this.sharedTime = sharedTime;
+        return this;
     }
 }

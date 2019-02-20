@@ -34,7 +34,7 @@ public class MaterialFileUploadedListener {
     public void processEvent(final JsonEnvelope jsonEnvelope) {
         LOGGER.info("Received material.material-added {}", jsonEnvelope.payloadAsJsonObject());
         final Optional<String> originator =
-                        getOriginatorValueFromJsonMetadata(jsonEnvelope.metadata().asJsonObject());
+                getOriginatorValueFromJsonMetadata(jsonEnvelope.metadata().asJsonObject());
         if (originator.isPresent() && ORIGINATOR_VALUE.equalsIgnoreCase(originator.get())) {
             findAndNudgeActivity(jsonEnvelope);
         }
@@ -43,23 +43,23 @@ public class MaterialFileUploadedListener {
     private void findAndNudgeActivity(final JsonEnvelope jsonEnvelope) {
         if (jsonEnvelope.payloadAsJsonObject().containsKey(MATERIAL_ID)) {
             final String materialId = jsonEnvelope.payloadAsJsonObject().getString(MATERIAL_ID);
-        int count=0;
-        while (!activitiService.signalProcessByActivitiIdAndFieldName(RECEIVE_MATERIAL_UPLOADED_CONFIRMATION, MATERIAL_ID, materialId) && count < MAX_RETRY_COUNT ){
-            count++;
-            LOGGER.error("No process Found after {} retries : Step Name {}, BusinessKey {} executionid [] ",
-                            count,RECEIVE_MATERIAL_UPLOADED_CONFIRMATION, materialId);
-            try {
-                TimeUnit.SECONDS.sleep(2);
-            } catch (final InterruptedException e) {
-                LOGGER.error("Interrupted ...",e);
+            int count = 0;
+            while (!activitiService.signalProcessByActivitiIdAndFieldName(RECEIVE_MATERIAL_UPLOADED_CONFIRMATION, MATERIAL_ID, materialId) && count < MAX_RETRY_COUNT) {
+                count++;
+                LOGGER.error("No process Found after {} retries : Step Name {}, BusinessKey {} executionid [] ",
+                        count, RECEIVE_MATERIAL_UPLOADED_CONFIRMATION, materialId);
+                try {
+                    TimeUnit.SECONDS.sleep(2);
+                } catch (final InterruptedException e) {
+                    LOGGER.error("Interrupted ...", e);
+                }
             }
-        }
 
         } else {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.error("Event Received without materialId : metadata {} payload {}",
-                                jsonEnvelope.metadata(),
-                                jsonEnvelope.toObfuscatedDebugString());
+                        jsonEnvelope.metadata(),
+                        jsonEnvelope.toObfuscatedDebugString());
             }
         }
     }

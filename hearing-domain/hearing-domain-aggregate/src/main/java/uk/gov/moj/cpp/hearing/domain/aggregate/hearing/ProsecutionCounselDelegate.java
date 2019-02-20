@@ -1,9 +1,15 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.moj.cpp.hearing.command.prosecutionCounsel.AddProsecutionCounselCommand;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpsert;
+import uk.gov.justice.core.courts.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpdated;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public class ProsecutionCounselDelegate implements Serializable {
@@ -14,21 +20,38 @@ public class ProsecutionCounselDelegate implements Serializable {
         this.momento = momento;
     }
 
-    public void handleProsecutionCounselUpsert(ProsecutionCounselUpsert prosecutionCounselUpsert) {
-        this.momento.getProsecutionCounsels().put(prosecutionCounselUpsert.getAttendeeId(), prosecutionCounselUpsert);
+    public void handleProsecutionCounselAdded(final ProsecutionCounselAdded prosecutionCounselAdded) {
+        final ProsecutionCounsel prosecutionCounsel = prosecutionCounselAdded.getProsecutionCounsel();
+        this.momento.getProsecutionCounsels().put(prosecutionCounsel.getId(), prosecutionCounsel);
     }
 
-    public Stream<Object> addProsecutionCounsel(AddProsecutionCounselCommand prosecutionCounselCommand) {
-        return Stream.of(
-                ProsecutionCounselUpsert.builder()
-                        .withHearingId(prosecutionCounselCommand.getHearingId())
-                        .withAttendeeId(prosecutionCounselCommand.getAttendeeId())
-                        .withPersonId(prosecutionCounselCommand.getPersonId())
-                        .withFirstName(prosecutionCounselCommand.getFirstName())
-                        .withLastName(prosecutionCounselCommand.getLastName())
-                        .withStatus(prosecutionCounselCommand.getStatus())
-                        .withTitle(prosecutionCounselCommand.getTitle())
-                        .build()
-        );
+    public void handleProsecutionCounselRemoved(final ProsecutionCounselRemoved prosecutionCounselRemoved) {
+        this.momento.getProsecutionCounsels().remove(prosecutionCounselRemoved.getId());
+    }
+
+    public void handleProsecutionCounselUpdated(final ProsecutionCounselUpdated prosecutionCounselUpdated) {
+        final ProsecutionCounsel prosecutionCounsel = prosecutionCounselUpdated.getProsecutionCounsel();
+        this.momento.getProsecutionCounsels().put(prosecutionCounsel.getId(), prosecutionCounsel);
+    }
+    public Stream<Object> addProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
+        if (this.momento.getProsecutionCounsels().containsKey(prosecutionCounsel.getId())) {
+            return Stream.of(new ProsecutionCounselChangeIgnored(String.format("Provided ProsecutionCounsel already exists, payload [%s]", prosecutionCounsel.toString())));
+        }
+        return Stream.of(new ProsecutionCounselAdded(prosecutionCounsel, hearingId));
+    }
+
+    public Stream<Object> removeProsecutionCounsel(final UUID id, final UUID hearingId) {
+        return Stream.of(new ProsecutionCounselRemoved(id, hearingId));
+    }
+
+    public Stream<Object> updateProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
+
+        final Map<UUID, ProsecutionCounsel> prosecutionCounsels = this.momento.getProsecutionCounsels();
+        if (!(prosecutionCounsels.containsKey(prosecutionCounsel.getId()))) {
+            return Stream.of(new DefenceCounselChangeIgnored(String.format("Provided ProsecutionCounsel does not exists, payload [%s]", prosecutionCounsel.toString())));
+        }else if (prosecutionCounsels.get(prosecutionCounsel.getId()).equals(prosecutionCounsel)){
+            return Stream.of(new DefenceCounselChangeIgnored(String.format("No change in provided ProsecutionCounsel, payload [%s]", prosecutionCounsel.toString())));
+        }
+        return Stream.of(new ProsecutionCounselUpdated(prosecutionCounsel, hearingId));
     }
 }

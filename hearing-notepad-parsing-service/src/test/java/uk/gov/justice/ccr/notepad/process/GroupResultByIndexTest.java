@@ -69,7 +69,7 @@ public class GroupResultByIndexTest {
 
     @Test
     public void runWithMultipleWords() throws Exception {
-        Set<String> words = new HashSet<>(Arrays.asList("restraining", "order","period","imprisonment", "suspended"));
+        Set<String> words = new HashSet<>(Arrays.asList("restraining", "order", "period", "imprisonment", "suspended"));
         List<Long> resultDefinitions = findDefinitionsIndexesByKeyword.run(words, LocalDate.now());
 
         GroupResultByIndex testObj = new GroupResultByIndex();

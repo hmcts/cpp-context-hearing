@@ -38,22 +38,17 @@ public class ResultPromptViewBuilderTest {
     Processor processor;
     @InjectMocks
     ResultPromptViewBuilder testObj;
-
-    @Mock
-    private CacheFactory cacheFactory;
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
-    @Spy
-    private ResultLoader resultLoader = new FileResultLoader();
-
     @Spy
     @InjectMocks
     ResultCache resultCache = new ResultCache();
-
     @InjectMocks // this is VERY hacky but won't have time to refactor for 2.3 release
-    ProcessorTest processorTest = new ProcessorTest();
+            ProcessorTest processorTest = new ProcessorTest();
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
+    @Spy
+    private ResultLoader resultLoader = new FileResultLoader();
 
     @Before
     public void setup() throws ExecutionException {
@@ -68,18 +63,18 @@ public class ResultPromptViewBuilderTest {
     public void buildFromKnowledge() throws Exception {
         List<Part> parts = new PartsResolver().getParts("parp");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
-        ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts,knowledge);
+        ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge);
 
-        ResultPromptView result= testObj.buildFromKnowledge(processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now()));
+        ResultPromptView result = testObj.buildFromKnowledge(processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now()));
 
         assertThat(result.getPromptChoices().size()
                 , is(2)
         );
         PromptChoice p1 = result.getPromptChoices().get(0);
         PromptChoice p2 = result.getPromptChoices().get(1);
-        assertThat(Arrays.asList(p1.getCode().length(), p1.getLabel(), p1.getType(),p1.getRequired())
+        assertThat(Arrays.asList(p1.getCode().length(), p1.getLabel(), p1.getType(), p1.getRequired())
                 , containsInAnyOrder(Arrays.asList(36, "Prohibited activities", TXT, true).toArray()));
-        assertThat(Arrays.asList(p2.getCode().length(), p2.getLabel(), p2.getType(),p2.getRequired())
+        assertThat(Arrays.asList(p2.getCode().length(), p2.getLabel(), p2.getType(), p2.getRequired())
                 , containsInAnyOrder(Arrays.asList(36, "Period of prohibition", DURATION, true).toArray()));
         List<Children> childrenList = p2.getChildren();
         Children c1 = childrenList.get(0);

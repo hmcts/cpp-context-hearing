@@ -9,7 +9,8 @@
         "id": 3
       },
       "caseAttributes": [
-        "defendant.name","counsel.name"
+        "defendant.name",
+        "counsel.name"
       ],
       "alterable": true
     },
@@ -21,8 +22,7 @@
         "defendant.name"
       ],
       "alterable": true
-    }
-  ,
+    },
     {
       "id": "17f37df1-c619-4674-82ec-64cfec632b35",
       "actionLabel": "Discussion on juror irregularity",

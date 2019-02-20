@@ -17,7 +17,7 @@ import org.junit.Test;
 
 
 public class StringToResultPromptConverterTest {
-    
+
     @Test
     public void convertForNonValidResultPrompt() {
         assertThat(new StringToResultPromptConverter(null).convert("ddd") == null, is(true));

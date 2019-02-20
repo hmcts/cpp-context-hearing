@@ -1,11 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.events.offence-deleted")
 public class OffenceDeleted implements Serializable {
@@ -23,16 +24,16 @@ public class OffenceDeleted implements Serializable {
         this.hearingId = hearingId;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getId() {
         return id;
     }
 
     public UUID getHearingId() {
         return hearingId;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static class Builder {

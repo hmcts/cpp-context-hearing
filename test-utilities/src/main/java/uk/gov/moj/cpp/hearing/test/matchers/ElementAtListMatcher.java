@@ -1,12 +1,13 @@
 package uk.gov.moj.cpp.hearing.test.matchers;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import java.util.List;
-
-public class ElementAtListMatcher extends TypeSafeMatcher<List> {
+public class ElementAtListMatcher extends TypeSafeMatcher<Collection<?>> {
 
     private int index;
     private Matcher<?> matcher;
@@ -17,48 +18,13 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List> {
         this.matcher = matcher;
     }
 
-    @Override
-    protected boolean matchesSafely(List item) {
-
-        if (this.index < 0 || this.index >= item.size()) {
-            this.error = Error.INVALID_INDEX;
-            return false;
+    private static Object get(Collection<?> item, int index) {
+        final Iterator it = item.iterator();
+        Object o = null;
+        for (int i = 0; i <= index; i++) {
+            o = it.next();
         }
-
-        if (!this.matcher.matches(item.get(index))) {
-            this.error = Error.MATCHER_FALSE;
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public void describeTo(Description description) {
-        description.appendText("[").appendText(Integer.toString(this.index)).appendText("]");
-
-        if (this.error == Error.MATCHER_FALSE) {
-
-            description.appendDescriptionOf(this.matcher);
-        }
-        if (this.error == Error.INVALID_INDEX) {
-            description.appendText(" is present");
-        }
-    }
-
-    @Override
-    protected void describeMismatchSafely(List item, Description mismatchDescription) {
-        if (this.error == Error.MATCHER_FALSE) {
-            this.matcher.describeMismatch(item.get(this.index), mismatchDescription);
-        }
-
-        if (this.error == Error.INVALID_INDEX) {
-            mismatchDescription.appendText("list has no element for index ").appendText(Integer.toString(this.index));
-        }
-    }
-
-    private enum Error {
-        INVALID_INDEX, MATCHER_FALSE
+        return o;
     }
 
     public static ElementAtListMatcher first(Matcher<?> matcher) {
@@ -83,5 +49,62 @@ public class ElementAtListMatcher extends TypeSafeMatcher<List> {
 
     public static ElementAtListMatcher elementAt(int index, Matcher<?> matcher) {
         return new ElementAtListMatcher(index, matcher);
+    }
+
+    @Override
+    protected boolean matchesSafely(Collection<?> item) {
+
+        if (item == null) {
+            this.error = Error.NULL;
+            return false;
+        }
+
+        if (this.index < 0 || this.index >= item.size()) {
+            this.error = Error.INVALID_INDEX;
+            return false;
+        }
+
+        if (!this.matcher.matches(get(item, index))) {
+            this.error = Error.MATCHER_FALSE;
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public void describeTo(Description description) {
+        description.appendText("[").appendText(Integer.toString(this.index)).appendText("]");
+
+        if (this.error == Error.NULL) {
+            description.appendText(" is a list object");
+        }
+
+        if (this.error == Error.MATCHER_FALSE) {
+            description.appendDescriptionOf(this.matcher);
+        }
+        if (this.error == Error.INVALID_INDEX) {
+            description.appendText(" is present");
+        }
+    }
+
+    @Override
+    protected void describeMismatchSafely(Collection<?> item, Description mismatchDescription) {
+
+        if (this.error == Error.NULL) {
+            mismatchDescription.appendText("was null");
+        }
+
+        if (this.error == Error.MATCHER_FALSE) {
+            this.matcher.describeMismatch(get(item, index), mismatchDescription);
+        }
+
+        if (this.error == Error.INVALID_INDEX) {
+            mismatchDescription.appendText("list has no element for index ").appendText(Integer.toString(this.index));
+        }
+    }
+
+    private enum Error {
+        NULL, INVALID_INDEX, MATCHER_FALSE
     }
 }

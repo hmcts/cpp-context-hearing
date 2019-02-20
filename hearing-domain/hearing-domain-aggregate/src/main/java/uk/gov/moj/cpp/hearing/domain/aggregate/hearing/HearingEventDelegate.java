@@ -1,35 +1,30 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.UUID.fromString;
-
-import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.moj.cpp.hearing.domain.CourtCentre;
+import uk.gov.moj.cpp.hearing.domain.HearingType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 
 public class HearingEventDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String HEARING_EVENTS = "hearingEvents";
     private static final String REASON_ALREADY_LOGGED = "Already logged";
     private static final String REASON_ALREADY_DELETED = "Already deleted";
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
     private static final String REASON_HEARING_NOT_FOUND = "Hearing not found";
-    private static final String HEARING_EVENT_ID = "hearingEventId";
-    private static final String RECORDED_LABEL = "recordedLabel";
-    private static final String HEARING_ID = "hearingId";
+    private static final String REASON_ONLY_CROWN_COURT_HEARINGS_CAN_LOG_EVENTS = "Only crown court hearings can log events";
+    private static final String REASON_CASEURN_NOT_FOUND = "Case URN not found";
+
 
     private final HearingAggregateMomento momento;
 
@@ -45,125 +40,134 @@ public class HearingEventDelegate implements Serializable {
         this.momento.getHearingEvents().get(hearingEventDeleted.getHearingEventId()).setDeleted(true);
     }
 
-    public Stream<Object> logHearingEvent(final LogEventCommand logEventCommand) {
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent) {
 
-        if (this.momento.getHearing() == null) {
-            return Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand));
+        Optional<String> ignoreReason = validateHearingEvent(hearingEvent.getHearingEventId());
+        if (ignoreReason.isPresent()) {
+            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
         }
+        final String caseURN = this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN();
 
-        if (this.momento.getHearingEvents().containsKey(logEventCommand.getHearingEventId())) {
-            if (this.momento.getHearingEvents().get(logEventCommand.getHearingEventId()).isDeleted()) {
-                return Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_DELETED, logEventCommand));
-            }
-
-            return Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_LOGGED, logEventCommand));
+        if(caseURN == null){
+            ignoreReason = Optional.of(REASON_CASEURN_NOT_FOUND);
+            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
         }
-
         return Stream.of(new HearingEventLogged(
-                logEventCommand.getHearingEventId(),
+                hearingEvent.getHearingEventId(),
                 null,
-                logEventCommand.getHearingId(),
-                logEventCommand.getHearingEventDefinitionId(),
-                logEventCommand.getRecordedLabel(),
-                logEventCommand.getEventTime(),
-                logEventCommand.getLastModifiedTime(),
-                logEventCommand.getAlterable(),
-                this.momento.getHearing().getCourtCentreId(),
-                this.momento.getHearing().getCourtCentreName(),
-                this.momento.getHearing().getCourtRoomId(),
-                this.momento.getHearing().getCourtRoomName(),
-                this.momento.getHearing().getType(),
-                this.momento.getCases().get(0).getUrn(),
-                this.momento.getCases().get(0).getCaseId(),
-                logEventCommand.getWitnessId(), logEventCommand.getCounselId()));
+                hearingId,
+                hearingEventDefinitionId,
+                defenceCounselId,
+                hearingEvent.getRecordedLabel(),
+                hearingEvent.getEventTime(),
+                hearingEvent.getLastModifiedTime(),
+                alterable,
+                CourtCentre.courtCentre()
+                        .withId(momento.getHearing().getCourtCentre().getId())
+                        .withName(momento.getHearing().getCourtCentre().getName())
+                        .withRoomId(momento.getHearing().getCourtCentre().getRoomId())
+                        .withRoomName(momento.getHearing().getCourtCentre().getRoomName())
+                        .withWelshName(momento.getHearing().getCourtCentre().getWelshName())
+                        .withWelshRoomName(momento.getHearing().getCourtCentre().getWelshRoomName())
+                        .build(),
+                HearingType.hearingType()
+                        .withId(momento.getHearing().getType().getId())
+                        .withDescription(momento.getHearing().getType().getDescription())
+                        .build(),
+                caseURN)); //TODO: GPE-5657 Which case URN is expected to be set?
     }
 
-    public Stream<Object> updateHearingEvents(final JsonObject payload) {
-        final UUID hearingId = fromString(payload.getString(HEARING_ID));
+
+    public Stream<Object> updateHearingEvents(final UUID hearingId, List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents) {
+
         if (this.momento.getHearing() == null) {
-            return Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND,
-                    hearingId));
+            return Stream.of(raiseHearingEventIgnored(REASON_HEARING_NOT_FOUND, hearingId));
         }
 
-        final List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents = new ArrayList<>();
-        final JsonArray hearingEventsArray = payload.getJsonArray(HEARING_EVENTS);
-        hearingEventsArray.getValuesAs(JsonObject.class).forEach(hearingEvent ->
+        if (this.momento.getHearing().getJurisdictionType() == JurisdictionType.MAGISTRATES) {
+            return Stream.of(raiseHearingEventIgnored(REASON_ONLY_CROWN_COURT_HEARINGS_CAN_LOG_EVENTS, hearingId));
+        }
 
-                hearingEvents.add(new uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent(
-                        fromString(hearingEvent.getString(HEARING_EVENT_ID)),
-                        hearingEvent.getString(RECORDED_LABEL)))
-        );
-        return hearingEvents.isEmpty() ? Stream.empty()
-                : Stream.of(new HearingEventsUpdated(hearingId, hearingEvents));
+        if (hearingEvents.isEmpty()) {
+            return Stream.empty();
+        }
+
+        return Stream.of(new HearingEventsUpdated(hearingId, hearingEvents));
     }
 
-    public Stream<Object> correctHearingEvent(final CorrectLogEventCommand logEventCommand) {
+    public Stream<Object> correctHearingEvent(final UUID latestHearingEventId, final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent) {
 
-        if (this.momento.getHearing() == null) {
-            return Stream.of(generateHearingIgnoredMessage(REASON_HEARING_NOT_FOUND, logEventCommand));
-        }
-
-        if (!this.momento.getHearingEvents().containsKey(logEventCommand.getHearingEventId())) {
-
-            return Stream.of(generateHearingIgnoredMessage(REASON_EVENT_NOT_FOUND, logEventCommand));
-        }
-
-        if (this.momento.getHearingEvents().get(logEventCommand.getHearingEventId()).isDeleted()) {
-            return Stream.of(generateHearingIgnoredMessage(REASON_ALREADY_DELETED, logEventCommand));
+        final Optional<String> ignoreReason = validateHearingEventBeforeApplyCorrection(hearingEvent.getHearingEventId());
+        if (ignoreReason.isPresent()) {
+            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
         }
 
         return Stream.of(
-                new HearingEventDeleted(logEventCommand.getHearingEventId()),
+                new HearingEventDeleted(hearingEvent.getHearingEventId()),
                 new HearingEventLogged(
-                        logEventCommand.getLatestHearingEventId(),
-                        logEventCommand.getHearingEventId(),
-                        logEventCommand.getHearingId(),
-                        logEventCommand.getHearingEventDefinitionId(),
-                        logEventCommand.getRecordedLabel(),
-                        logEventCommand.getEventTime(),
-                        logEventCommand.getLastModifiedTime(),
-                        logEventCommand.getAlterable(),
-                        this.momento.getHearing().getCourtCentreId(),
-                        this.momento.getHearing().getCourtCentreName(),
-                        this.momento.getHearing().getCourtRoomId(),
-                        this.momento.getHearing().getCourtRoomName(),
-                        this.momento.getHearing().getType(),
-                        this.momento.getCases().get(0).getUrn(),
-                        this.momento.getCases().get(0).getCaseId(),
-                        logEventCommand.getWitnessId(),
-                        logEventCommand.getCounselId()
+                        latestHearingEventId,
+                        hearingEvent.getHearingEventId(),
+                        hearingId,
+                        hearingEventDefinitionId,
+                        defenceCounselId,
+                        hearingEvent.getRecordedLabel(),
+                        hearingEvent.getEventTime(),
+                        hearingEvent.getLastModifiedTime(),
+                        alterable,
+                        CourtCentre.courtCentre()
+                                .withId(momento.getHearing().getCourtCentre().getId())
+                                .withName(momento.getHearing().getCourtCentre().getName())
+                                .withRoomId(momento.getHearing().getCourtCentre().getRoomId())
+                                .withRoomName(momento.getHearing().getCourtCentre().getRoomName())
+                                .withWelshName(momento.getHearing().getCourtCentre().getWelshName())
+                                .withWelshRoomName(momento.getHearing().getCourtCentre().getWelshRoomName())
+                                .build(),
+                        HearingType.hearingType()
+                                .withId(momento.getHearing().getType().getId())
+                                .withDescription(momento.getHearing().getType().getDescription())
+                                .build(),
+                        this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN() //TODO: GPE-5657 Which case URN is expected to be set?
                 ));
     }
 
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final CorrectLogEventCommand logEventCommand) {
-        return new HearingEventIgnored(
-                logEventCommand.getHearingEventId(),
-                logEventCommand.getHearingId(),
-                logEventCommand.getHearingEventDefinitionId(),
-                logEventCommand.getRecordedLabel(),
-                logEventCommand.getEventTime(),
-                reason,
-                logEventCommand.getAlterable()
-        );
-    }
-
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final LogEventCommand logEventCommand) {
-        return new HearingEventIgnored(
-                logEventCommand.getHearingEventId(),
-                logEventCommand.getHearingId(),
-                logEventCommand.getHearingEventDefinitionId(),
-                logEventCommand.getRecordedLabel(),
-                logEventCommand.getEventTime(),
-                reason,
-                logEventCommand.getAlterable()
-        );
-    }
-
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {
+    private HearingEventIgnored raiseHearingEventIgnored(final String reason, final UUID hearingId) {
         return new HearingEventIgnored(
                 hearingId,
                 reason
         );
+    }
+
+    private Optional<String> validateHearingEvent(final UUID hearingEventId) {
+        if (this.momento.getHearing() == null) {
+            return Optional.of(REASON_HEARING_NOT_FOUND);
+        }
+        if (this.momento.getHearingEvents().containsKey(hearingEventId)) {
+            if (this.momento.getHearingEvents().get(hearingEventId).isDeleted()) {
+                return Optional.of(REASON_ALREADY_DELETED);
+            }
+            return Optional.of(REASON_ALREADY_LOGGED);
+        }
+        if (this.momento.getHearing().getJurisdictionType() == JurisdictionType.MAGISTRATES) {
+            return Optional.of(REASON_ONLY_CROWN_COURT_HEARINGS_CAN_LOG_EVENTS);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<String> validateHearingEventBeforeApplyCorrection(final UUID hearingEventId) {
+        if (this.momento.getHearing() == null) {
+            return Optional.of(REASON_HEARING_NOT_FOUND);
+        }
+        if (!this.momento.getHearingEvents().containsKey(hearingEventId)) {
+
+            return Optional.of(REASON_EVENT_NOT_FOUND);
+        }
+        if (this.momento.getHearingEvents().get(hearingEventId).isDeleted()) {
+            return Optional.of(REASON_ALREADY_DELETED);
+        }
+        if (this.momento.getHearing().getJurisdictionType() == JurisdictionType.MAGISTRATES) {
+            return Optional.of(REASON_ONLY_CROWN_COURT_HEARINGS_CAN_LOG_EVENTS);
+        }
+        return Optional.empty();
     }
 
     public static final class HearingEvent implements Serializable {

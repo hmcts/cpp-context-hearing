@@ -1,16 +1,18 @@
-
 package uk.gov.moj.cpp.hearing.event.nows.order;
 
 import java.io.Serializable;
 
 
-public class Address implements Serializable
-{
+public class Address implements Serializable {
 
     private final static long serialVersionUID = -468345944222529099L;
     private String line1;
     private String line2;
     private String postCode;
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public String getLine1() {
         return line1;
@@ -34,10 +36,6 @@ public class Address implements Serializable
 
     public void setPostCode(String postCode) {
         this.postCode = postCode;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {

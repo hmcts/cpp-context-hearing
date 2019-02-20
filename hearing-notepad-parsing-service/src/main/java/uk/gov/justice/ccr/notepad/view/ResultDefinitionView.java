@@ -19,10 +19,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 })
 public class ResultDefinitionView {
 
-    private String originalText;
-
     private final String resultLineId = UUID.randomUUID().toString();
-
+    private String originalText;
     private String resultCode;
 
     private String resultLevel;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
@@ -30,7 +30,8 @@
         <addForeignKeyConstraint baseColumnNames="nows_id" baseTableName="nows_result"
                                  constraintName="fk_nows_nows_result" deferrable="false"
                                  initiallyDeferred="false"
-                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
                                  referencedTableName="nows"/>
 
         <dropColumn tableName="nows_material" columnName="hearing_id"/>
@@ -44,7 +45,8 @@
         <addForeignKeyConstraint baseColumnNames="nows_id" baseTableName="nows_material"
                                  constraintName="fk_nows_nows_material" deferrable="false"
                                  initiallyDeferred="false"
-                                 onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="id"
+                                 onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id"
                                  referencedTableName="nows"/>
 
     </changeSet>

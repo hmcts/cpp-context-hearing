@@ -15,21 +15,22 @@ import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBa
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockUpdateHmpsMaterialStatus;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 
+import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeArea;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -38,8 +39,6 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -59,53 +58,25 @@ import org.slf4j.LoggerFactory;
 
 public class AbstractIT {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     protected static final UUID USER_ID_VALUE = randomUUID();
     protected static final UUID USER_ID_VALUE_AS_ADMIN = randomUUID();
-
     protected static final Header CPP_UID_HEADER = new Header(USER_ID, USER_ID_VALUE.toString());
     protected static final Header CPP_UID_HEADER_AS_ADMIN = new Header(USER_ID, USER_ID_VALUE_AS_ADMIN.toString());
-
-    private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
     protected static final Properties ENDPOINT_PROPERTIES = new Properties();
     protected static final String PUBLIC_EVENT_TOPIC = "public.event";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
+    private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
+    private static final ThreadLocal<UUID> USER_CONTEXT = new ThreadLocal<>();
     protected static RequestSpecification requestSpec;
     protected static String baseUri;
     protected static RestClient restClient = new RestClient();
 
-    private static final ThreadLocal<UUID> USER_CONTEXT = new ThreadLocal<>();
-
-    @Before
-    public void setUp() {
-        readConfig();
-        setRequestSpecification();
-        setupAsAuthorisedUser(USER_ID_VALUE);
-        setupAsSystemUser(USER_ID_VALUE_AS_ADMIN);
-        stubEnableAllCapabilities();
-        mockMaterialUpload();
-        mockUpdateHmpsMaterialStatus();
+    protected static UUID getLoggedInUser() {
+        return USER_CONTEXT.get();
     }
-
-    protected JSONObject getExistingHearing(final String hearingId) {
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .until(status().is(OK)).getPayload();
-        return new JSONObject(payload);
-    }
-
 
     protected static void setLoggedInUser(final UUID userId) {
         USER_CONTEXT.set(userId);
-    }
-
-    protected static UUID getLoggedInUser() {
-        return USER_CONTEXT.get();
     }
 
     protected static MultivaluedMap<String, Object> getLoggedInHeader() {
@@ -144,7 +115,7 @@ public class AbstractIT {
     protected static Matcher<Integer> equalInt(final Object bean, final String name) {
         return equalTo(getInteger(bean, name));
     }
-    
+
     protected static Matcher<String> equalDate(final Temporal localDate) {
         return equalTo(ISO_LOCAL_DATE.format(localDate));
     }
@@ -166,7 +137,7 @@ public class AbstractIT {
         }
     }
 
-    protected static UUID getUUID(final Object bean,final String name) {
+    protected static UUID getUUID(final Object bean, final String name) {
         return UUID.fromString(getString(bean, name));
     }
 
@@ -202,7 +173,6 @@ public class AbstractIT {
             public boolean matches(final Object o) {
                 if (o instanceof ResponseData) {
                     final ResponseData responseData = (ResponseData) o;
-                    System.out.println(responseData.getPayload());
                 }
                 return true;
             }
@@ -213,29 +183,59 @@ public class AbstractIT {
         };
     }
 
-    public static <T> Matcher<ResponseData> jsonPayloadMatchesBean(Class<T> theClass, BeanMatcher<T> beanMatcher) {
-        final BaseMatcher<JsonObject> jsonObjectMatcher = convertTo(theClass, beanMatcher);
-        return new BaseMatcher<ResponseData>() {
-            @Override
-            public boolean matches(final Object o) {
-                if (o instanceof ResponseData) {
-                    final ResponseData responseData = (ResponseData) o;
-                    if (responseData.getPayload() != null) {
-                        JsonObject jsonObject = Json.createReader(new StringReader(responseData.getPayload())).readObject();
-                        return jsonObjectMatcher.matches(jsonObject);
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-                jsonObjectMatcher.describeTo(description);
-            }
-        };
-    }
-
     protected static RequestParams requestParameters(final String url, final String contentType) {
         return requestParams(url, contentType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build();
     }
+
+    @Before
+    public void setUp() {
+        readConfig();
+        setRequestSpecification();
+        setupAsAuthorisedUser(USER_ID_VALUE);
+        setupAsSystemUser(USER_ID_VALUE_AS_ADMIN);
+        stubEnableAllCapabilities();
+        mockMaterialUpload();
+        mockUpdateHmpsMaterialStatus();
+    }
+
+    protected JSONObject getExistingHearing(final String hearingId) {
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
+
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.get.hearing+json";
+
+        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .until(status().is(OK)).getPayload();
+        return new JSONObject(payload);
+    }
+
+    protected void stubLjaDetails(final UUID courtCentreId) {
+        final String ljaCode = String.format("%04d", Integer.valueOf(Double.valueOf(Math.random() * 10000).intValue()));
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withOucode(ljaCode)
+                .withLja(ljaCode)
+                .withId(courtCentreId.toString())
+                .build();
+
+        final EnforcementArea enforcementArea = EnforcementArea.enforcementArea()
+                .withLocalJusticeArea(LocalJusticeArea.localJusticeArea()
+                        .withName("ljaName" + ljaCode)
+                        .build())
+                .withAccountDivisionCode(5673)
+                .withEmail("enforcement" + ljaCode + "@gov.com")
+                .withNationalPaymentPhone("07802683993")
+                .withAddress1("address1 " + ljaCode)
+                .withAddress2("address2 " + ljaCode)
+                .withAddress3("address3 " + ljaCode)
+                .withAddress4("address4 " + ljaCode)
+                .withPostcode("AL4 9LG")
+                .build();
+
+        ReferenceDataStub.stub(organisationalUnit);
+
+        ReferenceDataStub.stub(enforcementArea, ljaCode);
+
+    }
+
 }

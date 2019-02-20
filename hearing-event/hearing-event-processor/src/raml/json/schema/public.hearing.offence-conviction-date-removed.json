@@ -1,23 +1,24 @@
 {
-  "$schema":"http://json-schema.org/draft-04/schema#",
-  "type":"object",
-  "properties":{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/public.hearing.offence-conviction-date-removed.json",
+  "type": "object",
+  "properties": {
     "caseId": {
       "$ref": "#/definitions/uuid"
-    },  
-    "offenceId":{
-      "$ref":"#/definitions/uuid"
+    },
+    "offenceId": {
+      "$ref": "#/definitions/uuid"
     }
   },
-  "additionalProperties":false,
-  "required":[
-    "caseId",  
+  "additionalProperties": false,
+  "required": [
+    "caseId",
     "offenceId"
   ],
-  "definitions":{
-    "uuid":{
-      "type":"string",
-      "pattern":"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   }
 }
