@@ -12,14 +12,13 @@
 
     <properties>
         <cpp.service-component>QUERY_API</cpp.service-component>
-        <referencedata.version>2.4.3-CC-SNAPSHOT</referencedata.version>
+        <referencedata.version>2.0.174</referencedata.version>
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
-        <material.version>2.0.112</material.version>
-        <results.version>1.0.1-SNAPSHOT</results.version>
-        <notification.notify.version>0.0.25</notification.notify.version>
+        <material.version>2.0.116</material.version>
+        <results.version>1.0.12</results.version>
         <notification.notify.version>0.0.26</notification.notify.version>
-        <stagingenforcement.version>0.0.73-SNAPSHOT</stagingenforcement.version>
-        <progression-version>2.4.16-CC-SNAPSHOT</progression-version>
+        <stagingenforcement.version>0.0.82</stagingenforcement.version>
+        <progression-version>2.0.110</progression-version>
     </properties>
 
     <build>
@@ -36,12 +35,6 @@
                         <groupId>uk.gov.moj.cpp.staging.enforcement</groupId>
                         <artifactId>stagingenforcement-command-api</artifactId>
                         <version>${stagingenforcement.version}</version>
-                        <classifier>raml</classifier>
-                    </dependency>
-                    <dependency>
-                        <groupId>uk.gov.moj.cpp.progression</groupId>
-                        <artifactId>progression-command-api</artifactId>
-                        <version>${progression-version}</version>
                         <classifier>raml</classifier>
                     </dependency>
                     <dependency>
