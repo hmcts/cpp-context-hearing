@@ -15,7 +15,7 @@
         <referencedata.version>2.0.174</referencedata.version>
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
         <material.version>2.0.116</material.version>
-        <results.version>1.0.12</results.version>
+        <results.version>1.0.16</results.version>
         <notification.notify.version>0.0.26</notification.notify.version>
         <stagingenforcement.version>0.0.82</stagingenforcement.version>
         <progression-version>2.0.110</progression-version>
