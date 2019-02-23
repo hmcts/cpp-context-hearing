@@ -77,7 +77,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings("unchecked")
-@Ignore("This Test is ignore to get progression release version.")
 public class ShareResultsIT extends AbstractIT {
 
     public static final String DOCUMENT_TEXT = "someDocumentText";
