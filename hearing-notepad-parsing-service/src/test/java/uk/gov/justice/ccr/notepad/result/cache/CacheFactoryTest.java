@@ -2,7 +2,7 @@ package uk.gov.justice.ccr.notepad.result.cache;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 import com.google.common.cache.LoadingCache;
 import org.junit.Test;

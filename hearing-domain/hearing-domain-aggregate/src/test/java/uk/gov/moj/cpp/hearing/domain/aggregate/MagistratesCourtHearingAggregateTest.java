@@ -1,14 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import org.apache.commons.lang3.SerializationException;
-import org.apache.commons.lang3.SerializationUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.junit.Assert.fail;
+
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
@@ -20,13 +13,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.fail;
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MagistratesCourtHearingAggregateTest {
 
 
-    private static Hearing originatingHearing;
     private final static LocalDate CONVICTION_DATE = LocalDate.now();
     private final static UUID HEARING_ID = UUID.randomUUID();
     private final static UUID CASE_ID = UUID.randomUUID();
@@ -35,8 +35,7 @@ public class MagistratesCourtHearingAggregateTest {
     private final static String COURT_CENTRE_NAME = "Liverpool";
     private final static LocalDate SENDING_COMMITTAL_DATE = LocalDate.now();
     private final static String TYPE = "Magistrate Court Hearing";
-
-
+    private static Hearing originatingHearing;
     @InjectMocks
     private MagistratesCourtHearingAggregate magistratesCourtHearingAggregate;
 

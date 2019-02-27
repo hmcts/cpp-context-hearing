@@ -92,7 +92,6 @@
           "mandatory": true,
           "type": "FIXL",
           "sequence": 8,
-
           "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
         },
         {
@@ -109,6 +108,22 @@
           "mandatory": false,
           "type": "TXT",
           "sequence": 9
+        },
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc79",
+          "label": "Court Centre",
+          "mandatory": true,
+          "type": "TXT",
+          "sequence": 10,
+          "reference": "HCHOUSE"
+        },
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-9966bcd2fc79",
+          "label": "Hearing Type",
+          "mandatory": true,
+          "type": "TXT",
+          "sequence": 11,
+          "reference": "HTYPE"
         }
       ],
       "startDate": "2017-07-24",
@@ -209,7 +224,6 @@
           "duration": "Days",
           "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
         },
-
         {
           "id": "ea26f773-0a91-4526-b4ad-84d07b5bf942",
           "label": "Reason",

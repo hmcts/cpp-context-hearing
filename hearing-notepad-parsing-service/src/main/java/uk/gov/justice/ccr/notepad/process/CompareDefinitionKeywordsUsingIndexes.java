@@ -15,7 +15,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 class CompareDefinitionKeywordsUsingIndexes implements ResultFilter<List<ResultDefinition>, Map<Set<String>, Set<Long>>> {
-    
+
     @Inject
     ResultCache resultCache;
 
@@ -37,7 +37,7 @@ class CompareDefinitionKeywordsUsingIndexes implements ResultFilter<List<ResultD
         for (Long l : resultsFound) {
             matchedResultDefinition.add(resultDefinitions.get(l.intValue()));
         }
-        
+
         return matchedResultDefinition;
     }
 }

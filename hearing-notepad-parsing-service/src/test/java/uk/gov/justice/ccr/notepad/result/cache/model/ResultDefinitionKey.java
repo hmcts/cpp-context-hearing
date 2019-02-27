@@ -2,7 +2,7 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 
 
 public enum ResultDefinitionKey {
-    
+
     UUID(0),
     LABEL(1),
     SHORT_CODE(2),

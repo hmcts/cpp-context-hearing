@@ -2,6 +2,7 @@
   "type": "object",
   "definitions": {},
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.query.search-by-material-id.json",
   "properties": {
     "allowedUserGroups": {
       "type": "array",

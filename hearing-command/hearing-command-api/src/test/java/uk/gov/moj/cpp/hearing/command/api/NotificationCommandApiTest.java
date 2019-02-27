@@ -35,12 +35,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class NotificationCommandApiTest {
 
-    @Mock
-    private Sender sender;
-
     @Spy
     private final Enveloper enveloper = createEnveloper();
-
+    @Mock
+    private Sender sender;
     @Captor
     private ArgumentCaptor<JsonEnvelope> senderArgumentCaptor;
 

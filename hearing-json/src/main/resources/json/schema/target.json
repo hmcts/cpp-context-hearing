@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/core/courts/target.json",
+  "description": "The target",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "resultLines": {
+      "type": "array",
+      "items": {
+        "$ref": "http://justice.gov.uk/core/courts/resultLine.json"
+      }
+    },
+    "defendantId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "targetId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "offenceId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "draftResult": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "hearingId",
+    "targetId",
+    "defendantId",
+    "offenceId"
+  ],
+  "additionalProperties": false
+}

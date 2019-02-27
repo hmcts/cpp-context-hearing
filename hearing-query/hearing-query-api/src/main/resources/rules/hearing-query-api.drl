@@ -6,11 +6,11 @@ import java.util.Arrays;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
 
-rule "Query - API - hearing.get.hearings-by-date"
+rule "Query - API - hearing.get.hearings"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.get.hearings-by-date");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+    $action: Action(name == "hearing.get.hearings");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -19,7 +19,7 @@ rule "Query - API - hearing.get.hearing"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.hearing");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users"));
   then
     $outcome.setSuccess(true);
 end
@@ -28,7 +28,7 @@ rule "Query - API - hearing.get-hearing-event-definitions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-definitions");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -37,7 +37,7 @@ rule "Query - API - hearing.get-hearing-event-definition"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-definition");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -46,7 +46,7 @@ rule "Query - API - hearing.get-hearing-event-log"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-log");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -55,16 +55,7 @@ rule "Query - API - hearing.get-draft-result"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-draft-result");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
-  then
-    $outcome.setSuccess(true);
-end
-
-rule "Query - API - hearing.get.nows"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.get.nows");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -82,7 +73,16 @@ rule "Query - API - hearing.retrieve-subscriptions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.retrieve-subscriptions");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "System Users"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get.nows"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.nows");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
   then
     $outcome.setSuccess(true);
 end

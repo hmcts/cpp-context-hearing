@@ -13,6 +13,13 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.TimeZone.getTimeZone;
 import static uk.gov.justice.services.common.converter.ZonedDateTimes.ISO_8601;
 
+import uk.gov.justice.services.common.converter.exception.ConverterException;
+import uk.gov.justice.services.common.converter.jackson.additionalproperties.AdditionalPropertiesModule;
+import uk.gov.justice.services.common.converter.jackson.jsr353.InclusionAwareJSR353Module;
+
+import java.io.IOException;
+import java.time.ZonedDateTime;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -21,18 +28,10 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import uk.gov.justice.services.common.converter.exception.ConverterException;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.common.converter.jackson.additionalproperties.AdditionalPropertiesModule;
-import uk.gov.justice.services.common.converter.jackson.jsr353.InclusionAwareJSR353Module;
-
-import java.io.IOException;
-import java.time.ZonedDateTime;
 
 public class MapStringToTypeMatcher<T> extends BaseMatcher<String> {
-    private Class<T> clz;
     private final Matcher<T> matcher;
-
+    private Class<T> clz;
     private ObjectMapper objectMapper;
 
     public MapStringToTypeMatcher(Class<T> clz, Matcher<T> matcher) {
@@ -55,6 +54,15 @@ public class MapStringToTypeMatcher<T> extends BaseMatcher<String> {
                 .enable(READ_ENUMS_USING_TO_STRING);
     }
 
+    public static <T> MapStringToTypeMatcher<T> convertStringTo(Class<T> clazz, Matcher<T> matcher) {
+        return new MapStringToTypeMatcher<>(clazz, matcher);
+    }
+
+    public static <T> T convertStringTo(final Class<T> clazz, final String str) {
+        return new MapStringToTypeMatcher<>(clazz, null).convert(clazz, str);
+    }
+
+
     @Override
     public boolean matches(Object item) {
         T subject = convert(clz, (String) item);
@@ -72,7 +80,7 @@ public class MapStringToTypeMatcher<T> extends BaseMatcher<String> {
         this.matcher.describeMismatch(subject, description);
     }
 
-    private T convert(Class<T> clazz, String source) {
+    public T convert(Class<T> clazz, String source) {
 
         try {
             T object = this.objectMapper.readValue(source, clazz);
@@ -84,10 +92,6 @@ public class MapStringToTypeMatcher<T> extends BaseMatcher<String> {
         } catch (IOException var4) {
             throw new IllegalArgumentException(String.format("Error while converting %s to JsonObject", source), var4);
         }
-    }
-
-    public static <T> MapStringToTypeMatcher<T> convertStringTo(Class<T> clazz, Matcher<T> matcher) {
-        return new MapStringToTypeMatcher<>(clazz, matcher);
     }
 
     private JavaTimeModule javaTimeModuleWithFormattedDateTime() {

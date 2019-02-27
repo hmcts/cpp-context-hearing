@@ -14,7 +14,7 @@ public class BaseDefendantOffence {
 
     private String wording;
 
-    private LocalDate startDate;                                      
+    private LocalDate startDate;
 
     private LocalDate endDate;
 
@@ -39,32 +39,12 @@ public class BaseDefendantOffence {
         this.convictionDate = convictionDate;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public String getOffenceCode() {
-        return offenceCode;
-    }
-
-    public String getWording() {
-        return wording;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public LocalDate getConvictionDate() {
-        return convictionDate;
     }
 
     public BaseDefendantOffence setId(UUID id) {
@@ -72,9 +52,17 @@ public class BaseDefendantOffence {
         return this;
     }
 
+    public String getOffenceCode() {
+        return offenceCode;
+    }
+
     public BaseDefendantOffence setOffenceCode(String offenceCode) {
         this.offenceCode = offenceCode;
         return this;
+    }
+
+    public String getWording() {
+        return wording;
     }
 
     public BaseDefendantOffence setWording(String wording) {
@@ -82,9 +70,17 @@ public class BaseDefendantOffence {
         return this;
     }
 
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
     public BaseDefendantOffence setStartDate(LocalDate startDate) {
         this.startDate = startDate;
         return this;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
     }
 
     public BaseDefendantOffence setEndDate(LocalDate endDate) {
@@ -92,18 +88,22 @@ public class BaseDefendantOffence {
         return this;
     }
 
+    public Integer getCount() {
+        return count;
+    }
+
     public BaseDefendantOffence setCount(Integer count) {
         this.count = count;
         return this;
     }
 
+    public LocalDate getConvictionDate() {
+        return convictionDate;
+    }
+
     public BaseDefendantOffence setConvictionDate(LocalDate convictionDate) {
         this.convictionDate = convictionDate;
         return this;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static class Builder {

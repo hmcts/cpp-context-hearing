@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.witness;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AddDefenceWitnessCommand implements Serializable {
 

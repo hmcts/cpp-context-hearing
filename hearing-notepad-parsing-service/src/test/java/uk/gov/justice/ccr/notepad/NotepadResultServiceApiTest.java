@@ -94,9 +94,9 @@ public class NotepadResultServiceApiTest {
         assertThat(parsingLocalDateArgumentCaptor.getValue(), equalTo(LocalDate.parse("2018-06-01")));
         verify(resultDefinitionView, times(1)).setOriginalText("imp sus");
         verify(resultDefinitionView, times(1)).setOrderedDate("2018-06-01");
-        verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(any(),any());
+        verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(any(), any());
         verify(objectToJsonObjectConverter, times(1)).convert(any());
-        verify(enveloper, times(1)).withMetadataFrom(any(),any());
+        verify(enveloper, times(1)).withMetadataFrom(any(), any());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class NotepadResultServiceApiTest {
         assertThat(parsingLocalDateArgumentCaptor.getValue(), equalTo(LocalDate.parse("2018-06-01")));
         verify(resultPromptViewBuilder, times(1)).buildFromKnowledge(any());
         verify(objectToJsonObjectConverter, times(1)).convert(any());
-        verify(enveloper, times(1)).withMetadataFrom(any(),any());
+        verify(enveloper, times(1)).withMetadataFrom(any(), any());
     }
 
     @Test

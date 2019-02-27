@@ -2,16 +2,18 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.plea.Defendant;
-import uk.gov.moj.cpp.hearing.command.plea.HearingUpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.command.plea.Offence;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateInheritedPleaCommand;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
+
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,23 +29,35 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.hearing-offence-plea-update event received {}", envelope.toObfuscatedDebugString());
         }
-        final HearingUpdatePleaCommand command = convertToObject(envelope, HearingUpdatePleaCommand.class);
-        for (final Defendant defendant : command.getDefendants()) {
-            for (final Offence offence : defendant.getOffences()) {
-                aggregate(NewModelHearingAggregate.class, command.getHearingId(), envelope,
-                        (hearingAggregate) -> hearingAggregate.updatePlea(command.getHearingId(), offence.getId(),
-                                offence.getPlea().getPleaDate(), offence.getPlea().getValue()));
-            }
+        final UpdatePleaCommand command = convertToObject(envelope, UpdatePleaCommand.class);
+        for (final Plea plea : command.getPleas()) {
+            aggregate(HearingAggregate.class, command.getHearingId(), envelope,
+                    hearingAggregate -> hearingAggregate.updatePlea(command.getHearingId(), plea));
         }
     }
 
-    @Handles("hearing.offence-plea-updated")
+    @Handles("hearing.command.update-plea-against-offence")
     public void updateOffencePlea(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.offence-plea-updated event received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.update-plea-against-offence event received {}", envelope.toObfuscatedDebugString());
         }
-        final OffencePleaUpdated event = convertToObject(envelope, OffencePleaUpdated.class);
-        aggregate(OffenceAggregate.class, event.getOffenceId(), envelope,
-                (offenceAggregate) -> offenceAggregate.updatePlea(event.getHearingId(), event.getOffenceId(), event.getPleaDate(), event.getValue()));
+        final UpdateOffencePleaCommand command = convertToObject(envelope, UpdateOffencePleaCommand.class);
+        aggregate(OffenceAggregate.class, command.getPlea().getOffenceId(), envelope,
+                offenceAggregate -> offenceAggregate.updatePlea(command.getHearingId(), command.getPlea()));
+    }
+
+    @Handles("hearing.command.enrich-update-plea-with-associated-hearings")
+    public void updateInheritPlea(final JsonEnvelope envelope) throws EventStreamException {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.enrich-update-plea-with-associated-hearings event received {}", envelope.toObfuscatedDebugString());
+        }
+
+        final UpdateInheritedPleaCommand command = convertToObject(envelope, UpdateInheritedPleaCommand.class);
+
+        for (final UUID hearingId : command.getHearingIds()) {
+            aggregate(HearingAggregate.class, hearingId, envelope,
+                    hearingAggregate -> hearingAggregate.inheritPlea(hearingId, command.getPlea()));
+        }
     }
 }

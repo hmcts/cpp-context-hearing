@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+//TODO GPE-6313 remove
+@SuppressWarnings({"squid:S1135"})
 public class Nows implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -42,12 +44,17 @@ public class Nows implements Serializable {
         return this.nowsTypeId;
     }
 
+    public Nows setNowsTypeId(final UUID nowsTypeId) {
+        this.nowsTypeId = nowsTypeId;
+        return this;
+    }
+
     public LocalDate getReferenceDate() {
         return referenceDate;
     }
 
-    public Nows setNowsTypeId(final UUID nowsTypeId) {
-        this.nowsTypeId = nowsTypeId;
+    public Nows setReferenceDate(final LocalDate referenceDate) {
+        this.referenceDate = referenceDate;
         return this;
     }
 
@@ -75,11 +82,6 @@ public class Nows implements Serializable {
 
     public Nows setMaterials(final List<Material> materials) {
         this.materials = new ArrayList<>(materials);
-        return this;
-    }
-
-    public Nows setReferenceDate(final LocalDate referenceDate) {
-        this.referenceDate = referenceDate;
         return this;
     }
 

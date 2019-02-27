@@ -1,15 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -17,17 +9,16 @@ import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUti
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.HearingEventDefinitionsTemplates.buildCreateHearingEventDefinitionsCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -40,9 +31,12 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.domain.CourtCentre;
+import uk.gov.moj.cpp.hearing.domain.HearingType;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventDefinitionAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsCreated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDefinitionsDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -55,8 +49,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.json.JsonArrayBuilder;
-
+import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,70 +58,25 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+@SuppressWarnings({"unchecked"})
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventCommandHandlerTest {
 
-    private static final String HEARING_EVENT_DEFINITIONS_CREATED_EVENT = "hearing.hearing-event-definitions-created";
-    private static final String HEARING_EVENT_DEFINITIONS_DELETED_EVENT = "hearing.hearing-event-definitions-deleted";
-
-    private static final String FIELD_GENERIC_ID = "id";
-
-    private static final String FIELD_ACTION_LABEL = "actionLabel";
-    private static final String FIELD_RECORDED_LABEL = "recordedLabel";
-    private static final String FIELD_SEQUENCE = "sequence";
-    private static final String FIELD_SEQUENCE_TYPE = "sequenceType";
-    private static final String FIELD_CASE_ATTRIBUTE = "caseAttribute";
-    private static final String FIELD_ALTERABLE = "alterable";
-    private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
-    private static final String FIELD_GROUP_LABEL = "groupLabel";
-    private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
-
-    private static final UUID HEARING_ID = randomUUID();
-    private static final UUID COUNSEL_ID = randomUUID();
-
-    private static final String ACTION_LABEL = STRING.next();
-    private static final String RECORDED_LABEL = STRING.next();
-    private static final Integer SEQUENCE = INTEGER.next();
-    private static final String ACTION_LABEL_2 = STRING.next();
-    private static final String RECORDED_LABEL_2 = STRING.next();
-    private static final Integer SEQUENCE_2 = INTEGER.next();
-    private static final String CASE_ATTRIBUTE = STRING.next();
-    private static final String ACTION_LABEL_3 = STRING.next();
-    private static final String RECORDED_LABEL_3 = STRING.next();
-    private static final String SEQUENCE_TYPE = STRING.next();
-    private static final String GROUP_LABEL = STRING.next();
-    private static final String ACTION_LABEL_EXTENSION = STRING.next();
-
-    private static final UUID HEARING_EVENT_DEFINITIONS_ID = randomUUID();
-    private static final UUID HEARING_EVENT_DEFINITION_ID = randomUUID();
-    private static final UUID HEARING_EVENT_DEFINITION_ID_2 = randomUUID();
-    private static final UUID HEARING_EVENT_DEFINITION_ID_3 = randomUUID();
-
-    private static final boolean ALTERABLE = BOOLEAN.next();
-    private static final boolean ALTERABLE_2 = BOOLEAN.next();
-    private static final boolean ALTERABLE_3 = BOOLEAN.next();
-
-
-    @Mock
-    private EventStream eventStream;
-
-    @Mock
-    private EventSource eventSource;
-
-    @Mock
-    private AggregateService aggregateService;
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             HearingEventLogged.class, HearingEventDefinitionsCreated.class,
             HearingEventDeleted.class, HearingEventIgnored.class,
             HearingEventDefinitionsDeleted.class);
-
+    @Mock
+    private EventStream eventStream;
+    @Mock
+    private EventSource eventSource;
+    @Mock
+    private AggregateService aggregateService;
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @InjectMocks
     private HearingEventCommandHandler hearingEventCommandHandler;
 
@@ -141,300 +89,237 @@ public class HearingEventCommandHandlerTest {
     @Test
     public void shouldAlwaysRaiseHearingEventDefinitionsDeletedAndCreatedEvents() throws Exception {
 
-        when(eventSource.getStreamById(HEARING_ID)).thenReturn(eventStream);
-        when(aggregateService.get(eventStream, NewModelHearingAggregate.class)).thenReturn(new NewModelHearingAggregate());
+        final CreateHearingEventDefinitionsCommand createHearingEventDefinitionsCommand = buildCreateHearingEventDefinitionsCommand();
 
-        when(eventSource.getStreamById(HEARING_EVENT_DEFINITIONS_ID)).thenReturn(eventStream);
-        when(aggregateService.get(eventStream, HearingEventDefinitionAggregate.class)).thenReturn(new HearingEventDefinitionAggregate());
+        setupMockedEventStream(createHearingEventDefinitionsCommand.getId(), this.eventStream, new HearingEventDefinitionAggregate());
 
-        final JsonArrayBuilder eventDefinitionsBuilder = createArrayBuilder()
-                .add(createObjectBuilder()
-                        .add(FIELD_GENERIC_ID, HEARING_EVENT_DEFINITION_ID.toString())
-                        .add(FIELD_ACTION_LABEL, ACTION_LABEL)
-                        .add(FIELD_RECORDED_LABEL, RECORDED_LABEL)
-                        .add(FIELD_SEQUENCE, SEQUENCE)
-                        .add(FIELD_SEQUENCE_TYPE, SEQUENCE_TYPE)
-                        .add(FIELD_ALTERABLE, ALTERABLE)
-                )
-                .add(createObjectBuilder()
-                        .add(FIELD_GENERIC_ID, HEARING_EVENT_DEFINITION_ID_2.toString())
-                        .add(FIELD_GROUP_LABEL, GROUP_LABEL)
-                        .add(FIELD_ACTION_LABEL, ACTION_LABEL_2)
-                        .add(FIELD_ACTION_LABEL_EXTENSION, ACTION_LABEL_EXTENSION)
-                        .add(FIELD_RECORDED_LABEL, RECORDED_LABEL_2)
-                        .add(FIELD_SEQUENCE, SEQUENCE_2)
-                        .add(FIELD_SEQUENCE_TYPE, SEQUENCE_TYPE)
-                        .add(FIELD_CASE_ATTRIBUTE, CASE_ATTRIBUTE)
-                        .add(FIELD_ALTERABLE, ALTERABLE_2)
-                )
-                .add(createObjectBuilder()
-                        .add(FIELD_GENERIC_ID, HEARING_EVENT_DEFINITION_ID_3.toString())
-                        .add(FIELD_ACTION_LABEL, ACTION_LABEL_3)
-                        .add(FIELD_RECORDED_LABEL, RECORDED_LABEL_3)
-                        .add(FIELD_ALTERABLE, ALTERABLE_3)
-                );
+        final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.create-hearing-event-definitions"),
+                objectToJsonObjectConverter.convert(createHearingEventDefinitionsCommand));
 
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUIDAndName(),
-                createObjectBuilder()
-                        .add(FIELD_GENERIC_ID, HEARING_EVENT_DEFINITIONS_ID.toString())
-                        .add(FIELD_EVENT_DEFINITIONS, eventDefinitionsBuilder)
-                        .build());
+        hearingEventCommandHandler.createHearingEventDefinitions(jsonEnvelopCommand);
 
-        hearingEventCommandHandler.createHearingEventDefinitions(command);
+        final List<JsonEnvelope> jsonEnvelopeEvents = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName(HEARING_EVENT_DEFINITIONS_DELETED_EVENT),
-                        payloadIsJson(
-                                withJsonPath(format("$.%s", FIELD_GENERIC_ID), equalTo(HEARING_EVENT_DEFINITIONS_ID.toString()))
-                        )).thatMatchesSchema(),
+        assertThat(jsonEnvelopeEvents.get(0), jsonEnvelope(metadata().withName("hearing.hearing-event-definitions-deleted"), payloadIsJson(print())));
 
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName(HEARING_EVENT_DEFINITIONS_CREATED_EVENT),
-                        payloadIsJson(allOf(
-                                withJsonPath(format("$.%s", FIELD_GENERIC_ID), equalTo(HEARING_EVENT_DEFINITIONS_ID.toString())),
-                                withJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(3)),
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvents.get(0), HearingEventDefinitionsDeleted.class), isBean(HearingEventDefinitionsDeleted.class)
+                .with(HearingEventDefinitionsDeleted::getId, is(createHearingEventDefinitionsCommand.getId()))
+        );
 
-                                withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), equalTo(HEARING_EVENT_DEFINITION_ID.toString())),
-                                withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), equalTo(ACTION_LABEL)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), equalTo(ALTERABLE)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE), equalTo(SEQUENCE)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE_TYPE), equalTo(SEQUENCE_TYPE)),
-                                withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTE)),
-                                withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
-                                withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION)),
+        assertThat(jsonEnvelopeEvents.get(1), jsonEnvelope(metadata().withName("hearing.hearing-event-definitions-created"), payloadIsJson(print())));
 
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), equalTo(HEARING_EVENT_DEFINITION_ID_2.toString())),
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), equalTo(ACTION_LABEL_2)),
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_2)),
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), equalTo(ALTERABLE_2)),
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE), equalTo(SEQUENCE_2)),
-                                withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE_TYPE), equalTo(SEQUENCE_TYPE)),
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTE), equalTo(CASE_ATTRIBUTE)),
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), equalTo(GROUP_LABEL)),
-                                withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION), equalTo(ACTION_LABEL_EXTENSION)),
-
-                                withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), equalTo(HEARING_EVENT_DEFINITION_ID_3.toString())),
-                                withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), equalTo(ACTION_LABEL_3)),
-                                withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_3)),
-                                withJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), equalTo(ALTERABLE_3)),
-                                withoutJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE)),
-                                withoutJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_SEQUENCE_TYPE)),
-                                withoutJsonPath(format("$.%s[2].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTE)),
-                                withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
-                                withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL_EXTENSION))
-                        ))).thatMatchesSchema()
-        ));
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvents.get(1), HearingEventDefinitionsCreated.class), isBean(HearingEventDefinitionsCreated.class)
+                .with(HearingEventDefinitionsCreated::getId, is(createHearingEventDefinitionsCommand.getId()))
+                .with(HearingEventDefinitionsCreated::getEventDefinitions, is(createHearingEventDefinitionsCommand.getEventDefinitions()))
+        );
     }
-
 
     @Test
     public void logHearingEvent_shouldRaiseHearingEventLogged() throws Exception {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
-        final LogEventCommand logEvent = new LogEventCommand(randomUUID(), randomUUID(), randomUUID(), STRING.next(),
-                                        PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(),
-                                        false, null, COUNSEL_ID);
+        final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId, randomUUID(), STRING.next(),
+                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID());
 
-        setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
         }));
 
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"),
-                objectToJsonObjectConverter.convert(logEvent));
+        final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
 
-        hearingEventCommandHandler.logHearingEvent(command);
+        hearingEventCommandHandler.logHearingEvent(jsonEnvelopCommand);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName("hearing.hearing-event-logged"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.alterable", is(logEvent.getAlterable())),
-                                withJsonPath("$.hearingEventDefinitionId", is(logEvent.getHearingEventDefinitionId().toString())),
-                                withJsonPath("$.hearingEventId", is(logEvent.getHearingEventId().toString())),
-                                                        withJsonPath("$.counselId", is(logEvent
-                                                                        .getCounselId()
-                                                                        .toString())),
-                                withJsonPath("$.hearingId", is(logEvent.getHearingId().toString())),
-                                withJsonPath("$.recordedLabel", is(logEvent.getRecordedLabel())),
-                                withJsonPath("$.eventTime", is(logEvent.getEventTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString())),
-                                withoutJsonPath("$.lastHearingEventId"),
-                                withJsonPath("$.lastModifiedTime", is(logEvent.getLastModifiedTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString())),
-                                withJsonPath("$.caseId", is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
-                                withJsonPath("$.caseUrn", is(initiateHearingCommand.getCases().get(0).getUrn())),
-                                withJsonPath("$.courtCentreId", is(initiateHearingCommand.getHearing().getCourtCentreId().toString())),
-                                withJsonPath("$.courtCentreName", is(initiateHearingCommand.getHearing().getCourtCentreName())),
-                                withJsonPath("$.courtRoomId", is(initiateHearingCommand.getHearing().getCourtRoomId().toString())),
-                                withJsonPath("$.courtRoomName", is(initiateHearingCommand.getHearing().getCourtRoomName())),
-                                withJsonPath("$.hearingType", is(initiateHearingCommand.getHearing().getType()))
-                        ))
-                ).thatMatchesSchema()
-        ));
+        final JsonEnvelope jsonEnvelopeEvent = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
+
+        assertThat(jsonEnvelopeEvent, jsonEnvelope(metadata().withName("hearing.hearing-event-logged"), payloadIsJson(print())));
+
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvent, HearingEventLogged.class), isBean(HearingEventLogged.class)
+                .with(HearingEventLogged::getHearingEventDefinitionId, is(logEventCommand.getHearingEventDefinitionId()))
+                .with(HearingEventLogged::getHearingEventId, is(logEventCommand.getHearingEventId()))
+                .with(HearingEventLogged::getLastHearingEventId, IsNull.nullValue())
+                .with(HearingEventLogged::getDefenceCounselId, is(logEventCommand.getDefenceCounselId()))
+                .with(HearingEventLogged::getHearingId, is(logEventCommand.getHearingId()))
+                .with(HearingEventLogged::getHearingType, isBean(uk.gov.moj.cpp.hearing.domain.HearingType.class)
+                        .with(uk.gov.moj.cpp.hearing.domain.HearingType::getId, is(initiateHearingCommand.getHearing().getType().getId()))
+                        .with(uk.gov.moj.cpp.hearing.domain.HearingType::getDescription, is(initiateHearingCommand.getHearing().getType().getDescription())))
+                .with(HearingEventLogged::getRecordedLabel, is(logEventCommand.getRecordedLabel()))
+                .with(HearingEventLogged::getEventTime, is(logEventCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::isAlterable, is(logEventCommand.getAlterable()))
+                .with(HearingEventLogged::getLastModifiedTime, is(logEventCommand.getLastModifiedTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.domain.CourtCentre.class)
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getId, is(initiateHearingCommand.getHearing().getCourtCentre().getId()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getName, is(initiateHearingCommand.getHearing().getCourtCentre().getName()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomId, is(initiateHearingCommand.getHearing().getCourtCentre().getRoomId()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomName, is(initiateHearingCommand.getHearing().getCourtCentre().getRoomName()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshName, is(initiateHearingCommand.getHearing().getCourtCentre().getWelshName()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshRoomName, is(initiateHearingCommand.getHearing().getCourtCentre().getWelshRoomName())))
+                .with(HearingEventLogged::getCaseURN, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+        );
     }
 
     @Test
     public void logHearingEvent_shouldIgnoreLogEvent_givenEventHasAlreadyBeenLogged() throws Exception {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
-        final LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
-                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
-                        PAST_ZONED_DATE_TIME.next(), false, null, null);
+        final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
+                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null);
 
-        setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
             a.apply(new HearingEventLogged(
-                    logEvent.getHearingEventId(),
+                    logEventCommand.getHearingEventId(),
                     null,
-                    logEvent.getHearingId(),
-                    logEvent.getHearingEventDefinitionId(),
-                    logEvent.getRecordedLabel(),
-                    logEvent.getEventTime(),
-                    logEvent.getLastModifiedTime(),
-                    logEvent.getAlterable(),
-                    initiateHearingCommand.getHearing().getCourtCentreId(),
-                    initiateHearingCommand.getHearing().getCourtCentreName(),
-                    initiateHearingCommand.getHearing().getCourtRoomId(),
-                    initiateHearingCommand.getHearing().getCourtRoomName(),
-                    initiateHearingCommand.getHearing().getType(),
-                    initiateHearingCommand.getCases().get(0).getUrn(),
-                    initiateHearingCommand.getCases().get(0).getCaseId(),
-                                            logEvent.getWitnessId(), logEvent.getCounselId()));
+                    logEventCommand.getHearingId(),
+                    logEventCommand.getHearingEventDefinitionId(),
+                    logEventCommand.getDefenceCounselId(),
+                    logEventCommand.getRecordedLabel(),
+                    logEventCommand.getEventTime(),
+                    logEventCommand.getLastModifiedTime(),
+                    logEventCommand.getAlterable(),
+                    CourtCentre.courtCentre()
+                            .withId(initiateHearingCommand.getHearing().getCourtCentre().getId())
+                            .withName(initiateHearingCommand.getHearing().getCourtCentre().getName())
+                            .withRoomId(initiateHearingCommand.getHearing().getCourtCentre().getRoomId())
+                            .withRoomName(initiateHearingCommand.getHearing().getCourtCentre().getRoomName())
+                            .withWelshName(initiateHearingCommand.getHearing().getCourtCentre().getWelshName())
+                            .withWelshRoomName(initiateHearingCommand.getHearing().getCourtCentre().getWelshRoomName())
+                            .build(),
+                    HearingType.hearingType()
+                            .withId(initiateHearingCommand.getHearing().getType().getId())
+                            .withDescription(initiateHearingCommand.getHearing().getType().getDescription())
+                            .build(),
+                    initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN())); //TODO: GPE-5657 Which case URN is expected to be set?
         }));
 
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"),
-                objectToJsonObjectConverter.convert(logEvent));
+        final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
 
-        hearingEventCommandHandler.logHearingEvent(command);
+        hearingEventCommandHandler.logHearingEvent(jsonEnvelopCommand);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName("hearing.hearing-event-ignored"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.alterable", is(logEvent.getAlterable())),
-                                withJsonPath("$.hearingEventDefinitionId", is(logEvent.getHearingEventDefinitionId().toString())),
-                                withJsonPath("$.hearingEventId", is(logEvent.getHearingEventId().toString())),
-                                withJsonPath("$.hearingId", is(logEvent.getHearingId().toString())),
-                                withJsonPath("$.recordedLabel", is(logEvent.getRecordedLabel())),
-                                withJsonPath("$.eventTime", is(logEvent.getEventTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString()))
-                        ))
-                ).thatMatchesSchema()
-        ));
+        final JsonEnvelope jsonEnvelopeEvent = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
+
+        assertThat(jsonEnvelopeEvent, jsonEnvelope(metadata().withName("hearing.hearing-event-ignored"), payloadIsJson(print())));
+
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvent, HearingEventIgnored.class), isBean(HearingEventIgnored.class)
+                .with(HearingEventIgnored::getHearingEventDefinitionId, is(logEventCommand.getHearingEventDefinitionId()))
+                .with(HearingEventIgnored::getHearingEventId, is(logEventCommand.getHearingEventId()))
+                .with(HearingEventIgnored::getHearingId, is(logEventCommand.getHearingId()))
+                .with(HearingEventIgnored::getRecordedLabel, is(logEventCommand.getRecordedLabel()))
+                .with(HearingEventIgnored::getEventTime, is(logEventCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventIgnored::isAlterable, is(logEventCommand.getAlterable()))
+        );
     }
 
     @Test
     public void correctHearingEvent_shouldDeleteOldEventAndAddANewEvent() throws Exception {
+
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
-        final LogEventCommand logEvent = new LogEventCommand(randomUUID(), initiateHearingCommand.getHearing().getId(),
-                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
-                        PAST_ZONED_DATE_TIME.next(), false, null, null);
+        final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
+                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null);
 
-        final CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(logEvent.getHearingEventId(), randomUUID(), initiateHearingCommand.getHearing().getId(),
-                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
-                        PAST_ZONED_DATE_TIME.next(), false, randomUUID(), randomUUID());
+        final CorrectLogEventCommand correctLogEvenCommand = new CorrectLogEventCommand(logEventCommand.getHearingEventId(), randomUUID(), hearingId,
+                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID());
 
-        setupMockedEventStream(logEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
             a.apply(new HearingEventLogged(
-                    logEvent.getHearingEventId(),
+                    logEventCommand.getHearingEventId(),
                     null,
-                    logEvent.getHearingId(),
-                    logEvent.getHearingEventDefinitionId(),
-                    logEvent.getRecordedLabel(),
-                    logEvent.getEventTime(),
-                    logEvent.getLastModifiedTime(),
-                    logEvent.getAlterable(),
-                    initiateHearingCommand.getHearing().getCourtCentreId(),
-                    initiateHearingCommand.getHearing().getCourtCentreName(),
-                    initiateHearingCommand.getHearing().getCourtRoomId(),
-                    initiateHearingCommand.getHearing().getCourtRoomName(),
-                    initiateHearingCommand.getHearing().getType(),
-                    initiateHearingCommand.getCases().get(0).getUrn(),
-                    initiateHearingCommand.getCases().get(0).getCaseId(),
-                                            null, logEvent.getCounselId()));
+                    logEventCommand.getHearingId(),
+                    logEventCommand.getHearingEventDefinitionId(),
+                    logEventCommand.getDefenceCounselId(),
+                    logEventCommand.getRecordedLabel(),
+                    logEventCommand.getEventTime(),
+                    logEventCommand.getLastModifiedTime(),
+                    logEventCommand.getAlterable(),
+                    CourtCentre.courtCentre()
+                            .withId(initiateHearingCommand.getHearing().getCourtCentre().getId())
+                            .withName(initiateHearingCommand.getHearing().getCourtCentre().getName())
+                            .withRoomId(initiateHearingCommand.getHearing().getCourtCentre().getRoomId())
+                            .withRoomName(initiateHearingCommand.getHearing().getCourtCentre().getRoomName())
+                            .withWelshName(initiateHearingCommand.getHearing().getCourtCentre().getWelshName())
+                            .withWelshRoomName(initiateHearingCommand.getHearing().getCourtCentre().getWelshRoomName())
+                            .build(),
+                    HearingType.hearingType()
+                            .withId(initiateHearingCommand.getHearing().getType().getId())
+                            .withDescription(initiateHearingCommand.getHearing().getType().getDescription())
+                            .build(),
+                    initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN())); //TODO: GPE-5657 Which case URN is expected to be set?
         }));
 
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"),
-                objectToJsonObjectConverter.convert(correctLogEvent));
+        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"), objectToJsonObjectConverter.convert(correctLogEvenCommand));
 
         hearingEventCommandHandler.correctEvent(command);
 
-        final List<Object> events = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
+        final List<JsonEnvelope> jsonEnvelopeEvents = verifyAppendAndGetArgumentFrom(eventStream).collect(Collectors.toList());
 
-        assertThat((JsonEnvelope) events.get(0),
+        assertThat(jsonEnvelopeEvents.get(0), jsonEnvelope(metadata().withName("hearing.hearing-event-deleted"), payloadIsJson(print())));
 
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command).withName("hearing.hearing-event-deleted"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.hearingEventId", is(logEvent.getHearingEventId().toString()))
-                        ))
-                ).thatMatchesSchema()
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvents.get(0), HearingEventDeleted.class), isBean(HearingEventDeleted.class)
+                .with(HearingEventDeleted::getHearingEventId, is(logEventCommand.getHearingEventId()))
         );
 
-        assertThat((JsonEnvelope) events.get(1),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command).withName("hearing.hearing-event-logged"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.alterable", is(correctLogEvent.getAlterable())),
-                                withJsonPath("$.hearingEventDefinitionId", is(correctLogEvent.getHearingEventDefinitionId().toString())),
-                                withJsonPath("$.hearingEventId", is(correctLogEvent.getLatestHearingEventId().toString())),
-                                withJsonPath("$.hearingId", is(correctLogEvent.getHearingId().toString())),
-                                withJsonPath("$.recordedLabel", is(correctLogEvent.getRecordedLabel())),
-                                withJsonPath("$.eventTime", is(correctLogEvent.getEventTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString())),
-                                withJsonPath("$.lastHearingEventId", is(correctLogEvent.getHearingEventId().toString())),
-                                withJsonPath("$.lastModifiedTime", is(correctLogEvent.getLastModifiedTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString())),
-                                withJsonPath("$.counselId", is(correctLogEvent.getCounselId().toString())),
-                                withJsonPath("$.witnessId", is(correctLogEvent.getWitnessId().toString())),                                
-                                withJsonPath("$.caseId", is(initiateHearingCommand.getCases().get(0).getCaseId().toString())),
-                                withJsonPath("$.caseUrn", is(initiateHearingCommand.getCases().get(0).getUrn())),
-                                withJsonPath("$.courtCentreId", is(initiateHearingCommand.getHearing().getCourtCentreId().toString())),
-                                withJsonPath("$.courtCentreName", is(initiateHearingCommand.getHearing().getCourtCentreName())),
-                                withJsonPath("$.courtRoomId", is(initiateHearingCommand.getHearing().getCourtRoomId().toString())),
-                                withJsonPath("$.courtRoomName", is(initiateHearingCommand.getHearing().getCourtRoomName())),
-                                withJsonPath("$.hearingType", is(initiateHearingCommand.getHearing().getType()))
-                        ))
-                ).thatMatchesSchema()
+        assertThat(jsonEnvelopeEvents.get(1), jsonEnvelope(metadata().withName("hearing.hearing-event-logged"), payloadIsJson(print())));
+
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvents.get(1), HearingEventLogged.class), isBean(HearingEventLogged.class)
+                .with(HearingEventLogged::getHearingEventDefinitionId, is(correctLogEvenCommand.getHearingEventDefinitionId()))
+                .with(HearingEventLogged::getHearingEventId, is(correctLogEvenCommand.getLatestHearingEventId()))
+                .with(HearingEventLogged::getLastHearingEventId, is(correctLogEvenCommand.getHearingEventId()))
+                .with(HearingEventLogged::getDefenceCounselId, is(correctLogEvenCommand.getDefenceCounselId()))
+                .with(HearingEventLogged::getHearingId, is(correctLogEvenCommand.getHearingId()))
+                .with(HearingEventLogged::getHearingType, isBean(uk.gov.moj.cpp.hearing.domain.HearingType.class)
+                        .with(uk.gov.moj.cpp.hearing.domain.HearingType::getId, is(initiateHearingCommand.getHearing().getType().getId()))
+                        .with(uk.gov.moj.cpp.hearing.domain.HearingType::getDescription, is(initiateHearingCommand.getHearing().getType().getDescription())))
+                .with(HearingEventLogged::getRecordedLabel, is(correctLogEvenCommand.getRecordedLabel()))
+                .with(HearingEventLogged::getEventTime, is(correctLogEvenCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::isAlterable, is(correctLogEvenCommand.getAlterable()))
+                .with(HearingEventLogged::getLastModifiedTime, is(correctLogEvenCommand.getLastModifiedTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventLogged::getCourtCentre, isBean(uk.gov.moj.cpp.hearing.domain.CourtCentre.class)
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getId, is(initiateHearingCommand.getHearing().getCourtCentre().getId()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getName, is(initiateHearingCommand.getHearing().getCourtCentre().getName()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomId, is(initiateHearingCommand.getHearing().getCourtCentre().getRoomId()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getRoomName, is(initiateHearingCommand.getHearing().getCourtCentre().getRoomName()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshName, is(initiateHearingCommand.getHearing().getCourtCentre().getWelshName()))
+                        .with(uk.gov.moj.cpp.hearing.domain.CourtCentre::getWelshRoomName, is(initiateHearingCommand.getHearing().getCourtCentre().getWelshRoomName())))
+                .with(HearingEventLogged::getCaseURN, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
         );
     }
 
     @Test
     public void correctHearingEvent_shouldIgnoreCorrection_givenNoPreviousEventFound() throws Exception {
+
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
-        final CorrectLogEventCommand correctLogEvent = new CorrectLogEventCommand(randomUUID(), randomUUID(), initiateHearingCommand.getHearing().getId(),
-                        randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(),
-                        PAST_ZONED_DATE_TIME.next(), false, randomUUID(), randomUUID());
+        final CorrectLogEventCommand correctLogEventCommand = new CorrectLogEventCommand(randomUUID(), randomUUID(), hearingId,
+                randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID());
 
-        setupMockedEventStream(correctLogEvent.getHearingId(), this.eventStream, with(new NewModelHearingAggregate(), a -> {
-            a.apply(new HearingInitiated(initiateHearingCommand.getCases(), initiateHearingCommand.getHearing()));
+        setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
+            a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
         }));
 
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"),
-                objectToJsonObjectConverter.convert(correctLogEvent));
+        final JsonEnvelope jsonEnvelopeCommand = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"),
+                objectToJsonObjectConverter.convert(correctLogEventCommand));
 
-        hearingEventCommandHandler.correctEvent(command);
+        hearingEventCommandHandler.correctEvent(jsonEnvelopeCommand);
 
-        assertThat(verifyAppendAndGetArgumentFrom(eventStream), streamContaining(
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName("hearing.hearing-event-ignored"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.alterable", is(correctLogEvent.getAlterable())),
-                                withJsonPath("$.hearingEventDefinitionId", is(correctLogEvent.getHearingEventDefinitionId().toString())),
-                                withJsonPath("$.hearingEventId", is(correctLogEvent.getHearingEventId().toString())),
-                                withJsonPath("$.hearingId", is(correctLogEvent.getHearingId().toString())),
-                                withJsonPath("$.recordedLabel", is(correctLogEvent.getRecordedLabel())),
-                                withJsonPath("$.eventTime", is(correctLogEvent.getEventTime().toLocalDateTime().atZone(ZoneId.of("Z")).toString()))
-                        ))
-                ).thatMatchesSchema()
-        ));
+        final JsonEnvelope jsonEnvelopeEvent = verifyAppendAndGetArgumentFrom(eventStream).findFirst().get();
+
+        assertThat(jsonEnvelopeEvent, jsonEnvelope(metadata().withName("hearing.hearing-event-ignored"), payloadIsJson(print())));
+
+        assertThat(uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo(jsonEnvelopeEvent, HearingEventIgnored.class), isBean(HearingEventIgnored.class)
+                .with(HearingEventIgnored::getHearingEventDefinitionId, is(correctLogEventCommand.getHearingEventDefinitionId()))
+                .with(HearingEventIgnored::getHearingEventId, is(correctLogEventCommand.getHearingEventId()))
+                .with(HearingEventIgnored::getHearingId, is(correctLogEventCommand.getHearingId()))
+                .with(HearingEventIgnored::getRecordedLabel, is(correctLogEventCommand.getRecordedLabel()))
+                .with(HearingEventIgnored::getEventTime, is(correctLogEventCommand.getEventTime().withZoneSameLocal(ZoneId.of("UTC"))))
+                .with(HearingEventIgnored::isAlterable, is(correctLogEventCommand.getAlterable()))
+        );
     }
 
     private <T extends Aggregate> void setupMockedEventStream(final UUID id, final EventStream eventStream, final T aggregate) {

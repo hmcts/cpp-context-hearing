@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/courtCentreOrganisationUnit.json",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "oucode": {
+      "type": "string"
+    },
+    "oucodeL3Code": {
+      "type": "string"
+    },
+    "oucodeL3Name": {
+      "type": "string"
+    },
+    "oucodeL1Code": {
+      "type": "string"
+    },
+    "oucodeL1Name": {
+      "type": "string"
+    },
+    "address1": {
+      "type": "string"
+    },
+    "address2": {
+      "type": "string"
+    },
+    "address3": {
+      "type": "string"
+    },
+    "address4": {
+      "type": "string"
+    },
+    "address5": {
+      "type": "string"
+    },
+    "postcode": {
+      "type": "string"
+    },
+    "isWelsh": {
+      "type": "boolean"
+    },
+    "oucodeL3WelshName": {
+      "type": "string"
+    },
+    "welshAddress1": {
+      "type": "string"
+    },
+    "welshAddress2": {
+      "type": "string"
+    },
+    "welshAddress3": {
+      "type": "string"
+    },
+    "welshAddress4": {
+      "type": "string"
+    },
+    "welshAddress5": {
+      "type": "string"
+    },
+    "defaultStartTime": {
+      "type": "string"
+    },
+    "defaultDurationHrs": {
+      "type": "string"
+    },
+    "courtrooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/definitions/uuid"
+          },
+          "courtroomId": {
+            "type": "integer"
+          },
+          "venueName": {
+            "type": "string"
+          },
+          "courtroomName": {
+            "type": "string"
+          },
+          "welshVenueName": {
+            "type": "string"
+          },
+          "welshCourtroomName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "courtroomId",
+          "venueName",
+          "courtroomName"
+        ]
+      }
+    }
+  },
+  "required": [
+    "id",
+    "oucode",
+    "oucodeL1Name",
+    "oucodeL1Code",
+    "oucodeL2Name",
+    "oucodeL2Code",
+    "oucodeL3Name",
+    "oucodeL3Code",
+    "address1",
+    "address2",
+    "defaultStartTime",
+    "defaultDurationHrs",
+    "courtrooms"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

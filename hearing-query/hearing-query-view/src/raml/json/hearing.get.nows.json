@@ -1,12 +1,8 @@
 {
-  "materials": [
+  "nows": [
     {
-      "id": "5d5807c9-004c-4b75-9cfd-29757fd4fd78",
-      "defendantId": "2d1d2d8a-860c-479b-aa68-c4ad37850839",
-      "status": "REQUESTED",
-      "userGroups": [ "courtAdmin","defence" ]
+      "id": "88705e62-383d-4fc4-bba9-922448849f3d",
+      "hearingId": "9623a7ac-25bb-43f8-b219-2ae4cd8b05db"
     }
   ]
 }
-
-

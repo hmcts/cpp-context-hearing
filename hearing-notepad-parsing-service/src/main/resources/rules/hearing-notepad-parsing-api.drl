@@ -10,7 +10,7 @@ rule "Command - API - Action - hearing.notepad.parse-result-definition"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.notepad.parse-result-definition");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -19,7 +19,7 @@ rule "Command - API - Action - hearing.notepad.parse-result-prompt"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.notepad.parse-result-prompt");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end
@@ -28,7 +28,7 @@ rule "Command - API - Action - hearing.notepad.reload-result-cache"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.notepad.reload-result-cache");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks","Court Administrators"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks","Court Administrators", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end

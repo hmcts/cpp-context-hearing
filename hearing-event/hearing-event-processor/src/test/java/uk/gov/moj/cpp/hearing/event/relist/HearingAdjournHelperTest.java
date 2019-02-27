@@ -28,16 +28,16 @@ public class HearingAdjournHelperTest {
 
     @Test
     public void getDistinctPromptValue() throws Exception {
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HDATE)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HEST)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HTIME)).size());
 
-        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getCompletedResultLines()
+        assertEquals(1, HearingAdjournHelper.getDistinctPromptValue(getArbitrarySharedResultWithNextHearingResult().getHearing().getTargets().get(0).getResultLines()
                 , arbitraryNextHearingMetaData(), HearingAdjournHelper.getAllPromptUuidsByPromptReference(arbitraryNextHearingMetaData(), HTYPE)).size());
 
     }
@@ -49,8 +49,9 @@ public class HearingAdjournHelperTest {
 
         //when and then
         assertEquals(1, HearingAdjournHelper.getOffencesHaveResultNextHearing(
-                arbitraryResultsShared.getHearing().getDefendants().get(0),
-                arbitraryResultsShared.getCompletedResultLines(),
+                arbitraryResultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0),
+                arbitraryResultsShared.getHearing().getTargets(),
+                arbitraryResultsShared.getHearing().getTargets().get(0).getResultLines(),
                 arbitraryNextHearingMetaData()).size());
 
     }

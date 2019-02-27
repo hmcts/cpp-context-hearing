@@ -7,7 +7,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>2.0.128-SNAPSHOT</version>
+        <version>2.0.134-FRAMEWORK-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -16,9 +16,21 @@
             <artifactId>hearing-domain-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-viewstore-persistence</artifactId>
+            <version>${project.version}</version>
+        </dependency>-->
+
+        <!-- this is for the metadata builder -->
+        <dependency>
+            <groupId>uk.gov.justice.framework-api</groupId>
+            <artifactId>framework-api-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-domain-event</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 import java.io.Serializable;
 import java.util.UUID;
 
+//TODO GPE-6313 remove
+@SuppressWarnings({"squid:S1135"})
 public class CourtCentre implements Serializable {
 
     private static final long serialVersionUID = 1L;

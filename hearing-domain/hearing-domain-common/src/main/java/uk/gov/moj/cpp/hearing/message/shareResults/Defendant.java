@@ -14,24 +14,12 @@ public class Defendant {
 
     private List<Case> cases;
 
+    public static Defendant defendant() {
+        return new Defendant();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public Person getPerson() {
-        return person;
-    }
-
-    public String getDefenceOrganisation() {
-        return defenceOrganisation;
-    }
-
-    public Interpreter getInterpreter() {
-        return interpreter;
-    }
-
-    public List<Case> getCases() {
-        return cases;
     }
 
     public Defendant setId(UUID id) {
@@ -39,9 +27,17 @@ public class Defendant {
         return this;
     }
 
+    public Person getPerson() {
+        return person;
+    }
+
     public Defendant setPerson(Person person) {
         this.person = person;
         return this;
+    }
+
+    public String getDefenceOrganisation() {
+        return defenceOrganisation;
     }
 
     public Defendant setDefenceOrganisation(String defenceOrganisation) {
@@ -49,18 +45,22 @@ public class Defendant {
         return this;
     }
 
+    public Interpreter getInterpreter() {
+        return interpreter;
+    }
+
     public Defendant setInterpreter(Interpreter interpreter) {
         this.interpreter = interpreter;
         return this;
     }
 
+    public List<Case> getCases() {
+        return cases;
+    }
+
     public Defendant setCases(List<Case> cases) {
         this.cases = cases;
         return this;
-    }
-
-    public static Defendant defendant() {
-        return new Defendant();
     }
 
 }

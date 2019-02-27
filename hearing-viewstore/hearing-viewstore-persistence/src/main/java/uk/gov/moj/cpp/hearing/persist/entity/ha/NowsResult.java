@@ -1,12 +1,14 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
+import java.util.Objects;
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.UUID;
 
 @Entity
 @Table(name = "ha_nows_result")
@@ -25,6 +27,10 @@ public class NowsResult {
     @ManyToOne
     @JoinColumn(name = "nows_material_id", nullable = false)
     private NowsMaterial nowsMaterial;
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public UUID getId() {
         return id;
@@ -58,8 +64,22 @@ public class NowsResult {
         this.nowsMaterial = nowsMaterial;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final NowsResult that = (NowsResult) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(id);
     }
 
     public static final class Builder {

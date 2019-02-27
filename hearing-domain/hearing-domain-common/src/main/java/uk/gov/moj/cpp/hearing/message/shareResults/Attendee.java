@@ -22,36 +22,12 @@ public class Attendee {
 
     private List<UUID> caseIds;
 
+    public static Attendee attendee() {
+        return new Attendee();
+    }
+
     public UUID getPersonId() {
         return personId;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public List<UUID> getDefendantIds() {
-        return defendantIds;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public List<UUID> getCaseIds() {
-        return caseIds;
     }
 
     public Attendee setPersonId(UUID personId) {
@@ -59,9 +35,17 @@ public class Attendee {
         return this;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
     public Attendee setFirstName(String firstName) {
         this.firstName = firstName;
         return this;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public Attendee setLastName(String lastName) {
@@ -69,9 +53,17 @@ public class Attendee {
         return this;
     }
 
+    public String getType() {
+        return type;
+    }
+
     public Attendee setType(String type) {
         this.type = type;
         return this;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public Attendee setTitle(String title) {
@@ -79,9 +71,17 @@ public class Attendee {
         return this;
     }
 
+    public List<UUID> getDefendantIds() {
+        return defendantIds;
+    }
+
     public Attendee setDefendantIds(List<UUID> defendantIds) {
         this.defendantIds = new ArrayList<>(defendantIds);
         return this;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public Attendee setStatus(String status) {
@@ -89,12 +89,12 @@ public class Attendee {
         return this;
     }
 
+    public List<UUID> getCaseIds() {
+        return caseIds;
+    }
+
     public Attendee setCaseIds(List<UUID> caseIds) {
         this.caseIds = new ArrayList<>(caseIds);
         return this;
-    }
-
-    public static Attendee attendee() {
-        return new Attendee();
     }
 }

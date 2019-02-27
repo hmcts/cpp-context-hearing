@@ -1,14 +1,15 @@
 package uk.gov.moj.cpp.hearing.command.defenceCounsel;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.moj.cpp.hearing.command.DefendantId;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AddDefenceCounselCommand {
 
@@ -19,7 +20,6 @@ public class AddDefenceCounselCommand {
     private String firstName;
     private String lastName;
     private String title;
-
     private List<DefendantId> defendantIds;
 
     @JsonCreator
@@ -54,6 +54,10 @@ public class AddDefenceCounselCommand {
         this.defendantIds = builder.defendantIds.stream().map(DefendantId.Builder::build).collect(Collectors.toList());
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getHearingId() {
         return hearingId;
     }
@@ -84,36 +88,6 @@ public class AddDefenceCounselCommand {
 
     public List<DefendantId> getDefendantIds() {
         return defendantIds;
-    }
-
-    public AddDefenceCounselCommand withStatus(String status) {
-        this.status = status;
-        return this;
-    }
-
-    public AddDefenceCounselCommand withFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
-    public AddDefenceCounselCommand withLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
-    }
-
-    public AddDefenceCounselCommand withTitle(String title) {
-        this.title = title;
-        return this;
-    }
-
-    public AddDefenceCounselCommand clearAllDefendantIds() {
-        this.defendantIds.clear();
-        return this;
-    }
-
-    public AddDefenceCounselCommand addDefendantId(DefendantId defendantId) {
-        this.defendantIds.add(defendantId);
-        return this;
     }
 
     public static class Builder {
@@ -169,10 +143,6 @@ public class AddDefenceCounselCommand {
         public AddDefenceCounselCommand build() {
             return new AddDefenceCounselCommand(this);
         }
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
 }

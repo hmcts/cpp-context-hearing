@@ -10,20 +10,12 @@ public class Plea {
     private String value;
     private UUID enteredHearingId;
 
+    public static Plea plea() {
+        return new Plea();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public UUID getEnteredHearingId() {
-        return enteredHearingId;
     }
 
     public Plea setId(UUID id) {
@@ -31,9 +23,17 @@ public class Plea {
         return this;
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
     public Plea setDate(LocalDate date) {
         this.date = date;
         return this;
+    }
+
+    public String getValue() {
+        return value;
     }
 
     public Plea setValue(String value) {
@@ -41,12 +41,12 @@ public class Plea {
         return this;
     }
 
+    public UUID getEnteredHearingId() {
+        return enteredHearingId;
+    }
+
     public Plea setEnteredHearingId(UUID enteredHearingId) {
         this.enteredHearingId = enteredHearingId;
         return this;
-    }
-
-    public static Plea plea() {
-        return new Plea();
     }
 }

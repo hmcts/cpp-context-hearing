@@ -28,6 +28,10 @@ public class HearingView {
 
     private String courtCentreId;
 
+    public HearingView() {
+        super();
+    }
+
     public String getHearingId() {
         return hearingId;
     }
@@ -35,12 +39,6 @@ public class HearingView {
     public void setHearingId(final String hearingId) {
         this.hearingId = hearingId;
     }
-
-
-    public HearingView() {
-        super();
-    }
-
 
     public LocalDate getStartDate() {
         return startDate;
@@ -110,15 +108,15 @@ public class HearingView {
         return courtCentreId;
     }
 
+    public void setCourtCentreId(final String courtCentreId) {
+        this.courtCentreId = courtCentreId;
+    }
+
     public Judge getJudge() {
         return judge;
     }
 
     public void setJudge(Judge judge) {
         this.judge = judge;
-    }
-
-    public void setCourtCentreId(final String courtCentreId) {
-        this.courtCentreId = courtCentreId;
     }
 }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
-    <changeSet id="26" author="CCR" logicalFilePath="026_add_defendant_case.xml"  >
+    <changeSet id="26" author="CCR" logicalFilePath="026_add_defendant_case.xml">
 
         <createTable tableName="a_defendant_case">
             <column name="hearing_id" type="UUID">
@@ -20,14 +20,18 @@
             <column name="custody_time_limit" type="DATETIME TZ"/>
         </createTable>
 
-        <addPrimaryKey columnNames="hearing_id, defendant_id, case_id" constraintName="pk_defendant_case" tableName="a_defendant_case"/>
+        <addPrimaryKey columnNames="hearing_id, defendant_id, case_id"
+                       constraintName="pk_defendant_case" tableName="a_defendant_case"/>
 
         <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="a_defendant_case"
-                                 constraintName="fk_defendant_case_hearing" referencedColumnNames="id"
+                                 constraintName="fk_defendant_case_hearing"
+                                 referencedColumnNames="id"
                                  referencedTableName="a_hearing"/>
 
-        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id" baseTableName="a_defendant_case"
-                                 constraintName="fk_defendant_case_defendant" referencedColumnNames="id, hearing_id"
+        <addForeignKeyConstraint baseColumnNames="defendant_id, hearing_id"
+                                 baseTableName="a_defendant_case"
+                                 constraintName="fk_defendant_case_defendant"
+                                 referencedColumnNames="id, hearing_id"
                                  referencedTableName="a_defendant"/>
 
         <addForeignKeyConstraint baseColumnNames="case_id" baseTableName="a_defendant_case"

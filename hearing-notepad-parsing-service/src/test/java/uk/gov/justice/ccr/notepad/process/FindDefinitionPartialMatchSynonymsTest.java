@@ -33,21 +33,17 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class FindDefinitionPartialMatchSynonymsTest {
 
-    @Mock
-    private CacheFactory cacheFactory;
-
     @Spy
     @InjectMocks
     ResultCache resultCache = new ResultCache();
-
     @Spy
     FileResultLoader fileResultLoader = new FileResultLoader();
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
     @InjectMocks
     FindDefinitionPartialMatchSynonyms testObj;
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void init() throws ExecutionException {

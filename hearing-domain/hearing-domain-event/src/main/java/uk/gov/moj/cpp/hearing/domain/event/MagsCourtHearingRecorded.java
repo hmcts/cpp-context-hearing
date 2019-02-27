@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 
 import java.io.Serializable;
@@ -29,6 +28,10 @@ public class MagsCourtHearingRecorded implements Serializable {
         this.hearingId = hearingId;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public Hearing getOriginatingHearing() {
         return originatingHearing;
     }
@@ -40,7 +43,6 @@ public class MagsCourtHearingRecorded implements Serializable {
     public UUID getHearingId() {
         return hearingId;
     }
-
 
     public static class Builder {
 
@@ -68,9 +70,5 @@ public class MagsCourtHearingRecorded implements Serializable {
         public MagsCourtHearingRecorded build() {
             return new MagsCourtHearingRecorded(hearing, convictionDate, hearingId);
         }
-    }
-
-    public static Builder builder(){
-        return new Builder();
     }
 }

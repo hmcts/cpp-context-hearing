@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="51" author="hearing" logicalFilePath="051-create-draft-result-target.xml">
+
+        <createTable tableName="ha_target">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="defendant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="offence_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="draft_result" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="target_pkey" tableName="ha_target"/>
+
+        <addForeignKeyConstraint baseColumnNames="hearing_id" baseTableName="ha_target"
+                                 constraintName="fk_target_hearing" referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+
+
+        <createTable tableName="ha_result_line">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="target_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="delegated_powers_user_id" type="UUID"/>
+            <column name="delegated_powers_first_name" type="TEXT"/>
+            <column name="delegated_powers_last_name" type="TEXT"/>
+            <column name="is_complete" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_modified" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ordered_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="result_definition_id" type="UUID">
+                <!-- TODO this is not mandatory in the json schema - should it be ?  constraints nullable="false"/-->
+            </column>
+
+            <column name="result_label" type="TEXT"/>
+
+            <column name="last_shared_date_time" type="DATETIME"/>
+
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="ha_result_line_pkey"
+                       tableName="ha_result_line"/>
+
+        <addForeignKeyConstraint baseColumnNames="target_id" baseTableName="ha_result_line"
+                                 constraintName="fk_result_line_target" referencedColumnNames="id"
+                                 referencedTableName="ha_target"/>
+
+
+        <createTable tableName="ha_prompt">
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="result_line_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="fixed_list_code" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="label" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="value" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="welsh_value" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+
+
+        </createTable>
+
+        <addPrimaryKey columnNames="id" constraintName="ha_prompt_pkey" tableName="ha_prompt"/>
+
+        <addForeignKeyConstraint baseColumnNames="result_line_id" baseTableName="ha_prompt"
+                                 constraintName="fk_prompt_ha_result_line"
+                                 referencedColumnNames="id"
+                                 referencedTableName="ha_result_line"/>
+
+
+    </changeSet>
+
+</databaseChangeLog>

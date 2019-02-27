@@ -11,24 +11,12 @@ public class Case {
     private LocalDate custodyTimeLimitDate;
     private List<Offence> offences;
 
+    public static Case legalCase() {
+        return new Case();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public String getUrn() {
-        return urn;
-    }
-
-    public String getBailStatus() {
-        return bailStatus;
-    }
-
-    public LocalDate getCustodyTimeLimitDate() {
-        return custodyTimeLimitDate;
-    }
-
-    public List<Offence> getOffences() {
-        return offences;
     }
 
     public Case setId(UUID id) {
@@ -36,9 +24,17 @@ public class Case {
         return this;
     }
 
+    public String getUrn() {
+        return urn;
+    }
+
     public Case setUrn(String urn) {
         this.urn = urn;
         return this;
+    }
+
+    public String getBailStatus() {
+        return bailStatus;
     }
 
     public Case setBailStatus(String bailStatus) {
@@ -46,17 +42,21 @@ public class Case {
         return this;
     }
 
+    public LocalDate getCustodyTimeLimitDate() {
+        return custodyTimeLimitDate;
+    }
+
     public Case setCustodyTimeLimitDate(LocalDate custodyTimeLimitDate) {
         this.custodyTimeLimitDate = custodyTimeLimitDate;
         return this;
     }
 
+    public List<Offence> getOffences() {
+        return offences;
+    }
+
     public Case setOffences(List<Offence> offences) {
         this.offences = offences;
         return this;
-    }
-
-    public static Case legalCase() {
-        return new Case();
     }
 }

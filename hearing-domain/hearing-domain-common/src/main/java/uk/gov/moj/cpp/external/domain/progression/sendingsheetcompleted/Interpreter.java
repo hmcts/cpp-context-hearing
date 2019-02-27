@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
 
 public class Interpreter implements Serializable {
 
@@ -21,16 +21,16 @@ public class Interpreter implements Serializable {
         this.needed = needed;
     }
 
+    public static Builder interpreter() {
+        return new Interpreter.Builder();
+    }
+
     public String getLanguage() {
         return language;
     }
 
     public Boolean getNeeded() {
         return needed;
-    }
-
-    public static Builder interpreter() {
-        return new Interpreter.Builder();
     }
 
     public static class Builder {

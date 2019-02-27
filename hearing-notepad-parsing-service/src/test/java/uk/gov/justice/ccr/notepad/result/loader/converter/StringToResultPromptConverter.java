@@ -51,7 +51,7 @@ public final class StringToResultPromptConverter {
                     .collect(toList())
             );
             String fixedListId = values[ResultPromptKey.FIXED_LIST_UUID.getOrder()];
-            if(fixedListId != null && ResultType.FIXL == resultPrompt.getType()){
+            if (fixedListId != null && ResultType.FIXL == resultPrompt.getType()) {
                 resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId));
             }
             return resultPrompt;

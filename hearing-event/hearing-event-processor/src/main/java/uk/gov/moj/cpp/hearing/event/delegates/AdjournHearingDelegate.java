@@ -1,11 +1,14 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.relist.HearingAdjournTransformer;
 import uk.gov.moj.cpp.hearing.event.relist.HearingAdjournValidator;
@@ -36,6 +39,9 @@ public class AdjournHearingDelegate {
     private HearingAdjournTransformer hearingAdjournTransformer;
 
     @Inject
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Inject
     private RelistReferenceDataService relistReferenceDataService;
 
     @Inject
@@ -44,19 +50,23 @@ public class AdjournHearingDelegate {
     @Inject
     private Sender sender;
 
-
-    public void execute(final ResultsShared resultsShared, final JsonEnvelope jsonEnvelope) {
+    public HearingAdjourned execute(final ResultsShared resultsShared, final JsonEnvelope jsonEnvelope) {
         final LocalDate orderedDate = resultsShared.getHearing().getHearingDays().stream()
+                .map(HearingDay::getSittingDay)
                 .map(ZonedDateTime::toLocalDate)
                 .min(Comparator.comparing(LocalDate::toEpochDay))
                 .orElse(LocalDate.now());
         final List<UUID> withdrawnResultDefinitionUuid = relistReferenceDataService.getWithdrawnResultDefinitionUuids(jsonEnvelope, orderedDate);
         final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions = relistReferenceDataService.getNextHearingResultDefinitions(jsonEnvelope, orderedDate);
 
+        HearingAdjourned hearingAdjourned = null;
+
         if (hearingAdjournValidator.validate(resultsShared, withdrawnResultDefinitionUuid, nextHearingResultDefinitions)) {
-            final JsonObject adjournHearingRequestPayload = hearingAdjournTransformer.transform(resultsShared, nextHearingResultDefinitions);
+            hearingAdjourned = hearingAdjournTransformer.transform2Adjournment(jsonEnvelope, resultsShared, nextHearingResultDefinitions);
+            final JsonObject adjournHearingRequestPayload = objectToJsonObjectConverter.convert(hearingAdjourned);
             this.sender.send(this.enveloper.withMetadataFrom(jsonEnvelope, PRIVATE_HEARING_COMMAND_ADJOURN_HEARING).apply(adjournHearingRequestPayload));
         }
+        return hearingAdjourned;
 
     }
 

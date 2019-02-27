@@ -51,6 +51,18 @@ public class ResultingQueryService {
         return requester.request(requestEnvelope);
     }
 
+    public JsonEnvelope getAllCourtCentre(final JsonEnvelope envelope) {
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.query.courtrooms")
+                .apply(createObjectBuilder().build());
+        return requester.requestAsAdmin(requestEnvelope);
+    }
+
+    public JsonEnvelope getHearingTypes(final JsonEnvelope envelope) {
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.query.hearing-types")
+                .apply(createObjectBuilder().build());
+        return requester.requestAsAdmin(requestEnvelope);
+    }
+
     public JsonEnvelope getAllResultPromptWordSynonyms(final JsonEnvelope envelope, final LocalDate orderedDate) {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-prompt-word-synonyms")

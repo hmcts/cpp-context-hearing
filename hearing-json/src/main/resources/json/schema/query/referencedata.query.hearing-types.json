@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/hearingTypesResult.json",
+  "properties": {
+    "hearingTypes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+          },
+          "seqId": {
+            "type": "integer"
+          },
+          "hearingCode": {
+            "type": "string"
+          },
+          "hearingDescription": {
+            "type": "string"
+          },
+          "welshHearingDescription": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "defaultDurationMin": {
+            "type": "integer"
+          },
+          "validFrom": {
+            "type": ["string", "null"]
+          },
+          "validTo": {
+            "type": ["string", "null"]
+          }
+        },
+        "required": [
+          "id",
+          "seqId",
+          "hearingCode",
+          "hearingDescription",
+          "welshHearingDescription",
+          "defaultDurationMin"
+        ]
+      }
+    }
+  }
+}

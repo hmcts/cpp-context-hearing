@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.CONTAINS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.EQUALS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.SHORT_CODE;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.UNKNOWN;
@@ -24,7 +23,6 @@ import java.util.concurrent.ExecutionException;
 
 import com.google.common.cache.LoadingCache;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -39,13 +37,6 @@ public class ResultDefinitionMatcherTest {
     ResultCache resultCache = new ResultCache();
     @Spy
     FileResultLoader fileResultLoader = new FileResultLoader();
-
-    @Mock
-    private CacheFactory cacheFactory;
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
     @InjectMocks
     ResultDefinitionMatcher testObj = new ResultDefinitionMatcher();
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
@@ -54,6 +45,10 @@ public class ResultDefinitionMatcherTest {
     FindDefinitionsByShortCodes findDefinitionsByShortCodes = new FindDefinitionsByShortCodes();
     FindDefinitionExactMatchSynonyms findDefinitionExactMatchSynonyms = new FindDefinitionExactMatchSynonyms();
     GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void init() throws ExecutionException {
@@ -108,6 +103,7 @@ public class ResultDefinitionMatcherTest {
                 , is(EQUALS)
         );
     }
+
     @Test
     public void match3() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prd pard");
@@ -124,6 +120,7 @@ public class ResultDefinitionMatcherTest {
                 , is(EQUALS)
         );
     }
+
     @Test
     public void match3_1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("restr ord pred pard");
@@ -140,6 +137,7 @@ public class ResultDefinitionMatcherTest {
                 , is(SHORT_CODE)
         );
     }
+
     @Test
     public void match3_2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("restr ord prd fur");
@@ -178,6 +176,7 @@ public class ResultDefinitionMatcherTest {
                 , is(EQUALS)
         );
     }
+
     @Test
     public void match3_5() throws Exception {
         List<Part> parts = new PartsResolver().getParts("stimp");
@@ -190,6 +189,7 @@ public class ResultDefinitionMatcherTest {
                 , is(EQUALS)
         );
     }
+
     @Test
     public void match3_6() throws Exception {
         List<Part> parts = new PartsResolver().getParts("community ord em curfew");
@@ -215,6 +215,7 @@ public class ResultDefinitionMatcherTest {
                 , is(EQUALS)
         );
     }
+
     @Test
     public void match3_7() throws Exception {
         List<Part> parts = new PartsResolver().getParts("imp");
@@ -227,6 +228,7 @@ public class ResultDefinitionMatcherTest {
                 , is(EQUALS)
         );
     }
+
     @Test
     public void match4() throws Exception {
         List<Part> parts = new PartsResolver().getParts("iquash pard");
@@ -256,13 +258,12 @@ public class ResultDefinitionMatcherTest {
                 , is(SHORT_CODE)
         );
     }
-   
 
     @Test
     public void match7() throws Exception {
         List<Part> parts = new PartsResolver().getParts("f f f f f f f f f f f f f f f f f f f f f");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
-        
+
         ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
 
         assertThat(
@@ -297,7 +298,7 @@ public class ResultDefinitionMatcherTest {
 
         assertThat(resultDefinition.isPresent(), is(false));
     }
-    
+
     @Test
     public void matchEqual5() throws Exception {
         List<Part> parts = new PartsResolver().getParts("upw");
@@ -310,7 +311,7 @@ public class ResultDefinitionMatcherTest {
                 , is("Restraining order for period")
         );
     }
-    
+
     @Test
     public void matchEqual2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prdr further imp sus");

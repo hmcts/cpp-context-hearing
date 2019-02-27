@@ -12,9 +12,9 @@ import org.junit.Test;
 
 
 public class ResourceFileReaderTest {
-    
+
     private StringToResultDefinitionConverter converter = new StringToResultDefinitionConverter();
-    
+
     @Test
     public void getLines() {
         assertThat(new ResourceFileReader().getLines("/file-store/result-definitions.tdf", true)

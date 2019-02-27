@@ -1,4 +1,3 @@
-
 package uk.gov.moj.cpp.hearing.query.view.response.nowresponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,6 +9,10 @@ public class NowResult {
     private String sharedResultId;
     @JsonProperty("sequence")
     private Integer sequence;
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public String getSharedResultId() {
         return sharedResultId;
@@ -25,10 +28,6 @@ public class NowResult {
 
     public void setSequence(Integer sequence) {
         this.sequence = sequence;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {

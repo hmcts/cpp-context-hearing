@@ -7,10 +7,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 
@@ -18,11 +16,9 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
-import uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher;
 
 import java.time.LocalDate;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -35,26 +31,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ResultingQueryServiceTest {
 
-    private static final String REFERENCEDATA_GET_ALL_RESULT_DEFINITIONS = "referencedata.get-all-result-definitions";
-
-    private static final String REFERENCEDATA_GET_ALL_RESULT_WORD_SYNONYMS = "referencedata.get-all-result-word-synonyms";
-
-    private static final String REFERENCEDATA_RESULT_GET_ALL_PROMPT_KEYWORD_SYNONYMS = "referencedata.get-all-prompt-synonyms";
-
-    private static final String REFERENCEDATA_GET_ALL_RESULT_PROMPT_WORD_SYNONYMS = "referencedata.get-all-result-prompt-word-synonyms";
     public static final String REFERENCEDATA_GET_ALL_FIXED_LIST = "referencedata.get-all-fixed-list";
-
+    private static final String REFERENCEDATA_GET_ALL_RESULT_DEFINITIONS = "referencedata.get-all-result-definitions";
+    private static final String REFERENCEDATA_GET_ALL_RESULT_WORD_SYNONYMS = "referencedata.get-all-result-word-synonyms";
+    private static final String REFERENCEDATA_RESULT_GET_ALL_PROMPT_KEYWORD_SYNONYMS = "referencedata.get-all-prompt-synonyms";
+    private static final String REFERENCEDATA_GET_ALL_RESULT_PROMPT_WORD_SYNONYMS = "referencedata.get-all-result-prompt-word-synonyms";
+    private final LocalDate hearingDate = LocalDate.parse("2018-05-01");
     @InjectMocks
     private ResultingQueryService resultingQueryService;
-
     @Spy
     private Enveloper enveloper = EnveloperFactory.createEnveloper();
-
     @Mock
     private Requester requester;
-
-    private final LocalDate hearingDate = LocalDate.parse("2018-05-01");
-
     @Captor
     private ArgumentCaptor<JsonEnvelope> captor;
 

@@ -1,228 +1,247 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
-import uk.gov.moj.cpp.hearing.command.verdict.Verdict;
-import uk.gov.moj.cpp.hearing.it.TestUtilities.EventListener;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsNull.nullValue;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.customStructureInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.Jurors;
+import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
-import java.util.concurrent.TimeUnit;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class VerdictIT extends AbstractIT {
 
     @Test
-    public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryIsGuiltyType_shouldUpdateConvictionDateToVerdictDate() throws Exception {
+    public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryIsGuiltyType_shouldUpdateConvictionDateToVerdictDate() {
 
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-            h(i).getFirstOffenceForFirstDefendant().setConvictionDate(null);
-        })));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(
+                UseCases.initiateHearing(requestSpec,
+                        with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(null))));
 
         final EventListener publicEventConvictionDateChangedListener = listenFor(
                 "public.hearing.offence-conviction-date-changed")
                 .withFilter(isJson(allOf(
-                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
-                        withJsonPath("$.caseId", is(hearingOne.getFirstCaseId().toString())))));
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.getHearing().getProsecutionCases().get(0).getId().toString()))
+                )));
 
         final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
-                updateVerdictTemplate(hearingOne.getFirstCaseId(),
-                        hearingOne.getFirstDefendantId(),
-                        hearingOne.getFirstOffenceIdForFirstDefendant(),
-                        TestTemplates.VerdictCategoryType.GUILTY
-                ).build()));
+                updateVerdictTemplate(
+                        hearingOne.getHearingId(),
+                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                        TestTemplates.VerdictCategoryType.GUILTY)
+        ));
 
         publicEventConvictionDateChangedListener.waitFor();
 
-        Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
-
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category", is(verdict.getValue().getCategory())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code", is(verdict.getValue().getCode())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description", is(verdict.getValue().getDescription())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId", is(verdict.getValue().getVerdictTypeId().toString())),
-
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate", is(verdict.getVerdictDate().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors", is(verdict.getNumberOfSplitJurors())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfJurors", is(verdict.getNumberOfJurors())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.unanimous", is(verdict.getUnanimous())),
-
-                                withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", is(verdict.getVerdictDate().toString()))
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getVerdict, isBean(Verdict.class)
+                                                        .with(Verdict::getVerdictType, isBean(VerdictType.class)
+                                                                .with(VerdictType::getCategory, is(updateVerdict.getFirstVerdictCategory()))
+                                                                .with(VerdictType::getCategoryType, is(updateVerdict.getFirstVerdictCategoryType().name()))
+                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getVerdictTypeId()))
+                                                                .with(VerdictType::getDescription, is(updateVerdict.getFirstVerdict().getVerdictType().getDescription()))
+                                                                .with(VerdictType::getSequence, is(updateVerdict.getFirstVerdict().getVerdictType().getSequence()))
+                                                        )
+                                                        .with(Verdict::getOffenceId, is(updateVerdict.getFirstVerdict().getOffenceId()))
+                                                        .with(Verdict::getJurors, isBean(Jurors.class)
+                                                                .with(Jurors::getNumberOfJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfJurors()))
+                                                                .with(Jurors::getNumberOfSplitJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfSplitJurors()))
+                                                                .with(Jurors::getUnanimous, is(updateVerdict.getFirstVerdict().getJurors().getUnanimous()))
+                                                        )
+                                                        .with(Verdict::getLesserOrAlternativeOffence, isBean(LesserOrAlternativeOffence.class)
+                                                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceDefinitionId()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceCode, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceCode()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitle, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitle()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitleWelsh()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislation, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislation()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislationWelsh()))
+                                                        )
+                                                        .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
+                                                )
+                                                .with(Offence::getConvictionDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
+                                        ))
+                                ))
                         ))
-                );
+                )
+        );
     }
 
     @Test
-    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() throws Exception {
+    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-            h(i).getFirstOffenceForFirstDefendant().setConvictionDate(PAST_LOCAL_DATE.next());
-        })));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne =
+                h(UseCases.initiateHearing(requestSpec,
+                        with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next()))));
 
         final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor(
                 "public.hearing.offence-conviction-date-removed")
                 .withFilter(isJson(allOf(
-                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
-                        withJsonPath("$.caseId", is(hearingOne.getFirstCaseId().toString()))
-                )));
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.it().getHearing().getProsecutionCases().get(0).getId().toString())))));
 
         final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
-                updateVerdictTemplate(hearingOne.getFirstCaseId(),
-                        hearingOne.getFirstDefendantId(),
-                        hearingOne.getFirstOffenceIdForFirstDefendant(),
-                        TestTemplates.VerdictCategoryType.NOT_GUILTY
-                ).build()));
+                updateVerdictTemplate(
+                        hearingOne.getHearingId(),
+                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                        TestTemplates.VerdictCategoryType.NOT_GUILTY)
+        ));
 
         publicEventOffenceConvictionDateRemovedListener.waitFor();
 
-        Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
-
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
-                .build())
-                .timeout(30,
-                        TimeUnit.SECONDS)
-                .until(status().is(OK), payload().isJson(allOf(
-                        withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
-                        withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
-
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category", is(verdict.getValue().getCategory())),
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code", is(verdict.getValue().getCode())),
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description", is(verdict.getValue().getDescription())),
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId", is(verdict.getValue().getVerdictTypeId().toString())),
-
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate", is(verdict.getVerdictDate().toString())),
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors", is(verdict.getNumberOfSplitJurors())),
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfJurors", is(verdict.getNumberOfJurors())),
-                        withJsonPath("$.cases[0].defendants[0].offences[0].verdict.unanimous", is(verdict.getUnanimous())),
-                        withoutJsonPath("$.cases[0].defendants[0].offences[0].convictionDate")
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getVerdict, isBean(Verdict.class)
+                                                        .with(Verdict::getVerdictType, isBean(VerdictType.class)
+                                                                .with(VerdictType::getCategory, is(updateVerdict.getFirstVerdictCategory()))
+                                                                .with(VerdictType::getCategoryType, is(updateVerdict.getFirstVerdictCategoryType().name()))
+                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getVerdictTypeId()))
+                                                                .with(VerdictType::getDescription, is(updateVerdict.getFirstVerdict().getVerdictType().getDescription()))
+                                                                .with(VerdictType::getSequence, is(updateVerdict.getFirstVerdict().getVerdictType().getSequence()))
+                                                        )
+                                                        .with(Verdict::getOffenceId, is(updateVerdict.getFirstVerdict().getOffenceId()))
+                                                        .with(Verdict::getJurors, isBean(Jurors.class)
+                                                                .with(Jurors::getNumberOfJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfJurors()))
+                                                                .with(Jurors::getNumberOfSplitJurors, is(updateVerdict.getFirstVerdict().getJurors().getNumberOfSplitJurors()))
+                                                                .with(Jurors::getUnanimous, is(updateVerdict.getFirstVerdict().getJurors().getUnanimous()))
+                                                        )
+                                                        .with(Verdict::getLesserOrAlternativeOffence, isBean(LesserOrAlternativeOffence.class)
+                                                                .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceDefinitionId()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceCode, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceCode()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitle, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitle()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceTitleWelsh()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislation, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislation()))
+                                                                .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(updateVerdict.getFirstVerdict().getLesserOrAlternativeOffence().getOffenceLegislationWelsh()))
+                                                        )
+                                                        .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
+                                                )
+                                                .with(Offence::getConvictionDate, is(nullValue()))
+                                        ))
+                                ))
                         ))
-                );
-
-    }
-
-    @Test
-    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsGuilty_shouldNotUpdateConvictionDate()
-            throws Exception {
-
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
-
-        LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
-        LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
-
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-            h(i).getFirstOffenceForFirstDefendant().setConvictionDate(previousConvictionDate);
-        })));
-
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(), with(
-                updateVerdictTemplate(hearingOne.getFirstCaseId(),
-                        hearingOne.getFirstDefendantId(),
-                        hearingOne.getFirstOffenceIdForFirstDefendant(),
-                        TestTemplates.VerdictCategoryType.GUILTY
-                ), verdict -> {
-                    verdict.getDefendants().get(0).getOffences().get(0).getVerdict().withVerdictDate(currentConvictionDate);
-                }).build()));
-
-        final Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
-
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
-
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category", is(verdict.getValue().getCategory())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.categoryType", is(verdict.getValue().getCategoryType())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code", is(verdict.getValue().getCode())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description", is(verdict.getValue().getDescription())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId", is(verdict.getValue().getVerdictTypeId().toString())),
-
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate", is(verdict.getVerdictDate().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors", is(verdict.getNumberOfSplitJurors())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfJurors", is(verdict.getNumberOfJurors())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.unanimous", is(verdict.getUnanimous())),
-
-                                withJsonPath("$.cases[0].defendants[0].offences[0].convictionDate", is(previousConvictionDate.toString())))));
-    }
-
-    @Test
-    public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryTypeIsNotGuiltyType_shouldNotUpdateOrClearTheConvictionDate() throws Exception {
-
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
-
-        final InitiateHearingCommandHelper hearingOne = new InitiateHearingCommandHelper(
-                UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(), i -> {
-                    h(i).getFirstOffenceForFirstDefendant().setConvictionDate(null);
-                }))
+                )
         );
+    }
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(), with(
-                updateVerdictTemplate(hearingOne.getFirstCaseId(),
-                        hearingOne.getFirstDefendantId(),
-                        hearingOne.getFirstOffenceIdForFirstDefendant(),
-                        TestTemplates.VerdictCategoryType.NO_VERDICT
-                ), verdict -> {
-                    verdict.getDefendants().get(0).getOffences().get(0).getVerdict().withVerdictDate(PAST_LOCAL_DATE.next());
-                }).build()));
+    @Test
+    public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsGuilty_shouldNotUpdateConvictionDate() {
 
-        final Verdict verdict = updateVerdict.getFirstOffenceForFirstDefendant().getVerdict();
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
-                .build())
-                .timeout(30, TimeUnit.SECONDS)
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
+        final LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
+        final LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
 
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.category", is(verdict.getValue().getCategory())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.categoryType", is(verdict.getValue().getCategoryType())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.code", is(verdict.getValue().getCode())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.description", is(verdict.getValue().getDescription())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.value.verdictTypeId", is(verdict.getValue().getVerdictTypeId().toString())),
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(),
+                i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(previousConvictionDate))));
 
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.verdictDate", is(verdict.getVerdictDate().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfSplitJurors", is(verdict.getNumberOfSplitJurors())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.numberOfJurors", is(verdict.getNumberOfJurors())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].verdict.unanimous", is(verdict.getUnanimous())),
+        h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+                with(updateVerdictTemplate(
+                        hearingOne.getHearingId(),
+                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                        TestTemplates.VerdictCategoryType.GUILTY), t -> h(t).getFirstVerdict().setVerdictDate(currentConvictionDate))));
 
-                                withoutJsonPath("$.cases[0].defendants[0].offences[0].convictionDate")
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getVerdict, isBean(Verdict.class)
+                                                        .with(Verdict::getVerdictDate, is(currentConvictionDate))
+                                                )
+                                                .with(Offence::getConvictionDate, is(previousConvictionDate))
+                                        ))
+                                ))
                         ))
-                );
+                )
+        );
+    }
+
+    @Test
+    public void shouldInheritVerdict() {
+
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
+        final LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
+
+        final LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(),
+                i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(previousConvictionDate))));
+
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+                with(updateVerdictTemplate(
+                        hearingOne.getHearingId(),
+                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                        TestTemplates.VerdictCategoryType.GUILTY), t -> h(t).getFirstVerdict().setVerdictDate(currentConvictionDate))));
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getVerdict, isBean(Verdict.class)
+                                                        .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
+                                                        .with(Verdict::getOriginatingHearingId, is(hearingOne.getHearingId())))))))))));
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(requestSpec, customStructureInitiateHearingTemplate(
+                toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
+        )));
+
+        Queries.getHearingPollForMatch(hearingTwo.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingTwo.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getVerdict, isBean(Verdict.class)
+                                                        .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
+                                                        .with(Verdict::getOriginatingHearingId, is(hearingOne.getHearingId())))
+                                        ))))))));
     }
 }

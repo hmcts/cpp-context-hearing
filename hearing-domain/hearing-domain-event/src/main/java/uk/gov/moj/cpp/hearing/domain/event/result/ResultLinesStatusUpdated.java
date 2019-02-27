@@ -1,9 +1,9 @@
 package uk.gov.moj.cpp.hearing.domain.event.result;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import static java.util.Optional.ofNullable;
+
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.moj.cpp.hearing.command.result.CourtClerk;
+import uk.gov.justice.core.courts.CourtClerk;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 
 import java.io.Serializable;
@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.result-lines-status-updated")
 public final class ResultLinesStatusUpdated implements Serializable {
@@ -20,12 +21,9 @@ public final class ResultLinesStatusUpdated implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID hearingId;
-
-    private ZonedDateTime lastSharedDateTime;
-
-    private CourtClerk courtClerk;
-
     private final List<SharedResultLineId> sharedResultLines;
+    private ZonedDateTime lastSharedDateTime;
+    private CourtClerk courtClerk;
 
 
     @JsonCreator
@@ -39,6 +37,10 @@ public final class ResultLinesStatusUpdated implements Serializable {
         this.sharedResultLines = ofNullable(sharedResultLines).orElseGet(ArrayList::new);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getHearingId() {
         return hearingId;
     }
@@ -47,24 +49,20 @@ public final class ResultLinesStatusUpdated implements Serializable {
         return courtClerk;
     }
 
-    public ZonedDateTime getLastSharedDateTime() {
-        return lastSharedDateTime;
+    public void setCourtClerk(final CourtClerk courtClerk) {
+        this.courtClerk = courtClerk;
     }
 
-    public List<SharedResultLineId> getSharedResultLines() {
-        return sharedResultLines;
+    public ZonedDateTime getLastSharedDateTime() {
+        return lastSharedDateTime;
     }
 
     public void setLastSharedDateTime(final ZonedDateTime lastSharedDateTime) {
         this.lastSharedDateTime = lastSharedDateTime;
     }
 
-    public void setCourtClerk(final CourtClerk courtClerk) {
-        this.courtClerk = courtClerk;
-    }
-
-    public static Builder builder() {
-        return new Builder();
+    public List<SharedResultLineId> getSharedResultLines() {
+        return sharedResultLines;
     }
 
     public static final class Builder {

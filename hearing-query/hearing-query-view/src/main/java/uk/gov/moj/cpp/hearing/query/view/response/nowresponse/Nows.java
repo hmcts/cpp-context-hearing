@@ -1,10 +1,9 @@
-
 package uk.gov.moj.cpp.hearing.query.view.response.nowresponse;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class Nows {
@@ -20,6 +19,10 @@ public class Nows {
 
     @JsonProperty("material")
     private List<Material> material = new ArrayList<>();
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public String getId() {
         return id;
@@ -53,9 +56,6 @@ public class Nows {
         this.material = material;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
     public static final class Builder {
         private String id;
         private String defendantId;
@@ -64,7 +64,6 @@ public class Nows {
 
         private Builder() {
         }
-
 
 
         public Builder withId(String id) {

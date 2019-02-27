@@ -11,17 +11,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public final class Choice implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     private final String code;
     private final String label;
     private final String type;
     private final Boolean required;
 
     @JsonCreator
-    protected Choice(@JsonProperty("code") final String code, 
-            @JsonProperty("label") final String label, 
-            @JsonProperty("type") final String type, 
-            @JsonProperty("required") final Boolean required) {
+    protected Choice(@JsonProperty("code") final String code,
+                     @JsonProperty("label") final String label,
+                     @JsonProperty("type") final String type,
+                     @JsonProperty("required") final Boolean required) {
         this.code = code;
         this.label = label;
         this.type = type;
@@ -34,6 +34,10 @@ public final class Choice implements Serializable {
         this.label = builder.label;
         this.type = builder.type;
         this.required = builder.required;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public String getCode() {
@@ -72,32 +76,28 @@ public final class Choice implements Serializable {
         return Objects.hash(this.code, this.label, this.type, this.required);
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static final class Builder {
-        
+
         private String code;
         private String label;
         private String type;
         private Boolean required;
-        
+
         public Builder withCode(final String code) {
             this.code = code;
             return this;
         }
-        
+
         public Builder withLabel(final String label) {
             this.label = label;
             return this;
         }
-        
+
         public Builder withType(final String type) {
             this.type = type;
             return this;
         }
-        
+
         public Builder withRequired(final Boolean required) {
             this.required = required;
             return this;

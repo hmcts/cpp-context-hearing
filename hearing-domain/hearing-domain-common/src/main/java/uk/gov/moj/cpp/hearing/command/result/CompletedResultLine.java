@@ -19,19 +19,12 @@ public final class CompletedResultLine implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID id;
-
-    private UUID resultDefinitionId;
-
     private final UUID caseId;
-
-    private UUID defendantId;
-
     private final UUID offenceId;
-
     private final Level level;
-
     private final String resultLabel;
-
+    private UUID resultDefinitionId;
+    private UUID defendantId;
     private List<ResultPrompt> prompts;
 
     private LocalDate orderedDate;
@@ -44,8 +37,8 @@ public final class CompletedResultLine implements Serializable {
                                 @JsonProperty("offenceId") final UUID offenceId,
                                 @JsonProperty("level") final Level level,
                                 @JsonProperty("resultLabel") final String resultLabel,
-                    @JsonProperty("prompts") final List<ResultPrompt> prompts,
-                    @JsonProperty("orderedDate") final LocalDate orderedDate) {
+                                @JsonProperty("prompts") final List<ResultPrompt> prompts,
+                                @JsonProperty("orderedDate") final LocalDate orderedDate) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.caseId = caseId;
@@ -57,6 +50,10 @@ public final class CompletedResultLine implements Serializable {
         this.orderedDate = orderedDate;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getId() {
         return id;
     }
@@ -65,12 +62,20 @@ public final class CompletedResultLine implements Serializable {
         return resultDefinitionId;
     }
 
+    public void setResultDefinitionId(final UUID resultDefinitionId) {
+        this.resultDefinitionId = resultDefinitionId;
+    }
+
     public UUID getCaseId() {
         return caseId;
     }
 
     public UUID getDefendantId() {
         return defendantId;
+    }
+
+    public void setDefendantId(final UUID defendantId) {
+        this.defendantId = defendantId;
     }
 
     public UUID getOffenceId() {
@@ -89,28 +94,42 @@ public final class CompletedResultLine implements Serializable {
         return new ArrayList<>(prompts);
     }
 
+    public void setPrompts(List<ResultPrompt> prompts) {
+        this.prompts = new ArrayList<>(prompts);
+    }
+
     public LocalDate getOrderedDate() {
         return orderedDate;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public void setResultDefinitionId(final UUID resultDefinitionId) {
-        this.resultDefinitionId = resultDefinitionId;
-    }
-
-    public void setDefendantId(final UUID defendantId) {
-        this.defendantId = defendantId;
-    }
-
-    public void setOrderedDate(final LocalDate orderedDate){
+    public void setOrderedDate(final LocalDate orderedDate) {
         this.orderedDate = orderedDate;
     }
 
-    public void setPrompts(List<ResultPrompt> prompts) {
-        this.prompts = new ArrayList<>(prompts);
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final CompletedResultLine completedResultLine = (CompletedResultLine) o;
+        return Objects.equals(id, completedResultLine.id) &&
+                Objects.equals(resultDefinitionId, completedResultLine.resultDefinitionId) &&
+                Objects.equals(caseId, completedResultLine.caseId) &&
+                Objects.equals(defendantId, completedResultLine.defendantId) &&
+                Objects.equals(offenceId, completedResultLine.offenceId) &&
+                Objects.equals(level, completedResultLine.level) &&
+                Objects.equals(resultLabel, completedResultLine.resultLabel) &&
+                Objects.equals(prompts, completedResultLine.prompts) &&
+                Objects.equals(orderedDate, completedResultLine.orderedDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, resultDefinitionId, caseId, defendantId,
+                offenceId, level, resultLabel, prompts, orderedDate);
     }
 
     public static final class Builder {
@@ -177,35 +196,10 @@ public final class CompletedResultLine implements Serializable {
             this.orderedDate = orderedDate;
             return this;
         }
+
         public CompletedResultLine build() {
             return new CompletedResultLine(id, resultDefinitionId, caseId, defendantId, offenceId,
-                            level, resultLabel, prompts, orderedDate);
+                    level, resultLabel, prompts, orderedDate);
         }
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final CompletedResultLine completedResultLine = (CompletedResultLine) o;
-        return Objects.equals(id, completedResultLine.id) &&
-                Objects.equals(resultDefinitionId, completedResultLine.resultDefinitionId) &&
-                Objects.equals(caseId, completedResultLine.caseId) &&
-                Objects.equals(defendantId, completedResultLine.defendantId) &&
-                Objects.equals(offenceId, completedResultLine.offenceId) &&
-                Objects.equals(level, completedResultLine.level) &&
-                Objects.equals(resultLabel, completedResultLine.resultLabel) &&
-                Objects.equals(prompts, completedResultLine.prompts) &&
-                Objects.equals(orderedDate, completedResultLine.orderedDate);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, resultDefinitionId, caseId, defendantId,
-                offenceId, level, resultLabel, prompts, orderedDate);
     }
 }

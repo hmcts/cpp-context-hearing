@@ -14,36 +14,12 @@ public class Verdict {
     private Boolean unanimous;
     private UUID enteredHearingId;
 
+    public static Verdict verdict() {
+        return new Verdict();
+    }
+
     public UUID getTypeId() {
         return typeId;
-    }
-
-    public String getVerdictDescription() {
-        return verdictDescription;
-    }
-
-    public String getVerdictCategory() {
-        return verdictCategory;
-    }
-
-    public String getNumberOfSplitJurors() {
-        return numberOfSplitJurors;
-    }
-
-    public LocalDate getVerdictDate() {
-        return verdictDate;
-    }
-
-    public Integer getNumberOfJurors() {
-        return numberOfJurors;
-    }
-
-    public Boolean getUnanimous() {
-        return unanimous;
-    }
-
-    public UUID getEnteredHearingId() {
-        return enteredHearingId;
     }
 
     public Verdict setTypeId(UUID typeId) {
@@ -51,9 +27,17 @@ public class Verdict {
         return this;
     }
 
+    public String getVerdictDescription() {
+        return verdictDescription;
+    }
+
     public Verdict setVerdictDescription(String verdictDescription) {
         this.verdictDescription = verdictDescription;
         return this;
+    }
+
+    public String getVerdictCategory() {
+        return verdictCategory;
     }
 
     public Verdict setVerdictCategory(String verdictCategory) {
@@ -61,9 +45,17 @@ public class Verdict {
         return this;
     }
 
+    public String getNumberOfSplitJurors() {
+        return numberOfSplitJurors;
+    }
+
     public Verdict setNumberOfSplitJurors(String numberOfSplitJurors) {
         this.numberOfSplitJurors = numberOfSplitJurors;
         return this;
+    }
+
+    public LocalDate getVerdictDate() {
+        return verdictDate;
     }
 
     public Verdict setVerdictDate(LocalDate verdictDate) {
@@ -71,9 +63,17 @@ public class Verdict {
         return this;
     }
 
+    public Integer getNumberOfJurors() {
+        return numberOfJurors;
+    }
+
     public Verdict setNumberOfJurors(Integer numberOfJurors) {
         this.numberOfJurors = numberOfJurors;
         return this;
+    }
+
+    public Boolean getUnanimous() {
+        return unanimous;
     }
 
     public Verdict setUnanimous(Boolean unanimous) {
@@ -81,13 +81,13 @@ public class Verdict {
         return this;
     }
 
+    public UUID getEnteredHearingId() {
+        return enteredHearingId;
+    }
+
     public Verdict setEnteredHearingId(UUID enteredHearingId) {
         this.enteredHearingId = enteredHearingId;
         return this;
-    }
-
-    public static Verdict verdict() {
-        return new Verdict();
     }
 }
 

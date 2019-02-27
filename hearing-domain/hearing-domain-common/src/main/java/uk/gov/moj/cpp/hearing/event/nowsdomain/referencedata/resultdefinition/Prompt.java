@@ -3,11 +3,16 @@ package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Prompt {
 
     private UUID id;
 
     private String label;
+
+    private String welshLabel;
 
     private Boolean mandatory;
 
@@ -24,6 +29,8 @@ public class Prompt {
     private UUID fixedListId;
 
     private String reference;
+
+    private boolean isAvailableForCourtExtract;
 
     public static Prompt prompt() {
         return new Prompt();
@@ -117,5 +124,23 @@ public class Prompt {
     public Prompt setReference(String reference) {
         this.reference = reference;
         return this;
+    }
+
+    public boolean isAvailableForCourtExtract() {
+        return isAvailableForCourtExtract;
+    }
+
+    public Prompt setAvailableForCourtExtract(boolean availableForCourtExtract) {
+        isAvailableForCourtExtract = availableForCourtExtract;
+        return this;
+    }
+
+    public String getWelshLabel() {
+        return welshLabel;
+    }
+
+    public void setWelshLabel(String welshLabel) {
+        this.welshLabel = welshLabel;
+
     }
 }

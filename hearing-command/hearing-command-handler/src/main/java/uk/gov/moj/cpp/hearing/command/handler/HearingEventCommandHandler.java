@@ -1,25 +1,20 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventDefinitionAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.NewModelHearingAggregate;
+import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
-
-import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,75 +23,69 @@ import org.slf4j.LoggerFactory;
 @ServiceComponent(COMMAND_HANDLER)
 public class HearingEventCommandHandler extends AbstractCommandHandler {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(HearingEventCommandHandler.class.getName());
-
-    private static final String FIELD_GENERIC_ID = "id";
-    private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
-    private static final String FIELD_ACTION_LABEL = "actionLabel";
-    private static final String FIELD_RECORDED_LABEL = "recordedLabel";
-    private static final String FIELD_SEQUENCE = "sequence";
-    private static final String FIELD_SEQUENCE_TYPE = "sequenceType";
-    private static final String FIELD_CASE_ATTRIBUTE = "caseAttribute";
-    private static final String FIELD_ALTERABLE = "alterable";
-    private static final String FIELD_GROUP_LABEL = "groupLabel";
-    private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
-    private static final String FIELD_HEARING_ID = "hearingId";
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventCommandHandler.class.getName());
 
     @Handles("hearing.create-hearing-event-definitions")
-    public void createHearingEventDefinitions(final JsonEnvelope envelope) throws EventStreamException {
+    public void createHearingEventDefinitions(final JsonEnvelope jsonEnvelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.create-hearing-event-definitions event received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.create-hearing-event-definitions event received {}", jsonEnvelope.toObfuscatedDebugString());
         }
 
-        final JsonObject payload = envelope.payloadAsJsonObject();
-        final UUID hearingEventDefinitionsId = fromString(payload.getString(FIELD_GENERIC_ID));
-        final List<HearingEventDefinition> hearingEventDefinitions = payload
-                .getJsonArray(FIELD_EVENT_DEFINITIONS).getValuesAs(JsonObject.class)
-                .stream().map(hearingDefinitionJson -> new HearingEventDefinition(
-                        fromString(hearingDefinitionJson.getString(FIELD_GENERIC_ID)),
-                        hearingDefinitionJson.getString(FIELD_ACTION_LABEL),
-                        hearingDefinitionJson.getString(FIELD_RECORDED_LABEL),
-                        hearingDefinitionJson.containsKey(FIELD_SEQUENCE) ? hearingDefinitionJson.getInt(FIELD_SEQUENCE) : null,
-                        hearingDefinitionJson.getString(FIELD_SEQUENCE_TYPE, null),
-                        hearingDefinitionJson.getString(FIELD_CASE_ATTRIBUTE, null),
-                        hearingDefinitionJson.getString(FIELD_GROUP_LABEL, null),
-                        hearingDefinitionJson.getString(FIELD_ACTION_LABEL_EXTENSION, null),
-                        hearingDefinitionJson.getBoolean(FIELD_ALTERABLE)
-                )).collect(toList());
+        final CreateHearingEventDefinitionsCommand createHearingEventDefinitionsCommand = convertToObject(jsonEnvelope, CreateHearingEventDefinitionsCommand.class);
 
-        final EventStream eventStream = eventSource.getStreamById(hearingEventDefinitionsId);
-        final HearingEventDefinitionAggregate aggregate = aggregateService.get(eventStream, HearingEventDefinitionAggregate.class);
-        final Stream<Object> events = aggregate.createEventDefinitions(hearingEventDefinitionsId, hearingEventDefinitions);
-        eventStream.append(events.map(enveloper.withMetadataFrom(envelope)));
+        aggregate(HearingEventDefinitionAggregate.class, createHearingEventDefinitionsCommand.getId(), jsonEnvelope, a -> a.createEventDefinitions(createHearingEventDefinitionsCommand.getId(), createHearingEventDefinitionsCommand.getEventDefinitions()));
     }
 
     @Handles("hearing.command.log-hearing-event")
-    public void logHearingEvent(final JsonEnvelope command) throws EventStreamException {
+    public void logHearingEvent(final JsonEnvelope jsonEnvelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.log-hearing-event event received {}", command.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.log-hearing-event event received {}", jsonEnvelope.toObfuscatedDebugString());
         }
-        final LogEventCommand logEventCommand = convertToObject(command, LogEventCommand.class);
 
-        aggregate(NewModelHearingAggregate.class, logEventCommand.getHearingId(), command, a -> a.logHearingEvent(logEventCommand));
+        final LogEventCommand logEventCommand = convertToObject(jsonEnvelope, LogEventCommand.class);
+
+        final HearingEvent hearingEvent = HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final UUID hearingId = logEventCommand.getHearingId();
+        final UUID hearingEventDefinitionId = logEventCommand.getHearingEventDefinitionId();
+        final Boolean alterable = logEventCommand.getAlterable();
+        final UUID defenceCounselId = logEventCommand.getDefenceCounselId();
+
+        aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
     }
 
     @Handles("hearing.command.update-hearing-events")
-    public void updateHearingEvents(final JsonEnvelope command) throws EventStreamException {
-        final JsonObject payload = command.payloadAsJsonObject();
-        aggregate(NewModelHearingAggregate.class, fromString(payload.getString(FIELD_HEARING_ID)),
-                command,
-                a -> a.updateHearingEvents(payload));
+    public void updateHearingEvents(final JsonEnvelope jsonEnvelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-hearing-events event received {}", jsonEnvelope.toObfuscatedDebugString());
+        }
+
+        final UpdateHearingEventsCommand updateHearingEventsCommand = convertToObject(jsonEnvelope, UpdateHearingEventsCommand.class);
+
+        aggregate(HearingAggregate.class, updateHearingEventsCommand.getHearingId(), jsonEnvelope, a -> a.updateHearingEvents(updateHearingEventsCommand.getHearingId(), updateHearingEventsCommand.getHearingEvents()));
     }
 
     @Handles("hearing.command.correct-hearing-event")
-    public void correctEvent(final JsonEnvelope command) throws EventStreamException {
+    public void correctEvent(final JsonEnvelope jsonEnvelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.correct-hearing-event event received {}", command.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.correct-hearing-event event received {}", jsonEnvelope.toObfuscatedDebugString());
         }
 
-        final CorrectLogEventCommand logEventCommand = convertToObject(command, CorrectLogEventCommand.class);
-
-        aggregate(NewModelHearingAggregate.class, logEventCommand.getHearingId(), command, a -> a.correctHearingEvent(logEventCommand));
+        final CorrectLogEventCommand correctLogEventCommand = convertToObject(jsonEnvelope, CorrectLogEventCommand.class);
+        final HearingEvent hearingEvent = HearingEvent.builder()
+                .withHearingEventId(correctLogEventCommand.getHearingEventId())
+                .withEventTime(correctLogEventCommand.getEventTime())
+                .withLastModifiedTime(correctLogEventCommand.getLastModifiedTime())
+                .withRecordedLabel(correctLogEventCommand.getRecordedLabel()).build();
+        aggregate(HearingAggregate.class, correctLogEventCommand.getHearingId(), jsonEnvelope, a -> a.correctHearingEvent(correctLogEventCommand.getLatestHearingEventId(),
+                correctLogEventCommand.getHearingId(),
+                correctLogEventCommand.getHearingEventDefinitionId(),
+                correctLogEventCommand.getAlterable(),
+                correctLogEventCommand.getDefenceCounselId(),
+                hearingEvent));
     }
 }

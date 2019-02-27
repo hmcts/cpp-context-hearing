@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/organisationunitsResult.json",
+  "properties": {
+    "organisationunits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "http://justice.gov.uk/hearing/courts/referencedata/organisationalUnit.json"
+      }
+    }
+  },
+  "required": [
+    "organisationunits"
+  ]
+}

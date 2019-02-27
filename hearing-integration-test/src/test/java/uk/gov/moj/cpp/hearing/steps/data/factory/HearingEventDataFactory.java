@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.steps.data.factory;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
@@ -9,7 +8,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.val
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
-import uk.gov.moj.cpp.hearing.steps.data.DefenceCounselData;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
 import java.time.ZonedDateTime;

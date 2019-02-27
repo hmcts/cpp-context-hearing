@@ -25,14 +25,12 @@ import java.util.function.Function;
 public class HearingsTransformerTest {
 
     private HearingTransformer hearingTransformer;
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Before
     public void setup() {
         hearingTransformer = new HearingTransformer();
     }
-
-
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private LocalDate date(String strDate) {
         return LocalDate.parse(strDate, dateTimeFormatter);
@@ -149,7 +147,7 @@ public class HearingsTransformerTest {
         final int guiltyOffenceIndex = 2;
         final int guiltyDefendantIndex = 1;
         final BiFunction<Integer, Integer, Plea> defendantOffenceIndex2Plea = (d, o) -> {
-            return (d != guiltyDefendantIndex || o != guiltyOffenceIndex) ? null : new Plea(UUID.randomUUID(), LocalDate.now().plusDays(d), "GUILTY");
+            return (d != guiltyDefendantIndex || o != guiltyOffenceIndex) ? null : new Plea(UUID.randomUUID(), UUID.randomUUID(), LocalDate.now().plusDays(d), "GUILTY");
         };
         String hearingType = null;
         final SendingSheetCompleted sendingSheet = createSendingSheet(defendantCount, (i) -> {
@@ -183,7 +181,7 @@ public class HearingsTransformerTest {
         int offencesPerDefendant = 5;
         int guiltyOffenceIndex = 2;
         BiFunction<Integer, Integer, Plea> defendantOffenceIndex2Plea = (d, o) -> {
-            return o != guiltyOffenceIndex ? null : new Plea(UUID.randomUUID(), LocalDate.now().plusDays(d), "GUILTY");
+            return o != guiltyOffenceIndex ? null : new Plea(UUID.randomUUID(), UUID.randomUUID(), LocalDate.now().plusDays(d), "GUILTY");
         };
         String hearingType = null;
         SendingSheetCompleted sendingSheet = createSendingSheet(defendantCount, (i) -> {
@@ -232,7 +230,7 @@ public class HearingsTransformerTest {
         int offencesPerDefendant = 4;
         // make Pleas with plea dates going up
         BiFunction<Integer, Integer, Plea> defendantOffenceIndex2Plea = (d, o) -> {
-            return new Plea(UUID.randomUUID(), LocalDate.now().plusDays(d * defendantCount + o), "GUILTY");
+            return new Plea(UUID.randomUUID(), UUID.randomUUID(), LocalDate.now().plusDays(d * defendantCount + o), "GUILTY");
         };
         String hearingType = null;
         int guiltyPleaDateCount = defendantCount * offencesPerDefendant;

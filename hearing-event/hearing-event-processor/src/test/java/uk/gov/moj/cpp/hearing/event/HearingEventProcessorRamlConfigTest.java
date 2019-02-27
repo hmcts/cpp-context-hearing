@@ -1,8 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.Test;
-import uk.gov.justice.services.core.annotation.Handles;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,11 +10,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 public class HearingEventProcessorRamlConfigTest {
 
@@ -54,8 +51,8 @@ public class HearingEventProcessorRamlConfigTest {
         List<String> filesThatArePresent =
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json").listFiles()))
                         .map(File::getName)
-                        .filter(name -> !name.equals("schema"))
                         .map(name -> "json/" + name)
+                        .filter(name -> !name.equals("json/schema"))
                         .collect(Collectors.toList());
 
         Collections.sort(filesThatArePresent);
@@ -74,7 +71,8 @@ public class HearingEventProcessorRamlConfigTest {
 
         filesThatArePresent.removeAll(commandHandlerSchemas);
         filesThatArePresent.removeAll(privateEventSchemas);
-
+        //removing mac "json/.DS_Store" as it's not required
+        filesThatArePresent.remove("json/.DS_Store");
         assertThat(filesThatArePresent, empty());
     }
 }

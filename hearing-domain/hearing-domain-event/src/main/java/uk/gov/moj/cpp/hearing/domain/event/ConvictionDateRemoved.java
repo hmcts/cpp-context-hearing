@@ -1,78 +1,62 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import uk.gov.justice.domain.annotation.Event;
+
 import java.io.Serializable;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import uk.gov.justice.domain.annotation.Event;
-
 @Event("hearing.conviction-date-removed")
-public final class ConvictionDateRemoved implements Serializable{
+public class ConvictionDateRemoved implements Serializable {
 
     private static final long serialVersionUID = -5027540555216255520L;
-    
-    private final UUID caseId;
-    private final UUID hearingId;
-    private final UUID offenceId;
+
+    private UUID caseId;
+    private UUID hearingId;
+    private UUID offenceId;
+
+    public ConvictionDateRemoved() {
+    }
 
     @JsonCreator
-    public ConvictionDateRemoved(@JsonProperty("caseId") final UUID caseId, 
-            @JsonProperty("hearingId") final UUID hearingId,
-            @JsonProperty("offenceId") final UUID offenceId) {
+    public ConvictionDateRemoved(@JsonProperty("caseId") final UUID caseId,
+                                 @JsonProperty("hearingId") final UUID hearingId,
+                                 @JsonProperty("offenceId") final UUID offenceId) {
         this.caseId = caseId;
         this.hearingId = hearingId;
         this.offenceId = offenceId;
     }
 
-    @JsonIgnore
-    private ConvictionDateRemoved(final Builder builder) {
-        this.caseId = builder.caseId;
-        this.hearingId = builder.hearingId;
-        this.offenceId = builder.offenceId;
+    public static ConvictionDateRemoved convictionDateRemoved() {
+        return new ConvictionDateRemoved();
     }
 
     public UUID getCaseId() {
         return caseId;
     }
-    
+
+    public ConvictionDateRemoved setCaseId(UUID caseId) {
+        this.caseId = caseId;
+        return this;
+    }
+
     public UUID getHearingId() {
         return hearingId;
+    }
+
+    public ConvictionDateRemoved setHearingId(UUID hearingId) {
+        this.hearingId = hearingId;
+        return this;
     }
 
     public UUID getOffenceId() {
         return offenceId;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-    
-    public static final class Builder {
-
-        private UUID caseId;
-        private UUID hearingId;
-        private UUID offenceId;
-        
-        public Builder withCaseId(final UUID caseId) {
-            this.caseId = caseId;
-            return this;
-        }
-        
-        public Builder withHearingId(final UUID hearingId) {
-            this.hearingId = hearingId;
-            return this;
-        }
-        
-        public Builder withOffenceId(final UUID offenceId) {
-            this.offenceId = offenceId;
-            return this;
-        }
-        
-        public ConvictionDateRemoved build() {
-            return new ConvictionDateRemoved(this);
-        }
+    public ConvictionDateRemoved setOffenceId(UUID offenceId) {
+        this.offenceId = offenceId;
+        return this;
     }
 }

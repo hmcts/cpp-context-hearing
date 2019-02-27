@@ -35,7 +35,7 @@ public class NotepadHearingIT extends AbstractIT {
     public void shouldParseDataThatAreAvailableTodayWithAssociatedPrompts() {
         final String definitionQueryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "RESTRAOP", LocalDate.now().toString());
-        final String definitionUrl =  getBaseUri() + "/"  + definitionQueryAPIEndPoint;
+        final String definitionUrl = getBaseUri() + "/" + definitionQueryAPIEndPoint;
         final String definitionMediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         final ResponseData responseData = poll(requestParams(definitionUrl, definitionMediaType).withHeader(USER_ID, USER_ID_VALUE).build())
@@ -51,7 +51,7 @@ public class NotepadHearingIT extends AbstractIT {
         final String resultCode = jsonObject.getString("resultCode");
         final String promptsQueryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.prompt"), resultCode, LocalDate.now().toString());
-        final String promptUrl =  getBaseUri() + "/"  + promptsQueryAPIEndPoint;
+        final String promptUrl = getBaseUri() + "/" + promptsQueryAPIEndPoint;
         final String promptMediaType = "application/vnd.hearing.notepad.parse-result-prompt+json";
 
         poll(requestParams(promptUrl, promptMediaType).withHeader(USER_ID, USER_ID_VALUE).build())
@@ -71,7 +71,7 @@ public class NotepadHearingIT extends AbstractIT {
         final LocalDate orderedDate = LocalDate.now().plusDays(1);
         String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "RESTRAOP", orderedDate.toString());
-        String url =  getBaseUri() + "/"  + queryAPIEndPoint;
+        String url = getBaseUri() + "/" + queryAPIEndPoint;
         String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         poll(requestParams(url, mediaType).withHeader(USER_ID, USER_ID_VALUE).build())
@@ -79,7 +79,7 @@ public class NotepadHearingIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.originalText", is("RESTRAOP")) ,
+                                withJsonPath("$.originalText", is("RESTRAOP")),
                                 withJsonPath("$.orderedDate", is(LocalDates.to(orderedDate))),
                                 withJsonPath("$.parts[0].state", is("UNRESOLVED"))
                         )));
@@ -90,7 +90,7 @@ public class NotepadHearingIT extends AbstractIT {
     public void shouldParseDataThatAreAvailableTomorrow() {
         String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "RESTRAOP2", LocalDate.now().plusDays(1).toString());
-        String url =  getBaseUri() + "/"  + queryAPIEndPoint;
+        String url = getBaseUri() + "/" + queryAPIEndPoint;
         String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         poll(requestParams(url, mediaType).withHeader(USER_ID, USER_ID_VALUE).build())
@@ -98,7 +98,7 @@ public class NotepadHearingIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.originalText", is("RESTRAOP2")) ,
+                                withJsonPath("$.originalText", is("RESTRAOP2")),
                                 withJsonPath("$.parts[0].value", is("Restraining order for period")),
                                 withJsonPath("$.parts[0].state", is("RESOLVED"))
                         )));

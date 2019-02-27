@@ -6,6 +6,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+//TODO GPE-6752 remove
+@SuppressWarnings({"squid:S1135"})
 public class SharedResultLines implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -1,4 +1,3 @@
-
 package uk.gov.moj.cpp.hearing.query.view.response.nowresponse;
 
 import java.util.ArrayList;
@@ -12,16 +11,16 @@ public class NowsResponse {
     @JsonProperty("nows")
     private List<Nows> nows = new ArrayList<>();
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public List<Nows> getNows() {
         return nows;
     }
 
     public void setNows(List<Nows> nows) {
         this.nows = nows;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {

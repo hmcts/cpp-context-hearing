@@ -15,7 +15,7 @@ import org.junit.Test;
 
 public class ResultPromptsOrderTest {
 
-    
+
     @Test
     public void shouldOrderResultPrompts() throws Exception {
         //given
@@ -33,8 +33,8 @@ public class ResultPromptsOrderTest {
         assertThat(actualPromptOrders, is(equalTo(promptOrders)));
     }
 
-    private List<ResultPrompt> createResultPromptsWithPromptOrder(List<Integer> promptOrders ) {
-       return  promptOrders.stream().map(i -> {
+    private List<ResultPrompt> createResultPromptsWithPromptOrder(List<Integer> promptOrders) {
+        return promptOrders.stream().map(i -> {
             ResultPrompt rp = new ResultPrompt();
             rp.setPromptOrder(i);
             return rp;

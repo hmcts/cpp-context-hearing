@@ -1,4 +1,5 @@
 package uk.gov.moj.cpp.hearing.utils;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -34,9 +35,10 @@ import org.apache.http.HttpStatus;
 public class WireMockStubUtils {
 
     public static final String MATERIAL_STATUS_UPLOAD_COMMAND =
-                    "/resultinghmps-service/command/api/rest/resultinghmps/hearings/.*/nowsmaterial/.*";
+                    "/results-service/command/api/rest/results/hearings/.*/nowsmaterial/.*";
+
     public static final String MATERIAL_UPLOAD_COMMAND =
-                    "/material-service/command/api/rest/material/material";
+            "/material-service/command/api/rest/material/material";
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
     private static final String CONTENT_TYPE_QUERY_GROUPS = "application/vnd.usersgroups.groups+json";
     private static final String CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS = "application/vnd.progression.query.caseprogressiondetail+json";
@@ -95,10 +97,10 @@ public class WireMockStubUtils {
     public static final void mockUpdateHmpsMaterialStatus() {
         stubPingFor("resultinghmps-service");
         stubFor(post(urlMatching(
-                        MATERIAL_STATUS_UPLOAD_COMMAND))
-                                        .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
-                                                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                                                        .withBody("")));
+                MATERIAL_STATUS_UPLOAD_COMMAND))
+                .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody("")));
     }
 
     static void waitForStubToBeReady(final String resource, final String mediaType) {
@@ -107,7 +109,7 @@ public class WireMockStubUtils {
 
     private static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
         poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType).build())
-                        .until(status().is(expectedStatus));
+                .until(status().is(expectedStatus));
     }
 
     private static JsonObject getProgressionCaseJson(final UUID caseId, final String caseUrn) {

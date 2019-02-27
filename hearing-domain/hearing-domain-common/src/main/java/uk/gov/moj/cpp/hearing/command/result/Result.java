@@ -28,12 +28,12 @@ public final class Result implements Serializable {
 
     @JsonCreator
     protected Result(@JsonProperty("id") final UUID id,
-            @JsonProperty("resultLineId") final UUID resultLineId,
-            @JsonProperty("originalText") final String originalText, 
-            @JsonProperty("resultLevel") final String resultLevel, 
-            @JsonProperty("isCompleted") final Boolean isCompleted, 
-            @JsonProperty("parts") final List<Part> parts, 
-            @JsonProperty("choices") final List<Choice> choices) {
+                     @JsonProperty("resultLineId") final UUID resultLineId,
+                     @JsonProperty("originalText") final String originalText,
+                     @JsonProperty("resultLevel") final String resultLevel,
+                     @JsonProperty("isCompleted") final Boolean isCompleted,
+                     @JsonProperty("parts") final List<Part> parts,
+                     @JsonProperty("choices") final List<Choice> choices) {
         this.id = id;
         this.resultLineId = resultLineId;
         this.originalText = originalText;
@@ -52,6 +52,10 @@ public final class Result implements Serializable {
         this.isCompleted = builder.isCompleted;
         this.parts = builder.parts;
         this.choices = unmodifiableList(ofNullable(builder.choices).orElseGet(ArrayList::new));
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public UUID getResultDefinitionId() {
@@ -107,10 +111,6 @@ public final class Result implements Serializable {
     public int hashCode() {
         return Objects.hash(this.resultLineId, this.originalText, this.id,
                 this.resultLevel, this.isCompleted, this.parts, this.choices);
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {

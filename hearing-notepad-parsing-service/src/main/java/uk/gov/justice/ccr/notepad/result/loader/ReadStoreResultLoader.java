@@ -9,7 +9,11 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.FIXL;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.valueOf;
+import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.HCHOUSE;
+import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.HTYPE;
+import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.getPromptReferenceDynamicFixListUuids;
 
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionSynonym;
@@ -23,9 +27,14 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -118,20 +127,29 @@ public class ReadStoreResultLoader implements ResultLoader {
                     } else {
                         resultPrompt.setType(valueOf(promptJson.getString("type").trim().toUpperCase()));
                     }
-                    resultPrompt.setReference(promptJson.getString("reference", null));
+                    final String promptReference = promptJson.getString("reference", null);
+                    resultPrompt.setReference(promptReference);
                     resultPrompt.setPromptOrder(promptJson.getInt("sequence"));
                     resultPrompt.setMandatory(promptJson.getBoolean("mandatory"));
                     resultPrompt.setDurationElement(durationElement);
                     resultPrompt.setKeywords(getKeywordsForPrompts(promptJson));
 
                     final String fixedListId = promptJson.getString("fixedListId", null);
-                    if (fixedListId != null && (ResultType.FIXL == resultPrompt.getType() || ResultType.FIXLM == resultPrompt.getType())) {
+                    if (fixedListId != null && (FIXL == resultPrompt.getType() || ResultType.FIXLM == resultPrompt.getType())) {
                         resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId.trim()));
+                    } else if (HCHOUSE.equals(promptReference) || HTYPE.equals(promptReference)) {
+                        setFixedListValues(resultPromptFixedListMap, resultPrompt,promptReference);
                     }
                     resultPrompts.add(resultPrompt);
 
                 }));
         return resultPrompts;
+    }
+
+    private void setFixedListValues(final Map<String, Set<String>> resultPromptFixedListMap, final ResultPrompt resultPrompt, final String promptReference) {
+        resultPrompt.setFixedList(resultPromptFixedListMap.get(getPromptReferenceDynamicFixListUuids().get(promptReference)));
+        //overriding type as this is dynamicFixedList discovered by system
+        resultPrompt.setType(FIXL);
     }
 
     private List<String> getKeywordsForPrompts(final JsonObject resultPromptJson) {
@@ -145,7 +163,7 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     private Map<String, Set<String>> loadResultPromptFixedList(final LocalDate orderedDate) {
-        return resultingQueryService.getAllFixedLists(this.jsonEnvelope, orderedDate).payloadAsJsonObject()
+        final Map<String, Set<String>> staticFixedList = resultingQueryService.getAllFixedLists(this.jsonEnvelope, orderedDate).payloadAsJsonObject()
                 .getJsonArray("fixedListCollection").getValuesAs(JsonObject.class)
                 .stream()
                 .flatMap(fixedList -> fixedList.getJsonArray("elements").getValuesAs(JsonObject.class)
@@ -157,8 +175,37 @@ public class ReadStoreResultLoader implements ResultLoader {
                             return resultPromptFixedList;
                         })
                 ).collect(groupingBy(ResultPromptFixedList::getId, mapping(ResultPromptFixedList::getValue, toCollection(TreeSet::new))));
+        final Map<String, Set<String>> dynaMicFixedList = loadDynamicPromptFixedList();
+        //removing clashes between static and dynamic(dynamic has higher priority
+        staticFixedList.keySet().removeAll(dynaMicFixedList.keySet());
+        return Stream.concat(dynaMicFixedList.entrySet().stream(), staticFixedList.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    public Map<String, Set<String>> loadDynamicPromptFixedList() {
+        Map<String, Set<String>> result = new ConcurrentHashMap<>();
+        result.put(getPromptReferenceDynamicFixListUuids().get(HCHOUSE), getCourtCentres());
+        result.put(getPromptReferenceDynamicFixListUuids().get(HTYPE), getHearingTypes());
+        return result;
+    }
+
+    private Set<String> getCourtCentres() {
+        return resultingQueryService.getAllCourtCentre(this.jsonEnvelope).payloadAsJsonObject()
+                .getJsonArray("organisationunits").getValuesAs(JsonObject.class)
+                .stream()
+                .map(element -> element.getString("oucodeL3Name",null))
+                .filter(Objects::nonNull)
+                .collect(toCollection(TreeSet::new));
+    }
+
+    private Set<String> getHearingTypes() {
+        return resultingQueryService.getHearingTypes(this.jsonEnvelope).payloadAsJsonObject()
+                .getJsonArray("hearingTypes").getValuesAs(JsonObject.class)
+                .stream()
+                .map(element -> element.getString("hearingDescription",null))
+                .filter(Objects::nonNull)
+                .collect(toCollection(TreeSet::new));
+    }
     @Override
     public List<ResultPromptSynonym> loadResultPromptSynonym(final LocalDate orderedDate) {
         return resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope, orderedDate).payloadAsJsonObject()

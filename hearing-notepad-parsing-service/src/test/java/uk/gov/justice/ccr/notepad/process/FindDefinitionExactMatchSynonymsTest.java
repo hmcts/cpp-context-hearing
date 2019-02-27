@@ -35,15 +35,12 @@ public class FindDefinitionExactMatchSynonymsTest {
     ResultCache resultCache = new ResultCache();
     @Spy
     FileResultLoader fileResultLoader = new FileResultLoader();
-
-    @Mock
-    private CacheFactory cacheFactory;
-
-    @Mock
-    private LoadingCache<String, Object> cache;
-
     @InjectMocks
     FindDefinitionExactMatchSynonyms testObj;
+    @Mock
+    private CacheFactory cacheFactory;
+    @Mock
+    private LoadingCache<String, Object> cache;
 
     @Before
     public void init() throws ExecutionException {

@@ -2,14 +2,15 @@ package uk.gov.moj.cpp.hearing.domain.event;
 
 import static java.util.Collections.unmodifiableList;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.hearing-event-definitions-created")
 public class HearingEventDefinitionsCreated implements Serializable {

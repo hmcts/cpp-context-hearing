@@ -24,17 +24,15 @@ public class ConvictionDateEventProcessor {
     private static final String CASE_ID = "caseId";
     private static final String OFFENCE_ID = "offenceId";
     private static final String CONVICTION_DATE = "convictionDate";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConvictionDateEventProcessor.class);
     private Enveloper enveloper;
     private Sender sender;
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConvictionDateEventProcessor.class);
-
     @Inject
     public ConvictionDateEventProcessor(final Enveloper enveloper, final Sender sender,
-            final JsonObjectToObjectConverter jsonObjectToObjectConverter,
-            final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
+                                        final JsonObjectToObjectConverter jsonObjectToObjectConverter,
+                                        final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
         this.enveloper = enveloper;
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;

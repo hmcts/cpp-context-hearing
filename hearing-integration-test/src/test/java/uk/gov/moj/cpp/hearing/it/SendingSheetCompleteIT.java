@@ -3,25 +3,32 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
-import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.core.Is.is;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
-import static uk.gov.moj.cpp.hearing.it.TestUtilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaValue;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 public class SendingSheetCompleteIT extends AbstractIT {
@@ -35,7 +42,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
 
         final String eventPayloadString = getStringFromResource(eventName + ".noguilty.json").replaceAll("CASE_ID", caseID.toString());
 
-        TestUtilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
+        Utilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.caseId", is(caseID))));
 
         sendMessage(publicEvents.createProducer(),
@@ -49,21 +56,22 @@ public class SendingSheetCompleteIT extends AbstractIT {
         publicEventTopic.expectNoneWithin(10000);
     }
 
+
     @Test
     public void processSendingSheetComplete_shouldProduceMagsPleaInformation_givenInitiatedHearing() throws IOException {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = new CommandHelpers.InitiateHearingCommandHelper(standardInitiateHearingTemplate());
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
 
         final String eventName = "public.progression.events.sending-sheet-completed";
 
         String eventPayloadString = getStringFromResource(eventName + ".json")
-                .replaceAll("CASE_ID", hearingOne.getFirstCaseId().toString())
+                .replaceAll("CASE_ID", hearingOne.getFirstCase().getId().toString())
                 .replaceAll("PLEA_ID", randomUUID().toString())
                 .replaceAll("OFFENCE_ID_1", hearingOne.getFirstOffenceIdForFirstDefendant().toString())
                 .replaceAll("COURT_CENTRE_ID", randomUUID().toString());
 
-        TestUtilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
-                .withFilter(isJson(withJsonPath("$.caseId", is(hearingOne.getFirstCaseId().toString()))));
+        Utilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
+                .withFilter(isJson(withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))));
 
         sendMessage(publicEvents.createProducer(),
                 eventName,
@@ -77,18 +85,25 @@ public class SendingSheetCompleteIT extends AbstractIT {
 
         UseCases.initiateHearing(requestSpec, hearingOne.it());
 
-        final String hearingDetailsQueryURL = getURL("hearing.get.hearing", hearingOne.getHearingId().toString());
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, Matchers.is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, Matchers.is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, Matchers.is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getPleaValue, is(PleaValue.GUILTY))
+                                                        .with(Plea::getPleaDate, is(LocalDate.parse("2017-11-12")))
+                                                )
 
-        poll(requestParameters(hearingDetailsQueryURL, "application/vnd.hearing.get.hearing+json"))
-                .until(
-                        status().is(OK),
-                        payload().isJson(allOf(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
-                                withJsonPath("$.cases[0].caseId", is(hearingOne.getFirstCaseId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].defendantId", is(hearingOne.getFirstDefendantId().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].id", is(hearingOne.getFirstOffenceIdForFirstDefendant().toString())),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.pleaDate", is("2017-11-12")),
-                                withJsonPath("$.cases[0].defendants[0].offences[0].plea.value", is("GUILTY"))
-                        )));
+                                        ))
+                                ))
+                        ))
+                )
+        );
     }
 
     @Test
@@ -110,7 +125,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
             eventPayloadString = eventPayloadString.replaceAll("PLEA_ID_" + done, pleaID.toString());
         }
 
-        TestUtilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
+        Utilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.caseId", is(caseId.toString()))));
 
         sendMessage(publicEvents.createProducer(),

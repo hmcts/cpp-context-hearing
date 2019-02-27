@@ -1,74 +1,85 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import static java.util.UUID.fromString;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.justice.services.common.converter.JSONObjectValueObfuscator;
+import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.Now;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nows.order.NowsDocumentOrder;
-import uk.gov.moj.cpp.hearing.event.nows.service.NowGeneratorService;
+import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class NowsRequestedEventProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedEventProcessor.class);
 
-
     private final Enveloper enveloper;
     private final Sender sender;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    private NowGeneratorService nowGeneratorService;
+    private final NowsDelegate nowsDelegate;
 
     @Inject
     public NowsRequestedEventProcessor(final Enveloper enveloper, final Sender sender,
-                                       final NowGeneratorService nowGeneratorService,
-                                       final JsonObjectToObjectConverter jsonObjectToObjectConverter,
-                                       final ObjectToJsonObjectConverter objectToJsonObjectConverter
-                                       ) {
+                                       final NowsDelegate nowsDelegate,
+                                       final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
         this.enveloper = enveloper;
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
-        this.objectToJsonObjectConverter = objectToJsonObjectConverter;
-        this.nowGeneratorService = nowGeneratorService;
+        this.nowsDelegate = nowsDelegate;
     }
 
     @Handles("hearing.events.nows-requested")
-    public void processNowsRequested(final JsonEnvelope event) {
-        UUID userId = fromString(event.metadata().userId().orElseThrow(() -> new RuntimeException("UserId missing from event.")));
+    public void processNowsRequested(final JsonEnvelope envelope) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.nows-requested {}", envelope.toObfuscatedDebugString());
+        }
 
-        final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), NowsRequested.class);
-        final String hearingId = nowsRequested.getHearing().getId();
-        LOGGER.info("Nows requested for hearing id {}", hearingId);
+        final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), NowsRequested.class);
 
-        final Map<NowsDocumentOrder, NowsNotificationDocumentState> nowsDocumentOrderToNotificationState = NowsRequestedToOrderConvertor.convert(nowsRequested);
-        final List<NowsDocumentOrder> nowsDocumentOrdersList = new ArrayList<>(nowsDocumentOrderToNotificationState.keySet());
-        nowsDocumentOrdersList.stream().sorted(Comparator.comparing(NowsDocumentOrder::getPriority)).forEach(nowsDocumentOrder -> {
-            LOGGER.info("Input for docmosis order {}", JSONObjectValueObfuscator.obfuscated(objectToJsonObjectConverter.convert(nowsDocumentOrder)));
+        final String accountNumber = nowsRequested.getAccountNumber();
 
-            nowGeneratorService.generateNow(sender, userId, nowsRequested, hearingId, nowsDocumentOrderToNotificationState, nowsDocumentOrder);
-        });
+        final UUID requestId = nowsRequested.getRequestId();
 
-        this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.events.nows-requested")
-                .apply(this.objectToJsonObjectConverter.convert(nowsRequested)));
+        final CreateNowsRequest createNowsRequest = nowsRequested.getCreateNowsRequest();
+
+        final List<Now> nows = createNowsRequest.getNows();
+
+        if (nows.isEmpty()) {
+            throw new IllegalArgumentException("No Orders");
+        }
+
+        final List<Now> financialOrders = nows.stream().filter(now -> now.getId().equals(requestId)).filter(now -> nonNull(now.getFinancialOrders())).collect(Collectors.toList());
+
+        financialOrders.forEach(financialOrderDetail -> financialOrderDetail.getFinancialOrders().setAccountReference(accountNumber));
+
+        nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, financialOrders));
+
+        //Get all non financial orders
+        final List<Now> nonFinancialOrders = nows.stream().filter(now -> isNull(now.getFinancialOrders())).collect(Collectors.toList());
+
+        nonFinancialOrders.forEach(nonFinancialOrder -> nonFinancialOrder.setFinancialOrders(financialOrders.get(0).getFinancialOrders()));
+
+        if(!nonFinancialOrders.isEmpty()) {
+            nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, nonFinancialOrders));
+        }
+
     }
 
     @Handles("hearing.events.nows-material-status-updated")
@@ -78,6 +89,15 @@ public class NowsRequestedEventProcessor {
                         .add("materialId", envelope.payloadAsJsonObject().getJsonString("materialId"))
                         .build()
                 ));
+    }
+
+    private CreateNowsRequest createNowsRequest(final CreateNowsRequest nowsRequest, final List<Now> nows) {
+        return new CreateNowsRequest(
+                nowsRequest.getCourtClerk(),
+                nowsRequest.getHearing(),
+                nowsRequest.getNowTypes(),
+                nows,
+                nowsRequest.getSharedResultLines());
     }
 }
 

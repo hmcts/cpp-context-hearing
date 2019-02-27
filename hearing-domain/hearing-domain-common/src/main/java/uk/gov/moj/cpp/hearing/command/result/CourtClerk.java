@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CourtClerk implements Serializable {
 
@@ -28,6 +28,10 @@ public class CourtClerk implements Serializable {
         this.lastName = lastName;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getId() {
         return id;
     }
@@ -38,10 +42,6 @@ public class CourtClerk implements Serializable {
 
     public String getLastName() {
         return lastName;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {

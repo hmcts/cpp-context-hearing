@@ -51,10 +51,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Processor {
 
-    private final Pattern alphaNumericRegex = Pattern.compile("[a-z]+|\\d+");
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
-
+    private final Pattern alphaNumericRegex = Pattern.compile("[a-z]+|\\d+");
     @Inject
     ResultDefinitionMatcher resultDefinitionMatcher;
 
@@ -87,7 +85,7 @@ public class Processor {
             values.removeAll(knowledge.getResultDefinitionParts().keySet());
         } else {
             //in case no result definition found treat all parts as TXT
-            addAllPartsAsTxt(knowledge,values);
+            addAllPartsAsTxt(knowledge, values);
         }
 
         return processPrompts(knowledge, values, referenceDate);

@@ -1,10 +1,11 @@
 package uk.gov.moj.cpp.hearing.command;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.UUID;
 @SuppressWarnings({"squid:S1700"})
 public class DefendantId {
 
@@ -16,8 +17,12 @@ public class DefendantId {
     }
 
     @JsonIgnore
-    private DefendantId(Builder builder){
+    private DefendantId(Builder builder) {
         this.defendantId = builder.defendantId;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public UUID getDefendantId() {
@@ -27,17 +32,13 @@ public class DefendantId {
     public static class Builder {
         private UUID defendantId;
 
-        public Builder withDefendantId(UUID defendantId){
+        public Builder withDefendantId(UUID defendantId) {
             this.defendantId = defendantId;
             return this;
         }
 
-        public DefendantId build(){
+        public DefendantId build() {
             return new DefendantId(this);
         }
-    }
-
-    public static Builder builder(){
-        return new Builder();
     }
 }

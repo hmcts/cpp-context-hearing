@@ -1,0 +1,511 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/staging/enforceFinancialImposition.json",
+  "type": "object",
+  "properties": {
+    "prosecutionAuthorityCode": {
+      "description": "The code of the prosecuting authority for the case in question",
+      "type": "string"
+    },
+    "prosecutionCaseReference": {
+      "description": "The reference (PRN or URN)for the case in question",
+      "type": "string"
+    },
+    "originator": {
+      "description": "Used for correlation purposes.  A short string sent by the originator and expected on the responding public event so that the orinator may understand if the response is for a request that they originated",
+      "type": "string"
+    },
+    "requestId": {
+      "description": "Unique identifier for the request. Duplicate requests will not be processed by GoB.  ATCM set this to caseId but CC will need to set to the order id as there may be multiple impositions per case",
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "imposingCourt": {
+      "description": "The code for the imposing court required in the calculation of the enforcing court",
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "defendant": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "description": "The defendants title.  If the defendant is a company this must be set to Co",
+          "type": "string",
+          "enum": [
+            "Mr",
+            "Mrs",
+            "Ms",
+            "Miss",
+            "Co"
+          ]
+        },
+        "surname": {
+          "description": "Surname/last name/family name of the defendant. Mandatory when the defendant is a person",
+          "type": "string"
+        },
+        "forenames": {
+          "description": "Space separated list of forenames/given names.  Only relevant when the defendant is a person",
+          "type": "string"
+        },
+        "dateOfBirth": {
+          "description": "The defendants date of birth.  Only relevant when the defendant is a person",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "companyName": {
+          "description": "When the defendant is a company, the name of the company.  Mandatory when title is Co",
+          "type": "string"
+        },
+        "address1": {
+          "description": "Defendant address line 1, applicable to person and company defendants",
+          "type": "string"
+        },
+        "address2": {
+          "description": "Defendant address line 2, applicable to person and company defendants",
+          "type": "string"
+        },
+        "address3": {
+          "description": "Defendant address line 3, applicable to person and company defendants",
+          "type": "string"
+        },
+        "address4": {
+          "description": "Defendant address line 4, applicable to person and company defendants",
+          "type": "string"
+        },
+        "address5": {
+          "description": "Defendant address line 5, applicable to person and company defendants",
+          "type": "string"
+        },
+        "postcode": {
+          "description": "Defendant address post code, applicable to person and company defendants",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/ukGovPostCode"
+        },
+        "nationalInsuranceNumber": {
+          "description": "Defendant’s National Insurance Number. Not mandatory but useful for C&E if a Deduct from Benefits Order has been raised. If the Fine Order includes a DBO and this is not provided C&E have to do a manual lookup.",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/nino"
+        },
+        "telephoneNumberHome": {
+          "description": "Defendant’s home telephone number. Useful for C&E if the defendant needs to be contacted regarding their Fine account, but not mandatory. Must only contain numbers, spaces and hyphens.",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/phone"
+        },
+        "telephoneNumberBusiness": {
+          "description": "Defendant’s business telephone number. Useful for C&E if the defendant needs to be contacted regarding their Fine account, but not mandatory. Must only contain numbers, spaces and hyphens.  Mostly applicable to company defendants",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/phone"
+        },
+        "telephoneNumberMobile": {
+          "description": "Defendant’s mobile telephone number. Useful for C&E if the defendant needs to be contacted regarding their Fine account, but not mandatory. Must only contain numbers, spaces and hyphens.",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/phone"
+        },
+        "emailAddress1": {
+          "description": "Defendant’s email address. Useful for C&E if the defendant needs to be contacted regarding their Fine account, but not mandatory.",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/email"
+        },
+        "emailAddress2": {
+          "description": "Defendant’s alternate email address. Useful for C&E if the defendant needs to be contacted regarding their Fine account, but not mandatory.",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/email"
+        },
+        "dateOfSentence": {
+          "description": "The date of that the financial imposition was ordered",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "statementOfMeansProvided": {
+          "description": "Indicates if an MC100 has been provided",
+          "type": "boolean"
+        },
+        "weeklyIncome": {
+          "description": "The defendants stated weekly income.  Applicable to SJS",
+          "type": "object",
+          "properties": {
+            "amount": {
+              "$ref": "#/definitions/money"
+            }
+          },
+          "required": [
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        "benefitsTypes": {
+          "description": "The types of benefits that are claimed by the defendant and provided via the statement of means.",
+          "type": "string"
+        },
+        "vehicleMake": {
+          "type": "string"
+        },
+        "vehicleRegistrationMark": {
+          "type": "string"
+        },
+        "documentLanguage": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/hearingLanguage"
+        },
+        "hearingLanguage": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/hearingLanguage"
+        }
+      },
+      "required": [
+        "title",
+        "address1",
+        "postcode",
+        "documentLanguage",
+        "hearingLanguage"
+      ],
+      "additionalProperties": false
+    },
+    "parentGuardian": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "address3": {
+          "type": "string"
+        },
+        "address4": {
+          "type": "string"
+        },
+        "address5": {
+          "type": "string"
+        },
+        "postcode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "address1"
+      ],
+      "additionalProperties": false
+    },
+    "imposition": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/imposition"
+      }
+    },
+    "collectionOrder": {
+      "description": "When the imposition is a collection, the details about the type of collection",
+      "type": "object",
+      "properties": {
+        "isApplicationForBenefitsDeduction": {
+          "description": "Indicates that the imposition is a collection order for benefits deduction",
+          "type": "boolean"
+        },
+        "isAttachmentOfEarnings": {
+          "description": "Indicates that the imposition is a collection order for attachment from earnings",
+          "type": "boolean"
+        },
+        "isCollectionOrderMade": {
+          "description": "Indicates that collection order result was made in court",
+          "type": "boolean"
+        },
+        "reserveTerms": {
+          "type": "object",
+          "properties": {
+            "reserveTermsType": {
+              "description": "The type of reserve terms. Reserve Terms Lump sum - RLSUM, Reserve Terms Lump sum plus instalments - RLSUMI, Reserve Terms Instalments only - RINSTL",
+              "type": "string",
+              "enum": [
+                "LUMP_SUM",
+                "LUMP_SUM_PLUS_INSTALMENTS",
+                "INSTALMENTS_ONLY"
+              ]
+            },
+            "lumpSum": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "$ref": "#/definitions/money"
+                },
+                "withinDays": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false
+            },
+            "instalments": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "$ref": "#/definitions/money"
+                },
+                "frequency": {
+                  "type": "string",
+                  "enum": [
+                    "WEEKLY",
+                    "FORTIGHTLY",
+                    "MONTHLY"
+                  ]
+                },
+                "startDate": {
+                  "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+                }
+              },
+              "required": [
+                "amount",
+                "frequency",
+                "startDate"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "isApplicationForBenefitsDeduction",
+        "isAttachmentOfEarnings"
+      ],
+      "additionalProperties": false
+    },
+    "paymentTerms": {
+      "type": "object",
+      "properties": {
+        "paymentTermsType": {
+          "description": "An enumerated string that categorises the type of payment terms that have been made on the financial imposition.  BD - ByDate. This is used where the payment is supposed to be made by lump sum by specified date,  WK - Payments is made in weekly instalments,  FN - Payments is made in fortnightly instalments. MO - Monthly instalments, WL - Payments is made in weekly instalments following by lump sum, FL - fortnightly instalments + lump sum, ML - monthly instalments + lump sum, PD - Paid - not used by ATCM.",
+          "type": "string",
+          "enum": [
+            "BY_DATE",
+            "WEEKLY_INSTALMENTS",
+            "FORTNIGHTLY_INSTALMENTS",
+            "MONTHLY_INSTALMENTS",
+            "WEEKLY_INSTALMENTS_THEN_LUMP_SUM",
+            "FORTNIGHTLY_INSTALMENTS_THEN_LUMP_SUM",
+            "MONTHLY_INSTALMENTS_THEN_LUMP_SUM",
+            "PAID"
+          ]
+        },
+        "payByDate": {
+          "description": "The date by which the sum must be paid",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "lumpSumAmount": {
+          "description": "When payment is by lump sum, the amount that must be paid",
+          "$ref": "#/definitions/money"
+        },
+        "instalmentAmount": {
+          "description": "When payment is by instalments, the amount that must be paid for each instalment",
+          "$ref": "#/definitions/money"
+        },
+        "instalmentStartDate": {
+          "description": "When payment is by instalments, the date of the instalment",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "parentGuardianToPay": {
+          "description": "Not currently used. Included for future use when Youth cases are supported. Always false.",
+          "type": "boolean"
+        },
+        "defaultDaysInJail": {
+          "description": "The ordered imprisonment days that will be invoked in the event of a default",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "paymentTermsType"
+      ],
+      "additionalProperties": false
+    },
+    "minorCreditor": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/minorCreditor"
+      }
+    },
+    "employer": {
+      "type": "object",
+      "properties": {
+        "employerReference": {
+          "description": "Reference used by the employer (e.g. payroll number) to identify the defendant.",
+          "type": "string"
+        },
+        "employerCompanyName": {
+          "description": "The name of the employer",
+          "type": "string"
+        },
+        "employerAddress1": {
+          "description": "Employer address line 1",
+          "type": "string"
+        },
+        "employerAddress2": {
+          "description": "Employer address line 2",
+          "type": "string"
+        },
+        "employerAddress3": {
+          "description": "Employer address line 3",
+          "type": "string"
+        },
+        "employerAddress4": {
+          "description": "Employer address line 4",
+          "type": "string"
+        },
+        "employerAddress5": {
+          "description": "Employer address line 5",
+          "type": "string"
+        },
+        "employerPostcode": {
+          "description": "Employer post code",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/ukGovPostCode"
+        },
+        "employerTelephoneNumber": {
+          "description": "Employer telephone number",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/phone"
+        },
+        "employerEmailAddress": {
+          "description": "Employer email address",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/email"
+        }
+      },
+      "required": [
+        "employerCompanyName",
+        "employerAddress1"
+      ],
+      "additionalProperties": false
+    },
+    "plea": {
+      "type": "object",
+      "properties": {
+        "includesOnline": {
+          "description": "Indicates whether the defendant submitted a Financial Means document (MC100). Not currently used by C&E but sent by ATCM.",
+          "type": "boolean"
+        },
+        "includesGuilty": {
+          "description": "Indicates whether the defendant actively pled guilty to any of the offences. This is used by C&E to prove the defendant has interacted with the process in cases where they deny knowledge of the case, judgement or fine.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "includesGuilty",
+        "includesOnline"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "prosecutionAuthorityCode",
+    "prosecutionCaseReference",
+    "originator",
+    "requestId",
+    "imposingCourt",
+    "defendant",
+    "imposition",
+    "paymentTerms"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "imposition": {
+      "type": "object",
+      "properties": {
+        "offenceCode": {
+          "description": "Identifier of the original offence type.",
+          "type": "string"
+        },
+        "impositionResultCode": {
+          "description": "Identifier of the imposition raised against the offence. Must be FCOMP, FVS, FCOST, FCPC, FO, FVEBD, FCC.",
+          "type": "string",
+          "enum": [
+            "FO",
+            "FCPC",
+            "FVS",
+            "FVEBD",
+            "FCOST",
+            "FCOMP",
+            "FCC"
+          ]
+        },
+        "impositionAmount": {
+          "description": "Amount (in GBP) of this imposition.",
+          "$ref": "#/definitions/money"
+        },
+        "prosecutionAuthorityId": {
+          "description": "If this imposition is to be paid to a third party (e.g. TFL) this identifies the third party to be paid and must be provided",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "majorCreditor": {
+          "description": "The code of the major creditor from the resulting process.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "offenceCode",
+        "impositionResultCode",
+        "impositionAmount"
+      ],
+      "additionalProperties": false
+    },
+    "minorCreditor": {
+      "type": "object",
+      "properties": {
+        "minorCreditorTitle": {
+          "type": "string"
+        },
+        "minorCreditorSurname": {
+          "type": "string"
+        },
+        "minorCreditorInitials": {
+          "type": "string"
+        },
+        "minorCreditorForenames": {
+          "type": "string"
+        },
+        "companyName": {
+          "type": "string"
+        },
+        "minorCreditorAddress1": {
+          "type": "string"
+        },
+        "minorCreditorAddress2": {
+          "type": "string"
+        },
+        "minorCreditorAddress3": {
+          "type": "string"
+        },
+        "minorCreditorAddress4": {
+          "type": "string"
+        },
+        "minorCreditorAddress5": {
+          "type": "string"
+        },
+        "minorCreditorPostcode": {
+          "type": "string"
+        },
+        "minorCreditorPayByBACS": {
+          "type": "string",
+          "enum": [
+            "Y",
+            "N"
+          ]
+        },
+        "bankAccountType": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9
+        },
+        "bankSortCode": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999
+        },
+        "bankAccountNumber": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 99999999
+        },
+        "accountName": {
+          "type": "string"
+        },
+        "bankAccountReference": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "money": {
+      "type": "number",
+      "multipleOf": 0.01
+    }
+  }
+}

@@ -4,7 +4,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.val
 
 public class RandomPersonNameGenerator {
 
-    private static final String[] FIRST_NAMES = new String[] {
+    private static final String[] FIRST_NAMES = new String[]{
             "Ada", "Albert", "Alexandra", "Alfredo", "Allen", "Andre", "Angelica",
             "Anna", "Anthony", "Antonio", "Ashley", "Audrey", "Beatrice",
             "Benjamin", "Billy", "Bobby", "Bradley", "Bryant", "Candace",
@@ -22,7 +22,7 @@ public class RandomPersonNameGenerator {
             "Wanda", "Willard", "Winifred"
     };
 
-    private static final String[] LAST_NAMES = new String[] {
+    private static final String[] LAST_NAMES = new String[]{
             "Adkins", "Aguilar", "Anderson", "Armstrong", "Arnold", "Bailey",
             "Banks", "Barrett", "Bates", "Bennett", "Bowers", "Bradley", "Brown",
             "Bryant", "Buchanan", "Bush", "Butler", "Cain", "Carlson", "Carroll",

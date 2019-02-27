@@ -36,7 +36,7 @@ public class VariantValue implements Serializable {
     }
 
     public VariantValue setResultLines(List<ResultLineReference> resultLines) {
-        this.resultLines = new ArrayList<>(resultLines);
+        this.resultLines = resultLines==null?null:new ArrayList<>(resultLines);
         return this;
     }
 

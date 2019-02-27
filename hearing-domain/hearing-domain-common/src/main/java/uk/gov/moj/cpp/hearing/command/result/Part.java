@@ -25,12 +25,12 @@ public final class Part implements Serializable {
     private final String label;
 
     @JsonCreator
-    protected Part(@JsonProperty("value") final String value, 
-            @JsonProperty("type") final String type, 
-            @JsonProperty("state") final String state, 
-            @JsonProperty("resultChoices") final List<Choice> resultChoices, 
-            @JsonProperty("code") final String code, 
-            @JsonProperty("label") final String label) {
+    protected Part(@JsonProperty("value") final String value,
+                   @JsonProperty("type") final String type,
+                   @JsonProperty("state") final String state,
+                   @JsonProperty("resultChoices") final List<Choice> resultChoices,
+                   @JsonProperty("code") final String code,
+                   @JsonProperty("label") final String label) {
         this.value = value;
         this.type = type;
         this.state = state;
@@ -44,9 +44,13 @@ public final class Part implements Serializable {
         this.value = builder.value;
         this.type = builder.type;
         this.state = builder.state;
-        this.resultChoices =  unmodifiableList(ofNullable(builder.resultChoices).orElseGet(ArrayList::new));
+        this.resultChoices = unmodifiableList(ofNullable(builder.resultChoices).orElseGet(ArrayList::new));
         this.code = builder.code;
         this.label = builder.label;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public String getValue() {
@@ -96,10 +100,6 @@ public final class Part implements Serializable {
                 this.code, this.label);
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static final class Builder {
 
         private String value;
@@ -138,7 +138,7 @@ public final class Part implements Serializable {
             this.label = label;
             return this;
         }
-        
+
         public Part build() {
             return new Part(this);
         }

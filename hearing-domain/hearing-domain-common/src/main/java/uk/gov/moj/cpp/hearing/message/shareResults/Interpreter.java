@@ -5,12 +5,12 @@ public class Interpreter {
     private String name;
     private String language;
 
-    public String getName() {
-        return name;
+    public static Interpreter interpreter() {
+        return new Interpreter();
     }
 
-    public String getLanguage() {
-        return language;
+    public String getName() {
+        return name;
     }
 
     public Interpreter setName(String name) {
@@ -18,12 +18,12 @@ public class Interpreter {
         return this;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
     public Interpreter setLanguage(String language) {
         this.language = language;
         return this;
-    }
-
-    public static Interpreter interpreter(){
-        return new Interpreter();
     }
 }

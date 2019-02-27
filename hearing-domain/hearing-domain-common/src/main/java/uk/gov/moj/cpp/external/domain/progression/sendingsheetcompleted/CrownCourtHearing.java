@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CrownCourtHearing implements Serializable {
 
@@ -25,6 +25,14 @@ public class CrownCourtHearing implements Serializable {
         this.courtCentreName = courtCentreName;
     }
 
+    public static Builder crownCourtHearing() {
+        return new CrownCourtHearing.Builder();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public String getCcHearingDate() {
         return ccHearingDate;
     }
@@ -35,10 +43,6 @@ public class CrownCourtHearing implements Serializable {
 
     public String getCourtCentreName() {
         return courtCentreName;
-    }
-
-    public static Builder crownCourtHearing() {
-        return new CrownCourtHearing.Builder();
     }
 
     public static class Builder {
@@ -67,8 +71,4 @@ public class CrownCourtHearing implements Serializable {
             return new CrownCourtHearing(ccHearingDate, courtCentreId, courtCentreName);
         }
     }
-
-  public static Builder builder(){
-    return new Builder();
-  }
 }

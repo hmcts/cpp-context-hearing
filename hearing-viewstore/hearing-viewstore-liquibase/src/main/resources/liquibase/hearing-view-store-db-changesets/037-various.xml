@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="36" author="hearing" logicalFilePath="035-various.xml">
 
 
-        <modifyDataType columnName="custody_time_limit" newDataType="date" tableName="a_defendant_case"/>
-        <modifyDataType columnName="date" newDataType="timestamp with time zone" tableName="a_hearing_date"/>
+        <modifyDataType columnName="custody_time_limit" newDataType="date"
+                        tableName="a_defendant_case"/>
+        <modifyDataType columnName="date" newDataType="timestamp with time zone"
+                        tableName="a_hearing_date"/>
 
         <renameTable newTableName="ha_attendee" oldTableName="a_attendee"/>
         <renameTable newTableName="ha_attendee_case" oldTableName="a_attendee_case"/>
         <renameTable newTableName="ha_attendee_defendant" oldTableName="a_attendee_defendant"/>
-        <renameTable newTableName="ha_attendee_hearing_date" oldTableName="a_attendee_hearing_date"/>
+        <renameTable newTableName="ha_attendee_hearing_date"
+                     oldTableName="a_attendee_hearing_date"/>
         <renameTable newTableName="ha_case" oldTableName="a_case"/>
         <renameTable newTableName="ha_defendant" oldTableName="a_defendant"/>
         <renameTable newTableName="ha_defendant_case" oldTableName="a_defendant_case"/>
@@ -23,9 +26,11 @@
         <renameTable newTableName="ha_witness" oldTableName="a_witness"/>
         <renameTable newTableName="ha_defendant_witnesses" oldTableName="defendant_witnesses"/>
         <renameTable newTableName="ui_store" oldTableName="hearing_outcome"/>
-        <renameTable newTableName="heda_hearing_event_definition" oldTableName="hearing_event_definition"/>
+        <renameTable newTableName="heda_hearing_event_definition"
+                     oldTableName="hearing_event_definition"/>
         <renameTable newTableName="ha_nows_material" oldTableName="nows_material"/>
-        <renameTable newTableName="ha_nows_material_usergroups" oldTableName="nows_material_usersgroups"/>
+        <renameTable newTableName="ha_nows_material_usergroups"
+                     oldTableName="nows_material_usersgroups"/>
 
         <dropTable cascadeConstraints="true" tableName="hearing"/>
         <dropTable cascadeConstraints="true" tableName="hearing_case"/>

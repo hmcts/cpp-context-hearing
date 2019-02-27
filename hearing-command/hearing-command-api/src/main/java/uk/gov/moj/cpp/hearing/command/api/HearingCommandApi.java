@@ -28,18 +28,38 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.save-draft-result")
-    public void saveDraftResult(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
+    public void saveDraftResult(final JsonEnvelope command) {
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.save-draft-result").apply(command.payloadAsJsonObject()));
     }
 
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-prosecution-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.remove-prosecution-counsel")
+    public void removeProsecutionCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-prosecution-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.update-prosecution-counsel")
+    public void updateProsecutionCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.update-prosecution-counsel").apply(envelope.payloadAsJsonObject()));
     }
 
     @Handles("hearing.add-defence-counsel")
     public void addDefenceCounsel(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-defence-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.remove-defence-counsel")
+    public void removeDefenceCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-defence-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.update-defence-counsel")
+    public void updateDefenceCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.update-defence-counsel").apply(envelope.payloadAsJsonObject()));
     }
 
     @Handles("hearing.update-plea")
@@ -52,29 +72,23 @@ public class HearingCommandApi {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-verdict").apply(command.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.add-update-witness")
-    public void addWitness(final JsonEnvelope command) {
-        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.add-update-witness").apply(command.payloadAsJsonObject()));
-    }
-
     @Handles("hearing.generate-nows")
     public void generateNows(final JsonEnvelope command) {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.generate-nows").apply(command.payloadAsJsonObject()));
     }
-
-    @Handles("hearing.update-nows-material-status")
-    public void updateNowsMaterialStatus(final JsonEnvelope command) {
-        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.update-nows-material-status").apply(command.payloadAsJsonObject()));
-    }
-
 
     @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.share-results").apply(envelope.payloadAsJsonObject()));
     }
 
-    @Handles("hearing.delete-attendee")
-    public void deleteAttendee(final JsonEnvelope envelope) {
-        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.delete-attendee").apply(envelope.payloadAsJsonObject()));
+    @Handles("hearing.update-defendant-attendance-on-hearing-day")
+    public void updateDefendantAttendance(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.update-defendant-attendance-on-hearing-day").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.save-hearing-case-note")
+    public void saveHearingCaseNote(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.save-hearing-case-note").apply(envelope.payloadAsJsonObject()));
     }
 }

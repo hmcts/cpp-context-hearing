@@ -58,7 +58,7 @@ public class NowsGeneratedEventListenerTest {
 
         final ArgumentCaptor<UUID> materialIdArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
         final ArgumentCaptor<String> nowsMaterialStatusArgumentCaptor = ArgumentCaptor.forClass(String.class);
- 
+
         verify(this.nowsMaterialRepository).updateStatus(materialIdArgumentCaptor.capture(), nowsMaterialStatusArgumentCaptor.capture());
 
         assertThat(materialIdArgumentCaptor.getValue(), is(nowsMaterialStatusUpdated.getMaterialId()));
@@ -77,7 +77,7 @@ public class NowsGeneratedEventListenerTest {
 
         final ArgumentCaptor<UUID> materialIdArgumentCaptor = ArgumentCaptor.forClass(UUID.class);
         final ArgumentCaptor<String> nowsMaterialStatusArgumentCaptor = ArgumentCaptor.forClass(String.class);
- 
+
         verify(this.nowsMaterialRepository).updateStatus(materialIdArgumentCaptor.capture(), nowsMaterialStatusArgumentCaptor.capture());
 
         assertThat(materialIdArgumentCaptor.getValue(), is(nowsMaterialStatusUpdated.getMaterialId()));

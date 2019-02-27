@@ -1,11 +1,15 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 
+import uk.gov.justice.core.courts.CourtCentre;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+//TODO GPE-6313 remove
+@SuppressWarnings({"squid:S1135"})
 public class Hearing implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -18,17 +22,13 @@ public class Hearing implements Serializable {
 
     private List<ZonedDateTime> hearingDates;
 
-    private CourtCentre courtCentre;
+    private uk.gov.justice.core.courts.CourtCentre courtCentre;
 
     private List<Attendees> attendees;
 
     private List<Defendants> defendants;
 
     private List<SharedResultLines> sharedResultLines;
-
-    private List<Nows> nows;
-
-    private List<NowTypes> nowTypes;
 
     public static Hearing hearing() {
         return new Hearing();
@@ -74,7 +74,7 @@ public class Hearing implements Serializable {
         return this.courtCentre;
     }
 
-    public Hearing setCourtCentre(CourtCentre courtCentre) {
+    public Hearing setCourtCentre(uk.gov.justice.core.courts.CourtCentre courtCentre) {
         this.courtCentre = courtCentre;
         return this;
     }
@@ -103,24 +103,6 @@ public class Hearing implements Serializable {
 
     public Hearing setSharedResultLines(List<SharedResultLines> sharedResultLines) {
         this.sharedResultLines = new ArrayList<>(sharedResultLines);
-        return this;
-    }
-
-    public List<Nows> getNows() {
-        return this.nows;
-    }
-
-    public Hearing setNows(List<Nows> nows) {
-        this.nows = new ArrayList<>(nows);
-        return this;
-    }
-
-    public List<NowTypes> getNowTypes() {
-        return this.nowTypes;
-    }
-
-    public Hearing setNowTypes(List<NowTypes> nowTypes) {
-        this.nowTypes = new ArrayList<>(nowTypes);
         return this;
     }
 }

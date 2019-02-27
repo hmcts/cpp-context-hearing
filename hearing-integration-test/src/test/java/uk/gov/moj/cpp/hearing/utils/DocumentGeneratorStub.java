@@ -20,7 +20,7 @@ public class DocumentGeneratorStub {
     public static final String PATH = "/system-documentgenerator-api/rest/documentgenerator/render";
 
     public static void stubDocumentCreate(String documentText) {
-        stubFor(post(urlPathMatching(PATH ))
+        stubFor(post(urlPathMatching(PATH))
                 .withHeader(CONTENT_TYPE, equalTo("application/vnd.system.documentgenerator.render+json"))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withBody(documentText.getBytes())));
@@ -28,7 +28,7 @@ public class DocumentGeneratorStub {
 
     public static void verifyCreate(List<String> expectedValues) {
 
-        RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlPathMatching(PATH ));
+        RequestPatternBuilder requestPatternBuilder = postRequestedFor(urlPathMatching(PATH));
         expectedValues.forEach(
                 expectedValue -> requestPatternBuilder.withRequestBody(containing(expectedValue))
         );

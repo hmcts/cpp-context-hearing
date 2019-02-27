@@ -1,16 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.time.LocalDate;
-import java.util.UUID;
-
-import static java.util.Optional.ofNullable;
-
-import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Offence implements Serializable {
@@ -30,7 +27,8 @@ public class Offence implements Serializable {
     private String title;
     private String legislation;
 
-    public Offence(){}
+    public Offence() {
+    }
 
     @JsonCreator
     public Offence(@JsonProperty("id") final UUID id,
@@ -60,12 +58,26 @@ public class Offence implements Serializable {
         this.legislation = legislation;
     }
 
+    public static Offence offence() {
+        return new Offence();
+    }
+
     public UUID getId() {
         return id;
     }
 
+    public Offence setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
     public UUID getCaseId() {
         return caseId;
+    }
+
+    public Offence setCaseId(UUID caseId) {
+        this.caseId = caseId;
+        return this;
     }
 
     public String getOffenceCode() {
@@ -88,6 +100,11 @@ public class Offence implements Serializable {
 
     public String getSection() {
         return section;
+    }
+
+    public Offence setSection(String section) {
+        this.section = section;
+        return this;
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -114,6 +131,11 @@ public class Offence implements Serializable {
         return orderIndex;
     }
 
+    public Offence setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+        return this;
+    }
+
     public Integer getCount() {
         return count;
     }
@@ -137,41 +159,17 @@ public class Offence implements Serializable {
         return title;
     }
 
-    public String getLegislation() {
-        return legislation;
-    }
-
-    public Offence setId(UUID id) {
-        this.id = id;
-        return this;
-    }
-
-    public Offence setCaseId(UUID caseId) {
-        this.caseId = caseId;
-        return this;
-    }
-
-    public Offence setSection(String section) {
-        this.section = section;
-        return this;
-    }
-
-    public Offence setOrderIndex(Integer orderIndex) {
-        this.orderIndex = orderIndex;
-        return this;
-    }
-
     public Offence setTitle(String title) {
         this.title = title;
         return this;
     }
 
+    public String getLegislation() {
+        return legislation;
+    }
+
     public Offence setLegislation(String legislation) {
         this.legislation = legislation;
         return this;
-    }
-
-    public static Offence offence(){
-        return new Offence();
     }
 }

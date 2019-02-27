@@ -1,16 +1,17 @@
 package uk.gov.justice.ccr.notepad;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
-import org.kie.api.runtime.ExecutionResults;
-import org.mockito.Mock;
+import static org.mockito.BDDMockito.given;
+
 import uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;
 import uk.gov.moj.cpp.accesscontrol.test.utils.BaseDroolsAccessControlTest;
 
 import java.util.Map;
 
-import static org.mockito.BDDMockito.given;
+import com.google.common.collect.ImmutableMap;
+import org.junit.Test;
+import org.kie.api.runtime.ExecutionResults;
+import org.mockito.Mock;
 
 public class HearingNotepadParsingServiceAccessControlTest extends BaseDroolsAccessControlTest {
 
@@ -25,7 +26,7 @@ public class HearingNotepadParsingServiceAccessControlTest extends BaseDroolsAcc
     @Test
     public void shouldAllowAuthorisedUserToParseResultDefinition() {
         final Action action = createActionFor(HEARING_NOTEPAD_PARSE_RESULT_DEFINITION);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks"))
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks","Legal Advisers"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -44,7 +45,7 @@ public class HearingNotepadParsingServiceAccessControlTest extends BaseDroolsAcc
     @Test
     public void shouldAllowAuthorisedUserToParseResultPrompt() {
         final Action action = createActionFor(HEARING_NOTEPAD_PARSE_RESULT_PROMPT);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks"))
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks","Legal Advisers"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -63,7 +64,7 @@ public class HearingNotepadParsingServiceAccessControlTest extends BaseDroolsAcc
     @Test
     public void shouldAllowAuthorisedUserToReloadResultCache() {
         final Action action = createActionFor(HEARING_NOTEPAD_RELOAD_RESULT_CACHE);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks","Court Administrators"))
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Court Administrators","Legal Advisers"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);

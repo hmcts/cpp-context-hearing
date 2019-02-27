@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.external.domain.listing;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -12,8 +11,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class StatementOfOffence implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private final String title;
-    private final String legislation;
+    private String title;
+    private String legislation;
+
+    public StatementOfOffence() {
+    }
 
     @JsonCreator
     public StatementOfOffence(@JsonProperty(value = "title") final String title,
@@ -22,29 +24,25 @@ public class StatementOfOffence implements Serializable {
         this.legislation = legislation;
     }
 
+    public static StatementOfOffence statementOfOffence() {
+        return new StatementOfOffence();
+    }
+
     public String getTitle() {
         return title;
+    }
+
+    public StatementOfOffence setTitle(String title) {
+        this.title = title;
+        return this;
     }
 
     public String getLegislation() {
         return legislation;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        StatementOfOffence that = (StatementOfOffence) o;
-        return Objects.equals(title, that.title) &&
-                Objects.equals(legislation, that.legislation);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, legislation);
+    public StatementOfOffence setLegislation(String legislation) {
+        this.legislation = legislation;
+        return this;
     }
 }

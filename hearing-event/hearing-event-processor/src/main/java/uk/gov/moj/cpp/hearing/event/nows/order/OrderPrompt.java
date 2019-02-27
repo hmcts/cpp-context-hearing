@@ -8,14 +8,6 @@ public class OrderPrompt implements Serializable {
     private String label;
     private String value;
 
-    public String getLabel() {
-        return label;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
     public OrderPrompt(String label, String value) {
         this.label = label;
         this.value = value;
@@ -25,6 +17,13 @@ public class OrderPrompt implements Serializable {
         return new Builder();
     }
 
+    public String getLabel() {
+        return label;
+    }
+
+    public String getValue() {
+        return value;
+    }
 
     public static final class Builder {
         private String label;

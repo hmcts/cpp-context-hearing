@@ -11,9 +11,9 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.events.initiated.json
             example: !include json/hearing.events.initiated.json
 
-        application/vnd.hearing.command.lookup-plea-on-offence-for-hearing+json:
-            schema: !include json/schema/hearing.command.lookup-plea-on-offence-for-hearing.json
-            example: !include json/hearing.command.lookup-plea-on-offence-for-hearing.json
+        application/vnd.hearing.command.register-hearing-against-offence+json:
+            schema: !include json/schema/hearing.command.register-hearing-against-offence.json
+            example: !include json/hearing.command.register-hearing-against-offence.json
 
         application/vnd.hearing.command.register-hearing-against-defendant+json:
             example: !include json/hearing.command.register-hearing-against-defendant.json
@@ -23,10 +23,6 @@ baseUri: message://event/processor/message/hearing
             example: !include json/hearing.command.register-hearing-against-case.json
             schema: !include json/schema/hearing.command.register-hearing-against-case.json
 
-        application/vnd.hearing.command.lookup-witnesses-on-defendant-for-hearing+json:
-             example: !include json/hearing.command.lookup-witnesses-on-defendant-for-hearing.json
-             schema: !include json/schema/hearing.command.lookup-witnesses-on-defendant-for-hearing.json
-
 # Inherit Plea after Initiate Hearing
         application/vnd.hearing.events.found-plea-for-hearing-to-inherit+json:
             schema: !include json/schema/hearing.events.found-plea-for-hearing-to-inherit.json
@@ -35,6 +31,16 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.command.update-hearing-with-inherited-plea+json:
             schema: !include json/schema/hearing.command.update-hearing-with-inherited-plea.json
             example: !include json/hearing.command.update-hearing-with-inherited-plea.json
+
+# Inherit verdict after Initiate Hearing
+        application/vnd.hearing.events.found-verdict-for-hearing-to-inherit+json:
+            schema: !include json/schema/hearing.events.found-verdict-for-hearing-to-inherit.json
+            example: !include json/hearing.events.found-verdict-for-hearing-to-inherit.json
+
+        application/vnd.hearing.command.update-hearing-with-inherited-verdict+json:
+            schema: !include json/schema/hearing.command.update-hearing-with-inherited-verdict.json
+            example: !include json/hearing.command.update-hearing-with-inherited-verdict.json
+
 
 # Sending Sheet Complete
         application/vnd.hearing.record-sending-sheet-complete+json:
@@ -78,10 +84,15 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.hearing-offence-plea-updated.json
             example: !include json/hearing.hearing-offence-plea-updated.json
 
-# Witness-added
-        application/vnd.hearing.events.witness-added+json:
-            schema: !include json/schema/hearing.events.witness-added.json
-            example: !include json/hearing.events.witness-added.json
+#enrich Plea
+        application/vnd.hearing.events.enrich-update-plea-with-associated-hearings+json:
+            schema: !include json/schema/hearing.events.enrich-update-plea-with-associated-hearings.json
+            example: !include json/hearing.events.enrich-update-plea-with-associated-hearings.json
+
+#enrich Verdict
+        application/vnd.hearing.events.enrich-update-verdict-with-associated-hearings+json:
+            schema: !include json/schema/hearing.events.enrich-update-verdict-with-associated-hearings.json
+            example: !include json/hearing.events.enrich-update-verdict-with-associated-hearings.json
 
 # Conviction Date
         application/vnd.hearing.conviction-date-added+json:
@@ -103,9 +114,9 @@ baseUri: message://event/processor/message/hearing
             example: !include json/hearing.draft-result-saved.json
 
 # Update Verdict
-        application/vnd.hearing.offence-verdict-updated+json:
-            schema: !include json/schema/hearing.offence-verdict-updated.json
-            example: !include json/hearing.offence-verdict-updated.json
+        application/vnd.hearing.hearing-offence-verdict-updated+json:
+            schema: !include json/schema/hearing.hearing-offence-verdict-updated.json
+            example: !include json/hearing.hearing-offence-verdict-updated.json
 
 # Case Defendant Details Change
         application/vnd.hearing.update-case-defendant-details-enriched-with-hearing-ids+json:
@@ -149,9 +160,18 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.events.nows-material-status-updated+json:
             schema: !include json/schema/hearing.events.nows-material-status-updated.json
             example: !include json/hearing.events.nows-material-status-updated.json
+
         application/vnd.hearing.events.nows-requested+json:
             schema: !include json/schema/hearing.events.nows-requested.json
             example: !include json/hearing.events.nows-requested.json
+
+        application/vnd.hearing.command.pending-nows-requested+json:
+            schema: !include json/schema/hearing.command.pending-nows-requested.json
+            example: !include json/hearing.command.pending-nows-requested.json
+
+        application/vnd.hearing.events.pending-nows-requested+json:
+             schema: !include json/schema/hearing.events.pending-nows-requested.json
+             example: !include json/hearing.events.pending-nows-requested.json
 
 # Attendees
         application/vnd.hearing.events.attendee-deleted+json:
@@ -168,6 +188,10 @@ baseUri: message://event/processor/message/hearing
                 schema: !include json/schema/hearing.event.hearing-adjourned.json
                 example: !include json/hearing.event.hearing-adjourned.json
 
+# Update Defendant Attendance
+        application/vnd.hearing.defendant-attendance-updated+json:
+            schema: !include json/schema/hearing.defendant-attendance-updated.json
+            example: !include json/hearing.defendant-attendance-updated.json
 
 /public.event:
   post:
@@ -182,22 +206,17 @@ baseUri: message://event/processor/message/hearing
                 schema: !include json/schema/public.progression.case-defendant-changed.json
                 example: !include json/public.progression.case-defendant-changed.json
 
-# Case Defendant Offences Changed
+# Offences For Defendant Updated
         application/vnd.public.progression.defendant-offences-changed+json:
                 schema: !include json/schema/public.progression.defendant-offences-changed.json
                 example: !include json/public.progression.defendant-offences-changed.json
-# Material upload
-        application/vnd.material.material-added+json:
-                schema: !include json/schema/material.material-added.json
-                example: !include json/material.material-added.json
-        application/vnd.public.hearing.events.nows-material-status-updated+json:
-                schema: !include json/schema/public.hearing.events.nows-material-status-updated.json
-                example: !include json/public.hearing.events.nows-material-status-updated.json
-        application/vnd.public.resultinghmps.event.nows-material-status-updated+json:
-                schema: !include json/schema/public.resultinghmps.event.nows-material-status-updated.json
-                example: !include json/public.resultinghmps.event.nows-material-status-updated.json
 
 # Listing Hearing Detail Changed
         application/vnd.public.hearing-detail-changed+json:
                 schema: !include json/schema/public.hearing-detail-changed.json
                 example: !include json/public.hearing-detail-changed.json
+
+# Staging Enforcement
+        application/vnd.public.stagingenforcement.enforce-financial-imposition-acknowledgement+json:
+                schema: !include json/schema/public.stagingenforcement.enforce-financial-imposition-acknowledgement.json
+                example: !include json/public.stagingenforcement.enforce-financial-imposition-acknowledgement.json

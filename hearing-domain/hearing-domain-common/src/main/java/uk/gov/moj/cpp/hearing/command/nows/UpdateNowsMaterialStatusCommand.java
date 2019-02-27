@@ -11,10 +11,14 @@ public class UpdateNowsMaterialStatusCommand {
     private final String status;
 
     @JsonCreator
-    protected UpdateNowsMaterialStatusCommand(@JsonProperty(value = "materialId", required = true) final UUID materialId, 
-            @JsonProperty(value = "status", required = true) final String status) {
+    protected UpdateNowsMaterialStatusCommand(@JsonProperty(value = "materialId", required = true) final UUID materialId,
+                                              @JsonProperty(value = "status", required = true) final String status) {
         this.materialId = materialId;
         this.status = status;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public UUID getMaterialId() {
@@ -23,10 +27,6 @@ public class UpdateNowsMaterialStatusCommand {
 
     public String getStatus() {
         return status;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {

@@ -10,6 +10,9 @@ public class OrderResult implements Serializable {
     private String label;
     private List<OrderPrompt> prompts = new ArrayList<OrderPrompt>();
 
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public String getLabel() {
         return label;
@@ -27,17 +30,12 @@ public class OrderResult implements Serializable {
         this.prompts = prompts;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
     public static final class Builder {
         private String label;
         private List<OrderPrompt> prompts = new ArrayList<OrderPrompt>();
 
         private Builder() {
         }
-
 
 
         public Builder withLabel(String label) {

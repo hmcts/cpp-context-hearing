@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 import org.junit.Test;
 
 public class ResultPromptsProcessorTest {
-    private ResultPromptsProcessor resultPromptsProcessor = new ResultPromptsProcessor(new StringToResultPromptConverter(new HashMap<> ()));
+    private ResultPromptsProcessor resultPromptsProcessor = new ResultPromptsProcessor(new StringToResultPromptConverter(new HashMap<>()));
 
     @Test
     public void shouldGroupResultPromptsByResultDefinition() {
@@ -60,14 +60,14 @@ public class ResultPromptsProcessorTest {
     }
 
     private void addRowForResultPromptsByResultDefinition(Map<String, List<ResultPrompt>> resultPromptsByResultDefinition, String key, int range) {
-        List<ResultPrompt> resultPrompts = IntStream.range(1,range+1).mapToObj(i -> createResultPrompt(key,i)).collect(toList());
+        List<ResultPrompt> resultPrompts = IntStream.range(1, range + 1).mapToObj(i -> createResultPrompt(key, i)).collect(toList());
         resultPromptsByResultDefinition.put(key, resultPrompts);
     }
 
     private ResultPrompt createResultPrompt(String resultDefinitionLabel, int order) {
         ResultPrompt resultPrompt = new ResultPrompt();
         resultPrompt.setResultDefinitionLabel(resultDefinitionLabel);
-        resultPrompt.setLabel(""+order);
+        resultPrompt.setLabel("" + order);
         return resultPrompt;
     }
 }

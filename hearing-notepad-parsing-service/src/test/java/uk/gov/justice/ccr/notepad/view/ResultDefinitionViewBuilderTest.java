@@ -46,18 +46,13 @@ public class ResultDefinitionViewBuilderTest {
     @Spy
     @InjectMocks
     ResultCache resultCache = new ResultCache();
-
-    @Spy
-    private ResultLoader resultLoader = new FileResultLoader();
-
     Processor processor;
-
     @InjectMocks
     ResultDefinitionViewBuilder testObj;
-
     @InjectMocks
     ProcessorTest processorTest = new ProcessorTest();
-
+    @Spy
+    private ResultLoader resultLoader = new FileResultLoader();
     @Mock
     private CacheFactory cacheFactory;
 
@@ -254,8 +249,8 @@ public class ResultDefinitionViewBuilderTest {
                 , containsInAnyOrder(Arrays.asList("req", UNRESOLVED, 11).toArray()));
         assertThat(Arrays.asList(p4.getValue(), p4.getState(), p4.getType())
                 , containsInAnyOrder(Arrays.asList(78, UNRESOLVED, INT).toArray()));
-        assertThat(Arrays.asList( p5.getState(), p5.getValue(), p5.getType())
-                , containsInAnyOrder(Arrays.asList( UNRESOLVED,"2,000", CURR).toArray()));
+        assertThat(Arrays.asList(p5.getState(), p5.getValue(), p5.getType())
+                , containsInAnyOrder(Arrays.asList(UNRESOLVED, "2,000", CURR).toArray()));
         assertThat(Arrays.asList(p6.getState(), p6.getType())
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, DURATION).toArray()));
     }
@@ -416,11 +411,11 @@ public class ResultDefinitionViewBuilderTest {
 
         assertThat(Arrays.asList(p1.getValue(), p2.getState(), p3.getType())
                 , containsInAnyOrder(Arrays.asList("aaaAAaaaa", UNRESOLVED, TXT).toArray()));
-        assertThat(Arrays.asList( p2.getState(), p2.getValue(), p2.getType())
-                , containsInAnyOrder(Arrays.asList( UNRESOLVED,"34", TXT).toArray()));
-        assertThat(Arrays.asList(p3.getState(), p3.getType(),p3.getValue())
+        assertThat(Arrays.asList(p2.getState(), p2.getValue(), p2.getType())
+                , containsInAnyOrder(Arrays.asList(UNRESOLVED, "34", TXT).toArray()));
+        assertThat(Arrays.asList(p3.getState(), p3.getType(), p3.getValue())
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "£23.00").toArray()));
-        assertThat(Arrays.asList(p4.getState(), p4.getType(),p4.getValue())
+        assertThat(Arrays.asList(p4.getState(), p4.getType(), p4.getValue())
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "conc").toArray()));
     }
 }

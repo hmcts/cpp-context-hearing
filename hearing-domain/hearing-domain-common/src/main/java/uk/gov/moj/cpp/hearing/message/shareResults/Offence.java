@@ -14,37 +14,12 @@ public class Offence {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    public static Offence offence() {
+        return new Offence();
+    }
 
     public UUID getId() {
         return id;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public LocalDate getConvictionDate() {
-        return convictionDate;
-    }
-
-    public Plea getPlea() {
-        return plea;
-    }
-
-    public Verdict getVerdict() {
-        return verdict;
-    }
-
-    public String getWording() {
-        return wording;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
     }
 
     public Offence setId(UUID id) {
@@ -52,9 +27,17 @@ public class Offence {
         return this;
     }
 
+    public String getCode() {
+        return code;
+    }
+
     public Offence setCode(String code) {
         this.code = code;
         return this;
+    }
+
+    public LocalDate getConvictionDate() {
+        return convictionDate;
     }
 
     public Offence setConvictionDate(LocalDate convictionDate) {
@@ -62,9 +45,17 @@ public class Offence {
         return this;
     }
 
+    public Plea getPlea() {
+        return plea;
+    }
+
     public Offence setPlea(Plea plea) {
         this.plea = plea;
         return this;
+    }
+
+    public Verdict getVerdict() {
+        return verdict;
     }
 
     public Offence setVerdict(Verdict verdict) {
@@ -72,9 +63,17 @@ public class Offence {
         return this;
     }
 
+    public String getWording() {
+        return wording;
+    }
+
     public Offence setWording(String wording) {
         this.wording = wording;
         return this;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
     public Offence setStartDate(LocalDate startDate) {
@@ -82,12 +81,12 @@ public class Offence {
         return this;
     }
 
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
     public Offence setEndDate(LocalDate endDate) {
         this.endDate = endDate;
         return this;
-    }
-
-    public static Offence offence() {
-        return new Offence();
     }
 }

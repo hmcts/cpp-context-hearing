@@ -39,7 +39,7 @@ public class CurrencyMatcherTest {
     }
 
     private List<String> invalidCurrencyProvider() {
-        return Arrays.asList("222£", "bvbvb£7676", "£", "£d", "£444r", "$33333", "£-90","£ ");
+        return Arrays.asList("222£", "bvbvb£7676", "£", "£d", "£444r", "$33333", "£-90", "£ ");
     }
 
 }

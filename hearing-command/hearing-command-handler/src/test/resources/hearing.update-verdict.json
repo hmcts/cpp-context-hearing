@@ -10,7 +10,7 @@
           "id": "RANDOM_OFFENCE_ID",
           "verdict": {
             "id": "RANDOM_VERDICT_ID",
-            "verdictDate":"2017-02-02",
+            "verdictDate": "2017-02-02",
             "value": {
               "id": "0baecac5-222b-402d-9047-84803679edab",
               "category": "GUILTY",

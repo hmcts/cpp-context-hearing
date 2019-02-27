@@ -20,53 +20,12 @@ public class Person {
 
     private String email;
 
+    public static Person person() {
+        return new Person();
+    }
 
     public UUID getId() {
         return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
-
-    public String getNationality() {
-        return nationality;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public String getHomeTelephone() {
-        return homeTelephone;
-    }
-
-    public String getWorkTelephone() {
-        return workTelephone;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-
-    public String getFax() {
-        return fax;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public Person setId(UUID id) {
@@ -74,9 +33,17 @@ public class Person {
         return this;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
     public Person setFirstName(String firstName) {
         this.firstName = firstName;
         return this;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public Person setLastName(String lastName) {
@@ -84,9 +51,17 @@ public class Person {
         return this;
     }
 
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
+
     public Person setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
         return this;
+    }
+
+    public Address getAddress() {
+        return address;
     }
 
     public Person setAddress(Address address) {
@@ -94,9 +69,17 @@ public class Person {
         return this;
     }
 
+    public String getNationality() {
+        return nationality;
+    }
+
     public Person setNationality(String nationality) {
         this.nationality = nationality;
         return this;
+    }
+
+    public String getGender() {
+        return gender;
     }
 
     public Person setGender(String gender) {
@@ -104,9 +87,17 @@ public class Person {
         return this;
     }
 
+    public String getHomeTelephone() {
+        return homeTelephone;
+    }
+
     public Person setHomeTelephone(String homeTelephone) {
         this.homeTelephone = homeTelephone;
         return this;
+    }
+
+    public String getWorkTelephone() {
+        return workTelephone;
     }
 
     public Person setWorkTelephone(String workTelephone) {
@@ -114,9 +105,17 @@ public class Person {
         return this;
     }
 
+    public String getMobile() {
+        return mobile;
+    }
+
     public Person setMobile(String mobile) {
         this.mobile = mobile;
         return this;
+    }
+
+    public String getFax() {
+        return fax;
     }
 
     public Person setFax(String fax) {
@@ -124,12 +123,12 @@ public class Person {
         return this;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public Person setEmail(String email) {
         this.email = email;
         return this;
-    }
-
-    public static Person person() {
-        return new Person();
     }
 }

@@ -2,18 +2,18 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_LISTENER)
 public class NowsGeneratedEventListener {
@@ -25,7 +25,7 @@ public class NowsGeneratedEventListener {
 
     @Inject
     public NowsGeneratedEventListener(final NowsMaterialRepository nowsMaterialRepository,
-            final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
+                                      final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
         this.nowsMaterialRepository = nowsMaterialRepository;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
     }

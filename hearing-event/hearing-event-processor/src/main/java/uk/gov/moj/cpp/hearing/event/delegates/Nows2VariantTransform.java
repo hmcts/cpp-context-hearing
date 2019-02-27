@@ -1,14 +1,12 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.stream.Collectors.toList;
-
+import uk.gov.justice.core.courts.Now;
+import uk.gov.justice.core.courts.NowVariant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Material;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.Nows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.UserGroups;
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 
 import java.time.ZonedDateTime;
@@ -17,27 +15,27 @@ import java.util.UUID;
 
 public class Nows2VariantTransform {
 
-    public List<Variant> toVariants(final UUID hearingId, final List<Nows> nows, final ZonedDateTime sharedTime) {
+    public List<Variant> toVariants(final UUID hearingId, final List<Now> nows, final ZonedDateTime sharedTime) {
         return nows.stream()
-                .flatMap(now -> now.getMaterials().stream()
+                .flatMap(now -> now.getRequestedMaterials().stream()
                         .map(m -> toVariant(hearingId, now, m, sharedTime))
                 )
                 .collect(toList());
     }
 
-    public Variant toVariant(final UUID hearingId, final Nows nows, final Material material, final ZonedDateTime sharedTime) {
+    public Variant toVariant(final UUID hearingId, final Now now, final NowVariant material, final ZonedDateTime sharedTime) {
 
         return Variant.variant()
                 .setKey(VariantKey.variantKey()
-                        .setNowsTypeId(nows.getNowsTypeId())
-                        .setDefendantId(nows.getDefendantId())
+                        .setNowsTypeId(now.getNowsTypeId())
+                        .setDefendantId(now.getDefendantId())
                         .setHearingId(hearingId)
-                        .setUsergroups(material.getUserGroups().stream().map(UserGroups::getGroup).collect(toList()))
+                        .setUsergroups(material.getKey().getUsergroups().stream().collect(toList()))
                 )
                 .setValue(VariantValue.variantValue()
-                        .setMaterialId(material.getId())
+                        .setMaterialId(material.getMaterialId())
                         .setStatus(VariantStatus.BUILDING)
-                        .setResultLines(material.getNowResult().stream()
+                        .setResultLines(material.getNowResults()==null?null: material.getNowResults().stream()
                                 .map(nr -> ResultLineReference.resultLineReference()
                                         .setLastSharedTime(sharedTime)
                                         .setResultLineId(nr.getSharedResultId())
@@ -45,6 +43,6 @@ public class Nows2VariantTransform {
                                 .collect(toList())
                         )
                 )
-                .setReferenceDate(nows.getReferenceDate());
+                .setReferenceDate(now.getReferenceDate());
     }
 }

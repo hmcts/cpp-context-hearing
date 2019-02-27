@@ -15,12 +15,12 @@ public class NowsVariantsSavedEvent {
 
     private List<Variant> variants;
 
-    public UUID getHearingId() {
-        return this.hearingId;
+    public static NowsVariantsSavedEvent nowsVariantsSavedEvent() {
+        return new NowsVariantsSavedEvent();
     }
 
-    public List<Variant> getVariants() {
-        return this.variants;
+    public UUID getHearingId() {
+        return this.hearingId;
     }
 
     public NowsVariantsSavedEvent setHearingId(UUID hearingId) {
@@ -28,12 +28,12 @@ public class NowsVariantsSavedEvent {
         return this;
     }
 
+    public List<Variant> getVariants() {
+        return this.variants;
+    }
+
     public NowsVariantsSavedEvent setVariants(List<Variant> variants) {
         this.variants = new ArrayList<>(variants);
         return this;
-    }
-
-    public static NowsVariantsSavedEvent nowsVariantsSavedEvent() {
-        return new NowsVariantsSavedEvent();
     }
 }

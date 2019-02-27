@@ -1,12 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import uk.gov.justice.domain.annotation.Event;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.justice.domain.annotation.Event;
 
 @Event("hearing.hearing-event-ignored")
 public class HearingEventIgnored implements Serializable {
@@ -36,10 +37,6 @@ public class HearingEventIgnored implements Serializable {
         this.eventTime = eventTime;
         this.reason = reason;
         this.alterable = alterable;
-    }
-
-    public HearingEventIgnored() {
-        // default constructor for Jackson serialisation
     }
 
     public HearingEventIgnored(final UUID hearingId, final String reason) {

@@ -23,9 +23,9 @@ public class HearingEventDefinitionAggregate implements Aggregate {
         );
     }
 
-    public Stream<Object> createEventDefinitions(final UUID hearingEventDefinitionId, final List<HearingEventDefinition> eventDefinitions) {
+    public Stream<Object> createEventDefinitions(final UUID id, final List<HearingEventDefinition> eventDefinitions) {
         return apply(Stream.of(
-                new HearingEventDefinitionsDeleted(hearingEventDefinitionId),
-                new HearingEventDefinitionsCreated(hearingEventDefinitionId, eventDefinitions)));
+                new HearingEventDefinitionsDeleted(id),
+                new HearingEventDefinitionsCreated(id, eventDefinitions)));
     }
 }

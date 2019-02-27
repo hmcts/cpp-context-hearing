@@ -25,6 +25,17 @@ public final class Plea implements Serializable {
         this.value = value;
     }
 
+    public static Plea.Builder builder() {
+        return new Plea.Builder();
+    }
+
+    public static Plea.Builder from(Plea plea) {
+        return builder()
+                .withId(plea.getId())
+                .withValue(plea.getValue())
+                .withPleaDate(plea.getPleaDate());
+    }
+
     public UUID getId() {
         return id;
     }
@@ -92,16 +103,5 @@ public final class Plea implements Serializable {
         public Plea build() {
             return new Plea(this.id, this.value, this.pleaDate);
         }
-    }
-
-    public static Plea.Builder builder() {
-        return new Plea.Builder();
-    }
-
-    public static Plea.Builder from(Plea plea) {
-        return builder()
-                .withId(plea.getId())
-                .withValue(plea.getValue())
-                .withPleaDate(plea.getPleaDate());
     }
 }

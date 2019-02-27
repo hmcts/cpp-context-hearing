@@ -1,34 +1,34 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.common.reflection.ReflectionUtils.setField;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
+import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpsert;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.AttendeeHearingDate;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceAdvocate;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpdated;
+import uk.gov.moj.cpp.hearing.mapping.HearingDefenceCounselJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDate;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.repository.AttendeeHearingDateRespository;
+import uk.gov.moj.cpp.hearing.repository.HearingDefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,9 +45,6 @@ public class DefenceCounselAddedEventListenerTest {
     @Mock
     private HearingRepository hearingRepository;
 
-    @Mock
-    private AttendeeHearingDateRespository attendeeHearingDateRespository;
-
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -55,13 +52,16 @@ public class DefenceCounselAddedEventListenerTest {
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @InjectMocks
-    private DefenceCounselAddedEventListener defenceCounselAddedEventListener;
+    private DefenceCounselEventListener defenceCounselAddedEventListener;
 
     @Captor
-    private ArgumentCaptor<Hearing> ahearingArgumentCaptor;
+    private ArgumentCaptor<HearingDefenceCounsel> ahearingArgumentCaptor;
 
-    @Captor
-    private ArgumentCaptor<AttendeeHearingDate> attendeeHearingDateArgumentCaptor;
+    @Mock
+    HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper ;
+
+    @Mock
+    HearingDefenceCounselRepository hearingDefenceCounselRepository ;
 
     @Before
     public void setUp() {
@@ -72,62 +72,88 @@ public class DefenceCounselAddedEventListenerTest {
     @Test
     public void shouldStoreDefenceCounselOnAddEvent() {
 
-        DefenceCounselUpsert defenceCounselUpsert = DefenceCounselUpsert.builder()
-                .withAttendeeId(randomUUID())
-                .withHearingId(randomUUID())
-                .withFirstName("David")
-                .withLastName("Davidson")
-                .withTitle("Colonel")
-                .withStatus("QC")
-                .withDefendantIds(asList(randomUUID(), randomUUID()))
-                .build();
+        //Given
+        DefenceCounsel defenceCounsel = new DefenceCounsel(
+                Arrays.asList(LocalDate.now()),
+                Arrays.asList(UUID.randomUUID()),
+                STRING.next(),
+                randomUUID(),
+                STRING.next(),
+                STRING.next(),
+                STRING.next(),
+                STRING.next()
+        );
 
-        final Hearing hearing = Hearing.builder()
-                .withId(defenceCounselUpsert.getHearingId())
-                .withDefendants(asList(
-                        Defendant.builder().withId(new HearingSnapshotKey(defenceCounselUpsert.getDefendantIds().get(0), defenceCounselUpsert.getHearingId())).build(),
-                        Defendant.builder().withId(new HearingSnapshotKey(defenceCounselUpsert.getDefendantIds().get(1), defenceCounselUpsert.getHearingId())).build()))
-                .build();
+        final DefenceCounselAdded defenceCounselAdded = new DefenceCounselAdded(defenceCounsel, randomUUID());
 
-        hearing.getHearingDays().add(HearingDate.builder()
-                .withId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()))
-                .withDate(LocalDate.now())
-                .withDateTime(ZonedDateTime.now())
-                .withHearing(hearing)
-                .build());
+        final Hearing hearing = new Hearing();
+        hearing.setId(defenceCounselAdded.getHearingId());
 
-        when(this.hearingRepository.findBy(defenceCounselUpsert.getHearingId())).thenReturn(hearing);
+        HearingDefenceCounsel hearingDefenceCounsel = new HearingDefenceCounsel();
+        hearingDefenceCounsel.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
+        hearingDefenceCounsel.setHearing(hearing);
+        hearingDefenceCounsel.setPayload(getEntityPayload(defenceCounsel));
 
-        this.defenceCounselAddedEventListener.defenseCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.newdefence-counsel-added"),
-                objectToJsonObjectConverter.convert(defenceCounselUpsert)));
+        when(this.hearingRepository.findBy(defenceCounselAdded.getHearingId())).thenReturn(hearing);
+        when(this.hearingDefenceCounselJPAMapper.toJPA(hearing,defenceCounsel)).thenReturn(hearingDefenceCounsel);
 
-        verify(this.hearingRepository).saveAndFlush(ahearingArgumentCaptor.capture());
-        
-        final Hearing savedHearing = ahearingArgumentCaptor.getValue();
-        assertThat(savedHearing, is(hearing));
-        assertThat(savedHearing.getAttendees().size(), is(1));
-        assertThat(savedHearing.getAttendees().get(0), instanceOf(DefenceAdvocate.class));
+        //When
+        this.defenceCounselAddedEventListener.defenceCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-added"),
+                objectToJsonObjectConverter.convert(defenceCounselAdded)));
 
-        final DefenceAdvocate defenceAdvocate = (DefenceAdvocate) hearing.getAttendees().get(0);
+        //Then
+        verify(this.hearingDefenceCounselRepository).saveAndFlush(ahearingArgumentCaptor.capture());
 
-        assertThat(defenceAdvocate.getId().getId(), is(defenceCounselUpsert.getAttendeeId()));
-        assertThat(defenceAdvocate.getId().getHearingId(), is(defenceCounselUpsert.getHearingId()));
-        assertThat(defenceAdvocate.getFirstName(), is(defenceCounselUpsert.getFirstName()));
-        assertThat(defenceAdvocate.getLastName(), is(defenceCounselUpsert.getLastName()));
-        assertThat(defenceAdvocate.getTitle(), is(defenceCounselUpsert.getTitle()));
-        assertThat(defenceAdvocate.getStatus(), is(defenceCounselUpsert.getStatus()));
+        final HearingDefenceCounsel savedHearing = ahearingArgumentCaptor.getValue();
+        assertThat(savedHearing, is(hearingDefenceCounsel));
 
-        assertThat(hearing.getDefendants().get(0).getDefenceAdvocates(), hasItems(defenceAdvocate));
-        assertThat(hearing.getDefendants().get(1).getDefenceAdvocates(), hasItems(defenceAdvocate));
-
-        verify(this.attendeeHearingDateRespository).saveAndFlush(attendeeHearingDateArgumentCaptor.capture());
-
-        final AttendeeHearingDate attendeeHearingDate = attendeeHearingDateArgumentCaptor.getValue();
-
-        assertThat(attendeeHearingDate.getId().getId(), instanceOf(UUID.class));
-        assertThat(attendeeHearingDate.getId().getHearingId(), is(defenceCounselUpsert.getHearingId()));
-        assertThat(attendeeHearingDate.getAttendeeId(), is(defenceCounselUpsert.getAttendeeId()));
-        assertThat(attendeeHearingDate.getHearingDateId(), is(savedHearing.getHearingDays().get(0).getId().getId()));
     }
 
+    @Test
+    public void shouldUpdateDefenceCounselOnUpdateEvent() {
+
+        //Given
+        DefenceCounsel defenceCounsel = new DefenceCounsel(
+                Arrays.asList(LocalDate.now()),
+                Arrays.asList(UUID.randomUUID()),
+                STRING.next(),
+                randomUUID(),
+                STRING.next(),
+                STRING.next(),
+                STRING.next(),
+                STRING.next()
+        );
+
+        final DefenceCounselUpdated defenceCounselUpdated = new DefenceCounselUpdated(defenceCounsel, randomUUID());
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(defenceCounselUpdated.getHearingId());
+
+        HearingDefenceCounsel hearingDefenceCounsel = new HearingDefenceCounsel();
+        hearingDefenceCounsel.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
+        hearingDefenceCounsel.setHearing(hearing);
+        hearingDefenceCounsel.setPayload(getEntityPayload(defenceCounsel));
+
+        when(this.hearingRepository.findBy(defenceCounselUpdated.getHearingId())).thenReturn(hearing);
+        when(this.hearingDefenceCounselJPAMapper.toJPA(hearing,defenceCounsel)).thenReturn(hearingDefenceCounsel);
+
+        //When
+        this.defenceCounselAddedEventListener.defenceCounselUpdated(envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-updated"),
+                objectToJsonObjectConverter.convert(defenceCounselUpdated)));
+
+        //Then
+        verify(this.hearingDefenceCounselRepository).saveAndFlush(ahearingArgumentCaptor.capture());
+
+        final HearingDefenceCounsel savedHearing = ahearingArgumentCaptor.getValue();
+        assertThat(savedHearing, is(hearingDefenceCounsel));
+
+    }
+
+    private JsonNode getEntityPayload(DefenceCounsel defenceCounsel){
+
+        final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
+
+       return mapper.valueToTree(defenceCounsel);
+
+    }
 }

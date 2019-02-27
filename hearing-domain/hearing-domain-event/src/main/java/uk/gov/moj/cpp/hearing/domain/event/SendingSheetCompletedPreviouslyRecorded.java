@@ -4,10 +4,10 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
 
 @Event("hearing.sending-sheet-previously-recorded")
 public class SendingSheetCompletedPreviouslyRecorded implements Serializable {

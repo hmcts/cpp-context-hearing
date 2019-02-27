@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
+//TODO GPE-6313 remove
+@SuppressWarnings({"squid:S1135"})
 public class Offences implements Serializable {
 
     private static final long serialVersionUID = 1L;

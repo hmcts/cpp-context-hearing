@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -18,9 +19,9 @@ public class Offence {
 
     @EmbeddedId
     private HearingSnapshotKey id;
-    
-    @Column(name = "origin_hearing_id")
-    private UUID originHearingId;
+
+    @Column(name = "offence_definition_id")
+    private UUID offenceDefinitionId;
 
     @ManyToOne
     @JoinColumns({
@@ -28,20 +29,29 @@ public class Offence {
             @JoinColumn(name = "hearing_id", insertable = false, updatable = false, referencedColumnName = "hearing_id")})
     private Defendant defendant;
 
-    @Column(name = "code")
-    private String code;
+    @Column(name = "defendant_id")
+    private UUID defendantId;
 
-    @Column(name = "count")
-    private Integer count;
+    @Column(name = "code")
+    private String offenceCode;
+
+    @Column(name = "title")
+    private String offenceTitle;
+
+    @Column(name = "title_welsh")
+    private String offenceTitleWelsh;
+
+    @Column(name = "legislation")
+    private String offenceLegislation;
+
+    @Column(name = "legislation_welsh")
+    private String offenceLegislationWelsh;
 
     @Column(name = "wording")
     private String wording;
 
-    @Column(name = "title")
-    private String title;
-
-    @Column(name = "legislation")
-    private String legislation;
+    @Column(name = "wording_welsh")
+    private String wordingWelsh;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -49,421 +59,229 @@ public class Offence {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "arrest_date")
+    private LocalDate arrestDate;
+
+    @Column(name = "charge_date")
+    private LocalDate chargeDate;
+
+    @Column(name = "order_index")
+    private Integer orderIndex;
+
+    @Column(name = "count")
+    private Integer count;
+
     @Column(name = "conviction_date")
     private LocalDate convictionDate;
 
-    @Column(name = "plea_date")
-    private LocalDate pleaDate;
+    @Embedded
+    private NotifiedPlea notifiedPlea;
 
-    @Column(name = "plea_value")
-    private String pleaValue;
+    @Embedded
+    private IndicatedPlea indicatedPlea;
 
-    @Column(name = "verdict_code")
-    private String verdictCode;
+    @Embedded
+    private Plea plea;
 
-    @Column(name = "verdict_category")
-    private String verdictCategory;
-    
-    @Column(name = "verdict_category_type")
-    private String verdictCategoryType;
-    
-    @Column(name = "verdict_type_id")
-    private UUID verdictTypeId;    
+    @Embedded
+    private OffenceFacts offenceFacts;
 
-    @Column(name = "lesser_offence")
-    private String lesserOffence;
-    
-    @Column(name = "verdict_description")
-    private String verdictDescription;
+    @Embedded
+    private Verdict verdict;
 
-    @Column(name = "verdict_date")
-    private LocalDate verdictDate;
-
-    @Column(name = "number_of_jurors")
-    private Integer numberOfJurors;
-
-    @Column(name = "number_of_split_jurors")
-    private Integer numberOfSplitJurors;
-
-    @Column(name = "unanimous")
-    private Boolean unanimous;
-
-    //bi-directional many-to-one association to ACase
-    @ManyToOne
-    @JoinColumn(name = "case_id")
-    private LegalCase legalCase;
-
-    @Column(name = "defendant_id")
-    private UUID defendantId;
-
-    public Offence() {
-
-    }
-
-    private Offence(final Builder builder) {
-        this.id = builder.id;
-        this.originHearingId = builder.originHearingId;
-        this.defendant = builder.defendant;
-        if (defendant != null) {
-            this.defendantId = builder.defendant.getId().getId();
-        }
-        this.code = builder.code;
-        this.count = builder.count;
-        this.wording = builder.wording;
-        this.title = builder.title;
-        this.legislation = builder.legislation;
-        this.startDate = builder.startDate;
-        this.endDate = builder.endDate;
-        this.convictionDate = builder.convictionDate;
-        this.pleaDate = builder.pleaDate;
-        this.pleaValue = builder.pleaValue;
-        this.verdictCode = builder.verdictCode;
-        this.verdictCategory = builder.verdictCategory;
-        this.verdictCategoryType = builder.verdictCategoryType;
-        this.verdictTypeId = builder.verdictTypeId;
-        this.lesserOffence = builder.lesserOffence;
-        this.verdictDescription = builder.verdictDescription;
-        this.verdictDate = builder.verdictDate;
-        this.numberOfJurors = builder.numberOfJurors;
-        this.numberOfSplitJurors = builder.numberOfSplitJurors;
-        this.unanimous = builder.unanimous;
-        this.legalCase = builder.legalCase;
-    }
+    @Column(name = "mode_of_trial")
+    private String modeOfTrial;
 
     public HearingSnapshotKey getId() {
         return id;
     }
-    
-    public UUID getOriginHearingId() {
-        return originHearingId;
-    }
-    
-    public void setOriginHearingId(final UUID originHearingId) {
-        this.originHearingId = originHearingId;
+
+    public void setId(HearingSnapshotKey id) {
+        this.id = id;
     }
 
-    public LegalCase getLegalCase() {
-        return legalCase;
+    public UUID getOffenceDefinitionId() {
+        return offenceDefinitionId;
+    }
+
+    public void setOffenceDefinitionId(UUID offenceDefinitionId) {
+        this.offenceDefinitionId = offenceDefinitionId;
     }
 
     public Defendant getDefendant() {
         return defendant;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public Integer getCount() {
-        return count;
-    }
-
-    public String getWording() {
-        return wording;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getLegislation() {
-        return legislation;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public LocalDate getConvictionDate() {
-        return convictionDate;
-    }
-
-    public LocalDate getPleaDate() {
-        return pleaDate;
-    }
-
-    public void setPleaDate(final LocalDate pleaDate) {
-        this.pleaDate = pleaDate;
-    }
-
-    public String getPleaValue() {
-        return pleaValue;
-    }
-
-    public void setPleaValue(final String pleaValue) {
-        this.pleaValue = pleaValue;
-    }
-
-    public String getVerdictCode() {
-        return verdictCode;
-    }
-
-    public String getVerdictCategory() {
-        return verdictCategory;
-    }
-
-    public String getVerdictCategoryType() {
-        return verdictCategoryType;
-    }
-
-    public UUID getVerdictTypeId() {
-        return verdictTypeId;
-    }
-
-    public String getLesserOffence() {
-        return lesserOffence;
-    }
-
-    public String getVerdictDescription() {
-        return verdictDescription;
-    }
-
-    public LocalDate getVerdictDate() {
-        return verdictDate;
-    }
-
-    public Integer getNumberOfJurors() {
-        return numberOfJurors;
-    }
-
-    public Integer getNumberOfSplitJurors() {
-        return numberOfSplitJurors;
-    }
-
-    public Boolean getUnanimous() {
-        return unanimous;
+    public void setDefendant(Defendant defendant) {
+        this.defendant = defendant;
     }
 
     public UUID getDefendantId() {
         return defendantId;
     }
 
-    public void setVerdictCode(String verdictCode) {
-        this.verdictCode = verdictCode;
+    public void setDefendantId(UUID defendantId) {
+        this.defendantId = defendantId;
     }
 
-    public void setVerdictCategory(String verdictCategory) {
-        this.verdictCategory = verdictCategory;
+    public String getOffenceCode() {
+        return offenceCode;
     }
 
-    public void setVerdictCategoryType(String verdictCategoryType) {
-        this.verdictCategoryType = verdictCategoryType;
+    public void setOffenceCode(String offenceCode) {
+        this.offenceCode = offenceCode;
     }
 
-    public void setVerdictTypeId(UUID verdictTypeId) {
-        this.verdictTypeId = verdictTypeId;
+    public String getOffenceTitle() {
+        return offenceTitle;
     }
 
-    public void setLesserOffence(String lesserOffence) {
-        this.lesserOffence = lesserOffence;
+    public void setOffenceTitle(String offenceTitle) {
+        this.offenceTitle = offenceTitle;
     }
 
-    public void setVerdictDescription(String verdictDescription) {
-        this.verdictDescription = verdictDescription;
+    public String getOffenceTitleWelsh() {
+        return offenceTitleWelsh;
     }
 
-    public void setVerdictDate(LocalDate verdictDate) {
-        this.verdictDate = verdictDate;
+    public void setOffenceTitleWelsh(String offenceTitleWelsh) {
+        this.offenceTitleWelsh = offenceTitleWelsh;
     }
 
-    public void setNumberOfJurors(Integer numberOfJurors) {
-        this.numberOfJurors = numberOfJurors;
+    public String getOffenceLegislation() {
+        return offenceLegislation;
     }
 
-    public void setNumberOfSplitJurors(Integer numberOfSplitJurors) {
-        this.numberOfSplitJurors = numberOfSplitJurors;
+    public void setOffenceLegislation(String offenceLegislation) {
+        this.offenceLegislation = offenceLegislation;
     }
 
-    public void setUnanimous(Boolean unanimous) {
-        this.unanimous = unanimous;
+    public String getOffenceLegislationWelsh() {
+        return offenceLegislationWelsh;
     }
 
-    public void setConvictionDate(LocalDate convictionDate) {
-        this.convictionDate = convictionDate;
+    public void setOffenceLegislationWelsh(String offenceLegislationWelsh) {
+        this.offenceLegislationWelsh = offenceLegislationWelsh;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
+    public String getWording() {
+        return wording;
     }
 
     public void setWording(String wording) {
         this.wording = wording;
     }
 
-    public void setLegislation(String legislation) {
-        this.legislation = legislation;
+    public String getWordingWelsh() {
+        return wordingWelsh;
+    }
+
+    public void setWordingWelsh(String wordingWelsh) {
+        this.wordingWelsh = wordingWelsh;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
     }
 
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public LocalDate getArrestDate() {
+        return arrestDate;
     }
-    
-    public static final class Builder {
 
-        private HearingSnapshotKey id;
-        private UUID originHearingId;
-        private LegalCase legalCase;
-        private String code;
-        private Integer count;
-        private String wording;
-        private String title;
-        private String legislation;
-        private LocalDate startDate;
-        private LocalDate endDate;
-        private LocalDate convictionDate;
-        private LocalDate pleaDate;
-        private String pleaValue;
-        private String verdictCode;
-        private String verdictCategory;
-        private String verdictCategoryType;
-        private UUID verdictTypeId;
-        private String lesserOffence;
-        private String verdictDescription;
-        private LocalDate verdictDate;
-        private Integer numberOfJurors;
-        private Integer numberOfSplitJurors;
-        private Boolean unanimous;
-        private Defendant defendant;
+    public void setArrestDate(LocalDate arrestDate) {
+        this.arrestDate = arrestDate;
+    }
 
-        public Builder withId(final HearingSnapshotKey id) {
-            this.id = id;
-            return this;
-        }
-        
-        public Builder withOriginHearingId(final UUID originHearingId) {
-            this.originHearingId = originHearingId;
-            return this;
-        }
+    public LocalDate getChargeDate() {
+        return chargeDate;
+    }
 
-        public Builder withCase(final LegalCase legalCase) {
-            this.legalCase = legalCase;
-            return this;
-        }
+    public void setChargeDate(LocalDate chargeDate) {
+        this.chargeDate = chargeDate;
+    }
 
-        public Builder withDefendant(final Defendant defendant) {
-            this.defendant = defendant;
-            return this;
-        }
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
 
-        public Builder withCode(final String code) {
-            this.code = code;
-            return this;
-        }
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+    }
 
-        public Builder withCount(final Integer count) {
-            this.count = count;
-            return this;
-        }
+    public Integer getCount() {
+        return count;
+    }
 
-        public Builder withWording(final String wording) {
-            this.wording = wording;
-            return this;
-        }
+    public void setCount(Integer count) {
+        this.count = count;
+    }
 
-        public Builder withTitle(final String title) {
-            this.title = title;
-            return this;
-        }
+    public LocalDate getConvictionDate() {
+        return convictionDate;
+    }
 
-        public Builder withLegislation(final String legislation) {
-            this.legislation = legislation;
-            return this;
-        }
+    public void setConvictionDate(LocalDate convictionDate) {
+        this.convictionDate = convictionDate;
+    }
 
-        public Builder withStartDate(final LocalDate startDate) {
-            this.startDate = startDate;
-            return this;
-        }
+    public NotifiedPlea getNotifiedPlea() {
+        return notifiedPlea;
+    }
 
-        public Builder withEndDate(final LocalDate endDate) {
-            this.endDate = endDate;
-            return this;
-        }
+    public void setNotifiedPlea(NotifiedPlea notifiedPlea) {
+        this.notifiedPlea = notifiedPlea;
+    }
 
-        public Builder withConvictionDate(final LocalDate convictionDate) {
-            this.convictionDate = convictionDate;
-            return this;
-        }
+    public IndicatedPlea getIndicatedPlea() {
+        return indicatedPlea;
+    }
 
-        public Builder withPleaDate(final LocalDate pleaDate) {
-            this.pleaDate = pleaDate;
-            return this;
-        }
+    public void setIndicatedPlea(IndicatedPlea indicatedPlea) {
+        this.indicatedPlea = indicatedPlea;
+    }
 
-        public Builder withPleaValue(final String pleaValue) {
-            this.pleaValue = pleaValue;
-            return this;
-        }
+    public Plea getPlea() {
+        return plea;
+    }
 
-        public Builder withVerdictCode(final String verdictCode) {
-            this.verdictCode = verdictCode;
-            return this;
-        }
+    public void setPlea(Plea plea) {
+        this.plea = plea;
+    }
 
-        public Builder withVerdictCategory(final String verdictCategory) {
-            this.verdictCategory = verdictCategory;
-            return this;
-        }
+    public OffenceFacts getOffenceFacts() {
+        return offenceFacts;
+    }
 
-        public Builder withVerdictCategoryType(final String verdictCategoryType) {
-            this.verdictCategoryType = verdictCategoryType;
-            return this;
-        }
-        
-        public Builder withVerdictTypeId(final UUID verdictTypeId) {
-            this.verdictTypeId = verdictTypeId;
-            return this;
-        }
-        
-        public Builder withLesserOffence(final String lesserOffence) {
-            this.lesserOffence = lesserOffence;
-            return this;
-        }
-        
-        public Builder withVerdictDescription(final String verdictDescription) {
-            this.verdictDescription = verdictDescription;
-            return this;
-        }
+    public void setOffenceFacts(OffenceFacts offenceFacts) {
+        this.offenceFacts = offenceFacts;
+    }
 
-        public Builder withVerdictDate(final LocalDate verdictDate) {
-            this.verdictDate = verdictDate;
-            return this;
-        }
+    public String getModeOfTrial() {
+        return modeOfTrial;
+    }
 
-        public Builder withNumberOfJurors(final Integer numberOfJurors) {
-            this.numberOfJurors = numberOfJurors;
-            return this;
-        }
+    public void setModeOfTrial(String modeOfTrial) {
+        this.modeOfTrial = modeOfTrial;
+    }
 
-        public Builder withNumberOfSplitJurors(final Integer numberOfSplitJurors) {
-            this.numberOfSplitJurors = numberOfSplitJurors;
-            return this;
-        }
+    public Verdict getVerdict() {
+        return verdict;
+    }
 
-        public Builder withUnanimous(final Boolean unanimous) {
-            this.unanimous = unanimous;
-            return this;
-        }
-
-        public Offence build() {
-            return new Offence(this);
-        }
+    public void setVerdict(Verdict verdict) {
+        this.verdict = verdict;
     }
 
     @Override

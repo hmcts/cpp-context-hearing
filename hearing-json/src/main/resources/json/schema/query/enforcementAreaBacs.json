@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/enforcementAreaBacs.json",
+  "properties": {
+    "bankAccntName": {
+      "type": "string"
+    },
+    "bankAccntNum": {
+      "type": "integer"
+    },
+    "bankAccntSortCode": {
+      "type": "string"
+    },
+    "bankAddressLine1": {
+      "type": "string"
+    },
+    "bankAddressLine2": {
+      "type": "string"
+    },
+    "bankAddressLine3": {
+      "type": "string"
+    },
+    "paymentQueriesAddress1": {
+      "type": "string"
+    },
+    "paymentQueriesAddress2": {
+      "type": "string"
+    },
+    "paymentQueriesAddress3": {
+      "type": "string"
+    },
+    "paymentQueriesAddress4": {
+      "type": "string"
+    },
+    "paymentQueriesAddress5": {
+      "type": "string"
+    },
+    "paymentQueriesPostcode": {
+      "type": "string"
+    },
+    "remittanceAdviceEmailAddress": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "oucode",
+    "oucodeL1Name",
+    "oucodeL1Code",
+    "oucodeL2Name",
+    "oucodeL2Code",
+    "oucodeL3Name",
+    "oucodeL3Code",
+    "address1",
+    "address2",
+    "defaultStartTime",
+    "defaultDurationHrs",
+    "courtrooms"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

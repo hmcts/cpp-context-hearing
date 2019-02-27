@@ -23,6 +23,10 @@ public class DefenceWitness {
         this.defendants = builder.defendants;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public String getId() {
         return id;
     }
@@ -50,11 +54,6 @@ public class DefenceWitness {
     public List<DefendantId> getDefendants() {
         return defendants;
     }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
 
     public static class Builder {
         private String id;
@@ -95,7 +94,7 @@ public class DefenceWitness {
             return this;
         }
 
-        public Builder withDefendants(List<DefendantId> defendants){
+        public Builder withDefendants(List<DefendantId> defendants) {
             this.defendants = defendants;
             return this;
         }

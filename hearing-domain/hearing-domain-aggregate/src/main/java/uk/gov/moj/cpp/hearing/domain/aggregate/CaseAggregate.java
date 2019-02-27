@@ -6,7 +6,6 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
-import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -41,11 +40,11 @@ public class CaseAggregate implements Aggregate {
         }
     }
 
-    public Stream<Object> registerHearingId(RegisterHearingAgainstCaseCommand command) {
+    public Stream<Object> registerHearingId(final UUID caseId, final UUID hearingId) {
         return apply(Stream.of(
                 RegisteredHearingAgainstCase.builder()
-                        .withCaseId(command.getCaseId())
-                        .withHearingId(command.getHearingId())
+                        .withCaseId(caseId)
+                        .withHearingId(hearingId)
                         .build()));
     }
 }

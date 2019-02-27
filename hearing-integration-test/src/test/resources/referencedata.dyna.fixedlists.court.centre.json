@@ -1,0 +1,76 @@
+{
+  "organisationunits": [
+    {
+      "id": "80921334-2cf0-4609-8a29-0921bf6b3520",
+      "oucode": "B01BE01",
+      "oucodeL1Code": "C",
+      "oucodeL1Name": "Magistrates' Courts",
+      "oucodeL3Name": "Wimbledon",
+      "address1": "4 Belmarsh Road",
+      "address2": "London",
+      "postcode": "SE28 0HA",
+      "defaultStartTime": "10:00",
+      "defaultDurationHrs": "7:00",
+      "courtrooms": [
+        {
+          "id": "f703dc83-d0e4-42c8-8d44-0352d46e5194",
+          "venueName": "WIMBLEDON MAGISTRATES' COURT",
+          "courtroomId": 789,
+          "courtroomName": "Room A"
+        },
+        {
+          "id": "2bd3e322-f603-411d-a5ab-2e42ff4b6e00",
+          "venueName": "WIMBLEDON MAGISTRATES' COURT",
+          "courtroomId": 790,
+          "courtroomName": "Room B"
+        }
+
+      ]
+    },
+    {
+      "id": "7e967376-eacf-4fca-9b30-21b0c5aad427",
+      "oucode": "B01BH00",
+      "oucodeL1Code": "B",
+      "oucodeL1Name": "Magistrates' Courts",
+      "oucodeL3Name": "Bexley Magistrates' Court",
+      "address1": "Norwich Place",
+      "address2": "Bexleyheath",
+      "address3": "Kent",
+      "postcode": "DA6 7ND",
+      "defaultStartTime": "10:00",
+      "defaultDurationHrs": "7:00",
+      "courtrooms": [
+        {
+          "id": "8e912353-3b5d-36c3-953e-ad3b94b19de3",
+          "venueName": "BEXLEY MAGISTRATES' COURT",
+          "courtroomId": 121,
+          "courtroomName": "Courtroom 01"
+        },
+        {
+          "id": "1309d479-b08f-3576-8fa7-fd4e77c8d80c",
+          "venueName": "BEXLEY MAGISTRATES' COURT",
+          "courtroomId": 122,
+          "courtroomName": "Courtroom 02"
+        },
+        {
+          "id": "a3018f5f-f3a2-37b9-8af9-f1571647fa80",
+          "venueName": "BEXLEY MAGISTRATES' COURT",
+          "courtroomId": 123,
+          "courtroomName": "Courtroom 03"
+        },
+        {
+          "id": "32ef1e16-93e5-31b0-b7e9-7de1a0dc0291",
+          "venueName": "BEXLEY MAGISTRATES' COURT",
+          "courtroomId": 124,
+          "courtroomName": "Courtroom 04"
+        },
+        {
+          "id": "29afefde-9b11-3bad-b3e7-7d89956355d1",
+          "venueName": "BEXLEY MAGISTRATES' COURT",
+          "courtroomId": 125,
+          "courtroomName": "Courtroom 05"
+        }
+      ]
+    }
+  ]
+}

@@ -30,6 +30,10 @@ public final class UncompletedResultLine implements Serializable {
         this.orderedDate = orderedDate;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public UUID getId() {
         return id;
     }
@@ -44,9 +48,6 @@ public final class UncompletedResultLine implements Serializable {
 
     public LocalDate getOrderedDate() {
         return orderedDate;
-    }
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static final class Builder {
@@ -78,6 +79,7 @@ public final class UncompletedResultLine implements Serializable {
             this.dateOrdered = dateOrdered;
             return this;
         }
+
         public UncompletedResultLine build() {
             return new UncompletedResultLine(id, resultDefinitionId, defendantId, dateOrdered);
         }

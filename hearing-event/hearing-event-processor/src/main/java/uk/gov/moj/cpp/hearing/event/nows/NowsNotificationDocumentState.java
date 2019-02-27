@@ -18,7 +18,7 @@ public class NowsNotificationDocumentState implements Serializable {
     private String courtCentreName;
     private String orderName;
     private String priority;
-    private String materialId;
+    private UUID materialId;
 
     public UUID getOriginatingCourtCentreId() {
         return originatingCourtCentreId;
@@ -83,17 +83,12 @@ public class NowsNotificationDocumentState implements Serializable {
         return this;
     }
 
-    public NowsNotificationDocumentState setCourtCentreName(String courtCentreName) {
-        this.courtCentreName = courtCentreName;
-        return this;
-    }
-
     public String getCourtCentreName() {
         return courtCentreName;
     }
 
-    public NowsNotificationDocumentState setOrderName(String orderName) {
-        this.orderName = orderName;
+    public NowsNotificationDocumentState setCourtCentreName(String courtCentreName) {
+        this.courtCentreName = courtCentreName;
         return this;
     }
 
@@ -101,8 +96,8 @@ public class NowsNotificationDocumentState implements Serializable {
         return orderName;
     }
 
-    public NowsNotificationDocumentState setPriority(String priority) {
-        this.priority = priority;
+    public NowsNotificationDocumentState setOrderName(String orderName) {
+        this.orderName = orderName;
         return this;
     }
 
@@ -110,12 +105,17 @@ public class NowsNotificationDocumentState implements Serializable {
         return priority;
     }
 
-    public NowsNotificationDocumentState setMaterialId(String materialId) {
-        this.materialId = materialId;
+    public NowsNotificationDocumentState setPriority(String priority) {
+        this.priority = priority;
         return this;
     }
 
-    public String getMaterialId() {
+    public UUID getMaterialId() {
         return materialId;
+    }
+
+    public NowsNotificationDocumentState setMaterialId(UUID materialId) {
+        this.materialId = materialId;
+        return this;
     }
 }

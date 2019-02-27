@@ -7,16 +7,16 @@ import static uk.gov.justice.services.messaging.JsonMetadata.ID;
 import static uk.gov.justice.services.messaging.JsonMetadata.NAME;
 import static uk.gov.justice.services.messaging.JsonMetadata.USER_ID;
 
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.justice.services.messaging.Metadata;
+
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.JsonObjects;
-import uk.gov.justice.services.messaging.Metadata;
 
 public class JsonHelper {
 
@@ -38,9 +38,11 @@ public class JsonHelper {
                         .add(USER_ID, userId))
                 .build()).build();
     }
+
     public static Optional<String> getOriginatorValueFromJsonMetadata(final JsonObject jsonMetadata) {
         return JsonObjects.getString(jsonMetadata, ORIGINATOR);
     }
+
     public static JsonEnvelope assembleEnvelopeWithPayloadAndMetaDetails(final JsonObject payload, final String contentType, final String processId, final String userId) {
         final Metadata metadata = createMetadataWithProcessIdAndUserId(UUID.randomUUID().toString(), contentType, processId, userId);
         final JsonObject payloadWithMetada = addMetadataToPayload(payload, metadata);

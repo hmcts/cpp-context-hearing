@@ -1,13 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.initiate;
 
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Witness implements Serializable {
@@ -69,69 +69,12 @@ public class Witness implements Serializable {
         this.email = email;
     }
 
+    public static Witness witness() {
+        return new Witness();
+    }
+
     public UUID getId() {
         return id;
-    }
-
-    public UUID getCaseId() {
-        return caseId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getClassification() {
-        return classification;
-    }
-
-    public UUID getPersonId() {
-        return personId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getNationality() {
-        return nationality;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public String getWorkTelephone() {
-        return workTelephone;
-    }
-
-    public String getHomeTelephone() {
-        return homeTelephone;
-    }
-
-    public String getMobile() {
-        return mobile;
-    }
-
-    public String getFax() {
-        return fax;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public Witness setId(UUID id) {
@@ -139,9 +82,17 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public UUID getCaseId() {
+        return caseId;
+    }
+
     public Witness setCaseId(UUID caseId) {
         this.caseId = caseId;
         return this;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public Witness setType(String type) {
@@ -149,9 +100,17 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public String getClassification() {
+        return classification;
+    }
+
     public Witness setClassification(String classification) {
         this.classification = classification;
         return this;
+    }
+
+    public UUID getPersonId() {
+        return personId;
     }
 
     public Witness setPersonId(UUID personId) {
@@ -159,9 +118,17 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public Witness setTitle(String title) {
         this.title = title;
         return this;
+    }
+
+    public String getFirstName() {
+        return firstName;
     }
 
     public Witness setFirstName(String firstName) {
@@ -169,9 +136,17 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public String getLastName() {
+        return lastName;
+    }
+
     public Witness setLastName(String lastName) {
         this.lastName = lastName;
         return this;
+    }
+
+    public String getNationality() {
+        return nationality;
     }
 
     public Witness setNationality(String nationality) {
@@ -179,9 +154,18 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public String getGender() {
+        return gender;
+    }
+
     public Witness setGender(String gender) {
         this.gender = gender;
         return this;
+    }
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
     }
 
     public Witness setDateOfBirth(LocalDate dateOfBirth) {
@@ -189,9 +173,17 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public String getWorkTelephone() {
+        return workTelephone;
+    }
+
     public Witness setWorkTelephone(String workTelephone) {
         this.workTelephone = workTelephone;
         return this;
+    }
+
+    public String getHomeTelephone() {
+        return homeTelephone;
     }
 
     public Witness setHomeTelephone(String homeTelephone) {
@@ -199,9 +191,17 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public String getMobile() {
+        return mobile;
+    }
+
     public Witness setMobile(String mobile) {
         this.mobile = mobile;
         return this;
+    }
+
+    public String getFax() {
+        return fax;
     }
 
     public Witness setFax(String fax) {
@@ -209,13 +209,13 @@ public class Witness implements Serializable {
         return this;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public Witness setEmail(String email) {
         this.email = email;
         return this;
-    }
-
-    public static Witness witness() {
-        return new Witness();
     }
 
 }
