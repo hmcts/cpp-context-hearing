@@ -82,16 +82,13 @@ public class EnforceFinancialImpositionMapperTest {
         assertEquals(false, enforceFinancialImposition.getPlea().getIncludesGuilty());
         assertEquals(false, enforceFinancialImposition.getPlea().getIncludesOnline());
 
-        assertEquals(defendant.getPersonDefendant().getEmployerPayrollReference(), enforceFinancialImposition.getEmployer().getEmployerReference());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getName(), enforceFinancialImposition.getEmployer().getEmployerCompanyName());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getAddress().getAddress1(), enforceFinancialImposition.getEmployer().getEmployerAddress1());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getAddress().getAddress2(), enforceFinancialImposition.getEmployer().getEmployerAddress2());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getAddress().getAddress3(), enforceFinancialImposition.getEmployer().getEmployerAddress3());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getAddress().getAddress4(), enforceFinancialImposition.getEmployer().getEmployerAddress4());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getAddress().getAddress5(), enforceFinancialImposition.getEmployer().getEmployerAddress5());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getAddress().getPostcode(), enforceFinancialImposition.getEmployer().getEmployerPostcode());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getContact().getWork(), enforceFinancialImposition.getEmployer().getEmployerTelephoneNumber());
-        assertEquals(defendant.getPersonDefendant().getEmployerOrganisation().getContact().getPrimaryEmail(), enforceFinancialImposition.getEmployer().getEmployerEmailAddress());
+        assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getName(), enforceFinancialImposition.getEmployer().getEmployerCompanyName());
+        assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress1(), enforceFinancialImposition.getEmployer().getEmployerAddress1());
+        assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress2(), enforceFinancialImposition.getEmployer().getEmployerAddress2());
+        assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress3(), enforceFinancialImposition.getEmployer().getEmployerAddress3());
+        assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress4(), enforceFinancialImposition.getEmployer().getEmployerAddress4());
+        assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress5(), enforceFinancialImposition.getEmployer().getEmployerAddress5());
+        assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getPostcode(), enforceFinancialImposition.getEmployer().getEmployerPostcode());
 
         assertNull(enforceFinancialImposition.getMinorCreditor());
 

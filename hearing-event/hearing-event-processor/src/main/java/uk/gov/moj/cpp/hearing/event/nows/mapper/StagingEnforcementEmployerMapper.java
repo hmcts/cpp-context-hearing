@@ -5,45 +5,45 @@ import static java.util.Objects.nonNull;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
-import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Organisation;
-import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.json.schemas.staging.Employer;
 
 public class StagingEnforcementEmployerMapper {
 
-    private final Defendant defendant;
+    private final Organisation employer;
 
-    StagingEnforcementEmployerMapper(final Defendant defendant) {
-        this.defendant = defendant;
+    StagingEnforcementEmployerMapper(final Organisation employer) {
+        this.employer = employer;
     }
 
     public Employer map() {
 
-        final PersonDefendant personDefendant = defendant.getPersonDefendant();
-
-        final Organisation employerOrganisation = personDefendant.getEmployerOrganisation();
-
-        if(isNull(employerOrganisation)) {
+        if(isNull(employer)) {
             return null;
         }
 
-        final Address address = employerOrganisation.getAddress();
+        final Address address = employer.getAddress();
 
-        final ContactNumber contact = employerOrganisation.getContact();
+        final ContactNumber contact = employer.getContact();
 
-        final String emailAddress = nonNull(contact.getPrimaryEmail()) ? contact.getPrimaryEmail() : contact.getSecondaryEmail();
+        String emailAddress = null;
+
+        String work = null;
+
+        if(nonNull(contact)) {
+            emailAddress = nonNull(contact.getPrimaryEmail()) ? contact.getPrimaryEmail() : contact.getSecondaryEmail();
+            work = contact.getWork();
+        }
 
         return Employer.employer()
-                .withEmployerReference(personDefendant.getEmployerPayrollReference())
-                .withEmployerCompanyName(employerOrganisation.getName())
+                .withEmployerCompanyName(employer.getName())
                 .withEmployerAddress1(address.getAddress1())
                 .withEmployerAddress2(address.getAddress2())
                 .withEmployerAddress3(address.getAddress3())
                 .withEmployerAddress4(address.getAddress4())
                 .withEmployerAddress5(address.getAddress5())
                 .withEmployerPostcode(address.getPostcode())
-                .withEmployerTelephoneNumber(contact.getWork())
+                .withEmployerTelephoneNumber(work)
                 .withEmployerEmailAddress(emailAddress)
                 .build();
     }
