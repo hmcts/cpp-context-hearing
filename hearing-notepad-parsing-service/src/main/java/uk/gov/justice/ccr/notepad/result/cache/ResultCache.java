@@ -23,6 +23,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.AccessTimeout;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
@@ -34,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 @Startup
 @Singleton
+@AccessTimeout(value = 60000)
 public class ResultCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResultCache.class);
@@ -60,6 +64,8 @@ public class ResultCache {
         cache = cacheFactory.build();
     }
 
+    @Lock(LockType.WRITE)
+    @AccessTimeout(value = 120000)
     public void lazyLoad(final JsonEnvelope envelope, final LocalDate orderedDate) {
         if (!cache.asMap().containsKey(getKey(orderedDate, RESULT_DEFINITION_KEY))) {
             synchronized (this) {
@@ -134,18 +140,22 @@ public class ResultCache {
         return resultDefinitionsIndexByKeyWord;
     }
 
+    @Lock(LockType.READ)
     public List<ResultDefinition> getResultDefinitions(final LocalDate orderedDate) {
         return getCachedResultDefinitions(orderedDate);
     }
 
+    @Lock(LockType.READ)
     public Map<String, List<Long>> getResultDefinitionsIndexGroupByKeyword(final LocalDate orderedDate) {
         return getCachedResultDefinitionsGroupByKeyword(orderedDate);
     }
 
+    @Lock(LockType.READ)
     public Map<String, List<Long>> getResultPromptsIndexGroupByKeyword(final LocalDate orderedDate) {
         return getCachedResultPromptsGroupByKeyword(orderedDate);
     }
 
+    @Lock(LockType.READ)
     public List<ResultDefinitionSynonym> getResultDefinitionSynonym(final LocalDate orderedDate) {
         Set<String> allKeyWords = newHashSet();
         getResultDefinitions(orderedDate).stream().map(ResultDefinition::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
@@ -161,10 +171,12 @@ public class ResultCache {
         return resultDefinitionKeyWordsSynonyms;
     }
 
+    @Lock(LockType.READ)
     public List<ResultPrompt> getResultPrompt(final LocalDate orderedDate) {
         return getCachedResultPrompt(orderedDate);
     }
 
+    @Lock(LockType.READ)
     public List<ResultPrompt> getResultPromptByResultDefinitionId(final String resultDefinitionId, final LocalDate orderedDate) {
         return getCachedResultPrompt(orderedDate)
                 .stream()
@@ -172,6 +184,7 @@ public class ResultCache {
                 .collect(toList());
     }
 
+    @Lock(LockType.READ)
     public List<ResultPromptSynonym> getResultPromptSynonym(final LocalDate orderedDate) {
         Set<String> allKeyWords = newHashSet();
         getCachedResultPrompt(orderedDate).stream().map(ResultPrompt::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
