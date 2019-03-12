@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>hearing-domain-transformation-archive</module>
+        <module>hearing-domain-transformation-delete-all-events</module>
     </modules>
 
 
