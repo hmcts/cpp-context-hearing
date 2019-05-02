@@ -1,8 +1,15 @@
 package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
 import static java.util.Objects.nonNull;
+
+import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.ContactNumber;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Now;
 import uk.gov.justice.core.courts.NowVariantResult;
+import uk.gov.justice.core.courts.Organisation;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.SharedResultLine;
 import uk.gov.justice.json.schemas.staging.Defendant;
 import uk.gov.justice.json.schemas.staging.DocumentLanguage;
@@ -12,11 +19,15 @@ import uk.gov.justice.json.schemas.staging.Title;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class StagingEnforcementDefendantMapper {
 
+    private static final String SPACE = " ";
     private final List<SharedResultLine> sharedResultLines;
 
     private final uk.gov.justice.core.courts.Defendant defendant;
@@ -70,192 +81,218 @@ class StagingEnforcementDefendantMapper {
     }
 
     private Title convertTitle(uk.gov.justice.core.courts.Title title) {
-        switch (title) {
-            case MR:
-                return Title.MR;
-            case MRS:
-                return Title.MRS;
-            case MS:
-                return Title.MS;
-            case MISS:
-                return Title.MISS;
-        }
+        return Optional.ofNullable(title)
+                .map(t -> {
+                    switch (t) {
+                        case MR:
+                            return Title.MR;
+                        case MRS:
+                            return Title.MRS;
+                        case MS:
+                            return Title.MS;
+                        case MISS:
+                            return Title.MISS;
+                        default:
+                            return Title.MR;
+                    }
+                })
+                .orElse(Title.MR);
 
-        return null;
     }
 
     private String setSurname(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getLastName();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getLastName)
+                .orElse(null);
     }
 
     private String setForenames(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getFirstName() + " " + defendant.getPersonDefendant().getPersonDetails().getMiddleName();
-        }
-
-        return null;
+        return Stream.of(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                        .map(PersonDefendant::getPersonDetails)
+                        .map(Person::getFirstName)
+                        .orElse(null),
+                Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                        .map(PersonDefendant::getPersonDetails)
+                        .map(Person::getMiddleName)
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining(SPACE));
     }
 
     private LocalDate setDateOfBirth(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getDateOfBirth();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getDateOfBirth)
+                .orElse(null);
     }
 
     private String setCompanyName(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getName();
-        }
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                .map(LegalEntityDefendant::getOrganisation)
+                .map(Organisation::getName)
+                .orElse(null);
 
-        return null;
     }
 
     private String setAddress1(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getAddress().getAddress1();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getAddress().getAddress1();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getAddress)
+                .map(Address::getAddress1)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getAddress)
+                        .map(Address::getAddress1)
+                        .orElse(null));
     }
 
     private String setAddress2(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getAddress().getAddress2();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getAddress().getAddress2();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getAddress)
+                .map(Address::getAddress2)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getAddress)
+                        .map(Address::getAddress2)
+                        .orElse(null));
     }
 
     private String setAddress3(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getAddress().getAddress3();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getAddress().getAddress3();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getAddress)
+                .map(Address::getAddress3)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getAddress)
+                        .map(Address::getAddress3)
+                        .orElse(null));
     }
 
     private String setAddress4(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getAddress().getAddress4();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getAddress().getAddress4();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getAddress)
+                .map(Address::getAddress4)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getAddress)
+                        .map(Address::getAddress4)
+                        .orElse(null));
     }
 
     private String setAddress5(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getAddress().getAddress5();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getAddress().getAddress5();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getAddress)
+                .map(Address::getAddress5)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getAddress)
+                        .map(Address::getAddress5)
+                        .orElse(null));
     }
 
     private String setPostcode(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getAddress().getPostcode();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getAddress().getPostcode();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getAddress)
+                .map(Address::getPostcode)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getAddress)
+                        .map(Address::getPostcode)
+                        .orElse(null));
     }
 
     private String setNationalInsuranceNumber(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getNationalInsuranceNumber();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getNationalInsuranceNumber)
+                .orElse(null);
     }
 
     private String setTelephoneNumberHome(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getContact().getHome();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getContact)
+                .map(ContactNumber::getHome)
+                .orElse(null);
     }
 
     private String setTelephoneNumberBusiness(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getContact().getWork();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getContact().getWork();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getContact)
+                .map(ContactNumber::getWork)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getContact)
+                        .map(ContactNumber::getWork)
+                        .orElse(null));
     }
 
     private String setTelephoneNumberMobile(final uk.gov.justice.core.courts.Defendant defendant) {
 
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getContact().getMobile();
-        }
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getContact)
+                .map(ContactNumber::getMobile)
+                .orElse(null);
 
-        return null;
     }
 
     private String setEmailAddress1(final uk.gov.justice.core.courts.Defendant defendant) {
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getContact)
+                .map(ContactNumber::getPrimaryEmail)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getContact)
+                        .map(ContactNumber::getPrimaryEmail)
+                        .orElse(null));
 
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getContact().getPrimaryEmail();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getContact().getPrimaryEmail();
-        }
-
-        return null;
     }
 
     private String setEmailAddress2(final uk.gov.justice.core.courts.Defendant defendant) {
-
-        if (nonNull(defendant.getPersonDefendant())) {
-            return defendant.getPersonDefendant().getPersonDetails().getContact().getSecondaryEmail();
-        }
-
-        if (nonNull(defendant.getLegalEntityDefendant())) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getContact().getSecondaryEmail();
-        }
-
-        return null;
+        return Optional.ofNullable(defendant)
+                .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
+                .map(PersonDefendant::getPersonDetails)
+                .map(Person::getContact)
+                .map(ContactNumber::getSecondaryEmail)
+                .orElse(Optional.ofNullable(defendant)
+                        .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
+                        .map(LegalEntityDefendant::getOrganisation)
+                        .map(Organisation::getContact)
+                        .map(ContactNumber::getSecondaryEmail)
+                        .orElse(null));
     }
 
     private LocalDate setDateOfSentence(final Now nows, final List<SharedResultLine> sharedResultLines) {

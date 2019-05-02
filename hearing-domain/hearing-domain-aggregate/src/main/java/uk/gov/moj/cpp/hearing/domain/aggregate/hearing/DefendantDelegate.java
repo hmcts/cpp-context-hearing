@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantAttendance;
+import uk.gov.justice.core.courts.Title;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -60,15 +62,25 @@ public class DefendantDelegate implements Serializable {
 
     }
 
-    public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant) {
-
+    public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant newDefendant) {
         if (!this.momento.isPublished()) {
+            final Optional<Defendant> previouslyStoredDefendant = momento.getHearing().getProsecutionCases().stream()
+                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                    .filter(d -> d.getId().equals(newDefendant.getId()))
+                    .findFirst();
+            if (previouslyStoredDefendant.isPresent()) {
+                final Title storedTitle = previouslyStoredDefendant.get().getPersonDefendant().getPersonDetails().getTitle();
+                final Title newTitle = newDefendant.getPersonDefendant().getPersonDetails().getTitle();
+                if (newTitle == null) {
+                    newDefendant.getPersonDefendant().getPersonDetails().setTitle(storedTitle);
+                }
+
+            }
             return Stream.of(DefendantDetailsUpdated.defendantDetailsUpdated()
                     .setHearingId(hearingId)
-                    .setDefendant(defendant)
+                    .setDefendant(newDefendant)
             );
         }
-
         return Stream.empty();
     }
 

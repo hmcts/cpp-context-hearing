@@ -21,14 +21,25 @@ import uk.gov.justice.json.schemas.staging.PaymentTermsType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings({"squid:S1135"})
 public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforcementMapper {
 
+    public static final String EMPTY_STRING = "";
+    public static final String REGEX_ONLY_NUMBERS = "[^0-9]";
+    public static final String INCOMING_PROMPT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String OUTGOING_PROMPT_DATE_FORMAT = "dd MMM yyyy";
+    private static final Logger LOGGER = LoggerFactory.getLogger(StagingEnforcementPaymentTermsMapper.class.getName());
     private final Map<UUID, UUID> resultLineResultDefinitionIdMap;
 
     private final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts;
@@ -88,7 +99,7 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
         }
 
         if (nonNull(promptValue)) {
-            return LocalDate.parse(promptValue);
+            return LocalDate.parse(reformatDateIfRequired(promptValue));
         }
 
         return null;
@@ -100,7 +111,7 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
                 resultDefinitionId.equals(RD_INSTL)) {
             promptValue = getPromptValue(promptRefs, P_INSTALMENT_AMOUNT);
         }
-        return isNull(promptValue) ? null : new BigDecimal(promptValue);
+        return isNull(promptValue) ? null : getStringAsDecimal(promptValue);
     }
 
     private BigDecimal getLumpSumAmount(final UUID resultDefinitionId, final List<UUID> promptRefs) {
@@ -109,21 +120,21 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
             promptValue = getPromptValue(promptRefs, P_LUMP_SUM_AMOUNT);
         }
 
-        return isNull(promptValue) ? null : new BigDecimal(promptValue);
+        return isNull(promptValue) ? null : getStringAsDecimal(promptValue);
     }
 
     private LocalDate getPayByDate(final PaymentTermsType paymentTermsType, final List<UUID> promptRefs) {
         if (paymentTermsType == PaymentTermsType.BY_DATE) {
             final String promptValue = getPromptValue(promptRefs, P_PAY_BY_DATE);
-            return LocalDate.parse(promptValue);
+            return LocalDate.parse(reformatDateIfRequired(promptValue));
         }
         return null;
     }
 
     private PaymentTermsType getPaymentTermsType(final UUID resultDefinitionId, final List<UUID> promptRefsList) {
-        if(RD_PDATE.equals(resultDefinitionId)) {
+        if (RD_PDATE.equals(resultDefinitionId)) {
             return PaymentTermsType.BY_DATE;
-        } else if(RD_INSTL.equals(resultDefinitionId)) {
+        } else if (RD_INSTL.equals(resultDefinitionId)) {
             return getPaymentTermsType(promptRefsList);
         } else if (RD_LUMSI.equals(resultDefinitionId)) {
             return getLumpSumPaymentTermsType(promptRefsList);
@@ -172,5 +183,30 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
         }
 
         return null;
+    }
+
+    private BigDecimal getStringAsDecimal(final String value) {
+        return new BigDecimal(value.replaceAll(REGEX_ONLY_NUMBERS, EMPTY_STRING));
+    }
+
+    private String reformatDateIfRequired(final String value) {
+        String originalValue = value;
+        if (isRequired(OUTGOING_PROMPT_DATE_FORMAT, value, Locale.ENGLISH)) {
+            originalValue = LocalDate.parse(value, DateTimeFormatter.ofPattern(OUTGOING_PROMPT_DATE_FORMAT)).format((DateTimeFormatter.ofPattern(INCOMING_PROMPT_DATE_FORMAT)));
+        }
+        return originalValue;
+    }
+
+    private boolean isRequired(final String format,final String value,final Locale locale) {
+        final DateTimeFormatter fomatter = DateTimeFormatter.ofPattern(format, locale);
+        boolean isNotEqualToOutgoingFormat = false;
+        try {
+            final LocalDate localDate = LocalDate.parse(value, fomatter);
+            final String result = localDate.format(fomatter);
+            isNotEqualToOutgoingFormat = result.equals(value);
+        } catch (DateTimeParseException exp) {
+            LOGGER.error(String.format("Invalid date - %s ", value), exp);
+        }
+        return isNotEqualToOutgoingFormat;
     }
 }

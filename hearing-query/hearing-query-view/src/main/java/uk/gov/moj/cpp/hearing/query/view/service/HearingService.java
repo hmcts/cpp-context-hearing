@@ -13,7 +13,7 @@ import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -24,8 +24,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListRespons
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.Material;
-import uk.gov.moj.cpp.hearing.query.view.response.nowresponse.NowResult;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
@@ -37,12 +35,13 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -59,6 +58,7 @@ public class HearingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+    private static final String SPACE = " ";
     @Inject
     private HearingRepository hearingRepository;
     @Inject
@@ -194,6 +194,20 @@ public class HearingService {
         };
     }
 
+    private String formatName(final Person person) {
+        return Stream.of(Optional.ofNullable(person)
+                        .map(Person::getFirstName)
+                        .orElse(null),
+                Optional.ofNullable(person)
+                        .map(Person::getMiddleName)
+                        .orElse(null),
+                Optional.ofNullable(person)
+                        .map(Person::getLastName)
+                        .orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining(SPACE));
+    }
+
     private HearingListResponseHearing populateHearing(final Hearing source) {
         if (null == source || null == source.getId()) {
             return null;
@@ -204,19 +218,10 @@ public class HearingService {
                         .withId(prosecutionCase.getId().getId())
                         .withProsecutionCaseIdentifier(prosecutionCaseIdentifierJPAMapper.fromJPA(prosecutionCase.getProsecutionCaseIdentifier()))
                         .withDefendants(prosecutionCase.getDefendants().stream()
-                                .map(defendant -> {
-                                    if(isNull(defendant.getPersonDefendant().getPersonDetails().getMiddleName())) {
-                                        return HearingListResponseDefendant.builder()
-                                                .withId(defendant.getId().getId())
-                                                .withName(defendant.getPersonDefendant().getPersonDetails().getFirstName()
-                                                        + " " + defendant.getPersonDefendant().getPersonDetails().getLastName()).build();
-                                    }
-                                    return HearingListResponseDefendant.builder()
-                                            .withId(defendant.getId().getId())
-                                            .withName(defendant.getPersonDefendant().getPersonDetails().getFirstName()
-                                                    + " " + defendant.getPersonDefendant().getPersonDetails().getMiddleName()
-                                                    + " " + defendant.getPersonDefendant().getPersonDetails().getLastName()).build();
-                                }).collect(toList()))
+                                .map(defendant -> HearingListResponseDefendant.builder()
+                                        .withId(defendant.getId().getId())
+                                        .withName(formatName(defendant.getPersonDefendant().getPersonDetails())).build()
+                                ).collect(toList()))
                         .build()).collect(toList());
 
         return HearingListResponseHearing.builder()

@@ -112,7 +112,7 @@ public class UpdateDefendantCommandHandlerTest {
                 CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
                         .setDefendant(defendantTemplate())
                         .setHearingIds(singletonList(randomUUID()));
-
+        caseDefendantDetailsWithHearingsEvent.getDefendant().setId(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId());
         setupMockedEventStream(caseDefendantDetailsWithHearingsEvent.getHearingIds().get(0), this.eventStream, hearingAggregate);
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-details-against-hearing-aggregate"),
@@ -122,7 +122,47 @@ public class UpdateDefendantCommandHandlerTest {
 
         assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
                 jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-details-updated"),
-                        payloadIsJson(allOf(withJsonPath("$.defendant.id", is(caseDefendantDetailsWithHearingsEvent.getDefendant().getId().toString())))))));
+                        payloadIsJson(
+                                allOf(
+                                        withJsonPath("$.defendant.id", is(caseDefendantDetailsWithHearingsEvent.getDefendant().getId().toString())),
+                                        withJsonPath("$.defendant.personDefendant.personDetails.title", is(caseDefendantDetailsWithHearingsEvent.getDefendant().getPersonDefendant().getPersonDetails().getTitle().toString()))
+                                )
+                        ))));
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testUpdateCaseDefendantDetails_When_Defendant_Person_Title_Not_Provided() throws EventStreamException {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearingsEvent =
+                CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
+                        .setDefendant(defendantTemplate())
+                        .setHearingIds(singletonList(randomUUID()));
+        caseDefendantDetailsWithHearingsEvent.getDefendant().setId(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId());
+        caseDefendantDetailsWithHearingsEvent.getDefendant().getPersonDefendant().getPersonDetails().setTitle(null);
+        setupMockedEventStream(caseDefendantDetailsWithHearingsEvent.getHearingIds().get(0), this.eventStream, hearingAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-details-against-hearing-aggregate"),
+                objectToJsonObjectConverter.convert(caseDefendantDetailsWithHearingsEvent));
+
+        changeDefendantDetailsCommandHandler.updateCaseDefendantDetails(envelope);
+
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-details-updated"),
+                        payloadIsJson(
+                                allOf(
+                                        withJsonPath("$.defendant.id", is(caseDefendantDetailsWithHearingsEvent.getDefendant().getId().toString())),
+                                        withJsonPath("$.defendant.personDefendant.personDetails.title", is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getTitle().toString()))
+                                )
+                        ))));
     }
 
     @SuppressWarnings("unchecked")
