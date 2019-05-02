@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static java.util.Locale.ENGLISH;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -34,6 +35,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -48,18 +50,14 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S1188", "squid:S1602", "squid:S1135", "squid:S00112", "squid:S1612"})
 public class NowsDelegate {
 
-    private final Enveloper enveloper;
-
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    private final ReferenceDataService referenceDataService;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NowsDelegate.class.getName());
-
     public static final String INCOMING_PROMPT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String OUTGOING_PROMPT_DATE_FORMAT = "dd MMM yyyy";
     public static final String DATE_PROMPT_TYPE = "DATE";
     public static final String CURRENCY_PROMPT_TYPE = "CURR";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NowsDelegate.class.getName());
+    private final Enveloper enveloper;
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private final ReferenceDataService referenceDataService;
 
     @Inject
     public NowsDelegate(final Enveloper enveloper,
@@ -127,7 +125,7 @@ public class NowsDelegate {
             return null;
         }
         value = value.trim();
-        if (promptRef != null && DATE_PROMPT_TYPE.equals(promptRef.getType()) && value.length() > 0) {
+        if (promptRef != null && DATE_PROMPT_TYPE.equals(promptRef.getType()) && value.length() > 0 && onlyIfNotEqualsToOutgoingFormat(OUTGOING_PROMPT_DATE_FORMAT, value, ENGLISH)) {
             try {
                 final LocalDate dateValue = LocalDate.parse(value, DateTimeFormatter.ofPattern(INCOMING_PROMPT_DATE_FORMAT));
                 value = dateValue.format(DateTimeFormatter.ofPattern(OUTGOING_PROMPT_DATE_FORMAT));
@@ -272,8 +270,10 @@ public class NowsDelegate {
 
         nowsRequest.getHearing().setTargets(null);
 
-        sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "progression.generate-nows")
-                .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
+        if (!generateNowsCommand.getCreateNowsRequest().getNows().isEmpty()) {
+            sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "progression.generate-nows")
+                    .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
+        }
 
         nowsRequest.getHearing().setTargets(targets);
     }
@@ -285,5 +285,18 @@ public class NowsDelegate {
         }
         sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.pending-nows-requested")
                 .apply(this.objectToJsonObjectConverter.convert(pendingNowsRequestedCommand)));
+    }
+
+    private boolean onlyIfNotEqualsToOutgoingFormat(final String format, final String value, final Locale locale) {
+        final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(format, locale);
+        boolean isNotEqualToOutgoingFormat = true;
+        try {
+            final LocalDate localDate = LocalDate.parse(value, dateTimeFormatter);
+            final String result = localDate.format(dateTimeFormatter);
+            isNotEqualToOutgoingFormat = !result.equals(value);
+        } catch (DateTimeParseException exp) {
+            LOGGER.error(String.format("Invalid date - %s ", value), exp);
+        }
+        return isNotEqualToOutgoingFormat;
     }
 }

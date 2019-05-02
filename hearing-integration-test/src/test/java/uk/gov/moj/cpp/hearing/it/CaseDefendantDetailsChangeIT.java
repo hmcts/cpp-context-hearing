@@ -16,8 +16,11 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.function.Consumer;
 
 import org.junit.Test;
 
@@ -25,6 +28,19 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
 
     @Test
     public void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared() throws Exception {
+        updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(c -> {
+        });
+    }
+
+    @Test
+    public void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotSharedNoBailStatus() throws Exception {
+        updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(c -> {
+            c.getDefendants().get(0).getPersonDefendant().setBailStatus(null);
+        });
+    }
+
+
+    private void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(Consumer<CaseDefendantDetails> caseDefendantDetailsConsumer) throws Exception {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
@@ -32,6 +48,7 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                 with(caseDefendantDetailsChangedCommandTemplate(), template -> {
                             template.getDefendants().get(0).setId(hearingOne.getFirstDefendantForFirstCase().getId());
                             template.getDefendants().get(0).setProsecutionCaseId(hearingOne.getFirstDefendantForFirstCase().getProsecutionCaseId());
+                            caseDefendantDetailsConsumer.accept(template);
                         }
                 )));
 

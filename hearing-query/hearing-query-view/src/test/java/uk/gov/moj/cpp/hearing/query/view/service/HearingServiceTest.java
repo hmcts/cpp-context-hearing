@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
@@ -30,11 +31,15 @@ import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
@@ -137,6 +142,18 @@ public class HearingServiceTest {
         assertEquals(0, response.getHearings().size());
     }
 
+    private String expectedFormattedName(final Person person) {
+        StringBuilder sb = new StringBuilder();
+        if (person.getFirstName()!=null) {
+            sb.append(person.getFirstName() + " ");
+        }
+        if (person.getMiddleName()!=null) {
+            sb.append(person.getMiddleName() + " ");
+        }
+        sb.append(person.getLastName());
+        return sb.toString();
+    }
+
     @Test
     public void shouldFindHearingListWhenStartDateIsBeforeAndEndDateIsAfterSittingDate() {
 
@@ -160,6 +177,18 @@ public class HearingServiceTest {
 
         LocalDate startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate();
         final HearingTestUtils.HearingHelper hearing = helper(HearingTestUtils.buildHearing());
+
+        final Defendant defendant = hearing.getFirstDefendant();
+        final Defendant extraDefendant = new Defendant();
+        HearingSnapshotKey defendantId =  new HearingSnapshotKey();
+        defendantId.setId(UUID.randomUUID());
+        extraDefendant.setId(defendantId);
+        final PersonDefendant personDefendant = new PersonDefendant();
+        final Person personDetails = new Person();
+        personDetails.setLastName("LastNameOnly");
+        personDefendant.setPersonDetails(personDetails);
+        extraDefendant.setPersonDefendant(personDefendant);
+        hearing.it().getProsecutionCases().iterator().next().getDefendants().add(extraDefendant);
 
         when(hearingRepository.findByFilters(startDateStartOfDay, hearing.it().getCourtCentre().getId(), hearing.it().getCourtCentre().getRoomId())).thenReturn(asList(hearing.it()));
         when(prosecutionCaseIdentifierJPAMapper.fromJPA(any(ProsecutionCaseIdentifier.class))).thenReturn(prosecutionCaseIdentifier);
@@ -188,13 +217,15 @@ public class HearingServiceTest {
                                         .with(uk.gov.justice.core.courts.ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(hearing.getFirstProsecutionCase().getProsecutionCaseIdentifier().getProsecutionAuthorityReference()))
                                         .with(uk.gov.justice.core.courts.ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(hearing.getFirstProsecutionCase().getProsecutionCaseIdentifier().getProsecutionAuthorityId()))
                                 )
-                                .with(ProsecutionCase::getDefendants, first(isBean(HearingListResponseDefendant.class)
-                                        .with(HearingListResponseDefendant::getId, is(hearing.getFirstDefendant().getId().getId()))
-                                        .with(HearingListResponseDefendant::getName, is(String.format("%s %s %s",
-                                                hearing.getFirstDefendantPersonDetails().getFirstName(),
-                                                hearing.getFirstDefendantPersonDetails().getMiddleName(),
-                                                hearing.getFirstDefendantPersonDetails().getLastName()
-                                        )))
+                                .with(ProsecutionCase::getDefendants, hasItem(isBean(HearingListResponseDefendant.class)
+                                        .with(HearingListResponseDefendant::getId, is(defendant.getId().getId()))
+                                        .with(HearingListResponseDefendant::getName, is(expectedFormattedName(defendant.getPersonDefendant().getPersonDetails())
+                                        ))
+                                ))
+                                .with(ProsecutionCase::getDefendants, hasItem(isBean(HearingListResponseDefendant.class)
+                                        .with(HearingListResponseDefendant::getId, is(extraDefendant.getId().getId()))
+                                        .with(HearingListResponseDefendant::getName, is(expectedFormattedName(extraDefendant.getPersonDefendant().getPersonDetails())
+                                        ))
                                 ))
 
                         ))

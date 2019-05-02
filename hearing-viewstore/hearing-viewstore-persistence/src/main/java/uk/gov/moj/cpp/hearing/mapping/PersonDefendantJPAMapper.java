@@ -56,7 +56,7 @@ public class PersonDefendantJPAMapper {
         return uk.gov.justice.core.courts.PersonDefendant.personDefendant()
                 .withAliases(defendantAliasesJPAMapper.fromJPA(pojo.getAliases()))
                 .withArrestSummonsNumber(pojo.getArrestSummonsNumber())
-                .withBailStatus(pojo.getBailStatus() != null ? BailStatus.valueOf(pojo.getBailStatus()) : null)
+                .withBailStatus(BailStatus.valueFor(pojo.getBailStatus()).orElse(null))
                 .withCustodyTimeLimit(pojo.getCustodyTimeLimit())
                 .withDriverNumber(pojo.getDriverNumber())
                 .withEmployerOrganisation(organisationJPAMapper.fromJPA(pojo.getEmployerOrganisation()))

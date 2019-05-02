@@ -64,7 +64,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
                                 personDefendantJpa.setAliases(String.join(", ", personDefendantPojo.getAliases()));
                             }
                             personDefendantJpa.setArrestSummonsNumber(personDefendantPojo.getArrestSummonsNumber());
-                            personDefendantJpa.setBailStatus(personDefendantPojo.getBailStatus().name());
+                            personDefendantJpa.setBailStatus(personDefendantPojo.getBailStatus() != null ? personDefendantPojo.getBailStatus().name() : null);
                             personDefendantJpa.setCustodyTimeLimit(personDefendantPojo.getCustodyTimeLimit());
                             personDefendantJpa.setDriverNumber(personDefendantPojo.getDriverNumber());
                             personDefendantJpa.setEmployerPayrollReference(personDefendantPojo.getEmployerPayrollReference());
