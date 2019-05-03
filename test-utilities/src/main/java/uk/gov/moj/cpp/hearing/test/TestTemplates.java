@@ -23,6 +23,8 @@ import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.customStructureInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+
+import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.CourtDecision;
 import uk.gov.justice.core.courts.CreateNowsRequest;
@@ -42,6 +44,7 @@ import uk.gov.justice.core.courts.NowVariantKey;
 import uk.gov.justice.core.courts.NowVariantResult;
 import uk.gov.justice.core.courts.NowVariantResultText;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
@@ -295,12 +298,22 @@ public class TestTemplates {
 
                 ))
                 .withNows(asList(Now.now()
-                        .withId(UUID.randomUUID())
+                        .withId(randomUUID())
                         .withNowsTypeId(nowsTypeId)
                         .withDefendantId(defendantId)
                         //.w(STRING.next())
                         .withDocumentationLanguage(DocumentationLanguage.ENGLISH)
-                        .withFinancialOrders(FinancialOrderDetails.financialOrderDetails().build())
+                        .withFinancialOrders(FinancialOrderDetails.financialOrderDetails().withEmployerOrganisation(Organisation.organisation()
+                                .withName("Testing Company Ltd")
+                                .withAddress(
+                                        Address.address()
+                                                .withAddress1("Emp Address Line 1")
+                                                .withAddress2("Emp Address Line 2")
+                                                .withAddress3("Emp Address Line 3")
+                                                .withAddress4("Emp Address Line 4")
+                                                .withAddress5("Emp Address Line 5")
+                                                .withPostcode("TF3 1YE")
+                                                .build()).build()).build())
                         .withRequestedMaterials(asList(
                                 NowVariant.nowVariant()
                                         .withMaterialId(materialId)

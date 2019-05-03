@@ -93,7 +93,7 @@ public class EnforceFinancialImpositionMapper {
                 .withParentGuardian(new StagingEnforcementParentGuardianMapper(defendant).map())
                 .withCollectionOrder(new StagingEnforcementCollectionOrderMapper(sharedResultLines, nows, resultLineResultDefinitionIdMap, resultLineIdWithListOfPrompts).map())
                 .withPlea(new StagingEnforcementPleaMapper(defendant).map())
-                .withEmployer(new StagingEnforcementEmployerMapper(defendant).map())
+                .withEmployer(new StagingEnforcementEmployerMapper(nows.getFinancialOrders().getEmployerOrganisation()).map())
                 //TODO: Set Null By ATCM.  Does Courts need to support minor creditors in increment 2.4?  Check with Helen Locke/BPOs.  If required check with Helen Locke regarding the results mappings
                 .withMinorCreditor(new StagingEnforcementMinorCreditorMapper().map())//TODO: we do not differentiate major from minor -> prompt 296.  BPO Question concerning how we will deal with minor creditors and the expectation of GOB
                 .withPaymentTerms(new StagingEnforcementPaymentTermsMapper(sharedResultLines, resultLineResultDefinitionIdMap, resultLineIdWithListOfPrompts).map())

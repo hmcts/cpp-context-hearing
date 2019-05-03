@@ -7,10 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hearing-domain-transformation-archive</artifactId>
+    <artifactId>hearing-domain-transformation-delete-all-events</artifactId>
 
     <properties>
-        <stream-transformation-tool.version>2.1.0</stream-transformation-tool.version>
+        <stream-transformation-tool.version>4.1.0</stream-transformation-tool.version>
     </properties>
 
     <dependencies>
