@@ -34,8 +34,12 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingDetailChanged(HearingDetailChanged hearingDetailChanged) {
 
-        this.momento.getHearing().setJudiciary(new ArrayList<>(hearingDetailChanged.getJudiciary()));
-        this.momento.getHearing().setHearingDays(new ArrayList<>(hearingDetailChanged.getHearingDays()));
+        if (hearingDetailChanged.getJudiciary() != null && !hearingDetailChanged.getJudiciary().isEmpty()) {
+            this.momento.getHearing().setJudiciary(new ArrayList<>(hearingDetailChanged.getJudiciary()));
+        }
+        if (hearingDetailChanged.getHearingDays() != null && !hearingDetailChanged.getHearingDays().isEmpty()) {
+            this.momento.getHearing().setHearingDays(new ArrayList<>(hearingDetailChanged.getHearingDays()));
+        }
         this.momento.getHearing().setCourtCentre(hearingDetailChanged.getCourtCentre());
         this.momento.getHearing().setHearingLanguage(hearingDetailChanged.getHearingLanguage());
         this.momento.getHearing().setJurisdictionType(hearingDetailChanged.getJurisdictionType());
