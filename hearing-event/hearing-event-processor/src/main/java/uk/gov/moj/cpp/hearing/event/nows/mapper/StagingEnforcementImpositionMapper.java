@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_AMOUNT_OF_BACK_DUTY;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_AMOUNT_OF_COMPENSATION;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_AMOUNT_OF_COSTS;
@@ -22,6 +23,7 @@ import uk.gov.justice.json.schemas.staging.ImpositionResultCode;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,6 +37,8 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 
     private final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts;
 
+    private final Map<String, String> majorCreditorMap;
+
     StagingEnforcementImpositionMapper(final List<SharedResultLine> sharedResultLines,
                                        final Map<UUID, UUID> resultLineResultDefinitionIdMap,
                                        final Map<UUID, String> sharedResultLineOffenceCodeMap,
@@ -43,6 +47,10 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
         this.resultLineResultDefinitionIdMap = resultLineResultDefinitionIdMap;
         this.sharedResultLineOffenceCodeMap = sharedResultLineOffenceCodeMap;
         this.resultLineIdWithListOfPrompts = resultLineIdWithListOfPrompts;
+        this.majorCreditorMap = new HashMap<>();
+        this.majorCreditorMap.put("Transport for London", "TFL2");
+        this.majorCreditorMap.put("Driver and Vehicle Licensing Agency", "DVL2");
+        this.majorCreditorMap.put("Television Licensing Organisation", "TVL3");
     }
 
     List<Imposition> createImpositions() {
@@ -63,7 +71,7 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 
                 final BigDecimal impositionAmount = setImpositionAmount(impositionResultCode, promptRefsList);
 
-                final String majorCreditor = setMajorCreditor(impositionResultCode, promptRefsList);
+                final String majorCreditor = ofNullable(setMajorCreditor(impositionResultCode, promptRefsList)).map(majorCreditorMap::get).orElse(null);
 
                 /*
                  * Note : prosecutionAuthorityId - Not required by courts as in courts any major creditor may be provided.
