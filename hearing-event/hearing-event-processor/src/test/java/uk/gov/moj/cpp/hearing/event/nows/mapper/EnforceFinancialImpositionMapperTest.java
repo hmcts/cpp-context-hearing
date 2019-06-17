@@ -4,17 +4,29 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.generateNowsRequestTemplate;
 
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.json.schemas.staging.EnforceFinancialImposition;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EnforceFinancialImpositionMapperTest {
 
     private EnforceFinancialImpositionMapper mapper;
@@ -25,12 +37,40 @@ public class EnforceFinancialImpositionMapperTest {
 
     private UUID requestId = UUID.randomUUID();
 
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @InjectMocks
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+
+    private static final FileAsStringReader fileAsStringReader = new FileAsStringReader();
+
     @Before
     public void setup() {
+
+        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
 
         nowsRequest = generateNowsRequestTemplate(defendantId);
 
         mapper = new EnforceFinancialImpositionMapper(requestId, nowsRequest);
+    }
+
+    @Test
+    public void testInstalmentAmountAndLumpSumAmount() {
+
+        String payload = payload("/data/hearing.events.pending-nows-requested.json");
+
+        final PendingNowsRequested pendingNowsRequested = this.jsonObjectToObjectConverter.convert(stringToJsonObjectConverter.convert(payload), PendingNowsRequested.class);
+
+        final EnforceFinancialImposition enforceFinancialImposition = new EnforceFinancialImpositionMapper(requestId, pendingNowsRequested.getCreateNowsRequest()).map();
+
+        assertEquals(new BigDecimal("19.90"), enforceFinancialImposition.getPaymentTerms().getInstalmentAmount());
+
+        assertEquals(new BigDecimal("200"), enforceFinancialImposition.getPaymentTerms().getLumpSumAmount());
     }
 
     @Test
@@ -95,5 +135,9 @@ public class EnforceFinancialImpositionMapperTest {
         assertEquals(nowsRequest.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityCode(), enforceFinancialImposition.getProsecutionAuthorityCode());
 
 
+    }
+
+    private static String payload(final String fileName) {
+        return fileAsStringReader.readFile(fileName);
     }
 }

@@ -86,7 +86,7 @@ public class NowsReferenceDataLoaderTest {
 
         final JsonEnvelope resultEnvelope = envelopeFrom(metadataWithRandomUUID("something"), objectToJsonObjectConverter.convert(allResultDefinitionsIn));
 
-        when(requester.request(any())).thenReturn(resultEnvelope);
+        when(requester.requestAsAdmin(any())).thenReturn(resultEnvelope);
 
         AllResultDefinitions actual = target.loadAllResultDefinitions(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
 
@@ -122,7 +122,7 @@ public class NowsReferenceDataLoaderTest {
 
         final JsonEnvelope resultEnvelope = envelopeFrom(metadataWithRandomUUID("something"), objectToJsonObjectConverter.convert(data));
 
-        when(requester.request(any())).thenReturn(resultEnvelope);
+        when(requester.requestAsAdmin(any())).thenReturn(resultEnvelope);
 
         AllNows actual = target.loadAllNowsReference(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
 

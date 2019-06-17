@@ -5,7 +5,6 @@ import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DAYS_IN_DE
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_AMOUNT;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_START_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_AMOUNT;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_PAY_WITHIN;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_FREQUENCY;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAY_BY_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_INSTL;
@@ -27,7 +26,7 @@ public class PaymentTermsCalculator {
 
     private static final String PAY_BY_DATE = "Date to pay in full by %s";
 
-    private static final String LUMP_SUM_PLUS_INSTALMENTS = "Lump sum amount £%s Pay within days %s Instalment amount £%s Payment frequency %s Instalment start date %s";
+    private static final String LUMP_SUM_PLUS_INSTALMENTS = "Lump sum amount £%s Instalment amount £%s Payment frequency %s Instalment start date %s";
 
     private static final String INSTALMENTS_ONLY = "Instalment amount £%s Payment frequency %s Instalment start date %s";
 
@@ -56,7 +55,6 @@ public class PaymentTermsCalculator {
             if (hasOptionalText) {
                 return String.format(LUMP_SUM_PLUS_INSTALMENTS + OPTIONAL_TEXT,
                         getPromptValue(id2PromptRef, resultLines4Now, P_LUMP_SUM_AMOUNT),
-                        getPromptValue(id2PromptRef, resultLines4Now, P_LUMP_SUM_PAY_WITHIN),
                         getPromptValue(id2PromptRef, resultLines4Now, P_INSTALMENT_AMOUNT),
                         getPromptValue(id2PromptRef, resultLines4Now, P_PAYMENT_FREQUENCY),
                         LocalDate.parse(getPromptValue(id2PromptRef, resultLines4Now, P_INSTALMENT_START_DATE)).format(FORMATTER),
@@ -64,7 +62,6 @@ public class PaymentTermsCalculator {
             } else {
                 return String.format(LUMP_SUM_PLUS_INSTALMENTS,
                         getPromptValue(id2PromptRef, resultLines4Now, P_LUMP_SUM_AMOUNT),
-                        getPromptValue(id2PromptRef, resultLines4Now, P_LUMP_SUM_PAY_WITHIN),
                         getPromptValue(id2PromptRef, resultLines4Now, P_INSTALMENT_AMOUNT),
                         getPromptValue(id2PromptRef, resultLines4Now, P_PAYMENT_FREQUENCY),
                         LocalDate.parse(getPromptValue(id2PromptRef, resultLines4Now, P_INSTALMENT_START_DATE)).format(FORMATTER)

@@ -8,11 +8,9 @@ import static uk.gov.justice.json.schemas.staging.Frequency.WEEKLY;
 import static uk.gov.justice.json.schemas.staging.ReserveTermsType.INSTALMENTS_ONLY;
 import static uk.gov.justice.json.schemas.staging.ReserveTermsType.LUMP_SUM;
 import static uk.gov.justice.json.schemas.staging.ReserveTermsType.LUMP_SUM_PLUS_INSTALMENTS;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_FOURTEEN;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_AMOUNT;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_START_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_AMOUNT;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_PAY_WITHIN;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_FREQUENCY;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_ABCD;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_AEOC;
@@ -31,7 +29,6 @@ import uk.gov.justice.json.schemas.staging.ReserveTermsType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,12 +163,7 @@ public class StagingEnforcementCollectionOrderMapperTest {
         Map<UUID, List<Prompt>> sharedResultLineWithPrompts = new HashMap<>();
         UUID sharedResultLineId = randomUUID();
 
-        final ResultPrompt resultPrompt = ResultPrompt.resultPrompt()
-                .withId(randomUUID()).withPromptReference(P_LUMP_SUM_PAY_WITHIN)
-                .withValue(P_FOURTEEN)
-                .build();
-
-        sharedResultLineWithPrompts.put(sharedResultLineId, asList(Prompt.prompt().withId(resultPrompt.getId()).build()));
+        sharedResultLineWithPrompts.put(sharedResultLineId, asList());
 
         Map<UUID, UUID> resultLineResultDefinitionIdMap = new HashMap<>();
         resultLineResultDefinitionIdMap.put(sharedResultLineId, resultDefinitions.get(0));
@@ -180,7 +172,6 @@ public class StagingEnforcementCollectionOrderMapperTest {
         sharedResultLines.add(
                 SharedResultLine.sharedResultLine()
                         .withId(sharedResultLineId)
-                        .withPrompts(Arrays.asList(resultPrompt))
                         .build());
 
         StagingEnforcementCollectionOrderMapper mapper = new StagingEnforcementCollectionOrderMapper(
@@ -192,48 +183,6 @@ public class StagingEnforcementCollectionOrderMapperTest {
         CollectionOrder collectionOrder = mapper.map();
 
         assertEquals(new BigDecimal(100), collectionOrder.getReserveTerms().getLumpSum().getAmount());
-    }
-
-    @Test
-    public void testLumpSumWithinDays() {
-
-        final Now now = Now.now().build();
-
-        Map<UUID, ReserveTermsType> reserveTermsTypeMap = new HashMap<>();
-        reserveTermsTypeMap.put(RD_RLSUM, LUMP_SUM);
-
-        List<UUID> resultDefinitions = new ArrayList<>(reserveTermsTypeMap.keySet());
-
-        Map<UUID, List<Prompt>> sharedResultLineWithPrompts = new HashMap<>();
-        UUID sharedResultLineId = randomUUID();
-        UUID promptId1 = randomUUID();
-        UUID promptId2 = randomUUID();
-        ResultPrompt resultPrompt1 = ResultPrompt.resultPrompt()
-                .withId(promptId1)
-                .withPromptReference(P_LUMP_SUM_PAY_WITHIN)
-                .withValue(P_FOURTEEN)
-                .build();
-
-        sharedResultLineWithPrompts.put(sharedResultLineId, asList(Prompt.prompt().withId(resultPrompt1.getId()).build()));
-
-        Map<UUID, UUID> resultLineResultDefinitionIdMap = new HashMap<>();
-        resultLineResultDefinitionIdMap.put(sharedResultLineId, resultDefinitions.get(0));
-
-        final List<SharedResultLine> sharedResultLines = new ArrayList<>();
-        sharedResultLines.add(
-                SharedResultLine.sharedResultLine()
-                        .withId(sharedResultLineId)
-                        .withPrompts(asList(resultPrompt1)).build());
-
-        StagingEnforcementCollectionOrderMapper mapper = new StagingEnforcementCollectionOrderMapper(
-                sharedResultLines,
-                now,
-                resultLineResultDefinitionIdMap,
-                sharedResultLineWithPrompts);
-
-        CollectionOrder collectionOrder = mapper.map();
-
-        assertEquals(new Integer(14), collectionOrder.getReserveTerms().getLumpSum().getWithinDays());
     }
 
     @Test

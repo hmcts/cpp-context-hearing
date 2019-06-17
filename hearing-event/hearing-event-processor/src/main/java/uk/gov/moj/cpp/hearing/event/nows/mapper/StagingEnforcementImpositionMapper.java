@@ -133,10 +133,10 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
         } else {
             //Remove '£' sign
             if(impositionAmount.startsWith("£")) {
-                return new BigDecimal(impositionAmount.substring(1));
+                return getStringAsDecimal(impositionAmount.substring(1));
             }
 
-            return new BigDecimal(impositionAmount);
+            return getStringAsDecimal(impositionAmount);
         }
     }
 
