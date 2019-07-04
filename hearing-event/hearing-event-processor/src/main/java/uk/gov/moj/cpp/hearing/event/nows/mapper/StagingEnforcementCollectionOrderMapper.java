@@ -5,13 +5,10 @@ import static java.util.Objects.nonNull;
 import static uk.gov.justice.json.schemas.staging.ReserveTermsType.INSTALMENTS_ONLY;
 import static uk.gov.justice.json.schemas.staging.ReserveTermsType.LUMP_SUM;
 import static uk.gov.justice.json.schemas.staging.ReserveTermsType.LUMP_SUM_PLUS_INSTALMENTS;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_FOURTEEN;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_AMOUNT;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_START_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_AMOUNT;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_PAY_WITHIN;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_FREQUENCY;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_TWOEIGHT;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_ABCD;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_AEOC;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_COLLECTIONORDER;
@@ -145,7 +142,7 @@ public class StagingEnforcementCollectionOrderMapper extends AbstractStagingEnfo
 
         String promptValue = getPromptValue(promptRefsList, P_INSTALMENT_AMOUNT);
 
-        return isNull(promptValue) ? null : new BigDecimal(promptValue);
+        return isNull(promptValue) ? null : getStringAsDecimal(promptValue);
     }
 
     private LocalDate getInstalmentStartDate(final ReserveTermsType reserveTermsType, final List<UUID> promptRefsList) {
@@ -171,50 +168,12 @@ public class StagingEnforcementCollectionOrderMapper extends AbstractStagingEnfo
     private LumpSum setLumpSum(ReserveTermsType reserveTermsType, final List<UUID> promptRefsList, final String totalBalance) {
         if (reserveTermsType != INSTALMENTS_ONLY) {
             final BigDecimal reserveTermsAmount = getReserveTermsAmount(reserveTermsType, promptRefsList, totalBalance);
-            final Integer withInDays = getReserveTermsWithinDays(reserveTermsType, promptRefsList);
             if(nonNull(reserveTermsAmount)) {
                 return LumpSum.lumpSum()
                         .withAmount(reserveTermsAmount)
-                        .withWithinDays(withInDays)
                         .build();
             }
         }
-        return null;
-    }
-
-    private Integer getReserveTermsWithinDays(final ReserveTermsType reserveTermsType, final List<UUID> promptRefsList) {
-
-        String withinDays = null;
-
-        if (reserveTermsType == LUMP_SUM) {
-
-            final String withinDaysFixList = getPromptValue(promptRefsList, P_LUMP_SUM_PAY_WITHIN);
-
-            if (nonNull(withinDaysFixList)) {
-                if (withinDaysFixList.equals(P_FOURTEEN)) {
-                    withinDays = "14";
-                } else if (withinDaysFixList.equals(P_TWOEIGHT)) {
-                    withinDays = "28";
-                }
-            }
-
-        } else if (reserveTermsType == LUMP_SUM_PLUS_INSTALMENTS) {
-
-            final String withinDaysFixList = getPromptValue(promptRefsList, P_LUMP_SUM_PAY_WITHIN);
-
-            if (nonNull(withinDaysFixList)) {
-                if (withinDaysFixList.equals(P_FOURTEEN)) {
-                    withinDays = "14";
-                } else if (withinDaysFixList.equals(P_TWOEIGHT)) {
-                    withinDays = "28";
-                }
-            }
-        }
-
-        if (nonNull(withinDays)) {
-            return new Integer(withinDays);
-        }
-
         return null;
     }
 
@@ -231,7 +190,7 @@ public class StagingEnforcementCollectionOrderMapper extends AbstractStagingEnfo
             outstandingBalance = getPromptValue(promptRefsList, P_LUMP_SUM_AMOUNT);
         }
 
-        return nonNull(outstandingBalance) ? new BigDecimal(outstandingBalance) : null;
+        return isNull(outstandingBalance) ? null : getStringAsDecimal(outstandingBalance);
     }
 
     private ReserveTermsType setReserveTermsType(final UUID resultDefinitionId) {

@@ -4,10 +4,16 @@ import static java.util.Objects.isNull;
 import uk.gov.justice.core.courts.ResultPrompt;
 import uk.gov.justice.core.courts.SharedResultLine;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 public class AbstractStagingEnforcementMapper {
+
+    protected static final String EMPTY_STRING = "";
+    protected static final String REGEX_ONLY_NUMBERS = "[^\\d*.\\d+|\\d+\\.\\d*$]";
+    protected static final String INCOMING_PROMPT_DATE_FORMAT = "yyyy-MM-dd";
+    protected static final String OUTGOING_PROMPT_DATE_FORMAT = "dd MMM yyyy";
 
     private final List<SharedResultLine> sharedResultLines;
 
@@ -25,5 +31,9 @@ public class AbstractStagingEnforcementMapper {
                 .map(ResultPrompt::getValue)
                 .findFirst()
                 .orElse(null);
+    }
+
+    protected BigDecimal getStringAsDecimal(final String value) {
+        return new BigDecimal(value.replaceAll(REGEX_ONLY_NUMBERS, EMPTY_STRING));
     }
 }

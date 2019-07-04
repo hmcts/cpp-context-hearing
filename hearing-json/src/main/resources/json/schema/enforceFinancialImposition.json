@@ -236,7 +236,7 @@
                   "type": "string",
                   "enum": [
                     "WEEKLY",
-                    "FORTIGHTLY",
+                    "FORTNIGHTLY",
                     "MONTHLY"
                   ]
                 },

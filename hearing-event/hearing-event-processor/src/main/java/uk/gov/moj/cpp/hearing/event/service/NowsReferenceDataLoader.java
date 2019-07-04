@@ -42,7 +42,7 @@ public class NowsReferenceDataLoader {
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_NOWS_REQUEST_ID)
                 .apply(createObjectBuilder().add(ON_QUERY_PARAMETER, strLocalDate).build());
 
-        final JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
+        final JsonEnvelope jsonResultEnvelope = requester.requestAsAdmin(requestEnvelope);
 
         final AllNows allNows = jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), AllNows.class);
 
@@ -67,7 +67,7 @@ public class NowsReferenceDataLoader {
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(context, GET_ALL_RESULT_DEFINITIONS_REQUEST_ID)
                 .apply(createObjectBuilder().add(ON_QUERY_PARAMETER, strLocalDate).build());
 
-        final JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
+        final JsonEnvelope jsonResultEnvelope = requester.requestAsAdmin(requestEnvelope);
         final AllResultDefinitions allResultDefinitions = jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), AllResultDefinitions.class);
         //correct incoming data
         allResultDefinitions.getResultDefinitions().forEach(rd -> trimUserGroups(rd));

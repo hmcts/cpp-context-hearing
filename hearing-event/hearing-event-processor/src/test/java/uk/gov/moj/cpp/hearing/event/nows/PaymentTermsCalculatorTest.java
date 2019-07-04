@@ -6,7 +6,6 @@ import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DAYS_IN_DE
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_AMOUNT;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_START_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_AMOUNT;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_PAY_WITHIN;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_FREQUENCY;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAY_BY_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_INSTL;
@@ -99,7 +98,6 @@ public class PaymentTermsCalculatorTest {
         final UUID promptId2 = UUID.randomUUID();
         final UUID promptId3 = UUID.randomUUID();
         final UUID promptId4 = UUID.randomUUID();
-        final UUID promptId5 = UUID.randomUUID();
         final UUID promptId6 = UUID.randomUUID();
 
         final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
@@ -107,7 +105,6 @@ public class PaymentTermsCalculatorTest {
         id2PromptRef.put(promptId2, Prompt.prompt().setId(promptId2).setReference(P_DAYS_IN_DEFAULT));
         id2PromptRef.put(promptId3, Prompt.prompt().setId(promptId3).setReference(P_INSTALMENT_START_DATE));
         id2PromptRef.put(promptId4, Prompt.prompt().setId(promptId4).setReference(P_LUMP_SUM_AMOUNT));
-        id2PromptRef.put(promptId5, Prompt.prompt().setId(promptId5).setReference(P_LUMP_SUM_PAY_WITHIN));
         id2PromptRef.put(promptId6, Prompt.prompt().setId(promptId6).setReference(P_INSTALMENT_AMOUNT));
 
         final List<ResultLine> resultLines4Now = Collections.singletonList(
@@ -117,9 +114,6 @@ public class PaymentTermsCalculatorTest {
                                 uk.gov.justice.core.courts.Prompt.prompt()
                                         .withId(promptId4)
                                         .withValue("100").build(),
-                                uk.gov.justice.core.courts.Prompt.prompt()
-                                        .withId(promptId5)
-                                        .withValue("28 days").build(),
                                 uk.gov.justice.core.courts.Prompt.prompt()
                                         .withId(promptId6)
                                         .withValue("10").build(),
@@ -135,7 +129,7 @@ public class PaymentTermsCalculatorTest {
                         )
                         .build());
 
-        final String expected = "Lump sum amount £100 Pay within days 28 days Instalment amount £10 Payment frequency monthly Instalment start date 02-Feb-2019 Number of days in default 2";
+        final String expected = "Lump sum amount £100 Instalment amount £10 Payment frequency monthly Instalment start date 02-Feb-2019 Number of days in default 2";
 
         String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now);
 

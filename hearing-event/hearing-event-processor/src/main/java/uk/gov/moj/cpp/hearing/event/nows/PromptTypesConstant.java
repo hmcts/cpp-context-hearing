@@ -10,21 +10,17 @@ public class PromptTypesConstant {
     public static final String P_AMOUNT_OF_COMPENSATION = "AOCOM";
     public static final String P_CREDITOR_NAME = "CREDNAME";
     public static final String P_LUMP_SUM_AMOUNT = "LSA";
-    public static final String P_LUMP_SUM_PAY_WITHIN = "LSPW";
     public static final String P_PAYMENT_FREQUENCY = "PF";
     public static final String P_INSTALMENT_START_DATE = "ISTD";
     public static final String P_INSTALMENT_AMOUNT = "IAMT";
     public static final String P_PAY_BY_DATE = "PBD";
     public static final String P_DAYS_IN_DEFAULT = "DID";
+    public static final String P_NON_STANDARD_REASON = "NSR";
 
     // Fixed List for Payment Frequency
     public static final String P_WEEKLY = "weekly";
     public static final String P_FORTNIGHTLY = "fortnightly";
     public static final String P_MONTHLY = "monthly";
-
-    // Fixed List for LUMP SUM PAY WITHIN
-    public static final String P_FOURTEEN = "14 days";
-    public static final String P_TWOEIGHT = "28 days";
 
     public static final String EMPLOYER_ORGANISATION_NAME_PROMPT_REFERENCE = "employerName";
     public static final String EMPLOYER_ORGANISATION_ADDRESS1_PROMPT_REFERENCE = "employerAddress1";

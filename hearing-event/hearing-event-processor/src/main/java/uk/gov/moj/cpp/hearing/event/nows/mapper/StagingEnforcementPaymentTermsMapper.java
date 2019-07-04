@@ -35,10 +35,6 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S1135"})
 public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforcementMapper {
 
-    public static final String EMPTY_STRING = "";
-    public static final String REGEX_ONLY_NUMBERS = "[^0-9]";
-    public static final String INCOMING_PROMPT_DATE_FORMAT = "yyyy-MM-dd";
-    public static final String OUTGOING_PROMPT_DATE_FORMAT = "dd MMM yyyy";
     private static final Logger LOGGER = LoggerFactory.getLogger(StagingEnforcementPaymentTermsMapper.class.getName());
     private final Map<UUID, UUID> resultLineResultDefinitionIdMap;
 
@@ -183,10 +179,6 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
         }
 
         return null;
-    }
-
-    private BigDecimal getStringAsDecimal(final String value) {
-        return new BigDecimal(value.replaceAll(REGEX_ONLY_NUMBERS, EMPTY_STRING));
     }
 
     private String reformatDateIfRequired(final String value) {

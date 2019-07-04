@@ -17,8 +17,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID;
-import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_RESULT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_ADDRESS1_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_ADDRESS2_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_ADDRESS3_PROMPT_REFERENCE;
@@ -26,6 +24,8 @@ import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORG
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_ADDRESS5_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_NAME_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_REFERENCE_NUMBER_PROMPT_REFERENCE;
+import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_RESULT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_AEOC;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.target;
@@ -76,8 +76,10 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -997,5 +999,64 @@ public class NowsGeneratorTest {
         assertThat(nows.get(0).getRequestedMaterials(), hasSize(1));
 
         assertThat(nows.get(0).getRequestedMaterials().get(0).getIsAmended(), is(true));
+    }
+
+    @Test
+    public void testNowVariantResultText() {
+
+        final String expected = "";
+
+        final NowResultDefinitionRequirement nowsRequirementRow = NowResultDefinitionRequirement.resultDefinitions()
+                .setId(UUID.randomUUID())
+                .setNowReference(STRING.next());
+
+        final Map<UUID, Prompt> id2PromptRef = null;
+
+        final ResultLine resultLine = null;
+
+        NowVariantResultText nowVariantResultText = target.nowVariantResultText(nowsRequirementRow, id2PromptRef, resultLine);
+
+        assertThat(nowVariantResultText.getAdditionalProperties().get(nowsRequirementRow.getNowReference()), is(expected));
+    }
+
+    @Test
+    public void testNowVariantResultTextForAdjournmentOtherThanNonStandardReason() {
+
+        final String expected = "";
+
+        final NowResultDefinitionRequirement nowsRequirementRow = NowResultDefinitionRequirement.resultDefinitions()
+                .setId(UUID.randomUUID())
+                .setNowReference("adjournmentReason");
+
+        final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
+
+        final ResultLine resultLine = ResultLine.resultLine().withPrompts(singletonList(uk.gov.justice.core.courts.Prompt.prompt().build())).build();
+
+        final NowVariantResultText nowVariantResultText = target.nowVariantResultText(nowsRequirementRow, id2PromptRef, resultLine);
+
+        assertThat(nowVariantResultText.getAdditionalProperties().get(nowsRequirementRow.getNowReference()), is(expected));
+    }
+
+    @Test
+    public void testNowVariantResultTextForAdjournmentWithNonStandardReason() {
+
+        final String expected = "This is non-standard reason for adjournment";
+
+        final String reference = "NSR";
+
+        final NowResultDefinitionRequirement nowsRequirementRow = NowResultDefinitionRequirement.resultDefinitions()
+                .setId(UUID.randomUUID())
+                .setNowReference("adjournmentReason");
+
+        final UUID promptId = randomUUID();
+
+        final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
+        id2PromptRef.put(promptId, Prompt.prompt().setReference(reference).setId(promptId));
+
+        final ResultLine resultLine = ResultLine.resultLine().withPrompts(singletonList(uk.gov.justice.core.courts.Prompt.prompt().withId(promptId).withValue(expected).build())).build();
+
+        final NowVariantResultText nowVariantResultText = target.nowVariantResultText(nowsRequirementRow, id2PromptRef, resultLine);
+
+        assertThat(nowVariantResultText.getAdditionalProperties().get(nowsRequirementRow.getNowReference()), is(expected));
     }
 }

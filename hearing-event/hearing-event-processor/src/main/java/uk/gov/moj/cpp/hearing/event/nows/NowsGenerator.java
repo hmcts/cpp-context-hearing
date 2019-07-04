@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORG
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_NAME_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_POST_CODE_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_REFERENCE_NUMBER_PROMPT_REFERENCE;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_NON_STANDARD_REASON;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptUtil.extractByPromptReference;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_RESULT_DEFINITION_ID;
@@ -76,6 +77,7 @@ public class NowsGenerator {
     public static final String INITIAL_MATERIAL_STATUS = "requesting";
     public static final String NEXT_HEARING_START_DATE_FORMAT = "yyyy-MM-dd";
     public static final String NEXT_HEARING_START_TIME_FORMAT = "HH:mm";
+    private static final String ADJOURNMENT_REASON = "adjournmentReason";
 
     private final ReferenceDataService referenceDataService;
     private final FinancialResultCalculator financialResultCalculator;
@@ -214,7 +216,7 @@ public class NowsGenerator {
             }
         }
 
-        if(results.isEmpty()) {
+        if (results.isEmpty()) {
             LOGGER.error("No Now's Meta data found for Result Lines - {}", resultLines.stream().map(ResultLine::getResultDefinitionId).collect(Collectors.toList()));
         }
 
@@ -391,7 +393,7 @@ public class NowsGenerator {
         return NowVariantResult.nowVariantResult()
                 .withSharedResultId(resultLine.getResultLineId())
                 .withSequence(resultDefinition.getRank())
-                .withNowVariantResultText(nowVariantResultText(now2ResultDefinitionRelation))
+                .withNowVariantResultText(nowVariantResultText(now2ResultDefinitionRelation, id2PromptRef, resultLine))
                 .withPromptRefs(promptRefs.isEmpty() ? null : promptRefs)
                 .build();
 
@@ -416,21 +418,24 @@ public class NowsGenerator {
         return nowVariantAddressee;
     }
 
-    private static NowVariantResultText nowVariantResultText(final NowResultDefinitionRequirement nowsRequirementRow) {
+    protected NowVariantResultText nowVariantResultText(final NowResultDefinitionRequirement nowsRequirementRow, final Map<UUID, Prompt> id2PromptRef, final ResultLine resultLine) {
 
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(String.format("nowVariantResultText_nowReference: '%s'  text: '%s' ",
-                    nowsRequirementRow.getNowReference(), nowsRequirementRow.getText() ));
+                    nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
         }
 
         if (nowsRequirementRow.getNowReference() != null && nowsRequirementRow.getNowReference().trim().length() > 0) {
             final NowVariantResultText.Builder builder = NowVariantResultText.nowVariantResultText();
-            final String text = nowsRequirementRow.getText()==null?" ":nowsRequirementRow.getText();
+            String text = isNull(nowsRequirementRow.getText()) ? "" : nowsRequirementRow.getText();
+
+            if (nowsRequirementRow.getNowReference().equalsIgnoreCase(ADJOURNMENT_REASON)) {
+                text = text + extractByPromptReference(id2PromptRef, P_NON_STANDARD_REASON, Collections.singletonList(resultLine)).orElse("");
+            }
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(String.format("**** nowVariantResultText nowReference: '%s'  text: '%s' ",
-                        nowsRequirementRow.getNowReference(), nowsRequirementRow.getText() ));
+                        nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
             }
-
             builder
                     .withAdditionalProperty(nowsRequirementRow.getNowReference(), text)
                     .withAdditionalProperty(nowsRequirementRow.getNowReference() + ".welsh", nowsRequirementRow.getWelshText() != null ? nowsRequirementRow.getWelshText() : text);

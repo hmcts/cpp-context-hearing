@@ -22,17 +22,16 @@
             "type": "string"
           },
           "welshHearingDescription": {
-            "type": "string",
-            "maxLength": 255
+            "type": "string"
           },
           "defaultDurationMin": {
             "type": "integer"
           },
           "validFrom": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "validTo": {
-            "type": ["string", "null"]
+            "type": "string"
           }
         },
         "required": [
