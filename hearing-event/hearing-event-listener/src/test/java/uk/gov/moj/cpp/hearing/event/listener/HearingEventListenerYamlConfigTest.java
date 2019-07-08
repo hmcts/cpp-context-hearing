@@ -32,25 +32,26 @@ import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
 import uk.gov.moj.cpp.hearing.nows.events.EnforcementError;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class HearingEventListenerRamlConfigTest {
-    private static final String PATH_TO_RAML = "src/raml/hearing-event-listener.messaging.raml";
-    private static final String COMMAND_NAME = "hearing";
-    private static final String CONTENT_TYPE_PREFIX = "application/vnd.";
+public class HearingEventListenerYamlConfigTest {
+
+    private static final Path PATH_TO_YAML = Paths.get("src/yaml/subscriptions-descriptor.yaml");
+
     private final List<String> handlerNamesToIgnore = asList(
             FoundVerdictForHearingToInherit.class.getAnnotation(Event.class).value(),
             FoundPleaForHearingToInherit.class.getAnnotation(Event.class).value(),
@@ -81,10 +82,11 @@ public class HearingEventListenerRamlConfigTest {
     );
 
     private Map<String, String> handlerNames = new HashMap<>();
-    private List<String> ramlActionNames;
+    private List<String> yamlEventNames;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() throws MalformedURLException {
+
         handlerNames.putAll(getMethodsToHandlerNamesMapFor(HearingEventListener.class,
                 InitiateHearingEventListener.class,
                 PleaUpdateEventListener.class,
@@ -101,18 +103,12 @@ public class HearingEventListenerRamlConfigTest {
                 DefenceCounselEventListener.class,
                 StagingEnforcementEventListener.class));
 
-        final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
-
-        this.ramlActionNames = allLines.stream()
-                .filter(action -> !action.isEmpty())
-                .filter(line -> line.contains(CONTENT_TYPE_PREFIX) && line.contains(COMMAND_NAME))
-                .map(line -> line.replaceAll("(application/vnd\\.)|(\\+json:)", "").trim())
-                .collect(toList());
+        yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }
 
     @Test
     public void testActionNameAndHandleNameAreSame() {
-        assertThat(handlerNames.values(), containsInAnyOrder(this.ramlActionNames.toArray()));
+        assertThat(handlerNames.values(), containsInAnyOrder(yamlEventNames.toArray()));
     }
 
     @Test
@@ -132,7 +128,7 @@ public class HearingEventListenerRamlConfigTest {
                 })
                 .collect(toList());
         eventHandlerNames.removeAll(this.handlerNamesToIgnore);
-        assertThat(this.ramlActionNames, containsInAnyOrder(eventHandlerNames.toArray()));
+        assertThat(yamlEventNames, containsInAnyOrder(eventHandlerNames.toArray()));
     }
 
     private Map<String, String> getMethodsToHandlerNamesMapFor(final Class<?>... commandApiClasses) {

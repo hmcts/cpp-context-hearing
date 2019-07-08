@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 
@@ -23,56 +24,18 @@ public class HearingEventProcessorRamlConfigTest {
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json/schema").listFiles()))
                         .map(File::getName)
                         .map(name -> "json/schema/" + name)
-                        .collect(Collectors.toList());
-
-        Collections.sort(filesThatArePresent);
-
-        List<String> commandHandlerSchemas = FileUtils.readLines(new File("src/raml/hearing-event-processor.messaging.raml"))
-                .stream()
-                .filter(line -> line.contains("schema:"))
-                .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())
-                .collect(Collectors.toList());
+                        .sorted()
+                        .collect(toList());
 
         List<String> privateEventSchemas = FileUtils.readLines(new File("src/raml/hearing-public-event.messaging.raml"))
                 .stream()
                 .filter(line -> line.contains("schema:"))
                 .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())
-                .collect(Collectors.toList());
+                .collect(toList());
 
-        filesThatArePresent.removeAll(commandHandlerSchemas);
         filesThatArePresent.removeAll(privateEventSchemas);
 
         assertThat(filesThatArePresent, empty());
     }
 
-    @Test
-    public void testThatAllFilesInExamplesAreReferenced() throws IOException {
-
-        List<String> filesThatArePresent =
-                Arrays.stream(Objects.requireNonNull(new File("src/raml/json").listFiles()))
-                        .map(File::getName)
-                        .map(name -> "json/" + name)
-                        .filter(name -> !name.equals("json/schema"))
-                        .collect(Collectors.toList());
-
-        Collections.sort(filesThatArePresent);
-
-        List<String> commandHandlerSchemas = FileUtils.readLines(new File("src/raml/hearing-event-processor.messaging.raml"))
-                .stream()
-                .filter(line -> line.contains("example:"))
-                .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())
-                .collect(Collectors.toList());
-
-        List<String> privateEventSchemas = FileUtils.readLines(new File("src/raml/hearing-public-event.messaging.raml"))
-                .stream()
-                .filter(line -> line.contains("example:"))
-                .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())
-                .collect(Collectors.toList());
-
-        filesThatArePresent.removeAll(commandHandlerSchemas);
-        filesThatArePresent.removeAll(privateEventSchemas);
-        //removing mac "json/.DS_Store" as it's not required
-        filesThatArePresent.remove("json/.DS_Store");
-        assertThat(filesThatArePresent, empty());
-    }
 }

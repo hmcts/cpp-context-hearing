@@ -14,8 +14,8 @@ fi
 
 declare -rx WILDFLY_DEPLOYMENT_DIR="${VAGRANT_DIR}/deployments"
 declare -rx CONTEXT_NAME=hearing
-declare -rx EVENT_STORE_VERSION=1.1.8
-declare -rx EVENT_BUFFER_VERSION=1.1.8
+declare -rx EVENT_STORE_VERSION=2.0.0-RC3
+declare -rx FRAMEWORK_VERSION=6.0.0-RC2
 declare -rx FILE_SERVICE_VERSION=1.17.2
 
 #fail script on error

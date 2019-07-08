@@ -48,8 +48,8 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>generator-plugin</artifactId>
-                <groupId>uk.gov.justice.maven.generator</groupId>
+                <groupId>uk.gov.justice.generators</groupId>
+                <artifactId>pojo-generation-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>pojo-generation</id>

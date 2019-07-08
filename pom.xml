@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>7.1.4</version>
+        <version>9.0.8-FRAMEWORK-SNAPSHOT</version>
     </parent>
 
     <groupId>uk.gov.moj.cpp.hearing</groupId>
@@ -21,10 +21,17 @@
         <sonar.report.export.path>sonar-report.json</sonar.report.export.path>
         <sonar.scm.provider>git</sonar.scm.provider>
         <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
-        <authorisation.service.version>0.1.96</authorisation.service.version>
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
+
+        <referencedata.version>2.0.239</referencedata.version>
+        <material.version>2.0.118</material.version>
+        <results.version>1.0.16</results.version>
+        <notification.notify.version>0.0.26</notification.notify.version>
+        <stagingenforcement.version>0.0.87</stagingenforcement.version>
+        <progression-version>2.0.113</progression-version>
+
     </properties>
     <modules>
         <module>hearing-query</module>
@@ -39,6 +46,7 @@
         <module>test-utilities</module>
         <module>hearing-json</module>
         <module>pojo-plugin</module>
+        <module>hearing-event-sources</module>
     </modules>
     <build>
         <pluginManagement>

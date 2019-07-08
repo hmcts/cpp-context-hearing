@@ -1,0 +1,180 @@
+subscriptions_descriptor:
+  spec_version: 1.0.0
+  service: hearing
+  service_component: EVENT_PROCESSOR
+  subscriptions:
+    - name: event processor subscription
+      events:
+
+      # Initiate Hearing
+        - name: hearing.events.initiated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.initiated.json
+
+        - name: hearing.command.register-hearing-against-offence
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.register-hearing-against-offence.json
+
+        - name: hearing.command.register-hearing-against-defendant
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.register-hearing-against-defendant.json
+
+        - name: hearing.command.register-hearing-against-case
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.register-hearing-against-case.json
+
+      # Inherit Plea after Initiate Hearing
+        - name: hearing.events.found-plea-for-hearing-to-inherit
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.found-plea-for-hearing-to-inherit.json
+
+        - name: hearing.command.update-hearing-with-inherited-plea
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.update-hearing-with-inherited-plea.json
+
+      # Inherit verdict after Initiate Hearing
+        - name: hearing.events.found-verdict-for-hearing-to-inherit
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.found-verdict-for-hearing-to-inherit.json
+
+        - name: hearing.command.update-hearing-with-inherited-verdict
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.update-hearing-with-inherited-verdict.json
+
+      # Sending Sheet Complete
+        - name: hearing.record-sending-sheet-complete
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.record-sending-sheet-complete.json
+
+        - name: hearing.sending-sheet-recorded
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.sending-sheet-recorded.json
+
+        - name: hearing.record-mags-court-hearing
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.record-mags-court-hearing.json
+
+        - name: hearing.mags-court-hearing-recorded
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.mags-court-hearing-recorded.json
+
+      # Log Event
+        - name: hearing.hearing-event-logged
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.hearing-event-logged.json
+
+        - name: hearing.hearing-event-ignored
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.hearing-event-ignored.json
+
+        - name: hearing.hearing-events-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.hearing-events-updated.json
+
+      # Update Plea
+        - name: hearing.hearing-plea-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.hearing-plea-updated.json
+
+        - name: hearing.hearing-update-plea-ignored
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.hearing-update-plea-ignored.json
+
+      # Update Offence Aggregate with Plea
+        - name: hearing.hearing-offence-plea-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.hearing-offence-plea-updated.json
+
+      #enrich Plea
+        - name: hearing.events.enrich-update-plea-with-associated-hearings
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.enrich-update-plea-with-associated-hearings.json
+
+      #enrich Verdict
+        - name: hearing.events.enrich-update-verdict-with-associated-hearings
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.enrich-update-verdict-with-associated-hearings.json
+
+      # Conviction Date
+        - name: hearing.conviction-date-added
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.conviction-date-added.json
+
+        - name: hearing.conviction-date-removed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.conviction-date-removed.json
+
+      # Share Results
+        - name: hearing.results-shared
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.results-shared.json
+
+      # Save Draft Results
+        - name: hearing.draft-result-saved
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.draft-result-saved.json
+
+      # Update Verdict
+        - name: hearing.hearing-offence-verdict-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.hearing-offence-verdict-updated.json
+
+      # Case Defendant Details Change
+        - name: hearing.update-case-defendant-details-enriched-with-hearing-ids
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.update-case-defendant-details-enriched-with-hearing-ids.json
+
+        - name: hearing.update-case-defendant-details-against-hearing-aggregate
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.update-case-defendant-details-against-hearing-aggregate.json
+
+        - name: hearing.update-case-defendant-details
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.update-case-defendant-details.json
+
+      # Case Defendant Offences Change
+        - name: hearing.events.found-hearings-for-new-offence
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.found-hearings-for-new-offence.json
+
+        - name: hearing.command.add-new-offence-to-hearings
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.add-new-offence-to-hearings.json
+
+        - name: hearing.events.found-hearings-for-edit-offence
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.found-hearings-for-edit-offence.json
+
+        - name: hearing.command.update-offence-on-hearings
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.update-offence-on-hearings.json
+
+        - name: hearing.events.found-hearings-for-delete-offence
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.found-hearings-for-delete-offence.json
+
+        - name: hearing.command.delete-offence-on-hearings
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.delete-offence-on-hearings.json
+
+      # Nows
+        - name: hearing.events.nows-material-status-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.nows-material-status-updated.json
+
+        - name: hearing.events.nows-requested
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.nows-requested.json
+
+        - name: hearing.command.pending-nows-requested
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.pending-nows-requested.json
+
+        - name: hearing.events.pending-nows-requested
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.pending-nows-requested.json
+
+      # Attendees
+        - name: hearing.events.attendee-deleted
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.attendee-deleted.json
+
+      # Hearing Detail Change
+        - name: hearing.change-hearing-detail
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.change-hearing-detail.json
+
+      # Hearing Adjourn
+        - name: hearing.event.hearing-adjourned
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.event.hearing-adjourned.json
+
+      # Update Defendant Attendance
+        - name: hearing.defendant-attendance-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.defendant-attendance-updated.json
+
+      event_source_name: hearing.event.source
+
+    - name: public event subscription
+      events:
+
+      # Initiate Mags Court Hearing
+        - name: public.progression.events.sending-sheet-completed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/public.progression.events.sending-sheet-completed.json
+
+      # Case Defendant Details Change
+        - name: public.progression.case-defendant-changed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/public.progression.case-defendant-changed.json
+
+      # Offences For Defendant Updated
+        - name: public.progression.defendant-offences-changed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/public.progression.defendant-offences-changed.json
+
+      # Listing Hearing Detail Changed
+        - name: public.hearing-detail-changed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/public.hearing-detail-changed.json
+
+      # Staging Enforcement
+        - name: public.stagingenforcement.enforce-financial-imposition-acknowledgement
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/public.stagingenforcement.enforce-financial-imposition-acknowledgement.json
+
+      event_source_name: public.event.source
