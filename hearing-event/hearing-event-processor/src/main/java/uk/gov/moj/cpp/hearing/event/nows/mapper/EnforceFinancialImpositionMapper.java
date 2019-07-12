@@ -18,6 +18,8 @@ import uk.gov.justice.json.schemas.staging.EnforceFinancialImposition;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -83,13 +85,17 @@ public class EnforceFinancialImpositionMapper {
 
         final HearingLanguage hearingLanguage = isNull(hearing.getHearingLanguage()) ? HearingLanguage.ENGLISH : hearing.getHearingLanguage();
 
+        final Set<String> prosecutionAuthorityCodes = Optional.of(hearing.getProsecutionCases())
+                .get().stream().map(prosecutionCase -> prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityCode())
+                .collect(Collectors.toSet());
+
         return EnforceFinancialImposition.enforceFinancialImposition()
                 .withRequestId(requestId)
                 .withOriginator(originator)
                 .withImposingCourt(hearing.getCourtCentre().getId())
                 .withProsecutionCaseReference(prosecutionMapper.getCaseReference())
                 .withDefendant(new StagingEnforcementDefendantMapper(defendant, nows, hearingLanguage.toString(), sharedResultLines).createDefendant())
-                .withImposition(new StagingEnforcementImpositionMapper(sharedResultLines, resultLineResultDefinitionIdMap, sharedResultLineOffenceCodeMap, resultLineIdWithListOfPrompts).createImpositions())
+                .withImposition(new StagingEnforcementImpositionMapper(sharedResultLines, resultLineResultDefinitionIdMap, sharedResultLineOffenceCodeMap, resultLineIdWithListOfPrompts, prosecutionAuthorityCodes).createImpositions())
                 .withParentGuardian(new StagingEnforcementParentGuardianMapper(defendant).map())
                 .withCollectionOrder(new StagingEnforcementCollectionOrderMapper(sharedResultLines, nows, resultLineResultDefinitionIdMap, resultLineIdWithListOfPrompts).map())
                 .withPlea(new StagingEnforcementPleaMapper(defendant).map())

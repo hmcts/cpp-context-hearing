@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,18 +41,24 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 
     private final Map<String, String> majorCreditorMap;
 
+    private final Set<String> prosecutionAuthorityCodes;
+
     StagingEnforcementImpositionMapper(final List<SharedResultLine> sharedResultLines,
                                        final Map<UUID, UUID> resultLineResultDefinitionIdMap,
                                        final Map<UUID, String> sharedResultLineOffenceCodeMap,
-                                       final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts) {
+                                       final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts,
+                                       final Set<String> prosecutionAuthorityCodes) {
         super(sharedResultLines);
         this.resultLineResultDefinitionIdMap = resultLineResultDefinitionIdMap;
         this.sharedResultLineOffenceCodeMap = sharedResultLineOffenceCodeMap;
         this.resultLineIdWithListOfPrompts = resultLineIdWithListOfPrompts;
+        this.prosecutionAuthorityCodes = prosecutionAuthorityCodes;
         this.majorCreditorMap = new HashMap<>();
         this.majorCreditorMap.put("Transport for London", "TFL2");
         this.majorCreditorMap.put("Driver and Vehicle Licensing Agency", "DVL2");
         this.majorCreditorMap.put("Television Licensing Organisation", "TVL3");
+        this.majorCreditorMap.put("TFL", "TFL2");
+        this.majorCreditorMap.put("TVL", "TVL3");
     }
 
     List<Imposition> createImpositions() {
@@ -71,7 +79,7 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 
                 final BigDecimal impositionAmount = setImpositionAmount(impositionResultCode, promptRefsList);
 
-                final String majorCreditor = ofNullable(setMajorCreditor(impositionResultCode, promptRefsList)).map(majorCreditorMap::get).orElse(null);
+                final String majorCreditor = getMajorCreditor(impositionResultCode, promptRefsList);
 
                 /*
                  * Note : prosecutionAuthorityId - Not required by courts as in courts any major creditor may be provided.
@@ -90,7 +98,20 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
         return impositionList;
     }
 
-    private String setMajorCreditor(final ImpositionResultCode impositionResultCode, List<UUID> promptRefsList) {
+    private String getMajorCreditor(final ImpositionResultCode impositionResultCode, final List<UUID> promptRefsList) {
+
+        String majorCreditor = ofNullable(getMajorCreditorFromPrompt(impositionResultCode, promptRefsList)).map(majorCreditorMap::get).orElse(null);
+
+        if(isNull(majorCreditor)) {
+            final Optional<String> firstItem = prosecutionAuthorityCodes.stream().findFirst();
+            if(firstItem.isPresent()) {
+                majorCreditor = majorCreditorMap.get(firstItem.get());
+            }
+        }
+        return majorCreditor;
+    }
+
+    private String getMajorCreditorFromPrompt(final ImpositionResultCode impositionResultCode, List<UUID> promptRefsList) {
 //        only applies where impositionResultCode ==  impositionResultCode.FCOMP || impositionResultCode ==  impositionResultCode.FCOST.
 //        In these cases when a resultCode is FCOMP, look for an associated prompt "Creditor name" (line 296).
 //        When the resultCode is FCOST, look for an associated prompt  "Creditor name" (line 2061).
