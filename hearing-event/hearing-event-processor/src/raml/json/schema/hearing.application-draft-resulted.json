@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/draft-result-application.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "applicationId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "targetId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "draftResult": {
+      "type": "string"
+    },
+    "applicationOutcomeType": {
+      "$ref": "http://justice.gov.uk/core/courts/courtApplicationOutcomeType.json"
+    },
+    "applicationOutcomeDate": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+    }
+  },
+  "required": [
+    "hearingId",
+    "targetId",
+    "applicationId",
+    "draftResult"
+  ],
+  "additionalProperties": true
+}

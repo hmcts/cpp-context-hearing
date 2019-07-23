@@ -181,6 +181,7 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
         return null;
     }
 
+
     private String reformatDateIfRequired(final String value) {
         String originalValue = value;
         if (isRequired(OUTGOING_PROMPT_DATE_FORMAT, value, Locale.ENGLISH)) {

@@ -69,7 +69,7 @@ public class NowsRequestedEventProcessor {
 
         financialOrders.forEach(financialOrderDetail -> financialOrderDetail.getFinancialOrders().setAccountReference(accountNumber));
 
-        nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, financialOrders));
+        nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, financialOrders), nowsRequested.getTargets());
 
         //Get all non financial orders
         final List<Now> nonFinancialOrders = nows.stream().filter(now -> isNull(now.getFinancialOrders())).collect(Collectors.toList());
@@ -77,9 +77,8 @@ public class NowsRequestedEventProcessor {
         nonFinancialOrders.forEach(nonFinancialOrder -> nonFinancialOrder.setFinancialOrders(financialOrders.get(0).getFinancialOrders()));
 
         if(!nonFinancialOrders.isEmpty()) {
-            nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, nonFinancialOrders));
+            nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, nonFinancialOrders), nowsRequested.getTargets());
         }
-
     }
 
     @Handles("hearing.events.nows-material-status-updated")

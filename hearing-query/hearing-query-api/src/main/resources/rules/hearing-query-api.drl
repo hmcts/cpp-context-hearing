@@ -60,6 +60,15 @@ rule "Query - API - hearing.get-draft-result"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get-application-draft-result"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-application-draft-result");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Query - API - hearing.query.search-by-material-id"
   when
     $outcome: Outcome();

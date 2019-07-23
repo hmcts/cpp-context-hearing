@@ -31,8 +31,8 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
@@ -61,7 +61,7 @@ public class HearingDetailChangeCommandHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             HearingDetailChanged.class,
-            HearingEventIgnored.class
+            HearingChangeIgnored.class
     );
 
     @Mock
@@ -175,8 +175,8 @@ public class HearingDetailChangeCommandHandlerTest {
 
         final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
 
-        assertThat(asPojo(events.get(0), HearingEventIgnored.class), isBean(HearingEventIgnored.class)
-                .with(HearingEventIgnored::getHearingId, Matchers.is(hearingId)));
+        assertThat(asPojo(events.get(0), HearingChangeIgnored.class), isBean(HearingChangeIgnored.class)
+                .with(HearingChangeIgnored::getHearingId, Matchers.is(hearingId)));
     }
 
     private List<HearingDay> createHearingDays() {

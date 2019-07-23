@@ -10,12 +10,16 @@ public class PersonJPAMapper {
 
     private AddressJPAMapper addressJPAMapper;
     private ContactNumberJPAMapper contactNumberJPAMapper;
+    private EthnicityJPAMapper ethnicityJPAMapper;
 
     @Inject
-    public PersonJPAMapper(final AddressJPAMapper addressJPAMapper, final ContactNumberJPAMapper contactNumberJPAMapper) {
+    public PersonJPAMapper(final AddressJPAMapper addressJPAMapper,
+                           final ContactNumberJPAMapper contactNumberJPAMapper,
+                           final EthnicityJPAMapper ethnicityJPAMapper) {
         super();
         this.addressJPAMapper = addressJPAMapper;
         this.contactNumberJPAMapper = contactNumberJPAMapper;
+        this.ethnicityJPAMapper =ethnicityJPAMapper;
     }
 
     //To keep cditester happy
@@ -34,8 +38,6 @@ public class PersonJPAMapper {
         person.setDateOfBirth(pojo.getDateOfBirth());
         person.setDisabilityStatus(pojo.getDisabilityStatus());
         person.setDocumentationLanguageNeeds(pojo.getDocumentationLanguageNeeds());
-        person.setEthnicity(pojo.getEthnicityCode());
-        person.setEthnicityId(pojo.getEthnicityId());
         person.setFirstName(pojo.getFirstName());
         person.setGender(pojo.getGender());
         person.setInterpreterLanguageNeeds(pojo.getInterpreterLanguageNeeds());
@@ -49,6 +51,7 @@ public class PersonJPAMapper {
         person.setSpecificRequirements(pojo.getSpecificRequirements());
         person.setTitle(pojo.getTitle());
         person.setNationalityDescription(pojo.getNationalityDescription());
+        person.setEthnicity(ethnicityJPAMapper.toJPA(pojo.getEthnicity()));
         return person;
     }
 
@@ -64,8 +67,6 @@ public class PersonJPAMapper {
                 .withDateOfBirth(entity.getDateOfBirth())
                 .withDisabilityStatus(entity.getDisabilityStatus())
                 .withDocumentationLanguageNeeds(entity.getDocumentationLanguageNeeds())
-                .withEthnicityCode(entity.getEthnicity())
-                .withEthnicityId(entity.getEthnicityId())
                 .withFirstName(entity.getFirstName())
                 .withGender(entity.getGender())
                 .withInterpreterLanguageNeeds(entity.getInterpreterLanguageNeeds())
@@ -79,6 +80,7 @@ public class PersonJPAMapper {
                 .withSpecificRequirements(entity.getSpecificRequirements())
                 .withTitle(entity.getTitle())
                 .withNationalityDescription(entity.getNationalityDescription())
+                .withEthnicity(ethnicityJPAMapper.fromJPA(entity.getEthnicity()))
                 .build();
     }
 }

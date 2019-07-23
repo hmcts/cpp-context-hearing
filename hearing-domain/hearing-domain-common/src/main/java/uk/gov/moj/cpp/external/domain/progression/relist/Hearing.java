@@ -5,7 +5,7 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JurisdictionType;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -23,7 +23,7 @@ public class Hearing implements Serializable {
     private JurisdictionType jurisdictionType;
     private String reportingRestrictionReason;
     private HearingLanguage hearingLanguage;
-    private LocalDateTime earliestStartDateTime;
+    private ZonedDateTime earliestStartDateTime;
     private int estimatedMinutes;
     private CourtCentre courtCentre;
     private List<JudicialRole> judiciary;
@@ -38,7 +38,7 @@ public class Hearing implements Serializable {
                    @JsonProperty(value = "jurisdictionType") final JurisdictionType jurisdictionType,
                    @JsonProperty(value = "reportingRestrictionReason") final String reportingRestrictionReason,
                    @JsonProperty(value = "hearingLanguage") final HearingLanguage hearingLanguage,
-                   @JsonProperty(value = "earliestStartDateTime") final LocalDateTime earliestStartDateTime,
+                   @JsonProperty(value = "earliestStartDateTime") final ZonedDateTime earliestStartDateTime,
                    @JsonProperty(value = "estimatedMinutes") final int estimatedMinutes,
                    @JsonProperty(value = "courtCentre") final CourtCentre courtCentre,
                    @JsonProperty(value = "judiciary") final List<JudicialRole> judiciary,
@@ -94,11 +94,11 @@ public class Hearing implements Serializable {
         return this;
     }
 
-    public LocalDateTime getEarliestStartDateTime() {
+    public ZonedDateTime getEarliestStartDateTime() {
         return earliestStartDateTime;
     }
 
-    public Hearing setEarliestStartDateTime(LocalDateTime earliestStartDateTime) {
+    public Hearing setEarliestStartDateTime(ZonedDateTime earliestStartDateTime) {
         this.earliestStartDateTime = earliestStartDateTime;
         return this;
     }

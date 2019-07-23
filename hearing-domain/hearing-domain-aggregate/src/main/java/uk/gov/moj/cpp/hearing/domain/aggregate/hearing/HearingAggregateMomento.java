@@ -1,14 +1,16 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
+import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -25,17 +27,19 @@ public class HearingAggregateMomento implements Serializable {
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
+    private final Map<UUID, ApplicantCounsel> applicantCounsels = new HashMap<>();
     private final Map<UUID, DefenceCounsel> defenceCounsels = new HashMap<>();
     private final Map<UUID, Plea> pleas = new HashMap<>();
     private final Map<UUID, Verdict> verdicts = new HashMap<>();
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
+    private final Map<UUID, RespondentCounsel> respondentCounsels = new HashMap<>();
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
     private List<UUID> adjournedHearingIds = new ArrayList<>();
     private Map<UUID, Target> targets = new HashMap<>();
     private Map<UUID, LocalDate> convictionDates = new HashMap<>();
-    private Map<UUID, CreateNowsRequest> hearingNowsMapper = new HashMap<>();
-
+    private List<PendingNowsRequested> hearingNowsMapper = new ArrayList<>();
+    private Map<UUID, Target> savedTargets = new HashMap<>();
     private boolean published = false;
 
     public Map<UUID, HearingEventDelegate.HearingEvent> getHearingEvents() {
@@ -110,5 +114,23 @@ public class HearingAggregateMomento implements Serializable {
         this.convictionDates = convictionDates;
     }
 
-    public Map<UUID, CreateNowsRequest> getHearingNowsMapper() { return this.hearingNowsMapper; }
+    public List<PendingNowsRequested> getHearingNowsMapper() {
+        return this.hearingNowsMapper;
+    }
+
+    public Map<UUID, RespondentCounsel> getRespondentCounsels() {
+        return respondentCounsels;
+    }
+
+    public Map<UUID, ApplicantCounsel> getApplicantCounsels() {
+        return applicantCounsels;
+    }
+
+    public Map<UUID, Target> getSavedTargets() {
+        return savedTargets;
+    }
+
+    public void setSavedTargets(final Map<UUID, Target> savedTargets) {
+        this.savedTargets.putAll(savedTargets);
+    }
 }

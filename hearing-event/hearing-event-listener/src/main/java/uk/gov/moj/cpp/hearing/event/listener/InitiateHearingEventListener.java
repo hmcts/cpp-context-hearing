@@ -10,8 +10,10 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
@@ -69,6 +71,44 @@ public class InitiateHearingEventListener {
         final HearingInitiated initiated = jsonObjectToObjectConverter.convert(payload, HearingInitiated.class);
 
         final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
+
+        hearingRepository.save(hearingEntity);
+    }
+
+    @Transactional
+    @Handles("hearing.events.hearing-extended")
+    public void hearingExtended(final JsonEnvelope event) {
+
+        final JsonObject payload = event.payloadAsJsonObject();
+
+        LOGGER.debug("hearing.hearingExtended event received {}", payload);
+
+        final HearingExtended hearingExtended = jsonObjectToObjectConverter.convert(payload, HearingExtended.class);
+
+        final Hearing hearingEntity = hearingRepository.findBy(hearingExtended.getHearingId());
+
+        final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), hearingExtended.getCourtApplication());
+
+        hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
+
+        hearingRepository.save(hearingEntity);
+    }
+
+    @Transactional
+    @Handles("hearing.events.application-detail-changed")
+    public void hearingApplicationDetailChanged(final JsonEnvelope event) {
+
+        final JsonObject payload = event.payloadAsJsonObject();
+
+        LOGGER.debug("hearing.events.application-detail-changed event received {}", payload);
+
+        final ApplicationDetailChanged applicationDetailChanged = jsonObjectToObjectConverter.convert(payload, ApplicationDetailChanged.class);
+
+        final Hearing hearingEntity = hearingRepository.findBy(applicationDetailChanged.getHearingId());
+
+        final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), applicationDetailChanged.getCourtApplication());
+
+        hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
 
         hearingRepository.save(hearingEntity);
     }

@@ -2,6 +2,10 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.stream.Collectors.toSet;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcome;
+import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -11,25 +15,28 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-@SuppressWarnings("squid:S3864")
+@SuppressWarnings("squid:S3776")
 public class ResultsSharedDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,6 +50,7 @@ public class ResultsSharedDelegate implements Serializable {
     public void handleResultsShared(ResultsShared resultsShared) {
         this.momento.setPublished(true);
         this.momento.setVariantDirectory(resultsShared.getVariantDirectory());
+        this.momento.setSavedTargets(resultsShared.getTargets().stream().filter(Objects::nonNull).collect(Collectors.toMap(Target::getTargetId, target -> target, (target1, target2) -> target1)));
     }
 
     public void handleResultLinesStatusUpdated(ResultLinesStatusUpdated resultLinesStatusUpdated) {
@@ -59,18 +67,17 @@ public class ResultsSharedDelegate implements Serializable {
 
         );
 
-        final Set<UUID> resultLineIdsToUpdate = resultLinesStatusUpdated.getSharedResultLines().stream()
-                .map(SharedResultLineId::getSharedResultLineId)
-                .collect(toSet());
-
         momento.getTargets().values().stream()
-                .peek(target -> {
+                .map(target -> {
                     if (target.getResultLines() == null) {
                         target.setResultLines(Collections.emptyList());
                     }
+                    return target;
                 })
                 .flatMap(target -> target.getResultLines().stream())
-                .filter(line -> resultLineIdsToUpdate.contains(line.getResultLineId()))
+                .filter(line -> resultLinesStatusUpdated.getSharedResultLines().stream()
+                        .map(SharedResultLineId::getSharedResultLineId)
+                        .collect(toSet()).contains(line.getResultLineId()))
                 .forEach(resultLine -> resultLine.setIsModified(false));
 
     }
@@ -89,6 +96,20 @@ public class ResultsSharedDelegate implements Serializable {
 
     public Stream<Object> saveDraftResult(final Target target) {
         return Stream.of(new DraftResultSaved(target));
+    }
+
+    public Stream<Object> applicationDraftResult(final UUID targetId, final UUID applicationId, final UUID hearingId, final String draftResult, final CourtApplicationOutcomeType applicationOutcomeType, final LocalDate applicationOutcomeDate) {
+        return Stream.of(ApplicationDraftResulted.applicationDraftResulted()
+                .setApplicationId(applicationId)
+                .setTargetId(targetId)
+                .setHearingId(hearingId)
+                .setDraftResult(draftResult)
+                .setApplicationOutcomeType(applicationOutcomeType)
+                .setApplicationOutcomeDate(applicationOutcomeDate));
+    }
+
+    public void handleApplicationDraftResulted(final ApplicationDraftResulted applicationDraftResulted) {
+        //place holder method
     }
 
     private ResultLine convert(final SharedResultsCommandResultLine resultLineIn) {
@@ -112,11 +133,17 @@ public class ResultsSharedDelegate implements Serializable {
                                 .collect(Collectors.toList())
                 )
                 .withDelegatedPowers(resultLineIn.getDelegatedPowers())
+                .withAmendmentDate(resultLineIn.getAmendmentDate())
+                .withAmendmentReasonId(resultLineIn.getAmendmentReasonId())
+                .withAmendmentReason(resultLineIn.getAmendmentReason())
+                .withApprovedDate(resultLineIn.getApprovedDate())
+                .withFourEyesApproval(resultLineIn.getFourEyesApproval())
+                .withIsDeleted(resultLineIn.getIsDeleted())
                 .build();
     }
 
-    public Stream<Object> shareResults(final UUID hearingId, final uk.gov.justice.core.courts.CourtClerk courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines) {
-
+    public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines) {
+        final Map<UUID, Target> finalTargets = new HashMap<>();
         final Map<UUID, Target> targets = new HashMap<>();
         resultLines.forEach(
                 rl -> {
@@ -124,7 +151,7 @@ public class ResultsSharedDelegate implements Serializable {
                     if (targets.containsKey(rl.getTargetId())) {
                         target = targets.get(rl.getTargetId());
                     } else {
-                        target = new Target(rl.getDefendantId(), null, hearingId, rl.getOffenceId(), new ArrayList<>(), rl.getTargetId());
+                        target = new Target(rl.getApplicationId(), rl.getDefendantId(), null, hearingId, rl.getOffenceId(), new ArrayList<>(), rl.getTargetId());
                         targets.put(target.getTargetId(), target);
                     }
                     target.getResultLines().add(convert(rl));
@@ -133,49 +160,92 @@ public class ResultsSharedDelegate implements Serializable {
 
         targets.values().forEach(
                 target -> {
-                    if (this.momento.getTargets().containsKey(target.getTargetId()) && !StringUtils.isEmpty(target.getDraftResult())) {
+                    if (finalTargets.containsKey(target.getTargetId()) && !StringUtils.isEmpty(target.getDraftResult())) {
                         //retain draft result
                         target.setDraftResult(this.momento.getTargets().get(target.getTargetId()).getDraftResult());
                     }
-                    this.momento.getTargets().put(target.getTargetId(), target);
+                    finalTargets.put(target.getTargetId(), target);
                 }
         );
 
-        //GPE-6752 should filter out targets with no result lines
-        enrichHearing(resultLines);
-        return Stream.of(ResultsShared.builder()
+        return Stream.concat(enrichHearing(resultLines), Stream.of(ResultsShared.builder()
                 .withHearingId(hearingId)
                 .withSharedTime(sharedTime)
                 .withCourtClerk(courtClerk)
                 .withVariantDirectory(calculateNewVariants())
                 .withHearing(this.momento.getHearing())
+                .withTargets(new ArrayList<>(finalTargets.values()))
+                .withSavedTargets(new ArrayList<>(momento.getSavedTargets().values()))
                 .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus())
-                .build());
+                .build()));
     }
 
-    private void enrichHearing(final List<SharedResultsCommandResultLine> resultLines) {
-        this.momento.getHearing().setTargets(new ArrayList<>(this.momento.getTargets().values()));
+    private Stream<Object> enrichHearing(final List<SharedResultsCommandResultLine> resultLines) {
+        setSharedResults(resultLines);
+        updateCounsels();
+        updateOffence();
+        return updateApplicationOutcomes(resultLines);
+    }
+
+    private void setSharedResults(final List<SharedResultsCommandResultLine> resultLines) {
         this.momento.getHearing().setHasSharedResults(resultLines.stream().filter(SharedResultsCommandResultLine::getIsComplete).count() == resultLines.size());
+        this.momento.getHearing().setHasSharedResults(true);
+    }
+
+    private Stream<Object> updateApplicationOutcomes(final List<SharedResultsCommandResultLine> resultLines) {
+        Stream<Object> applicationChanged = Stream.empty();
+        if (this.momento.getHearing().getCourtApplications() != null) {
+            final List<CourtApplication> courtApplications = momento.getHearing().getCourtApplications();
+            final Map<UUID, CourtApplicationOutcome> courtApplicationOutcomeMap =
+                    resultLines.stream().map(SharedResultsCommandResultLine::getCourtApplicationOutcome).filter(Objects::nonNull).collect(Collectors.toMap(CourtApplicationOutcome::getApplicationId, courtApplicationOutcome -> courtApplicationOutcome, (courtApplicationOutcome1, courtApplicationOutcome2) -> courtApplicationOutcome1));
+            for (final CourtApplication courtApplication : courtApplications) {
+                if (courtApplicationOutcomeMap.containsKey(courtApplication.getId()) && !courtApplicationOutcomeMap.get(courtApplication.getId()).equals(courtApplication.getApplicationOutcome())) {
+                    applicationChanged = Stream.concat(checkAndUpdateApplicationOutcomes(courtApplicationOutcomeMap, courtApplication), applicationChanged);
+                }
+            }
+        }
+        return applicationChanged;
+    }
+
+    private void updateOffence() {
+        if (this.momento.getHearing().getProsecutionCases() != null && !this.momento.getHearing().getProsecutionCases().isEmpty()) {
+            this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().forEach(defendant -> defendant.getOffences().forEach(offence -> {
+                if (momento.getPleas().containsKey(offence.getId())) {
+                    offence.setPlea(momento.getPleas().get(offence.getId()));
+                }
+                if (momento.getVerdicts().containsKey(offence.getId())) {
+                    offence.setVerdict(momento.getVerdicts().get(offence.getId()));
+                }
+                if (momento.getConvictionDates().containsKey(offence.getId())) {
+                    offence.setConvictionDate(momento.getConvictionDates().get(offence.getId()));
+                }
+            })));
+        }
+    }
+
+    private void updateCounsels() {
         if (!this.momento.getProsecutionCounsels().isEmpty()) {
             this.momento.getHearing().setProsecutionCounsels(new ArrayList<>(this.momento.getProsecutionCounsels().values()));
         }
         if (!this.momento.getDefenceCounsels().isEmpty()) {
             this.momento.getHearing().setDefenceCounsels(new ArrayList<>(this.momento.getDefenceCounsels().values()));
         }
-        this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().forEach(defendant -> defendant.getOffences().forEach(offence -> {
-            if (momento.getPleas().containsKey(offence.getId())) {
-                offence.setPlea(momento.getPleas().get(offence.getId()));
-            }
-            if (momento.getVerdicts().containsKey(offence.getId())) {
-                offence.setVerdict(momento.getVerdicts().get(offence.getId()));
-            }
-            if (momento.getConvictionDates().containsKey(offence.getId())) {
-                offence.setConvictionDate(momento.getConvictionDates().get(offence.getId()));
-            }
-        })));
+        if (!this.momento.getApplicantCounsels().isEmpty()) {
+            this.momento.getHearing().setApplicantCounsels(new ArrayList<>(this.momento.getApplicantCounsels().values()));
+        }
+        if (!this.momento.getRespondentCounsels().isEmpty()) {
+            this.momento.getHearing().setRespondentCounsels(new ArrayList<>(this.momento.getRespondentCounsels().values()));
+        }
     }
 
-    public Stream<Object> updateResultLinesStatus(final UUID hearingId, final uk.gov.justice.core.courts.CourtClerk courtClerk, final ZonedDateTime lastSharedDateTime, final List<SharedResultLineId> sharedResultLines) {
+    private Stream<Object> checkAndUpdateApplicationOutcomes(final Map<UUID, CourtApplicationOutcome> courtApplicationOutcomeMap, final CourtApplication courtApplication) {
+        CourtApplicationOutcome courtApplicationOutcome = courtApplicationOutcomeMap.get(courtApplication.getId());
+        courtApplicationOutcome.setOriginatingHearingId(momento.getHearing().getId());
+        courtApplication.setApplicationOutcome(courtApplicationOutcome);
+        return Stream.of(new ApplicationDetailChanged(momento.getHearing().getId(), courtApplication));
+    }
+
+    public Stream<Object> updateResultLinesStatus(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime lastSharedDateTime, final List<SharedResultLineId> sharedResultLines) {
         return Stream.of(ResultLinesStatusUpdated.builder()
                 .withHearingId(hearingId)
                 .withLastSharedDateTime(lastSharedDateTime)

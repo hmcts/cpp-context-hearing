@@ -1,0 +1,565 @@
+{
+  "hearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+  "sharedTime": "2019-05-03T22:51:23.961Z",
+  "courtClerk": {
+    "firstName": "Anne",
+    "id": "222768ad-c607-419f-81d5-96a49613475a",
+    "lastName": "Green"
+  },
+  "hearing": {
+    "courtCentre": {
+      "id": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+      "name": "Liverpool Crown Court",
+      "roomId": "fbe3ca1a-6be6-3bd5-86e8-fc879aa5e3e7",
+      "roomName": "Crown Court 5-3"
+    },
+    "defenceCounsels": [
+      {
+        "attendanceDays": [
+          "2018-07-17",
+          "2018-07-18",
+          "2018-07-19",
+          "2018-07-21",
+          "2018-07-22"
+        ],
+        "defendants": [
+          "fe41ab3a-8969-453b-8403-e4462724d6a5"
+        ],
+        "firstName": "Natasha",
+        "id": "81433f6a-ee07-44aa-b083-5ad38ea47079",
+        "lastName": "Tyler",
+        "status": "QC",
+        "title": "Mr"
+      },
+      {
+        "attendanceDays": [
+          "2018-07-17",
+          "2018-07-18",
+          "2018-07-19",
+          "2018-07-21",
+          "2018-07-22"
+        ],
+        "defendants": [
+          "20504a07-e6ac-4e9d-9964-882229d7b010"
+        ],
+        "firstName": "James",
+        "id": "8c6841be-b470-478a-9cfc-0a53ec922b6c",
+        "lastName": "Reese",
+        "status": "QC",
+        "title": "Mr"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-03T08:00:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 360,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-04T09:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 360,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-05T09:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 360,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-07T09:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 2,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-08T14:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+    "judiciary": [
+      {
+        "firstName": "Shamim (Sham)",
+        "judicialId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+          "judiciaryType": "DJ"
+        },
+        "lastName": "Qureshi",
+        "title": "Mr"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [
+      {
+        "caseStatus": "READY_FOR_REVIEW",
+        "defendants": [
+          {
+            "defenceOrganisation": {
+              "name": "TestOne"
+            },
+            "id": "20504a07-e6ac-4e9d-9964-882229d7b010",
+            "offences": [
+              {
+                "convictionDate": "2019-05-03",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "6cf90305-8b2c-46a8-bee3-f26cac9d51a9",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "6cf90305-8b2c-46a8-bee3-f26cac9d51a9",
+                  "originatingHearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+                  "pleaDate": "2019-05-03",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              },
+              {
+                "convictionDate": "2019-05-03",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "fd2f8970-ed63-42d8-b1de-0356956a9752",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "fd2f8970-ed63-42d8-b1de-0356956a9752",
+                  "originatingHearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+                  "pleaDate": "2019-05-03",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              }
+            ],
+            "personDefendant": {
+              "bailStatus": "UNCONDITIONAL",
+              "personDetails": {
+                "address": {
+                  "address1": "222 Furze Road",
+                  "address2": "Exeter",
+                  "address3": "England",
+                  "address4": "UK"
+                },
+                "dateOfBirth": "1983-05-23",
+                "firstName": "Jacynthe",
+                "gender": "MALE",
+                "interpreterLanguageNeeds": "English",
+                "lastName": "Leuschke",
+                "nationalityCode": "GBR",
+                "nationalityDescription": "British",
+                "nationalityId": "49433158-3542-49c8-a9af-581a0e746152"
+              }
+            },
+            "prosecutionCaseId": "169a24d5-ff98-48cc-8062-99abbdf5733b"
+          },
+          {
+            "defenceOrganisation": {
+              "name": "TestTwo"
+            },
+            "id": "fe41ab3a-8969-453b-8403-e4462724d6a5",
+            "offences": [
+              {
+                "convictionDate": "2019-05-03",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "0cc7db48-5dc4-4101-8975-272b441b68ae",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "0cc7db48-5dc4-4101-8975-272b441b68ae",
+                  "originatingHearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+                  "pleaDate": "2019-05-03",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              },
+              {
+                "convictionDate": "2019-05-03",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "b9c4534f-e817-434f-9048-671de196d129",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "b9c4534f-e817-434f-9048-671de196d129",
+                  "originatingHearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+                  "pleaDate": "2019-05-03",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              }
+            ],
+            "personDefendant": {
+              "bailStatus": "UNCONDITIONAL",
+              "personDetails": {
+                "address": {
+                  "address1": "222 Furze Road",
+                  "address2": "Exeter",
+                  "address3": "England",
+                  "address4": "UK"
+                },
+                "dateOfBirth": "1980-10-12",
+                "firstName": "Ulices",
+                "gender": "MALE",
+                "interpreterLanguageNeeds": "English",
+                "lastName": "Jacobi",
+                "nationalityCode": "GBR",
+                "nationalityDescription": "British",
+                "nationalityId": "49433158-3542-49c8-a9af-581a0e746152"
+              }
+            },
+            "prosecutionCaseId": "169a24d5-ff98-48cc-8062-99abbdf5733b"
+          }
+        ],
+        "id": "169a24d5-ff98-48cc-8062-99abbdf5733b",
+        "initiationCode": "C",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "CPS",
+          "prosecutionAuthorityId": "52b27284-0686-4894-b1c7-7d4b634cacdb",
+          "caseURN": "96GD6629119"
+        }
+      }
+    ],
+    "prosecutionCounsels": [
+      {
+        "attendanceDays": [
+          "2018-07-17",
+          "2018-07-18",
+          "2018-07-19",
+          "2018-07-21",
+          "2018-07-22"
+        ],
+        "firstName": "Sabrina",
+        "id": "c8961afb-0915-46d2-8709-9763e682f41f",
+        "lastName": "Fox",
+        "prosecutionCases": [
+          "2c2ef757-4a6f-4706-830d-4683723e6a35"
+        ],
+        "status": "QC",
+        "title": "Mr"
+      }
+    ],
+    "targets": [
+      {
+        "defendantId": "20504a07-e6ac-4e9d-9964-882229d7b010",
+        "draftResult": "{\"targetId\":\"dfdad7b6-d464-4f90-bb66-d76e6ea6aeea\",\"caseId\":\"169a24d5-ff98-48cc-8062-99abbdf5733b\",\"defendantId\":\"20504a07-e6ac-4e9d-9964-882229d7b010\",\"offenceId\":\"fd2f8970-ed63-42d8-b1de-0356956a9752\",\"defendantFirstName\":\"Ardith\",\"defendantLastName\":\"Becker\",\"addMoreResults\":false,\"results\":[{\"resultLineId\":\"e99ae478-a80a-4052-94b8-7fbba9dff6b5_1\",\"originalText\":\"stimp\",\"resultCode\":\"b65fb5f1-b11d-4a95-a198-3b81333c7cf9\",\"resultLevel\":\"D\",\"isCompleted\":true,\"parts\":[{\"value\":\"Total suspended imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"label\":\"Total imprisonment period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"label\":\"Suspended period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"label\":\"Time of hearing\",\"value\":\"01:1\",\"type\":\"TIME\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Total imprisonment period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}],\"label\":\"Suspended period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}]},{\"code\":\"0ccd9da5-d611-4f9e-92ff-02375be8bb11\",\"label\":\"Total sentence consecutive to what\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fcff158b-aa4b-4111-afd8-6d536895fc20\",\"value\":[],\"label\":\"Supervision period\",\"type\":\"DURATION\",\"required\":false,\"children\":[{\"label\":\"Years\",\"type\":\"INT\"},{\"label\":\"Months\",\"type\":\"INT\"},{\"label\":\"Weeks\",\"type\":\"INT\"},{\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"978001b1-47d5-4cda-a1b6-b6c3a2e4975d\",\"label\":\"Review frequency\",\"type\":\"TXT\",\"required\":false},{\"code\":\"d254208d-60e1-407e-a38c-c484d53e33b4\",\"label\":\"First review date\",\"type\":\"DATE\",\"required\":false},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"value\":\"01:1\",\"label\":\"Time of hearing\",\"type\":\"TIME\",\"required\":true},{\"code\":\"dab2947a-9b21-450e-8fd1-d82ea3e0f42f\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"335094b9-94ab-44de-b43e-8fcbc7600008\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fe774a35-5353-4e4f-adef-44b7a8717dc6\",\"label\":\"Defendant to attend review\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"34f900f3-132c-4baa-a9d3-b7fd5c7b24d0\",\"label\":\"Judge reserves review hearing\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"a37124c4-e21a-4139-974d-5c28dedf8726\",\"label\":\"Judge reserves breach proceedings\",\"type\":\"BOOLEAN\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"},{\"resultLineId\":\"e99ae478-a80a-4052-94b8-7fbba9dff6b5_2\",\"originalText\":\"susps\",\"resultCode\":\"8b1cff00-a456-40da-9ce4-f11c20959084\",\"resultLevel\":\"O\",\"isCompleted\":true,\"parts\":[{\"value\":\"Suspended sentence order - imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"label\":\"Imprisonment Period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"label\":\"Responsible officer\",\"value\":\"a probation officer\",\"type\":\"FIXL\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Imprisonment Period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"763ea765-d8af-4ba1-8507-a8396b43c431\",\"label\":\"Concurrent\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"62c8eaf6-1d41-4952-af14-06dd548483e1\",\"label\":\"Consecutive to offence number\",\"type\":\"INT\",\"required\":false},{\"code\":\"8b215f58-8bc8-4e3b-8717-3985d6425c24\",\"label\":\"Where consecutive to an offence on another case - specify that case number\",\"type\":\"TXT\",\"required\":false},{\"code\":\"ea957761-0813-4a92-9e7c-b536654325f0\",\"label\":\"Imprisonment reasons\",\"type\":\"FIXL\",\"required\":false,\"fixedList\":[\"failure to comply with a pre-sentence drug testing order\",\"failure to comply with requirements of post custodial sentence supervision\",\"failure to express willingness to comply with a proposed requirement for a community order\",\"the offence(s) are so serious that only a custodial sentence can be justified\",\"there has been a wilful and persistent failure to comply with your community order\",\"to await surety\",\"to secure a recognisance\"]},{\"code\":\"90d17fe3-8f87-43f2-bd96-a4108e4603ae\",\"label\":\"Reason for custody\",\"type\":\"TXT\",\"required\":false},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"value\":\"a probation officer\",\"label\":\"Responsible officer\",\"type\":\"FIXL\",\"required\":true,\"fixedList\":[\"Not applicable\",\"a probation officer\",\"an officer of a provider of probation services\",\"the electronic monitoring supervisor\",\"the officer in charge of the Attendance Centre\"]},{\"code\":\"c6d033d5-d25f-435b-8a21-a138f312fa35\",\"label\":\"Supervising Court name\",\"type\":\"TXT\",\"required\":false},{\"code\":\"2c55b793-7f22-4a75-8954-4e4ec7fe471e\",\"label\":\"Probation team to be notified\",\"type\":\"TXT\",\"required\":false},{\"code\":\"8a8f4c9e-f92e-4c25-aa35-d682110ba667\",\"label\":\"Reason for sentence without PSR\",\"type\":\"TXT\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"}]}",
+        "hearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+        "offenceId": "fd2f8970-ed63-42d8-b1de-0356956a9752",
+        "resultLines": [
+
+        ],
+        "targetId": "b0f799dc-82c2-4d37-a20e-4c29b77c7817"
+      },
+      {
+        "defendantId": "20504a07-e6ac-4e9d-9964-882229d7b010",
+        "draftResult": "{\"targetId\":\"a9bcb3f7-c9a0-4606-8c07-e37ecf1f8f00\",\"caseId\":\"169a24d5-ff98-48cc-8062-99abbdf5733b\",\"defendantId\":\"20504a07-e6ac-4e9d-9964-882229d7b010\",\"offenceId\":\"6cf90305-8b2c-46a8-bee3-f26cac9d51a9\",\"defendantFirstName\":\"Ardith\",\"defendantLastName\":\"Becker\",\"addMoreResults\":false,\"results\":[{\"resultLineId\":\"ec4d3116-3e7e-472c-8f42-838f9e3bc1d3_1\",\"originalText\":\"stimp\",\"resultCode\":\"b65fb5f1-b11d-4a95-a198-3b81333c7cf9\",\"resultLevel\":\"D\",\"isCompleted\":true,\"parts\":[{\"value\":\"Total suspended imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"label\":\"Total imprisonment period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"label\":\"Suspended period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"label\":\"Time of hearing\",\"value\":\"01:1\",\"type\":\"TIME\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Total imprisonment period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}],\"label\":\"Suspended period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}]},{\"code\":\"0ccd9da5-d611-4f9e-92ff-02375be8bb11\",\"label\":\"Total sentence consecutive to what\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fcff158b-aa4b-4111-afd8-6d536895fc20\",\"value\":[],\"label\":\"Supervision period\",\"type\":\"DURATION\",\"required\":false,\"children\":[{\"label\":\"Years\",\"type\":\"INT\"},{\"label\":\"Months\",\"type\":\"INT\"},{\"label\":\"Weeks\",\"type\":\"INT\"},{\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"978001b1-47d5-4cda-a1b6-b6c3a2e4975d\",\"label\":\"Review frequency\",\"type\":\"TXT\",\"required\":false},{\"code\":\"d254208d-60e1-407e-a38c-c484d53e33b4\",\"label\":\"First review date\",\"type\":\"DATE\",\"required\":false},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"value\":\"01:1\",\"label\":\"Time of hearing\",\"type\":\"TIME\",\"required\":true},{\"code\":\"dab2947a-9b21-450e-8fd1-d82ea3e0f42f\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"335094b9-94ab-44de-b43e-8fcbc7600008\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fe774a35-5353-4e4f-adef-44b7a8717dc6\",\"label\":\"Defendant to attend review\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"34f900f3-132c-4baa-a9d3-b7fd5c7b24d0\",\"label\":\"Judge reserves review hearing\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"a37124c4-e21a-4139-974d-5c28dedf8726\",\"label\":\"Judge reserves breach proceedings\",\"type\":\"BOOLEAN\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"},{\"resultLineId\":\"ec4d3116-3e7e-472c-8f42-838f9e3bc1d3_2\",\"originalText\":\"susps\",\"resultCode\":\"8b1cff00-a456-40da-9ce4-f11c20959084\",\"resultLevel\":\"O\",\"isCompleted\":true,\"parts\":[{\"value\":\"Suspended sentence order - imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"label\":\"Imprisonment Period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"label\":\"Responsible officer\",\"value\":\"a probation officer\",\"type\":\"FIXL\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Imprisonment Period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"763ea765-d8af-4ba1-8507-a8396b43c431\",\"label\":\"Concurrent\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"62c8eaf6-1d41-4952-af14-06dd548483e1\",\"label\":\"Consecutive to offence number\",\"type\":\"INT\",\"required\":false},{\"code\":\"8b215f58-8bc8-4e3b-8717-3985d6425c24\",\"label\":\"Where consecutive to an offence on another case - specify that case number\",\"type\":\"TXT\",\"required\":false},{\"code\":\"ea957761-0813-4a92-9e7c-b536654325f0\",\"label\":\"Imprisonment reasons\",\"type\":\"FIXL\",\"required\":false,\"fixedList\":[\"failure to comply with a pre-sentence drug testing order\",\"failure to comply with requirements of post custodial sentence supervision\",\"failure to express willingness to comply with a proposed requirement for a community order\",\"the offence(s) are so serious that only a custodial sentence can be justified\",\"there has been a wilful and persistent failure to comply with your community order\",\"to await surety\",\"to secure a recognisance\"]},{\"code\":\"90d17fe3-8f87-43f2-bd96-a4108e4603ae\",\"label\":\"Reason for custody\",\"type\":\"TXT\",\"required\":false},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"value\":\"a probation officer\",\"label\":\"Responsible officer\",\"type\":\"FIXL\",\"required\":true,\"fixedList\":[\"Not applicable\",\"a probation officer\",\"an officer of a provider of probation services\",\"the electronic monitoring supervisor\",\"the officer in charge of the Attendance Centre\"]},{\"code\":\"c6d033d5-d25f-435b-8a21-a138f312fa35\",\"label\":\"Supervising Court name\",\"type\":\"TXT\",\"required\":false},{\"code\":\"2c55b793-7f22-4a75-8954-4e4ec7fe471e\",\"label\":\"Probation team to be notified\",\"type\":\"TXT\",\"required\":false},{\"code\":\"8a8f4c9e-f92e-4c25-aa35-d682110ba667\",\"label\":\"Reason for sentence without PSR\",\"type\":\"TXT\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"}]}",
+        "hearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+        "offenceId": "6cf90305-8b2c-46a8-bee3-f26cac9d51a9",
+        "resultLines": [
+
+        ],
+        "targetId": "76faeba3-1c1c-41bd-858f-003be232aefd"
+      },
+      {
+        "defendantId": "fe41ab3a-8969-453b-8403-e4462724d6a5",
+        "draftResult": "{\"targetId\":\"152808a0-4bc1-4bf2-985a-54ff43501ebb\",\"caseId\":\"169a24d5-ff98-48cc-8062-99abbdf5733b\",\"defendantId\":\"fe41ab3a-8969-453b-8403-e4462724d6a5\",\"offenceId\":\"0cc7db48-5dc4-4101-8975-272b441b68ae\",\"defendantFirstName\":\"Ardith\",\"defendantLastName\":\"Becker\",\"addMoreResults\":false,\"results\":[{\"resultLineId\":\"f333e761-bb5c-427c-81aa-f973858c136e_1\",\"originalText\":\"stimp\",\"resultCode\":\"b65fb5f1-b11d-4a95-a198-3b81333c7cf9\",\"resultLevel\":\"D\",\"isCompleted\":true,\"parts\":[{\"value\":\"Total suspended imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"label\":\"Total imprisonment period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"label\":\"Suspended period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"label\":\"Time of hearing\",\"value\":\"01:1\",\"type\":\"TIME\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Total imprisonment period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}],\"label\":\"Suspended period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}]},{\"code\":\"0ccd9da5-d611-4f9e-92ff-02375be8bb11\",\"label\":\"Total sentence consecutive to what\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fcff158b-aa4b-4111-afd8-6d536895fc20\",\"value\":[],\"label\":\"Supervision period\",\"type\":\"DURATION\",\"required\":false,\"children\":[{\"label\":\"Years\",\"type\":\"INT\"},{\"label\":\"Months\",\"type\":\"INT\"},{\"label\":\"Weeks\",\"type\":\"INT\"},{\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"978001b1-47d5-4cda-a1b6-b6c3a2e4975d\",\"label\":\"Review frequency\",\"type\":\"TXT\",\"required\":false},{\"code\":\"d254208d-60e1-407e-a38c-c484d53e33b4\",\"label\":\"First review date\",\"type\":\"DATE\",\"required\":false},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"value\":\"01:1\",\"label\":\"Time of hearing\",\"type\":\"TIME\",\"required\":true},{\"code\":\"dab2947a-9b21-450e-8fd1-d82ea3e0f42f\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"335094b9-94ab-44de-b43e-8fcbc7600008\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fe774a35-5353-4e4f-adef-44b7a8717dc6\",\"label\":\"Defendant to attend review\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"34f900f3-132c-4baa-a9d3-b7fd5c7b24d0\",\"label\":\"Judge reserves review hearing\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"a37124c4-e21a-4139-974d-5c28dedf8726\",\"label\":\"Judge reserves breach proceedings\",\"type\":\"BOOLEAN\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"},{\"resultLineId\":\"f333e761-bb5c-427c-81aa-f973858c136e_2\",\"originalText\":\"susps\",\"resultCode\":\"8b1cff00-a456-40da-9ce4-f11c20959084\",\"resultLevel\":\"O\",\"isCompleted\":true,\"parts\":[{\"value\":\"Suspended sentence order - imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"label\":\"Imprisonment Period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"label\":\"Responsible officer\",\"value\":\"a probation officer\",\"type\":\"FIXL\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Imprisonment Period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"763ea765-d8af-4ba1-8507-a8396b43c431\",\"label\":\"Concurrent\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"62c8eaf6-1d41-4952-af14-06dd548483e1\",\"label\":\"Consecutive to offence number\",\"type\":\"INT\",\"required\":false},{\"code\":\"8b215f58-8bc8-4e3b-8717-3985d6425c24\",\"label\":\"Where consecutive to an offence on another case - specify that case number\",\"type\":\"TXT\",\"required\":false},{\"code\":\"ea957761-0813-4a92-9e7c-b536654325f0\",\"label\":\"Imprisonment reasons\",\"type\":\"FIXL\",\"required\":false,\"fixedList\":[\"failure to comply with a pre-sentence drug testing order\",\"failure to comply with requirements of post custodial sentence supervision\",\"failure to express willingness to comply with a proposed requirement for a community order\",\"the offence(s) are so serious that only a custodial sentence can be justified\",\"there has been a wilful and persistent failure to comply with your community order\",\"to await surety\",\"to secure a recognisance\"]},{\"code\":\"90d17fe3-8f87-43f2-bd96-a4108e4603ae\",\"label\":\"Reason for custody\",\"type\":\"TXT\",\"required\":false},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"value\":\"a probation officer\",\"label\":\"Responsible officer\",\"type\":\"FIXL\",\"required\":true,\"fixedList\":[\"Not applicable\",\"a probation officer\",\"an officer of a provider of probation services\",\"the electronic monitoring supervisor\",\"the officer in charge of the Attendance Centre\"]},{\"code\":\"c6d033d5-d25f-435b-8a21-a138f312fa35\",\"label\":\"Supervising Court name\",\"type\":\"TXT\",\"required\":false},{\"code\":\"2c55b793-7f22-4a75-8954-4e4ec7fe471e\",\"label\":\"Probation team to be notified\",\"type\":\"TXT\",\"required\":false},{\"code\":\"8a8f4c9e-f92e-4c25-aa35-d682110ba667\",\"label\":\"Reason for sentence without PSR\",\"type\":\"TXT\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"}]}",
+        "hearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+        "offenceId": "0cc7db48-5dc4-4101-8975-272b441b68ae",
+        "resultLines": [
+
+        ],
+        "targetId": "b55ca8c2-1f67-43e8-93a8-a0b039381714"
+      },
+      {
+        "defendantId": "20504a07-e6ac-4e9d-9964-882229d7b010",
+        "hearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+        "offenceId": "6cf90305-8b2c-46a8-bee3-f26cac9d51a9",
+        "resultLines": [
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "DEFENDANT",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "47ab7bd4-21ee-449e-833f-8de0642820ed",
+                "label": "Total imprisonment period",
+                "value": "3 Years, 3 Months, 3 Weeks, 3 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "95618691-0742-417e-82b9-c4d4bff94585",
+                "label": "Suspended period",
+                "value": "3 Years, 3 Months",
+                "welshValue": ""
+              },
+              {
+                "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+                "label": "Time of hearing",
+                "value": "03:3",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+            "resultLabel": "Total suspended imprisonment",
+            "resultLineId": "dd1f0b9b-c092-443d-ba8e-88662e2bb9d2",
+            "sharedDate": "2019-01-31"
+          },
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "OFFENCE",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "db79058e-75f4-450f-b514-5be8018dd98b",
+                "label": "Imprisonment Period",
+                "value": "3 Years, 3 Months, 3 Weeks, 3 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "9535e328-c28c-45ad-8e2d-6d6e5565d3ae",
+                "label": "Responsible officer",
+                "value": "a probation officer",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+            "resultLabel": "Suspended sentence order - imprisonment",
+            "resultLineId": "1d363780-b512-4902-81c2-922aa73c5c92",
+            "sharedDate": "2019-01-31"
+          },
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "DEFENDANT",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "47ab7bd4-21ee-449e-833f-8de0642820ed",
+                "label": "Total imprisonment period",
+                "value": "2 Years, 2 Months, 2 Weeks, 2 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "95618691-0742-417e-82b9-c4d4bff94585",
+                "label": "Suspended period",
+                "value": "2 Years, 2 Months",
+                "welshValue": ""
+              },
+              {
+                "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+                "label": "Time of hearing",
+                "value": "02:2",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+            "resultLabel": "Total suspended imprisonment",
+            "resultLineId": "33da7e64-21c4-41d1-be8b-9f793c526ef3",
+            "sharedDate": "2019-01-31"
+          },
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "OFFENCE",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "db79058e-75f4-450f-b514-5be8018dd98b",
+                "label": "Imprisonment Period",
+                "value": "2 Years, 2 Months, 2 Weeks, 2 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "9535e328-c28c-45ad-8e2d-6d6e5565d3ae",
+                "label": "Responsible officer",
+                "value": "a probation officer",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+            "resultLabel": "Suspended sentence order - imprisonment",
+            "resultLineId": "f57168d1-5653-4389-906b-02514929d14f",
+            "sharedDate": "2019-01-31"
+          },
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "DEFENDANT",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "47ab7bd4-21ee-449e-833f-8de0642820ed",
+                "label": "Total imprisonment period",
+                "value": "4 Years, 4 Months, 4 Weeks, 4 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "95618691-0742-417e-82b9-c4d4bff94585",
+                "label": "Suspended period",
+                "value": "4 Years, 4 Months",
+                "welshValue": ""
+              },
+              {
+                "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+                "label": "Time of hearing",
+                "value": "04:4",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+            "resultLabel": "Total suspended imprisonment",
+            "resultLineId": "03cc5c2b-15c6-4a70-8fa0-77a4bdad3fce",
+            "sharedDate": "2019-01-31"
+          },
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "OFFENCE",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "db79058e-75f4-450f-b514-5be8018dd98b",
+                "label": "Imprisonment Period",
+                "value": "4 Years, 4 Months, 4 Weeks, 4 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "9535e328-c28c-45ad-8e2d-6d6e5565d3ae",
+                "label": "Responsible officer",
+                "value": "a probation officer",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+            "resultLabel": "Suspended sentence order - imprisonment",
+            "resultLineId": "fa592ed1-93b0-4802-81f3-b341cbd38637",
+            "sharedDate": "2019-01-31"
+          },
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "DEFENDANT",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "47ab7bd4-21ee-449e-833f-8de0642820ed",
+                "label": "Total imprisonment period",
+                "value": "1 Years, 1 Months, 1 Weeks, 1 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "95618691-0742-417e-82b9-c4d4bff94585",
+                "label": "Suspended period",
+                "value": "1 Years, 1 Months",
+                "welshValue": ""
+              },
+              {
+                "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+                "label": "Time of hearing",
+                "value": "01:1",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+            "resultLabel": "Total suspended imprisonment",
+            "resultLineId": "cb954627-674f-4491-a3d7-c5acd152aa6b",
+            "sharedDate": "2019-01-31"
+          },
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "OFFENCE",
+            "orderedDate": "2019-05-03",
+            "prompts": [
+              {
+                "id": "db79058e-75f4-450f-b514-5be8018dd98b",
+                "label": "Imprisonment Period",
+                "value": "1 Years, 1 Months, 1 Weeks, 1 Days",
+                "welshValue": ""
+              },
+              {
+                "id": "9535e328-c28c-45ad-8e2d-6d6e5565d3ae",
+                "label": "Responsible officer",
+                "value": "a probation officer",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+            "resultLabel": "Suspended sentence order - imprisonment",
+            "resultLineId": "ff2ee8ce-523f-4d47-beeb-0b86d047c9bf",
+            "sharedDate": "2019-01-31"
+          }
+        ],
+        "targetId": "874fdb27-9e88-48ab-9e70-e4b042afcbae"
+      },
+      {
+        "defendantId": "fe41ab3a-8969-453b-8403-e4462724d6a5",
+        "draftResult": "{\"targetId\":\"00ae872f-7fc3-4ace-98e6-64167d46639e\",\"caseId\":\"169a24d5-ff98-48cc-8062-99abbdf5733b\",\"defendantId\":\"fe41ab3a-8969-453b-8403-e4462724d6a5\",\"offenceId\":\"b9c4534f-e817-434f-9048-671de196d129\",\"defendantFirstName\":\"Ardith\",\"defendantLastName\":\"Becker\",\"addMoreResults\":false,\"results\":[{\"resultLineId\":\"97108560-2c99-433e-b7b8-43a4ef3f63de_1\",\"originalText\":\"stimp\",\"resultCode\":\"b65fb5f1-b11d-4a95-a198-3b81333c7cf9\",\"resultLevel\":\"D\",\"isCompleted\":true,\"parts\":[{\"value\":\"Total suspended imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"label\":\"Total imprisonment period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"label\":\"Suspended period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"label\":\"Time of hearing\",\"value\":\"01:1\",\"type\":\"TIME\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"47ab7bd4-21ee-449e-833f-8de0642820ed\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Total imprisonment period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"95618691-0742-417e-82b9-c4d4bff94585\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}],\"label\":\"Suspended period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"}]},{\"code\":\"0ccd9da5-d611-4f9e-92ff-02375be8bb11\",\"label\":\"Total sentence consecutive to what\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fcff158b-aa4b-4111-afd8-6d536895fc20\",\"value\":[],\"label\":\"Supervision period\",\"type\":\"DURATION\",\"required\":false,\"children\":[{\"label\":\"Years\",\"type\":\"INT\"},{\"label\":\"Months\",\"type\":\"INT\"},{\"label\":\"Weeks\",\"type\":\"INT\"},{\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"978001b1-47d5-4cda-a1b6-b6c3a2e4975d\",\"label\":\"Review frequency\",\"type\":\"TXT\",\"required\":false},{\"code\":\"d254208d-60e1-407e-a38c-c484d53e33b4\",\"label\":\"First review date\",\"type\":\"DATE\",\"required\":false},{\"code\":\"4d125a5a-acbc-461d-a657-ba5643af85a6\",\"value\":\"01:1\",\"label\":\"Time of hearing\",\"type\":\"TIME\",\"required\":true},{\"code\":\"dab2947a-9b21-450e-8fd1-d82ea3e0f42f\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"335094b9-94ab-44de-b43e-8fcbc7600008\",\"label\":\"Courthouse\",\"type\":\"TXT\",\"required\":false},{\"code\":\"fe774a35-5353-4e4f-adef-44b7a8717dc6\",\"label\":\"Defendant to attend review\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"34f900f3-132c-4baa-a9d3-b7fd5c7b24d0\",\"label\":\"Judge reserves review hearing\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"a37124c4-e21a-4139-974d-5c28dedf8726\",\"label\":\"Judge reserves breach proceedings\",\"type\":\"BOOLEAN\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"},{\"resultLineId\":\"97108560-2c99-433e-b7b8-43a4ef3f63de_2\",\"originalText\":\"susps\",\"resultCode\":\"8b1cff00-a456-40da-9ce4-f11c20959084\",\"resultLevel\":\"O\",\"isCompleted\":true,\"parts\":[{\"value\":\"Suspended sentence order - imprisonment\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"label\":\"Imprisonment Period\",\"value\":[{\"label\":\"Years\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Months\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Weeks\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"label\":\"Days\",\"value\":1,\"type\":\"INT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"type\":\"DURATION\",\"state\":\"RESOLVED\",\"resultChoices\":[]},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"label\":\"Responsible officer\",\"value\":\"a probation officer\",\"type\":\"FIXL\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"db79058e-75f4-450f-b514-5be8018dd98b\",\"value\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}],\"label\":\"Imprisonment Period\",\"type\":\"DURATION\",\"required\":true,\"children\":[{\"value\":1,\"label\":\"Years\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Months\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Weeks\",\"type\":\"INT\"},{\"value\":1,\"label\":\"Days\",\"type\":\"INT\"}]},{\"code\":\"763ea765-d8af-4ba1-8507-a8396b43c431\",\"label\":\"Concurrent\",\"type\":\"BOOLEAN\",\"required\":false},{\"code\":\"62c8eaf6-1d41-4952-af14-06dd548483e1\",\"label\":\"Consecutive to offence number\",\"type\":\"INT\",\"required\":false},{\"code\":\"8b215f58-8bc8-4e3b-8717-3985d6425c24\",\"label\":\"Where consecutive to an offence on another case - specify that case number\",\"type\":\"TXT\",\"required\":false},{\"code\":\"ea957761-0813-4a92-9e7c-b536654325f0\",\"label\":\"Imprisonment reasons\",\"type\":\"FIXL\",\"required\":false,\"fixedList\":[\"failure to comply with a pre-sentence drug testing order\",\"failure to comply with requirements of post custodial sentence supervision\",\"failure to express willingness to comply with a proposed requirement for a community order\",\"the offence(s) are so serious that only a custodial sentence can be justified\",\"there has been a wilful and persistent failure to comply with your community order\",\"to await surety\",\"to secure a recognisance\"]},{\"code\":\"90d17fe3-8f87-43f2-bd96-a4108e4603ae\",\"label\":\"Reason for custody\",\"type\":\"TXT\",\"required\":false},{\"code\":\"9535e328-c28c-45ad-8e2d-6d6e5565d3ae\",\"value\":\"a probation officer\",\"label\":\"Responsible officer\",\"type\":\"FIXL\",\"required\":true,\"fixedList\":[\"Not applicable\",\"a probation officer\",\"an officer of a provider of probation services\",\"the electronic monitoring supervisor\",\"the officer in charge of the Attendance Centre\"]},{\"code\":\"c6d033d5-d25f-435b-8a21-a138f312fa35\",\"label\":\"Supervising Court name\",\"type\":\"TXT\",\"required\":false},{\"code\":\"2c55b793-7f22-4a75-8954-4e4ec7fe471e\",\"label\":\"Probation team to be notified\",\"type\":\"TXT\",\"required\":false},{\"code\":\"8a8f4c9e-f92e-4c25-aa35-d682110ba667\",\"label\":\"Reason for sentence without PSR\",\"type\":\"TXT\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":true,\"orderedDate\":\"2019-05-03\"}]}",
+        "hearingId": "7e7deca1-1d89-4e85-aed0-07292b20c5e2",
+        "offenceId": "b9c4534f-e817-434f-9048-671de196d129",
+        "resultLines": [
+
+        ],
+        "targetId": "eb1cbfdc-248d-419b-acd8-3adf2ce1fedf"
+      }
+    ],
+    "type": {
+      "description": "Plea & Trial Preparation",
+      "id": "06b0c2bf-3f98-46ed-ab7e-56efaf9ecced"
+    }
+  },
+  "variantDirectory": [
+
+  ],
+  "completedResultLinesStatus": {
+
+  }
+}

@@ -9,6 +9,7 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTIME;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ResultLine;
@@ -33,15 +34,24 @@ public class HearingAdjournValidator {
     private static final int ZERO = 0;
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingAdjournValidator.class);
 
-    public boolean validate(final ResultsShared resultsShared, final List<UUID> withdrawnResultDefinitionUuid, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
+    private ResultsSharedFilter resultsSharedFilter = new ResultsSharedFilter();
 
-        return checkSharedResultHaveNextHearingResult(resultsShared, withdrawnResultDefinitionUuid, nextHearingResultDefinitions)
+    public boolean validateProsecutionCase(final ResultsShared resultsSharedUnfiltered, final List<UUID> withdrawnResultDefinitionUuid, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
+        final ResultsShared resultsShared = resultsSharedFilter.filterTargets(resultsSharedUnfiltered, t -> t.getApplicationId() == null);
+
+        return !resultsShared.getTargets().isEmpty()
+                && checkSharedResultHaveNextHearingOffenceResult(resultsShared, withdrawnResultDefinitionUuid, nextHearingResultDefinitions)
                 && checkNextHearingDateOfHearingIsSameForAllOffences(getCompletedResultLines(resultsShared), nextHearingResultDefinitions)
                 && checkNextHearingTypeIsSameForAllOffences(getCompletedResultLines(resultsShared), nextHearingResultDefinitions)
                 && checkNextHearingEstimatedDurationIsSameForAllOffences(getCompletedResultLines(resultsShared), nextHearingResultDefinitions)
                 && checkNextHearingCourtHouseIsSameForAllOffences(getCompletedResultLines(resultsShared), nextHearingResultDefinitions)
                 && checkNextHearingTimeOfHearingIsSameForAllOffences(getCompletedResultLines(resultsShared), nextHearingResultDefinitions)
                 ;
+    }
+
+    public boolean validateApplication(final ResultsShared resultsSharedUnfiltered, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
+        final ResultsShared resultsShared = resultsSharedFilter.filterTargets(resultsSharedUnfiltered, t -> t.getApplicationId() != null);
+        return !resultsShared.getTargets().isEmpty() && checkSharedResultHaveNextHearingApplicationResult(resultsShared, nextHearingResultDefinitions);
     }
 
     boolean checkNextHearingEstimatedDurationIsSameForAllOffences(final List<ResultLine> completedResultLines, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
@@ -73,29 +83,53 @@ public class HearingAdjournValidator {
         return distinctValuesByOffence.size() == ONE;
     }
 
-    boolean checkSharedResultHaveNextHearingResult(final ResultsShared resultsShared, final List<UUID> withdrawnResultDefinitionUuid, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
+    boolean checkSharedResultHaveNextHearingOffenceResult(final ResultsShared resultsShared, final List<UUID> withdrawnResultDefinitionUuid, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
         final List<Offence> flatOffences = resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc -> pc.getDefendants().stream()).map(Defendant::getOffences).flatMap(List::stream)
                 .collect(Collectors.toList());
 
-        return flatOffences.size() == flatOffences.stream().filter(off -> isSharedResultHaveNextHearingOrWithdrawnResults(resultsShared.getHearing().getTargets(),
+        return flatOffences.size() == flatOffences.stream().filter(off -> isSharedResultHaveNextHearingOrWithdrawnOffenceResults(resultsShared.getTargets(),
                 getCompletedResultLines(resultsShared), off,
                 Stream.concat(withdrawnResultDefinitionUuid.stream(), nextHearingResultDefinitions.keySet().stream()).collect(Collectors.toList())
         )).count();
     }
 
-    private Target getTargetByResultLine(final List<Target> targets, final ResultLine resultLine) {
-        return targets.stream().filter(target -> target.getResultLines().contains(resultLine)).findFirst().orElse(null);
+    boolean checkSharedResultHaveNextHearingApplicationResult(final ResultsShared resultsShared, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions) {
+        final List<CourtApplication> applications = resultsShared.getHearing().getCourtApplications();
+        if (applications == null) {
+            return false;
+        } else {
+            return applications.stream().filter(app -> isSharedResultHaveNextHearingOrWithdrawnApplicationResults(resultsShared.getTargets(),
+                    getCompletedResultLines(resultsShared), app,
+                    nextHearingResultDefinitions.keySet().stream().collect(Collectors.toList())
+            )).count() > 0;
+        }
     }
 
-    private boolean isSharedResultHaveNextHearingOrWithdrawnResults(final List<Target> targets, final List<ResultLine> completedResultLines, final Offence offence, final List<UUID> nextHearingAndWithdrawnIds) {
+
+    private Target getTargetByResultLine(final List<Target> targets, final ResultLine resultLine) {
+        Target result;
+        result = targets.stream().filter(target -> target.getResultLines().contains(resultLine)).findFirst().orElse(null);
+        return result;
+    }
+
+    private boolean isSharedResultHaveNextHearingOrWithdrawnOffenceResults(final List<Target> targets, final List<ResultLine> completedResultLines, final Offence offence, final List<UUID> nextHearingAndWithdrawnIds) {
         return completedResultLines.stream()
                 .filter(completedResultLine -> getTargetByResultLine(targets, completedResultLine).getOffenceId().equals(offence.getId()))
                 .filter(completedResultLine -> nextHearingAndWithdrawnIds.contains(completedResultLine.getResultDefinitionId()))
                 .count() > ZERO;
     }
 
+    private boolean isSharedResultHaveNextHearingOrWithdrawnApplicationResults(final List<Target> targets, final List<ResultLine> completedResultLines, final CourtApplication application, final List<UUID> nextHearingAndWithdrawnIds) {
+        final long result = completedResultLines.stream()
+                .filter(completedResultLine -> application.getId().equals(getTargetByResultLine(targets, completedResultLine).getApplicationId()))
+                .filter(completedResultLine -> nextHearingAndWithdrawnIds.contains(completedResultLine.getResultDefinitionId()))
+                .count();
+        return result > ZERO;
+    }
+
+
     private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
-        return resultsShared.getHearing().getTargets().stream().flatMap(target -> target.getResultLines().stream()).collect(Collectors.toList());
+        return resultsShared.getTargets().stream().flatMap(target -> target.getResultLines().stream()).collect(Collectors.toList());
     }
 
 }

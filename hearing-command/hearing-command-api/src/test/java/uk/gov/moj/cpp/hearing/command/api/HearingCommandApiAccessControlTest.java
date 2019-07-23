@@ -21,6 +21,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_REMOVE_PROSECUTION_COUNSEL = "hearing.remove-prosecution-counsel";
     private static final String ACTION_NAME_UPDATE_PROSECUTION_COUNSEL = "hearing.update-prosecution-counsel";
     private static final String ACTION_NAME_SAVE_DRAFT_RESULT = "hearing.save-draft-result";
+    private static final String ACTION_NAME_APPLICATION_DRAFT_RESULT = "hearing.application-draft-result";
     private static final String ACTION_NAME_LOG_HEARING_EVENT = "hearing.log-hearing-event";
     private static final String ACTION_NAME_CORRECT_HEARING_EVENT = "hearing.correct-hearing-event";
     private static final String ACTION_NAME_SHARE_RESULTS_EVENT = "hearing.share-results";
@@ -29,6 +30,15 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS = "hearing.update-nows-material-status";
     private static final String ACTION_NAME_DELETE_ATTENDEE = "hearing.delete-attendee";
     private static final String ACTION_NAME_SAVE_HEARING_CASE_NOTE = "hearing.save-hearing-case-note";
+    private static final String ACTION_NAME_SAVE_APPLICATION_RESPONSE = "hearing.save-application-response";
+
+    private static final String ACTION_NAME_ADD_RESPONDENT_COUNSEL = "hearing.add-respondent-counsel";
+    private static final String ACTION_NAME_REMOVE_RESPONDENT_COUNSEL = "hearing.remove-respondent-counsel";
+    private static final String ACTION_NAME_UPDATE_RESPONDENT_COUNSEL = "hearing.update-respondent-counsel";
+
+    private static final String ACTION_NAME_ADD_APPLICANT_COUNSEL = "hearing.add-applicant-counsel";
+    private static final String ACTION_NAME_REMOVE_APPLICANT_COUNSEL = "hearing.remove-applicant-counsel";
+    private static final String ACTION_NAME_UPDATE_APPLICANT_COUNSEL = "hearing.update-applicant-counsel";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -139,6 +149,24 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToSaveDraftResult() {
         final Action action = createActionFor(ACTION_NAME_SAVE_DRAFT_RESULT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToApplicationDraftResult() {
+        final Action action = createActionFor(ACTION_NAME_APPLICATION_DRAFT_RESULT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToApplicaitonDraftResult() {
+        final Action action = createActionFor(ACTION_NAME_APPLICATION_DRAFT_RESULT);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -293,8 +321,141 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         assertFailureOutcome(results);
     }
 
+    @Test
+    public void shouldAllowAuthorisedUserToSaveApplicationResponse() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_APPLICATION_RESPONSE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToSaveApplicationResponse() {
+        final Action action = createActionFor(ACTION_NAME_SAVE_APPLICATION_RESPONSE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToAddApplicantCounsel() {
+        final Action action = createActionFor(ACTION_NAME_ADD_APPLICANT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToAddApplicantCounsel() {
+        final Action action = createActionFor(ACTION_NAME_ADD_APPLICANT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToRemoveApplicantCounsel() {
+        final Action action = createActionFor(ACTION_NAME_REMOVE_APPLICANT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToRemoveApplicantCounsel() {
+        final Action action = createActionFor(ACTION_NAME_REMOVE_APPLICANT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToUpdateApplicantCounsel() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_APPLICANT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToUpdateApplicantCounsel() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_APPLICANT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
     @Override
     protected Map<Class, Object> getProviderMocks() {
         return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, this.userAndGroupProvider).build();
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToAddRespondentCounsel() {
+        final Action action = createActionFor(ACTION_NAME_ADD_RESPONDENT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToAddRespondentCounsel() {
+        final Action action = createActionFor(ACTION_NAME_ADD_RESPONDENT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToRemoveRespondentCounsel() {
+        final Action action = createActionFor(ACTION_NAME_REMOVE_RESPONDENT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToREMOVERespondentCounsel() {
+        final Action action = createActionFor(ACTION_NAME_REMOVE_RESPONDENT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToUpdateRespondentCounsel() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_RESPONDENT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToUpdateRespondentCounsel() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_RESPONDENT_COUNSEL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
     }
 }

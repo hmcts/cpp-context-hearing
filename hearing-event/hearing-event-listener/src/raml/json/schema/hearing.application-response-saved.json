@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.application-response-saved.json",
+  "type": "object",
+  "properties": {
+    "applicationPartyId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "courtApplicationResponse": {
+      "$ref": "http://justice.gov.uk/core/courts/courtApplicationResponse.json"
+    }
+  },
+  "required": [
+    "applicationPartyId",
+    "courtApplicationResponse"
+  ],
+  "additionalProperties": false
+}

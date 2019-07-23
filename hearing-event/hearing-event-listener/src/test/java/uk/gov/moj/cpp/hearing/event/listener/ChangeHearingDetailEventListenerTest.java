@@ -169,7 +169,7 @@ public class ChangeHearingDetailEventListenerTest {
         judicialRole.setFirstName(STRING.next());
         judicialRole.setMiddleName(STRING.next());
         judicialRole.setLastName(STRING.next());
-        judicialRole.setJudicialRoleType(CoreTestTemplates.circuitJudge().getJudiciaryType()   );
+        judicialRole.setJudicialRoleType(CoreTestTemplates.circuitJudge().getJudiciaryType());
         judicialRole.setBenchChairman(true);
         judicialRole.setDeputy(false);
         return judicialRole;

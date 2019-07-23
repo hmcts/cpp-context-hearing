@@ -74,7 +74,7 @@ public class StagingEnforcementEventProcessor {
 
             addMappingForHearingId(requestId, hearingId);
 
-            final EnforceFinancialImposition enforceFinancialImposition = new EnforceFinancialImpositionMapper(requestId, pendingNowsRequested.getCreateNowsRequest()).map();
+            final EnforceFinancialImposition enforceFinancialImposition = new EnforceFinancialImpositionMapper(requestId, pendingNowsRequested.getCreateNowsRequest(), pendingNowsRequested.getTargets()).map();
 
             final JsonObject enforceFinancialImpositionPayload = this.objectToJsonObjectConverter.convert(enforceFinancialImposition);
 

@@ -25,7 +25,7 @@ public class HearingDayJPAMapper {
         hearingDay.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
         hearingDay.setHearing(hearing);
         hearingDay.setDate(pojo.getSittingDay().toLocalDate());
-        hearingDay.setDateTime(pojo.getSittingDay().toLocalDateTime());
+        hearingDay.setDateTime(pojo.getSittingDay());
         hearingDay.setListedDurationMinutes(pojo.getListedDurationMinutes());
         hearingDay.setListingSequence(pojo.getListingSequence());
         hearingDay.setSittingDay(pojo.getSittingDay());

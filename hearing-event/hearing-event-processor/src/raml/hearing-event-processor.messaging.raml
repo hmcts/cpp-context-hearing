@@ -10,6 +10,9 @@ baseUri: message://event/processor/message/hearing
         application/vnd.hearing.events.initiated+json:
             schema: !include json/schema/hearing.events.initiated.json
             example: !include json/hearing.events.initiated.json
+        application/vnd.hearing.events.hearing-initiate-ignored+json:
+            schema: !include json/schema/hearing.events.hearing-initiate-ignored.json
+            example: !include json/hearing.events.hearing-initiate-ignored.json
 
         application/vnd.hearing.command.register-hearing-against-offence+json:
             schema: !include json/schema/hearing.command.register-hearing-against-offence.json
@@ -113,6 +116,10 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.draft-result-saved.json
             example: !include json/hearing.draft-result-saved.json
 
+        application/vnd.hearing.application-draft-resulted+json:
+            schema: !include json/schema/hearing.application-draft-resulted.json
+            example: !include json/hearing.application-draft-resulted.json
+
 # Update Verdict
         application/vnd.hearing.hearing-offence-verdict-updated+json:
             schema: !include json/schema/hearing.hearing-offence-verdict-updated.json
@@ -193,6 +200,16 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.defendant-attendance-updated.json
             example: !include json/hearing.defendant-attendance-updated.json
 
+# application response
+        application/vnd.hearing.application-response-saved+json:
+            schema: !include json/schema/hearing.application-response-saved.json
+            example: !include json/hearing.application-response-saved.json
+
+# New Defendant added
+        application/vnd.hearing.defendant-added+json:
+                schema: !include json/schema/hearing.defendant-added.json
+                example: !include json/hearing.defendant-added.json
+
 /public.event:
   post:
     body:
@@ -206,10 +223,25 @@ baseUri: message://event/processor/message/hearing
                 schema: !include json/schema/public.progression.case-defendant-changed.json
                 example: !include json/public.progression.case-defendant-changed.json
 
+# Application Defendant Details Change
+        application/vnd.public.progression.court-application-updated+json:
+            schema: !include json/schema/public.progression.court-application-updated.json
+            example: !include json/public.progression.court-application-updated.json
+
+# Case Defendants added
+        application/vnd.public.progression.defendants-added-to-court-proceedings+json:
+            schema: !include json/schema/public.progression.defendants-added-to-court-proceedings.json
+            example: !include json/public.progression.defendants-added-to-court-proceedings.json
+
 # Offences For Defendant Updated
         application/vnd.public.progression.defendant-offences-changed+json:
                 schema: !include json/schema/public.progression.defendant-offences-changed.json
                 example: !include json/public.progression.defendant-offences-changed.json
+
+# hearing extended with application details
+        application/vnd.public.progression.events.hearing-extended+json:
+                schema: !include json/schema/public.progression.events.hearing-extended.json
+                example: !include json/public.progression.events.hearing-extended.json
 
 # Listing Hearing Detail Changed
         application/vnd.public.hearing-detail-changed+json:

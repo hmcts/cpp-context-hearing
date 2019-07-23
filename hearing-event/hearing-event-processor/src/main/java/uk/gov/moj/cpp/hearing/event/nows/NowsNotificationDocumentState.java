@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings({"squid:S2384"})
 public class NowsNotificationDocumentState implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -19,6 +20,7 @@ public class NowsNotificationDocumentState implements Serializable {
     private String orderName;
     private String priority;
     private UUID materialId;
+    private boolean isRemotePrintingRequired;
 
     public UUID getOriginatingCourtCentreId() {
         return originatingCourtCentreId;
@@ -83,17 +85,18 @@ public class NowsNotificationDocumentState implements Serializable {
         return this;
     }
 
-    public String getCourtCentreName() {
-        return courtCentreName;
-    }
-
     public NowsNotificationDocumentState setCourtCentreName(String courtCentreName) {
         this.courtCentreName = courtCentreName;
         return this;
     }
 
-    public String getOrderName() {
-        return orderName;
+    public NowsNotificationDocumentState setIsRemotePrintingRequired(final boolean isRemotePrintingRequired) {
+        this.isRemotePrintingRequired = isRemotePrintingRequired;
+        return this;
+    }
+
+    public String getCourtCentreName() {
+        return courtCentreName;
     }
 
     public NowsNotificationDocumentState setOrderName(String orderName) {
@@ -101,8 +104,8 @@ public class NowsNotificationDocumentState implements Serializable {
         return this;
     }
 
-    public String getPriority() {
-        return priority;
+    public String getOrderName() {
+        return orderName;
     }
 
     public NowsNotificationDocumentState setPriority(String priority) {
@@ -110,12 +113,20 @@ public class NowsNotificationDocumentState implements Serializable {
         return this;
     }
 
-    public UUID getMaterialId() {
-        return materialId;
+    public String getPriority() {
+        return priority;
     }
 
     public NowsNotificationDocumentState setMaterialId(UUID materialId) {
         this.materialId = materialId;
         return this;
+    }
+
+    public UUID getMaterialId() {
+        return materialId;
+    }
+
+    public boolean getIsRemotePrintingRequired() {
+        return isRemotePrintingRequired;
     }
 }

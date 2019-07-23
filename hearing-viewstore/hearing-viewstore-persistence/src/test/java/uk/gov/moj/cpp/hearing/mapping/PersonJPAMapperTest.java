@@ -4,11 +4,13 @@ import static io.github.benas.randombeans.EnhancedRandomBuilder.aNewEnhancedRand
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.mapping.AddressJPAMapperTest.whenAddress;
+import static uk.gov.moj.cpp.hearing.mapping.EthnicityJPAMapperTest.whenEthnicity;
 import static uk.gov.moj.cpp.hearing.mapping.ContactNumberJPAMapperTest.whenContactNumber;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
+import uk.gov.justice.core.courts.Ethnicity;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
@@ -27,8 +29,6 @@ public class PersonJPAMapperTest {
                 .with(Person::getDateOfBirth, is(entity.getDateOfBirth()))
                 .with(Person::getDisabilityStatus, is(entity.getDisabilityStatus()))
                 .with(Person::getDocumentationLanguageNeeds, is(entity.getDocumentationLanguageNeeds()))
-                .with(Person::getEthnicityCode, is(entity.getEthnicity()))
-                .with(Person::getEthnicityId, is(entity.getEthnicityId()))
                 .with(Person::getFirstName, is(entity.getFirstName()))
                 .with(Person::getGender, is(entity.getGender()))
                 .with(Person::getInterpreterLanguageNeeds, is(entity.getInterpreterLanguageNeeds()))
@@ -39,6 +39,7 @@ public class PersonJPAMapperTest {
                 .with(Person::getNationalityId, is(entity.getNationalityId()))
                 .with(Person::getOccupation, is(entity.getOccupation()))
                 .with(Person::getOccupationCode, is(entity.getOccupationCode()))
+                .with(Person::getEthnicity, whenEthnicity(isBean(Ethnicity.class), entity.getEthnicity()))
                 .with(Person::getSpecificRequirements, is(entity.getSpecificRequirements()))
                 .with(Person::getNationalityDescription, is(entity.getNationalityDescription()))
                 .with(Person::getTitle, is(entity.getTitle()));
@@ -54,8 +55,6 @@ public class PersonJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getDateOfBirth, is(pojo.getDateOfBirth()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getDisabilityStatus, is(pojo.getDisabilityStatus()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getDocumentationLanguageNeeds, is(pojo.getDocumentationLanguageNeeds()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getEthnicity, is(pojo.getEthnicityCode()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getEthnicityId, is(pojo.getEthnicityId()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getFirstName, is(pojo.getFirstName()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getGender, is(pojo.getGender()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getInterpreterLanguageNeeds, is(pojo.getInterpreterLanguageNeeds()))
@@ -67,7 +66,8 @@ public class PersonJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getOccupation, is(pojo.getOccupation()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getOccupationCode, is(pojo.getOccupationCode()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getSpecificRequirements, is(pojo.getSpecificRequirements()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getTitle, is(pojo.getTitle()));
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getTitle, is(pojo.getTitle()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Person::getEthnicity, whenEthnicity(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Ethnicity.class), pojo.getEthnicity()));
     }
 
     @Test

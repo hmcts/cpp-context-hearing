@@ -2,18 +2,28 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Optional.ofNullable;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcome;
+import uk.gov.justice.core.courts.CourtApplicationResponse;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-@SuppressWarnings("squid:S00107")
+
+@SuppressWarnings({"squid:S00107","squid:S3655"})
 @ApplicationScoped
 public class HearingJPAMapper {
 
     private CourtCentreJPAMapper courtCentreJPAMapper;
-    private HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper ;
+    private HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper;
     private DefendantAttendanceJPAMapper defendantAttendanceJPAMapper;
     private DefendantReferralReasonJPAMapper defendantReferralReasonsJPAMapper;
     private HearingCaseNoteJPAMapper hearingCaseNoteJPAMapper;
@@ -21,8 +31,10 @@ public class HearingJPAMapper {
     private JudicialRoleJPAMapper judicialRoleJPAMapper;
     private ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
     private HearingProsecutionCounselJPAMapper hearingProsecutionCounselJPAMapper;
-    private TargetJPAMapper targetJPAMapper;
     private HearingTypeJPAMapper hearingTypeJPAMapper;
+    private CourtApplicationsSerializer courtApplicationsSerializer;
+    private HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper;
+    private HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper;
 
     @Inject
     public HearingJPAMapper(final CourtCentreJPAMapper courtCentreJPAMapper,
@@ -34,10 +46,12 @@ public class HearingJPAMapper {
                             final JudicialRoleJPAMapper judicialRoleJPAMapper,
                             final ProsecutionCaseJPAMapper prosecutionCaseJPAMapper,
                             final HearingProsecutionCounselJPAMapper hearingProsecutionCounselJPAMapper,
-                            final TargetJPAMapper targetJPAMapper,
-                            final HearingTypeJPAMapper hearingTypeJPAMapper) {
+                            final HearingTypeJPAMapper hearingTypeJPAMapper,
+                            final CourtApplicationsSerializer courtApplicationsSerializer,
+                            final HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper,
+                            final HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper) {
         this.courtCentreJPAMapper = courtCentreJPAMapper;
-        this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper ;
+        this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper;
         this.defendantAttendanceJPAMapper = defendantAttendanceJPAMapper;
         this.defendantReferralReasonsJPAMapper = defendantReferralReasonsJPAMapper;
         this.hearingCaseNoteJPAMapper = hearingCaseNoteJPAMapper;
@@ -45,8 +59,10 @@ public class HearingJPAMapper {
         this.judicialRoleJPAMapper = judicialRoleJPAMapper;
         this.prosecutionCaseJPAMapper = prosecutionCaseJPAMapper;
         this.hearingProsecutionCounselJPAMapper = hearingProsecutionCounselJPAMapper;
-        this.targetJPAMapper = targetJPAMapper;
         this.hearingTypeJPAMapper = hearingTypeJPAMapper;
+        this.courtApplicationsSerializer = courtApplicationsSerializer;
+        this.hearingRespondentCounselJPAMapper=hearingRespondentCounselJPAMapper;
+        this.hearingApplicantCounselJPAMapper = hearingApplicantCounselJPAMapper;
     }
 
     //to keep cditester happy
@@ -82,8 +98,8 @@ public class HearingJPAMapper {
         hearing.setProsecutionCases(prosecutionCaseJPAMapper.toJPA(hearing, pojo.getProsecutionCases()));
         hearing.setProsecutionCounsels(hearingProsecutionCounselJPAMapper.toJPA(hearing, pojo.getProsecutionCounsels()));
         hearing.setReportingRestrictionReason(pojo.getReportingRestrictionReason());
-        hearing.setTargets(targetJPAMapper.toJPA(hearing, pojo.getTargets()));
         hearing.setHearingType(hearingTypeJPAMapper.toJPA(pojo.getType()));
+        hearing.setCourtApplicationsJson(courtApplicationsSerializer.json(pojo.getCourtApplications()));
         return hearing;
     }
 
@@ -106,9 +122,57 @@ public class HearingJPAMapper {
                 .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(entity.getProsecutionCases()))
                 .withProsecutionCounsels(hearingProsecutionCounselJPAMapper.fromJPA(entity.getProsecutionCounsels()))
                 .withReportingRestrictionReason(entity.getReportingRestrictionReason())
-                .withTargets(targetJPAMapper.fromJPA(entity.getTargets()))
                 .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
                 .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withCourtApplications(courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson()))
+                .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
+                .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
                 .build();
     }
+
+    public String addOrUpdateCourtApplication(final String courtApplicationsJson, final CourtApplication courtApplicationUpdate) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = Collections.emptyList();
+        }
+        courtApplications = courtApplications.stream().filter(
+                ca -> !ca.getId().equals(courtApplicationUpdate.getId())
+        ).collect(Collectors.toList());
+        courtApplications.add(courtApplicationUpdate);
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    public String saveApplicationResponse(final String courtApplicationsJson, final CourtApplicationResponse courtApplicationResponse, final UUID applicationPartyId) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = Collections.emptyList();
+        }
+
+        Optional<CourtApplication> courtApplication = courtApplications.stream().filter(
+                ca -> ca.getId().equals(courtApplicationResponse.getApplicationId())
+        ).findFirst();
+
+        if (courtApplication.isPresent()) {
+            //The Admitted / denied flag should be only passed once for each application.
+            courtApplication.get().getRespondents().stream().filter( r -> r.getPartyDetails().getId().equals(applicationPartyId)).findFirst().get().setApplicationResponse(courtApplicationResponse);
+        }
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    public String saveApplicationOutcome(final String courtApplicationsJson, final CourtApplicationOutcome courtApplicationOutcome) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = Collections.emptyList();
+        }
+
+        Optional<CourtApplication> courtApplication = courtApplications.stream().filter(
+                ca -> ca.getId().equals(courtApplicationOutcome.getApplicationId())
+        ).findFirst();
+
+        if (courtApplication.isPresent()) {
+            courtApplication.get().setApplicationOutcome(courtApplicationOutcome);
+        }
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
 }

@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -35,10 +36,10 @@ public class UpdateResultLineStatusDelegate {
         final UpdateResultLinesStatusCommand updateResultLinesStatusCommand = UpdateResultLinesStatusCommand.builder()
                 .withLastSharedDateTime(resultsShared.getSharedTime())
                 .withHearingId(resultsShared.getHearingId())
-                .withCourtClerk(uk.gov.justice.core.courts.CourtClerk.courtClerk()
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
                         .withFirstName(resultsShared.getCourtClerk().getFirstName())
                         .withLastName(resultsShared.getCourtClerk().getLastName())
-                        .withId(resultsShared.getCourtClerk().getId())
+                        .withUserId(resultsShared.getCourtClerk().getUserId())
                         .build()
                 )
                 .withSharedResultLines(findCompletedResultLineIdsThatAreNew(getCompletedResultLines(resultsShared), resultsShared.getCompletedResultLinesStatus()))
@@ -49,7 +50,7 @@ public class UpdateResultLineStatusDelegate {
     }
 
     private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
-        return resultsShared.getHearing().getTargets().stream()
+        return resultsShared.getTargets().stream()
                 .flatMap(target -> target.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList());

@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.command.result;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
 
+import uk.gov.justice.core.courts.DelegatedPowers;
+
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -19,12 +21,14 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
 
     private final UUID hearingId;
     private final ZonedDateTime lastSharedDateTime;
-    private final uk.gov.justice.core.courts.CourtClerk courtClerk;
+
+    private final DelegatedPowers courtClerk;
+
     private final List<SharedResultLineId> sharedResultLines;
 
     @JsonCreator
     protected UpdateResultLinesStatusCommand(@JsonProperty("hearingId") final UUID hearingId,
-                                             @JsonProperty("courtClerk") final uk.gov.justice.core.courts.CourtClerk courtClerk,
+                                             @JsonProperty("courtClerk") final DelegatedPowers courtClerk,
                                              @JsonProperty("lastSharedDateTime") final ZonedDateTime lastSharedDateTime,
                                              @JsonProperty("sharedResultLines") final List<SharedResultLineId> sharedResultLines) {
         this.hearingId = hearingId;
@@ -46,7 +50,7 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
         return lastSharedDateTime;
     }
 
-    public uk.gov.justice.core.courts.CourtClerk getCourtClerk() {
+    public DelegatedPowers getCourtClerk() {
         return courtClerk;
     }
 
@@ -58,7 +62,9 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
 
         private UUID hearingId;
         private ZonedDateTime lastSharedDateTime;
-        private uk.gov.justice.core.courts.CourtClerk courtClerk;
+
+        private DelegatedPowers courtClerk;
+
         private List<SharedResultLineId> sharedResultLines;
 
         public Builder withHearingId(final UUID hearingId) {
@@ -76,7 +82,7 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
             return this;
         }
 
-        public Builder withCourtClerk(uk.gov.justice.core.courts.CourtClerk courtClerk) {
+        public Builder withCourtClerk(DelegatedPowers courtClerk) {
             this.courtClerk = courtClerk;
             return this;
         }

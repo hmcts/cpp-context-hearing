@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
+import uk.gov.justice.core.courts.DelegatedPowers;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
@@ -16,7 +18,7 @@ public final class ShareResultsCommand implements Serializable {
 
     private List<SharedResultsCommandResultLine> resultLines;
 
-    private uk.gov.justice.core.courts.CourtClerk courtClerk;
+    private DelegatedPowers courtClerk;
 
     public ShareResultsCommand() {
     }
@@ -24,7 +26,7 @@ public final class ShareResultsCommand implements Serializable {
     @JsonCreator
     private ShareResultsCommand(
             @JsonProperty("hearingId") final UUID hearingId,
-            @JsonProperty("courtClerk") final uk.gov.justice.core.courts.CourtClerk courtClerk,
+            @JsonProperty("courtClerk") final DelegatedPowers courtClerk,
             @JsonProperty("resultLines") final List<SharedResultsCommandResultLine> resultLines) {
         this.hearingId = hearingId;
         this.courtClerk = courtClerk;
@@ -53,11 +55,11 @@ public final class ShareResultsCommand implements Serializable {
         return this;
     }
 
-    public uk.gov.justice.core.courts.CourtClerk getCourtClerk() {
+    public DelegatedPowers getCourtClerk() {
         return courtClerk;
     }
 
-    public ShareResultsCommand setCourtClerk(final uk.gov.justice.core.courts.CourtClerk courtClerk) {
+    public ShareResultsCommand setCourtClerk(final DelegatedPowers courtClerk) {
         this.courtClerk = courtClerk;
         return this;
     }

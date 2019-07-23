@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/v24/hearing/events/listener/hearing.events.offence-updated.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "defendantId": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "offence": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/offence.json"
+    }
+  },
+  "required": [
+    "hearingId",
+    "defendantId",
+    "offence"
+  ]
+}

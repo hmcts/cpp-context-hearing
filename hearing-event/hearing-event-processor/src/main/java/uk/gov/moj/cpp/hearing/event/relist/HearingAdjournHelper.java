@@ -46,8 +46,12 @@ public final class HearingAdjournHelper {
 
     private static boolean isSharedResultHaveNextHearingResults(final List<Target> targets, final List<ResultLine> completedResultLines, final Offence offence, final Set<UUID> nextHearingResultIds) {
         return completedResultLines.stream()
-                .filter(completedResultLine -> findTargetByResultLine(targets, completedResultLine).getOffenceId().equals(offence.getId()))
                 .filter(completedResultLine -> nextHearingResultIds.contains(completedResultLine.getResultDefinitionId()))
+                .filter(completedResultLine ->
+                {
+                    final Target target = findTargetByResultLine(targets, completedResultLine);
+                    return target != null && target.getOffenceId() != null && offence != null && target.getOffenceId().equals(offence.getId());
+                })
                 .count() > 0;
     }
 }

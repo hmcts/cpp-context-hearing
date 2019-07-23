@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/v24/hearing/events/listener/hearing.draft-result-saved.json",
+  "type": "object",
+  "properties": {
+    "target": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/target.json"
+    }
+  },
+  "required": [
+    "target"
+  ],
+  "additionalProperties": false
+}

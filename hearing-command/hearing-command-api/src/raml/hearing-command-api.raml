@@ -72,6 +72,27 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.save-hearing-case-note+json
             name: hearing.save-hearing-case-note
+        (mapping):
+            requestType: application/vnd.hearing.save-application-response+json
+            name: hearing.save-application-response
+        (mapping):
+            requestType: application/vnd.hearing.add-respondent-counsel+json
+            name: hearing.add-respondent-counsel
+        (mapping):
+            requestType: application/vnd.hearing.remove-respondent-counsel+json
+            name: hearing.remove-respondent-counsel
+        (mapping):
+            requestType: application/vnd.hearing.update-respondent-counsel+json
+            name: hearing.update-respondent-counsel
+        (mapping):
+            requestType: application/vnd.hearing.add-applicant-counsel+json
+            name: hearing.add-applicant-counsel
+        (mapping):
+            requestType: application/vnd.hearing.remove-applicant-counsel+json
+            name: hearing.remove-applicant-counsel
+        (mapping):
+            requestType: application/vnd.hearing.update-applicant-counsel+json
+            name: hearing.update-applicant-counsel
         ...
       body:
         application/vnd.hearing.save-draft-result+json:
@@ -119,10 +140,30 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.update-verdict.json
             schema:
              !include json/schema/hearing.update-verdict.json
-
         application/vnd.hearing.save-hearing-case-note+json:
             example: !include json/hearing.save-hearing-case-note.json
             schema: !include json/schema/hearing.save-hearing-case-note.json
+        application/vnd.hearing.save-application-response+json:
+            example: !include json/hearing.save-application-response.json
+            schema: !include json/schema/hearing.save-application-response.json
+        application/vnd.hearing.add-respondent-counsel+json:
+            example: !include json/hearing.add-respondent-counsel.json
+            schema:  !include json/schema/hearing.add-respondent-counsel.json
+        application/vnd.hearing.remove-respondent-counsel+json:
+            example: !include json/hearing.remove-respondent-counsel.json
+            schema:  !include json/schema/hearing.remove-respondent-counsel.json
+        application/vnd.hearing.update-respondent-counsel+json:
+            example: !include json/hearing.update-respondent-counsel.json
+            schema:  !include json/schema/hearing.update-respondent-counsel.json
+        application/vnd.hearing.add-applicant-counsel+json:
+            example: !include json/hearing.add-applicant-counsel.json
+            schema:  !include json/schema/hearing.add-applicant-counsel.json
+        application/vnd.hearing.remove-applicant-counsel+json:
+            example: !include json/hearing.remove-applicant-counsel.json
+            schema:  !include json/schema/hearing.remove-applicant-counsel.json
+        application/vnd.hearing.update-applicant-counsel+json:
+            example: !include json/hearing.update-applicant-counsel.json
+            schema:  !include json/schema/hearing.update-applicant-counsel.json
       responses:
             202:
                 description: OK
@@ -205,6 +246,22 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.share-results+json:
             example: !include json/hearing.share-results.json
             schema: !include json/schema/hearing.share-results.json
+      responses:
+            202:
+                description: OK
+
+/application-draft-result:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.application-draft-result+json
+            name: hearing.application-draft-result
+        ...
+      body:
+        application/vnd.hearing.application-draft-result+json:
+            example: !include json/hearing.application-draft-result.json
+            schema: !include json/schema/hearing.application-draft-result.json
       responses:
             202:
                 description: OK

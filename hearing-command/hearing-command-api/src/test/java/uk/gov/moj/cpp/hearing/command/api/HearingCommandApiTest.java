@@ -60,8 +60,11 @@ public class HearingCommandApiTest {
 
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
-            "addProsecutionCounsel", "removeProsecutionCounsel","updateProsecutionCounsel", "removeDefenceCounsel", "updateDefenceCounsel", "initiateHearing", "saveDraftResult", "saveHearingCaseNote",
-            "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance");
+            "addProsecutionCounsel", "removeProsecutionCounsel","updateProsecutionCounsel", "removeDefenceCounsel", "updateDefenceCounsel", "initiateHearing", "saveDraftResult", "applicationDraftResult", "saveHearingCaseNote",
+            "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance", "saveApplicationResponse",
+            "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel",
+            "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel");
+
     @Spy
     private final Enveloper enveloper = createEnveloper();
     @Spy

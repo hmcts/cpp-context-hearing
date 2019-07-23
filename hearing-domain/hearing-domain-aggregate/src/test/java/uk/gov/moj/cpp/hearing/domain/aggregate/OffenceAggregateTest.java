@@ -106,7 +106,7 @@ public class OffenceAggregateTest {
                         Verdict.verdict()
                                 .withVerdictDate(PAST_LOCAL_DATE.next())
                                 .withVerdictType(VerdictType.verdictType()
-                                        .withVerdictTypeId(randomUUID())
+                                        .withId(randomUUID())
                                         .withCategory(STRING.next())
                                         .withCategoryType(TestTemplates.VerdictCategoryType.GUILTY.name())
                                         .withDescription(STRING.next())

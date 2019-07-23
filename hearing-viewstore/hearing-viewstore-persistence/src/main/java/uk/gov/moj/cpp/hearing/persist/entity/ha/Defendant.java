@@ -134,6 +134,9 @@ public class Defendant {
     @Column(name = "mitigation_welsh")
     private String mitigationWelsh;
 
+    @Column(name = "p_nci_id")
+    private String pncId;
+
     public Defendant() {
         //For JPA
     }
@@ -248,6 +251,14 @@ public class Defendant {
 
     public void setMitigationWelsh(String mitigationWelsh) {
         this.mitigationWelsh = mitigationWelsh;
+    }
+
+    public String getPncId() {
+        return pncId;
+    }
+
+    public void setPncId(String pncId) {
+        this.pncId = pncId;
     }
 
     @Override

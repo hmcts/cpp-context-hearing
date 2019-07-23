@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
-import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
@@ -12,17 +12,15 @@ import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseDefendant;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseHearing;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -30,18 +28,18 @@ import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -58,7 +56,6 @@ public class HearingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
-    private static final String SPACE = " ";
     @Inject
     private HearingRepository hearingRepository;
     @Inject
@@ -79,26 +76,37 @@ public class HearingService {
     private TargetJPAMapper targetJPAMapper;
     @Inject
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
+    @Inject
+    private GetHearingsTransformer getHearingTransformer;
+
+    private final ZoneId zid = ZoneId.of(ZoneOffset.UTC.getId());
 
     @Transactional
-    public HearingListResponse getHearingByDateV2(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
+    public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
 
         if (null == date || null == courtCentreId || null == roomId) {
-            return new HearingListResponse();
+            return new GetHearings(null);
         }
         final List<Hearing> source = hearingRepository.findByFilters(date, courtCentreId, roomId);
         if (CollectionUtils.isEmpty(source)) {
-            return new HearingListResponse();
+            return new GetHearings(null);
         }
 
-        final LocalDateTime from = getDateWithTime(date, startTime);
-        final LocalDateTime to = getDateWithTime(date, endTime);
+        final ZonedDateTime from = getDateWithTime(date, startTime);
+        final ZonedDateTime to = getDateWithTime(date, endTime);
         final List<Hearing> filteredHearings = filterHearings(source, from, to);
 
-        return HearingListResponse.builder()
-                .withHearings(filteredHearings.stream().map(this::populateHearing).collect(toList()))
+        //sorting listSequence for hearing day
+        filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
+
+        return GetHearings.getHearings()
+                .withHearingSummaries(filteredHearings.stream()
+                        .map(ha -> hearingJPAMapper.fromJPA(ha))
+                        .map(h -> getHearingTransformer.summary(h).build())
+                        .collect(toList()))
                 .build();
     }
+
 
     @Transactional
     public HearingDetailsResponse getHearingById(final UUID hearingId) {
@@ -181,6 +189,18 @@ public class HearingService {
                 .withTargets(targetJPAMapper.fromJPA(hearing.getTargets())).build();
     }
 
+    @Transactional
+    public ApplicationTargetListResponse getApplicationTargets(UUID hearingId) {
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+
+        return ApplicationTargetListResponse.applicationTargetListResponse().setHearingId(hearing.getId())
+                .setTargets(hearing.getApplicationDraftResults().stream().map(dr ->
+                        ApplicationTarget.applicationTarget().setDraftResult(dr.getDraftResult())
+                                .setApplicationId(dr.getApplicationId())
+                                .setTargetId(dr.getId())
+                ).collect(toList()));
+    }
+
     private Function<Subscription, uk.gov.moj.cpp.hearing.domain.notification.Subscription> populateHearing() {
         return s -> {
             final uk.gov.moj.cpp.hearing.domain.notification.Subscription subscription = new uk.gov.moj.cpp.hearing.domain.notification.Subscription();
@@ -194,63 +214,25 @@ public class HearingService {
         };
     }
 
-    private String formatName(final Person person) {
-        return Stream.of(Optional.ofNullable(person)
-                        .map(Person::getFirstName)
-                        .orElse(null),
-                Optional.ofNullable(person)
-                        .map(Person::getMiddleName)
-                        .orElse(null),
-                Optional.ofNullable(person)
-                        .map(Person::getLastName)
-                        .orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining(SPACE));
-    }
-
-    private HearingListResponseHearing populateHearing(final Hearing source) {
-        if (null == source || null == source.getId()) {
-            return null;
-        }
-
-        final List<ProsecutionCase> prosecutionCases = source.getProsecutionCases().stream()
-                .map(prosecutionCase -> ProsecutionCase.builder()
-                        .withId(prosecutionCase.getId().getId())
-                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifierJPAMapper.fromJPA(prosecutionCase.getProsecutionCaseIdentifier()))
-                        .withDefendants(prosecutionCase.getDefendants().stream()
-                                .map(defendant -> HearingListResponseDefendant.builder()
-                                        .withId(defendant.getId().getId())
-                                        .withName(formatName(defendant.getPersonDefendant().getPersonDetails())).build()
-                                ).collect(toList()))
-                        .build()).collect(toList());
-
-        return HearingListResponseHearing.builder()
-                .withId(source.getId())
-                .withType(hearingTypeJPAMapper.fromJPA(source.getHearingType()))
-                .withJurisdictionType(JurisdictionType.valueOf(source.getJurisdictionType().name()))
-                .withReportingRestrictionReason(source.getReportingRestrictionReason())
-                .withHearingLanguage(source.getHearingLanguage().name())
-                .withHearingDays(hearingDayJPAMapper.fromJPA(source.getHearingDays()))
-                .withProsecutionCases(prosecutionCases)
-                .withHasSharedResults(source.getHasSharedResults())
-                .build();
-    }
-
-    private LocalDateTime getDateWithTime(final LocalDate date, final String time) {
+    private ZonedDateTime getDateWithTime(final LocalDate date, final String time) {
         final String[] times = time.split(":");
         final LocalTime localTime = LocalTime.of(Integer.parseInt(times[0]), Integer.parseInt(times[1]));
-        return LocalDateTime.of(date, localTime);
+        return ZonedDateTime.of(date, localTime, zid );
     }
 
-    private List<Hearing> filterHearings(final List<Hearing> hearings, final LocalDateTime from, final LocalDateTime to) {
+    private List<Hearing> filterHearings(final List<Hearing> hearings, final ZonedDateTime from, final ZonedDateTime to) {
         return hearings.stream().filter(hearing -> hasHearingDayMatched(hearing, from, to)).collect(Collectors.toList());
     }
 
-    private boolean hasHearingDayMatched(final Hearing hearing, final LocalDateTime from, final LocalDateTime to) {
+    private boolean hasHearingDayMatched(final Hearing hearing, final ZonedDateTime from, final ZonedDateTime to) {
         return hearing.getHearingDays().stream().anyMatch(hearingDay -> isBetween(hearingDay.getDateTime(), from, to));
     }
 
-    private boolean isBetween(final LocalDateTime sittingDay, final LocalDateTime from, final LocalDateTime to) {
-        return sittingDay.isAfter(from) && sittingDay.isBefore(to);
+    private boolean isBetween(final ZonedDateTime sittingDay, final ZonedDateTime from, final ZonedDateTime to) {
+        return (sittingDay.isAfter(from) || sittingDay.isEqual(from)) && (sittingDay.isEqual(to) || sittingDay.isBefore(to));
+    }
+
+    private Integer sortListingSequence(LocalDate date, Hearing o1) {
+        return o1.getHearingDays().stream().filter(d -> d.getDate().isEqual(date)).map(HearingDay::getListingSequence).findFirst().orElse(0);
     }
 }

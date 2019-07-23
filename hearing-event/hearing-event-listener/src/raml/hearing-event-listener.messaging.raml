@@ -11,6 +11,14 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.events.initiated.json
             example: !include json/hearing.events.initiated.json
 
+        application/vnd.hearing.events.hearing-extended+json:
+            schema: !include json/schema/hearing.events.hearing-extended.json
+            example: !include json/hearing.events.hearing-extended.json
+
+        application/vnd.hearing.events.application-detail-changed+json:
+            schema: !include json/schema/hearing.events.application-detail-changed.json
+            example: !include json/hearing.events.application-detail-changed.json
+
         application/vnd.hearing.events.inherited-plea+json:
             schema: !include json/schema/hearing.events.inherited-plea.json
             example: !include json/hearing.events.inherited-plea.json
@@ -70,6 +78,10 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.draft-result-saved+json:
             schema: !include json/schema/hearing.draft-result-saved.json
             example: !include json/hearing.draft-result-saved.json
+
+        application/vnd.hearing.application-draft-resulted+json:
+            schema: !include json/schema/hearing.application-draft-resulted.json
+            example: !include json/hearing.application-draft-resulted.json
 
 # Case Defendant Details Updated
         application/vnd.hearing.defendant-details-updated+json:
@@ -140,3 +152,35 @@ baseUri: message://event/listener/message/hearing
         application/vnd.hearing.results-shared+json:
             schema: !include json/schema/hearing.results-shared.json
             example: !include json/hearing.results-shared.json
+
+# application response
+        application/vnd.hearing.application-response-saved+json:
+            schema: !include json/schema/hearing.application-response-saved.json
+            example: !include json/hearing.application-response-saved.json
+
+# Respondent Counsel
+        application/vnd.hearing.respondent-counsel-added+json:
+            schema: !include json/schema/hearing.respondent-counsel-added.json
+            example: !include json/hearing.respondent-counsel-added.json
+        application/vnd.hearing.respondent-counsel-removed+json:
+            schema: !include json/schema/hearing.respondent-counsel-removed.json
+            example: !include json/hearing.respondent-counsel-removed.json
+        application/vnd.hearing.respondent-counsel-updated+json:
+            schema: !include json/schema/hearing.respondent-counsel-updated.json
+            example: !include json/hearing.respondent-counsel-updated.json
+
+# Applicant Counsel
+        application/vnd.hearing.applicant-counsel-added+json:
+            schema: !include json/schema/hearing.applicant-counsel-added.json
+            example: !include json/hearing.applicant-counsel-added.json
+        application/vnd.hearing.applicant-counsel-removed+json:
+            schema: !include json/schema/hearing.applicant-counsel-removed.json
+            example: !include json/hearing.applicant-counsel-removed.json
+        application/vnd.hearing.applicant-counsel-updated+json:
+            schema: !include json/schema/hearing.applicant-counsel-updated.json
+            example: !include json/hearing.applicant-counsel-updated.json
+
+# Case Defendant added
+        application/vnd.hearing.defendant-added+json:
+            schema: !include json/schema/hearing.defendant-added.json
+            example: !include json/hearing.defendant-added.json

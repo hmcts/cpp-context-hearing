@@ -16,21 +16,22 @@ public class OffenceFactsJPAMapperTest {
 
     public static BeanMatcher<OffenceFacts> whenOffenceFacts(final BeanMatcher<OffenceFacts> m,
                                                              final uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts entity) {
-        return m.with(OffenceFacts::getAlcoholReadingAmount, is(entity.getAlcoholReadingAmount()))
-                .with(OffenceFacts::getAlcoholReadingMethod, is(entity.getAlcoholReadingMethod()))
+        return m.with(OffenceFacts::getAlcoholReadingAmount, is(Integer.parseInt(entity.getAlcoholReadingAmount())))
+                .with(OffenceFacts::getAlcoholReadingMethodCode, is(entity.getAlcoholReadingMethodCode()))
                 .with(OffenceFacts::getVehicleRegistration, is(entity.getVehicleRegistration()));
     }
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts> whenOffenceFacts(
             final BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts> m, final OffenceFacts pojo) {
-        return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts::getAlcoholReadingAmount, is(pojo.getAlcoholReadingAmount()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts::getAlcoholReadingMethod, is(pojo.getAlcoholReadingMethod()))
+        return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts::getAlcoholReadingAmount, is(pojo.getAlcoholReadingAmount().toString()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts::getAlcoholReadingMethodCode, is(pojo.getAlcoholReadingMethodCode()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts::getVehicleRegistration, is(pojo.getVehicleRegistration()));
     }
 
     @Test
     public void testFromJPA() {
         final uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts offenceFactsEntity = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts.class);
+        offenceFactsEntity.setAlcoholReadingAmount("123");
         assertThat(offenceFactsJPAMapper.fromJPA(offenceFactsEntity), whenOffenceFacts(isBean(OffenceFacts.class), offenceFactsEntity));
     }
 

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class ResultDefinition {
 
     public static final String YES = "Y";
+
     private UUID id;
 
     private String label;
@@ -38,6 +39,16 @@ public class ResultDefinition {
     private Boolean isAvailableForCourtExtract;
 
     private String financial;
+
+    private String category;
+
+    private String cjsCode;
+
+    private String adjournment;
+
+    private String convicted;
+
+    private String qualifier;
 
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
@@ -167,5 +178,50 @@ public class ResultDefinition {
     public ResultDefinition setWelshLabel(String welshLabel) {
         this.welshLabel = welshLabel;
         return this;
+    }
+
+    public ResultDefinition setCategory(final String category) {
+        this.category = category;
+        return this;
+    }
+
+    public String getCategory() {
+        return this.category;
+    }
+
+    public ResultDefinition setCjsCode(final String cjsCode) {
+        this.cjsCode = cjsCode;
+        return this;
+    }
+
+    public String getCjsCode() {
+        return this.cjsCode;
+    }
+
+    public boolean isAdjournment() {
+        return adjournment != null && adjournment.equalsIgnoreCase(YES);
+    }
+
+    public ResultDefinition setAdjournment(final String adjournment) {
+        this.adjournment = adjournment;
+        return this;
+    }
+
+    public boolean isConvicted() {
+        return convicted != null && convicted.equalsIgnoreCase(YES);
+    }
+
+    public ResultDefinition setConvicted(final String convicted) {
+        this.convicted = convicted;
+        return this;
+    }
+
+    public ResultDefinition setQualifier(final String qualifier) {
+        this.qualifier = qualifier;
+        return this;
+    }
+
+    public String getQualifier() {
+        return this.qualifier;
     }
 }

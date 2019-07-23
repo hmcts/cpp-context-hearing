@@ -1,0 +1,36 @@
+{
+  "hearingId": "20cdf36e-93e4-41b0-8277-17d9dba7f06f",
+  "courtApplication": {
+    "id": "20cdf36e-93e4-41b0-8277-17d9dba7f06f",
+    "type": {
+      "id": "88cdf36e-93e4-41b0-8277-17d9dba7f06f",
+      "applicationCode": "a",
+      "applicationType": "a",
+      "applicationTypeWelsh": "a",
+      "applicationLegislation": "a",
+      "applicationLegislationWelsh": "a",
+      "applicationCategory": "a",
+      "requiresCourtHearing": true,
+      "linkType": "STANDALONE",
+      "applicantSynonym": "a",
+      "respondentSynonym": "a",
+      "applicationJurisdictionType": "MAGISTRATES"
+    },
+    "applicationReceivedDate": "0000-01-01",
+    "applicationReference": "a",
+    "applicant": {
+      "id": "88cdf36e-93e4-41b0-8277-17d9dba7f06f"
+    },
+    "respondents": [
+      {
+        "partyDetails": {
+          "id": "88cdf36e-93e4-41b0-8277-17d9dba7f06f"
+        }
+      }
+    ],
+    "respondentsNA": true,
+    "linkedCaseId": "b977919d-60de-431c-9739-04ca6aefe968",
+    "applicationStatus": "DRAFT",
+    "outOfTimeReasons": "a"
+  }
+}

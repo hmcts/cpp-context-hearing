@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/v24/hearing/events/listener/hearing.nows-variants-saved.json",
+  "type": "object",
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "variantKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "defendantId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "nowsTypeId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "usergroups": {
+          "type": "array",
+          "additionalItems": false,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resultLineReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "resultLineId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "lastSharedTime": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "variantValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "materialId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "resultLines": {
+          "type": "array",
+          "additionalProperties": false,
+          "items": {
+            "$ref": "#/definitions/resultLineReference"
+          }
+        }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/definitions/variantKey"
+        },
+        "value": {
+          "$ref": "#/definitions/variantValue"
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "variants": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "$ref": "#/definitions/variant"
+      }
+    }
+  }
+}

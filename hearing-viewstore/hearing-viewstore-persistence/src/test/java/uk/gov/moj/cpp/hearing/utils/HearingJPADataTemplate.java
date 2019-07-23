@@ -105,6 +105,8 @@ public final class HearingJPADataTemplate {
 
                     offence.setPlea(plea);
 
+                    offence.getOffenceFacts().setAlcoholReadingAmount(Integer.valueOf(123).toString());
+
                     hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().add(offence);
                 });
         //

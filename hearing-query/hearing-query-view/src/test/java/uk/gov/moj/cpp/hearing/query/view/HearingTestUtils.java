@@ -6,7 +6,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.at;
 
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.HearingLanguage;
-import uk.gov.justice.core.courts.JudicialRoleType;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
@@ -25,7 +24,12 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -213,7 +217,8 @@ public class HearingTestUtils {
         hearingDay.setSittingDay(startDate);
         hearingDay.setListedDurationMinutes(2);
         hearingDay.setListingSequence(5);
-        hearingDay.setDateTime(startDate.toLocalDateTime());
+        hearingDay.setDateTime(startDate);
+        hearingDay.setDate(startDate.toLocalDate());
         hearingDay.setId(new HearingSnapshotKey(UUID.randomUUID(), ahearingId));
         return hearingDay;
     }
@@ -254,4 +259,66 @@ public class HearingTestUtils {
             return at(at(hearing.getProsecutionCases(), 0).getDefendants(), 0).getPersonDefendant().getPersonDetails();
         }
     }
+
+    public static List<Hearing> buildHearingAndHearingDays() {
+
+        List<Hearing> hearings = new ArrayList<>();
+
+        // Hearing 1
+        final Hearing hearing1 = new Hearing();
+        hearing1.setId(UUID.randomUUID());
+        Set<HearingDay> hearingDays1 = generateHearingDays(hearing1.getId(), 2019, 7, 1, 3);//3
+        hearing1.setHearingDays(hearingDays1);
+
+        //Hearing 2
+        final Hearing hearing2 = new Hearing();
+        hearing2.setId(UUID.randomUUID());
+        Set<HearingDay> hearingDays2 = generateHearingDays(hearing1.getId(),2019, 7, 4, 1); //5
+        hearing2.setHearingDays(hearingDays2);
+
+        //Hearing 3
+        final Hearing hearing3 = new Hearing();
+        hearing3.setId(UUID.randomUUID());
+        Set<HearingDay> hearingDays3 = generateHearingDays(hearing1.getId(),2019, 7, 2, 4); //1
+        hearing3.setHearingDays(hearingDays3);
+
+        hearings.add(hearing1);
+        hearings.add(hearing2);
+        hearings.add(hearing3);
+
+        return hearings;
+    }
+
+    private static Set<HearingDay> generateHearingDays(UUID hearingId, int year, int month, int day, int sequence) {
+
+        Set<HearingDay> hearingDays = new HashSet<>(); //add 5 days
+
+        HearingDay hearingDay1 = getHearingDay(hearingId, year, month, day++, sequence);
+        HearingDay hearingDay2 = getHearingDay(hearingId, year, month, day++, sequence);
+        HearingDay hearingDay3 = getHearingDay(hearingId, year, month, day++, sequence);
+        HearingDay hearingDay4 = getHearingDay(hearingId, year, month, day++, sequence);
+        HearingDay hearingDay5 = getHearingDay(hearingId, year, month, day++, sequence);
+
+        hearingDays.add(hearingDay1);
+        hearingDays.add(hearingDay2);
+        hearingDays.add(hearingDay3);
+        hearingDays.add(hearingDay4);
+        hearingDays.add(hearingDay5);
+
+        return hearingDays;
+    }
+
+    private static HearingDay getHearingDay(UUID hearingId, int year, int month, int day, int sequence) {
+        HearingDay hearingDay = new HearingDay();
+        hearingDay.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        hearingDay.setListingSequence(sequence);
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));
+        hearingDay.setDate(zonedDateTime.toLocalDate());
+        hearingDay.setSittingDay(zonedDateTime);
+        hearingDay.setDateTime(zonedDateTime);
+
+        return hearingDay;
+    }
+
 }

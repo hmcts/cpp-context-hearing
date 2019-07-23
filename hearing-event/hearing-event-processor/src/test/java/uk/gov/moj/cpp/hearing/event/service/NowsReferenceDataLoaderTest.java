@@ -94,7 +94,7 @@ public class NowsReferenceDataLoaderTest {
                 .withValue(ResultDefinition::getId, actual.getResultDefinitions().get(0).getId())
                 .withValue(ResultDefinition::getWelshLabel, actual.getResultDefinitions().get(0).getWelshLabel())
                 .withValue(ResultDefinition::getIsAvailableForCourtExtract, actual.getResultDefinitions().get(0).getIsAvailableForCourtExtract())
-                .withValue(rd->rd.getUserGroups().get(0), "Court Admin")
+                .withValue(rd -> rd.getUserGroups().get(0), "Court Admin")
                 .with(ResultDefinition::getPrompts, first(isBean(Prompt.class)
                         .withValue(p -> p.getUserGroups().get(0), "Court Admin")
                 ))

@@ -28,7 +28,8 @@ import org.slf4j.LoggerFactory;
 @ServiceComponent(EVENT_LISTENER)
 public class ProsecutionCounselEventListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HearingCaseNoteSavedEventListener.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProsecutionCounselEventListener.class.getName());
+
     public static final String HEARING_NOT_FOUND = "Hearing not found";
 
     @Inject

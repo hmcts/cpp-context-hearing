@@ -3,8 +3,10 @@ package uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.Target;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 public class PendingNowsRequestedCommand implements Serializable {
@@ -13,12 +15,17 @@ public class PendingNowsRequestedCommand implements Serializable {
 
     private CreateNowsRequest createNowsRequest;
 
+    private List<Target> targets;
+
     private PendingNowsRequestedCommand() {
     }
 
     @JsonCreator
-    public PendingNowsRequestedCommand(@JsonProperty("createNowsRequest") final CreateNowsRequest createNowsRequest) {
+    public PendingNowsRequestedCommand(
+            @JsonProperty("createNowsRequest") final CreateNowsRequest createNowsRequest,
+            @JsonProperty("targets") final List<Target> targets) {
         this.createNowsRequest = createNowsRequest;
+        this.targets = targets;
     }
 
 
@@ -35,4 +42,12 @@ public class PendingNowsRequestedCommand implements Serializable {
         return this;
     }
 
+    public List<Target> getTargets() {
+        return targets;
+    }
+
+    public PendingNowsRequestedCommand setTargets(List<Target> targets) {
+        this.targets = targets;
+        return this;
+    }
 }

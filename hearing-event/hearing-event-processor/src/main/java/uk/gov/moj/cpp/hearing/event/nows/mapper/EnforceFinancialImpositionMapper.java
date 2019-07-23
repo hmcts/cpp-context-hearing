@@ -13,6 +13,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.SharedResultLine;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.json.schemas.staging.EnforceFinancialImposition;
 
 import java.util.HashMap;
@@ -29,9 +30,12 @@ public class EnforceFinancialImpositionMapper {
 
     private final UUID requestId;
 
-    public EnforceFinancialImpositionMapper(final UUID requestId, final CreateNowsRequest nowsRequest) {
+    private final List<Target> targets;
+
+    public EnforceFinancialImpositionMapper(final UUID requestId, final CreateNowsRequest nowsRequest, final List<Target> targets) {
         this.nowsRequest = nowsRequest;
         this.requestId = requestId;
+        this.targets = targets;
     }
 
     public EnforceFinancialImposition map() {
@@ -58,27 +62,30 @@ public class EnforceFinancialImpositionMapper {
             throw new IllegalArgumentException("Only One Order will be sent to enforcement at time.");
         }
 
-        return createEnforceFinancialImposition(defendant, now, hearing, sharedResultLines);
+        return createEnforceFinancialImposition(defendant, now, hearing, sharedResultLines, targets);
 
     }
 
-    private EnforceFinancialImposition createEnforceFinancialImposition(final Defendant defendant, final Now nows, final Hearing hearing, final List<SharedResultLine> sharedResultLines) {
+    private EnforceFinancialImposition createEnforceFinancialImposition(final Defendant defendant, final Now nows, final Hearing hearing, final List<SharedResultLine> sharedResultLines,
+                                                                        final List<Target> targets) {
 
         final String originator = "Courts";
 
-        final Map<UUID, UUID> resultLineResultDefinitionIdMap = hearing.getTargets().stream()
+        final Map<UUID, UUID> resultLineResultDefinitionIdMap = targets.stream()
                 .filter(target -> target.getDefendantId().equals(defendant.getId()))
                 .flatMap(target -> target.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
+                .filter(r -> (isNull(r.getIsDeleted()) || !r.getIsDeleted()))
                 .collect(Collectors.toMap(ResultLine::getResultLineId, ResultLine::getResultDefinitionId));
 
         final Map<UUID, String> sharedResultLineOffenceCodeMap = mapSharedResultWithOffenceCode(
                 defendant, sharedResultLines);
 
-        final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts = hearing.getTargets().stream()
+        final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts = targets.stream()
                 .filter(target -> target.getDefendantId().equals(defendant.getId()))
                 .flatMap(target -> target.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
+                .filter(r -> (isNull(r.getIsDeleted()) || !r.getIsDeleted()))
                 .collect(Collectors.toMap(ResultLine::getResultLineId, ResultLine::getPrompts));
 
         final StagingEnforcementProsecutionMapper prosecutionMapper = new StagingEnforcementProsecutionMapper(defendant.getId(), hearing);
@@ -110,6 +117,7 @@ public class EnforceFinancialImpositionMapper {
     private Map<UUID, String> mapSharedResultWithOffenceCode(final Defendant defendant, final List<SharedResultLine> sharedResultLines) {
         final Map<UUID, UUID> sharedResultLineIdOffenceIdMap = sharedResultLines.stream()
                 .filter(s -> s.getDefendantId().equals(defendant.getId()))
+                .filter(r -> (isNull(r.getIsDeleted()) || !r.getIsDeleted()))
                 .collect(Collectors.toMap(SharedResultLine::getId, SharedResultLine::getOffenceId));
 
         final Map<UUID, String> offenceIdOffenceCodeMap = defendant.getOffences().stream()

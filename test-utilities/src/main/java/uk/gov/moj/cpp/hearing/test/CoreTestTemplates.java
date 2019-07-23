@@ -27,6 +27,7 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantRepresentation;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
+import uk.gov.justice.core.courts.Ethnicity;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -61,11 +62,17 @@ import uk.gov.justice.core.courts.Title;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.JudicialRoleTypeEnum;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -82,6 +89,14 @@ public class CoreTestTemplates {
                 .withListedDurationMinutes(INTEGER.next());
     }
 
+    public static HearingDay.Builder hearingDayWithParam(int year, int month, int day, int seq) {
+        final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));
+        return HearingDay.hearingDay()
+                .withSittingDay(zonedDateTime)
+                .withListingSequence(seq)
+                .withListedDurationMinutes(INTEGER.next());
+    }
+
     public static CourtCentre.Builder courtCentre() {
         return CourtCentre.courtCentre()
                 .withId(randomUUID())
@@ -91,6 +106,17 @@ public class CoreTestTemplates {
                 .withRoomName(STRING.next())
                 .withWelshRoomName(STRING.next());
     }
+
+    public static CourtCentre.Builder courtCentreWithArgs(UUID courtAndRoomId) {
+        return CourtCentre.courtCentre()
+                .withId(courtAndRoomId)
+                .withName(STRING.next())
+                .withWelshName(STRING.next())
+                .withRoomId(courtAndRoomId)
+                .withRoomName(STRING.next())
+                .withWelshRoomName(STRING.next());
+    }
+
 
     public static JudicialRole.Builder judiciaryRole(CoreTemplateArguments args) {
         return JudicialRole.judicialRole()
@@ -154,8 +180,8 @@ public class CoreTestTemplates {
 
     public static OffenceFacts.Builder offenceFacts() {
         return OffenceFacts.offenceFacts()
-                .withAlcoholReadingAmount(STRING.next())
-                .withAlcoholReadingMethod(STRING.next())
+                .withAlcoholReadingAmount(INTEGER.next())
+                .withAlcoholReadingMethodCode(STRING.next())
                 .withVehicleRegistration(STRING.next());
     }
 
@@ -187,7 +213,6 @@ public class CoreTestTemplates {
                 .withOffenceTitle(STRING.next())
                 .withOffenceTitleWelsh(STRING.next())
                 .withOffenceCode(STRING.next())
-                .withCount(INTEGER.next())
                 .withOffenceFacts(offenceFacts().build())
                 .withOffenceLegislation(STRING.next())
                 .withOffenceLegislationWelsh(STRING.next())
@@ -196,7 +221,15 @@ public class CoreTestTemplates {
                 .withModeOfTrial(STRING.next())
                 .withOrderIndex(INTEGER.next());
 
+        if (!args.isOffenceCountNull) {
+            result.withCount(INTEGER.next());
+        }
         if (args.jurisdictionType == JurisdictionType.MAGISTRATES) {
+            final LocalDate convictionDate = PAST_LOCAL_DATE.next();
+            result.withConvictionDate(convictionDate);
+        }
+
+        if (args.convicted) {
             final LocalDate convictionDate = PAST_LOCAL_DATE.next();
             result.withConvictionDate(convictionDate);
         }
@@ -241,8 +274,7 @@ public class CoreTestTemplates {
                 .withDateOfBirth(PAST_LOCAL_DATE.next())
                 .withDisabilityStatus(STRING.next())
                 .withDocumentationLanguageNeeds(args.hearingLanguage == WELSH ? DocumentationLanguageNeeds.WELSH : DocumentationLanguageNeeds.ENGLISH)
-                .withEthnicityId(randomUUID())
-                .withEthnicityCode(STRING.next())
+                .withEthnicity(Ethnicity.ethnicity().withObservedEthnicityCode(STRING.next()).build())
                 .withAddress(address().build())
                 .withFirstName(STRING.next())
                 .withMiddleName(STRING.next())
@@ -282,22 +314,13 @@ public class CoreTestTemplates {
     public static PersonDefendant.Builder personDefendant(CoreTemplateArguments args) {
         return PersonDefendant.personDefendant()
                 .withPersonDetails(person(args).build())
-                .withAliases(asList(STRING.next()))
                 .withArrestSummonsNumber(STRING.next())
                 .withBailStatus(BailStatus.IN_CUSTODY)
                 .withDriverNumber(STRING.next())
                 .withPerceivedBirthYear(INTEGER.next())
-
-                .withSelfDefinedEthnicityId(randomUUID())
-                .withSelfDefinedEthnicityCode(STRING.next())
-                .withObservedEthnicityCode(STRING.next())
-                .withObservedEthnicityId(randomUUID())
-
                 .withEmployerOrganisation(organisation(args).build())
                 .withEmployerPayrollReference(STRING.next())
-
-                .withCustodyTimeLimit(PAST_LOCAL_DATE.next())
-                .withPncId(STRING.next());
+                .withCustodyTimeLimit(PAST_LOCAL_DATE.next());
     }
 
     public static LegalEntityDefendant.Builder legalEntityDefendant(CoreTemplateArguments args) {
@@ -354,28 +377,9 @@ public class CoreTestTemplates {
     }
 
     public static Hearing.Builder hearing(CoreTemplateArguments args) {
-
-        if (args.hearingLanguage == WELSH) {
-            return Hearing.hearing()
-                    .withId(randomUUID())
-                    .withType(hearingType().build())
-                    .withHearingLanguage(HearingLanguage.WELSH)
-                    .withJurisdictionType(args.jurisdictionType)
-                    .withReportingRestrictionReason(STRING.next())
-                    .withHearingDays(asList(hearingDay().build()))
-                    .withCourtCentre(courtCentre().build())
-                    .withJudiciary(singletonList(judiciaryRole(args).build()))
-                    .withProsecutionCases(
-                            args.structure.entrySet().stream()
-                                    .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
-                                    .collect(toList())
-                    );
-        }
-
-        return Hearing.hearing()
+        final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
-                .withHearingLanguage(HearingLanguage.ENGLISH)
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
                 .withHearingDays(asList(hearingDay().build()))
@@ -386,8 +390,49 @@ public class CoreTestTemplates {
                         args.structure.entrySet().stream()
                                 .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
                                 .collect(toList())
-                );
+                )
+
+                .withCourtApplications(asList((new HearingFactory().courtApplication().build())));
+
+        if (args.hearingLanguage == WELSH) {
+            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+        } else {
+            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+        }
+        return hearingBuilder;
     }
+
+    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,int year, int month, int day) throws NoSuchAlgorithmException {
+       final Random random = SecureRandom.getInstanceStrong();
+       final int min = 1;
+       final int max = 5;
+       final Hearing.Builder hearingBuilder = Hearing.hearing()
+                .withId(randomUUID())
+                .withType(hearingType().build())
+                .withJurisdictionType(args.jurisdictionType)
+                .withReportingRestrictionReason(STRING.next())
+                .withHearingDays(asList(    hearingDayWithParam(year, month, day+1,random.nextInt((max - min) + 1) + min).build(),
+                                            hearingDayWithParam(year, month, day,random.nextInt((max - min) + 1) + min).build(),
+                                            hearingDayWithParam(year, month, day-1,random.nextInt((max - min) + 1) + min).build()))
+                .withCourtCentre(courtCentreWithArgs(courtAndRoomId).build())
+                .withJudiciary(singletonList(judiciaryRole(args).build()))
+                .withDefendantReferralReasons(singletonList(referralReason().build()))
+                .withProsecutionCases(
+                        args.structure.entrySet().stream()
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                .collect(toList())
+                )
+
+                .withCourtApplications(asList((new HearingFactory().courtApplication().build())));
+
+        if (args.hearingLanguage == WELSH) {
+            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+        } else {
+            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+        }
+        return hearingBuilder;
+    }
+
 
     public static String generateRandomEmail() {
         return STRING.next().toLowerCase() + "@" + STRING.next().toLowerCase() + "." + STRING.next().toLowerCase();
@@ -413,11 +458,13 @@ public class CoreTestTemplates {
                 .withSharedDate(PAST_LOCAL_DATE.next())
                 .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
                         .withId(randomUUID())
+                        .withValue("2017-05-20")
                         .build()))
                 )
                 .withDelegatedPowers(null)
                 .withIsComplete(true)
                 .withIsModified(false)
+                .withIsDeleted(false)
                 .build();
     }
 
@@ -451,6 +498,8 @@ public class CoreTestTemplates {
         private boolean minimumPerson;
         private boolean minimumOrganisation;
         private boolean minimumOffence;
+        private boolean convicted = false;
+        private boolean isOffenceCountNull = false;
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
@@ -528,6 +577,45 @@ public class CoreTestTemplates {
             this.structure = structure;
             return this;
         }
+
+        public CoreTemplateArguments setConvicted(boolean convicted) {
+            this.convicted = convicted;
+            return this;
+        }
+
+        public CoreTemplateArguments setOffenceWithNullCount() {
+            this.isOffenceCountNull = true;
+            return this;
+        }
+    }
+
+    public static Target.Builder targetForDocumentIsDeleted(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
+        return Target.target()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult("json string")
+                .withResultLines(new ArrayList<>(asList(resultLineForDocumentIsDeleted(resultLineId))));
+    }
+
+    public static ResultLine resultLineForDocumentIsDeleted(UUID resultLineId) {
+        return ResultLine.resultLine()
+                .withResultDefinitionId(randomUUID())
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.CASE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .build()))
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
+                .withIsDeleted(true)
+                .build();
     }
 
 }

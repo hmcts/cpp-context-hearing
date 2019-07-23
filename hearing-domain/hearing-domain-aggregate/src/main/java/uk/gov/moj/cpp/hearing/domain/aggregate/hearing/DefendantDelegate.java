@@ -45,14 +45,14 @@ public class DefendantDelegate implements Serializable {
         Map<UUID, DefendantAttendance> defendantAttendanceMap = defendantAttendances.stream()
                 .collect(Collectors.toMap(DefendantAttendance::getDefendantId, Function.identity()));
 
-        DefendantAttendance defendantAttendance = defendantAttendanceMap.computeIfAbsent(defendantAttendanceUpdated.getDefendantId(), (id) -> DefendantAttendance.defendantAttendance()
+        DefendantAttendance defendantAttendance = defendantAttendanceMap.computeIfAbsent(defendantAttendanceUpdated.getDefendantId(), id -> DefendantAttendance.defendantAttendance()
                 .withDefendantId(id)
                 .withAttendanceDays(new ArrayList<>())
                 .build());
 
         Map<LocalDate, AttendanceDay> localDateAttendanceDayMap = defendantAttendance.getAttendanceDays().stream().collect(Collectors.toMap(AttendanceDay::getDay, Function.identity()));
 
-        AttendanceDay attendanceDay = localDateAttendanceDayMap.computeIfAbsent(defendantAttendanceUpdated.getAttendanceDay().getDay(), (date) -> AttendanceDay.attendanceDay().withDay(date).build());
+        AttendanceDay attendanceDay = localDateAttendanceDayMap.computeIfAbsent(defendantAttendanceUpdated.getAttendanceDay().getDay(), date -> AttendanceDay.attendanceDay().withDay(date).build());
 
         attendanceDay.setIsInAttendance(defendantAttendanceUpdated.getAttendanceDay().getIsInAttendance());
 
@@ -63,18 +63,17 @@ public class DefendantDelegate implements Serializable {
     }
 
     public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant newDefendant) {
-        if (!this.momento.isPublished()) {
+        if (!this.momento.isPublished() && momento.getHearing() != null) {
             final Optional<Defendant> previouslyStoredDefendant = momento.getHearing().getProsecutionCases().stream()
                     .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                     .filter(d -> d.getId().equals(newDefendant.getId()))
                     .findFirst();
-            if (previouslyStoredDefendant.isPresent()) {
+            if (previouslyStoredDefendant.isPresent() && newDefendant.getPersonDefendant().getPersonDetails() != null) {
                 final Title storedTitle = previouslyStoredDefendant.get().getPersonDefendant().getPersonDetails().getTitle();
                 final Title newTitle = newDefendant.getPersonDefendant().getPersonDetails().getTitle();
                 if (newTitle == null) {
                     newDefendant.getPersonDefendant().getPersonDetails().setTitle(storedTitle);
                 }
-
             }
             return Stream.of(DefendantDetailsUpdated.defendantDetailsUpdated()
                     .setHearingId(hearingId)

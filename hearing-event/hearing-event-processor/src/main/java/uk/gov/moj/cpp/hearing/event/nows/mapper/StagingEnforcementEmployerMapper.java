@@ -18,7 +18,7 @@ public class StagingEnforcementEmployerMapper {
 
     public Employer map() {
 
-        if(isNull(employer)) {
+        if (isNull(employer)) {
             return null;
         }
 
@@ -30,7 +30,7 @@ public class StagingEnforcementEmployerMapper {
 
         String work = null;
 
-        if(nonNull(contact)) {
+        if (nonNull(contact)) {
             emailAddress = nonNull(contact.getPrimaryEmail()) ? contact.getPrimaryEmail() : contact.getSecondaryEmail();
             work = contact.getWork();
         }

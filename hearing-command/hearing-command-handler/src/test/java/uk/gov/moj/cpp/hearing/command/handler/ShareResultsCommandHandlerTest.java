@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.command.handler;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -13,11 +14,16 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultWithOutcomeCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-import uk.gov.justice.core.courts.CourtClerk;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.CourtApplicationResponse;
+import uk.gov.justice.core.courts.CourtApplicationResponseType;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -39,15 +45,19 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
+import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.application.ApplicationResponseSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
@@ -76,14 +86,17 @@ public class ShareResultsCommandHandlerTest {
 
     public static final String HEARING_RESULTS_SHARED_EVENT_NAME = "hearing.results-shared";
     final static String DRAFT_RESULT_SAVED_EVENT_NAME = "hearing.draft-result-saved";
+    final static String APPLICATION_DRAFT_RESULT_EVENT_NAME = "hearing.application-draft-resulted";
+
     private static InitiateHearingCommand initiateHearingCommand;
     private static ProsecutionCounselAdded prosecutionCounselAdded;
     private static DefenceCounselAdded defenceCounselUpsert;
+    private static HearingExtended hearingExtended;
     private static uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent nowsVariantsSavedEvent;
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class);
+    private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class, ApplicationDraftResulted.class);
     @InjectMocks
     private ShareResultsCommandHandler shareResultsCommandHandler;
     @Mock
@@ -136,6 +149,8 @@ public class ShareResultsCommandHandlerTest {
                         .setKey(VariantKey.variantKey().setDefendantId(UUID.randomUUID()))
                         .setValue(VariantValue.variantValue())
                 ));
+
+        hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build());
     }
 
     @Before
@@ -153,6 +168,7 @@ public class ShareResultsCommandHandlerTest {
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
             apply(Stream.of(prosecutionCounselAdded));
             apply(Stream.of(defenceCounselUpsert));
+            apply(getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0)));
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
@@ -182,6 +198,66 @@ public class ShareResultsCommandHandlerTest {
 
     }
 
+
+    @Test
+    public void shouldRaiseApplicationDraftResulted() throws Exception {
+
+        final HearingAggregate aggregate = new HearingAggregate() {{
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
+        }};
+
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
+
+        final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultCommandTemplate(initiateHearingCommand.getHearing().getId());
+
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.application-draft-result"), objectToJsonObjectConverter.convert(applicationDraftResultCommand));
+
+        this.shareResultsCommandHandler.applicationDraftResult(envelope);
+
+        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> APPLICATION_DRAFT_RESULT_EVENT_NAME.equals(e.metadata().name())).findFirst();
+        assertThat("expected:" + APPLICATION_DRAFT_RESULT_EVENT_NAME, efound.get(), IsNull.notNullValue());
+
+        assertThat(asPojo(efound.get(), ApplicationDraftResulted.class), isBean(ApplicationDraftResulted.class)
+                .with(ApplicationDraftResulted::getTargetId, is(applicationDraftResultCommand.getTargetId()))
+                .with(ApplicationDraftResulted::getApplicationId, is(applicationDraftResultCommand.getApplicationId()))
+                .with(ApplicationDraftResulted::getDraftResult, is(applicationDraftResultCommand.getDraftResult()))
+                .with(ApplicationDraftResulted::getHearingId, is(applicationDraftResultCommand.getHearingId()))
+        );
+
+    }
+
+    @Test
+    public void shouldRaiseApplicationDraftResultedWithOutCome() throws Exception {
+
+        final HearingAggregate aggregate = new HearingAggregate() {{
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
+        }};
+
+        final UUID applicationId = randomUUID();
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
+
+        final CourtApplicationOutcomeType courtApplicationOutcomeType = CourtApplicationOutcomeType.courtApplicationOutcomeType().withDescription("Admitted")
+                .withId(UUID.randomUUID())
+                .withSequence(1).build();
+
+        final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultWithOutcomeCommandTemplate(initiateHearingCommand.getHearing().getId(), applicationId, courtApplicationOutcomeType);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.application-draft-result"), objectToJsonObjectConverter.convert(applicationDraftResultCommand));
+
+        this.shareResultsCommandHandler.applicationDraftResult(envelope);
+
+        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> APPLICATION_DRAFT_RESULT_EVENT_NAME.equals(e.metadata().name())).findFirst();
+        assertThat("expected:" + APPLICATION_DRAFT_RESULT_EVENT_NAME, efound.get(), IsNull.notNullValue());
+
+        assertThat(asPojo(efound.get(), ApplicationDraftResulted.class), isBean(ApplicationDraftResulted.class)
+                .with(ApplicationDraftResulted::getTargetId, is(applicationDraftResultCommand.getTargetId()))
+                .with(ApplicationDraftResulted::getApplicationId, is(applicationDraftResultCommand.getApplicationId()))
+                .with(ApplicationDraftResulted::getDraftResult, is(applicationDraftResultCommand.getDraftResult()))
+                .with(ApplicationDraftResulted::getHearingId, is(applicationDraftResultCommand.getHearingId()))
+                .with(ApplicationDraftResulted::getApplicationOutcomeType, is(courtApplicationOutcomeType))
+        );
+    }
+
     @Test
     public void shouldRaiseResultsSharedEvent() throws Exception {
 
@@ -191,6 +267,8 @@ public class ShareResultsCommandHandlerTest {
         targetDraft.setResultLines(null);
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
         final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft));
+        final int initialCourtApplicationCount = initiateHearingCommand.getHearing().getCourtApplications().size();
+        final ApplicationResponseSaved applicationResponseSaved = getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0));
 
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
@@ -198,6 +276,8 @@ public class ShareResultsCommandHandlerTest {
             apply(Stream.of(defenceCounselUpsert));
             apply(Stream.of(nowsVariantsSavedEvent));
             apply(draftResultSavedEvent);
+            apply(hearingExtended);
+            apply(applicationResponseSaved);
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
@@ -205,10 +285,10 @@ public class ShareResultsCommandHandlerTest {
         final ShareResultsCommand shareResultsCommand =
                 TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate(initiateHearingCommand.getHearing().getId());
 
-        shareResultsCommand.setCourtClerk(CourtClerk.courtClerk()
+        shareResultsCommand.setCourtClerk(DelegatedPowers.delegatedPowers()
                 .withFirstName("test")
                 .withLastName("testington")
-                .withId(UUID.randomUUID())
+                .withUserId(randomUUID())
                 .build());
 
         shareResultsCommand.setResultLines(Arrays.asList(
@@ -225,7 +305,15 @@ public class ShareResultsCommandHandlerTest {
                         resultLineIn.getResultLabel(),
                         resultLineIn.getLevel().name(),
                         resultLineIn.getIsModified(),
-                        resultLineIn.getIsComplete()
+                        resultLineIn.getIsComplete(),
+                        targetDraft.getApplicationId(),
+                        resultLineIn.getAmendmentReasonId(),
+                        resultLineIn.getAmendmentReason(),
+                        resultLineIn.getAmendmentDate(),
+                        resultLineIn.getFourEyesApproval(),
+                        resultLineIn.getApprovedDate(),
+                        resultLineIn.getIsDeleted(),
+                        null
                 )
         ));
 
@@ -239,21 +327,38 @@ public class ShareResultsCommandHandlerTest {
         final ResultsShared resultsShared = jsonObjectToObjectConverter.convert(efound.get().payloadAsJsonObject(), ResultsShared.class);
 
         assertThat(resultsShared, isBean(ResultsShared.class)
+                .with(h -> h.getTargets().size(), is(1))
+                .with(ResultsShared::getTargets, first(isBean(Target.class)
+                        .with(Target::getTargetId, is(targetDraft.getTargetId()))
+                        .with(t -> t.getResultLines().size(), is(shareResultsCommand.getResultLines().size()))
+                        .with(Target::getResultLines, first(isBean(ResultLine.class)
+                                .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
+                                .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
+                                .with(ResultLine::getPrompts, first(isBean(Prompt.class)
+                                        .with(Prompt::getId, is(promptIn.getId()))))))
+                ))
                 .with(ResultsShared::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(targetDraft.getHearingId()))
-                        .with(h -> h.getTargets().size(), is(1))
-                        .with(Hearing::getTargets, first(isBean(Target.class)
-                                .with(Target::getTargetId, is(targetDraft.getTargetId()))
-                                .with(t -> t.getResultLines().size(), is(shareResultsCommand.getResultLines().size()))
-                                .with(Target::getResultLines, first(isBean(ResultLine.class)
-                                        .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
-                                        .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
-                                        .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                                .with(Prompt::getId, is(promptIn.getId()))
-                                        ))
-                                ))
+                        .withValue(h -> h.getCourtApplications().size(), initialCourtApplicationCount + 1)
+                        .with(Hearing::getCourtApplications, hasItem(isBean(CourtApplication.class)
+                                        .withValue(CourtApplication::getId, hearingExtended.getCourtApplication().getId()
+                                        )
+                                )
                         ))
-                )
         );
+    }
+
+    private ApplicationResponseSaved getApplicationResponseSaved(final CourtApplication courtApplication) {
+        return ApplicationResponseSaved.applicationResponseSaved()
+                .setApplicationPartyId(courtApplication.getRespondents().get(0).getPartyDetails().getId())
+                .setCourtApplicationResponse(CourtApplicationResponse.courtApplicationResponse()
+                        .withApplicationResponseDate(LocalDate.now())
+                        .withOriginatingHearingId(randomUUID())
+                        .withApplicationId(courtApplication.getId())
+                        .withApplicationResponseType(CourtApplicationResponseType.courtApplicationResponseType()
+                                .withDescription("Admitted")
+                                .withId(UUID.randomUUID())
+                                .withSequence(1).build())
+                        .build());
     }
 }

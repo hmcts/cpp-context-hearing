@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/v24/hearing/events/listener/hearing.hearing-offence-verdict-updated.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "verdict": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/verdict.json"
+    }
+  },
+  "required": [
+    "hearingId",
+    "verdict"
+  ]
+}

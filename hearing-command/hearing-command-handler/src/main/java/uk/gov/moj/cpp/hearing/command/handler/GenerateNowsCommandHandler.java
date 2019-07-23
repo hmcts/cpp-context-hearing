@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
-import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.SystemUserProvider;
@@ -51,11 +50,11 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.pending-nows-requested {}", envelope.toObfuscatedDebugString());
         }
 
-        final CreateNowsRequest nowsRequest = convertToObject(envelope, PendingNowsRequestedCommand.class).getCreateNowsRequest();
+        final PendingNowsRequestedCommand pendingNowsRequestedCommand = convertToObject(envelope, PendingNowsRequestedCommand.class);
 
-        final UUID hearingId = nowsRequest.getHearing().getId();
+        final UUID hearingId = pendingNowsRequestedCommand.getCreateNowsRequest().getHearing().getId();
 
-        aggregate(HearingAggregate.class, hearingId, envelope, aggregate -> aggregate.registerPendingNowsRequest(nowsRequest));
+        aggregate(HearingAggregate.class, hearingId, envelope, aggregate -> aggregate.registerPendingNowsRequest(pendingNowsRequestedCommand.getCreateNowsRequest(), pendingNowsRequestedCommand.getTargets()));
     }
 
     @Handles("hearing.command.apply-enforcement-acknowledgement")
@@ -75,7 +74,7 @@ public class GenerateNowsCommandHandler extends AbstractCommandHandler {
             final UUID hearingId = mapping.get().getTargetId();
 
             aggregate(HearingAggregate.class, hearingId, envelope,
-                    aggregate -> aggregate.applyAccountNumber(hearingId, command.getRequestId(), command.getAcknowledgement().getAccountNumber()));
+                    aggregate -> aggregate.applyAccountNumber(command.getRequestId(), command.getAcknowledgement().getAccountNumber()));
         }
     }
 

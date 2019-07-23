@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 
-import uk.gov.justice.core.courts.CourtClerk;
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingCaseNote;
 import uk.gov.justice.core.courts.NoteType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingCaseNoteSaved;
@@ -28,7 +28,7 @@ public class HearingCaseNoteTest {
         final ZonedDateTime noteTime = ZonedDateTime.now();
         final List<UUID> prosecutionCases = asList(UUID.randomUUID(), UUID.randomUUID());
         final UUID originatingHearingId = UUID.randomUUID();
-        final CourtClerk courtClerk = mock(CourtClerk.class);
+        final DelegatedPowers courtClerk = mock(DelegatedPowers.class);
         final NoteType noteType = randomEnum(NoteType.class).next();
         final String note = STRING.next();
 

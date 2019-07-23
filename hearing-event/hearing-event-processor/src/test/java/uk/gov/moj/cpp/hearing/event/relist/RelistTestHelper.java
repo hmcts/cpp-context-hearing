@@ -61,8 +61,7 @@ public interface RelistTestHelper {
 
     static ResultsShared getArbitrarySharedResultWithNextHearingResult() {
         ResultsShared ARBITRARY_RESULT_SHARED = resultsSharedTemplate();
-        Defendant firstDefendant = ARBITRARY_RESULT_SHARED.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
-        Prompt dateOfHearing = Prompt.prompt().withId(fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283")).withLabel(DATE_OF_HEARING_LABEL).withValue("07/072018").build();
+        Prompt dateOfHearing = Prompt.prompt().withId(fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283")).withLabel(DATE_OF_HEARING_LABEL).withValue("12/12/2018").build();
         Prompt hearingType = Prompt.prompt().withId(HTYPE_PROMPT_ID).withLabel(HEARING_TYPE_LABEL).withValue("Trial").build();
         Prompt estimatedDuration = Prompt.prompt().withId(HEST_PROMPT_ID).withLabel(ESTIMATED_DURATION_LABEL).withValue("1 weeks,2 days").build();
         Prompt courtRoom = Prompt.prompt().withId(HCROOM_PROMPT_ID).withLabel(COURT_ROOM_LABEL).withValue("Room A").build();
@@ -76,7 +75,7 @@ public interface RelistTestHelper {
                 .withResultLabel("Next Hearing")
                 .withPrompts(Arrays.asList(dateOfHearing, hearingType, estimatedDuration, remandStatus, startTime, courtHouse, courtRoom))
                 .build();
-        ARBITRARY_RESULT_SHARED.getHearing().getTargets().get(0).getResultLines().add(nextHearingResult);
+        ARBITRARY_RESULT_SHARED.getTargets().get(0).getResultLines().add(nextHearingResult);
         return ARBITRARY_RESULT_SHARED;
     }
 

@@ -4,25 +4,7 @@
   "type": "object",
   "properties": {
     "courtClerk": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "description": "The identifier of teh court clerk sharing the results",
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "firstName",
-        "lastName"
-      ]
+      "$ref": "http://justice.gov.uk/core/courts/delegatedPowers.json"
     },
     "resultLines": {
       "type": "array",
@@ -114,6 +96,38 @@
         },
         "isComplete": {
           "type": "boolean"
+        },
+        "applicationId": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "amendmentDate": {
+          "description": "Indicates if the result is amended and the date of amendment",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "amendmentReasonId": {
+          "description": "Reference data for result amendment reason Id",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "amendmentReason": {
+          "description": "Reference data for result amendment reason",
+          "type": "string"
+        },
+        "fourEyesApproval": {
+          "$ref": "http://justice.gov.uk/core/courts/delegatedPowers.json"
+        },
+        "approvedDate": {
+          "description": "Indicates if the result is amended and the date of amendment",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+        },
+        "isDeleted": {
+          "description": "Indicates that the result amendment was a delete",
+          "type": "boolean"
+        },
+        "applicationOutcome": {
+          "type": "object",
+          "items": {
+            "$ref": "http://justice.gov.uk/core/courts/courtApplicationOutcome.json"
+          }
         }
       },
       "required": [

@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -27,7 +26,7 @@ public class HearingDay {
     private LocalDate date;
 
     @Column(name = "date_time")
-    private LocalDateTime dateTime;
+    private ZonedDateTime dateTime;
 
     @Column(name = "sitting_day")
     private ZonedDateTime sittingDay;
@@ -90,11 +89,11 @@ public class HearingDay {
         this.date = date;
     }
 
-    public LocalDateTime getDateTime() {
+    public ZonedDateTime getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(LocalDateTime dateTime) {
+    public void setDateTime(ZonedDateTime dateTime) {
         this.dateTime = dateTime;
     }
 

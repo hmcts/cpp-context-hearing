@@ -32,6 +32,11 @@ public class HearingCommandApi {
         this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.save-draft-result").apply(command.payloadAsJsonObject()));
     }
 
+    @Handles("hearing.application-draft-result")
+    public void applicationDraftResult(final JsonEnvelope command) {
+        this.sender.send(this.enveloper.withMetadataFrom(command, "hearing.command.application-draft-result").apply(command.payloadAsJsonObject()));
+    }
+
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-prosecution-counsel").apply(envelope.payloadAsJsonObject()));
@@ -90,5 +95,40 @@ public class HearingCommandApi {
     @Handles("hearing.save-hearing-case-note")
     public void saveHearingCaseNote(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.save-hearing-case-note").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.save-application-response")
+    public void saveApplicationResponse(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.save-application-response").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.remove-respondent-counsel")
+    public void removeRespondentCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-respondent-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.update-respondent-counsel")
+    public void updateRespondentCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.update-respondent-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.add-respondent-counsel")
+    public void addRespondentCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-respondent-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.remove-applicant-counsel")
+    public void removeApplicantCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-applicant-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.update-applicant-counsel")
+    public void updateApplicantCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.update-applicant-counsel").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.add-applicant-counsel")
+    public void addApplicantCounsel(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-applicant-counsel").apply(envelope.payloadAsJsonObject()));
     }
 }

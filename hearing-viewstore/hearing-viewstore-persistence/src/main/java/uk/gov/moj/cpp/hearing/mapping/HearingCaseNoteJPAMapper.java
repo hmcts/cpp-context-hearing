@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 
-import uk.gov.justice.core.courts.CourtClerk;
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.NoteType;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -57,7 +57,7 @@ public class HearingCaseNoteJPAMapper {
                 .add("noteDateTime", ZonedDateTimes.toString(pojo.getNoteDateTime()))
                 .add("prosecutionCases", prosecutionCases)
                 .add("courtClerk", Json.createObjectBuilder()
-                        .add("id", pojo.getCourtClerk().getId().toString())
+                        .add("userId", pojo.getCourtClerk().getUserId().toString())
                         .add("firstName", pojo.getCourtClerk().getFirstName())
                         .add("lastName", pojo.getCourtClerk().getLastName())
                 );
@@ -77,8 +77,8 @@ public class HearingCaseNoteJPAMapper {
 
         final NoteType noteType = Optional.ofNullable(entityPayload.getString("noteType")).map(NoteType::valueOf).orElse(null);
         return uk.gov.justice.core.courts.HearingCaseNote.hearingCaseNote()
-                .withCourtClerk(CourtClerk.courtClerk()
-                        .withId(fromString(courtClerk.getString("id")))
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(fromString(courtClerk.getString("userId")))
                         .withLastName(courtClerk.getString("lastName"))
                         .withFirstName(courtClerk.getString("firstName"))
                         .build())

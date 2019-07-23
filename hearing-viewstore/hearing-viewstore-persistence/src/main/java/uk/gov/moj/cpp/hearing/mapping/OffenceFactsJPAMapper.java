@@ -2,6 +2,9 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
@@ -12,8 +15,8 @@ public class OffenceFactsJPAMapper {
             return null;
         }
         final OffenceFacts offenceFacts = new OffenceFacts();
-        offenceFacts.setAlcoholReadingMethod(pojo.getAlcoholReadingMethod());
-        offenceFacts.setAlcoholReadingAmount(pojo.getAlcoholReadingAmount());
+        offenceFacts.setAlcoholReadingMethodCode(pojo.getAlcoholReadingMethodCode());
+        offenceFacts.setAlcoholReadingAmount(Optional.ofNullable(pojo.getAlcoholReadingAmount()).orElse(0).toString());
         offenceFacts.setVehicleRegistration(pojo.getVehicleRegistration());
         return offenceFacts;
     }
@@ -23,9 +26,18 @@ public class OffenceFactsJPAMapper {
             return null;
         }
         return uk.gov.justice.core.courts.OffenceFacts.offenceFacts()
-                .withAlcoholReadingAmount(entity.getAlcoholReadingAmount())
-                .withAlcoholReadingMethod(entity.getAlcoholReadingMethod())
+                .withAlcoholReadingAmount(parseAlcoholReadingAmount(entity.getAlcoholReadingAmount()))
+                .withAlcoholReadingMethodCode(entity.getAlcoholReadingMethodCode())
                 .withVehicleRegistration(entity.getVehicleRegistration())
                 .build();
     }
+
+    public Integer parseAlcoholReadingAmount(final String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException pex) {
+            return 0;
+        }
+    }
+
 }

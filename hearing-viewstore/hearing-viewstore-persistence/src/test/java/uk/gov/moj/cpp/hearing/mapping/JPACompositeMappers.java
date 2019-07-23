@@ -12,10 +12,10 @@ final class JPACompositeMappers {
     public static final OrganisationJPAMapper ORGANISATION_JPA_MAPPER = new OrganisationJPAMapper(
             new AddressJPAMapper(), new ContactNumberJPAMapper());
     public static final PersonJPAMapper PERSON_JPA_MAPPER = new PersonJPAMapper(new AddressJPAMapper(),
-            new ContactNumberJPAMapper());
+            new ContactNumberJPAMapper(), new EthnicityJPAMapper());
     public static final AssociatedPersonJPAMapper ASSOCIATED_PERSON_JPA_MAPPER = new AssociatedPersonJPAMapper(PERSON_JPA_MAPPER);
     public static final PersonDefendantJPAMapper PERSON_DEFENDANT_JPA_MAPPER = new PersonDefendantJPAMapper(
-            new DefendantAliasesJPAMapper(), ORGANISATION_JPA_MAPPER, PERSON_JPA_MAPPER);
+            ORGANISATION_JPA_MAPPER, PERSON_JPA_MAPPER);
     public static final DefendantJPAMapper DEFENDANT_JPA_MAPPER = new DefendantJPAMapper(ASSOCIATED_PERSON_JPA_MAPPER,
             ORGANISATION_JPA_MAPPER, OFFENCE_JPA_MAPPER, PERSON_DEFENDANT_JPA_MAPPER);
     public static final ProsecutionCaseJPAMapper PROSECUTION_CASE_JPA_MAPPER = new ProsecutionCaseJPAMapper(
@@ -24,10 +24,4 @@ final class JPACompositeMappers {
     public static final HearingDefenceCounselJPAMapper HEARING_DEFENCE_COUNSEL_JPA_MAPPER = new HearingDefenceCounselJPAMapper();
     private static final ResultLineJPAMapper RESULT_LINE_JPA_MAPPER = new ResultLineJPAMapper(new PromptJPAMapper(),
             new DelegatedPowersJPAMapper());
-    private static final TargetJPAMapper TARGET_JPA_MAPPER = new TargetJPAMapper(RESULT_LINE_JPA_MAPPER);
-    public static final HearingJPAMapper HEARING_JPA_MAPPER = new HearingJPAMapper(new CourtCentreJPAMapper(),
-            HEARING_DEFENCE_COUNSEL_JPA_MAPPER, new DefendantAttendanceJPAMapper(), new DefendantReferralReasonJPAMapper(),
-            HEARING_CASE_NOTE_JPA_MAPPER, new HearingDayJPAMapper(), new JudicialRoleJPAMapper(),
-            PROSECUTION_CASE_JPA_MAPPER, new HearingProsecutionCounselJPAMapper(), TARGET_JPA_MAPPER,
-            new HearingTypeJPAMapper());
 }

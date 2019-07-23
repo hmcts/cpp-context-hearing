@@ -1,11 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.nows.events.EnforcementError;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -19,23 +21,25 @@ public class NowDelegate implements Serializable {
         this.momento = momento;
     }
 
-    public Stream<Object> registerPendingNowsRequest(final CreateNowsRequest nowsRequest) {
-        return Stream.of(new PendingNowsRequested(nowsRequest));
+    public Stream<Object> registerPendingNowsRequest(final CreateNowsRequest nowsRequest, final List<Target> targets) {
+        return Stream.of(new PendingNowsRequested(nowsRequest, targets));
     }
 
     public void handlePendingNowsRequested(final PendingNowsRequested pendingNowsRequested) {
-        final UUID hearingId = pendingNowsRequested.getCreateNowsRequest().getHearing().getId();
-        momento.getHearingNowsMapper().putIfAbsent(hearingId, pendingNowsRequested.getCreateNowsRequest());
+        momento.getHearingNowsMapper().add(pendingNowsRequested);
     }
 
-    public Stream<Object> applyAccountNumber(final UUID hearingId, final UUID requestId, final String accountNumber) {
-        final CreateNowsRequest nowsRequest = momento.getHearingNowsMapper().get(hearingId);
+    public Stream<Object> applyAccountNumber(final UUID requestId, final String accountNumber) {
+        final PendingNowsRequested pendingNowsRequested = momento.getHearingNowsMapper().stream()
+                .filter(pendingNowsRequested1 -> pendingNowsRequested1.getCreateNowsRequest().getNows().stream().anyMatch(now -> now.getId().equals(requestId)))
+                .findFirst()
+                .orElse(null);
 
-        if (nowsRequest == null) {
+        if (pendingNowsRequested == null) {
             throw new IllegalStateException();
         }
 
-        return Stream.of(new NowsRequested(requestId, nowsRequest, accountNumber));
+        return Stream.of(new NowsRequested(requestId, pendingNowsRequested.getCreateNowsRequest(), accountNumber, pendingNowsRequested.getTargets()));
     }
 
     public Stream<Object> recordEnforcementError(final UUID requestId, final String errorCode, final String errorMessage) {

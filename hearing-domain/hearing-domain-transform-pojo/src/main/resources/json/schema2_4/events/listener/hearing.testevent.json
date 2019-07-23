@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/v24/hearing/events/listener/hearing.testevent.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "sequence": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/courtsDefinitions.json#/definitions/positiveInteger"
+    },
+    "id2": {
+      "$ref": "http://justice.gov.uk.v24/core/courts/courtsDefinitions.json#/definitions/uuid"
+    }
+
+  }
+}

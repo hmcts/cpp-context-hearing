@@ -40,12 +40,6 @@ public class Person {
     @Enumerated(EnumType.STRING)
     private DocumentationLanguageNeeds documentationLanguageNeeds;
 
-    @Column(name = "ethnicity_id")
-    private UUID ethnicityId;
-
-    @Column(name = "ethnicity")
-    private String ethnicity;
-
     @Column(name = "first_name")
     private String firstName;
 
@@ -87,6 +81,9 @@ public class Person {
     @Column(name = "title")
     @Enumerated(EnumType.STRING)
     private Title title;
+
+    @Embedded
+    private Ethnicity ethnicity;
 
     public Person() {
         //For JPA
@@ -146,22 +143,6 @@ public class Person {
 
     public void setDocumentationLanguageNeeds(DocumentationLanguageNeeds documentationLanguageNeeds) {
         this.documentationLanguageNeeds = documentationLanguageNeeds;
-    }
-
-    public UUID getEthnicityId() {
-        return ethnicityId;
-    }
-
-    public void setEthnicityId(UUID ethnicityId) {
-        this.ethnicityId = ethnicityId;
-    }
-
-    public String getEthnicity() {
-        return ethnicity;
-    }
-
-    public void setEthnicity(String ethnicity) {
-        this.ethnicity = ethnicity;
     }
 
     public String getFirstName() {
@@ -266,5 +247,13 @@ public class Person {
 
     public void setNationalityDescription(final String nationalityDescription) {
         this.nationalityDescription = nationalityDescription;
+    }
+
+    public Ethnicity getEthnicity() {
+        return ethnicity;
+    }
+
+    public void setEthnicity(final Ethnicity ethnicity) {
+        this.ethnicity = ethnicity;
     }
 }

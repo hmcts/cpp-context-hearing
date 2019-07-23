@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/progression/courts/public.progression.court-application-updated.json",
+  "type": "object",
+  "properties": {
+    "courtApplication": {
+      "description": "The court application that is to be updated",
+      "$ref": "http://justice.gov.uk/core/courts/courtApplication.json"
+    }
+  },
+  "required": [
+    "courtApplication"
+  ],
+  "additionalProperties": false
+}

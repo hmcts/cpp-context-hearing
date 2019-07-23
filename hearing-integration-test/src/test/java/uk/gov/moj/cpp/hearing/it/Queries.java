@@ -8,16 +8,17 @@ import static uk.gov.moj.cpp.hearing.it.AbstractIT.CPP_UID_HEADER;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getURL;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
 
+import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.io.StringReader;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.json.Json;
@@ -47,11 +48,11 @@ public class Queries {
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher));
 
-        final LocalDateTime expiryTime = LocalDateTime.now().plusSeconds(timeout);
+        final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 
         ResponseData responseData = makeRequest(requestParams);
 
-        while (!expectedConditions.matches(responseData) && LocalDateTime.now().isBefore(expiryTime)) {
+        while (!expectedConditions.matches(responseData) && ZonedDateTime.now().isBefore(expiryTime)) {
             sleep();
             responseData = makeRequest(requestParams);
         }
@@ -61,19 +62,19 @@ public class Queries {
         }
     }
 
-    public static void getHearingsByDatePollForMatch(final UUID courtCentreId, final UUID roomId, final String date, final String startTime, final String endTime, final long timeout, final BeanMatcher<HearingListResponse> resultMatcher) {
+    public static void getHearingsByDatePollForMatch(final UUID courtCentreId, final UUID roomId, final String date, final String startTime, final String endTime, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearings", date, startTime, endTime, courtCentreId, roomId), "application/vnd.hearing.get.hearings+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
                 .build();
 
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(HearingListResponse.class, resultMatcher));
+        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
 
-        final LocalDateTime expiryTime = LocalDateTime.now().plusSeconds(timeout);
+        final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 
         ResponseData responseData = makeRequest(requestParams);
 
-        while (!expectedConditions.matches(responseData) && LocalDateTime.now().isBefore(expiryTime)) {
+        while (!expectedConditions.matches(responseData) && ZonedDateTime.now().isBefore(expiryTime)) {
             sleep();
             responseData = makeRequest(requestParams);
         }
@@ -91,11 +92,34 @@ public class Queries {
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
 
-        final LocalDateTime expiryTime = LocalDateTime.now().plusSeconds(timeout);
+        final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 
         ResponseData responseData = makeRequest(requestParams);
 
-        while (!expectedConditions.matches(responseData) && LocalDateTime.now().isBefore(expiryTime)) {
+        while (!expectedConditions.matches(responseData) && ZonedDateTime.now().isBefore(expiryTime)) {
+            sleep();
+            responseData = makeRequest(requestParams);
+        }
+
+        if (!expectedConditions.matches(responseData)) {
+            assertThat(responseData, expectedConditions);
+        }
+
+    }
+
+    public static void getApplicationDraftResultsPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<ApplicationTargetListResponse> resultMatcher) {
+
+        final RequestParams requestParams = requestParams(getURL("hearing.get-application-draft-result", hearingId), "application/vnd.hearing.get-application-draft-result+json")
+                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(ApplicationTargetListResponse.class, resultMatcher));
+
+        final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
+
+        ResponseData responseData = makeRequest(requestParams);
+
+        while (!expectedConditions.matches(responseData) && ZonedDateTime.now().isBefore(expiryTime)) {
             sleep();
             responseData = makeRequest(requestParams);
         }

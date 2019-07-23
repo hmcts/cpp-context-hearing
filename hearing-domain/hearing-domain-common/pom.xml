@@ -37,6 +37,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>uk.gov.moj.cpp.core.domain</groupId>
+            <artifactId>criminal-court-public-model</artifactId>
+            <version>${criminal-court-public-model.version}</version>
+        </dependency>
+
         <!--<dependency>
             <groupId>uk.gov.justice.framework-api</groupId>
             <artifactId>framework-api-domain</artifactId>
@@ -82,7 +88,6 @@
                                     <plugin>
                                         uk.gov.justice.generation.pojo.plugin.classmodifying.AddAdditionalPropertiesToClassPlugin
                                     </plugin>
-
                                 </plugins>
                                 <typeMappings>
                                     <typeMapping>
@@ -115,6 +120,11 @@
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
                         <artifactId>pojo-plugin</artifactId>
                         <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.core.domain</groupId>
+                        <artifactId>criminal-court-public-model</artifactId>
+                        <version>${criminal-court-public-model.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

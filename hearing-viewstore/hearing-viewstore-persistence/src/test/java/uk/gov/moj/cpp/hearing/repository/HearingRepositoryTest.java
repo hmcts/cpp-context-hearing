@@ -63,8 +63,10 @@ public class HearingRepositoryTest {
         hearings.forEach(hearing -> {
 
             Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
-
+            // because h2 incorrectly maps column type TEXT to VARCHAR(255)
+            hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
             hearingRepository.save(hearingEntity);
+
         });
     }
 

@@ -5,8 +5,10 @@ import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForCrownCourtOffenceCountNull;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForDefendantTypeOrganisation;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
@@ -15,8 +17,10 @@ import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Ethnicity;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingLanguage;
@@ -34,17 +38,21 @@ import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReferralReason;
+import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
+import uk.gov.justice.hearing.courts.Defendants;
+import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseDefendant;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListResponseHearing;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.UUID;
 
 import org.junit.Test;
 
-@SuppressWarnings("unchecked")
 public class InitiateHearingIT extends AbstractIT {
 
     @Test
@@ -53,6 +61,7 @@ public class InitiateHearingIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
 
         final HearingDay hearingDay = hearing.getHearingDays().get(0);
 
@@ -73,7 +82,11 @@ public class InitiateHearingIT extends AbstractIT {
                                 .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
                         .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
                                 .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
-                                .withValue(jr-> judicialRole.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())))
+                                .withValue(jr -> judicialRole.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())))
+                        .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
+                                .withValue(CourtApplication::getId, courtApplication.getId())
+                                .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
+                        ))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
                                 .with(ProsecutionCase::getInitiationCode, is(hearingOne.getFirstCase().getInitiationCode()))
@@ -100,36 +113,98 @@ public class InitiateHearingIT extends AbstractIT {
                         ))
                 )
         );
-
+//TODO court applications
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
-                isBean(HearingListResponse.class)
-                        .with(HearingListResponse::getHearings, first(isBean(HearingListResponseHearing.class)
-                                .with(HearingListResponseHearing::getId, is(hearing.getId()))
-                                .with(HearingListResponseHearing::getJurisdictionType, is(hearing.getJurisdictionType()))
-                                .with(HearingListResponseHearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
-                                .with(HearingListResponseHearing::getHearingLanguage, is(HearingLanguage.ENGLISH.name()))
-                                .with(HearingListResponseHearing::getType, isBean(HearingType.class)
-                                        .with(HearingType::getId, is(hearing.getType().getId()))
-                                        .with(HearingType::getDescription, is(hearing.getType().getDescription())))
-                                .with(HearingListResponseHearing::getHearingDays, first(isBean(HearingDay.class)
-                                        .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
-                                        .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))
-                                        .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
-                                .with(HearingListResponseHearing::getProsecutionCases, first(isBean(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase.class)
-                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
-                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
-                                                .with(ProsecutionCaseIdentifier::getCaseURN, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getCaseURN()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityId()))
-                                                .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityReference())))
-                                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCase::getDefendants, first(isBean(HearingListResponseDefendant.class)
-                                                .with(HearingListResponseDefendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
-                                                .with(HearingListResponseDefendant::getName, is(hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails().getFirstName() + " " + hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails().getMiddleName() + " " + hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails().getLastName()))
+                isBean(GetHearings.class)
+                        .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
+                                .with(HearingSummaries::getId, is(hearing.getId()))
+                                //.withValue(HearingSummaries::getJurisdictionType, hearing.getJurisdictionType())
+                                .withValue(HearingSummaries::getReportingRestrictionReason, hearing.getReportingRestrictionReason())
+                                .withValue(HearingSummaries::getHearingLanguage, HearingLanguage.ENGLISH.name())
+                                .with(HearingSummaries::getType, isBean(HearingType.class)
+                                        .withValue(HearingType::getId, hearing.getType().getId())
+                                        .withValue(HearingType::getDescription, hearing.getType().getDescription()))
+                                .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
+                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
+                                        .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
+                                        .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
+                                .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
+                                        .withValue(ProsecutionCaseSummaries::getId, hearingOne.getFirstCase().getId())
+                                        .with(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                                .withValue(ProsecutionCaseIdentifier::getCaseURN, hearingOne.getFirstCase().getProsecutionCaseIdentifier().getCaseURN())
+                                                .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityCode())
+                                                .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityId, hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                                                .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, hearingOne.getFirstCase().getProsecutionCaseIdentifier().getProsecutionAuthorityReference()))
+                                        .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
+                                                .withValue(Defendants::getId, hearingOne.getFirstDefendantForFirstCase().getId())
+                                                .withValue(Defendants::getFirstName, hearingOne.getFirstDefendantForFirstCase().getPersonDefendant().getPersonDetails().getFirstName())
                                         ))
+                                ))
+                                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
                                 ))
                         ))
         );
     }
+
+    @Test
+    public void initiateHearing_ApplicationOnly() {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+
+        final Hearing hearing = hearingOne.getHearing();
+        hearing.setProsecutionCases(null);
+        final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+
+        final HearingDay hearingDay = hearing.getHearingDays().get(0);
+
+        final JudicialRole judicialRole = hearing.getJudiciary().get(0);
+
+        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getType, isBean(HearingType.class)
+                                .with(HearingType::getId, is(hearing.getType().getId())))
+                        .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
+                        .with(Hearing::getHearingLanguage, is(ENGLISH))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))
+                        .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))
+                                .with(HearingDay::getListedDurationMinutes, is(hearingDay.getListedDurationMinutes()))))
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
+                                .withValue(jr -> judicialRole.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())))
+                        .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
+                                .withValue(CourtApplication::getId, courtApplication.getId())
+                                .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
+                        ))
+
+                )
+        );
+//TODO court applications
+        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
+                isBean(GetHearings.class)
+                        .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
+                                .with(HearingSummaries::getId, is(hearing.getId()))
+                                //.withValue(HearingSummaries::getJurisdictionType, hearing.getJurisdictionType())
+                                .withValue(HearingSummaries::getReportingRestrictionReason, hearing.getReportingRestrictionReason())
+                                .withValue(HearingSummaries::getHearingLanguage, HearingLanguage.ENGLISH.name())
+                                .with(HearingSummaries::getType, isBean(HearingType.class)
+                                        .withValue(HearingType::getId, hearing.getType().getId())
+                                        .withValue(HearingType::getDescription, hearing.getType().getDescription()))
+                                .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
+                                        .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
+                                        .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
+                                        .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
+                                .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
+                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                                ))
+                        ))
+        );
+    }
+
 
     @Test
     public void initiateHearing_shouldInitiateHearing_whenDefendantTypeIsPerson() {
@@ -204,7 +279,7 @@ public class InitiateHearingIT extends AbstractIT {
                                         .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
                                         .with(JudicialRole::getMiddleName, is(judicialRole.getMiddleName()))
                                         .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
-                                        .withValue(jr->jr.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())
+                                        .withValue(jr -> jr.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())
                                         .with(JudicialRole::getIsDeputy, is(judicialRole.getIsDeputy()))
                                         .with(JudicialRole::getIsBenchChairman, is(judicialRole.getIsBenchChairman()))))
                                 .with(Hearing::getDefendantReferralReasons, first(isBean(ReferralReason.class)
@@ -254,8 +329,8 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(Person::getAdditionalNationalityId, is(person.getAdditionalNationalityId()))
                                                                 .with(Person::getAdditionalNationalityCode, is(person.getAdditionalNationalityCode()))
                                                                 .with(Person::getDisabilityStatus, is(person.getDisabilityStatus()))
-                                                                .with(Person::getEthnicityId, is(person.getEthnicityId()))
-                                                                .with(Person::getEthnicityCode, is(person.getEthnicityCode()))
+//                                                                .with(Person::getEthnicityId, is(person.getEthnicityId()))
+//                                                                .with(Person::getEthnicityCode, is(person.getEthnicityCode()))
                                                                 .with(Person::getGender, is(person.getGender()))
                                                                 .with(Person::getInterpreterLanguageNeeds, is(person.getInterpreterLanguageNeeds()))
                                                                 .with(Person::getDocumentationLanguageNeeds, is(person.getDocumentationLanguageNeeds()))
@@ -305,8 +380,8 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(Person::getAdditionalNationalityId, is(personDetails.getAdditionalNationalityId()))
                                                                 .with(Person::getAdditionalNationalityCode, is(personDetails.getAdditionalNationalityCode()))
                                                                 .with(Person::getDisabilityStatus, is(personDetails.getDisabilityStatus()))
-                                                                .with(Person::getEthnicityId, is(personDetails.getEthnicityId()))
-                                                                .with(Person::getEthnicityCode, is(personDetails.getEthnicityCode()))
+//                                                                .with(Person::getEthnicityId, is(personDetails.getEthnicityId()))
+//                                                                .with(Person::getEthnicityCode, is(personDetails.getEthnicityCode()))
                                                                 .with(Person::getGender, is(personDetails.getGender()))
                                                                 .with(Person::getInterpreterLanguageNeeds, is(personDetails.getInterpreterLanguageNeeds()))
                                                                 .with(Person::getDocumentationLanguageNeeds, is(personDetails.getDocumentationLanguageNeeds()))
@@ -330,12 +405,12 @@ public class InitiateHearingIT extends AbstractIT {
                                                         .with(PersonDefendant::getBailStatus, is(personDefendant.getBailStatus()))
                                                         .with(PersonDefendant::getCustodyTimeLimit, is(personDefendant.getCustodyTimeLimit()))
                                                         .with(PersonDefendant::getPerceivedBirthYear, is(personDefendant.getPerceivedBirthYear()))
-                                                        .with(PersonDefendant::getObservedEthnicityId, is(personDefendant.getObservedEthnicityId()))
-                                                        .with(PersonDefendant::getObservedEthnicityCode, is(personDefendant.getObservedEthnicityCode()))
-                                                        .with(PersonDefendant::getSelfDefinedEthnicityId, is(personDefendant.getSelfDefinedEthnicityId()))
-                                                        .with(PersonDefendant::getSelfDefinedEthnicityCode, is(personDefendant.getSelfDefinedEthnicityCode()))
+//                                                        .with(PersonDefendant::getObservedEthnicityId, is(personDefendant.getObservedEthnicityId()))
+//                                                        .with(PersonDefendant::getObservedEthnicityCode, is(personDefendant.getObservedEthnicityCode()))
+//                                                        .with(PersonDefendant::getSelfDefinedEthnicityId, is(personDefendant.getSelfDefinedEthnicityId()))
+//                                                        .with(PersonDefendant::getSelfDefinedEthnicityCode, is(personDefendant.getSelfDefinedEthnicityCode()))
                                                         .with(PersonDefendant::getDriverNumber, is(personDefendant.getDriverNumber()))
-                                                        .with(PersonDefendant::getPncId, is(personDefendant.getPncId()))
+//                                                        .with(PersonDefendant::getPncId, is(personDefendant.getPncId()))
                                                         .with(PersonDefendant::getArrestSummonsNumber, is(personDefendant.getArrestSummonsNumber()))
                                                         .with(PersonDefendant::getEmployerPayrollReference, is(personDefendant.getEmployerPayrollReference()))
                                                         .with(PersonDefendant::getEmployerOrganisation, isBean(Organisation.class)
@@ -390,6 +465,8 @@ public class InitiateHearingIT extends AbstractIT {
 
         final Address address = person.getAddress();
 
+        final uk.gov.justice.core.courts.Ethnicity associatedPersonEthnicity = person.getEthnicity();
+
         final ContactNumber contact = person.getContact();
 
         final Organisation legalEntityDefendantOrganisation = defendant.getLegalEntityDefendant().getOrganisation();
@@ -428,7 +505,7 @@ public class InitiateHearingIT extends AbstractIT {
                                         .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
                                         .with(JudicialRole::getMiddleName, is(judicialRole.getMiddleName()))
                                         .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
-                                        .withValue(jr->jr.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())
+                                        .withValue(jr -> jr.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())
                                         .with(JudicialRole::getIsDeputy, is(judicialRole.getIsDeputy()))
                                         .with(JudicialRole::getIsBenchChairman, is(judicialRole.getIsBenchChairman()))))
                                 .with(Hearing::getDefendantReferralReasons, first(isBean(ReferralReason.class)
@@ -501,8 +578,8 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(Person::getAdditionalNationalityId, is(person.getAdditionalNationalityId()))
                                                                 .with(Person::getAdditionalNationalityCode, is(person.getAdditionalNationalityCode()))
                                                                 .with(Person::getDisabilityStatus, is(person.getDisabilityStatus()))
-                                                                .with(Person::getEthnicityId, is(person.getEthnicityId()))
-                                                                .with(Person::getEthnicityCode, is(person.getEthnicityCode()))
+                                                                .with(Person::getEthnicity, isBean(Ethnicity.class)
+                                                                        .with(Ethnicity::getObservedEthnicityCode, is(associatedPersonEthnicity.getObservedEthnicityCode())))
                                                                 .with(Person::getGender, is(person.getGender()))
                                                                 .with(Person::getInterpreterLanguageNeeds, is(person.getInterpreterLanguageNeeds()))
                                                                 .with(Person::getDocumentationLanguageNeeds, is(person.getDocumentationLanguageNeeds()))
@@ -557,7 +634,8 @@ public class InitiateHearingIT extends AbstractIT {
                                                                         .with(ContactNumber::getWork, is(legalEntityDefendantOrganisation.getContact().getWork()))
                                                                         .with(ContactNumber::getMobile, is(legalEntityDefendantOrganisation.getContact().getMobile()))
                                                                         .with(ContactNumber::getPrimaryEmail, is(legalEntityDefendantOrganisation.getContact().getPrimaryEmail()))
-                                                                        .with(ContactNumber::getSecondaryEmail, is(legalEntityDefendantOrganisation.getContact().getSecondaryEmail())))))))))));
+                                                                        .with(ContactNumber::getSecondaryEmail, is(legalEntityDefendantOrganisation.getContact().getSecondaryEmail())))))))))))
+        ;
     }
 
     @Test
@@ -621,7 +699,7 @@ public class InitiateHearingIT extends AbstractIT {
                                         .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
                                         .with(JudicialRole::getMiddleName, is(judicialRole.getMiddleName()))
                                         .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
-                                        .withValue(jr->judicialRole.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())
+                                        .withValue(jr -> judicialRole.getJudicialRoleType().getJudiciaryType(), judicialRole.getJudicialRoleType().getJudiciaryType())
                                         .with(JudicialRole::getIsDeputy, is(judicialRole.getIsDeputy()))
                                         .with(JudicialRole::getIsBenchChairman, is(judicialRole.getIsBenchChairman()))))
                                 .with(Hearing::getDefendantReferralReasons, first(isBean(ReferralReason.class)
@@ -685,6 +763,38 @@ public class InitiateHearingIT extends AbstractIT {
                                                         .with(Offence::getOffenceFacts, isBean(OffenceFacts.class)
                                                                 .with(OffenceFacts::getVehicleRegistration, is(offenceFacts.getVehicleRegistration()))
                                                                 .with(OffenceFacts::getAlcoholReadingAmount, is(offenceFacts.getAlcoholReadingAmount()))
-                                                                .with(OffenceFacts::getAlcoholReadingMethod, is(offenceFacts.getAlcoholReadingMethod())))))))))));
+                                                                .with(OffenceFacts::getAlcoholReadingMethodCode, is(offenceFacts.getAlcoholReadingMethodCode())))))))))));
     }
+
+    @Test
+    public void ignoreInitiateHearing_whenOffenceCountMissingForCrownCourtHearing() {
+
+        UseCases.verifyIgnoreInitiateHearing(requestSpec, initiateHearingTemplateForCrownCourtOffenceCountNull());
+
+    }
+
+    @Test
+    public void listingHearings_with_sorted_listingSequence() throws NoSuchAlgorithmException {
+
+        UUID courtAndRoomId = UUID.randomUUID();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId,2019,7,5)));
+        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId,2019,7,4));
+
+        LocalDate localDate = LocalDate.of(2019,7,5);
+
+        Hearing hearing = hearingOne.getHearing();
+        hearing.setProsecutionCases(null);
+
+        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, localDate.toString(), "00:00", "23:59", 30,
+                isBean(GetHearings.class)
+                        .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
+                                .withValue(HearingSummaries::getHearingLanguage, HearingLanguage.ENGLISH.name())
+                                .with(HearingSummaries::getType, isBean(HearingType.class))
+                                .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
+                                ))
+                        ))
+        );
+    }
+
 }

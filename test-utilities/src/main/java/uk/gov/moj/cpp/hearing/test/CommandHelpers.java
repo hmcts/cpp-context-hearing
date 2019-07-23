@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
 import static java.util.stream.Collectors.toList;
-import uk.gov.justice.core.courts.CourtClerk;
+
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Now;
@@ -327,18 +327,18 @@ public class CommandHelpers {
         }
 
         public Target getFirstTarget() {
-            return resultsShared.getHearing().getTargets().get(0);
+            return resultsShared.getTargets().get(0);
         }
 
         public ResultLine getFirstCompletedResultLine() {
-            return resultsShared.getHearing().getTargets().stream()
+            return resultsShared.getTargets().stream()
                     .flatMap(target -> target.getResultLines().stream())
                     .filter(ResultLine::getIsComplete)
                     .collect(Collectors.toList()).get(0);
         }
 
         public ResultLine getSecondCompletedResultLine() {
-            return resultsShared.getHearing().getTargets().stream()
+            return resultsShared.getTargets().stream()
                     .flatMap(target -> target.getResultLines().stream())
                     .filter(ResultLine::getIsComplete)
                     .collect(Collectors.toList()).get(1);
@@ -360,7 +360,7 @@ public class CommandHelpers {
             return this.resultsShared.getHearing();
         }
 
-        public CourtClerk getCourtClerk() {
+        public DelegatedPowers getCourtClerk() {
             return this.resultsShared.getCourtClerk();
         }
 

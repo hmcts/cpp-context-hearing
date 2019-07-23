@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.generateNowsRequestTempl
 
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.json.schemas.staging.EnforceFinancialImposition;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -17,6 +19,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -48,6 +51,8 @@ public class EnforceFinancialImpositionMapperTest {
 
     private static final FileAsStringReader fileAsStringReader = new FileAsStringReader();
 
+    private List<Target> targets = asList();
+
     @Before
     public void setup() {
 
@@ -56,7 +61,7 @@ public class EnforceFinancialImpositionMapperTest {
 
         nowsRequest = generateNowsRequestTemplate(defendantId);
 
-        mapper = new EnforceFinancialImpositionMapper(requestId, nowsRequest);
+        mapper = new EnforceFinancialImpositionMapper(requestId, nowsRequest, targets);
     }
 
     @Test
@@ -66,7 +71,7 @@ public class EnforceFinancialImpositionMapperTest {
 
         final PendingNowsRequested pendingNowsRequested = this.jsonObjectToObjectConverter.convert(stringToJsonObjectConverter.convert(payload), PendingNowsRequested.class);
 
-        final EnforceFinancialImposition enforceFinancialImposition = new EnforceFinancialImpositionMapper(requestId, pendingNowsRequested.getCreateNowsRequest()).map();
+        final EnforceFinancialImposition enforceFinancialImposition = new EnforceFinancialImpositionMapper(requestId, pendingNowsRequested.getCreateNowsRequest(), pendingNowsRequested.getTargets()).map();
 
         assertEquals(new BigDecimal("19.90"), enforceFinancialImposition.getPaymentTerms().getInstalmentAmount());
 
@@ -129,6 +134,7 @@ public class EnforceFinancialImpositionMapperTest {
         assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress4(), enforceFinancialImposition.getEmployer().getEmployerAddress4());
         assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress5(), enforceFinancialImposition.getEmployer().getEmployerAddress5());
         assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getPostcode(), enforceFinancialImposition.getEmployer().getEmployerPostcode());
+
 
         assertNull(enforceFinancialImposition.getMinorCreditor());
 

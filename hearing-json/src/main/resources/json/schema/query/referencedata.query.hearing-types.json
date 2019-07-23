@@ -22,7 +22,8 @@
             "type": "string"
           },
           "welshHearingDescription": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 255
           },
           "defaultDurationMin": {
             "type": "integer"

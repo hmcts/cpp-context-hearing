@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import uk.gov.justice.core.courts.CourtClerk;
+import uk.gov.justice.core.courts.DelegatedPowers;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -15,7 +15,7 @@ public final class CompletedResultLineStatus implements Serializable {
 
     private final UUID id;
 
-    private uk.gov.justice.core.courts.CourtClerk courtClerk;
+    private uk.gov.justice.core.courts.DelegatedPowers courtClerk;
 
     private ZonedDateTime lastSharedDateTime;
 
@@ -23,7 +23,7 @@ public final class CompletedResultLineStatus implements Serializable {
     @JsonCreator
     private CompletedResultLineStatus(@JsonProperty("id") final UUID id,
                                       @JsonProperty("lastSharedDateTime") final ZonedDateTime lastSharedDateTime,
-                                      @JsonProperty("courtClerk") final uk.gov.justice.core.courts.CourtClerk courtClerk) {
+                                      @JsonProperty("courtClerk") final DelegatedPowers courtClerk) {
         this.id = id;
         this.lastSharedDateTime = lastSharedDateTime;
         this.courtClerk = courtClerk;
@@ -46,11 +46,11 @@ public final class CompletedResultLineStatus implements Serializable {
         return this;
     }
 
-    public uk.gov.justice.core.courts.CourtClerk getCourtClerk() {
+    public DelegatedPowers getCourtClerk() {
         return courtClerk;
     }
 
-    public CompletedResultLineStatus setCourtClerk(final uk.gov.justice.core.courts.CourtClerk courtClerk) {
+    public CompletedResultLineStatus setCourtClerk(final DelegatedPowers courtClerk) {
         this.courtClerk = courtClerk;
         return this;
     }
@@ -61,7 +61,7 @@ public final class CompletedResultLineStatus implements Serializable {
 
         private ZonedDateTime lastSharedDateTime;
 
-        private uk.gov.justice.core.courts.CourtClerk courtClerk;
+        private DelegatedPowers courtClerk;
 
         public Builder withId(final UUID id) {
             this.id = id;
@@ -73,7 +73,7 @@ public final class CompletedResultLineStatus implements Serializable {
             return this;
         }
 
-        public Builder withCourtClerk(final CourtClerk courtClerk) {
+        public Builder withCourtClerk(final DelegatedPowers courtClerk) {
             this.courtClerk = courtClerk;
             return this;
         }

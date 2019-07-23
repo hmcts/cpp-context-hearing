@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -8,20 +9,12 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.FinancialOrderDetails;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Now;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -34,9 +27,21 @@ import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.SaveNowVariantsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
 import uk.gov.moj.cpp.hearing.event.nows.NowsGenerator;
+import uk.gov.moj.cpp.hearing.event.relist.ResultsSharedFilter;
 
 import java.util.Collections;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class PublishResultsEventProcessorTest {
 
@@ -72,8 +77,23 @@ public class PublishResultsEventProcessorTest {
     @Mock
     private PublishResultsDelegate publishResultsDelegate;
 
+    @Mock
+    private ResultsSharedFilter resultsSharedFilter;
+
     @InjectMocks
     private PublishResultsEventProcessor publishResultsEventProcessor;
+
+    @Captor
+    private ArgumentCaptor<CreateNowsRequest> createNowsRequestArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Sender> senderArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<JsonEnvelope> eventArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<Target>> targetsArgumentCaptor;
 
     @Before
     public void initMocks() {
@@ -98,13 +118,13 @@ public class PublishResultsEventProcessorTest {
 
         when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
 
+        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+
         publishResultsEventProcessor.resultsShared(event);
 
         verify(nowsDelegate).generateNows(event, nows, resultsShared);
 
-        verify(saveNowVariantsDelegate).saveNowsVariants(sender, event, nows, resultsShared);
-
-        verify(publishResultsDelegate).shareResults(event, sender, event, resultsShared, resultsShared.getVariantDirectory());
+        verify(publishResultsDelegate).shareResults(event, sender, resultsShared);
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
     }
@@ -125,25 +145,18 @@ public class PublishResultsEventProcessorTest {
 
         when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
+        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+
         publishResultsEventProcessor.resultsShared(event);
 
         verifyNoMoreInteractions(nowsDelegate, saveNowVariantsDelegate);
 
-        verify(publishResultsDelegate).shareResults(event, sender, event, resultsShared, Collections.emptyList());
+        verify(publishResultsDelegate).shareResults(event, sender, resultsShared);
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
         verify(adjournHearingDelegate).execute(resultsShared, event);
     }
-
-    @Captor
-    ArgumentCaptor<CreateNowsRequest> createNowsRequestArgumentCaptor;
-
-    @Captor
-    ArgumentCaptor<Sender> senderArgumentCaptor;
-
-    @Captor
-    ArgumentCaptor<JsonEnvelope> eventArgumentCaptor;
 
     @Test
     public void resultsSharedFinancialCrownCourt() {
@@ -176,20 +189,28 @@ public class PublishResultsEventProcessorTest {
 
         when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
 
+        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+
         publishResultsEventProcessor.resultsShared(event);
 
         verify(nowsDelegate).generateNows(event, nows, resultsShared);
 
-        verify(saveNowVariantsDelegate).saveNowsVariants(sender, event, nows, resultsShared);
-
-        verify(publishResultsDelegate).shareResults(event, sender, event, resultsShared, resultsShared.getVariantDirectory());
+        verify(publishResultsDelegate).shareResults(event, sender, resultsShared);
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
         if (crownCourt) {
-            verify(nowsDelegate).sendNows(senderArgumentCaptor.capture(), eventArgumentCaptor.capture(), createNowsRequestArgumentCaptor.capture());
+            verify(nowsDelegate).sendNows(
+                    senderArgumentCaptor.capture(),
+                    eventArgumentCaptor.capture(),
+                    createNowsRequestArgumentCaptor.capture(),
+                    targetsArgumentCaptor.capture());
         } else {
-            verify(nowsDelegate).sendPendingNows(senderArgumentCaptor.capture(), eventArgumentCaptor.capture(), createNowsRequestArgumentCaptor.capture());
+            verify(nowsDelegate).sendPendingNows(
+                    senderArgumentCaptor.capture(),
+                    eventArgumentCaptor.capture(),
+                    createNowsRequestArgumentCaptor.capture(),
+                    targetsArgumentCaptor.capture());
         }
     }
 

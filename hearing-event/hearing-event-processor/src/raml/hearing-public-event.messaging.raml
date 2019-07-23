@@ -11,6 +11,9 @@ baseUri: message://event/processor/message/hearing
                   application/vnd.public.hearing.initiated+json:
                       schema: !include json/schema/public.hearing.initiated.json
                       example: !include json/public.hearing.initiated.json
+                  application/vnd.public.hearing.initiate-ignored+json:
+                      schema: !include json/schema/public.hearing.initiate-ignored.json
+                      example: !include json/public.hearing.initiate-ignored.json
 
 # Initiate Mags Court Hearing
                   application/vnd.public.mags.hearing.initiated+json:
@@ -38,6 +41,9 @@ baseUri: message://event/processor/message/hearing
                   application/vnd.public.hearing.draft-result-saved+json:
                       schema: !include json/schema/public.hearing.draft-result-saved.json
                       example: !include json/public.hearing.draft-result-saved.json
+                  application/vnd.public.hearing.application-draft-resulted+json:
+                      schema: !include json/schema/public.hearing.application-draft-resulted.json
+                      example: !include json/public.hearing.application-draft-resulted.json
 
 # Pleas
                   application/vnd.public.hearing.plea-updated+json:
@@ -61,15 +67,12 @@ baseUri: message://event/processor/message/hearing
                       example: !include json/public.hearing.offence-conviction-date-removed.json
 
 # Nows
-                  application/vnd.public.hearing.events.nows-material-status-updated+json:
-                      schema: !include json/schema/public.hearing.events.nows-material-status-updated.json
-                      example: !include json/public.hearing.events.nows-material-status-updated.json
+                  application/vnd.public.hearing.now-document-requested+json:
+                      schema: !include json/schema/public.hearing.now-document-requested.json
+                      example: !include json/public.hearing.now-document-requested.json
                   application/vnd.public.hearing.events.nows-requested+json:
                       schema: !include json/schema/public.hearing.events.nows-requested.json
                       example: !include json/public.hearing.events.nows-requested.json
-                  application/vnd.public.hearing.events.notification-id-generated+json:
-                      schema: !include json/schema/public.hearing.events.notification-id-generated.json
-                      example: !include json/public.hearing.events.notification-id-generated.json
 
 # Attendees
                   application/vnd.public.hearing.events.attendee-deleted+json:
@@ -86,3 +89,7 @@ baseUri: message://event/processor/message/hearing
                       schema: !include json/schema/public.hearing.defendant-attendance-updated.json
                       example: !include json/public.hearing.defendant-attendance-updated.json
 
+# application response
+                  application/vnd.public.hearing.application-response-saved+json:
+                      schema: !include json/schema/public.hearing.application-response-saved.json
+                      example: !include json/public.hearing.application-response-saved.json

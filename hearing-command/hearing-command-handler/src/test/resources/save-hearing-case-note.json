@@ -6,7 +6,7 @@
     "noteType": "LEGAL",
     "originatingHearingId": "e9b2ef55-5dc0-4eb1-b0e3-f22f31a0e5cb",
     "courtClerk": {
-      "id": "252d5de5-7f64-44e4-a7a5-2b955482a26b",
+      "userId": "252d5de5-7f64-44e4-a7a5-2b955482a26b",
       "firstName": "John",
       "lastName": "doe"
     },

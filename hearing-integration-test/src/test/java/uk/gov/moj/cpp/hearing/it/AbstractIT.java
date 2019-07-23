@@ -56,7 +56,7 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractIT {
+public class  AbstractIT {
 
     protected static final UUID USER_ID_VALUE = randomUUID();
     protected static final UUID USER_ID_VALUE_AS_ADMIN = randomUUID();

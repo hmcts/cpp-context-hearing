@@ -49,38 +49,40 @@ public class InitiateHearingEventProcessor {
 
         final List<ProsecutionCase> prosecutionCases = initiateHearingCommand.getHearing().getProsecutionCases();
 
-        prosecutionCases.forEach(prosecutionCase -> {
+        if (prosecutionCases!=null) {
+            prosecutionCases.forEach(prosecutionCase -> {
 
-            prosecutionCase.getDefendants().forEach(defendant -> {
-
-                this.sender.send(this.enveloper
-                        .withMetadataFrom(event, "hearing.command.register-hearing-against-defendant")
-                        .apply(RegisterHearingAgainstDefendantCommand.builder()
-                                .withDefendantId(defendant.getId())
-                                .withHearingId(initiateHearingCommand.getHearing().getId())
-                                .build()));
-
-                for (final uk.gov.justice.core.courts.Offence offence : defendant.getOffences()) {
-
-                    cases.add(prosecutionCase.getId().toString());
+                prosecutionCase.getDefendants().forEach(defendant -> {
 
                     this.sender.send(this.enveloper
-                            .withMetadataFrom(event, "hearing.command.register-hearing-against-offence")
-                            .apply(RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand()
-                                    .setHearingId(initiateHearingCommand.getHearing().getId())
-                                    .setOffenceId(offence.getId())
-                            ));
-                }
+                            .withMetadataFrom(event, "hearing.command.register-hearing-against-defendant")
+                            .apply(RegisterHearingAgainstDefendantCommand.builder()
+                                    .withDefendantId(defendant.getId())
+                                    .withHearingId(initiateHearingCommand.getHearing().getId())
+                                    .build()));
+
+                    for (final uk.gov.justice.core.courts.Offence offence : defendant.getOffences()) {
+
+                        cases.add(prosecutionCase.getId().toString());
+
+                        this.sender.send(this.enveloper
+                                .withMetadataFrom(event, "hearing.command.register-hearing-against-offence")
+                                .apply(RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand()
+                                        .setHearingId(initiateHearingCommand.getHearing().getId())
+                                        .setOffenceId(offence.getId())
+                                ));
+                    }
+                });
+
+                final RegisterHearingAgainstCaseCommand registerHearingAgainstCaseCommand = RegisterHearingAgainstCaseCommand.builder()
+                        .withCaseId(prosecutionCase.getId())
+                        .withHearingId(initiateHearingCommand.getHearing().getId())
+                        .build();
+
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-case")
+                        .apply(registerHearingAgainstCaseCommand));
             });
-
-            final RegisterHearingAgainstCaseCommand registerHearingAgainstCaseCommand = RegisterHearingAgainstCaseCommand.builder()
-                    .withCaseId(prosecutionCase.getId())
-                    .withHearingId(initiateHearingCommand.getHearing().getId())
-                    .build();
-
-            this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-case")
-                    .apply(registerHearingAgainstCaseCommand));
-        });
+        }
 
         this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.initiated").apply(createObjectBuilder()
                 .add(HEARING_ID, initiateHearingCommand.getHearing().getId().toString())
@@ -103,4 +105,13 @@ public class InitiateHearingEventProcessor {
         }
         this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-verdict").apply(event.payloadAsJsonObject()));
     }
+
+    @Handles("hearing.events.hearing-initiate-ignored")
+    public void ignoreHearingInitiate(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.hearing-initiate-ignored event received {}", event.toObfuscatedDebugString());
+        }
+        this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.initiate-ignored").apply(event.payloadAsJsonObject()));
+    }
+
 }

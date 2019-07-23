@@ -35,7 +35,6 @@ import java.time.LocalDate;
 
 import org.junit.Test;
 
-@SuppressWarnings("unchecked")
 public class VerdictIT extends AbstractIT {
 
     @Test
@@ -74,7 +73,7 @@ public class VerdictIT extends AbstractIT {
                                                         .with(Verdict::getVerdictType, isBean(VerdictType.class)
                                                                 .with(VerdictType::getCategory, is(updateVerdict.getFirstVerdictCategory()))
                                                                 .with(VerdictType::getCategoryType, is(updateVerdict.getFirstVerdictCategoryType().name()))
-                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getVerdictTypeId()))
+                                                                .with(VerdictType::getId, is(updateVerdict.getFirstVerdict().getVerdictType().getId()))
                                                                 .with(VerdictType::getDescription, is(updateVerdict.getFirstVerdict().getVerdictType().getDescription()))
                                                                 .with(VerdictType::getSequence, is(updateVerdict.getFirstVerdict().getVerdictType().getSequence()))
                                                         )
@@ -136,7 +135,7 @@ public class VerdictIT extends AbstractIT {
                                                         .with(Verdict::getVerdictType, isBean(VerdictType.class)
                                                                 .with(VerdictType::getCategory, is(updateVerdict.getFirstVerdictCategory()))
                                                                 .with(VerdictType::getCategoryType, is(updateVerdict.getFirstVerdictCategoryType().name()))
-                                                                .with(VerdictType::getVerdictTypeId, is(updateVerdict.getFirstVerdict().getVerdictType().getVerdictTypeId()))
+                                                                .with(VerdictType::getId, is(updateVerdict.getFirstVerdict().getVerdictType().getId()))
                                                                 .with(VerdictType::getDescription, is(updateVerdict.getFirstVerdict().getVerdictType().getDescription()))
                                                                 .with(VerdictType::getSequence, is(updateVerdict.getFirstVerdict().getVerdictType().getSequence()))
                                                         )

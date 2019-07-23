@@ -1,0 +1,286 @@
+{
+  "hearing": {
+    "courtCentre": {
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "hasSharedResults": false,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-03T08:00:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 420,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-04T09:00:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 420,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-05T09:00:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 420,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-07T09:00:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 2,
+        "listingSequence": 0,
+        "sittingDay": "2019-05-08T14:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "e8f8f622-b5e5-4a00-83da-88077e6f5873",
+    "judiciary": [
+      {
+        "firstName": "Shamim (Sham)",
+        "isBenchChairman": true,
+        "isDeputy": true,
+        "judicialId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+          "judiciaryType": "DJ"
+        },
+        "lastName": "Qureshi",
+        "title": "Mr"
+      }
+    ],
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "SJP_REFERRAL",
+        "defendants": [
+          {
+            "associatedPersons": [
+              {
+                "person": {
+                  "additionalNationalityCode": "GBR",
+                  "additionalNationalityDescription": "British",
+                  "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                  "address": {
+                    "address1": "314",
+                    "address2": "38865 Demetrius Center",
+                    "address3": "Elisafurt",
+                    "address4": "LC",
+                    "address5": "Iraq",
+                    "postcode": "SW11 1JU"
+                  },
+                  "contact": {
+                    "fax": "534.835.1930",
+                    "home": "1-755-424-5986",
+                    "mobile": "(083) 680-3037",
+                    "primaryEmail": "yasmine.casper@yahoo.com",
+                    "secondaryEmail": "ewald.turcotte@hotmail.com",
+                    "work": "1-546-405-4669"
+                  },
+                  "dateOfBirth": "1994-05-03",
+                  "disabilityStatus": "NoV43QRqs0",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "ethnicityCode": "W1",
+                  "ethnicityDescription": "British",
+                  "ethnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "firstName": "Korey",
+                  "gender": "FEMALE",
+                  "interpreterLanguageNeeds": "9LuIhzdBIm",
+                  "lastName": "Baumbach",
+                  "middleName": "Test",
+                  "nationalInsuranceNumber": "HX025949B",
+                  "nationalityCode": "GBR",
+                  "nationalityDescription": "British",
+                  "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                  "occupation": "crACLGmp3k",
+                  "occupationCode": "UiaCCQrXQS",
+                  "specificRequirements": "0ge33isXGY",
+                  "title": "MISS"
+                },
+                "role": "cHMec2d30S"
+              }
+            ],
+            "defenceOrganisation": {
+              "address": {
+                "address1": "314",
+                "address2": "38865 Demetrius Center",
+                "address3": "Elisafurt",
+                "address4": "LC",
+                "address5": "Iraq",
+                "postcode": "SW11 1JU"
+              },
+              "contact": {
+                "fax": "534.835.1930",
+                "home": "1-755-424-5986",
+                "mobile": "(083) 680-3037",
+                "primaryEmail": "yasmine.casper@yahoo.com",
+                "secondaryEmail": "ewald.turcotte@hotmail.com",
+                "work": "1-546-405-4669"
+              },
+              "incorporationNumber": "cSVAUfpSBA",
+              "name": "azx4XY6X40",
+              "registeredCharityNumber": "XguJT5pmuq"
+            },
+            "id": "d052c35a-7b6d-4f70-979c-bd7710f73408",
+            "legalEntityDefendant": {
+              "organisation": {
+                "address": {
+                  "address1": "314",
+                  "address2": "38865 Demetrius Center",
+                  "address3": "Elisafurt",
+                  "address4": "LC",
+                  "address5": "Iraq",
+                  "postcode": "SW11 1JU"
+                },
+                "contact": {
+                  "fax": "534.835.1930",
+                  "home": "1-755-424-5986",
+                  "mobile": "(083) 680-3037",
+                  "primaryEmail": "yasmine.casper@yahoo.com",
+                  "secondaryEmail": "ewald.turcotte@hotmail.com",
+                  "work": "1-546-405-4669"
+                },
+                "incorporationNumber": "cSVAUfpSBA",
+                "name": "azx4XY6X40",
+                "registeredCharityNumber": "XguJT5pmuq"
+              }
+            },
+            "mitigation": "Dd6QiigUKu",
+            "mitigationWelsh": "2OW6AurohU",
+            "numberOfPreviousConvictionsCited": 1,
+            "offences": [
+              {
+                "arrestDate": "2019-04-03",
+                "chargeDate": "2019-04-03",
+                "convictionDate": "2019-04-23",
+                "count": 1,
+                "endDate": "2019-01-03",
+                "id": "b4204d1c-702a-406f-8427-2528df8b5f8a",
+                "modeOfTrial": "IND",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2019-04-13",
+                  "notifiedPleaValue": "NOTIFIED_GUILTY",
+                  "offenceId": "b4204d1c-702a-406f-8427-2528df8b5f8a"
+                },
+                "offenceCode": "OF61016A",
+                "offenceDefinitionId": "5abe3e81-1de0-4c42-b0d2-2dc38f5c44c7",
+                "offenceFacts": {
+                  "alcoholReadingAmount": "t3JIXbJ7yc",
+                  "alcoholReadingMethod": "olyC9BFsKP",
+                  "vehicleRegistration": "IorlxkChud"
+                },
+                "offenceLegislation": "Contrary to section 1(1)    of the Criminal Attempts Act 1981.",
+                "offenceLegislationWelsh": "Yn groes i Adran 1(1) Deddf Ymgeisiau i Droseddu 1981.",
+                "offenceTitle": "Section 18 - attempt    wounding with intent",
+                "offenceTitleWelsh": "Adran 18 - ymgais i glwyfo gan fwriadu",
+                "orderIndex": 1,
+                "startDate": "2018-07-03",
+                "wording": "Wound / inflict grievous bodily harm without intent",
+                "wordingWelsh": "No Travel Card In Welsh"
+              }
+            ],
+            "personDefendant": {
+              "aliases": [
+                "56xicJbPGR"
+              ],
+              "arrestSummonsNumber": "gZLrEBhZ6U",
+              "bailStatus": "IN_CUSTODY",
+              "custodyTimeLimit": "2019-02-03",
+              "driverNumber": "us8OsEi5Ym",
+              "employerOrganisation": {
+                "address": {
+                  "address1": "314",
+                  "address2": "38865 Demetrius Center",
+                  "address3": "Elisafurt",
+                  "address4": "LC",
+                  "address5": "Iraq",
+                  "postcode": "SW11 1JU"
+                },
+                "contact": {
+                  "fax": "534.835.1930",
+                  "home": "1-755-424-5986",
+                  "mobile": "(083) 680-3037",
+                  "primaryEmail": "yasmine.casper@yahoo.com",
+                  "secondaryEmail": "ewald.turcotte@hotmail.com",
+                  "work": "1-546-405-4669"
+                },
+                "incorporationNumber": "cSVAUfpSBA",
+                "name": "azx4XY6X40",
+                "registeredCharityNumber": "XguJT5pmuq"
+              },
+              "employerPayrollReference": "Hak6sm7lUx",
+              "observedEthnicityCode": "W1",
+              "observedEthnicityDescription": "British",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "perceivedBirthYear": 1970,
+              "personDetails": {
+                "additionalNationalityCode": "GBR",
+                "additionalNationalityDescription": "British",
+                "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                "address": {
+                  "address1": "314",
+                  "address2": "38865 Demetrius Center",
+                  "address3": "Elisafurt",
+                  "address4": "LC",
+                  "address5": "Iraq",
+                  "postcode": "SW11 1JU"
+                },
+                "contact": {
+                  "fax": "534.835.1930",
+                  "home": "1-755-424-5986",
+                  "mobile": "(083) 680-3037",
+                  "primaryEmail": "yasmine.casper@yahoo.com",
+                  "secondaryEmail": "ewald.turcotte@hotmail.com",
+                  "work": "1-546-405-4669"
+                },
+                "dateOfBirth": "1994-05-03",
+                "disabilityStatus": "NoV43QRqs0",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicityCode": "W1",
+                "ethnicityDescription": "British",
+                "ethnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                "firstName": "Korey",
+                "gender": "FEMALE",
+                "interpreterLanguageNeeds": "9LuIhzdBIm",
+                "lastName": "Baumbach",
+                "middleName": "Test",
+                "nationalInsuranceNumber": "HX025949B",
+                "nationalityCode": "GBR",
+                "nationalityDescription": "British",
+                "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                "occupation": "crACLGmp3k",
+                "occupationCode": "UiaCCQrXQS",
+                "specificRequirements": "0ge33isXGY",
+                "title": "MISS"
+              },
+              "pncId": "spGFeQICcP",
+              "selfDefinedEthnicityCode": "W1",
+              "selfDefinedEthnicityDescription": "British",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "prosecutionAuthorityReference": "TFL5133039",
+            "prosecutionCaseId": "9eb2ae17-fe5c-4aa7-bfb3-34ebf8b79378",
+            "witnessStatement": "jDT6zCvEKG",
+            "witnessStatementWelsh": "mVYotMiv7a"
+          }
+        ],
+        "id": "9eb2ae17-fe5c-4aa7-bfb3-34ebf8b79378",
+        "initiationCode": "C",
+        "originatingOrganisation": "gc7Gg9ugOq",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "TFL",
+          "prosecutionAuthorityId": "31af405e-7b60-4dd8-a244-c24c2d3fa595",
+          "prosecutionAuthorityReference": "TFL5133039"
+        },
+        "statementOfFacts": "ziSUTWBaSW",
+        "statementOfFactsWelsh": "ZPqxjkKCRM"
+      }
+    ],
+    "reportingRestrictionReason": "Automatic anonymity under the Sexual Offences (Amendment) Act 1992",
+    "type": {
+      "description": "Plea & Trial Preparation",
+      "id": "06b0c2bf-3f98-46ed-ab7e-56efaf9ecced"
+    }
+  }
+}

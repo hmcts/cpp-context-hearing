@@ -10,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher;
@@ -98,7 +99,7 @@ public class Utilities {
             if (message == null) {
                 fail("Expected '" + eventType + "' message to emit on the public.event topic: " + description.toString());
             } else {
-               System.out.println("message:" + message.prettify());
+                System.out.println("message:" + message.prettify());
             }
 
             return message;
@@ -153,24 +154,27 @@ public class Utilities {
     }
 
     public static class JsonUtil {
+
+        public static ObjectMapper objectMapper() {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            return mapper;
+        }
+
         public static String toJsonString(final Object o) throws JsonProcessingException {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            return mapper.writeValueAsString(o);
+            return objectMapper().writeValueAsString(o);
         }
+
         public static <T> T fromJsonString(final String str, Class<T> theClass) throws IOException {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-            mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            return mapper.reader().forType(theClass).readValue(str);
+            return objectMapper().reader().forType(theClass).readValue(str);
         }
 
-
+        public static JsonObject objectToJsonObject(final Object o) throws JsonProcessingException {
+            return (new StringToJsonObjectConverter()).convert(toJsonString(o));
+        }
     }
 
     public static class CommandBuilder {
