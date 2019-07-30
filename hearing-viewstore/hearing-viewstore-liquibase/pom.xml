@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-viewstore</artifactId>
-        <version>2.0.156</version>
+        <version>2.0.157-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-viewstore-liquibase</artifactId>
 
