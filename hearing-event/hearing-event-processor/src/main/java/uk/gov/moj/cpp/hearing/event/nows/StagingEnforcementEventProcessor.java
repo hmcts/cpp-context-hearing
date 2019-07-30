@@ -92,29 +92,27 @@ public class StagingEnforcementEventProcessor {
 
         //Only deal with hearing messages where originator is courts
         final Optional<String> originator = JsonObjects.getString(event.payloadAsJsonObject(), ORIGINATOR);
+        if (originator.isPresent() && COURTS.equalsIgnoreCase(originator.get())) {
+            Optional<String> errorCode = Optional.empty();
 
-        Optional<String> errorCode = Optional.empty();
+            final String acknowledgementLbl = "acknowledgement";
 
-        final String acknowledgementLbl = "acknowledgement";
+            final String errorCodeLbl = "errorCode";
 
-        final String errorCodeLbl = "errorCode";
+            final Optional<JsonObject> acknowledgement = JsonObjects.getJsonObject(event.payloadAsJsonObject(), acknowledgementLbl);
 
-        final Optional<JsonObject> acknowledgement = JsonObjects.getJsonObject(event.payloadAsJsonObject(), acknowledgementLbl);
+            if (acknowledgement.isPresent()) {
+                errorCode = JsonObjects.getString(acknowledgement.get(), errorCodeLbl);
+            }
 
-        if(acknowledgement.isPresent()) {
-            errorCode = JsonObjects.getString(acknowledgement.get(), errorCodeLbl);
-        }
+            if (!errorCode.isPresent()) {
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.apply-enforcement-acknowledgement").apply(event.payloadAsJsonObject()));
+            }
 
-        if (originator.isPresent() && COURTS.equalsIgnoreCase(originator.get()) && !errorCode.isPresent()) {
-            this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.apply-enforcement-acknowledgement").apply(event.payloadAsJsonObject()));
-        }
+            if (errorCode.isPresent()) {
+                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.enforcement-acknowledgement-error").apply(event.payloadAsJsonObject()));
+            }
 
-        if (originator.isPresent() && COURTS.equalsIgnoreCase(originator.get()) && errorCode.isPresent()) {
-            this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.enforcement-acknowledgement-error").apply(event.payloadAsJsonObject()));
-        }
-
-        if(originator.isPresent() && !COURTS.equalsIgnoreCase(originator.get())) {
-            LOGGER.warn("Received public.stagingenforcement.enforce-financial-imposition-acknowledgement event for different originator {}", event.payloadAsJsonObject());
         }
     }
 

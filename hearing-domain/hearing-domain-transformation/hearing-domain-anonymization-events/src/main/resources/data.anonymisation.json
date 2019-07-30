@@ -28,6 +28,11 @@
         {"work" :  "StringAnonymisedPhoneNumber"},
         {"primaryEmail" : "StringAnonymisedEmail"},
         {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
         {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
         {"perceivedBirthYear" :  "DummyNumber1000"},
         {"reportingRestrictionReason" :  "StringAnonymisedString"}
@@ -54,6 +59,11 @@
         {"work" :  "StringAnonymisedPhoneNumber"},
         {"primaryEmail" : "StringAnonymisedEmail"},
         {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
         {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
         {"wording" : "StringAnonymisedString"},
         {"wordingWelsh" : "StringAnonymisedString"},
@@ -86,10 +96,16 @@
         {"work" :  "StringAnonymisedPhoneNumber"},
         {"primaryEmail" : "StringAnonymisedEmail"},
         {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
         {"wording" : "StringAnonymisedString"},
         {"nationalityCode" : "StringAnonymisedString"},
         {"nationalityDescription" : "StringAnonymisedString"},
-        {"specificRequirements" : "StringAnonymisedString"}
+        {"specificRequirements" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -112,7 +128,13 @@
         {"nationalityDescription" : "StringAnonymisedString"},
         {"description" : "StringAnonymisedString"},
         {"accountNumber" : "StringAnonymisedString"},
-        {"statementOfFacts" : "StringAnonymisedString"}
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"statementOfFacts" : "StringAnonymisedString"},
+        {"statementOfFactsWelsh" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -120,33 +142,39 @@
       "fieldsToBeAnonymised": [
         {"title" : "StringAnonymisedString"},
         {"firstName" : "StringAnonymisedString"},
-        {"lastName" : "StringAnonymisedString"}
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
       "eventName" : "hearing.newdefence-counsel-added",
       "fieldsToBeAnonymised": [
-        {"wording" : "StringAnonymisedString"}
+        {"wording" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
       "eventName" : "hearing.hearing-case-note-saved",
       "fieldsToBeAnonymised": [
         {"firstName" : "StringAnonymisedString"},
-        {"lastName" : "StringAnonymisedString"}
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
       "eventName" : "hearing.events.offence-added",
       "fieldsToBeAnonymised": [
-        {"wording" : "StringAnonymisedString"}
+        {"wording" : "StringAnonymisedString"},
+        {"vehicleRegistration" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"}
       ]
     },
     {
       "eventName" : "hearing.events.offence-updated",
       "fieldsToBeAnonymised": [
         {"wording" : "StringAnonymisedString"},
-        {"wordingWelsh" : "StringAnonymisedString"}
+        {"wordingWelsh" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -154,7 +182,8 @@
       "fieldsToBeAnonymised": [
         {"firstName" : "StringAnonymisedString"},
         {"lastName" : "StringAnonymisedString"},
-        {"middleName" : "StringAnonymisedString"}
+        {"middleName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -172,7 +201,8 @@
         {"wording" : "StringAnonymisedString"},
         {"nationality" : "StringAnonymisedString"},
         {"description" : "StringAnonymisedString"},
-        {"bailStatus" : "StringAnonymisedString"}
+        {"bailStatus" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -190,7 +220,8 @@
         {"wording" : "StringAnonymisedString"},
         {"nationality" : "StringAnonymisedString"},
         {"description" : "StringAnonymisedString"},
-        {"bailStatus" : "StringAnonymisedString"}
+        {"bailStatus" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -199,7 +230,8 @@
         {"firstName" : "StringAnonymisedString"},
         {"lastName" : "StringAnonymisedString"},
         {"middleName" : "StringAnonymisedString"},
-        {"title" : "StringAnonymisedString"}
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -224,7 +256,13 @@
         {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
         {"primaryEmail" : "StringAnonymisedEmail"},
         {"secondaryEmail" : "StringAnonymisedEmail"},
-        {"specificRequirements" : "StringAnonymisedString"}
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"specificRequirements" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
 
       ]
     },
@@ -255,6 +293,7 @@
         {"enforcementEmail" : "StringAnonymisedEmail"},
         {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
         {"wording" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"},
         {"specificRequirements" : "StringAnonymisedString"},
         {"reportingRestrictionReason" : "StringAnonymisedString"},
         {"accountDivisionCode" : "StringAnonymisedString"},
@@ -269,7 +308,8 @@
       "eventName" : "hearing.result-lines-status-updated",
       "fieldsToBeAnonymised": [
         {"firstName" : "StringAnonymisedString"},
-        {"lastName" : "StringAnonymisedString"}
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -278,7 +318,8 @@
         {"firstName" : "StringAnonymisedString"},
         {"lastName" : "StringAnonymisedString"},
         {"middleName" : "StringAnonymisedString"},
-        {"title" : "StringAnonymisedString"}
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -287,7 +328,8 @@
         {"firstName" : "StringAnonymisedString"},
         {"lastName" : "StringAnonymisedString"},
         {"middleName" : "StringAnonymisedString"},
-        {"title" : "StringAnonymisedString"}
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -296,7 +338,8 @@
         {"firstName" : "StringAnonymisedString"},
         {"lastName" : "StringAnonymisedString"},
         {"middleName" : "StringAnonymisedString"},
-        {"title" : "StringAnonymisedString"}
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -314,6 +357,7 @@
         {"address4" : "StringAnonymisedString"},
         {"postcode" : "StringAnonymisedPostcode"},
         {"wording" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"},
         {"nationalityCode" : "StringAnonymisedString"},
         {"nationalityDescription" : "StringAnonymisedString"},
         {"work" : "StringAnonymisedPhoneNumber"},
@@ -321,6 +365,11 @@
         {"mobile" : "StringAnonymisedPhoneNumber"},
         {"primaryEmail" : "StringAnonymisedEmail"},
         {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
         {"specificRequirements" : "StringAnonymisedString"},
         {"statementOfFacts" : "StringAnonymisedString"},
         {"statementOfFactsWelsh" : "StringAnonymisedString"},
@@ -332,7 +381,8 @@
       "fieldsToBeAnonymised": [
         {"title" : "StringAnonymisedString"},
         {"firstName" : "StringAnonymisedString"},
-        {"lastName" : "StringAnonymisedString"}
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -349,19 +399,22 @@
       "fieldsToBeAnonymised": [
         {"title" : "StringAnonymisedString"},
         {"firstName" : "StringAnonymisedString"},
-        {"lastName" : "StringAnonymisedString"}
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
       "eventName" : "hearing.events.found-hearings-for-edit-offence",
       "fieldsToBeAnonymised": [
-        {"wording" : "StringAnonymisedString"}
+        {"wording" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
       "eventName" : "hearing.events.found-hearings-for-new-offence",
       "fieldsToBeAnonymised": [
-        {"wording" : "StringAnonymisedString"}
+        {"wording" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
@@ -369,14 +422,16 @@
       "fieldsToBeAnonymised": [
         {"title" : "StringAnonymisedString"},
         {"firstName" : "StringAnonymisedString"},
-        {"lastName" : "StringAnonymisedString"}
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     },
     {
       "eventName" : "hearing.subscriptions-uploaded",
       "fieldsToBeAnonymised": [
         {"fromAddress" : "StringAnonymisedEmail"},
-        {"destination" : "StringAnonymisedEmail"}
+        {"destination" : "StringAnonymisedEmail"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
       ]
     }
 
