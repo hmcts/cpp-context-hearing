@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/stagingenforcement/courts/enforceFinancialImpositionAcknowledgement.json",
+  "id": "http://justice.gov.uk/stagingenforcement/courts/hearing.command.enforcement-acknowledgement-error.json",
   "type": "object",
   "properties": {
     "enterpriseId": {

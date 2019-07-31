@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/stagingenforcement/courts/enforceFinancialImpositionAcknowledgement.json",
+  "id": "http://justice.gov.uk/stagingenforcement/courts/public.stagingenforcement.enforce-financial-imposition-acknowledgement.json",
   "type": "object",
   "properties": {
     "originator": {
