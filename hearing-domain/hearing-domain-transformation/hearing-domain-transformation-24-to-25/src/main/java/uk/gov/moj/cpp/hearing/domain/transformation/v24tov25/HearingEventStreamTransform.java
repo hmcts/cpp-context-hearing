@@ -3,15 +3,13 @@ package uk.gov.moj.cpp.hearing.domain.transformation.v24tov25;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Stream.of;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
-import static uk.gov.justice.tools.eventsourcing.transformation.api.Action.DEACTIVATE;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.justice.tools.eventsourcing.transformation.api.Action.NO_ACTION;
 import static uk.gov.justice.tools.eventsourcing.transformation.api.Action.TRANSFORM;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.DEFENDANT_DETAILS_UPDATED;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.HEARING_CASE_NOTE_SAVED;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.HEARING_EVENTS_INITIATED;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.HEARING_OFFENCE_VERDICT_UPDATED;
-import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.ID;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.INHERITED_VERDICT_ADDED;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.NOWS_REQUESTED;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.OFFENCE_ADDED;
@@ -67,7 +65,8 @@ public class HearingEventStreamTransform implements EventTransformation {
 
         final JsonObject transformedPayload = eventInstance.transform(payload);
 
-        return of(envelopeFrom(metadataOf(event.metadata().asJsonObject().getString(ID), event.metadata().name()).build(), transformedPayload));
+        return of(envelopeFrom(metadataFrom(event.metadata()), transformedPayload));
+
     }
 
     @Override

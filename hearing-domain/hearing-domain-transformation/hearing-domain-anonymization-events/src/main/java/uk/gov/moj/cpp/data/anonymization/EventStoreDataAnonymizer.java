@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.data.anonymization;
 
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
+
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.tools.eventsourcing.transformation.api.Action;
@@ -9,21 +13,18 @@ import uk.gov.moj.cpp.data.anonymization.generator.AnonymizeGenerator;
 import uk.gov.moj.cpp.data.anonymization.generator.AnonymizerType;
 import uk.gov.moj.cpp.data.anonymization.generator.DummyNumberReplacer;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonObjectMetadata.metadataOf;
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 @SuppressWarnings({"squid:S3776", "squid:S134", "squid:MethodCyclomaticComplexity"})
 @Transformation
@@ -56,10 +57,7 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
 
     @Override
     public Stream<JsonEnvelope> apply(final JsonEnvelope event) {
-
-        final JsonEnvelope transformedEvent = buildTransformedPayload(event);
-        final JsonEnvelope transformedEnvelope = enveloper.withMetadataFrom(event, transformedEvent.metadata().asJsonObject().getString("name")).apply(transformedEvent.payload());
-        return Stream.of(transformedEnvelope);
+        return Stream.of(envelopeFrom(metadataFrom(event.metadata()), buildTransformedPayload(event)));
     }
 
     @Override
@@ -67,14 +65,12 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
         this.enveloper = enveloper;
     }
 
-    public JsonEnvelope buildTransformedPayload(JsonEnvelope event) {
+    public JsonObject buildTransformedPayload(JsonEnvelope event) {
         final String eventName = event.metadata().name();
         final JsonObjectBuilder transformedPayloadObjectBuilder = createObjectBuilder();
         final JsonObject payload = event.payloadAsJsonObject();
         final Map<String, String> eventFieldRuleMap = fieldRuleMap.get(eventName);
-        final JsonObject transformedPayload = processJsonPayload(payload, eventFieldRuleMap, transformedPayloadObjectBuilder).build();
-        return envelopeFrom(metadataOf(event.metadata().asJsonObject().getString("id"), eventName).build(), transformedPayload);
-
+        return processJsonPayload(payload, eventFieldRuleMap, transformedPayloadObjectBuilder).build();
     }
 
     public JsonObjectBuilder processJsonPayload(JsonObject payload, Map<String, String> eventFieldRuleMap, JsonObjectBuilder transformedPayloadObjectBuilder) {
