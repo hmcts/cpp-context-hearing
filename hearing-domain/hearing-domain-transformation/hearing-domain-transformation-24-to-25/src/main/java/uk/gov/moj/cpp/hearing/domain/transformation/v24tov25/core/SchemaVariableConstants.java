@@ -47,6 +47,7 @@ public final class SchemaVariableConstants {
     public static final String PROSECUTION_CASES = "prosecutionCases";
     public static final String NOTE_TYPE = "noteType";
     public static final String NOTE = "note";
+    public static final String NOTE_DATE_TIME = "noteDateTime";
     public static final String ORIGINATING_HEARING_ID = "originatingHearingId";
     public static final String HEARING_DAYS = "hearingDays";
     public static final String JURISDICTION_TYPE = "jurisdictionType";

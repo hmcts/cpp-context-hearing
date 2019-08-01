@@ -19,6 +19,7 @@ public class HearingCaseNoteHelper {
                 .add(ID, hearingCaseNote.getString(ID))
                 .add(ORIGINATING_HEARING_ID, hearingCaseNote.getString(ORIGINATING_HEARING_ID))
                 .add(PROSECUTION_CASES, hearingCaseNote.getJsonArray(PROSECUTION_CASES))
+                .add(NOTE_DATE_TIME, hearingCaseNote.getString(NOTE_DATE_TIME))
                 .add(NOTE_TYPE, hearingCaseNote.getString(NOTE_TYPE))
                 .add(NOTE, hearingCaseNote.getString(NOTE))
                 .add(COURT_CLERK, transformCourtClerk(hearingCaseNote.getJsonObject(COURT_CLERK)));
