@@ -99,16 +99,7 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
     }
 
     private String getMajorCreditor(final ImpositionResultCode impositionResultCode, final List<UUID> promptRefsList) {
-
-        String majorCreditor = ofNullable(getMajorCreditorFromPrompt(impositionResultCode, promptRefsList)).map(majorCreditorMap::get).orElse(null);
-
-        if(isNull(majorCreditor)) {
-            final Optional<String> firstItem = prosecutionAuthorityCodes.stream().findFirst();
-            if(firstItem.isPresent()) {
-                majorCreditor = majorCreditorMap.get(firstItem.get());
-            }
-        }
-        return majorCreditor;
+        return ofNullable(getMajorCreditorFromPrompt(impositionResultCode, promptRefsList)).map(majorCreditorMap::get).orElse(null);
     }
 
     private String getMajorCreditorFromPrompt(final ImpositionResultCode impositionResultCode, List<UUID> promptRefsList) {
@@ -116,11 +107,21 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 //        In these cases when a resultCode is FCOMP, look for an associated prompt "Creditor name" (line 296).
 //        When the resultCode is FCOST, look for an associated prompt  "Creditor name" (line 2061).
 
+        String majorCreditor = null;
+
         if (impositionResultCode == ImpositionResultCode.FCOMP || impositionResultCode == ImpositionResultCode.FCOST) {
-            return getPromptValue(promptRefsList, P_CREDITOR_NAME);
+
+            majorCreditor = getPromptValue(promptRefsList, P_CREDITOR_NAME);
+
+            if (isNull(majorCreditor)) {
+                final Optional<String> firstItem = prosecutionAuthorityCodes.stream().findFirst();
+                if (firstItem.isPresent()) {
+                    majorCreditor = firstItem.get();
+                }
+            }
         }
 
-        return null;
+        return majorCreditor;
     }
 
     private BigDecimal setImpositionAmount(final ImpositionResultCode impositionResultCode, List<UUID> promptRefsList) {
