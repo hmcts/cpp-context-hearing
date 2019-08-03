@@ -106,11 +106,11 @@ public class StagingEnforcementEventProcessor {
             }
 
             if (!errorCode.isPresent()) {
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.apply-enforcement-acknowledgement").apply(event.payloadAsJsonObject()));
+                this.sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "hearing.command.apply-enforcement-acknowledgement").apply(event.payloadAsJsonObject()));
             }
 
             if (errorCode.isPresent()) {
-                this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.enforcement-acknowledgement-error").apply(event.payloadAsJsonObject()));
+                this.sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "hearing.command.enforcement-acknowledgement-error").apply(event.payloadAsJsonObject()));
             }
 
         }
