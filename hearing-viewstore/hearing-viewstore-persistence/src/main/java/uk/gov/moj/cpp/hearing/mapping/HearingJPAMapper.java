@@ -35,6 +35,7 @@ public class HearingJPAMapper {
     private CourtApplicationsSerializer courtApplicationsSerializer;
     private HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper;
     private HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper;
+    private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
 
     @Inject
     public HearingJPAMapper(final CourtCentreJPAMapper courtCentreJPAMapper,
@@ -49,7 +50,8 @@ public class HearingJPAMapper {
                             final HearingTypeJPAMapper hearingTypeJPAMapper,
                             final CourtApplicationsSerializer courtApplicationsSerializer,
                             final HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper,
-                            final HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper) {
+                            final HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper,
+                            final HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper) {
         this.courtCentreJPAMapper = courtCentreJPAMapper;
         this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper;
         this.defendantAttendanceJPAMapper = defendantAttendanceJPAMapper;
@@ -63,6 +65,7 @@ public class HearingJPAMapper {
         this.courtApplicationsSerializer = courtApplicationsSerializer;
         this.hearingRespondentCounselJPAMapper=hearingRespondentCounselJPAMapper;
         this.hearingApplicantCounselJPAMapper = hearingApplicantCounselJPAMapper;
+        this.hearingCompanyRepresentativeJPAMapper = hearingCompanyRepresentativeJPAMapper;
     }
 
     //to keep cditester happy
@@ -127,6 +130,7 @@ public class HearingJPAMapper {
                 .withCourtApplications(courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson()))
                 .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
                 .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
+                .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
                 .build();
     }
 

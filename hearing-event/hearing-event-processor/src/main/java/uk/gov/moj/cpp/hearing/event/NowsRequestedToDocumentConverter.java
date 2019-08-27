@@ -457,7 +457,7 @@ public class NowsRequestedToDocumentConverter {
     private Nowdefendant getNowdefendant(final NowVariantDefendant nowVariantDefendant) {
         return Nowdefendant.nowdefendant()
                 .withName(nowVariantDefendant.getName())
-                .withDateOfBirth(nowVariantDefendant.getDateOfBirth().toString())
+                .withDateOfBirth(nonNull(nowVariantDefendant.getDateOfBirth()) ? nowVariantDefendant.getDateOfBirth().toString() : null)
                 .withAddress(getAddress(nowVariantDefendant.getAddress()))
                 .build();
     }

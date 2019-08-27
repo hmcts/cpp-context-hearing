@@ -183,6 +183,7 @@ public class ResultsSharedDelegate implements Serializable {
     private Stream<Object> enrichHearing(final List<SharedResultsCommandResultLine> resultLines) {
         setSharedResults(resultLines);
         updateCounsels();
+        updateCompanyRepresentatives();
         updateOffence();
         return updateApplicationOutcomes(resultLines);
     }
@@ -235,6 +236,12 @@ public class ResultsSharedDelegate implements Serializable {
         }
         if (!this.momento.getRespondentCounsels().isEmpty()) {
             this.momento.getHearing().setRespondentCounsels(new ArrayList<>(this.momento.getRespondentCounsels().values()));
+        }
+    }
+
+    private void updateCompanyRepresentatives() {
+        if (!this.momento.getCompanyRepresentatives().isEmpty()) {
+            this.momento.getHearing().setCompanyRepresentatives(new ArrayList<>(this.momento.getCompanyRepresentatives().values()));
         }
     }
 

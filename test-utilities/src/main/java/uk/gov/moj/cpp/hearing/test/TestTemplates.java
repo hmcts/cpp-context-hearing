@@ -27,6 +27,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtDecision;
 import uk.gov.justice.core.courts.CreateNowsRequest;
@@ -65,10 +66,13 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
+import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.hearing.courts.AddRespondentCounsel;
+import uk.gov.justice.hearing.courts.Position;
 import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
+import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
@@ -1892,4 +1896,49 @@ public class TestTemplates {
             return new UpdateRespondentCounsel(hearingId, respondentCounsel);
         }
     }
+
+    public static class AddCompanyRepresentativeCommandTemplates {
+        private AddCompanyRepresentativeCommandTemplates() {
+        }
+
+        public static AddCompanyRepresentative addCompanyRepresentativeCommandTemplate(final UUID hearingId) {
+            final CompanyRepresentative companyRepresentative = new CompanyRepresentative(
+                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(UUID.randomUUID()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    Position.DIRECTOR,
+                    STRING.next()
+            );
+            return new AddCompanyRepresentative(companyRepresentative, hearingId);
+        }
+
+        public static AddCompanyRepresentative addCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
+            return new AddCompanyRepresentative(companyRepresentative, hearingId);
+        }
+    }
+
+    public static class UpdateCompanyRepresentativeCommandTemplates {
+        private UpdateCompanyRepresentativeCommandTemplates() {
+        }
+
+        public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId) {
+            final CompanyRepresentative companyRepresentative = new CompanyRepresentative(
+                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(UUID.randomUUID()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    Position.DIRECTOR,
+                    STRING.next()
+            );
+            return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
+        }
+
+        public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
+            return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
+        }
+    }
+
 }

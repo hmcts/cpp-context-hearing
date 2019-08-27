@@ -14,6 +14,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
+import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.DefenceCounsel;
@@ -79,6 +80,8 @@ public class HearingJPAMapperTest {
     private HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper;
     @Mock
     private HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper;
+    @Mock
+    private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
 
     @Captor
     private ArgumentCaptor<List<CourtApplication>> courtApplicationCaptor;
@@ -199,6 +202,9 @@ public class HearingJPAMapperTest {
         DefenceCounsel defenceCounselMock = mock(DefenceCounsel.class);
         when(defenceCounselJPAMapper.fromJPA(hearingEntity.getDefenceCounsels())).thenReturn(asList(defenceCounselMock));
 
+        CompanyRepresentative companyRepresentativeMock = mock(CompanyRepresentative.class);
+        when(hearingCompanyRepresentativeJPAMapper.fromJPA(hearingEntity.getCompanyRepresentatives())).thenReturn(asList(companyRepresentativeMock));
+
         final List<CourtApplication> expectedCourtApplications = asList();
         when(courtApplicationsSerializer.courtApplications(hearingEntity.getCourtApplicationsJson())).thenReturn(expectedCourtApplications);
 
@@ -259,7 +265,6 @@ public class HearingJPAMapperTest {
 
         uk.gov.moj.cpp.hearing.persist.entity.ha.HearingProsecutionCounsel hearingProsecutionCounselCaseMock = mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingProsecutionCounsel.class);
         when(hearingProsecutionCounselJPAMapper.toJPA(any(), eq(hearing.getProsecutionCounsels()))).thenReturn(asSet(hearingProsecutionCounselCaseMock));
-
 
         uk.gov.moj.cpp.hearing.persist.entity.ha.Target targetMock = mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class);
 

@@ -49,8 +49,7 @@ import javax.json.JsonObjectBuilder;
 @SuppressWarnings({"squid:MethodCyclomaticComplexity", "squid:S3776"})
 public class OffenceHelper {
 
-    private OffenceHelper() {
-    }
+    private OffenceHelper() {}
 
     public static JsonArray transformOffences(final JsonArray offenceJsonObjects) {
 

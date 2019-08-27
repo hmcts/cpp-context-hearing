@@ -93,6 +93,15 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.update-applicant-counsel+json
             name: hearing.update-applicant-counsel
+        (mapping):
+            requestType: application/vnd.hearing.add-company-representative+json
+            name: hearing.add-company-representative
+        (mapping):
+            requestType: application/vnd.hearing.update-company-representative+json
+            name: hearing.update-company-representative
+        (mapping):
+            requestType: application/vnd.hearing.remove-company-representative+json
+            name: hearing.remove-company-representative
         ...
       body:
         application/vnd.hearing.save-draft-result+json:
@@ -164,6 +173,15 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.update-applicant-counsel+json:
             example: !include json/hearing.update-applicant-counsel.json
             schema:  !include json/schema/hearing.update-applicant-counsel.json
+        application/vnd.hearing.add-company-representative+json:
+            example: !include json/hearing.add-company-representative.json
+            schema:  !include json/schema/hearing.add-company-representative.json
+        application/vnd.hearing.update-company-representative+json:
+            example: !include json/hearing.update-company-representative.json
+            schema:  !include json/schema/hearing.update-company-representative.json
+        application/vnd.hearing.remove-company-representative+json:
+            example: !include json/hearing.remove-company-representative.json
+            schema:  !include json/schema/hearing.remove-company-representative.json
       responses:
             202:
                 description: OK

@@ -210,6 +210,11 @@ baseUri: message://event/processor/message/hearing
                 schema: !include json/schema/hearing.defendant-added.json
                 example: !include json/hearing.defendant-added.json
 
+# Company Representative Change Ignored
+        application/vnd.hearing.company-representative-change-ignored+json:
+            schema: !include json/schema/hearing.company-representative-change-ignored.json
+            example: !include json/hearing.company-representative-change-ignored.json
+
 /public.event:
   post:
     body:

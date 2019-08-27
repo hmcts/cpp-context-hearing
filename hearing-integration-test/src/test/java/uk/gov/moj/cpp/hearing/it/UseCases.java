@@ -25,14 +25,17 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
+import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.hearing.courts.AddRespondentCounsel;
 import uk.gov.justice.hearing.courts.RemoveApplicantCounsel;
+import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
 import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
 import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
 import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
 import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
+import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
@@ -443,6 +446,40 @@ public class UseCases {
                 .executeSuccessfully();
 
         return addDefenceCounsel;
+    }
+
+    public static AddCompanyRepresentative addCompanyRepresentative(final RequestSpecification requestSpec, final UUID hearingId,
+                                                                    final AddCompanyRepresentative addCompanyRepresentative) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.add-company-representative+json")
+                .withArgs(hearingId)
+                .withPayload(addCompanyRepresentative)
+                .executeSuccessfully();
+
+        return addCompanyRepresentative;
+    }
+
+    public static UpdateCompanyRepresentative updateCompanyRepresentative(final RequestSpecification requestSpec, final UUID hearingId, final UpdateCompanyRepresentative updateCompanyRepresentative) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.update-company-representative+json")
+                .withArgs(hearingId)
+                .withPayload(updateCompanyRepresentative)
+                .executeSuccessfully();
+
+        return updateCompanyRepresentative;
+    }
+
+    public static RemoveCompanyRepresentative removeCompanyRepresentative(final RequestSpecification requestSpec, final UUID hearingId, final RemoveCompanyRepresentative removeCompanyRepresentative) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.remove-company-representative+json")
+                .withArgs(hearingId)
+                .withPayload(removeCompanyRepresentative)
+                .executeSuccessfully();
+
+        return removeCompanyRepresentative;
     }
 
     public static AddProsecutionCounsel addProsecutionCounsel(final RequestSpecification requestSpec, final UUID hearingId,

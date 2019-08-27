@@ -266,3 +266,30 @@ rule "Command - API - Action - hearing.update-applicant-counsel"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.add-company-representative"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-company-representative");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.update-company-representative"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-company-representative");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.remove-company-representative"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.remove-company-representative");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end

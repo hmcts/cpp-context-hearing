@@ -131,4 +131,20 @@ public class HearingCommandApi {
     public void addApplicantCounsel(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-applicant-counsel").apply(envelope.payloadAsJsonObject()));
     }
+
+    @Handles("hearing.add-company-representative")
+    public void addCompanyRepresentative(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-company-representative").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.update-company-representative")
+    public void updateCompanyRepresentative(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.update-company-representative").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.remove-company-representative")
+    public void removeCompanyRepresentative(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-company-representative").apply(envelope.payloadAsJsonObject()));
+    }
+
 }

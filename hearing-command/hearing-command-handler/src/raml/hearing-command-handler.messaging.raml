@@ -230,3 +230,14 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.update-court-application+json:
             schema: !include json/schema/hearing.update-court-application.json
             example: !include json/hearing.update-court-application.json
+
+# Company Representative
+        application/vnd.hearing.command.add-company-representative+json:
+            example: !include json/hearing.command.add-company-representative.json
+            schema:  !include json/schema/hearing.command.add-company-representative.json
+        application/vnd.hearing.command.update-company-representative+json:
+            example: !include json/hearing.command.update-company-representative.json
+            schema:  !include json/schema/hearing.command.update-company-representative.json
+        application/vnd.hearing.command.remove-company-representative+json:
+            example: !include json/hearing.command.remove-company-representative.json
+            schema:  !include json/schema/hearing.command.remove-company-representative.json

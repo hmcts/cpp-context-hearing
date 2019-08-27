@@ -1,0 +1,864 @@
+{
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+  },
+  "hearing": {
+    "courtCentre": {
+      "id": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+      "name": "Liverpool Crown Court",
+      "roomId": "fbe3ca1a-6be6-3bd5-86e8-fc879aa5e3e7",
+      "roomName": "Crown Court 5-3"
+    },
+    "defenceCounsels": [
+      {
+        "attendanceDays": [
+          "2018-07-17",
+          "2018-07-18",
+          "2018-07-19",
+          "2018-07-21",
+          "2018-07-22"
+        ],
+        "defendants": [
+          "c02d7404-9c0f-43dd-9afe-37f9676199d3"
+        ],
+        "firstName": "Albert",
+        "id": "115bdb96-be0b-420a-81b9-7219e093361d",
+        "lastName": "Grant",
+        "status": "QC",
+        "title": "Mr"
+      },
+      {
+        "attendanceDays": [
+          "2018-07-17",
+          "2018-07-18",
+          "2018-07-19",
+          "2018-07-21",
+          "2018-07-22"
+        ],
+        "defendants": [
+          "15a0829e-ecd9-4354-949e-5dd62a411287"
+        ],
+        "firstName": "Miriam",
+        "id": "5adb1a26-0dac-4465-a018-daf12ee0b29e",
+        "lastName": "Norton",
+        "status": "QC",
+        "title": "Mr"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2019-06-05T08:00:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 360,
+        "listingSequence": 0,
+        "sittingDay": "2019-06-06T09:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 360,
+        "listingSequence": 0,
+        "sittingDay": "2019-06-07T09:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 360,
+        "listingSequence": 0,
+        "sittingDay": "2019-06-09T09:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 2,
+        "listingSequence": 0,
+        "sittingDay": "2019-06-10T14:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "a64a1af3-e27a-4fe7-999e-769daaf9d2f5",
+    "judiciary": [
+      {
+        "firstName": "Tim",
+        "judicialId": "00ac8ed3-b432-3bdd-8ebb-ebcb2ba10a00",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "00ac8ed3-b432-3bdd-8ebb-ebcb2ba10a00",
+          "judiciaryType": "DJ"
+        },
+        "lastName": "Daber",
+        "title": "Mr"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [
+      {
+        "caseStatus": "READY_FOR_REVIEW",
+        "defendants": [
+          {
+            "id": "15a0829e-ecd9-4354-949e-5dd62a411287",
+            "offences": [
+              {
+                "convictionDate": "2019-06-05",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "44538fca-bab9-4e0a-bff6-690d74f13ee0",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "44538fca-bab9-4e0a-bff6-690d74f13ee0",
+                  "originatingHearingId": "a64a1af3-e27a-4fe7-999e-769daaf9d2f5",
+                  "pleaDate": "2019-06-05",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              },
+              {
+                "convictionDate": "2019-06-05",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "2593cf09-ace0-4b7d-a746-0703a29f33b5",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "2593cf09-ace0-4b7d-a746-0703a29f33b5",
+                  "originatingHearingId": "a64a1af3-e27a-4fe7-999e-769daaf9d2f5",
+                  "pleaDate": "2019-06-05",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              }
+            ],
+            "legalEntityDefendant": {
+              "organisation": {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "name": "a",
+                "incorporationNumber": "a",
+                "registeredCharityNumber": "a",
+                "address": {
+                  "address1": "222 Furze Road",
+                  "address2": "Exeter",
+                  "address3": "England",
+                  "address4": "UK",
+                  "postcode": "GIR 0AA"
+                },
+                "contact": {
+                  "home": " ",
+                  "work": "a",
+                  "mobile": " ",
+                  "primaryEmail": "!.!@00.00",
+                  "secondaryEmail": "!.!@00.00",
+                  "fax": "a"
+                }
+              }
+            },
+            "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+          },
+          {
+            "id": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+            "offences": [
+              {
+                "convictionDate": "2019-06-05",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "7858802b-9019-40a1-9358-66337f08d599",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "7858802b-9019-40a1-9358-66337f08d599",
+                  "originatingHearingId": "a64a1af3-e27a-4fe7-999e-769daaf9d2f5",
+                  "pleaDate": "2019-06-05",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              },
+              {
+                "convictionDate": "2019-06-05",
+                "count": 0,
+                "endDate": "2018-08-01",
+                "id": "cdd863b9-17ed-4e36-9bea-f2c19a1d42c8",
+                "modeOfTrial": "EWAY",
+                "offenceCode": "OF61131",
+                "offenceDefinitionId": "6abe3e81-1de0-4c42-b0d2-2dc38f5c44c5",
+                "offenceLegislation": "Contrary to section 20 of the Offences Against the    Person Act 1861.",
+                "offenceLegislationWelsh": "Yn groes i adran 20 Deddf Troseddau Corfforol 1861.",
+                "offenceTitle": "Wound / inflict grievous bodily harm without intent",
+                "offenceTitleWelsh": "Clwyfo / peri niwed corfforol difrifol heb fwriadu",
+                "plea": {
+                  "delegatedPowers": {
+                    "firstName": "Anne",
+                    "lastName": "Green",
+                    "userId": "222768ad-c607-419f-81d5-96a49613475a"
+                  },
+                  "offenceId": "cdd863b9-17ed-4e36-9bea-f2c19a1d42c8",
+                  "originatingHearingId": "a64a1af3-e27a-4fe7-999e-769daaf9d2f5",
+                  "pleaDate": "2019-06-05",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2010-08-01",
+                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+              }
+            ],
+            "legalEntityDefendant": {
+              "organisation": {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "name": "a",
+                "incorporationNumber": "a",
+                "registeredCharityNumber": "a",
+                "address": {
+                  "address1": "222 Furze Road",
+                  "address2": "Exeter",
+                  "address3": "England",
+                  "address4": "UK",
+                  "postcode": "GIR 0AA"
+                },
+                "contact": {
+                  "home": " ",
+                  "work": "a",
+                  "mobile": " ",
+                  "primaryEmail": "!.!@00.00",
+                  "secondaryEmail": "!.!@00.00",
+                  "fax": "a"
+                }
+              }
+            },
+            "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+          }
+        ],
+        "id": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04",
+        "initiationCode": "C",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "CPS",
+          "prosecutionAuthorityId": "52b27284-0686-4894-b1c7-7d4b634cacdb",
+          "caseURN": "77GD5972319"
+        }
+      }
+    ],
+    "prosecutionCounsels": [
+      {
+        "attendanceDays": [
+          "2018-07-17",
+          "2018-07-18",
+          "2018-07-19",
+          "2018-07-21",
+          "2018-07-22"
+        ],
+        "firstName": "James",
+        "id": "8bef6e90-17f1-4304-b2d4-04ceeac53f71",
+        "lastName": "Parsons",
+        "prosecutionCases": [
+          "2d006c2c-8963-4880-9819-588691eb5550"
+        ],
+        "status": "QC",
+        "title": "Mr"
+      }
+    ],
+    "type": {
+      "description": "Plea & Trial Preparation",
+      "id": "06b0c2bf-3f98-46ed-ab7e-56efaf9ecced"
+    }
+  },
+  "nowTypes": [
+    {
+      "description": "Restraining Order for a period",
+      "id": "44227210-1d51-11e8-accf-0ed5f89f718b",
+      "jurisdiction": "B",
+      "priority": "30",
+      "rank": 20,
+      "requiresBulkPrinting": false,
+      "requiresEnforcement": false,
+      "staticText": "<p>Breach of this order without reasonable excuse is punishable with</p> <ul> <li>On summary conviction, imprisonment for a term not exceeding 6 months or a fine</li> <li>On conviction on Indictment, imprisonment for a term not exceeding 5 years or a fine, or both</li> </ul>",
+      "templateName": "NoticeOrderWarrants",
+      "welshStaticText": ""
+    }
+  ],
+  "nows": [
+    {
+      "defendantId": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+      "documentationLanguage": "ENGLISH",
+      "id": "fea525d7-67a4-4d23-8c04-a00284ed1bfa",
+      "nowsTypeId": "44227210-1d51-11e8-accf-0ed5f89f718b",
+      "referenceDate": "2019-06-05",
+      "requestedMaterials": [
+        {
+          "description": "Restraining Order for a period",
+          "isAmended": false,
+          "isRemotePrintingRequired": false,
+          "key": {
+            "defendantId": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+            "hearingId": "a64a1af3-e27a-4fe7-999e-769daaf9d2f5",
+            "nowsTypeId": "44227210-1d51-11e8-accf-0ed5f89f718b",
+            "usergroups": [
+              "Court Clerks",
+              "Police Admin"
+            ]
+          },
+          "materialId": "0a6229fb-16a7-46ad-be54-64e081626fb9",
+          "nowResults": [
+            {
+              "promptRefs": [
+                "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+                "3054909b-15b6-499f-b44f-67b2b1215c76",
+                "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "47337f1c-e343-4093-884f-035ba96c4db0",
+                "ea26f773-0a91-4526-b4ad-84d07b5bf940"
+              ],
+              "sequence": 1,
+              "sharedResultId": "a20c0c3e-0b21-48ad-acec-347503d9d87d"
+            },
+            {
+              "promptRefs": [
+                "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+                "3054909b-15b6-499f-b44f-67b2b1215c76",
+                "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "47337f1c-e343-4093-884f-035ba96c4db0",
+                "ea26f773-0a91-4526-b4ad-84d07b5bf940"
+              ],
+              "sequence": 1,
+              "sharedResultId": "1e7fa486-9e10-4758-99de-e6fe31d136a8"
+            },
+            {
+              "promptRefs": [
+                "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+                "3054909b-15b6-499f-b44f-67b2b1215c76",
+                "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "47337f1c-e343-4093-884f-035ba96c4db0",
+                "ea26f773-0a91-4526-b4ad-84d07b5bf940"
+              ],
+              "sequence": 1,
+              "sharedResultId": "6122045f-23b3-405e-a2d7-5af54ef50539"
+            }
+          ],
+          "nowVariantAddressee": {
+            "address": {
+              "address1": "222 Furze Road",
+              "address2": "Exeter",
+              "address3": "England",
+              "address4": "UK"
+            },
+            "name": "Tyshawn Denesik"
+          },
+          "nowVariantDefendant": {
+            "address": {
+              "address1": "222 Furze Road",
+              "address2": "Exeter",
+              "address3": "England",
+              "address4": "UK"
+            },
+            "name": "Tyshawn Denesik"
+          },
+          "status": "requesting",
+          "templateName": "NoticeOrderWarrants"
+        },
+        {
+          "description": "Restraining Order for a period",
+          "isAmended": false,
+          "isRemotePrintingRequired": false,
+          "key": {
+            "defendantId": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+            "hearingId": "a64a1af3-e27a-4fe7-999e-769daaf9d2f5",
+            "nowsTypeId": "44227210-1d51-11e8-accf-0ed5f89f718b",
+            "usergroups": [
+              "Victims & Witness Care Admin",
+              "Probation Admin"
+            ]
+          },
+          "materialId": "26f28926-6032-496d-8640-0167b5bb5fd4",
+          "nowResults": [
+            {
+              "promptRefs": [
+                "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "47337f1c-e343-4093-884f-035ba96c4db0",
+                "ea26f773-0a91-4526-b4ad-84d07b5bf940"
+              ],
+              "sequence": 1,
+              "sharedResultId": "a20c0c3e-0b21-48ad-acec-347503d9d87d"
+            },
+            {
+              "promptRefs": [
+                "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "47337f1c-e343-4093-884f-035ba96c4db0",
+                "ea26f773-0a91-4526-b4ad-84d07b5bf940"
+              ],
+              "sequence": 1,
+              "sharedResultId": "1e7fa486-9e10-4758-99de-e6fe31d136a8"
+            },
+            {
+              "promptRefs": [
+                "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "47337f1c-e343-4093-884f-035ba96c4db0",
+                "ea26f773-0a91-4526-b4ad-84d07b5bf940"
+              ],
+              "sequence": 1,
+              "sharedResultId": "6122045f-23b3-405e-a2d7-5af54ef50539"
+            }
+          ],
+          "nowVariantAddressee": {
+            "address": {
+              "address1": "222 Furze Road",
+              "address2": "Exeter",
+              "address3": "England",
+              "address4": "UK"
+            },
+            "name": "Tyshawn Denesik"
+          },
+          "nowVariantDefendant": {
+            "address": {
+              "address1": "222 Furze Road",
+              "address2": "Exeter",
+              "address3": "England",
+              "address4": "UK"
+            },
+
+            "name": "Tyshawn Denesik"
+          },
+          "status": "requesting",
+          "templateName": "NoticeOrderWarrants"
+        }
+      ]
+    }
+  ],
+  "sharedResultLines": [
+    {
+      "amendmentDate": "2019-06-24",
+      "amendmentReasonId": "ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+      "id": "6122045f-23b3-405e-a2d7-5af54ef50539",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "level": "OFFENCE",
+      "offenceId": "7858802b-9019-40a1-9358-66337f08d599",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "Test"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Test"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "Test"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "6 Years, 5 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    },
+    {
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+      "id": "1e7fa486-9e10-4758-99de-e6fe31d136a8",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "lastSharedDateTime": "2019-06-05",
+      "level": "OFFENCE",
+      "offenceId": "7858802b-9019-40a1-9358-66337f08d599",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "James Clerk"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Flat 5, Holborn Street"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "No details provided"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "10 Years, 0 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    },
+    {
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+      "id": "a20c0c3e-0b21-48ad-acec-347503d9d87d",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "lastSharedDateTime": "2019-06-05",
+      "level": "OFFENCE",
+      "offenceId": "cdd863b9-17ed-4e36-9bea-f2c19a1d42c8",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "James Clerk"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Flat 5, Holborn Street"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "No details provided"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "10 Years, 0 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    },
+    {
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "c02d7404-9c0f-43dd-9afe-37f9676199d3",
+      "id": "a20c0c3e-0b21-48ad-acec-347503d9d87d",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "lastSharedDateTime": "2019-06-05",
+      "level": "OFFENCE",
+      "offenceId": "cdd863b9-17ed-4e36-9bea-f2c19a1d42c8",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "James Clerk"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Flat 5, Holborn Street"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "No details provided"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "10 Years, 0 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    },
+    {
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "15a0829e-ecd9-4354-949e-5dd62a411287",
+      "id": "5a00848d-afe4-4dcc-b435-8391dee5f239",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "lastSharedDateTime": "2019-06-05",
+      "level": "OFFENCE",
+      "offenceId": "2593cf09-ace0-4b7d-a746-0703a29f33b5",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "James Clerk"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Flat 5, Holborn Street"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "No details provided"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "10 Years, 0 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    },
+    {
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "15a0829e-ecd9-4354-949e-5dd62a411287",
+      "id": "5a00848d-afe4-4dcc-b435-8391dee5f239",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "lastSharedDateTime": "2019-06-05",
+      "level": "OFFENCE",
+      "offenceId": "2593cf09-ace0-4b7d-a746-0703a29f33b5",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "James Clerk"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Flat 5, Holborn Street"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "No details provided"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "10 Years, 0 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    },
+    {
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "15a0829e-ecd9-4354-949e-5dd62a411287",
+      "id": "2af54f98-77a5-468b-b123-0bdc91da2d08",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "lastSharedDateTime": "2019-06-05",
+      "level": "OFFENCE",
+      "offenceId": "44538fca-bab9-4e0a-bff6-690d74f13ee0",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "James Clerk"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Flat 5, Holborn Street"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "No details provided"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "10 Years, 0 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    },
+    {
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      },
+      "defendantId": "15a0829e-ecd9-4354-949e-5dd62a411287",
+      "id": "2af54f98-77a5-468b-b123-0bdc91da2d08",
+      "isAvailableForCourtExtract": true,
+      "label": "Restraining order for period",
+      "lastSharedDateTime": "2019-06-05",
+      "level": "OFFENCE",
+      "offenceId": "44538fca-bab9-4e0a-bff6-690d74f13ee0",
+      "orderedDate": "2019-06-05",
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person",
+          "value": "James Clerk"
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "isAvailableForCourtExtract": false,
+          "label": "Protected person's address",
+          "value": "Flat 5, Holborn Street"
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "isAvailableForCourtExtract": false,
+          "label": "Order details",
+          "value": "No details provided"
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "isAvailableForCourtExtract": false,
+          "label": "Period of order",
+          "value": "10 Years, 0 Months, 0 Weeks, 0 Days"
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "isAvailableForCourtExtract": false,
+          "label": "Conviction / acquittal",
+          "value": "Convicted"
+        }
+      ],
+      "prosecutionCaseId": "0e40ded9-1c4b-4cfc-98fa-8b876e87ec04"
+    }
+  ]
+}

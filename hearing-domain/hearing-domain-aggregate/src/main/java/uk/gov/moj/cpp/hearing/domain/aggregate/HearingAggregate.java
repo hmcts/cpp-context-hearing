@@ -6,6 +6,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtApplicationResponse;
@@ -35,6 +36,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ApplicantCounselDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ApplicationDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.CompanyRepresentativeDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ConvictionDateDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefenceCounselDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantDelegate;
@@ -53,6 +55,9 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeAdded;
+import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
@@ -133,6 +138,8 @@ public class HearingAggregate implements Aggregate {
 
     private final ApplicantCounselDelegate applicantCounselDelegate = new ApplicantCounselDelegate(momento);
 
+    private final CompanyRepresentativeDelegate companyRepresentativeDelegate = new CompanyRepresentativeDelegate(momento);
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(
@@ -173,6 +180,9 @@ public class HearingAggregate implements Aggregate {
                 when(ApplicantCounselUpdated.class).apply(applicantCounselDelegate::handleApplicantCounselUpdated),
                 when(DefendantAdded.class).apply(hearingDelegate::handleDefendantAdded),
                 when(ApplicationDetailChanged.class).apply(hearingDelegate::handleApplicationDetailChanged),
+                when(CompanyRepresentativeAdded.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeAdded),
+                when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
+                when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
                 otherwiseDoNothing()
         );
 
@@ -356,5 +366,17 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> updateCourtApplication(final UUID hearingId, final uk.gov.justice.core.courts.CourtApplication courtApplication) {
         return hearingDelegate.updateCourtApplication(hearingId, courtApplication);
+    }
+
+    public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {
+        return apply(companyRepresentativeDelegate.addCompanyRepresentative(companyRepresentative, hearingId));
+    }
+
+    public Stream<Object> updateCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {
+        return apply(companyRepresentativeDelegate.updateCompanyRepresentative(companyRepresentative, hearingId));
+    }
+
+    public Stream<Object> removeCompanyRepresentative(final UUID id, final UUID hearingId) {
+        return apply(companyRepresentativeDelegate.removeCompanyRepresentative(id, hearingId));
     }
 }

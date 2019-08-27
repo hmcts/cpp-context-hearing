@@ -68,7 +68,7 @@ public class DefendantDelegate implements Serializable {
                     .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                     .filter(d -> d.getId().equals(newDefendant.getId()))
                     .findFirst();
-            if (previouslyStoredDefendant.isPresent() && newDefendant.getPersonDefendant().getPersonDetails() != null) {
+            if (previouslyStoredDefendant.isPresent() && nonNull(newDefendant.getPersonDefendant()) && nonNull(newDefendant.getPersonDefendant().getPersonDetails())) {
                 final Title storedTitle = previouslyStoredDefendant.get().getPersonDefendant().getPersonDetails().getTitle();
                 final Title newTitle = newDefendant.getPersonDefendant().getPersonDetails().getTitle();
                 if (newTitle == null) {

@@ -59,9 +59,9 @@ public class CaseDefendantDetailsUpdatedEventListener {
             with(defendant.getLegalEntityOrganisation(), getLegalEntityDefendantOrganisation(defendantIn.getLegalEntityDefendant()), this::setOrganisation);
             with(defendant.getPersonDefendant(), defendantIn.getPersonDefendant(),
                     (personDefendantJpa, personDefendantPojo) -> {
-                        if (nonNull(personDefendantJpa)) {
+                        if (nonNull(personDefendantJpa) && nonNull(personDefendantPojo)) {
                             personDefendantJpa.setArrestSummonsNumber(personDefendantPojo.getArrestSummonsNumber());
-                            personDefendantJpa.setBailStatus(personDefendantPojo.getBailStatus() != null ? personDefendantPojo.getBailStatus().name() : null);
+                            personDefendantJpa.setBailStatus(nonNull(personDefendantPojo.getBailStatus()) ? personDefendantPojo.getBailStatus().name() : null);
                             personDefendantJpa.setCustodyTimeLimit(personDefendantPojo.getCustodyTimeLimit());
                             personDefendantJpa.setDriverNumber(personDefendantPojo.getDriverNumber());
                             personDefendantJpa.setEmployerPayrollReference(personDefendantPojo.getEmployerPayrollReference());

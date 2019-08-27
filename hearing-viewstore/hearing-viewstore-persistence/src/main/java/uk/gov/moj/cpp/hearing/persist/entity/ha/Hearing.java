@@ -87,6 +87,9 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingApplicantCounsel> hearingApplicantCounsels = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingCompanyRepresentative> hearingCompanyRepresentatives = new HashSet<>();
+
     public Hearing() {
         //For JPA
     }
@@ -268,6 +271,15 @@ public class Hearing {
     public void setApplicantCounsels(Set<HearingApplicantCounsel> jpa) {
         this.hearingApplicantCounsels = jpa;
     }
+
+    public Set<HearingCompanyRepresentative> getCompanyRepresentatives() {
+        return hearingCompanyRepresentatives;
+    }
+
+    public void setCompanyRepresentatives(Set<HearingCompanyRepresentative> jpa) {
+        this.hearingCompanyRepresentatives = jpa;
+    }
+
 
     @Override
     public int hashCode() {

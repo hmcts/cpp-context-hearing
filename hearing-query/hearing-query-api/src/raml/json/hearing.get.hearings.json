@@ -1,38 +1,134 @@
 {
-  "hearings": [
+  "hearingSummaries": [
     {
-      "id": "88705e62-383d-4fc4-bba9-922448849f3d",
-      "type": {
-        "description": "qm1rJUZb0f",
-        "id": "9623a7ac-25bb-43f8-b219-2ae4cd8b05db"
-      },
-      "jurisdictionType": "CROWN",
-      "reportingRestrictionReason": "0bxiILwsNy",
-      "hearingLanguage": "ENGLISH",
-      "hearingDays": [
+      "courtApplicationSummaries": [
         {
-          "listedDurationMinutes": 1531791578,
-          "listingSequence": 810249414,
-          "sittingDay": "2015-01-12T05:27:17.210Z"
-        }
-      ],
-      "prosecutionCases": [
-        {
-          "id": "9f035918-5dd6-4771-a6bb-9b05fa92f129",
-          "prosecutionCaseIdentifier": {
-            "prosecutionAuthorityCode": "4ZKOPhuyh5",
-            "prosecutionAuthorityId": "e677b61a-3360-48b0-8eee-649911475106",
-            "caseURN": "qriGUBZKR5"
+          "applicant": {
+            "firstName": "Bryce",
+            "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+            "lastName": "Hammes",
+            "middleName": "Test",
+            "organisationName": "Testing Organisation Name",
+            "synonym": "Attendees"
           },
-          "defendants": [
+          "applicationReference": "46YE772132",
+          "id": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
+          "respondents": [
             {
-              "id": "5bdab12c-dfa5-4a7a-b302-21ca74652a96",
-              "name": "JquMYcAJxw 3YAWVaBXGj 6tyOhRMREc"
+              "firstName": "America",
+              "id": "421b0a0a-a7f1-46f9-b142-f85d5d3e95a2",
+              "lastName": "Ryan",
+              "organisationName": "Responding Organisation Name"
             }
           ]
         }
       ],
-      "hasSharedResults": false
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-25T07:19:59.780Z"
+        },
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-26T07:19:59.780Z"
+        }
+      ],
+      "hearingLanguage": "ENGLISH",
+      "id": "9cae7e41-aeac-11e9-9acc-7f31ecb97c4e",
+      "jurisdictionType": "CROWN",
+      "prosecutionCaseSummaries": [
+        {
+          "defendants": [
+            {
+              "firstName": "Lee",
+              "id": "9cae7e40-aeac-11e9-9acc-7f31ecb97c4e",
+              "lastName": "Pestelli",
+              "middleName": "",
+              "organisationName": "TestNameLei",
+              "synonym": "is this from aliases ?"
+            }
+          ],
+          "id": "9caea551-aeac-11e9-9acc-7f31ecb97c4e",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "TFL",
+            "prosecutionAuthorityId": "9caea553-aeac-11e9-9acc-7f31ecb97c4e",
+            "caseURN": "82SK912711"
+          }
+        }
+      ],
+      "reportingRestrictionReason": "Automatic anonymity under the Sexual Offences (Amendment) Act 1992",
+      "type": {
+        "description": "82SK912711",
+        "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+      }
+    },
+    {
+      "courtApplicationSummaries": [
+        {
+          "applicant": {
+            "firstName": "Bryce",
+            "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+            "lastName": "Hammes",
+            "middleName": "Test",
+            "organisationName": "Testing Organisation Name",
+            "synonym": "Attendees"
+          },
+          "applicationReference": "19YO356897",
+          "id": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
+          "respondents": [
+            {
+              "firstName": "America",
+              "id": "421b0a0a-a7f1-46f9-b142-f85d5d3e95a2",
+              "lastName": "Ryan",
+              "organisationName": "Responding Organisation Name"
+            }
+          ]
+        }
+      ],
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-24T10:06:44.893Z"
+        },
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-25T10:06:44.892Z"
+        }
+      ],
+      "hearingLanguage": "ENGLISH",
+      "id": "bdc7adc1-adfa-11e9-aa34-2f0cc588bb24",
+      "jurisdictionType": "CROWN",
+      "prosecutionCaseSummaries": [
+        {
+          "defendants": [
+            {
+              "firstName": "Connor",
+              "id": "bdc7adc0-adfa-11e9-aa34-2f0cc588bb24",
+              "lastName": "Berry",
+              "middleName": "",
+              "organisationName": "TestNameLei",
+              "synonym": "is this from aliases ?"
+            }
+          ],
+          "id": "bdc7fbe0-adfa-11e9-aa34-2f0cc588bb24",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "TFL",
+            "prosecutionAuthorityId": "bdc7fbe2-adfa-11e9-aa34-2f0cc588bb24",
+            "caseURN": "59XC279180"
+          }
+        }
+      ],
+      "reportingRestrictionReason": "Automatic anonymity under the Sexual Offences (Amendment) Act 1992",
+      "type": {
+        "description": "59XC279180",
+        "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+      }
     }
   ]
 }

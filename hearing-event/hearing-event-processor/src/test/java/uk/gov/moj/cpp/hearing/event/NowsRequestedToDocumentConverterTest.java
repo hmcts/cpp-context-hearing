@@ -2,7 +2,9 @@ package uk.gov.moj.cpp.hearing.event;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.Charset.defaultCharset;
+import static junit.framework.TestCase.assertNull;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
@@ -50,15 +52,27 @@ public class NowsRequestedToDocumentConverterTest {
     @Test
     public void convertNowsRequestToDocument() throws IOException {
 
-        final CreateNowsRequest createNowsRequest = this.jsonObjectToObjectConverter.convert(stringToJsonObjectConverter.convert(getStringFromResource()), CreateNowsRequest.class);
+        final CreateNowsRequest createNowsRequest = this.jsonObjectToObjectConverter.convert(stringToJsonObjectConverter.convert(getStringFromResource("createNowRequest.json")), CreateNowsRequest.class);
 
         List<NowDocumentRequest> nowDocumentRequests = nowsRequestedToDocumentConverter.convert(null, createNowsRequest);
 
         assertThat(nowDocumentRequests.size(), is(2));
         assertThat(nowDocumentRequests.get(0).getNowContent().getAmendmentDate(), is("2019-06-24"));
+        assertNotNull(nowDocumentRequests.get(0).getNowContent().getDefendant().getDateOfBirth());
     }
 
-    private String getStringFromResource() throws IOException {
-        return Resources.toString(getResource("createNowRequest.json"), defaultCharset());
+    @Test
+    public void convertNowsRequestToDocumentForLegalEntityDefendant() throws IOException {
+
+        final CreateNowsRequest createNowsRequest = this.jsonObjectToObjectConverter.convert(stringToJsonObjectConverter.convert(getStringFromResource("createNowRequestForLegalEntityDefendant.json")), CreateNowsRequest.class);
+
+        List<NowDocumentRequest> nowDocumentRequests = nowsRequestedToDocumentConverter.convert(null, createNowsRequest);
+
+        assertThat(nowDocumentRequests.size(), is(2));
+        assertNull(nowDocumentRequests.get(0).getNowContent().getDefendant().getDateOfBirth());
+    }
+
+    private String getStringFromResource(final String resource) throws IOException {
+        return Resources.toString(getResource(resource), defaultCharset());
     }
 }

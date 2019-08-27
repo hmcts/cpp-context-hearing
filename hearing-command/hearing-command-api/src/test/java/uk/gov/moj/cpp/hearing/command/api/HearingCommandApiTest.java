@@ -63,7 +63,8 @@ public class HearingCommandApiTest {
             "addProsecutionCounsel", "removeProsecutionCounsel","updateProsecutionCounsel", "removeDefenceCounsel", "updateDefenceCounsel", "initiateHearing", "saveDraftResult", "applicationDraftResult", "saveHearingCaseNote",
             "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance", "saveApplicationResponse",
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel",
-            "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel");
+            "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel",
+            "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative");
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
