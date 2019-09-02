@@ -6,6 +6,7 @@ import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.HEARING_COMMAND_HEARIN
 import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.HEARING_COMMAND_HEARING_COMMAND_HANDLER_SRC_RAML_JSON;
 import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.createObjectMapper;
 
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 
 import java.io.File;
@@ -20,8 +21,8 @@ public class CreateSamplePublicResultsSharedJson {
     public static void main(String[] args) throws IOException {
         final ObjectMapper objectMapper = createObjectMapper();
         final ShareResultsCommand command = ShareResultsCommand.shareResultsCommand()
-                .setCourtClerk(uk.gov.justice.core.courts.CourtClerk.courtClerk()
-                        .withId(randomUUID())
+                .setCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(randomUUID())
                         .withFirstName(STRING.next())
                         .withLastName(STRING.next())
                         .build());

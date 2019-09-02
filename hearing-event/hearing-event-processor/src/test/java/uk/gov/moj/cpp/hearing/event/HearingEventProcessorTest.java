@@ -22,6 +22,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -34,9 +35,11 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -213,6 +216,34 @@ public class HearingEventProcessorTest {
         //TODO json schema check ?
     }
 
+    @Test
+    public void publicApplicationDraftResultedPublicEvent() {
+        final ApplicationDraftResulted applicationDraftResulted = ApplicationDraftResulted.applicationDraftResulted()
+                .setDraftResult("result")
+                .setTargetId(randomUUID())
+                .setHearingId(randomUUID())
+                .setApplicationId(randomUUID())
+                .setApplicationOutcomeType(CourtApplicationOutcomeType.courtApplicationOutcomeType()
+                        .withDescription("Granted")
+                        .withId(UUID.randomUUID())
+                        .withSequence(1).build())
+                .setApplicationOutcomeDate(LocalDate.now());
+        final JsonEnvelope eventIn = createApplicationDraftResultedPrivateEvent(applicationDraftResulted);
+
+        this.hearingEventProcessor.publicApplicationDraftResultedPublicEvent(eventIn);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED));
+        final PublicHearingApplicationDraftResulted publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingApplicationDraftResulted.class);
+        assertThat(publicEventOut.getDraftResult(), is(applicationDraftResulted.getDraftResult()));
+        assertThat(publicEventOut.getHearingId(), is(applicationDraftResulted.getHearingId()));
+        assertThat(publicEventOut.getApplicationId(), is(applicationDraftResulted.getApplicationId()));
+        assertThat(publicEventOut.getTargetId(), is(applicationDraftResulted.getTargetId()));
+        assertThat(publicEventOut.getApplicationOutcomeType(), is(applicationDraftResulted.getApplicationOutcomeType()));
+        assertThat(publicEventOut.getApplicationOutcomeDate(), is(applicationDraftResulted.getApplicationOutcomeDate()));
+    }
+
     private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class<?> commandClass, int sendCount) {
         final JsonValue payload = this.objectToJsonValueConverter.convert(typedEvent);
         final Metadata metadata = metadataWithDefaults().build();
@@ -288,6 +319,12 @@ public class HearingEventProcessorTest {
     private JsonEnvelope createDraftResultSavedPrivateEvent(final uk.gov.justice.core.courts.Target target) {
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(target);
         return envelope().withPayloadOf(jsonObject, "target").with(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT)).build();
+    }
+
+    private JsonEnvelope createApplicationDraftResultedPrivateEvent(final ApplicationDraftResulted applicationDraftResulted) {
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(applicationDraftResulted);
+        final Metadata metadata = metadataWithDefaults().build();
+        return envelopeFrom(metadata, jsonObject);
     }
 
     private JsonEnvelope createDraftResultSavedPrivateEvent(String draftResult) {

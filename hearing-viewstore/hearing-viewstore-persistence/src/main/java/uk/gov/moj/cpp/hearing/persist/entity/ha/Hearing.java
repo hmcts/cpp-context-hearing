@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -40,6 +41,9 @@ public class Hearing {
     @Column(name = "reporting_restriction_reason")
     private String reportingRestrictionReason;
 
+    @Column(name = "court_applications_json", columnDefinition = "TEXT")
+    private String courtApplicationsJson;
+
     @Column(name = "hearing_language")
     @Enumerated(EnumType.STRING)
     private HearingLanguage hearingLanguage;
@@ -63,6 +67,9 @@ public class Hearing {
     private Set<Target> targets = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<ApplicationDraftResult> applicationDraftResults = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<DefendantAttendance> defendantAttendance = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
@@ -73,6 +80,15 @@ public class Hearing {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingDefenceCounsel> hearingDefenceCounsels = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingRespondentCounsel> hearingRespondentCounsels = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingApplicantCounsel> hearingApplicantCounsels = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingCompanyRepresentative> hearingCompanyRepresentatives = new HashSet<>();
 
     public Hearing() {
         //For JPA
@@ -186,6 +202,25 @@ public class Hearing {
         return this;
     }
 
+    public Set<ApplicationDraftResult> getApplicationDraftResults() {
+        return applicationDraftResults;
+    }
+
+    public Hearing setApplicationDraftResults(final Set<ApplicationDraftResult> applicationDraftResults) {
+        this.applicationDraftResults = applicationDraftResults;
+        return this;
+    }
+
+    public String getCourtApplicationsJson() {
+        return courtApplicationsJson;
+    }
+
+
+    public Hearing setCourtApplicationsJson(final String courtApplicationsJson) {
+        this.courtApplicationsJson = courtApplicationsJson;
+        return this;
+    }
+
     public Set<HearingCaseNote> getHearingCaseNotes() {
         return hearingCaseNotes;
     }
@@ -220,6 +255,31 @@ public class Hearing {
     public void setDefenceCounsels(Set<HearingDefenceCounsel> jpa) {
         this.hearingDefenceCounsels = jpa;
     }
+
+    public Set<HearingRespondentCounsel> getRespondentCounsels() {
+        return hearingRespondentCounsels;
+    }
+
+    public void setRespondentCounsels(Set<HearingRespondentCounsel> jpa) {
+        this.hearingRespondentCounsels = jpa;
+    }
+
+    public Set<HearingApplicantCounsel> getApplicantCounsels() {
+        return hearingApplicantCounsels;
+    }
+
+    public void setApplicantCounsels(Set<HearingApplicantCounsel> jpa) {
+        this.hearingApplicantCounsels = jpa;
+    }
+
+    public Set<HearingCompanyRepresentative> getCompanyRepresentatives() {
+        return hearingCompanyRepresentatives;
+    }
+
+    public void setCompanyRepresentatives(Set<HearingCompanyRepresentative> jpa) {
+        this.hearingCompanyRepresentatives = jpa;
+    }
+
 
     @Override
     public int hashCode() {

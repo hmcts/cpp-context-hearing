@@ -25,21 +25,29 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.CompanyRepresentative;
+import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtDecision;
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.DefendantAlias;
 import uk.gov.justice.core.courts.DefendantRepresentation;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.DocumentationLanguage;
 import uk.gov.justice.core.courts.FinancialOrderDetails;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
+import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Now;
 import uk.gov.justice.core.courts.NowType;
 import uk.gov.justice.core.courts.NowVariant;
+import uk.gov.justice.core.courts.NowVariantAddressee;
+import uk.gov.justice.core.courts.NowVariantDefendant;
 import uk.gov.justice.core.courts.NowVariantKey;
 import uk.gov.justice.core.courts.NowVariantResult;
 import uk.gov.justice.core.courts.NowVariantResultText;
@@ -49,6 +57,7 @@ import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ProsecutionRepresentation;
+import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.ResultPrompt;
 import uk.gov.justice.core.courts.SharedResultLine;
@@ -56,10 +65,17 @@ import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.justice.hearing.courts.AddApplicantCounsel;
+import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
+import uk.gov.justice.hearing.courts.AddRespondentCounsel;
+import uk.gov.justice.hearing.courts.Position;
+import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
+import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
+import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
@@ -74,6 +90,7 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffences;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
+import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
@@ -88,6 +105,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefin
 import uk.gov.moj.cpp.hearing.message.shareResults.VariantStatus;
 
 import java.math.BigDecimal;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -100,12 +118,23 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"squid:S1188", "squid:S1135"})
+@SuppressWarnings({"squid:S1188", "squid:S1135", "squid:S1314"})
 public class TestTemplates {
 
     private static final String DAVID = "David";
     private static final String BOWIE = "Bowie";
     private static final String IMPRISONMENT_LABEL = "Imprisonment";
+    private static final String IMPRISONMENT_DURATION_VALUE = "Imprisonment duration";
+    private static final String WORMWOOD_SCRUBS_VALUE = "Wormwood Scrubs";
+    private static final String IMPRISONMENT_DURATION = "Imprisonment Duration";
+    private static final String PRISON = "Prison";
+    private static final String DEFENDANT_LEVEL = "DEFENDANT";
+    private static final String OFFENCE_LEVEL = "OFFENCE";
+    private static final String SINGLE_TEMPLATE_NAME = "SingleTemplate";
+    private static final String IMPRISONMENT_ORDER_DESCRIPTION = "Imprisonment Order";
+    private static final String WELSH_STATIC_TEXT = "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar. Os ydych <ul> <li> Peidiwch â chydymffurfio â gofynion y gorchymyn hwn yn ystod y cyfnod goruchwylio </u>; neu </li> <li> Ymrwymo unrhyw drosedd arall yn ystod y cyfnod gweithredol </u> </li> </ul> efallai y byddwch yn atebol i wasanaethu'r cyfnod gwarchodaeth </u> yn y carchar. <br/> <br/> <br/> <p> Yn ystod y cyfnod goruchwylio </u>, byddwch chi'n cael eich goruchwylio gan eich Swyddog Prawf, a <br/> Rhaid ichi <ul> < li> Cadwch mewn cysylltiad â'ch Swyddog Prawf wrth iddyn nhw ddweud wrthych </li> <li> Dywedwch wrth eich Swyddog Prawf os ydych yn bwriadu newid eich cyfeiriad </li> <li> Cydymffurfio â'r holl ofynion eraill </li></ul > <p> <strong> Gofynion </strong> - Cyfeiriwch yn unig at y gofynion a nododd y llys yn manylion eich archeb, fel y nodir uchod </u> <p> <strong> Gwaith Di-dāl Gofyniad </strong><p> Rhaid i chi wneud gwaith di-dāl am yr oriau a bennir fel y dywedir wrthych a chi erbyn y dyddiad a bennir yn y gorchymyn. Bydd eich Swyddog Prawf yn dweud wrthych pwy fydd yn gyfrifol am oruchwylio gwaith.<p> <strong> Gweithgaredd Gofyniad </strong> <p> Rhaid i chi gyflwyno eich hun fel y'i cyfarwyddir ar yr amser ac ar y diwrnodau a bennir yn y gorchymyn a rhaid i chi ymgymryd â chi y gweithgaredd y mae'r llys wedi ei nodi ar gyfer y cyfnod a bennir yn y drefn yn y ffordd y dywedir wrth eich Swyddog Prawf <p> <strong> Gofyniad Rhaglen </strong><p> Rhaid i chi gymryd rhan yn y rhaglen a bennir yn y drefn yn y lleoliad a bennir ac am y nifer o ddyddiau a bennir yn y gorchymyn <p> <strong> Gofyniad Gweithgaredd Gwahardd </strong> <p> Rhaid i chi beidio â chymryd rhan yn y gweithgaredd a waharddodd y llys yn y drefn ar gyfer nifer y dyddiau llys penodol <p> <strong> Curfew Requirement </strong> <p> Rhaid i chi aros yn y lle neu lle mae'r llys wedi nodi yn ystod y cyfnodau a bennir. Mae'r gofyniad cyrffyw yn para am y nifer o ddyddiau a bennir yn y<p> Gweler \"Darpariaeth Monitro Electronig\" yn yr orchymyn hwn <p> <strong> Gofyniad Preswyl </strong> <p> Rhaid i chi fyw yn yr adeilad y llys wedi nodi ac ufuddhau i unrhyw reolau sy'n berthnasol yno am y nifer o ddyddiau a bennir yn y gorchymyn. Efallai y byddwch yn byw yn ???? gyda chymeradwyaeth ymlaen llaw eich Swyddog Prawf. <p> <strong> Gofyniad Gwahardd Teithio Tramor </strong> <p> Rhaid i chi beidio â theithio i'r lleoliad gwaharddedig a bennir yn yr orchymyn yn ystod y cyfnod y mae'r llys wedi'i bennu yn y gorchymyn. < p> <strong> Gofyniad Triniaeth Iechyd Meddwl </strong> <p> Rhaid i chi gael triniaeth iechyd meddwl gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y <p> <strong> Angen Adsefydlu Cyffuriau </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar gyffuriau gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am nifer y dyddiau <p> Er mwyn sicrhau nad oes gennych unrhyw gyffur anghyfreithlon yn eich corff, rhaid i chi ddarparu samplau i'w profi ar yr adegau hynny neu mewn amgylchiadau o'r fath y bydd eich Swyddog Prawf neu'r person sy'n gyfrifol am eich triniaeth yn dweud wrthych chi . Anfonir canlyniadau'r profion ar y samplau i'ch Swyddog Prawf a fydd yn adrodd y canlyniadau i'r llys. Bydd eich Swyddog Prawf hefyd yn dweud wrth y llys sut mae'ch gorchymyn yn mynd rhagddo a barn eich darparwr triniaeth. <P> Bydd y llys yn adolygu'r gorchymyn hwn ????. Bydd yr adolygiad cyntaf ar y dyddiad a'r amser a bennir yn y llys a bennir. <P> Rhaid i chi / nid oes angen i chi fynychu'r gwrandawiad hwn. <P> <strong> Gofyniad Trin Alcohol </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar alcohol gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y gorchymyn. <p> <strong> Gofyniad Goruchwylio </strong> <p> Rhaid i chi fynychu penodiadau gyda'ch Swyddog Prawf neu berson arall ar yr adegau a lle mae eich Swyddog Prawf yn dweud. <p> <strong> Gofyniad y Ganolfan Bresennol </strong> <p> Rhaid i chi fynychu canolfan bresenoldeb - <p> <strong> RHYBUDD </strong> <p> Os na fyddwch chi'n cydymffurfio â'ch archeb, fe'ch cewch eich troi'n ôl i'r llys. Gall y llys wedyn <ul> <li> Newid y gorchymyn trwy ychwanegu gofynion ychwanegol </li> <li> Pasiwch frawddeg wahanol ar gyfer y troseddau gwreiddiol; neu </li> <li> Anfonwch chi at y carchar </li> </ul> <p> <strong> NOTE </strong> <p> Naill ai chi neu'ch Swyddog Prawf all ofyn i'r llys edrych eto ar y gorchymyn hwn ac yna gall y llys ei newid neu ei ganslo os yw'n teimlo mai dyna'r peth iawn i'w wneud. Gall y llys hefyd basio brawddeg wahanol ar gyfer y trosedd (wyr) gwreiddiol. Os hoffech ofyn i'r llys edrych ar eich archeb eto dylech gysylltu â'r llys yn y cyfeiriad uchod. ";
+    private static final String STATIC_TEXT = "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment. If you<ul><li>Do not comply with the requirements of this order during the <u>supervision period</u>; or</li><li>Commit any other offence during the <u>operational period</u></li></ul>you may be liable to serve the <u>custodial period</u> in prison.<br/><br/><br/><p>For the duration of the <u>supervision period</u>, you will be supervised by your Probation Officer, and<br/>You must<ul><li>Keep in touch with your Probation Officer as they tell you</li><li>Tell your Probation Officer if you intend to change your address</li><li>Comply with all other requirements</li></ul><p><strong>Requirements</strong> – Please refer only to the requirements that the court has specified in the details of your order, <u>as set out above</u><p><strong>Unpaid Work Requirement</strong><p>You must carry out unpaid work for the hours specified as you are told and by the date specified in the order. Your Probation Officer will tell you who will be responsible for supervising work.<p><strong>Activity Requirement</strong><p>You must present yourself as directed at the time and on the days specified in the order and you must undertake the activity the court has specified for the duration specified in the order in the way you are told by your Probation Officer<p><strong>Programme Requirement</strong><p>You must participate in the programme specified in the order at the location specified and for the number of days specified in the order<p><strong>Prohibited Activity Requirement</strong><p>You must not take part in the activity that the court has prohibited in the order for the number of days the court specified<p><strong>Curfew Requirement</strong><p>You must remain in the place or places the court has specified during the periods specified. The curfew requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Exclusion Requirement</strong><p>You must not enter the place or places the court has specified between the hours specified in the order. The exclusion requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Residence Requirement</strong><p>You must live at the premises the court has specified and obey any rules that apply there for the number of days specified in the order. You may live at ???? with the prior approval of your Probation Officer.<p><strong>Foreign Travel Prohibition Requirement</strong><p>You must not travel to the prohibited location specified in the order during the period the court has specified in the order.<p><strong>Mental Health Treatment Requirement</strong><p>You must have mental health treatment by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Drug Rehabilitation Requirement</strong><p>You must have treatment for drug dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p>To be sure that you do not have any illegal drug in your body, you must provide samples for testing at such times or in such circumstances as your Probation Officer or the person responsible for your treatment will tell you. The results of tests on the samples will be sent to your Probation Officer who will report the results to the court. Your Probation Officer will also tell the court how your order is progressing and the views of your treatment provider.<p>The court will review this order ????. The first review will be on the date and time specified at the court specified.<p>You must / need not attend this review hearing.<p><strong>Alcohol Treatment Requirement</strong><p>You must have treatment for alcohol dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Supervision Requirement</strong><p>You must attend appointments with your Probation Officer or another person at the times and places your Probation Officer says.<p><strong>Attendance Centre Requirement</strong><p>You must attend an attendance centre - see separate sheet for details<p><strong>WARNING</strong><p>If you do not comply with your order, you will be brought back to court. The court may then<ul><li>Change the order by adding extra requirements</li><li>Pass a different sentence for the original offences; or</li><li>Send you to prison</li></ul><p><strong>NOTE</strong><p>Either you or your Probation Officer can ask the court to look again at this order and the court can then change it or cancel it if it feels that is the right thing to do. The court may also pass a different sentence for the original offence(s). If you wish to ask the court to look at your order again you should get in touch with the court at the address above.";
+    private static final String OFFENCE = "Offence";
 
     private TestTemplates() {
     }
@@ -199,8 +228,26 @@ public class TestTemplates {
         return generateNowsCommand;
     }
 
+    public static class FullNowsRequest {
+        private CreateNowsRequest createNowsRequest;
+        private List<Target> targets;
+
+        public CreateNowsRequest getCreateNowsRequest() {
+            return createNowsRequest;
+        }
+
+        public List<Target> getTargets() {
+            return targets;
+        }
+    }
+
     // still used by enforcement
     public static CreateNowsRequest generateNowsRequestTemplate(final UUID defendantId) {
+        return generateFullNowsRequestTemplate(defendantId).createNowsRequest;
+    }
+
+    // still used by enforcement
+    public static FullNowsRequest generateFullNowsRequestTemplate(final UUID defendantId) {
         final UUID caseId = UUID.randomUUID();
         final UUID offenceId = UUID.randomUUID();
         final UUID nowsTypeId = UUID.randomUUID();
@@ -214,8 +261,8 @@ public class TestTemplates {
         final UUID promptId11 = UUID.randomUUID();
         final UUID promptId20 = UUID.randomUUID();
         final UUID promptId21 = UUID.randomUUID();
-        final String promptLabel0 = "Imprisonment Duration";
-        final String promptLabel1 = "Prison";
+        final String promptLabel0 = IMPRISONMENT_DURATION;
+        final String promptLabel1 = PRISON;
 
         final Hearing hearing = customStructureInitiateHearingTemplate(toMap(caseId, toMap(defendantId, asList(offenceId)))).getHearing();
 
@@ -227,12 +274,13 @@ public class TestTemplates {
         final Map<UUID, String> promptReferenceMap = new HashMap<>();
         promptReferenceMap.put(promptId00, "FO");
 
-        hearing.setTargets(asList(targetTemplate(hearing.getId(), defendantId, offenceId,
+        final FullNowsRequest fullNowsRequest = new FullNowsRequest();
+        fullNowsRequest.targets = asList(targetTemplate(hearing.getId(), defendantId, offenceId,
                 asList(sharedResultLineId0, sharedResultLineId1, sharedResultLineId2),
                 resultDefinationMap)
-        ));
+        );
 
-        return CreateNowsRequest.createNowsRequest()
+        fullNowsRequest.createNowsRequest = CreateNowsRequest.createNowsRequest()
                 .withHearing(hearing)
                 .withSharedResultLines(asList(
                         SharedResultLine.sharedResultLine()
@@ -261,7 +309,7 @@ public class TestTemplates {
                                 .withProsecutionCaseId(caseId)
                                 .withDefendantId(defendantId)
                                 .withOffenceId(offenceId)
-                                .withLevel("DEFENDANT")
+                                .withLevel(DEFENDANT_LEVEL)
                                 .withLabel(IMPRISONMENT_LABEL)
                                 .withRank(BigDecimal.valueOf(2))
                                 .withPrompts(asList(
@@ -281,7 +329,7 @@ public class TestTemplates {
                                 .withProsecutionCaseId(caseId)
                                 .withDefendantId(defendantId)
                                 .withOffenceId(offenceId)
-                                .withLevel("OFFENCE")
+                                .withLevel(OFFENCE_LEVEL)
                                 .withLabel(IMPRISONMENT_LABEL)
                                 .withRank(BigDecimal.valueOf(3))
                                 .withPrompts(asList(
@@ -377,11 +425,11 @@ public class TestTemplates {
 
                 .withNowTypes(asList(NowType.nowType()
                                 .withId(nowsTypeId)
-                                .withTemplateName("SingleTemplate")
-                                .withDescription("Imprisonment Order")
+                                .withTemplateName(SINGLE_TEMPLATE_NAME)
+                                .withDescription(IMPRISONMENT_ORDER_DESCRIPTION)
                                 .withRank(1)
-                                .withStaticText("<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment. If you<ul><li>Do not comply with the requirements of this order during the <u>supervision period</u>; or</li><li>Commit any other offence during the <u>operational period</u></li></ul>you may be liable to serve the <u>custodial period</u> in prison.<br/><br/><br/><p>For the duration of the <u>supervision period</u>, you will be supervised by your Probation Officer, and<br/>You must<ul><li>Keep in touch with your Probation Officer as they tell you</li><li>Tell your Probation Officer if you intend to change your address</li><li>Comply with all other requirements</li></ul><p><strong>Requirements</strong> – Please refer only to the requirements that the court has specified in the details of your order, <u>as set out above</u><p><strong>Unpaid Work Requirement</strong><p>You must carry out unpaid work for the hours specified as you are told and by the date specified in the order. Your Probation Officer will tell you who will be responsible for supervising work.<p><strong>Activity Requirement</strong><p>You must present yourself as directed at the time and on the days specified in the order and you must undertake the activity the court has specified for the duration specified in the order in the way you are told by your Probation Officer<p><strong>Programme Requirement</strong><p>You must participate in the programme specified in the order at the location specified and for the number of days specified in the order<p><strong>Prohibited Activity Requirement</strong><p>You must not take part in the activity that the court has prohibited in the order for the number of days the court specified<p><strong>Curfew Requirement</strong><p>You must remain in the place or places the court has specified during the periods specified. The curfew requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Exclusion Requirement</strong><p>You must not enter the place or places the court has specified between the hours specified in the order. The exclusion requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Residence Requirement</strong><p>You must live at the premises the court has specified and obey any rules that apply there for the number of days specified in the order. You may live at ???? with the prior approval of your Probation Officer.<p><strong>Foreign Travel Prohibition Requirement</strong><p>You must not travel to the prohibited location specified in the order during the period the court has specified in the order.<p><strong>Mental Health Treatment Requirement</strong><p>You must have mental health treatment by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Drug Rehabilitation Requirement</strong><p>You must have treatment for drug dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p>To be sure that you do not have any illegal drug in your body, you must provide samples for testing at such times or in such circumstances as your Probation Officer or the person responsible for your treatment will tell you. The results of tests on the samples will be sent to your Probation Officer who will report the results to the court. Your Probation Officer will also tell the court how your order is progressing and the views of your treatment provider.<p>The court will review this order ????. The first review will be on the date and time specified at the court specified.<p>You must / need not attend this review hearing.<p><strong>Alcohol Treatment Requirement</strong><p>You must have treatment for alcohol dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Supervision Requirement</strong><p>You must attend appointments with your Probation Officer or another person at the times and places your Probation Officer says.<p><strong>Attendance Centre Requirement</strong><p>You must attend an attendance centre - see separate sheet for details<p><strong>WARNING</strong><p>If you do not comply with your order, you will be brought back to court. The court may then<ul><li>Change the order by adding extra requirements</li><li>Pass a different sentence for the original offences; or</li><li>Send you to prison</li></ul><p><strong>NOTE</strong><p>Either you or your Probation Officer can ask the court to look again at this order and the court can then change it or cancel it if it feels that is the right thing to do. The court may also pass a different sentence for the original offence(s). If you wish to ask the court to look at your order again you should get in touch with the court at the address above.")
-                                .withWelshStaticText("<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar. Os ydych <ul> <li> Peidiwch â chydymffurfio â gofynion y gorchymyn hwn yn ystod y cyfnod goruchwylio </u>; neu </li> <li> Ymrwymo unrhyw drosedd arall yn ystod y cyfnod gweithredol </u> </li> </ul> efallai y byddwch yn atebol i wasanaethu'r cyfnod gwarchodaeth </u> yn y carchar. <br/> <br/> <br/> <p> Yn ystod y cyfnod goruchwylio </u>, byddwch chi'n cael eich goruchwylio gan eich Swyddog Prawf, a <br/> Rhaid ichi <ul> < li> Cadwch mewn cysylltiad â'ch Swyddog Prawf wrth iddyn nhw ddweud wrthych </li> <li> Dywedwch wrth eich Swyddog Prawf os ydych yn bwriadu newid eich cyfeiriad </li> <li> Cydymffurfio â'r holl ofynion eraill </li></ul > <p> <strong> Gofynion </strong> - Cyfeiriwch yn unig at y gofynion a nododd y llys yn manylion eich archeb, fel y nodir uchod </u> <p> <strong> Gwaith Di-dāl Gofyniad </strong><p> Rhaid i chi wneud gwaith di-dāl am yr oriau a bennir fel y dywedir wrthych a chi erbyn y dyddiad a bennir yn y gorchymyn. Bydd eich Swyddog Prawf yn dweud wrthych pwy fydd yn gyfrifol am oruchwylio gwaith.<p> <strong> Gweithgaredd Gofyniad </strong> <p> Rhaid i chi gyflwyno eich hun fel y'i cyfarwyddir ar yr amser ac ar y diwrnodau a bennir yn y gorchymyn a rhaid i chi ymgymryd â chi y gweithgaredd y mae'r llys wedi ei nodi ar gyfer y cyfnod a bennir yn y drefn yn y ffordd y dywedir wrth eich Swyddog Prawf <p> <strong> Gofyniad Rhaglen </strong><p> Rhaid i chi gymryd rhan yn y rhaglen a bennir yn y drefn yn y lleoliad a bennir ac am y nifer o ddyddiau a bennir yn y gorchymyn <p> <strong> Gofyniad Gweithgaredd Gwahardd </strong> <p> Rhaid i chi beidio â chymryd rhan yn y gweithgaredd a waharddodd y llys yn y drefn ar gyfer nifer y dyddiau llys penodol <p> <strong> Curfew Requirement </strong> <p> Rhaid i chi aros yn y lle neu lle mae'r llys wedi nodi yn ystod y cyfnodau a bennir. Mae'r gofyniad cyrffyw yn para am y nifer o ddyddiau a bennir yn y<p> Gweler \"Darpariaeth Monitro Electronig\" yn yr orchymyn hwn <p> <strong> Gofyniad Preswyl </strong> <p> Rhaid i chi fyw yn yr adeilad y llys wedi nodi ac ufuddhau i unrhyw reolau sy'n berthnasol yno am y nifer o ddyddiau a bennir yn y gorchymyn. Efallai y byddwch yn byw yn ???? gyda chymeradwyaeth ymlaen llaw eich Swyddog Prawf. <p> <strong> Gofyniad Gwahardd Teithio Tramor </strong> <p> Rhaid i chi beidio â theithio i'r lleoliad gwaharddedig a bennir yn yr orchymyn yn ystod y cyfnod y mae'r llys wedi'i bennu yn y gorchymyn. < p> <strong> Gofyniad Triniaeth Iechyd Meddwl </strong> <p> Rhaid i chi gael triniaeth iechyd meddwl gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y <p> <strong> Angen Adsefydlu Cyffuriau </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar gyffuriau gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am nifer y dyddiau <p> Er mwyn sicrhau nad oes gennych unrhyw gyffur anghyfreithlon yn eich corff, rhaid i chi ddarparu samplau i'w profi ar yr adegau hynny neu mewn amgylchiadau o'r fath y bydd eich Swyddog Prawf neu'r person sy'n gyfrifol am eich triniaeth yn dweud wrthych chi . Anfonir canlyniadau'r profion ar y samplau i'ch Swyddog Prawf a fydd yn adrodd y canlyniadau i'r llys. Bydd eich Swyddog Prawf hefyd yn dweud wrth y llys sut mae'ch gorchymyn yn mynd rhagddo a barn eich darparwr triniaeth. <P> Bydd y llys yn adolygu'r gorchymyn hwn ????. Bydd yr adolygiad cyntaf ar y dyddiad a'r amser a bennir yn y llys a bennir. <P> Rhaid i chi / nid oes angen i chi fynychu'r gwrandawiad hwn. <P> <strong> Gofyniad Trin Alcohol </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar alcohol gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y gorchymyn. <p> <strong> Gofyniad Goruchwylio </strong> <p> Rhaid i chi fynychu penodiadau gyda'ch Swyddog Prawf neu berson arall ar yr adegau a lle mae eich Swyddog Prawf yn dweud. <p> <strong> Gofyniad y Ganolfan Bresennol </strong> <p> Rhaid i chi fynychu canolfan bresenoldeb - <p> <strong> RHYBUDD </strong> <p> Os na fyddwch chi'n cydymffurfio â'ch archeb, fe'ch cewch eich troi'n ôl i'r llys. Gall y llys wedyn <ul> <li> Newid y gorchymyn trwy ychwanegu gofynion ychwanegol </li> <li> Pasiwch frawddeg wahanol ar gyfer y troseddau gwreiddiol; neu </li> <li> Anfonwch chi at y carchar </li> </ul> <p> <strong> NOTE </strong> <p> Naill ai chi neu'ch Swyddog Prawf all ofyn i'r llys edrych eto ar y gorchymyn hwn ac yna gall y llys ei newid neu ei ganslo os yw'n teimlo mai dyna'r peth iawn i'w wneud. Gall y llys hefyd basio brawddeg wahanol ar gyfer y trosedd (wyr) gwreiddiol. Os hoffech ofyn i'r llys edrych ar eich archeb eto dylech gysylltu â'r llys yn y cyfeiriad uchod. ")
+                                .withStaticText(STATIC_TEXT)
+                                .withWelshStaticText(WELSH_STATIC_TEXT)
                                 .withPriority("0.5 hours")
                                 .withJurisdiction("B")
                                 .withRequiresBulkPrinting(false)
@@ -390,6 +438,7 @@ public class TestTemplates {
                         )
                 )
                 .build();
+        return fullNowsRequest;
     }
 
     public static CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate(final UUID hearingId) {
@@ -427,6 +476,13 @@ public class TestTemplates {
 
         defendant.setLegalEntityDefendant(legalEntityDefendant(defaultArguments()).build());
 
+        defendant.setPncId("pnc1234");
+
+        defendant.setAliases(Arrays.asList(DefendantAlias.defendantAlias()
+                .withFirstName("Steve")
+                .withLastName("Walsh")
+                .build()));
+
         return defendant;
     }
 
@@ -438,7 +494,7 @@ public class TestTemplates {
 
         return Verdict.verdict()
                 .withVerdictType(VerdictType.verdictType()
-                        .withVerdictTypeId(randomUUID())
+                        .withId(randomUUID())
                         .withCategory(STRING.next())
                         .withCategoryType(verdictCategoryType.name())
                         .withDescription(STRING.next())
@@ -502,6 +558,17 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand initiateHearingTemplateWithParam(UUID courtAndRoomId, int year, int month, int day) throws NoSuchAlgorithmException {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
+                                    .setDefendantType(PERSON)
+                                    .setHearingLanguage(ENGLISH)
+                                    .setJurisdictionType(CROWN)
+                                    .setMinimumAssociatedPerson(true)
+                                    .setMinimumDefenceOrganisation(true)
+                            ,courtAndRoomId, year, month, day).build());
+        }
+
         public static InitiateHearingCommand initiateHearingTemplateForDefendantTypeOrganisation() {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
@@ -510,6 +577,18 @@ public class TestTemplates {
                             .setJurisdictionType(CROWN)
                             .setMinimumAssociatedPerson(true)
                             .setMinimumDefenceOrganisation(true)
+                    ).build());
+        }
+
+        public static InitiateHearingCommand initiateHearingTemplateForCrownCourtOffenceCountNull() {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(ORGANISATION)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                            .setMinimumAssociatedPerson(true)
+                            .setMinimumDefenceOrganisation(true)
+                            .setOffenceWithNullCount()
                     ).build());
         }
 
@@ -558,7 +637,7 @@ public class TestTemplates {
                     .withHearingId(hearingId)
                     .withVerdicts(singletonList(Verdict.verdict()
                             .withVerdictType(VerdictType.verdictType()
-                                    .withVerdictTypeId(randomUUID())
+                                    .withId(randomUUID())
                                     .withCategory(STRING.next())
                                     .withCategoryType(verdictCategoryType.name())
                                     .withDescription(STRING.next())
@@ -601,7 +680,77 @@ public class TestTemplates {
             return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID());
         }
 
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
+            return saveDraftResultCommandTemplateForDeletedResult(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID());
+        }
+
         public static ResultLine.Builder standardResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
+            return ResultLine.resultLine()
+                    .withResultLineId(resultLineId)
+                    .withDelegatedPowers(
+                            DelegatedPowers.delegatedPowers()
+                                    .withUserId(UUID.randomUUID())
+                                    .withLastName(BOWIE)
+                                    .withFirstName(DAVID)
+                                    .build()
+                    )
+                    .withIsComplete(true)
+                    .withIsModified(true)
+                    .withIsDeleted(false)
+                    .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
+                    .withOrderedDate(orderedDate)
+                    .withResultLineId(UUID.randomUUID())
+                    .withResultLabel("imprisonment")
+                    .withSharedDate(LocalDate.now())
+                    .withResultDefinitionId(resultDefinitionId)
+                    .withPrompts(
+                            asList(
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withFixedListCode("fixedlistcode0")
+                                            .withId(UUID.randomUUID())
+                                            .withLabel("imprisonment term")
+                                            .withValue("6 years")
+                                            .withWelshValue("6 blynedd")
+                                            .build()
+                            )
+                    );
+
+        }
+
+        public static ResultLine.Builder standardResultLineTemplateForDeletedResult(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
+            return ResultLine.resultLine()
+                    .withResultLineId(resultLineId)
+                    .withDelegatedPowers(
+                            DelegatedPowers.delegatedPowers()
+                                    .withUserId(UUID.randomUUID())
+                                    .withLastName(BOWIE)
+                                    .withFirstName(DAVID)
+                                    .build()
+                    )
+                    .withIsComplete(true)
+                    .withIsModified(true)
+                    .withIsDeleted(true)
+                    .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
+                    .withOrderedDate(orderedDate)
+                    .withResultLineId(UUID.randomUUID())
+                    .withResultLabel("imprisonment")
+                    .withSharedDate(LocalDate.now())
+                    .withResultDefinitionId(resultDefinitionId)
+                    .withPrompts(
+                            asList(
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withFixedListCode("fixedlistcode0")
+                                            .withId(UUID.randomUUID())
+                                            .withLabel("imprisonment term")
+                                            .withValue("6 years")
+                                            .withWelshValue("6 blynedd")
+                                            .build()
+                            )
+                    );
+
+        }
+
+        public static ResultLine.Builder standardAmendedResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
                     .withDelegatedPowers(
@@ -619,6 +768,15 @@ public class TestTemplates {
                     .withResultLabel("imprisonment")
                     .withSharedDate(LocalDate.now())
                     .withResultDefinitionId(resultDefinitionId)
+                    .withAmendmentReason(STRING.next())
+                    .withAmendmentReasonId(randomUUID())
+                    .withApprovedDate(PAST_LOCAL_DATE.next())
+                    .withFourEyesApproval(DelegatedPowers.delegatedPowers()
+                            .withUserId(UUID.randomUUID())
+                            .withLastName(STRING.next())
+                            .withFirstName(STRING.next())
+                            .build())
+                    .withAmendmentDate(LocalDate.now())
                     .withPrompts(
                             asList(
                                     uk.gov.justice.core.courts.Prompt.prompt()
@@ -648,6 +806,39 @@ public class TestTemplates {
                     .build();
             return new SaveDraftResultCommand(target, null);
         }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand,
+                                                                                            final LocalDate orderedDate, final UUID resultLineId,
+                                                                                            final UUID resultDefinitionId) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final uk.gov.justice.core.courts.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+            final Offence offence0 = defendant0.getOffences().get(0);
+            final Target target = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult("draft results content")
+                    .withOffenceId(offence0.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplateForDeletedResult(resultLineId, resultDefinitionId, orderedDate).build()))
+                    .build();
+            return new SaveDraftResultCommand(target, null);
+        }
+
+        public static ApplicationDraftResultCommand applicationDraftResultCommandTemplate(final UUID hearingId) {
+            return ApplicationDraftResultCommand.applicationDraftResultCommand().setDraftResult("application draft result context")
+                    .setHearingId(hearingId)
+                    .setTargetId(UUID.randomUUID())
+                    .setApplicationId(UUID.randomUUID());
+        }
+
+        public static ApplicationDraftResultCommand applicationDraftResultWithOutcomeCommandTemplate(final UUID hearingId, final UUID applicationId, final CourtApplicationOutcomeType applicationOutCome) {
+            return ApplicationDraftResultCommand.applicationDraftResultCommand().setDraftResult("application draft result context")
+                    .setHearingId(hearingId)
+                    .setTargetId(UUID.randomUUID())
+                    .setApplicationId(applicationId)
+                    .setApplicationOutcomeType(applicationOutCome)
+                    .setApplicationOutcomeDate(LocalDate.now());
+        }
     }
 
     public static class ShareResultsCommandTemplates {
@@ -657,8 +848,8 @@ public class TestTemplates {
         public static ShareResultsCommand basicShareResultsCommandTemplate() {
 
             return ShareResultsCommand.shareResultsCommand()
-                    .setCourtClerk(uk.gov.justice.core.courts.CourtClerk.courtClerk()
-                            .withId(randomUUID())
+                    .setCourtClerk(DelegatedPowers.delegatedPowers()
+                            .withUserId(randomUUID())
                             .withFirstName(STRING.next())
                             .withLastName(STRING.next())
                             .build());
@@ -680,8 +871,8 @@ public class TestTemplates {
             return CompletedResultLineStatus.builder()
                     .withId(resultLineId)
                     .withLastSharedDateTime(startDateTime)
-                    .withCourtClerk(uk.gov.justice.core.courts.CourtClerk.courtClerk()
-                            .withId(randomUUID())
+                    .withCourtClerk(DelegatedPowers.delegatedPowers()
+                            .withUserId(randomUUID())
                             .withFirstName(STRING.next())
                             .withLastName(STRING.next())
                             .build())
@@ -725,7 +916,6 @@ public class TestTemplates {
                             .map(offenceId -> Offence.offence()
                                     .withArrestDate(PAST_LOCAL_DATE.next())
                                     .withChargeDate(PAST_LOCAL_DATE.next())
-                                    //.withConvictionDate(PAST_LOCAL_DATE.next())
                                     .withCount(INTEGER.next())
                                     .withEndDate(PAST_LOCAL_DATE.next())
                                     .withId(offenceId)
@@ -745,8 +935,8 @@ public class TestTemplates {
                                     .withOffenceCode(STRING.next())
                                     .withOffenceDefinitionId(randomUUID())
                                     .withOffenceFacts(uk.gov.justice.core.courts.OffenceFacts.offenceFacts()
-                                            .withAlcoholReadingAmount(STRING.next())
-                                            .withAlcoholReadingMethod(STRING.next())
+                                            .withAlcoholReadingAmount(INTEGER.next())
+                                            .withAlcoholReadingMethodCode(STRING.next())
                                             .withVehicleRegistration(STRING.next())
                                             .build())
                                     .withOffenceLegislation(STRING.next())
@@ -940,6 +1130,43 @@ public class TestTemplates {
         }
     }
 
+    public static class AddApplicantCounselCommandTemplates {
+        private AddApplicantCounselCommandTemplates() {
+        }
+
+        public static AddApplicantCounsel addApplicantCounselCommandTemplate(final UUID hearingId) {
+            ApplicantCounsel applicantCounsel = new ApplicantCounsel(
+                    Arrays.asList(UUID.randomUUID()),
+                    Arrays.asList(LocalDate.now()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    STRING.next(),
+                    STRING.next(),
+                    STRING.next()
+            );
+            return new AddApplicantCounsel(applicantCounsel, hearingId);
+        }
+
+        public static AddApplicantCounsel addApplicantCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
+            ApplicantCounsel applicantCounsel = new ApplicantCounsel(
+                    Arrays.asList(UUID.randomUUID()),
+                    Arrays.asList(LocalDate.now()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    null,
+                    STRING.next(),
+                    STRING.next()
+            );
+            return new AddApplicantCounsel(applicantCounsel, hearingId);
+        }
+
+        public static AddApplicantCounsel addApplicantCounselCommandTemplate(final UUID hearingId, ApplicantCounsel applicantCounsel) {
+            return new AddApplicantCounsel(applicantCounsel, hearingId);
+        }
+    }
+
     public static class UpdateProsecutionCounselCommandTemplates {
         private UpdateProsecutionCounselCommandTemplates() {
         }
@@ -962,6 +1189,30 @@ public class TestTemplates {
             return new UpdateProsecutionCounsel(hearingId, prosecutionCounsel);
         }
     }
+
+    public static class UpdateApplicantCounselCommandTemplates {
+        private UpdateApplicantCounselCommandTemplates() {
+        }
+
+        public static UpdateApplicantCounsel updateApplicantCounselCommandTemplate(final UUID hearingId) {
+            ApplicantCounsel applicantCounsel = new ApplicantCounsel(
+                    Arrays.asList(UUID.randomUUID()),
+                    Arrays.asList(LocalDate.now()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    null,
+                    STRING.next(),
+                    STRING.next()
+            );
+            return new UpdateApplicantCounsel(applicantCounsel, hearingId);
+        }
+
+        public static UpdateApplicantCounsel updateApplicantCounselCommandTemplate(final UUID hearingId, ApplicantCounsel applicantCounsel) {
+            return new UpdateApplicantCounsel(applicantCounsel, hearingId);
+        }
+    }
+
 
     public static class NowDefinitionTemplates {
         private NowDefinitionTemplates() {
@@ -1149,4 +1400,545 @@ public class TestTemplates {
                             .build());
         }
     }
+
+    public static CreateNowsRequest generateNowsRequestTemplate(final UUID defendantId, final JurisdictionType jurisdictionType, boolean convicted) {
+        return generateNowsRequestTemplate(defendantId, jurisdictionType, convicted, false);
+    }
+
+    public static CreateNowsRequest generateNowsRequestTemplate(final UUID defendantId, final JurisdictionType jurisdictionType, boolean convicted, boolean remotePrintingRequired) {
+        final UUID caseId = UUID.randomUUID();
+        final UUID offenceId = UUID.randomUUID();
+        final UUID nowsTypeId = UUID.randomUUID();
+        final UUID materialId = UUID.randomUUID();
+        final UUID sharedResultLineId0 = UUID.randomUUID();
+        final UUID sharedResultLineId1 = UUID.randomUUID();
+        final UUID sharedResultLineId2 = UUID.randomUUID();
+        final UUID promptId00 = UUID.randomUUID();
+        final UUID promptId01 = UUID.randomUUID();
+        final UUID promptId10 = UUID.randomUUID();
+        final UUID promptId11 = UUID.randomUUID();
+        final UUID promptId20 = UUID.randomUUID();
+        final UUID promptId21 = UUID.randomUUID();
+        final String promptLabel0 = IMPRISONMENT_DURATION;
+        final String promptLabel1 = PRISON;
+        final LocalDate orderedDate = LocalDate.of(2012, 11, 11);
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withFirstName(DAVID)
+                .withLastName(BOWIE)
+                .withUserId(UUID.randomUUID())
+                .build();
+
+        final Hearing hearing = CoreTestTemplates.hearing(defaultArguments()
+                .setJurisdictionType(jurisdictionType)
+                .setStructure(toMap(caseId, toMap(defendantId, singletonList(offenceId))))
+                .setConvicted(convicted))
+                .build();
+
+        final String templateName = STRING.next();
+        return CreateNowsRequest.createNowsRequest()
+                .withHearing(hearing)
+                .withCourtClerk(courtClerk)
+                .withSharedResultLines(Arrays.asList(
+                        SharedResultLine.sharedResultLine()
+                                .withId(sharedResultLineId0)
+                                .withProsecutionCaseId((caseId))
+                                .withDefendantId((defendantId))
+                                .withOffenceId((offenceId))
+                                .withLevel("CASE")
+                                .withLabel(IMPRISONMENT_LABEL)
+                                .withRank((BigDecimal.ONE))
+                                .withOrderedDate((orderedDate))
+                                .withCourtClerk(courtClerk)
+                                .withIsAvailableForCourtExtract(true)
+                                .withPrompts(Arrays.asList(
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId00)
+                                                .withLabel(promptLabel0)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(IMPRISONMENT_DURATION_VALUE).build(),
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId01)
+                                                .withLabel(promptLabel1)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(WORMWOOD_SCRUBS_VALUE).build()
+                                        )
+                                ).build(),
+                        SharedResultLine.sharedResultLine()
+                                .withId(sharedResultLineId1)
+                                .withProsecutionCaseId((caseId))
+                                .withDefendantId((defendantId))
+                                .withOffenceId((offenceId))
+                                .withLevel(DEFENDANT_LEVEL)
+                                .withLabel(IMPRISONMENT_LABEL)
+                                .withRank((BigDecimal.valueOf(2)))
+                                .withOrderedDate((orderedDate))
+                                .withCourtClerk(courtClerk)
+                                .withIsAvailableForCourtExtract(true)
+                                .withPrompts(Arrays.asList(
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId10)
+                                                .withLabel(promptLabel0)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(IMPRISONMENT_DURATION_VALUE).build(),
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId11)
+                                                .withLabel(promptLabel1)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(WORMWOOD_SCRUBS_VALUE).build()
+                                        )
+                                ).build(),
+                        SharedResultLine.sharedResultLine()
+                                .withId(sharedResultLineId2)
+                                .withProsecutionCaseId((caseId))
+                                .withDefendantId((defendantId))
+                                .withOffenceId((offenceId))
+                                .withLevel(OFFENCE_LEVEL)
+                                .withLabel(IMPRISONMENT_LABEL)
+                                .withRank((BigDecimal.valueOf(3)))
+                                .withOrderedDate((orderedDate))
+                                .withCourtClerk(courtClerk)
+                                .withIsAvailableForCourtExtract(true)
+                                .withPrompts(Arrays.asList(
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId20)
+                                                .withLabel(promptLabel0)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(IMPRISONMENT_DURATION_VALUE).build(),
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId21)
+                                                .withLabel(promptLabel1)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(WORMWOOD_SCRUBS_VALUE).build()
+                                        )
+                                ).build()
+
+                ))
+                .withNows(singletonList(Now.now()
+                        .withId(UUID.randomUUID())
+                        .withNowsTypeId(nowsTypeId)
+                        .withDefendantId(defendantId)
+                        .withDocumentationLanguage(DocumentationLanguage.ENGLISH)
+                        .withRequestedMaterials(singletonList(
+                                NowVariant.nowVariant()
+                                        .withMaterialId(materialId)
+                                        .withIsAmended((true))
+                                        .withTemplateName(templateName)
+                                        .withStatus(STRING.next())
+                                        .withDescription(STRING.next())
+                                        .withKey(NowVariantKey.nowVariantKey()
+                                                .withDefendantId(defendantId)
+                                                .withHearingId(hearing.getId())
+                                                .withNowsTypeId(nowsTypeId)
+                                                .withUsergroups(Arrays.asList("Listing Officers", "Crown Court Admin"))
+                                                .build())
+                                        .withNowResults(Arrays.asList(
+                                                NowVariantResult.nowVariantResult()
+                                                        .withSharedResultId(sharedResultLineId0)
+                                                        .withSequence(1)
+                                                        .withPromptRefs(Arrays.asList(promptId00, promptId01))
+                                                        .build(),
+                                                NowVariantResult.nowVariantResult()
+                                                        .withSharedResultId(sharedResultLineId1)
+                                                        .withSequence(1)
+                                                        .withPromptRefs(Arrays.asList(promptId10, promptId11)
+                                                        ).build(),
+                                                NowVariantResult.nowVariantResult()
+                                                        .withSharedResultId(sharedResultLineId2)
+                                                        .withSequence(1)
+                                                        .withPromptRefs(Arrays.asList(promptId20, promptId01)
+                                                        ).build()
+                                        ))
+                                        .withNowVariantAddressee(
+                                                NowVariantAddressee.nowVariantAddressee()
+                                                        .withAddress(Address.address()
+                                                                .withAddress1(STRING.next())
+                                                                .build())
+                                                        .withName(STRING.next())
+                                                        .build())
+                                        .withNowVariantDefendant(NowVariantDefendant.nowVariantDefendant()
+                                                .withName(STRING.next())
+                                                .withDateOfBirth(LocalDate.of(1977, 12, 12))
+                                                .withAddress(Address.address()
+                                                        .withAddress1(STRING.next())
+                                                        .build())
+                                                .build())
+                                        .withIsRemotePrintingRequired(remotePrintingRequired)
+                                        .build()
+                        ))
+
+                        .withLjaDetails(LjaDetails.ljaDetails()
+                                .withLjaCode(STRING.next())
+                                .withLjaName(STRING.next())
+                                .withAccountDivisionCode(STRING.next())
+                                .withBacsAccountNumber(STRING.next())
+                                .withBacsBankName(STRING.next())
+                                .withBacsSortCode(STRING.next())
+                                .withEnforcementAddress(Address.address()
+                                        .withAddress1(STRING.next())
+                                        .build())
+                                .withEnforcementEmail(STRING.next() + "@gmail.com")
+                                .withEnforcementPhoneNumber(STRING.next())
+                                .build())
+                        .build()))
+                .withNowTypes(singletonList(NowType.nowType()
+                                .withId(nowsTypeId)
+                                .withTemplateName(SINGLE_TEMPLATE_NAME)
+                                .withDescription(IMPRISONMENT_ORDER_DESCRIPTION)
+                                .withRank(1)
+                                .withRequiresEnforcement(true)
+                                .withRequiresBulkPrinting(true)
+                                .withStaticText(STATIC_TEXT)
+                                .withWelshStaticText(WELSH_STATIC_TEXT)
+                                .withPriority(("30"))
+                                .withJurisdiction("B")
+                                .build()
+                        )
+                )
+                .build();
+    }
+
+    public static CreateNowsRequest generateNowsRequestTemplateWithConditionalText(final UUID defendantId, final JurisdictionType jurisdictionType, boolean convicted) {
+        final UUID caseId = UUID.randomUUID();
+        final UUID offenceId1 = UUID.randomUUID();
+        final UUID offenceId2 = UUID.randomUUID();
+        final UUID nowsTypeId = UUID.randomUUID();
+        final UUID materialId = UUID.randomUUID();
+        final UUID sharedResultLineId0 = UUID.randomUUID();
+        final UUID sharedResultLineId1 = UUID.randomUUID();
+        final UUID sharedResultLineId2 = UUID.randomUUID();
+        final UUID sharedResultLineId3 = UUID.randomUUID();
+        final UUID promptId00 = UUID.randomUUID();
+        final UUID promptId01 = UUID.randomUUID();
+        final UUID promptId10 = UUID.randomUUID();
+        final UUID promptId11 = UUID.randomUUID();
+        final UUID promptId20 = UUID.randomUUID();
+        final UUID promptId21 = UUID.randomUUID();
+        final String promptLabel0 = IMPRISONMENT_DURATION;
+        final String promptLabel1 = PRISON;
+        final LocalDate orderedDate = LocalDate.of(2012, 11, 11);
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers()
+                .withFirstName(DAVID)
+                .withLastName(BOWIE)
+                .withUserId(UUID.randomUUID())
+                .build();
+
+        final Hearing hearing = CoreTestTemplates.hearing(defaultArguments()
+                .setJurisdictionType(jurisdictionType)
+                .setStructure(toMap(caseId, toMap(defendantId, Arrays.asList(offenceId1))))
+                .setConvicted(convicted))
+                .build();
+
+        final String templateName = "NoticeOrderWarrants";
+        final String offence = OFFENCE;
+        return CreateNowsRequest.createNowsRequest()
+                .withHearing(hearing)
+                .withCourtClerk(courtClerk)
+                .withSharedResultLines(Arrays.asList(
+                        SharedResultLine.sharedResultLine()
+                                .withId(sharedResultLineId0)
+                                .withProsecutionCaseId((caseId))
+                                .withDefendantId((defendantId))
+                                .withOffenceId((offenceId1))
+                                .withLevel("CASE")
+                                .withLabel(IMPRISONMENT_LABEL)
+                                .withRank((BigDecimal.ONE))
+                                .withOrderedDate((orderedDate))
+                                .withCourtClerk(courtClerk)
+                                .withIsAvailableForCourtExtract(true)
+                                .withPrompts(Arrays.asList(
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId00)
+                                                .withLabel(promptLabel0)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(IMPRISONMENT_DURATION_VALUE).build(),
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId01)
+                                                .withLabel(promptLabel1)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(WORMWOOD_SCRUBS_VALUE).build()
+                                        )
+                                ).build(),
+                        SharedResultLine.sharedResultLine()
+                                .withId(sharedResultLineId1)
+                                .withProsecutionCaseId((caseId))
+                                .withDefendantId((defendantId))
+                                .withOffenceId((offenceId1))
+                                .withLevel(DEFENDANT_LEVEL)
+                                .withLabel(IMPRISONMENT_LABEL)
+                                .withRank((BigDecimal.valueOf(2)))
+                                .withOrderedDate((orderedDate))
+                                .withCourtClerk(courtClerk)
+                                .withIsAvailableForCourtExtract(true)
+                                .withPrompts(Arrays.asList(
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId10)
+                                                .withLabel(promptLabel0)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(IMPRISONMENT_DURATION_VALUE).build(),
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId11)
+                                                .withLabel(promptLabel1)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(WORMWOOD_SCRUBS_VALUE).build()
+                                        )
+                                ).build(),
+                        SharedResultLine.sharedResultLine()
+                                .withId(sharedResultLineId2)
+                                .withProsecutionCaseId((caseId))
+                                .withDefendantId((defendantId))
+                                .withOffenceId((offenceId1))
+                                .withLevel(offence)
+                                .withLabel(IMPRISONMENT_LABEL)
+                                .withRank((BigDecimal.valueOf(3)))
+                                .withOrderedDate((orderedDate))
+                                .withCourtClerk(courtClerk)
+                                .withIsAvailableForCourtExtract(true)
+                                .withPrompts(Arrays.asList(
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId20)
+                                                .withLabel(promptLabel0)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(IMPRISONMENT_DURATION_VALUE).build(),
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId21)
+                                                .withLabel(promptLabel1)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(WORMWOOD_SCRUBS_VALUE).build()
+                                        )
+                                ).build(),
+                        SharedResultLine.sharedResultLine()
+                                .withId(sharedResultLineId3)
+                                .withProsecutionCaseId((caseId))
+                                .withDefendantId((defendantId))
+                                .withOffenceId((offenceId2))
+                                .withLevel(offence)
+                                .withLabel(IMPRISONMENT_LABEL)
+                                .withRank((BigDecimal.valueOf(3)))
+                                .withOrderedDate((orderedDate))
+                                .withCourtClerk(courtClerk)
+                                .withIsAvailableForCourtExtract(true)
+                                .withPrompts(Arrays.asList(
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId20)
+                                                .withLabel(promptLabel0)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(IMPRISONMENT_DURATION_VALUE).build(),
+                                        ResultPrompt.resultPrompt()
+                                                .withId(promptId21)
+                                                .withLabel(promptLabel1)
+                                                .withIsAvailableForCourtExtract(true)
+                                                .withValue(WORMWOOD_SCRUBS_VALUE).build()
+                                        )
+                                ).build()
+                ))
+                .withNows(singletonList(Now.now()
+                        .withId(UUID.randomUUID())
+                        .withNowsTypeId(nowsTypeId)
+                        .withDefendantId(defendantId)
+                        .withDocumentationLanguage(DocumentationLanguage.ENGLISH)
+                        .withFinancialOrders(FinancialOrderDetails.financialOrderDetails()
+                                .withAccountReference(STRING.next())
+                                .withIsCrownCourt(true)
+                                .withTotalAmountImposed(STRING.next())
+                                .withTotalBalance(STRING.next())
+                                .withPaymentTerms(STRING.next())
+                                .build())
+                        .withRequestedMaterials(singletonList(
+                                NowVariant.nowVariant()
+                                        .withMaterialId(materialId)
+                                        .withIsAmended((true))
+                                        .withTemplateName(templateName)
+                                        .withStatus(STRING.next())
+                                        .withDescription(STRING.next())
+                                        .withKey(NowVariantKey.nowVariantKey()
+                                                .withDefendantId(defendantId)
+                                                .withHearingId(hearing.getId())
+                                                .withNowsTypeId(nowsTypeId)
+                                                .withUsergroups(Arrays.asList("Listing Officers", "Crown Court Admin"))
+                                                .build())
+                                        .withNowResults(Arrays.asList(
+                                                NowVariantResult.nowVariantResult()
+                                                        .withSharedResultId(sharedResultLineId0)
+                                                        .withSequence(1)
+                                                        .withPromptRefs(Arrays.asList(promptId00, promptId01))
+                                                        .build(),
+                                                NowVariantResult.nowVariantResult()
+                                                        .withSharedResultId(sharedResultLineId1)
+                                                        .withSequence(1)
+                                                        .withPromptRefs(Arrays.asList(promptId10, promptId11))
+                                                        .build(),
+                                                NowVariantResult.nowVariantResult()
+                                                        .withSharedResultId(sharedResultLineId2)
+                                                        .withSequence(1)
+                                                        .withPromptRefs(Arrays.asList(promptId20, promptId01))
+                                                        .withNowVariantResultText((NowVariantResultText
+                                                                .nowVariantResultText()
+                                                                .withAdditionalProperty("ABCD", "1234")
+                                                                .withAdditionalProperty("1234", "ABCD")
+                                                                .build()))
+                                                        .build(),
+                                                NowVariantResult.nowVariantResult()
+                                                        .withSharedResultId(sharedResultLineId3)
+                                                        .withSequence(1)
+                                                        .withPromptRefs(Arrays.asList(promptId20, promptId01))
+                                                        .withNowVariantResultText((NowVariantResultText
+                                                                .nowVariantResultText()
+                                                                .withAdditionalProperty("ABCD", "1234")
+                                                                .withAdditionalProperty("1234", "ABCD")
+                                                                .build()))
+                                                        .build()
+                                        ))
+                                        .withNowVariantAddressee(
+                                                NowVariantAddressee.nowVariantAddressee()
+                                                        .withAddress(Address.address()
+                                                                .withAddress1(STRING.next())
+                                                                .build())
+                                                        .withName(STRING.next())
+                                                        .build())
+                                        .withNowVariantDefendant(NowVariantDefendant.nowVariantDefendant()
+                                                .withName(STRING.next())
+                                                .withDateOfBirth(LocalDate.of(1977, 01, 01))
+                                                .withAddress(Address.address()
+                                                        .withAddress1(STRING.next())
+                                                        .build())
+                                                .build())
+                                        .withIsRemotePrintingRequired(BOOLEAN.next())
+                                        .build()
+                        ))
+
+                        .withLjaDetails(LjaDetails.ljaDetails()
+                                .withLjaCode(STRING.next())
+                                .withLjaName(STRING.next())
+                                .withAccountDivisionCode(STRING.next())
+                                .withBacsAccountNumber(STRING.next())
+                                .withBacsBankName(STRING.next())
+                                .withBacsSortCode(STRING.next())
+                                .withEnforcementAddress(Address.address()
+                                        .withAddress1(STRING.next())
+                                        .build())
+                                .withEnforcementEmail(STRING.next() + "@gmail.com")
+                                .withEnforcementPhoneNumber(STRING.next())
+                                .build())
+                        .build()))
+                .withNowTypes(singletonList(NowType.nowType()
+                                .withId(nowsTypeId)
+                                .withTemplateName(SINGLE_TEMPLATE_NAME)
+                                .withDescription(IMPRISONMENT_ORDER_DESCRIPTION)
+                                .withRank(1)
+                                .withRequiresEnforcement(true)
+                                .withRequiresBulkPrinting(true)
+                                .withStaticText(STATIC_TEXT)
+                                .withWelshStaticText(WELSH_STATIC_TEXT)
+                                .withPriority(("30"))
+                                .withJurisdiction("B")
+                                .build()
+                        )
+                )
+                .build();
+    }
+
+    public static class AddRespondentCounselCommandTemplates {
+        private AddRespondentCounselCommandTemplates() {
+        }
+
+        public static AddRespondentCounsel addRespondentCounselCommandTemplate(final UUID hearingId) {
+            final RespondentCounsel respondentCounsel = new RespondentCounsel(
+                    Arrays.asList(LocalDate.now()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    STRING.next(),
+                    Arrays.asList(UUID.randomUUID()),
+                    STRING.next(),
+                    STRING.next()
+            );
+            return new AddRespondentCounsel(hearingId, respondentCounsel);
+        }
+
+        public static AddRespondentCounsel addRespondentCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
+            final RespondentCounsel respondentCounsel = new RespondentCounsel(
+                    Arrays.asList(LocalDate.now()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    null,
+                    Arrays.asList(UUID.randomUUID()),
+                    STRING.next(),
+                    STRING.next()
+            );
+            return new AddRespondentCounsel(hearingId, respondentCounsel);
+        }
+
+        public static AddRespondentCounsel addRespondentCounselCommandTemplate(final UUID hearingId, RespondentCounsel respondentCounsel) {
+            return new AddRespondentCounsel(hearingId, respondentCounsel);
+        }
+    }
+
+    public static class UpdateRespondentCounselCommandTemplates {
+        private UpdateRespondentCounselCommandTemplates() {
+        }
+
+        public static UpdateRespondentCounsel updateRespondentCounselCommandTemplate(final UUID hearingId) {
+            final RespondentCounsel respondentCounsel = new RespondentCounsel(
+                    Arrays.asList(LocalDate.now()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    STRING.next(),
+                    Arrays.asList(UUID.randomUUID()),
+                    STRING.next(),
+                    STRING.next()
+            );
+            return new UpdateRespondentCounsel(hearingId, respondentCounsel);
+        }
+
+        public static UpdateRespondentCounsel updateRespondentCounselCommandTemplate(final UUID hearingId, RespondentCounsel respondentCounsel) {
+            return new UpdateRespondentCounsel(hearingId, respondentCounsel);
+        }
+    }
+
+    public static class AddCompanyRepresentativeCommandTemplates {
+        private AddCompanyRepresentativeCommandTemplates() {
+        }
+
+        public static AddCompanyRepresentative addCompanyRepresentativeCommandTemplate(final UUID hearingId) {
+            final CompanyRepresentative companyRepresentative = new CompanyRepresentative(
+                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(UUID.randomUUID()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    Position.DIRECTOR,
+                    STRING.next()
+            );
+            return new AddCompanyRepresentative(companyRepresentative, hearingId);
+        }
+
+        public static AddCompanyRepresentative addCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
+            return new AddCompanyRepresentative(companyRepresentative, hearingId);
+        }
+    }
+
+    public static class UpdateCompanyRepresentativeCommandTemplates {
+        private UpdateCompanyRepresentativeCommandTemplates() {
+        }
+
+        public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId) {
+            final CompanyRepresentative companyRepresentative = new CompanyRepresentative(
+                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(UUID.randomUUID()),
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    Position.DIRECTOR,
+                    STRING.next()
+            );
+            return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
+        }
+
+        public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
+            return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
+        }
+    }
+
 }

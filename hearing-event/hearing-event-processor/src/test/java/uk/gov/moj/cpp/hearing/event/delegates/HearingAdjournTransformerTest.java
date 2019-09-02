@@ -22,6 +22,7 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -32,9 +33,7 @@ import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingResultDefinition;
 import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.HearingTypeReverseLookup;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,7 +56,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingAdjournTransformerTest {
-
     @Mock
     private HearingTypeReverseLookup hearingTypeReverseLookup;
 
@@ -73,10 +73,28 @@ public class HearingAdjournTransformerTest {
     }
 
     @Test
-    public void transform() {
+    public void transformProsecutionCase() {
+        transform(rs -> {
+        }, true, true);
+    }
+
+    @Test
+    public void transformApplicationOnly() {
+        transform(rs -> {
+        }, false, true);
+    }
+
+    @Test
+    public void transformLinkedApplicationDoNotHavingOffenceResult() {
+        transform(rs -> rs.getTargets().get(0).setOffenceId(null), true, true);
+    }
+
+    private void transform(final Consumer<ResultsShared> resultSharedModifier, boolean hasProsecutionCase,
+                           boolean hasApplications) {
         final ResultsShared resultsShared = getArbitrarySharedResultWithNextHearingResult();
+        resultSharedModifier.accept(resultsShared);
         final Hearing hearing = resultsShared.getHearing();
-        final Target firstTarget = hearing.getTargets().get(0);
+        final Target firstTarget = resultsShared.getTargets().get(0);
 
         Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions = new HashMap<>();
 
@@ -135,10 +153,10 @@ public class HearingAdjournTransformerTest {
 
         final ResultLine resultLineStartDate = firstTarget.getResultLines().get(1);
         final Prompt promptStartDate = resultLineStartDate.getPrompts().get(0);
-        final LocalDateTime startDate = LocalDateTime.of(1972, 12, 05, 11, 23, 00);
-        promptStartDate.setValue(startDate.format(DateTimeFormatter.ofPattern(HearingAdjournTransformer.DATE_FORMAT)));
-        final Prompt promptStartTime = resultLineStartDate.getPrompts().stream().filter(p->p.getLabel().toLowerCase().startsWith("time")).findFirst().orElse(null);
-        promptStartTime.setValue(startDate.format(DateTimeFormatter.ofPattern(HearingAdjournTransformer.TIME_FORMAT)));
+        final LocalDateTime startDate = LocalDateTime.of(2019, 01, 12, 19, 35, 00);
+        promptStartDate.setValue(startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        final Prompt promptStartTime = resultLineStartDate.getPrompts().stream().filter(p -> p.getLabel().toLowerCase().startsWith("time")).findFirst().orElse(null);
+        promptStartTime.setValue(startDate.format(DateTimeFormatter.ofPattern("HH:mm")));
 
         final NextHearingPrompt startDatePromptReference = new NextHearingPrompt(promptStartDate.getId(), NextHearingPromptReference.HDATE.name());
         final NextHearingResultDefinition startDateResultDefinition = new NextHearingResultDefinition(resultLineStartDate.getResultDefinitionId(), startDatePromptReference);
@@ -149,13 +167,17 @@ public class HearingAdjournTransformerTest {
         Assert.assertEquals(hearing.getId(), hearingAdjourned.getAdjournedHearing());
         Assert.assertEquals(1, hearingAdjourned.getNextHearings().size());
         final NextHearing nextHearing = hearingAdjourned.getNextHearings().get(0);
-        Assert.assertEquals(1, nextHearing.getNextHearingProsecutionCases().size());
+        if (hasProsecutionCase) {
+            Assert.assertEquals(1, nextHearing.getNextHearingProsecutionCases().size());
+        }
         Assert.assertEquals(hearingType, nextHearing.getType());
 
         // need to check the court room
         // need to check the court centre
 
-        Assert.assertEquals(1, nextHearing.getNextHearingProsecutionCases().get(0).getDefendants().size());
+        if (hasProsecutionCase) {
+            Assert.assertEquals(1, nextHearing.getNextHearingProsecutionCases().get(0).getDefendants().size());
+        }
 
         final CourtCentre courtCentre = nextHearing.getCourtCentre();
         final Address courtCentreAddress = courtCentre.getAddress();
@@ -172,7 +194,7 @@ public class HearingAdjournTransformerTest {
         Assert.assertEquals(courtCentreAddress.getAddress5(), courtcentreOrganisationunits.getAddress5());
 
         Assert.assertEquals(601, nextHearing.getEstimatedMinutes().intValue());
-        Assert.assertEquals(ZonedDateTime.of(startDate, ZoneId.systemDefault()), nextHearing.getEarliestStartDateTime());
+        Assert.assertEquals(ZonedDateTimes.fromString(ZonedDateTime.of(startDate, ZoneId.systemDefault()).toString()), nextHearing.getListedStartDateTime());
 
         final NextHearingProsecutionCase nextHearingProsecutionCase = nextHearing.getNextHearingProsecutionCases().get(0);
         Assert.assertEquals(hearing.getProsecutionCases().get(0).getId(), nextHearingProsecutionCase.getId());
@@ -180,9 +202,10 @@ public class HearingAdjournTransformerTest {
         final Defendant defendant = hearing.getProsecutionCases().get(0).getDefendants().get(0);
 
         Assert.assertEquals(defendant.getId(), nextHearingDefendant.getId());
-
         Assert.assertEquals(defendant.getOffences().size(), nextHearingDefendant.getOffences().size());
         Assert.assertEquals(defendant.getOffences().get(0).getId(), nextHearingDefendant.getOffences().get(0).getId());
+        Assert.assertEquals(hearing.getCourtApplications().stream().map(app -> app.getId()).collect(Collectors.toSet()),
+                nextHearing.getNextHearingCourtApplicationId().stream().collect(Collectors.toSet()));
 
     }
 

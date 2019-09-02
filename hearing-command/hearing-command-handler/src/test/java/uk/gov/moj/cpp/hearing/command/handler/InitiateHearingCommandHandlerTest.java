@@ -6,6 +6,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -25,6 +26,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.verdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -52,19 +54,23 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedVerdictCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
@@ -76,14 +82,18 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -98,10 +108,12 @@ public class InitiateHearingCommandHandlerTest {
             RegisteredHearingAgainstDefendant.class,
             RegisteredHearingAgainstOffence.class,
             RegisteredHearingAgainstCase.class,
-            InheritedVerdictAdded.class
+            InheritedVerdictAdded.class,
+            RegisteredHearingAgainstApplication.class,
+            HearingExtended.class
     );
     @Mock
-    private EventStream hearingEventStream;
+    private EventStream hearingEventStream, applicationEventStream;
     @Mock
     private EventStream offenceEventStream;
     @Mock
@@ -126,11 +138,61 @@ public class InitiateHearingCommandHandlerTest {
     }
 
     @Test
+    public void extendHearing() throws Throwable {
+        extendHearing((h) -> {
+        });
+    }
+
+    @Test
+    public void extendHearingNullInitialApplications() throws Throwable {
+
+        extendHearing((h) -> h.setCourtApplications(null));
+    }
+
+    private void extendHearing(Consumer<Hearing> hearingModification) throws Throwable {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        hearingModification.accept(hearingOne.getHearing());
+
+        final JsonEnvelope initcommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        if (hearingOne.getHearing().getCourtApplications() != null) {
+            setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        }
+
+        this.hearingCommandHandler.initiate(initcommand);
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setCourtApplication(CourtApplication.courtApplication().withId(UUID.randomUUID()).build());
+        command.setHearingId(hearingOne.getHearingId());
+        setupMockedEventStream(command.getCourtApplication().getId(), this.applicationEventStream, new ApplicationAggregate());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        //final JsonEnvelope jsonEnvelope = verifyAppendAndGetArgumentFrom(this.hearingEventStream).findAny().get();
+
+        ArgumentCaptor<Stream> argumentCaptor = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(this.hearingEventStream, times(2))).append((Stream) argumentCaptor.capture());
+        final JsonEnvelope jsonEnvelope = (JsonEnvelope) argumentCaptor.getAllValues().get(1).findFirst().orElse(null);
+
+        HearingExtended hearingExtended = asPojo(jsonEnvelope, HearingExtended.class);
+
+        assertThat(hearingExtended.getCourtApplication().getId(), is(command.getCourtApplication().getId()));
+        assertThat(hearingExtended.getHearingId(), is(command.getHearingId()));
+
+    }
+
+
+    @Test
     public void initiateHearing() throws Throwable {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
 
         setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
 
@@ -200,6 +262,57 @@ public class InitiateHearingCommandHandlerTest {
                                                 .with(Offence::getCount, is(offence.getCount()))))
                                 ))))));
     }
+
+    @Test
+    public void initiateHearingApplicationOnly() throws Throwable {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        hearingOne.getHearing().setProsecutionCases(null);
+
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+
+        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+
+        this.hearingCommandHandler.initiate(command);
+
+        final JsonEnvelope jsonEnvelope = verifyAppendAndGetArgumentFrom(this.hearingEventStream).findAny().get();
+
+        final Hearing hearing = hearingOne.it().getHearing();
+        final JudicialRole judicialRole = hearing.getJudiciary().get(0);
+        final CourtCentre courtCentre = hearing.getCourtCentre();
+        final HearingDay hearingDay = hearing.getHearingDays().get(0);
+
+        assertThat(asPojo(jsonEnvelope, HearingInitiated.class), isBean(HearingInitiated.class)
+                .with(HearingInitiated::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getReportingRestrictionReason, is(hearing.getReportingRestrictionReason()))
+                        .with(Hearing::getHasSharedResults, is(false))
+                        .with(Hearing::getHearingLanguage, is(hearing.getHearingLanguage()))
+                        .with(Hearing::getJurisdictionType, is(JurisdictionType.CROWN))
+                        .with(Hearing::getType, isBean(HearingType.class)
+                                .with(HearingType::getId, is(hearing.getType().getId()))
+                                .with(HearingType::getDescription, is(hearing.getType().getDescription())))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getId, is(courtCentre.getId()))
+                                .with(CourtCentre::getName, is(courtCentre.getName()))
+                                .with(CourtCentre::getRoomId, is(courtCentre.getRoomId()))
+                                .with(CourtCentre::getRoomName, is(courtCentre.getRoomName())))
+                        .with(Hearing::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingDay::getSittingDay, is(hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC"))))
+                                .with(HearingDay::getListingSequence, is(hearingDay.getListingSequence()))))
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getFirstName, is(judicialRole.getFirstName()))
+                                .with(JudicialRole::getIsBenchChairman, is(judicialRole.getIsBenchChairman()))
+                                .with(JudicialRole::getIsDeputy, is(judicialRole.getIsDeputy()))
+                                .with(JudicialRole::getJudicialId, is(judicialRole.getJudicialId()))
+                                .with(JudicialRole::getJudicialRoleType, is(judicialRole.getJudicialRoleType()))
+                                .with(JudicialRole::getLastName, is(judicialRole.getLastName()))
+                                .with(JudicialRole::getMiddleName, is(judicialRole.getMiddleName()))
+                                .with(JudicialRole::getTitle, is(judicialRole.getTitle()))))
+                ));
+    }
+
 
     @Test
     public void initiateHearingOffence() throws Throwable {
@@ -320,7 +433,7 @@ public class InitiateHearingCommandHandlerTest {
                                 .with(Verdict::getVerdictType, isBean(VerdictType.class)
                                         .with(VerdictType::getCategory, is(input.getVerdict().getVerdictType().getCategory()))
                                         .with(VerdictType::getCategoryType, is(input.getVerdict().getVerdictType().getCategoryType()))
-                                        .with(VerdictType::getVerdictTypeId, is(input.getVerdict().getVerdictType().getVerdictTypeId()))
+                                        .with(VerdictType::getId, is(input.getVerdict().getVerdictType().getId()))
                                         .with(VerdictType::getDescription, is(input.getVerdict().getVerdictType().getDescription()))
                                         .with(VerdictType::getSequence, is(input.getVerdict().getVerdictType().getSequence()))
                                 )

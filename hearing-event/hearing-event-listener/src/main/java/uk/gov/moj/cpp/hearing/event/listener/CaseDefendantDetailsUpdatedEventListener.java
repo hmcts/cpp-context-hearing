@@ -59,21 +59,13 @@ public class CaseDefendantDetailsUpdatedEventListener {
             with(defendant.getLegalEntityOrganisation(), getLegalEntityDefendantOrganisation(defendantIn.getLegalEntityDefendant()), this::setOrganisation);
             with(defendant.getPersonDefendant(), defendantIn.getPersonDefendant(),
                     (personDefendantJpa, personDefendantPojo) -> {
-                        if (nonNull(personDefendantJpa)) {
-                            if (personDefendantPojo.getAliases() != null) {
-                                personDefendantJpa.setAliases(String.join(", ", personDefendantPojo.getAliases()));
-                            }
+                        if (nonNull(personDefendantJpa) && nonNull(personDefendantPojo)) {
                             personDefendantJpa.setArrestSummonsNumber(personDefendantPojo.getArrestSummonsNumber());
-                            personDefendantJpa.setBailStatus(personDefendantPojo.getBailStatus() != null ? personDefendantPojo.getBailStatus().name() : null);
+                            personDefendantJpa.setBailStatus(nonNull(personDefendantPojo.getBailStatus()) ? personDefendantPojo.getBailStatus().name() : null);
                             personDefendantJpa.setCustodyTimeLimit(personDefendantPojo.getCustodyTimeLimit());
                             personDefendantJpa.setDriverNumber(personDefendantPojo.getDriverNumber());
                             personDefendantJpa.setEmployerPayrollReference(personDefendantPojo.getEmployerPayrollReference());
-                            personDefendantJpa.setObservedEthnicityCode(personDefendantPojo.getObservedEthnicityCode());
-                            personDefendantJpa.setObservedEthnicityId(personDefendantPojo.getObservedEthnicityId());
                             personDefendantJpa.setPerceivedBirthYear(personDefendantPojo.getPerceivedBirthYear());
-                            personDefendantJpa.setPncId(personDefendantPojo.getPncId());
-                            personDefendantJpa.setSelfDefinedEthnicityCode(personDefendantPojo.getSelfDefinedEthnicityCode());
-                            personDefendantJpa.setSelfDefinedEthnicityId(personDefendantPojo.getSelfDefinedEthnicityId());
                             with(personDefendantJpa.getEmployerOrganisation(), personDefendantPojo.getEmployerOrganisation(), this::setOrganisation);
                             with(personDefendantJpa.getPersonDetails(), personDefendantPojo.getPersonDetails(), this::setPerson);
                         }
@@ -121,8 +113,6 @@ public class CaseDefendantDetailsUpdatedEventListener {
         personDetailsJpa.setDateOfBirth(personDetailsPojo.getDateOfBirth());
         personDetailsJpa.setDisabilityStatus(personDetailsPojo.getDisabilityStatus());
         personDetailsJpa.setDocumentationLanguageNeeds(personDetailsPojo.getDocumentationLanguageNeeds());
-        personDetailsJpa.setEthnicity(personDetailsPojo.getEthnicityCode());
-        personDetailsJpa.setEthnicityId(personDetailsPojo.getEthnicityId());
         personDetailsJpa.setFirstName(personDetailsPojo.getFirstName());
         personDetailsJpa.setGender(personDetailsPojo.getGender());
         personDetailsJpa.setInterpreterLanguageNeeds(personDetailsPojo.getInterpreterLanguageNeeds());

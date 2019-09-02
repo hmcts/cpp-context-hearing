@@ -10,7 +10,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +79,7 @@ public class EmailNowNotificationChannel {
 
         final String nowTypeName = nowsNotificationDocumentState.getOrderName();
 
-        final LocalDateTime now = LocalDateTime.now();
+        final ZonedDateTime now = ZonedDateTime.now();
 
         final Map<String, String> personalisation = new HashMap<>();
         personalisation.put(CASE_URNS_PERSONALISATION_KEY, caseUrns);

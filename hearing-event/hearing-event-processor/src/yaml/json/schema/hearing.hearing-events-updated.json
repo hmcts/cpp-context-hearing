@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.hearing-events-updated.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-events-updated.json",
   "type": "object",
   "properties": {
     "hearingId": {

@@ -48,9 +48,9 @@ public class ProsecutionCounselDelegate implements Serializable {
 
         final Map<UUID, ProsecutionCounsel> prosecutionCounsels = this.momento.getProsecutionCounsels();
         if (!(prosecutionCounsels.containsKey(prosecutionCounsel.getId()))) {
-            return Stream.of(new DefenceCounselChangeIgnored(String.format("Provided ProsecutionCounsel does not exists, payload [%s]", prosecutionCounsel.toString())));
+            return Stream.of(new ProsecutionCounselChangeIgnored(String.format("Provided ProsecutionCounsel does not exists, payload [%s]", prosecutionCounsel.toString())));
         }else if (prosecutionCounsels.get(prosecutionCounsel.getId()).equals(prosecutionCounsel)){
-            return Stream.of(new DefenceCounselChangeIgnored(String.format("No change in provided ProsecutionCounsel, payload [%s]", prosecutionCounsel.toString())));
+            return Stream.of(new ProsecutionCounselChangeIgnored(String.format("No change in provided ProsecutionCounsel, payload [%s]", prosecutionCounsel.toString())));
         }
         return Stream.of(new ProsecutionCounselUpdated(prosecutionCounsel, hearingId));
     }

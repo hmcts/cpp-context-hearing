@@ -145,167 +145,6 @@
           "statementOfFacts": "An incident took place at GREEN PARK station whereby you were spoken to by a member of London Underground staff regarding your train journey and the associated fare.The facts of this incidents are now being considered and I must advise you that legal proceedings may be initiated against you regarding this matter in accordance with the LU prosecution policy"
         }
       ],
-      "targets": [
-        {
-          "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
-          "hearingId": "9a62c7c1-66d0-4bcc-b713-7d88dd85ec69",
-          "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
-          "resultLines": [
-            {
-              "isComplete": true,
-              "isModified": false,
-              "level": "CASE",
-              "orderedDate": "2019-06-17",
-              "prompts": [
-                {
-                  "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
-                  "label": "Amount of costs",
-                  "value": "225",
-                  "welshValue": ""
-                },
-                {
-                  "id": "2b0ca749-7ede-4446-ae59-5beec3a72143",
-                  "label": "Creditor name",
-                  "value": "Transport for London",
-                  "welshValue": ""
-                }
-              ],
-              "resultDefinitionId": "76d43772-0660-4a33-b5c6-8f8ccaf6b4e3",
-              "resultLabel": "Costs",
-              "resultLineId": "b787bd82-23f0-49e3-aeac-7885d4a02fa6",
-              "sharedDate": "2019-06-17"
-            },
-            {
-              "isComplete": true,
-              "isModified": false,
-              "level": "CASE",
-              "orderedDate": "2019-06-17",
-              "prompts": [
-                {
-                  "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
-                  "label": "Amount of surcharge",
-                  "value": "30",
-                  "welshValue": ""
-                }
-              ],
-              "resultDefinitionId": "e866cd11-6073-4fdf-a229-51c9d694e1d0",
-              "resultLabel": "surcharge",
-              "resultLineId": "dbcde05d-184d-4a85-9276-b84beb14b0cc",
-              "sharedDate": "2019-06-17"
-            },
-            {
-              "isComplete": true,
-              "isModified": false,
-              "level": "CASE",
-              "orderedDate": "2019-06-17",
-              "prompts": [
-                {
-                  "id": "369b6e22-4678-4b04-9fe9-5bb53bed5067",
-                  "label": "Reason for not making an attachment of earnings order or deduction from benefit application",
-                  "value": "AEO  pay quicker",
-                  "welshValue": ""
-                }
-              ],
-              "resultDefinitionId": "9ea0d845-5096-44f6-9ce0-8ae801141eac",
-              "resultLabel": "Collection order",
-              "resultLineId": "50aca993-314a-4558-ab0e-37f831f0bd8d",
-              "sharedDate": "2019-06-17"
-            },
-            {
-              "isComplete": true,
-              "isModified": false,
-              "level": "CASE",
-              "orderedDate": "2019-06-17",
-              "prompts": [
-                {
-                  "id": "11ba492a-e2ad-11e8-9f32-f2801f1b9fd1",
-                  "label": "Lump sum amount",
-                  "value": "200",
-                  "welshValue": ""
-                },
-                {
-                  "id": "37909b32-aff3-469e-9ed2-9c5fc0aae4e7",
-                  "label": "Instalment amount",
-                  "value": "197.90",
-                  "welshValue": ""
-                },
-                {
-                  "id": "fb4f761c-29d0-4a8e-a947-3debf281dab0",
-                  "label": "Payment frequency following lump sum",
-                  "value": "monthly",
-                  "welshValue": ""
-                },
-                {
-                  "id": "b76870fe-634b-11e8-adc0-fa7ae01bbebc",
-                  "label": "Instalment start date",
-                  "value": "2019-07-27",
-                  "welshValue": ""
-                }
-              ],
-              "resultDefinitionId": "272d1ec2-634b-11e8-adc0-fa7ae01bbebc",
-              "resultLabel": "Lump sum plus instalments",
-              "resultLineId": "80062e5f-c533-4381-a9d7-0c21580f0b0f",
-              "sharedDate": "2019-06-17"
-            },
-            {
-              "isComplete": true,
-              "isModified": false,
-              "level": "OFFENCE",
-              "orderedDate": "2019-06-17",
-              "prompts": [
-                {
-                  "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
-                  "label": "Amount of fine",
-                  "value": "138",
-                  "welshValue": ""
-                }
-              ],
-              "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
-              "resultLabel": "Fine",
-              "resultLineId": "5eaaf894-8b4b-42d5-8a57-9b98cd340fbd",
-              "sharedDate": "2019-06-17"
-            },
-            {
-              "isComplete": true,
-              "isModified": false,
-              "level": "OFFENCE",
-              "orderedDate": "2019-06-17",
-              "prompts": [
-                {
-                  "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
-                  "label": "Amount of compensation",
-                  "value": "4.90",
-                  "welshValue": ""
-                },
-                {
-                  "id": "af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe",
-                  "label": "Major creditor name",
-                  "value": "Transport for London",
-                  "welshValue": ""
-                }
-              ],
-              "resultDefinitionId": "ae89b99c-e0e3-47b5-b218-24d4fca3ca53",
-              "resultLabel": "compensation",
-              "resultLineId": "ee8b7042-0682-4746-ae17-6bfcf20321ad",
-              "sharedDate": "2019-06-17"
-            },
-            {
-              "isComplete": true,
-              "isModified": false,
-              "level": "OFFENCE",
-              "orderedDate": "2019-06-17",
-              "prompts": [
-
-              ],
-              "resultDefinitionId": "9161f3cb-e821-44e5-a9ee-4680b358a037",
-              "resultLabel": "Guilty plea taken into account",
-              "resultLineId": "0db8e76f-b598-4c3b-a100-9758d2782c93",
-              "sharedDate": "2019-06-17"
-            }
-          ],
-          "targetId": "6ff5b070-90df-11e9-ab1f-6dc4ffa907a7"
-        }
-      ],
       "type": {
         "description": "Plea",
         "id": "511fe0a3-1391-4954-8158-6b10eed0dad9"
@@ -652,5 +491,166 @@
         "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
       }
     ]
-  }
+  },
+  "targets": [
+    {
+      "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+      "hearingId": "9a62c7c1-66d0-4bcc-b713-7d88dd85ec69",
+      "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+              "label": "Amount of costs",
+              "value": "225",
+              "welshValue": ""
+            },
+            {
+              "id": "2b0ca749-7ede-4446-ae59-5beec3a72143",
+              "label": "Creditor name",
+              "value": "Transport for London",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "76d43772-0660-4a33-b5c6-8f8ccaf6b4e3",
+          "resultLabel": "Costs",
+          "resultLineId": "b787bd82-23f0-49e3-aeac-7885d4a02fa6",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
+              "label": "Amount of surcharge",
+              "value": "30",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "e866cd11-6073-4fdf-a229-51c9d694e1d0",
+          "resultLabel": "surcharge",
+          "resultLineId": "dbcde05d-184d-4a85-9276-b84beb14b0cc",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "369b6e22-4678-4b04-9fe9-5bb53bed5067",
+              "label": "Reason for not making an attachment of earnings order or deduction from benefit application",
+              "value": "AEO  pay quicker",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "9ea0d845-5096-44f6-9ce0-8ae801141eac",
+          "resultLabel": "Collection order",
+          "resultLineId": "50aca993-314a-4558-ab0e-37f831f0bd8d",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "11ba492a-e2ad-11e8-9f32-f2801f1b9fd1",
+              "label": "Lump sum amount",
+              "value": "200",
+              "welshValue": ""
+            },
+            {
+              "id": "37909b32-aff3-469e-9ed2-9c5fc0aae4e7",
+              "label": "Instalment amount",
+              "value": "197.90",
+              "welshValue": ""
+            },
+            {
+              "id": "fb4f761c-29d0-4a8e-a947-3debf281dab0",
+              "label": "Payment frequency following lump sum",
+              "value": "monthly",
+              "welshValue": ""
+            },
+            {
+              "id": "b76870fe-634b-11e8-adc0-fa7ae01bbebc",
+              "label": "Instalment start date",
+              "value": "2019-07-27",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "272d1ec2-634b-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Lump sum plus instalments",
+          "resultLineId": "80062e5f-c533-4381-a9d7-0c21580f0b0f",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "value": "138",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "5eaaf894-8b4b-42d5-8a57-9b98cd340fbd",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+              "label": "Amount of compensation",
+              "value": "4.90",
+              "welshValue": ""
+            },
+            {
+              "id": "af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe",
+              "label": "Major creditor name",
+              "value": "Transport for London",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "ae89b99c-e0e3-47b5-b218-24d4fca3ca53",
+          "resultLabel": "compensation",
+          "resultLineId": "ee8b7042-0682-4746-ae17-6bfcf20321ad",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "9161f3cb-e821-44e5-a9ee-4680b358a037",
+          "resultLabel": "Guilty plea taken into account",
+          "resultLineId": "0db8e76f-b598-4c3b-a100-9758d2782c93",
+          "sharedDate": "2019-06-17"
+        }
+      ],
+      "targetId": "6ff5b070-90df-11e9-ab1f-6dc4ffa907a7"
+    }
+  ]
 }

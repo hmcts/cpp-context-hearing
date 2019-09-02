@@ -89,7 +89,7 @@ public class HearingCaseNoteSavedEventListenerTest {
                         .add("id", randomUUID().toString())
                         .add("originatingHearingId", hearingId.toString())
                         .add("courtClerk", createObjectBuilder()
-                                .add("id", randomUUID().toString())
+                                .add("userId", randomUUID().toString())
                                 .add("firstName", STRING.next())
                                 .add("lastName", STRING.next())
                         )

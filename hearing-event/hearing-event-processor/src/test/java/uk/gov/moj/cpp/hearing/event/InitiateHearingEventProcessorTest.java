@@ -75,15 +75,30 @@ public class InitiateHearingEventProcessorTest {
 
     @Test
     public void publishHearingInitiatedEvent() {
-
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        publishHearingInitiatedEvent(initiateHearingCommand);
+    }
+
+    @Test
+    public void publishHearingInitiatedEventNoCases() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        initiateHearingCommand.getHearing().setProsecutionCases(null);
+        publishHearingInitiatedEvent(initiateHearingCommand);
+    }
+
+
+    private void publishHearingInitiatedEvent(final InitiateHearingCommand initiateHearingCommand ) {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.initiated"),
                 objectToJsonObjectConverter.convert(initiateHearingCommand));
 
         this.initiateHearingEventProcessor.hearingInitiated(event);
 
-        verify(this.sender, times(4)).send(this.envelopeArgumentCaptor.capture());
+        int caseCount = initiateHearingCommand.getHearing().getProsecutionCases()==null?0:initiateHearingCommand.getHearing().getProsecutionCases().size();
+        int expectedInvocations = 1+ (3*caseCount);
+
+
+        verify(this.sender, times(expectedInvocations)).send(this.envelopeArgumentCaptor.capture());
 
         final List<JsonEnvelope> envelopes = this.envelopeArgumentCaptor.getAllValues();
 
@@ -91,47 +106,52 @@ public class InitiateHearingEventProcessorTest {
         final List<UUID> defendantIds = new ArrayList<>();
         final List<UUID> offenceIds = new ArrayList<>();
 
-        initiateHearingCommand.getHearing().getProsecutionCases().forEach(prosecutionCase -> {
-            prosecutionCaseIds.add(prosecutionCase.getId());
-            prosecutionCase.getDefendants().forEach(defendant -> {
-                defendantIds.add(defendant.getId());
-                defendant.getOffences().forEach(offence -> offenceIds.add(offence.getId()));
+        if (caseCount>0) {
+            initiateHearingCommand.getHearing().getProsecutionCases().forEach(prosecutionCase -> {
+                prosecutionCaseIds.add(prosecutionCase.getId());
+                prosecutionCase.getDefendants().forEach(defendant -> {
+                    defendantIds.add(defendant.getId());
+                    defendant.getOffences().forEach(offence -> offenceIds.add(offence.getId()));
+                });
             });
-        });
+        }
+
+        if (caseCount>0) {
+            assertThat(
+                    envelopes.get(0), jsonEnvelope(
+                            metadata().withName("hearing.command.register-hearing-against-defendant"),
+                            payloadIsJson(allOf(
+                                    withJsonPath("$.defendantId", is(defendantIds.get(0).toString())),
+                                    withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
+                            .thatMatchesSchema()
+            );
+
+            assertThat(
+                    envelopes.get(1), jsonEnvelope(
+                            metadata().withName("hearing.command.register-hearing-against-offence"),
+                            payloadIsJson(allOf(
+                                    withJsonPath("$.offenceId", is(offenceIds.get(0).toString())),
+                                    withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))))));
+
+
+            assertThat(
+                    envelopes.get(2), jsonEnvelope(
+                            metadata().withName("hearing.command.register-hearing-against-case"),
+                            payloadIsJson(allOf(
+                                    withJsonPath("$.caseId", is(prosecutionCaseIds.get(0).toString())),
+                                    withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
+                            .thatMatchesSchema()
+            );
+        }
 
         assertThat(
-                envelopes.get(0), jsonEnvelope(
-                        metadata().withName("hearing.command.register-hearing-against-defendant"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.defendantId", is(defendantIds.get(0).toString())),
-                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
-                        .thatMatchesSchema()
-        );
-
-        assertThat(
-                envelopes.get(1), jsonEnvelope(
-                        metadata().withName("hearing.command.register-hearing-against-offence"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.offenceId", is(offenceIds.get(0).toString())),
-                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))))));
-
-
-        assertThat(
-                envelopes.get(2), jsonEnvelope(
-                        metadata().withName("hearing.command.register-hearing-against-case"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.caseId", is(prosecutionCaseIds.get(0).toString())),
-                                withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString())))))
-                        .thatMatchesSchema()
-        );
-
-        assertThat(
-                envelopes.get(3), jsonEnvelope(
+                envelopes.get(caseCount * 3), jsonEnvelope(
                         metadata().withName("public.hearing.initiated"),
                         payloadIsJson(withJsonPath("$.hearingId", is(initiateHearingCommand.getHearing().getId().toString()))))
                         .thatMatchesSchema()
         );
     }
+
 
     @Test
     public void hearingInitiateOffencePlea() {

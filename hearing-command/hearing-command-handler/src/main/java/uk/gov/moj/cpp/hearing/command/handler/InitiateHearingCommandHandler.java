@@ -2,21 +2,27 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedVerdictCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -35,17 +41,42 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
         }
         final InitiateHearingCommand command = convertToObject(envelope, InitiateHearingCommand.class);
         // initiate Hearing command must not contain verdict and plea
-        command.getHearing().getProsecutionCases().stream()
-                .flatMap(p -> p.getDefendants().stream())
-                .collect(Collectors.toList())
-                .stream()
-                .flatMap(d -> d.getOffences().stream())
-                .forEach(o -> {
-                    o.setVerdict(null);
-                    o.setPlea(null);
-                });
+        if (command.getHearing().getProsecutionCases() != null) {
+            command.getHearing().getProsecutionCases().stream()
+                    .flatMap(p -> p.getDefendants().stream())
+                    .collect(Collectors.toList())
+                    .stream()
+                    .flatMap(d -> d.getOffences().stream())
+                    .forEach(o -> {
+                        o.setVerdict(null);
+                        o.setPlea(null);
+                    });
+        }
+
         aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command.getHearing()));
+
+        final Hearing hearing = command.getHearing();
+        final List<CourtApplication> courtApplications = hearing.getCourtApplications();
+        if (courtApplications != null) {
+            for (final CourtApplication courtApplication : courtApplications) {
+                aggregate(ApplicationAggregate.class, courtApplication.getId(), envelope, a -> a.registerHearingId(courtApplication.getId(), hearing.getId()));
+            }
+        }
     }
+
+    @Handles("hearing.command.extend-hearing")
+    public void extendHearing(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.extend-hearing received {}", envelope.toObfuscatedDebugString());
+        }
+        final ExtendHearingCommand command = convertToObject(envelope, ExtendHearingCommand.class);
+
+        final UUID hearingId = command.getHearingId();
+        final UUID applicationId = command.getCourtApplication().getId();
+        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.extend(hearingId, command.getCourtApplication()));
+        aggregate(ApplicationAggregate.class, applicationId, envelope, a -> a.registerHearingId(applicationId, hearingId));
+    }
+
 
     @Handles("hearing.command.register-hearing-against-offence")
     public void initiateHearingOffence(final JsonEnvelope envelope) throws EventStreamException {

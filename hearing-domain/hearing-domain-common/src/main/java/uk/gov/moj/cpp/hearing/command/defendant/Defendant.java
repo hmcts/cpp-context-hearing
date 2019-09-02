@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.defendant;
 
 import uk.gov.justice.core.courts.AssociatedPerson;
+import uk.gov.justice.core.courts.DefendantAlias;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.PersonDefendant;
@@ -36,6 +37,26 @@ public class Defendant implements Serializable {
     private PersonDefendant personDefendant;
 
     private LegalEntityDefendant legalEntityDefendant;
+
+    private List<DefendantAlias> aliases;
+
+    private String pncId;
+
+    public List<DefendantAlias> getAliases() {
+        return aliases;
+    }
+
+    public void setAliases(List<DefendantAlias> aliases) {
+        this.aliases = aliases;
+    }
+
+    public String getPncId() {
+        return pncId;
+    }
+
+    public void setPncId(String pncId) {
+        this.pncId = pncId;
+    }
 
     public List<AssociatedPerson> getAssociatedPersons() {
         return associatedPersons;

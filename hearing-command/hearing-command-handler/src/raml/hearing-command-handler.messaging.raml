@@ -10,6 +10,10 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.initiate.json
             schema:  !include json/schema/hearing.initiate.json
 
+        application/vnd.hearing.command.extend-hearing+json:
+            example: !include json/hearing.command.extend-hearing.json
+            schema:  !include json/schema/hearing.command.extend-hearing.json
+
         application/vnd.hearing.command.register-hearing-against-offence+json:
             schema: !include json/schema/hearing.command.register-hearing-against-offence.json
             example: !include json/hearing.command.register-hearing-against-offence.json
@@ -72,6 +76,10 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.save-draft-result+json:
             example: !include json/hearing.command.save-draft-result.json
             schema: !include json/schema/hearing.command.save-draft-result.json
+
+        application/vnd.hearing.command.application-draft-result+json:
+            example: !include json/hearing.command.application-draft-result.json
+            schema: !include json/schema/hearing.command.application-draft-result.json
 
         application/vnd.hearing.command.share-results+json:
             example: !include json/hearing.command.share-results.json
@@ -185,3 +193,51 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.enforcement-acknowledgement-error+json:
                 schema: !include json/schema/hearing.command.enforcement-acknowledgement-error.json
                 example: !include json/hearing.command.enforcement-acknowledgement-error.json
+
+# Application response
+        application/vnd.hearing.command.save-application-response+json:
+                schema: !include json/schema/hearing.command.save-application-response.json
+                example: !include json/hearing.command.save-application-response.json
+
+# Respondent Counsel
+        application/vnd.hearing.command.add-respondent-counsel+json:
+            example: !include json/hearing.command.add-respondent-counsel.json
+            schema:  !include json/schema/hearing.command.add-respondent-counsel.json
+        application/vnd.hearing.command.remove-respondent-counsel+json:
+            example: !include json/hearing.command.remove-respondent-counsel.json
+            schema:  !include json/schema/hearing.command.remove-respondent-counsel.json
+        application/vnd.hearing.command.update-respondent-counsel+json:
+            example: !include json/hearing.command.update-respondent-counsel.json
+            schema:  !include json/schema/hearing.command.update-respondent-counsel.json
+
+# Applicant Counsel
+        application/vnd.hearing.command.add-applicant-counsel+json:
+            example: !include json/hearing.command.add-applicant-counsel.json
+            schema:  !include json/schema/hearing.command.add-applicant-counsel.json
+        application/vnd.hearing.command.remove-applicant-counsel+json:
+            example: !include json/hearing.command.remove-applicant-counsel.json
+            schema:  !include json/schema/hearing.command.remove-applicant-counsel.json
+        application/vnd.hearing.command.update-applicant-counsel+json:
+            example: !include json/hearing.command.update-applicant-counsel.json
+            schema:  !include json/schema/hearing.command.update-applicant-counsel.json
+
+# Add Defendant
+        application/vnd.hearing.add-defendants+json:
+            example: !include json/hearing.add-defendants.json
+            schema:  !include json/schema/hearing.add-defendants.json
+
+# Update Application Detail
+        application/vnd.hearing.update-court-application+json:
+            schema: !include json/schema/hearing.update-court-application.json
+            example: !include json/hearing.update-court-application.json
+
+# Company Representative
+        application/vnd.hearing.command.add-company-representative+json:
+            example: !include json/hearing.command.add-company-representative.json
+            schema:  !include json/schema/hearing.command.add-company-representative.json
+        application/vnd.hearing.command.update-company-representative+json:
+            example: !include json/hearing.command.update-company-representative.json
+            schema:  !include json/schema/hearing.command.update-company-representative.json
+        application/vnd.hearing.command.remove-company-representative+json:
+            example: !include json/hearing.command.remove-company-representative.json
+            schema:  !include json/schema/hearing.command.remove-company-representative.json

@@ -60,7 +60,7 @@ public class HearingCaseNoteIT extends AbstractIT {
                 .add("prosecutionCases", createArrayBuilder().add(randomUUID().toString()).add(randomUUID().toString()))
                 .add("noteType", randomEnum(NoteType.class).next().toString())
                 .add("courtClerk", createObjectBuilder()
-                        .add("id", randomUUID().toString())
+                        .add("userId", randomUUID().toString())
                         .add("firstName", STRING.next())
                         .add("lastName", STRING.next()));
 

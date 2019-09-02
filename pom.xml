@@ -5,7 +5,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>9.0.8-FRAMEWORK-SNAPSHOT</version>
+        <version>9.1.1</version>
     </parent>
 
     <groupId>uk.gov.moj.cpp.hearing</groupId>
@@ -25,13 +25,14 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
 
-        <referencedata.version>2.0.240</referencedata.version>
+        <referencedata.version>2.0.261</referencedata.version>
         <material.version>2.0.118</material.version>
         <results.version>1.0.16</results.version>
         <notification.notify.version>0.0.26</notification.notify.version>
         <stagingenforcement.version>0.0.87</stagingenforcement.version>
         <progression-version>2.0.138</progression-version>
 
+        <criminal-court-public-model.version>1.0.40</criminal-court-public-model.version>
     </properties>
     <modules>
         <module>hearing-query</module>
@@ -147,7 +148,6 @@
                     <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 

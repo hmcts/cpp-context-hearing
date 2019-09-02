@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.update-case-defendant-details-enriched-with-hearing-ids.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/update-case-defendant-details-enriched-with-hearing-ids.json",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -68,6 +68,16 @@
         "legalEntityDefendant": {
           "description": "When the defendant is a legal entity the additional legal entity specific details for the defendant",
           "$ref": "http://justice.gov.uk/core/courts/legalEntityDefendant.json"
+        },
+        "aliases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "http://justice.gov.uk/core/courts/defendantAlias.json"
+          }
+        },
+        "pncId": {
+          "type": "string"
         }
       },
       "required": [

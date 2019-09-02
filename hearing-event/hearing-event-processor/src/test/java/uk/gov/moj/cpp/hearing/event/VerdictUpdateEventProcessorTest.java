@@ -90,7 +90,7 @@ public class VerdictUpdateEventProcessorTest {
                                         .build())
                         .withVerdictType(
                                 uk.gov.justice.core.courts.VerdictType.verdictType()
-                                        .withVerdictTypeId(randomUUID())
+                                        .withId(randomUUID())
                                         .withCategoryType(STRING.next())
                                         .withCategory(STRING.next())
                                         .withDescription(STRING.next())
@@ -147,7 +147,7 @@ public class VerdictUpdateEventProcessorTest {
                                                 .build())
                                 .withVerdictType(
                                         uk.gov.justice.core.courts.VerdictType.verdictType()
-                                                .withVerdictTypeId(randomUUID())
+                                                .withId(randomUUID())
                                                 .withCategoryType(STRING.next())
                                                 .withCategory(STRING.next())
                                                 .withDescription(STRING.next())

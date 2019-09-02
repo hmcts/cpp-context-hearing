@@ -11,6 +11,10 @@ baseUri: message://command/handler/message/hearing
                     example: !include json/hearing.events.initiated.json
                     schema:  !include json/schema/hearing.events.initiated.json
 
+                application/vnd.hearing.events.hearing-extended+json:
+                   schema: !include json/schema/hearing.events.hearing-extended.json
+                   example: !include json/hearing.events.hearing-extended.json
+
                 application/vnd.hearing.events.found-plea-for-hearing-to-inherit+json:
                     schema: !include json/schema/hearing.events.found-plea-for-hearing-to-inherit.json
                     example: !include json/hearing.events.found-plea-for-hearing-to-inherit.json

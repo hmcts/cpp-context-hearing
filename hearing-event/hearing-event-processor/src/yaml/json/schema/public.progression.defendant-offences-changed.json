@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/progression/courts/public.progression.defendant-offences-changed.json",
+  "id": "http://cpp.moj.gov.uk/progression/json/schema/event/public-defendant-offences-changed.json",
   "type": "object",
   "additionalProperties": false,
   "properties": {

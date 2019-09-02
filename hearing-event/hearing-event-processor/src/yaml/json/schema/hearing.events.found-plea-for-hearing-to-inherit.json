@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.events.found-plea-for-hearing-to-inherit.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/found-plea-for-hearing-to-inherit.json",
   "type": "object",
   "properties": {
     "hearingId": {

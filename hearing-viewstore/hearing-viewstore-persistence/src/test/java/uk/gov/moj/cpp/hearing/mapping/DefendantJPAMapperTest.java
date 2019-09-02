@@ -9,6 +9,7 @@ import static uk.gov.moj.cpp.hearing.mapping.PersonDefendantJPAMapperTest.whenPe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import uk.gov.justice.core.courts.AssociatedPerson;
@@ -22,9 +23,16 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
+import java.util.UUID;
+
 public class DefendantJPAMapperTest {
 
     private DefendantJPAMapper defendantJPAMapper = JPACompositeMappers.DEFENDANT_JPA_MAPPER;
+    private uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity;
+    private uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation organisation;
+    private HearingSnapshotKey hearingSnapshotKey;
+
+
 
     @Test
     public void testFromJPA() {
@@ -39,7 +47,7 @@ public class DefendantJPAMapperTest {
     public void testToJPA() {
 
         final uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearingEntity = aNewHearingJPADataTemplate().getHearing();
-        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntity = hearingEntity.getProsecutionCases().iterator().next();
+        final ProsecutionCase prosecutionCaseEntity = hearingEntity.getProsecutionCases().iterator().next();
         final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity = prosecutionCaseEntity.getDefendants().iterator().next();
         final Defendant defendantPojo = defendantJPAMapper.fromJPA(defendantEntity);
 
@@ -59,7 +67,8 @@ public class DefendantJPAMapperTest {
     public static BeanMatcher<Defendant> whenDefendant(final BeanMatcher<Defendant> m,
             final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant entity) {
 
-        return m.with(Defendant::getAssociatedPersons, 
+        return //m.with(Defendant::getAliases, is(entity.getAliases()))
+                m.with(Defendant::getAssociatedPersons,
                         whenFirstAssociatedPerson(isBean(AssociatedPerson.class), entity.getAssociatedPersons().iterator().next()))
 
                 .with(Defendant::getDefenceOrganisation, 
@@ -79,6 +88,7 @@ public class DefendantJPAMapperTest {
                 .with(Defendant::getProsecutionAuthorityReference, is(entity.getProsecutionAuthorityReference()))
                 .with(Defendant::getProsecutionCaseId, is(entity.getProsecutionCaseId()))
                 .with(Defendant::getWitnessStatement, is(entity.getWitnessStatement()))
+                .with(Defendant::getPncId, is(entity.getPncId()))
                 .with(Defendant::getWitnessStatementWelsh, is(entity.getWitnessStatementWelsh()));
     }
 
@@ -107,6 +117,37 @@ public class DefendantJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getProsecutionAuthorityReference, is(pojo.getProsecutionAuthorityReference()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getProsecutionCaseId, is(pojo.getProsecutionCaseId()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getWitnessStatement, is(pojo.getWitnessStatement()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getPncId, is(pojo.getPncId()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getWitnessStatementWelsh, is(pojo.getWitnessStatementWelsh()));
     }
+
+    @Test
+    public void testFromJPAMapWithLegalEntityDefendant() {
+        setupTestData();
+        organisation = new uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation();
+        organisation.setName("ABC LTD");
+        defendantEntity.setLegalEntityOrganisation(organisation);
+        Defendant results = defendantJPAMapper.fromJPA(defendantEntity);
+        Assert.assertEquals("ABC LTD", results.getLegalEntityDefendant().getOrganisation().getName());
+        Assert.assertNull(results.getPersonDefendant());
+    }
+
+    @Test
+    public void testFromJPAMapWithPersonDefendant() {
+        setupTestData();
+        uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
+        defendantEntity.setPersonDefendant(personDefendant);
+        Defendant results = defendantJPAMapper.fromJPA(defendantEntity);
+        Assert.assertNull(results.getLegalEntityDefendant());
+        Assert.assertNotNull(results.getPersonDefendant());
+    }
+
+    private void setupTestData(){
+        defendantEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
+        hearingSnapshotKey = new HearingSnapshotKey();
+        hearingSnapshotKey.setId(UUID.randomUUID());
+        defendantEntity.setId(hearingSnapshotKey);
+    }
+
+
 }

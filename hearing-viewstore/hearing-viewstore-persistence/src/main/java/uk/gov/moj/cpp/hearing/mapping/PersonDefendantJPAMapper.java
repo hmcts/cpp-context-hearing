@@ -9,14 +9,11 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class PersonDefendantJPAMapper {
 
-    private DefendantAliasesJPAMapper defendantAliasesJPAMapper;
     private OrganisationJPAMapper organisationJPAMapper;
     private PersonJPAMapper personJPAMapper;
 
     @Inject
-    public PersonDefendantJPAMapper(final DefendantAliasesJPAMapper defendantAliasesJPAMapper,
-                                    final OrganisationJPAMapper organisationJPAMapper, final PersonJPAMapper personJPAMapper) {
-        this.defendantAliasesJPAMapper = defendantAliasesJPAMapper;
+    public PersonDefendantJPAMapper(final OrganisationJPAMapper organisationJPAMapper, final PersonJPAMapper personJPAMapper) {
         this.organisationJPAMapper = organisationJPAMapper;
         this.personJPAMapper = personJPAMapper;
     }
@@ -30,7 +27,6 @@ public class PersonDefendantJPAMapper {
             return null;
         }
         final PersonDefendant personDefendant = new PersonDefendant();
-        personDefendant.setAliases(defendantAliasesJPAMapper.toJPA(pojo.getAliases()));
         personDefendant.setArrestSummonsNumber(pojo.getArrestSummonsNumber());
         if (pojo.getBailStatus() != null) {
             personDefendant.setBailStatus(pojo.getBailStatus().name());
@@ -39,13 +35,8 @@ public class PersonDefendantJPAMapper {
         personDefendant.setDriverNumber(pojo.getDriverNumber());
         personDefendant.setEmployerOrganisation(organisationJPAMapper.toJPA(pojo.getEmployerOrganisation()));
         personDefendant.setEmployerPayrollReference(pojo.getEmployerPayrollReference());
-        personDefendant.setObservedEthnicityCode(pojo.getObservedEthnicityCode());
-        personDefendant.setObservedEthnicityId(pojo.getObservedEthnicityId());
         personDefendant.setPerceivedBirthYear(pojo.getPerceivedBirthYear());
         personDefendant.setPersonDetails(personJPAMapper.toJPA(pojo.getPersonDetails()));
-        personDefendant.setPncId(pojo.getPncId());
-        personDefendant.setSelfDefinedEthnicityCode(pojo.getSelfDefinedEthnicityCode());
-        personDefendant.setSelfDefinedEthnicityId(pojo.getSelfDefinedEthnicityId());
         return personDefendant;
     }
 
@@ -54,20 +45,14 @@ public class PersonDefendantJPAMapper {
             return null;
         }
         return uk.gov.justice.core.courts.PersonDefendant.personDefendant()
-                .withAliases(defendantAliasesJPAMapper.fromJPA(pojo.getAliases()))
                 .withArrestSummonsNumber(pojo.getArrestSummonsNumber())
-                .withBailStatus(BailStatus.valueFor(pojo.getBailStatus()).orElse(null))
+                .withBailStatus(pojo.getBailStatus() != null ? BailStatus.valueOf(pojo.getBailStatus()) : null)
                 .withCustodyTimeLimit(pojo.getCustodyTimeLimit())
                 .withDriverNumber(pojo.getDriverNumber())
                 .withEmployerOrganisation(organisationJPAMapper.fromJPA(pojo.getEmployerOrganisation()))
                 .withEmployerPayrollReference(pojo.getEmployerPayrollReference())
-                .withObservedEthnicityCode(pojo.getObservedEthnicityCode())
-                .withObservedEthnicityId(pojo.getObservedEthnicityId())
                 .withPerceivedBirthYear(pojo.getPerceivedBirthYear())
                 .withPersonDetails(personJPAMapper.fromJPA(pojo.getPersonDetails()))
-                .withPncId(pojo.getPncId())
-                .withSelfDefinedEthnicityCode(pojo.getSelfDefinedEthnicityCode())
-                .withSelfDefinedEthnicityId(pojo.getSelfDefinedEthnicityId())
                 .build();
     }
 }

@@ -9,7 +9,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
 
-import uk.gov.justice.core.courts.CourtClerk;
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingCaseNote;
 import uk.gov.justice.core.courts.NoteType;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -53,8 +53,8 @@ public class HearingCaseNoteJPAMapperTest {
         assertThat(hearingCaseNote.getNoteType(), is(noteType));
         assertThat(hearingCaseNote.getNote(), is(note));
         assertThat(ZonedDateTimes.toString(hearingCaseNote.getNoteDateTime()), is(noteDateTime));
-        final CourtClerk courtClerk = hearingCaseNote.getCourtClerk();
-        assertThat(courtClerk.getId(), is(clerkId));
+        final uk.gov.justice.core.courts.DelegatedPowers courtClerk = hearingCaseNote.getCourtClerk();
+        assertThat(courtClerk.getUserId(), is(clerkId));
         assertThat(courtClerk.getFirstName(), is(clerkFirstName));
         assertThat(courtClerk.getLastName(), is(clerkLastName));
         assertThat(hearingCaseNote.getProsecutionCases().get(0), is(firstCaseId));
@@ -78,8 +78,8 @@ public class HearingCaseNoteJPAMapperTest {
                 .withNote(note)
                 .withNoteType(noteType)
                 .withNoteDateTime(noteDateTime)
-                .withCourtClerk(CourtClerk.courtClerk()
-                        .withId(clerkId)
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(clerkId)
                         .withLastName(clerkLastName)
                         .withFirstName(clerkFirstName)
                         .build())
@@ -98,7 +98,7 @@ public class HearingCaseNoteJPAMapperTest {
         assertThat(payload.getString("originatingHearingId"), is(originatingHearingId.toString()));
         assertThat((payload.getJsonArray("prosecutionCases").getString(0)), is(firstCaseId.toString()));
         final JsonObject courtClerk = payload.getJsonObject("courtClerk");
-        assertThat(courtClerk.getString("id"), is(clerkId.toString()));
+        assertThat(courtClerk.getString("userId"), is(clerkId.toString()));
         assertThat(courtClerk.getString("lastName"), is(clerkLastName));
         assertThat(courtClerk.getString("firstName"), is(clerkFirstName));
     }
@@ -109,8 +109,8 @@ public class HearingCaseNoteJPAMapperTest {
         final HearingCaseNote caseNote = HearingCaseNote.hearingCaseNote()
                 .withOriginatingHearingId(hearingEntity.getId())
                 .withNote(note)
-                .withCourtClerk(CourtClerk.courtClerk()
-                        .withId(clerkId)
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(clerkId)
                         .withFirstName(clerkFirstName)
                         .withLastName(clerkLastName)
                         .build())

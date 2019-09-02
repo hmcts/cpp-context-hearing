@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "$id": "http://cpp.moj.gov.uk/hearing/json/schema/event/subscriptions-uploaded.json",
   "$ref": "#/definitions/Document",
   "definitions": {
     "Document": {

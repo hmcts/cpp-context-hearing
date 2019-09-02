@@ -7,7 +7,7 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "id": {
+        "userId": {
           "description": "The identifier of teh court clerk sharing the results",
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
@@ -19,7 +19,7 @@
         }
       },
       "required": [
-        "id",
+        "userId",
         "firstName",
         "lastName"
       ]

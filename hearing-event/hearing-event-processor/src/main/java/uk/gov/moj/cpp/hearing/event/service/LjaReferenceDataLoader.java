@@ -79,7 +79,7 @@ public class LjaReferenceDataLoader {
         try {
             enforcementArea = enforcementAreaByLjaCode(context, organisationUnit.getLja());
         } catch (Throwable tw) {
-            throw new RuntimeException(String.format("failed to find enforcement  area for lja code %s organisational unit (from  court centreId %s)", organisationUnit.getLja(), courtCentreId), tw);
+            throw new RuntimeException(String.format("failed to find enforcement area for lja code %s organisational unit (from  court centreId %s)", organisationUnit.getLja(), courtCentreId), tw);
         }
 
         final EnforcementAreaBacs enforcementAreaBACS = organisationUnit.getEnforcementArea();

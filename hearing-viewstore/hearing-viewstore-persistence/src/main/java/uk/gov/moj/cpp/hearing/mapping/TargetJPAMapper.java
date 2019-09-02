@@ -36,6 +36,7 @@ public class TargetJPAMapper {
         target.setDefendantId(pojo.getDefendantId());
         target.setDraftResult(pojo.getDraftResult());
         target.setOffenceId(pojo.getOffenceId());
+        target.setApplicationId(pojo.getApplicationId());
         target.setResultLines(resultLineJPAMapper.toJPA(target, pojo.getResultLines()));
         return target;
     }
@@ -49,6 +50,7 @@ public class TargetJPAMapper {
                 .withDraftResult(entity.getDraftResult())
                 .withHearingId(entity.getHearing().getId())
                 .withOffenceId(entity.getOffenceId())
+                .withApplicationId(entity.getApplicationId())
                 .withTargetId(entity.getId())
                 .withResultLines(resultLineJPAMapper.fromJPA(entity.getResultLines()))
                 .build();

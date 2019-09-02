@@ -12,7 +12,7 @@
     "courtClerk": {
       "type": "object",
       "properties": {
-        "id": {
+        "userId": {
           "$ref": "#/definitions/uuid"
         },
         "firstName": {
@@ -23,7 +23,7 @@
         }
       },
       "required": [
-        "id",
+        "userId",
         "firstName",
         "lastName"
       ]

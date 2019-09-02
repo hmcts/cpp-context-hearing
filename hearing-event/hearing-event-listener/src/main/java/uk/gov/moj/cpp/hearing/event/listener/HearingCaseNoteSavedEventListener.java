@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import uk.gov.justice.core.courts.CourtClerk;
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingCaseNote;
 import uk.gov.justice.core.courts.NoteType;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -61,8 +61,8 @@ public class HearingCaseNoteSavedEventListener {
                                 .map(e -> UUID.fromString(((JsonString) e).getString()))
                                 .collect(Collectors.toList()))
                         .withOriginatingHearingId(UUID.fromString(caseNote.getString("originatingHearingId")))
-                        .withCourtClerk(CourtClerk.courtClerk()
-                                .withId(UUID.fromString(courtClerk.getString("id")))
+                        .withCourtClerk(DelegatedPowers.delegatedPowers()
+                                .withUserId(UUID.fromString(courtClerk.getString("userId")))
                                 .withFirstName(courtClerk.getString("firstName"))
                                 .withLastName(courtClerk.getString("lastName"))
                                 .build())

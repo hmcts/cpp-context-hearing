@@ -114,7 +114,7 @@ function integrationTests {
   echo "Finished running Integration Tests"
 }
 
-function createEventLog() {
+function runEventLogLiquibase() {
     mvn org.apache.maven.plugins:maven-dependency-plugin:3.0.1:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.event-store:event-repository-liquibase:${EVENT_STORE_VERSION}:jar
     java -jar target/event-repository-liquibase-${EVENT_STORE_VERSION}.jar --url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}eventstore --username=${CONTEXT_NAME} --password=${CONTEXT_NAME} --logLevel=info update
 
@@ -143,7 +143,7 @@ function runEventTrackingLiquibase {
     echo "Finished executing event tracking liquibase"
 }
 
-function runLiquibase {
+function runViewStoreLiquibase {
   #run liquibase for context
   mvn -f ${CONTEXT_NAME}-viewstore/${CONTEXT_NAME}-viewstore-liquibase/pom.xml -Dliquibase.url=jdbc:postgresql://localhost:5432/${CONTEXT_NAME}viewstore -Dliquibase.username=${CONTEXT_NAME} -Dliquibase.password=${CONTEXT_NAME} -Dliquibase.logLevel=info resources:resources liquibase:update
   echo "Finished executing liquibase"
@@ -154,6 +154,16 @@ function runFileServiceLiquibase() {
     mvn org.apache.maven.plugins:maven-dependency-plugin:3.0.1:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:file-service-liquibase:${FILE_SERVICE_VERSION}:jar
     java -jar target/file-service-liquibase-${FILE_SERVICE_VERSION}.jar --url=jdbc:postgresql://localhost:5432/fileservice --username=fileservice --password=fileservice --logLevel=info update
     echo "finished file service  liquibase"
+}
+
+function runLiquibase {
+   runEventLogLiquibase
+   runEventBufferLiquibase
+   runViewStoreLiquibase
+   runSystemLiquibase
+   runEventTrackingLiquibase
+   runFileServiceLiquibase
+   echo "All liquibase update scripts run"
 }
 
 function buildDeployAndTest {
@@ -189,11 +199,6 @@ function deployAndTest {
   deployWiremock
   startVagrant
   runLiquibase
-  createEventLog
-  runEventBufferLiquibase
-  runFileServiceLiquibase
-  runSystemLiquibase
-  runEventTrackingLiquibase
   deployWars
   if [[ "skipIntegrationTests" != "${1}" ]]; then
       healthCheck

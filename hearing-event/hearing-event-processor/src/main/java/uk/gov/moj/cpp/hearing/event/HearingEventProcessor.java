@@ -10,6 +10,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ import org.slf4j.LoggerFactory;
 public class HearingEventProcessor {
 
     public static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
+
+    public static final String PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED = "public.hearing.application-draft-resulted";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
     private final Enveloper enveloper;
     private final Sender sender;
@@ -55,6 +58,27 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
 
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_DRAFT_RESULT_SAVED).apply(publicEventPayload));
+    }
+
+    @Handles("hearing.application-draft-resulted")
+    public void publicApplicationDraftResultedPublicEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.application-draft-resulted event received {}", event.toObfuscatedDebugString());
+        }
+
+        final ApplicationDraftResulted applicationDraftResulted = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ApplicationDraftResulted.class);
+
+        final PublicHearingApplicationDraftResulted publicHearingApplicationDraftResulted = PublicHearingApplicationDraftResulted.publicHearingApplicationDraftResulted()
+                .setDraftResult(applicationDraftResulted.getDraftResult())
+                .setHearingId(applicationDraftResulted.getHearingId())
+                .setApplicationId(applicationDraftResulted.getApplicationId())
+                .setTargetId(applicationDraftResulted.getTargetId())
+                .setApplicationOutcomeType(applicationDraftResulted.getApplicationOutcomeType())
+                .setApplicationOutcomeDate(applicationDraftResulted.getApplicationOutcomeDate());
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingApplicationDraftResulted);
+
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED).apply(publicEventPayload));
     }
 
 }

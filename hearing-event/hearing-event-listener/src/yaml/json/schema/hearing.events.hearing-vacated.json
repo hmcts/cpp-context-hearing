@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.events.hearing-vacated.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-vacated.json",
   "type": "object",
   "properties": {
     "hearingId": {

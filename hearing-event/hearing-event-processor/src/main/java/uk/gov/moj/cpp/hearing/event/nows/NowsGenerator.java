@@ -49,6 +49,9 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,16 +76,12 @@ import org.slf4j.LoggerFactory;
         "squid:S1172", "squid:S3400", "squid:S00112", "squid:S3776", "squid:S3864"})
 public class NowsGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NowsGenerator.class.getName());
     public static final String INITIAL_MATERIAL_STATUS = "requesting";
     public static final String NEXT_HEARING_START_DATE_FORMAT = "yyyy-MM-dd";
     public static final String NEXT_HEARING_START_TIME_FORMAT = "HH:mm";
+    public static final String EUROPE_LONDON = "Europe/London";
     private static final String ADJOURNMENT_REASON = "adjournmentReason";
-
-    private final ReferenceDataService referenceDataService;
-    private final FinancialResultCalculator financialResultCalculator;
-    private final PaymentTermsCalculator paymentTermsCalculator;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(NowsGenerator.class.getName());
     private static final List<String> ATTACHMENT_OF_EARNINGS_PROMPT_REFERENCES = asList(EMPLOYER_ORGANISATION_NAME_PROMPT_REFERENCE,
             EMPLOYER_ORGANISATION_ADDRESS1_PROMPT_REFERENCE,
             EMPLOYER_ORGANISATION_ADDRESS2_PROMPT_REFERENCE,
@@ -91,6 +90,9 @@ public class NowsGenerator {
             EMPLOYER_ORGANISATION_ADDRESS5_PROMPT_REFERENCE,
             EMPLOYER_ORGANISATION_POST_CODE_PROMPT_REFERENCE,
             EMPLOYER_ORGANISATION_REFERENCE_NUMBER_PROMPT_REFERENCE);
+    private final ReferenceDataService referenceDataService;
+    private final FinancialResultCalculator financialResultCalculator;
+    private final PaymentTermsCalculator paymentTermsCalculator;
 
     @Inject
     public NowsGenerator(final ReferenceDataService referenceDataService, final FinancialResultCalculator financialResultCalculator,
@@ -100,16 +102,101 @@ public class NowsGenerator {
         this.paymentTermsCalculator = paymentTermsCalculator;
     }
 
-    private static boolean anyUncompletedResultLinesForDefendant(final ResultsShared resultsShared, final Defendant defendant) {
-        return resultsShared.getHearing().getTargets().stream()
+    private static List<ResultLine> uncompletedResultLinesForDefendant(final ResultsShared resultsShared, final Defendant defendant) {
+        return resultsShared.getTargets().stream()
+                .filter(target -> target.getDefendantId() != null)
                 .filter(target -> target.getDefendantId().equals(defendant.getId()))
                 .flatMap(target -> target.getResultLines().stream())
-                .anyMatch(resultLine -> !resultLine.getIsComplete());
+                .filter(resultLine -> !resultLine.getIsComplete())
+                .collect(Collectors.toList());
     }
 
-    private static boolean anyMandatoryResultLineNotPresent(final Set<UUID> completedResultDefinitionIds, final NowDefinition nowDefinition) {
-        return nowDefinition.getResultDefinitions().stream().anyMatch(resultDefinition -> resultDefinition.getMandatory() &&
-                !completedResultDefinitionIds.contains(resultDefinition.getId()));
+    private static List<NowResultDefinitionRequirement> mandatoryResultLineNotPresent(final Set<UUID> completedResultDefinitionIds, final NowDefinition nowDefinition) {
+        return nowDefinition.getResultDefinitions().stream().filter(resultDefinition -> resultDefinition.getMandatory() &&
+                !completedResultDefinitionIds.contains(resultDefinition.getId())).collect(Collectors.toList());
+    }
+
+    protected static NowVariantResultText nowVariantResultText(final NowResultDefinitionRequirement nowsRequirementRow, final Map<UUID, Prompt> id2PromptRef, final ResultLine resultLine) {
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(String.format("nowVariantResultText_nowReference: '%s'  text: '%s' ",
+                    nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
+        }
+
+        if (nowsRequirementRow.getNowReference() != null && nowsRequirementRow.getNowReference().trim().length() > 0) {
+            final NowVariantResultText.Builder builder = NowVariantResultText.nowVariantResultText();
+            String text = isNull(nowsRequirementRow.getText()) ? "" : nowsRequirementRow.getText();
+
+            if (nowsRequirementRow.getNowReference().equalsIgnoreCase(ADJOURNMENT_REASON)) {
+                text = text + extractByPromptReference(id2PromptRef, P_NON_STANDARD_REASON, Collections.singletonList(resultLine)).orElse("");
+            }
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(String.format("**** nowVariantResultText nowReference: '%s'  text: '%s' ",
+                        nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
+            }
+
+            builder
+                    .withAdditionalProperty(nowsRequirementRow.getNowReference(), text)
+                    .withAdditionalProperty(nowsRequirementRow.getNowReference() + ".welsh", nowsRequirementRow.getWelshText() != null ? nowsRequirementRow.getWelshText() : text);
+            return builder.build();
+        }
+
+        return null;
+    }
+
+    private static Address getAddress(final Defendant defendant) {
+        if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
+            return defendant.getPersonDefendant().getPersonDetails().getAddress();
+        } else if (defendant.getLegalEntityDefendant() != null) {
+            return defendant.getLegalEntityDefendant().getOrganisation().getAddress();
+        } else {
+            return null;
+        }
+    }
+
+    private static String getName(final Defendant defendant) {
+        if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
+            final Person person = defendant.getPersonDefendant().getPersonDetails();
+            return person.getFirstName() + (person.getMiddleName() == null ? "" : (" " + person.getMiddleName())) +
+                    " " + person.getLastName();
+        }
+        if (defendant.getLegalEntityDefendant() != null) {
+            return defendant.getLegalEntityDefendant().getOrganisation().getName();
+        }
+        return null;
+    }
+
+    private static LocalDate getDateOfBirth(final Defendant defendant) {
+        if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
+            final Person person = defendant.getPersonDefendant().getPersonDetails();
+            return person.getDateOfBirth();
+        } else {
+            return null;
+        }
+
+    }
+
+    private static boolean isJurisdictionMatch(final NowDefinition nowDefinition, final JurisdictionType jurisdictionType) {
+
+        String nowJurisdiction = nowDefinition.getJurisdiction();
+        if (nowDefinition.getJurisdiction() == null) {
+            //GPE-7138 empty jurisdiction is allowed
+            return true;
+        }
+        nowJurisdiction = nowJurisdiction.toUpperCase();
+
+        if (nowJurisdiction.startsWith("M")) {
+            return jurisdictionType == JurisdictionType.MAGISTRATES;
+        }
+        if (nowJurisdiction.startsWith("C")) {
+            return jurisdictionType == JurisdictionType.CROWN;
+        }
+        if (nowJurisdiction.startsWith("B")) {
+            return true;
+        }
+        //TODO GPE-7138 blow up if there is a reference data error !
+        throw new RuntimeException(String.format("nowDefinition %s %s has unexpected jurisdiction \"%s\"",
+                nowDefinition.getName(), nowDefinition.getId(), nowDefinition.getJurisdiction()));
     }
 
     public List<Now> createNows(final JsonEnvelope context, final ResultsShared resultsShared, final HearingAdjourned hearingAdjourned) {
@@ -121,7 +208,7 @@ public class NowsGenerator {
         final GenerateVariantDecisionMakerFactory generateVariantDecisionMakerFactory = new GenerateVariantDecisionMakerFactory()
                 .setVariantDirectory(resultsShared.getVariantDirectory())
                 .setCompletedResultLineStatuses(resultsShared.getCompletedResultLinesStatus())
-                .setTargets(resultsShared.getHearing().getTargets());
+                .setTargets(resultsShared.getTargets());
 
         resultLinesByDefendant.forEach((defendantId, completedResultLines4Defendant)
                 -> nows.addAll(createNowsForDefendant(context, resultsShared.getHearing(), defendantId, completedResultLines4Defendant, generateVariantDecisionMakerFactory, hearingAdjourned)));
@@ -137,7 +224,6 @@ public class NowsGenerator {
                 .anyMatch(rl -> rl.getResultDefinitionId().equals(ResultDefinitionsConstant.NEXT_HEARING_IN_MAGISTRATES_COURT_RESULT_DEFINITION_ID));
     }
 
-
     private DocumentationLanguage documentationLanguage(final HearingLanguage hearingLanguage) {
         if (HearingLanguage.WELSH.equals(hearingLanguage)) {
             return DocumentationLanguage.WELSH;
@@ -150,21 +236,33 @@ public class NowsGenerator {
 
         final Map<UUID, List<ResultLine>> completedResultLines4DefendantMap = new HashMap<>();
 
-        resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc -> pc.getDefendants().stream()).collect(toList()).forEach(defendant -> {
+        if (resultsShared.getHearing().getProsecutionCases() != null) {
+            resultsShared.getHearing().getProsecutionCases().stream().flatMap(pc -> pc.getDefendants().stream()).collect(toList()).forEach(defendant -> {
 
-            if (anyUncompletedResultLinesForDefendant(resultsShared, defendant)) {
-                LOGGER.info("aborting NOWs generation for defendant {} as there are uncompleted result lines", defendant.getId());
-                return; //we don't generate any NOW for the defendant if they have any uncompleted result lines.
-            }
+                final List<ResultLine> uncompletedResultLinesForDefendant = uncompletedResultLinesForDefendant(resultsShared, defendant);
+                if (!uncompletedResultLinesForDefendant.isEmpty()) {
+                    if (LOGGER.isInfoEnabled()) {
+                        final StringBuilder sbError = new StringBuilder();
+                        sbError.append(String.format("aborting NOWs generation for defendant %s as there are uncompleted result lines:", defendant.getId()));
+                        uncompletedResultLinesForDefendant.forEach(
+                                resultLine -> sbError.append(String.format(", %s", resultLine.toString()))
+                        );
+                        LOGGER.info(sbError.toString());
+                    }
+                    return; //we don't generate any NOW for the defendant if they have any uncompleted result lines.
+                }
 
-            final List<ResultLine> completedResultLines4Defendant = resultsShared.getHearing().getTargets().stream()
-                    .filter(target -> target.getDefendantId().equals(defendant.getId()))
-                    .flatMap(target -> target.getResultLines().stream())
-                    .filter(ResultLine::getIsComplete)
-                    .collect(toList());
+                final List<ResultLine> completedResultLines4Defendant = resultsShared.getTargets().stream()
+                        .filter(target -> target.getDefendantId() != null)
+                        .filter(target -> target.getDefendantId().equals(defendant.getId()))
+                        .flatMap(target -> target.getResultLines().stream())
+                        .filter(ResultLine::getIsComplete)
+                        .filter(r -> (isNull(r.getIsDeleted()) || !r.getIsDeleted()))
+                        .collect(toList());
 
-            completedResultLines4DefendantMap.put(defendant.getId(), completedResultLines4Defendant);
-        });
+                completedResultLines4DefendantMap.put(defendant.getId(), completedResultLines4Defendant);
+            });
+        }
 
         return completedResultLines4DefendantMap;
     }
@@ -191,9 +289,18 @@ public class NowsGenerator {
 
         for (final NowDefinition nowDefinition : candidateNowDefinitions) {
 
-            if (anyMandatoryResultLineNotPresent(completedResultDefinitionIds, nowDefinition)) {
-                LOGGER.info("aborting NOW generation {} for defendant {} as not all mandatory results are present", defendantId, nowDefinition.getId());
-                return Collections.emptyList(); //This will suspend any now generation for the defendant.
+            final List<NowResultDefinitionRequirement> mandatoryResultsNotPresent = mandatoryResultLineNotPresent(completedResultDefinitionIds, nowDefinition);
+
+            if (!mandatoryResultsNotPresent.isEmpty()) {
+                if (LOGGER.isInfoEnabled()) {
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(String.format("aborting NOW generation for defendant: %s nowDefinition: %s as not all mandatory results are present", defendantId, nowDefinition.getId()));
+                    mandatoryResultsNotPresent.forEach(
+                            r -> sb.append(String.format(", id: %s %s %s %s", r.getId(), r.getNowReference(), r.getPrimary(), r.getText()))
+                    );
+                    LOGGER.info(sb.toString());
+                }
+                return Collections.emptyList();
             }
 
             final Set<UUID> resultDefinitionIds4Now = nowDefinition.getResultDefinitions().stream()
@@ -225,17 +332,15 @@ public class NowsGenerator {
 
     private void insertAdjournData(final Now now, final List<ResultLine> resultLines4Now, final HearingAdjourned hearingAdjourned) {
         //check for hearing adourned
-        if (isHearingAdjourned(resultLines4Now)) {
-            if (hearingAdjourned == null) {
-                throw new RuntimeException("hearing adjourned but no hearing adjourned data");
-            } else {
-                final NextHearing nextHearing = hearingAdjourned.getNextHearings().get(0);
-                now.setNextHearingCourtDetails(NextHearingCourtDetails.nextHearingCourtDetails()
-                        .withCourtCentre(nextHearing.getCourtCentre())
-                        .withHearingDate(nextHearing.getEarliestStartDateTime().toLocalDate().format(DateTimeFormatter.ofPattern(NEXT_HEARING_START_DATE_FORMAT)))
-                        .withHearingTime(nextHearing.getEarliestStartDateTime().toLocalTime().format(DateTimeFormatter.ofPattern(NEXT_HEARING_START_TIME_FORMAT)))
-                        .build());
-            }
+        if (hearingAdjourned != null && isHearingAdjourned(resultLines4Now)) {
+            final NextHearing nextHearing = hearingAdjourned.getNextHearings().get(0);
+            final ZonedDateTime localDateTime = ZonedDateTime.ofInstant(nextHearing.getListedStartDateTime().toInstant(), ZoneOffset.UTC)
+                    .withZoneSameInstant(ZoneId.of(EUROPE_LONDON));
+            now.setNextHearingCourtDetails(NextHearingCourtDetails.nextHearingCourtDetails()
+                    .withCourtCentre(nextHearing.getCourtCentre())
+                    .withHearingDate(localDateTime.format(DateTimeFormatter.ofPattern(NEXT_HEARING_START_DATE_FORMAT)))
+                    .withHearingTime(localDateTime.format(DateTimeFormatter.ofPattern(NEXT_HEARING_START_TIME_FORMAT)))
+                    .build());
         }
     }
 
@@ -418,33 +523,6 @@ public class NowsGenerator {
         return nowVariantAddressee;
     }
 
-    protected NowVariantResultText nowVariantResultText(final NowResultDefinitionRequirement nowsRequirementRow, final Map<UUID, Prompt> id2PromptRef, final ResultLine resultLine) {
-
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(String.format("nowVariantResultText_nowReference: '%s'  text: '%s' ",
-                    nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
-        }
-
-        if (nowsRequirementRow.getNowReference() != null && nowsRequirementRow.getNowReference().trim().length() > 0) {
-            final NowVariantResultText.Builder builder = NowVariantResultText.nowVariantResultText();
-            String text = isNull(nowsRequirementRow.getText()) ? "" : nowsRequirementRow.getText();
-
-            if (nowsRequirementRow.getNowReference().equalsIgnoreCase(ADJOURNMENT_REASON)) {
-                text = text + extractByPromptReference(id2PromptRef, P_NON_STANDARD_REASON, Collections.singletonList(resultLine)).orElse("");
-            }
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(String.format("**** nowVariantResultText nowReference: '%s'  text: '%s' ",
-                        nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
-            }
-            builder
-                    .withAdditionalProperty(nowsRequirementRow.getNowReference(), text)
-                    .withAdditionalProperty(nowsRequirementRow.getNowReference() + ".welsh", nowsRequirementRow.getWelshText() != null ? nowsRequirementRow.getWelshText() : text);
-            return builder.build();
-        }
-
-        return null;
-    }
-
     private Set<UUID> findAttachmentOfEarningsPrompts(final List<ResultLine> resultLines4Now, final Map<UUID, Prompt> id2PromptRef) {
 
         return resultLines4Now.stream().flatMap(resultLine -> resultLine.getPrompts().stream())
@@ -488,38 +566,6 @@ public class NowsGenerator {
                                 .withPostcode(extractByPromptReference(id2PromptRef, EMPLOYER_ORGANISATION_POST_CODE_PROMPT_REFERENCE, resultLines4Now).orElse(null))
                                 .build())
                         .build());
-    }
-
-    private static Address getAddress(final Defendant defendant) {
-        if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
-            return defendant.getPersonDefendant().getPersonDetails().getAddress();
-        } else if (defendant.getLegalEntityDefendant() != null) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getAddress();
-        } else {
-            return null;
-        }
-    }
-
-    private static String getName(final Defendant defendant) {
-        if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
-            final Person person = defendant.getPersonDefendant().getPersonDetails();
-            return person.getFirstName() + (person.getMiddleName() == null ? "" : (" " + person.getMiddleName())) +
-                    " " + person.getLastName();
-        }
-        if (defendant.getLegalEntityDefendant() != null) {
-            return defendant.getLegalEntityDefendant().getOrganisation().getName();
-        }
-        return null;
-    }
-
-    private static LocalDate getDateOfBirth(final Defendant defendant) {
-        if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
-            final Person person = defendant.getPersonDefendant().getPersonDetails();
-            return person.getDateOfBirth();
-        } else {
-            return null;
-        }
-
     }
 
     private Map<NowVariantInternal, List<String>> calculateVariants(final JsonEnvelope context, final List<ResultLine> resultLines4Now) {
@@ -568,29 +614,6 @@ public class NowsGenerator {
                             );
                         }
                 ).collect(toSet());
-    }
-
-    private static boolean isJurisdictionMatch(final NowDefinition nowDefinition, final JurisdictionType jurisdictionType) {
-
-        String nowJurisdiction = nowDefinition.getJurisdiction();
-        if (nowDefinition.getJurisdiction() == null) {
-            //GPE-7138 empty jurisdiction is allowed
-            return true;
-        }
-        nowJurisdiction = nowJurisdiction.toUpperCase();
-
-        if (nowJurisdiction.startsWith("M")) {
-            return jurisdictionType == JurisdictionType.MAGISTRATES;
-        }
-        if (nowJurisdiction.startsWith("C")) {
-            return jurisdictionType == JurisdictionType.CROWN;
-        }
-        if (nowJurisdiction.startsWith("B")) {
-            return true;
-        }
-        //TODO GPE-7138 blow up if there is a reference data error !
-        throw new RuntimeException(String.format("nowDefinition %s %s has unexpected jurisdiction \"%s\"",
-                nowDefinition.getName(), nowDefinition.getId(), nowDefinition.getJurisdiction()));
     }
 
     private Set<NowDefinition> findNowDefinitions(final JsonEnvelope context, final JurisdictionType jurisdictionType, final List<ResultLine> resultLines) {

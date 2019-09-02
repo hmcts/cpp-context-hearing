@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -31,26 +30,11 @@ public class PersonDefendant {
     @Column(name = "employer_payroll_reference")
     private String employerPayrollReference;
 
-    @Column(name = "observed_ethnicity_code")
-    private String observedEthnicityCode;
-
-    @Column(name = "observed_ethnicity_id")
-    private UUID observedEthnicityId;
-
     @Column(name = "perceived_birth_year")
     private Integer perceivedBirthYear;
 
     @Embedded
     private Person personDetails;
-
-    @Column(name = "p_nci_id")
-    private String pncId;
-
-    @Column(name = "self_defined_ethnicity_code")
-    private String selfDefinedEthnicityCode;
-
-    @Column(name = "self_defined_ethnicity_id")
-    private UUID selfDefinedEthnicityId;
 
     public String getAliases() {
         return aliases;
@@ -108,22 +92,6 @@ public class PersonDefendant {
         this.employerPayrollReference = employerPayrollReference;
     }
 
-    public String getObservedEthnicityCode() {
-        return observedEthnicityCode;
-    }
-
-    public void setObservedEthnicityCode(String observedEthnicityCode) {
-        this.observedEthnicityCode = observedEthnicityCode;
-    }
-
-    public UUID getObservedEthnicityId() {
-        return observedEthnicityId;
-    }
-
-    public void setObservedEthnicityId(UUID observedEthnicityId) {
-        this.observedEthnicityId = observedEthnicityId;
-    }
-
     public Integer getPerceivedBirthYear() {
         return perceivedBirthYear;
     }
@@ -138,29 +106,5 @@ public class PersonDefendant {
 
     public void setPersonDetails(Person personDetails) {
         this.personDetails = personDetails;
-    }
-
-    public String getPncId() {
-        return pncId;
-    }
-
-    public void setPncId(String pncId) {
-        this.pncId = pncId;
-    }
-
-    public String getSelfDefinedEthnicityCode() {
-        return selfDefinedEthnicityCode;
-    }
-
-    public void setSelfDefinedEthnicityCode(String selfDefinedEthnicityCode) {
-        this.selfDefinedEthnicityCode = selfDefinedEthnicityCode;
-    }
-
-    public UUID getSelfDefinedEthnicityId() {
-        return selfDefinedEthnicityId;
-    }
-
-    public void setSelfDefinedEthnicityId(UUID selfDefinedEthnicityId) {
-        this.selfDefinedEthnicityId = selfDefinedEthnicityId;
     }
 }

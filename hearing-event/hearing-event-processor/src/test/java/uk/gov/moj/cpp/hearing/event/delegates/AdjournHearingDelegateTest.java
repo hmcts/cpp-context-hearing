@@ -4,6 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -14,6 +15,7 @@ import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitraryS
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.NextHearing;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -25,8 +27,10 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.relist.HearingAdjournTransformer;
 import uk.gov.moj.cpp.hearing.event.relist.HearingAdjournValidator;
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
+import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingResultDefinition;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.json.Json;
@@ -71,6 +75,16 @@ public class AdjournHearingDelegateTest {
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<JsonEnvelope> transformerEnvelopeArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<ResultsShared> transformerResultSharedCaptor;
+
+    @Captor
+    private ArgumentCaptor<Map<UUID, NextHearingResultDefinition>> transformerNextHearingResultDefinitionsCaptor;
+
+
     @Before
     public void setup() {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
@@ -78,23 +92,59 @@ public class AdjournHearingDelegateTest {
     }
 
     @Test
-    public void execute()  {
+    public void executeCaseOnlyAdjournment() {
+        execute(true, false);
+    }
+
+    @Test
+    public void executeApplicationOnly() {
+        execute(false, true);
+    }
+
+
+
+    private void execute(final boolean validProsecutionCase, final boolean validApplication) {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.adjourn-hearing"), Json.createObjectBuilder().build());
         final ResultsShared resultsShared = getArbitrarySharedResult();
+        if (validApplication) {
+            Target targetForCase = resultsShared.getTargets().get(0);
+            Target target = new Target(UUID.randomUUID(), targetForCase.getDefendantId(), targetForCase.getDraftResult(), targetForCase.getHearingId(), targetForCase.getOffenceId(), targetForCase.getResultLines(), targetForCase.getTargetId());
+            resultsShared.getTargets().add(0,target);
+
+        }
         when(relistReferenceDataService.getNextHearingResultDefinitions(any(), eq(resultsShared.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate()))).thenReturn(emptyMap());
         when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(), eq(resultsShared.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate()))).thenReturn(emptyList());
-        when(hearingAdjournValidator.validate(any(), any(), any())).thenReturn(true);
+        when(hearingAdjournValidator.validateProsecutionCase(any(), any(), any())).thenReturn(validProsecutionCase);
+        when(hearingAdjournValidator.validateApplication(any(), any())).thenReturn(validApplication);
         final HearingAdjourned hearingAdjourned = new HearingAdjourned(UUID.randomUUID(),
                 Arrays.asList(NextHearing.nextHearing().withCourtCentre(CourtCentre.courtCentre().withId(UUID.randomUUID()).build()).build()));
         when(hearingAdjournTransformer.transform2Adjournment(any(), any(), any())).thenReturn(hearingAdjourned);
 
         testObj.execute(resultsShared, event);
 
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-        final HearingAdjourned hearingAdjournedOut =  jsonObjectToObjectConvertor.convert(this.envelopeArgumentCaptor.getValue().payloadAsJsonObject(), HearingAdjourned.class);
+        final int expectedSendCount = 1;
+
+        verify(hearingAdjournTransformer, times(expectedSendCount)).transform2Adjournment(transformerEnvelopeArgumentCaptor.capture(), transformerResultSharedCaptor.capture(), transformerNextHearingResultDefinitionsCaptor.capture());
+        if (validProsecutionCase) {
+            //check that a filtered resultsShared is used to create adjournment message
+            final ResultsShared filtered = transformerResultSharedCaptor.getAllValues().get(0);
+            final long applicationTargetCount = filtered.getTargets().stream().filter(t -> t.getApplicationId() != null).count();
+            Assert.assertEquals(0, applicationTargetCount);
+        }
+        if (validApplication) {
+            //check that a filtered resultsShared is used to create adjournment message
+            final ResultsShared filtered = transformerResultSharedCaptor.getAllValues().get(expectedSendCount - 1);
+            final long prosecutionCaseCount = filtered.getTargets().stream().filter(t -> t.getApplicationId() == null).count();
+            Assert.assertEquals(0, prosecutionCaseCount);
+        }
+
+        verify(this.sender, times(expectedSendCount)).send(this.envelopeArgumentCaptor.capture());
+
+        final HearingAdjourned hearingAdjournedOut = jsonObjectToObjectConvertor.convert(this.envelopeArgumentCaptor.getValue().payloadAsJsonObject(), HearingAdjourned.class);
         Assert.assertEquals(hearingAdjourned.getAdjournedHearing(), hearingAdjournedOut.getAdjournedHearing());
         Assert.assertEquals(hearingAdjourned.getNextHearings().get(0).getCourtCentre().getId(), hearingAdjournedOut.getNextHearings().get(0).getCourtCentre().getId());
 
     }
+
 
 }

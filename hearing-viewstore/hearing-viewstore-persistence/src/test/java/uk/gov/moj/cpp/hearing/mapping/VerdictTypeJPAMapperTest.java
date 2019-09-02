@@ -18,7 +18,7 @@ public class VerdictTypeJPAMapperTest {
                                                            final uk.gov.moj.cpp.hearing.persist.entity.ha.VerdictType entity) {
         return m.with(VerdictType::getCategory, is(entity.getVerdictCategory()))
                 .with(VerdictType::getCategoryType, is(entity.getVerdictCategoryType()))
-                .with(VerdictType::getVerdictTypeId, is(entity.getVerdictTypeId()));
+                .with(VerdictType::getId, is(entity.getVerdictTypeId()));
 
     }
 
@@ -26,7 +26,7 @@ public class VerdictTypeJPAMapperTest {
             final BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.VerdictType> m, final VerdictType pojo) {
         return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.VerdictType::getVerdictCategory, is(pojo.getCategory()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.VerdictType::getVerdictCategoryType, is(pojo.getCategoryType()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.VerdictType::getVerdictTypeId, is(pojo.getVerdictTypeId()));
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.VerdictType::getVerdictTypeId, is(pojo.getId()));
     }
 
     @Test

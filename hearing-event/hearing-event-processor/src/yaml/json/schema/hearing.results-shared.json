@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.results-shared.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/results-shared.json",
   "type": "object",
   "properties": {
     "hearingId": {
@@ -10,7 +10,7 @@
       "type": "string"
     },
     "courtClerk": {
-      "$ref": "http://justice.gov.uk/core/courts/courtClerk.json"
+      "$ref": "http://justice.gov.uk/core/courts/delegatedPowers.json"
     },
     "uncompletedResultLines": {
       "type": "array",

@@ -24,6 +24,7 @@ public class AbstractStagingEnforcementMapper {
     protected String getPromptValue(List<UUID> promptRefsList, String reference) {
 
         return sharedResultLines.stream()
+                .filter(r -> (isNull(r.getIsDeleted()) || !r.getIsDeleted()))
                 .filter(sharedResultLine -> sharedResultLine.getPrompts()!=null)
                 .flatMap(sharedResultLine -> sharedResultLine.getPrompts().stream())
                 .filter(sharedPrompt -> reference.equals(sharedPrompt.getPromptReference()))

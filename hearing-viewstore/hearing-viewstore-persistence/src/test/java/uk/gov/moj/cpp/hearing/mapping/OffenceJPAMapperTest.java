@@ -26,20 +26,20 @@ import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
 public class OffenceJPAMapperTest {
 
-    private OffenceJPAMapper offenceFactsJPAMapper = JPACompositeMappers.OFFENCE_JPA_MAPPER;
+    private OffenceJPAMapper offenceJpaMapper = JPACompositeMappers.OFFENCE_JPA_MAPPER;
 
     @Test
     public void testFromJPA() {
         final uk.gov.moj.cpp.hearing.persist.entity.ha.Offence offenceEntity = aNewHearingJPADataTemplate().getHearing().getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().iterator().next();
-        assertThat(offenceFactsJPAMapper.fromJPA(offenceEntity), whenOffence(isBean(Offence.class), offenceEntity));
+        assertThat(offenceJpaMapper.fromJPA(offenceEntity), whenOffence(isBean(Offence.class), offenceEntity));
     }
 
     @Test
     public void testToJPA() {
         final Hearing hearingEntity = aNewHearingJPADataTemplate().getHearing();
         final Defendant defendantEntity = hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next();
-        final Offence offencePojo = offenceFactsJPAMapper.fromJPA(defendantEntity.getOffences().iterator().next());
-        assertThat(offenceFactsJPAMapper.toJPA(hearingEntity, defendantEntity.getId().getId(), offencePojo), 
+        final Offence offencePojo = offenceJpaMapper.fromJPA(defendantEntity.getOffences().iterator().next());
+        assertThat(offenceJpaMapper.toJPA(hearingEntity, defendantEntity.getId().getId(), offencePojo),
                 whenOffence(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence.class), offencePojo));
     }
 

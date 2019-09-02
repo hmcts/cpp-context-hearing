@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import uk.gov.justice.core.courts.Address;
@@ -305,6 +306,7 @@ class StagingEnforcementDefendantMapper {
         final SharedResultLine sharedResultLine = sharedResultLines.stream()
                 .filter(line -> listOfSharedResultIds.contains(line.getId()))
                 .filter(line -> line.getOrderedDate() != null)
+                .filter(r -> (isNull(r.getIsDeleted()) || !r.getIsDeleted()))
                 .findFirst()
                 .orElse(null);
 

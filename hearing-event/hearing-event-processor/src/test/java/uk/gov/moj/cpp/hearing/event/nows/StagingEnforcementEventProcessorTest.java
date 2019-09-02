@@ -68,7 +68,7 @@ public class StagingEnforcementEventProcessorTest {
         testObj.processAcknowledgement(event);
 
         //Then
-        verify(sender).send(senderJsonEnvelopeCaptor.capture());
+        verify(sender).sendAsAdmin(senderJsonEnvelopeCaptor.capture());
 
         assertThat(senderJsonEnvelopeCaptor.getValue(), is(jsonEnvelope(withMetadataEnvelopedFrom(event).withName(PRIVATE_APPLY_ENFORCEMENT_ACKNOWLEDGEMENT),
                 payloadIsJson(allOf(
@@ -88,7 +88,7 @@ public class StagingEnforcementEventProcessorTest {
         testObj.processAcknowledgement(event);
 
         //Then
-        verify(sender, times(0)).send(anyObject());
+        verify(sender, times(0)).sendAsAdmin(anyObject());
     }
 
 
@@ -102,7 +102,7 @@ public class StagingEnforcementEventProcessorTest {
         testObj.processAcknowledgement(event);
 
         //Then
-        verify(sender).send(senderJsonEnvelopeCaptor.capture());
+        verify(sender).sendAsAdmin(senderJsonEnvelopeCaptor.capture());
 
         System.out.println(senderJsonEnvelopeCaptor.getValue());
 

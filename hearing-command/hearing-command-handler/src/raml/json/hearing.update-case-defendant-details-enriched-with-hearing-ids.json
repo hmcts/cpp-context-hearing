@@ -8,6 +8,13 @@
     "witnessStatementWelsh": "he did not do it in Welsh",
     "mitigation": "I was not there",
     "mitigationWelsh": "I was not there in Welsh",
+    "pncId": "1234567",
+    "aliases": [
+      {
+        "firstName": "Steve",
+        "lastName": "Jones"
+      }
+    ],
     "associatedPersons": [
       {
         "person": {

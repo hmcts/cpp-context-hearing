@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/stagingenforcement/courts/enforceFinancialImpositionAcknowledgement.json",
+  "id": "http://cpp.moj.gov.uk/stagingenforcement/json/schema/event/public-enforce-financial-imposition-acknowledgement.json",
   "type": "object",
   "properties": {
     "originator": {

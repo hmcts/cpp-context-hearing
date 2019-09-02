@@ -72,6 +72,7 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -295,7 +296,7 @@ public class NowsGeneratorTest {
                 .build();
         final NextHearing nextHearing = NextHearing.nextHearing()
                 .withCourtCentre(nextCourtCentre)
-                .withEarliestStartDateTime(ZonedDateTime.now())
+                .withListedStartDateTime(ZonedDateTime.now())
                 .withEstimatedMinutes(123)
                 .build();
 
@@ -303,12 +304,13 @@ public class NowsGeneratorTest {
 
         List<Now> nows = target.createNows(null, resultsShared.it(), hearingAdjourned);
 
-        final String strEarliestStartDateTime = nextHearing.getEarliestStartDateTime().format(DateTimeFormatter.ofPattern(NowsGenerator.NEXT_HEARING_START_DATE_FORMAT));
-
+        final String strEarliestStartDateTime = nextHearing.getListedStartDateTime().format(DateTimeFormatter.ofPattern(NowsGenerator.NEXT_HEARING_START_DATE_FORMAT));
+        final ZonedDateTime localDateTime = ZonedDateTime.ofInstant(nextHearing.getListedStartDateTime().toInstant(), ZoneOffset.UTC)
+                .withZoneSameInstant(ZoneId.of("Europe/London"));
         assertThat(nows, first(isBean(Now.class)
                 .with(Now::getNextHearingCourtDetails, isBean(NextHearingCourtDetails.class)
                         .withValue(NextHearingCourtDetails::getHearingDate, strEarliestStartDateTime)
-                        .withValue(NextHearingCourtDetails::getHearingTime, nextHearing.getEarliestStartDateTime().format(DateTimeFormatter.ofPattern(NowsGenerator.NEXT_HEARING_START_TIME_FORMAT)))
+                        .withValue(NextHearingCourtDetails::getHearingTime, localDateTime.format(DateTimeFormatter.ofPattern(NowsGenerator.NEXT_HEARING_START_TIME_FORMAT)))
                         .with(NextHearingCourtDetails::getCourtCentre, is(nextCourtCentre))
                 )
                 .with(Now::getDefendantId, is(resultsShared.getFirstDefendant().getId()))
@@ -506,11 +508,11 @@ public class NowsGeneratorTest {
             }
 
             assertThat(nows, first(isBean(Now.class)
-                    .with(Now::getFinancialOrders, financialOrderMatcher)
-                    .with(Now::getDefendantId, is(resultsShared.getFirstDefendant().getId()))
-                    .with(Now::getNowsTypeId, is(attachmentOfEarningsNowDefinition.getId()))
+                            .with(Now::getFinancialOrders, financialOrderMatcher)
+                            .with(Now::getDefendantId, is(resultsShared.getFirstDefendant().getId()))
+                            .with(Now::getNowsTypeId, is(attachmentOfEarningsNowDefinition.getId()))
 //                    .with(Now::getRequestedMaterials, first(variantMatcher))
-                    .withValue(Now::getLjaDetails, ljaDetails)
+                            .withValue(Now::getLjaDetails, ljaDetails)
             ));
         }
     }
@@ -570,7 +572,7 @@ public class NowsGeneratorTest {
 
             helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
 
-            helper.getHearing().getTargets().add(with(target(helper.getHearingId(), secondDefendantId, secondOffenceId, randomUUID()).build(),
+            helper.it().getTargets().add(with(target(helper.getHearingId(), secondDefendantId, secondOffenceId, randomUUID()).build(),
                     target -> target.getResultLines().get(0).setResultDefinitionId(resultDefinition.getId())));
 
             helper.getHearing().setJurisdictionType(jurisdictionType);
@@ -588,7 +590,7 @@ public class NowsGeneratorTest {
 
         final List<UUID> defendantIds = asList(resultsShared.getFirstDefendant().getId(), resultsShared.getSecondDefendant().getId());
 
-        final UUID firstResultLineId = resultsShared.getHearing().getTargets().stream()
+        final UUID firstResultLineId = resultsShared.it().getTargets().stream()
                 .filter(target -> target.getDefendantId().equals(nows.get(0).getDefendantId()))
                 .flatMap(target -> target.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
@@ -605,7 +607,7 @@ public class NowsGeneratorTest {
                 ))
         ));
 
-        final UUID secondResultLineId = resultsShared.getHearing().getTargets().stream()
+        final UUID secondResultLineId = resultsShared.it().getTargets().stream()
                 .filter(target -> target.getDefendantId().equals(nows.get(1).getDefendantId()))
                 .flatMap(target -> target.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
@@ -633,15 +635,15 @@ public class NowsGeneratorTest {
     }
 
     @Test
-    public void createNows_whenIncompleteLineIsPresent_noNowGenerated() {
+    public void createNows_whenIsDeleted_noNowGenerated() {
 
-        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplate(), event -> {
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplateForDocumentIsDeleted(), event -> {
             CommandHelpers.ResultsSharedEventHelper helper = h(event);
 
 
             helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
 
-            helper.getHearing().getTargets().add(with(target(helper.getHearingId(), helper.getFirstDefendant().getId(), helper.getFirstDefendantFirstOffence().getId(), randomUUID()).build(), target -> {
+            helper.it().getTargets().add(with(target(helper.getHearingId(), helper.getFirstDefendant().getId(), helper.getFirstDefendantFirstOffence().getId(), randomUUID()).build(), target -> {
                 target.getResultLines().get(0).setResultDefinitionId(resultDefinition.getId());
                 target.getResultLines().get(0).setIsComplete(false);
             }));
@@ -654,6 +656,7 @@ public class NowsGeneratorTest {
 
         assertThat(nows.size(), is(0));
     }
+
 
     @Test
     public void createNows_whenIncompleteLineIsPresentForADifferentDefendant_NowsAreGenerated() {
@@ -670,7 +673,7 @@ public class NowsGeneratorTest {
 
             helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
 
-            helper.getHearing().getTargets().add(with(target(helper.getHearingId(), secondDefendantId, secondOffenceId, randomUUID()).build(), target -> {
+            helper.it().getTargets().add(with(target(helper.getHearingId(), secondDefendantId, secondOffenceId, randomUUID()).build(), target -> {
                 target.getResultLines().get(0).setResultDefinitionId(resultDefinition.getId());
                 target.getResultLines().get(0).setIsComplete(false);
             }));
@@ -683,6 +686,36 @@ public class NowsGeneratorTest {
         List<Now> nows = target.createNows(null, resultsShared.it(), null);
 
         assertThat(nows.size(), is(1));
+    }
+
+    @Test
+    public void createNows_whenIsDeletedFlag_NowsAreNotGenerated() {
+
+        final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(NowsTemplates.resultsSharedTemplateForDocumentIsDeleted(), event -> {
+            CommandHelpers.ResultsSharedEventHelper helper = h(event);
+
+            UUID secondDefendantId = randomUUID();
+            UUID secondOffenceId = randomUUID();
+            helper.getFirstCase().getDefendants().add(CoreTestTemplates.defendant(helper.getFirstCase().getId(),
+                    CoreTestTemplates.defaultArguments(),
+                    new Pair<>(secondDefendantId, Collections.singletonList(secondOffenceId))
+            ).build());
+
+            helper.getFirstCompletedResultLine().setResultDefinitionId(resultDefinition.getId());
+
+            helper.it().getTargets().add(with(target(helper.getHearingId(), secondDefendantId, secondOffenceId, randomUUID()).build(), target -> {
+                target.getResultLines().get(0).setResultDefinitionId(resultDefinition.getId());
+                target.getResultLines().get(0).setIsComplete(false);
+            }));
+        }));
+
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultDefinition.getId()))).thenReturn(new HashSet<>(asList(nowDefinition)));
+
+        when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId()))).thenReturn(resultDefinition);
+
+        List<Now> nows = target.createNows(null, resultsShared.it(), null);
+
+        assertThat(nows.size(), is(0));
     }
 
     @Test
@@ -1001,7 +1034,8 @@ public class NowsGeneratorTest {
         assertThat(nows.get(0).getRequestedMaterials().get(0).getIsAmended(), is(true));
     }
 
-    @Test
+
+  @Test
     public void testNowVariantResultText() {
 
         final String expected = "";

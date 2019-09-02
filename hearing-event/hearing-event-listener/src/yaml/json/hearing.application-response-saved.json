@@ -1,0 +1,13 @@
+{
+  "applicationPartyId": "d8756d94-b5a5-4b61-9b3b-50ad9b3a7d0f",
+  "courtApplicationResponse": {
+    "applicationId": "d8756d94-b5a5-4b61-9b3b-50ad9b3a7d0f",
+    "originatingHearingId": "f404ac65-5d49-4af2-8580-8277e0e8a6e2",
+    "applicationResponseDate": "2011-07-14",
+    "applicationResponseType": {
+      "id": "d8756d94-b5a5-4b61-9b3b-50ad9b3a7d0d",
+      "description": "Admitted",
+      "sequence": 1
+    }
+  }
+}

@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse;
 
 import java.time.LocalDate;
 import java.util.Set;
-
 public final class ProsecutionCounsel {
 
     private final String attendeeId;

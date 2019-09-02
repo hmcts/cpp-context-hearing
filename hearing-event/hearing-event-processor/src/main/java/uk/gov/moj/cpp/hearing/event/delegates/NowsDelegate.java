@@ -5,7 +5,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import uk.gov.justice.core.courts.CourtClerk;
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -16,12 +15,14 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.ResultPrompt;
 import uk.gov.justice.core.courts.SharedResultLine;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.nowdocument.NowDocumentRequest;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.NowsRequestedToDocumentConverter;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PendingNowsRequestedCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -43,6 +44,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,36 +52,44 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S1188", "squid:S1602", "squid:S1135", "squid:S00112", "squid:S1612"})
 public class NowsDelegate {
 
+    private final Enveloper enveloper;
+
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    private final ReferenceDataService referenceDataService;
+
+    private final NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NowsDelegate.class.getName());
+
     public static final String INCOMING_PROMPT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String OUTGOING_PROMPT_DATE_FORMAT = "dd MMM yyyy";
     public static final String DATE_PROMPT_TYPE = "DATE";
     public static final String CURRENCY_PROMPT_TYPE = "CURR";
-    private static final Logger LOGGER = LoggerFactory.getLogger(NowsDelegate.class.getName());
-    private final Enveloper enveloper;
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
-    private final ReferenceDataService referenceDataService;
 
     @Inject
     public NowsDelegate(final Enveloper enveloper,
                         final ObjectToJsonObjectConverter objectToJsonObjectConverter,
-                        final ReferenceDataService referenceDataService) {
+                        final ReferenceDataService referenceDataService,
+                        final NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter) {
         this.enveloper = enveloper;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.referenceDataService = referenceDataService;
+        this.nowsRequestedToDocumentConverter = nowsRequestedToDocumentConverter;
     }
 
     private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
-        return resultsShared.getHearing().getTargets().stream()
+        return resultsShared.getTargets().stream()
                 .flatMap(target -> target.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList());
     }
 
-    private DelegatedPowers delegatedPowers(final CourtClerk courtClerk) {
+    private DelegatedPowers delegatedPowers(final DelegatedPowers courtClerk) {
         return DelegatedPowers.delegatedPowers()
                 .withLastName(courtClerk.getLastName())
                 .withFirstName(courtClerk.getFirstName())
-                .withUserId(courtClerk.getId())
+                .withUserId(courtClerk.getUserId())
                 .build();
     }
 
@@ -157,7 +167,7 @@ public class NowsDelegate {
 
         final List<SharedResultLine> sharedResultLines = new ArrayList<>();
 
-        resultsShared.getHearing().getTargets().forEach(target ->
+        resultsShared.getTargets().forEach(target ->
                 sharedResultLines.addAll(target.getResultLines().stream()
                         .filter(ResultLine::getIsComplete)
                         .map(line -> {
@@ -198,7 +208,7 @@ public class NowsDelegate {
                                             DelegatedPowers.delegatedPowers()
                                                     .withFirstName(resultsShared.getCourtClerk().getFirstName())
                                                     .withLastName(resultsShared.getCourtClerk().getLastName())
-                                                    .withUserId(resultsShared.getCourtClerk().getId())
+                                                    .withUserId(resultsShared.getCourtClerk().getUserId())
                                                     .build())
                                     .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())//TODO GPE-6752
                                     .withLastSharedDateTime(ofNullable(resultsShared.getCompletedResultLinesStatus()
@@ -208,6 +218,10 @@ public class NowsDelegate {
                                             .map(LocalDate::toString)
                                             .orElse(null)
                                     )
+                                    .withAmendmentDate(line.getAmendmentDate())
+                                    .withAmendmentReasonId(line.getAmendmentReasonId())
+                                    .withApprovedDate(line.getApprovedDate())
+                                    .withFourEyesApproval(line.getFourEyesApproval())
                                     .build();
                         })
                         .collect(Collectors.toList())));
@@ -260,26 +274,26 @@ public class NowsDelegate {
         );
     }
 
-    public void sendNows(final Sender sender, final JsonEnvelope event, final CreateNowsRequest nowsRequest) {
+    public void sendNows(final Sender sender, final JsonEnvelope event, final CreateNowsRequest nowsRequest, final List<Target> targets) {
+
         final GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand();
-        final List<Target> targets = nowsRequest.getHearing().getTargets();
 
         formatPrompts(event, targets, nowsRequest.getSharedResultLines());
 
         generateNowsCommand.setCreateNowsRequest(nowsRequest);
 
-        nowsRequest.getHearing().setTargets(null);
+        final List<NowDocumentRequest> nowDocumentRequests = nowsRequestedToDocumentConverter.convert(event, nowsRequest);
 
-        if (!generateNowsCommand.getCreateNowsRequest().getNows().isEmpty()) {
-            sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "progression.generate-nows")
-                    .apply(this.objectToJsonObjectConverter.convert(generateNowsCommand)));
-        }
+        nowDocumentRequests.forEach(nowDocumentRequest -> {
+            final JsonObject nowsDocumentOrderJson = objectToJsonObjectConverter.convert(nowDocumentRequest);
 
-        nowsRequest.getHearing().setTargets(targets);
+            sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "public.hearing.now-document-requested")
+                    .apply(this.objectToJsonObjectConverter.convert(nowsDocumentOrderJson)));
+        });
     }
 
-    public void sendPendingNows(Sender sender, JsonEnvelope event, CreateNowsRequest nowsRequest) {
-        final PendingNowsRequestedCommand pendingNowsRequestedCommand = new PendingNowsRequestedCommand(nowsRequest);
+    public void sendPendingNows(final Sender sender, final JsonEnvelope event, final CreateNowsRequest nowsRequest, final List<Target> targets) {
+        final PendingNowsRequestedCommand pendingNowsRequestedCommand = new PendingNowsRequestedCommand(nowsRequest, targets);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("sending hearing.command.pending-nows-requested {} ", this.objectToJsonObjectConverter.convert(pendingNowsRequestedCommand));
         }

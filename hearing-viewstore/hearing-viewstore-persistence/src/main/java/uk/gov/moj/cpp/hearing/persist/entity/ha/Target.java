@@ -35,6 +35,9 @@ public class Target {
     @Column(name = "offence_id")
     private UUID offenceId;
 
+    @Column(name = "application_id")
+    private UUID applicationId;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "target", orphanRemoval = true)
     private Set<ResultLine> resultLines = new HashSet<>();
 
@@ -88,6 +91,15 @@ public class Target {
 
     public Target setOffenceId(final UUID offenceId) {
         this.offenceId = offenceId;
+        return this;
+    }
+
+    public UUID getApplicationId() {
+        return applicationId;
+    }
+
+    public Target setApplicationId(final UUID applicationId) {
+        this.applicationId = applicationId;
         return this;
     }
 

@@ -14,7 +14,7 @@ public class VerdictTypeJPAMapper {
         final VerdictType verdictType = new VerdictType();
         verdictType.setVerdictCategory(pojo.getCategory());
         verdictType.setVerdictCategoryType(pojo.getCategoryType());
-        verdictType.setVerdictTypeId(pojo.getVerdictTypeId());
+        verdictType.setVerdictTypeId(pojo.getId());
         verdictType.setDescription(pojo.getDescription());
         verdictType.setSequence(pojo.getSequence());
         return verdictType;
@@ -27,7 +27,7 @@ public class VerdictTypeJPAMapper {
         return uk.gov.justice.core.courts.VerdictType.verdictType()
                 .withCategory(entity.getVerdictCategory())
                 .withCategoryType(entity.getVerdictCategoryType())
-                .withVerdictTypeId(entity.getVerdictTypeId())
+                .withId(entity.getVerdictTypeId())
                 .withDescription(entity.getDescription())
                 .withSequence(entity.getSequence())
                 .build();

@@ -58,10 +58,10 @@ public class DefenceCounselAddedEventListenerTest {
     private ArgumentCaptor<HearingDefenceCounsel> ahearingArgumentCaptor;
 
     @Mock
-    HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper ;
+    HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper;
 
     @Mock
-    HearingDefenceCounselRepository hearingDefenceCounselRepository ;
+    HearingDefenceCounselRepository hearingDefenceCounselRepository;
 
     @Before
     public void setUp() {
@@ -95,7 +95,7 @@ public class DefenceCounselAddedEventListenerTest {
         hearingDefenceCounsel.setPayload(getEntityPayload(defenceCounsel));
 
         when(this.hearingRepository.findBy(defenceCounselAdded.getHearingId())).thenReturn(hearing);
-        when(this.hearingDefenceCounselJPAMapper.toJPA(hearing,defenceCounsel)).thenReturn(hearingDefenceCounsel);
+        when(this.hearingDefenceCounselJPAMapper.toJPA(hearing, defenceCounsel)).thenReturn(hearingDefenceCounsel);
 
         //When
         this.defenceCounselAddedEventListener.defenceCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-added"),
@@ -135,7 +135,7 @@ public class DefenceCounselAddedEventListenerTest {
         hearingDefenceCounsel.setPayload(getEntityPayload(defenceCounsel));
 
         when(this.hearingRepository.findBy(defenceCounselUpdated.getHearingId())).thenReturn(hearing);
-        when(this.hearingDefenceCounselJPAMapper.toJPA(hearing,defenceCounsel)).thenReturn(hearingDefenceCounsel);
+        when(this.hearingDefenceCounselJPAMapper.toJPA(hearing, defenceCounsel)).thenReturn(hearingDefenceCounsel);
 
         //When
         this.defenceCounselAddedEventListener.defenceCounselUpdated(envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-updated"),
@@ -149,11 +149,11 @@ public class DefenceCounselAddedEventListenerTest {
 
     }
 
-    private JsonNode getEntityPayload(DefenceCounsel defenceCounsel){
+    private JsonNode getEntityPayload(DefenceCounsel defenceCounsel) {
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
-       return mapper.valueToTree(defenceCounsel);
+        return mapper.valueToTree(defenceCounsel);
 
     }
 }

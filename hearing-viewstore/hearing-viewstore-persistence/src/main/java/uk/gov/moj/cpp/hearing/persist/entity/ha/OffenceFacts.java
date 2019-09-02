@@ -13,7 +13,7 @@ public class OffenceFacts {
     private String alcoholReadingAmount;
 
     @Column(name = "alcohol_reading_method")
-    private String alcoholReadingMethod;
+    private String alcoholReadingMethodCode;
 
     public String getVehicleRegistration() {
         return vehicleRegistration;
@@ -31,11 +31,11 @@ public class OffenceFacts {
         this.alcoholReadingAmount = alcoholReadingAmount;
     }
 
-    public String getAlcoholReadingMethod() {
-        return alcoholReadingMethod;
+    public String getAlcoholReadingMethodCode() {
+        return alcoholReadingMethodCode;
     }
 
-    public void setAlcoholReadingMethod(String alcoholReadingMethod) {
-        this.alcoholReadingMethod = alcoholReadingMethod;
+    public void setAlcoholReadingMethodCode(String alcoholReadingMethodCode) {
+        this.alcoholReadingMethodCode = alcoholReadingMethodCode;
     }
 }

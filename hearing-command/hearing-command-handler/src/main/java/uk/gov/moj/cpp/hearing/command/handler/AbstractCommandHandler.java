@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.json.JsonValue;
 
 abstract class AbstractCommandHandler {
@@ -39,6 +40,11 @@ abstract class AbstractCommandHandler {
         return aggregate;
     }
 
+    protected <A extends Aggregate> A aggregate(final Class<A> clazz, final UUID streamId) throws EventStreamException {
+        final EventStream eventStream = eventSource.getStreamById(streamId);
+        return aggregateService.get(eventStream, clazz);
+    }
+
     protected <A extends Aggregate, B> A aggregate(final Class<A> clazz, final UUID streamId,
                                                    final Envelope<B> envelope, final Function<A, Stream<Object>> function) throws EventStreamException {
         final EventStream eventStream = eventSource.getStreamById(streamId);
@@ -50,6 +56,10 @@ abstract class AbstractCommandHandler {
 
     protected <T> T convertToObject(final JsonEnvelope envelope, final Class<T> clazz) {
         return this.jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), clazz);
+    }
+
+    protected <T> T convertToObject(final JsonObject jsonObject, final Class<T> clazz) {
+        return this.jsonObjectToObjectConverter.convert(jsonObject, clazz);
     }
 
     protected <T> List<T> convertToList(final JsonArray jsonArray, final Class<T> clazz) {

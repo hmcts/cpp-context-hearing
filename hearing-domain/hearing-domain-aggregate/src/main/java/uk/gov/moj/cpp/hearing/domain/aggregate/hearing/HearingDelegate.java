@@ -1,20 +1,30 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("squid:S00107")
@@ -30,6 +40,18 @@ public class HearingDelegate implements Serializable {
 
     public void handleHearingInitiated(HearingInitiated hearingInitiated) {
         this.momento.setHearing(hearingInitiated.getHearing());
+    }
+
+    public void handleHearingExtended(final HearingExtended hearingExtended) {
+        if (this.momento.getHearing() != null) {
+            final List<CourtApplication> oldCourtApplications = this.momento.getHearing().getCourtApplications();
+            final List<CourtApplication> newCourtApplications = oldCourtApplications == null ? new ArrayList<>() :
+                    oldCourtApplications.stream()
+                            .filter(ca -> !ca.getId().equals(hearingExtended.getCourtApplication().getId()))
+                            .collect(Collectors.toList());
+            newCourtApplications.add(hearingExtended.getCourtApplication());
+            this.momento.getHearing().setCourtApplications(newCourtApplications);
+        }
     }
 
     public void handleHearingDetailChanged(HearingDetailChanged hearingDetailChanged) {
@@ -53,6 +75,11 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingInitiated(hearing));
     }
 
+    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication) {
+
+        return Stream.of(new HearingExtended(hearingId, courtApplication));
+    }
+
     public Stream<Object> updateHearingDetails(final UUID id,
                                                final HearingType type,
                                                final CourtCentre courtCentre,
@@ -69,7 +96,58 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingDetailChanged(id, type, courtCentre, jurisdictionType, reportingRestrictionReason, hearingLanguage, hearingDays, judiciary));
     }
 
-    private HearingEventIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {
-        return new HearingEventIgnored(hearingId, reason);
+    private HearingChangeIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {
+        return new HearingChangeIgnored(hearingId, reason);
+    }
+
+    public List<Offence> getAllOffencesMissingCount(final Hearing hearing) {
+        return hearing.getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .filter(o -> o.getCount() == null).collect(Collectors.toList());
+    }
+
+    public Stream<Object> ignoreHearingInitiate(final List<Offence> offences, final UUID hearingId) {
+        return Stream.of(new HearingInitiateIgnored(hearingId, offences));
+    }
+
+    public Stream<Object> addDefendant(final UUID hearingId, final Defendant defendant) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.add-defendant' event as hearing not found", hearingId));
+        } else if (checkIfHearingDateAlreadyPassed()) {
+            return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.add-defendant' event as hearing date has already passed", hearingId));
+        }
+        return Stream.of(DefendantAdded.caseDefendantAdded().setHearingId(hearingId).setDefendant(defendant));
+    }
+
+    private boolean checkIfHearingDateAlreadyPassed() {
+        return momento.getHearing().getHearingDays().stream()
+                .map(hearingDay -> hearingDay.getSittingDay().toLocalDate())
+                .filter(localDate -> (localDate.isAfter(LocalDate.now()) || localDate.isEqual(LocalDate.now())))
+                .collect(Collectors.toList()).isEmpty();
+
+    }
+
+    public Stream<Object> updateCourtApplication(final UUID hearingId, final CourtApplication courtApplication) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.update-court-application' event as hearing not found", hearingId));
+        }
+        return Stream.of(new ApplicationDetailChanged(hearingId, courtApplication));
+    }
+
+    public void handleDefendantAdded(final DefendantAdded defendantAdded) {
+        if (momento.getHearing() != null) {
+            momento.getHearing().getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().add(defendantAdded.getDefendant()));
+        }
+    }
+
+    public void handleApplicationDetailChanged(final ApplicationDetailChanged applicationDetailChanged) {
+        if (momento.getHearing() != null) {
+            final Optional<CourtApplication> previousStoredApplication = momento.getHearing().getCourtApplications().stream()
+                    .filter(courtApplication -> courtApplication.getId().equals(applicationDetailChanged.getCourtApplication().getId()))
+                    .findFirst();
+            previousStoredApplication.ifPresent(courtApplication -> momento.getHearing().getCourtApplications().remove(courtApplication));
+            momento.getHearing().getCourtApplications().add(applicationDetailChanged.getCourtApplication());
+        }
     }
 }

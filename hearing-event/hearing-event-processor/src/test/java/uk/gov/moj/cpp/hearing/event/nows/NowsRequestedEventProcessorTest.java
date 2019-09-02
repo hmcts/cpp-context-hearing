@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.eq;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -28,6 +30,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
 import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.print.DocFlavor;
@@ -50,6 +53,9 @@ public class NowsRequestedEventProcessorTest {
 
     @Captor
     private ArgumentCaptor<CreateNowsRequest> nowsRequestArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<Target>> targetsArgumentCaptor;
 
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
@@ -76,14 +82,15 @@ public class NowsRequestedEventProcessorTest {
         final String accountNumber = "12345678";
         final CreateNowsRequest nowsRequest = generateNowsRequestTemplate(defendantId);
         final UUID requestId = nowsRequest.getNows().get(0).getId();
-        final NowsRequested nowsRequested = new NowsRequested(requestId, nowsRequest, accountNumber);
+        final List<Target> targets = asList();
+        final NowsRequested nowsRequested = new NowsRequested(requestId, nowsRequest, accountNumber, targets);
         final JsonEnvelope envelope = envelopeFrom(
                 metadataWithRandomUUID("hearing.events.nows-requested"),
                 objectToJsonObjectConverter.convert(nowsRequested)
         );
         nowsRequestedEventProcessor.processNowsRequested(envelope);
 
-        verify(nowsDelegate).sendNows(eq(sender), eq(envelope), nowsRequestArgumentCaptor.capture());
+        verify(nowsDelegate).sendNows(eq(sender), eq(envelope), nowsRequestArgumentCaptor.capture(), targetsArgumentCaptor.capture());
 
         final CreateNowsRequest capturedNowsRequest = nowsRequestArgumentCaptor.getValue();
         assertThat(capturedNowsRequest.getNows().get(0).getId().toString(), is(nowsRequest.getNows().get(0).getId().toString()));

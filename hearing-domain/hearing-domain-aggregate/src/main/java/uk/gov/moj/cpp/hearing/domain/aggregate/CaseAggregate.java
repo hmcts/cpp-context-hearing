@@ -47,4 +47,8 @@ public class CaseAggregate implements Aggregate {
                         .withHearingId(hearingId)
                         .build()));
     }
+
+    public List<UUID> getHearingIds() {
+        return hearingIds;
+    }
 }

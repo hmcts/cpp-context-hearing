@@ -8,6 +8,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
@@ -34,9 +35,20 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final Target target = convertToObject(envelope, Target.class);
         if (target != null) {
             aggregate(HearingAggregate.class, target.getHearingId(), envelope,
-                    aggregate -> aggregate.saveDraftResults(target.getTargetId(), target.getDefendantId(), target.getHearingId(),
+                    aggregate -> aggregate.saveDraftResults(target.getApplicationId(), target.getTargetId(), target.getDefendantId(), target.getHearingId(),
                             target.getOffenceId(), target.getDraftResult(), target.getResultLines()));
         }
+    }
+
+    @Handles("hearing.command.application-draft-result")
+    public void applicationDraftResult(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.application-draft-result event received {}", envelope.toObfuscatedDebugString());
+        }
+        final ApplicationDraftResultCommand applicationDraftResultCommand = convertToObject(envelope, ApplicationDraftResultCommand.class);
+            aggregate(HearingAggregate.class, applicationDraftResultCommand.getHearingId(), envelope,
+                    aggregate -> aggregate.applicationDraftResults(applicationDraftResultCommand.getTargetId(), applicationDraftResultCommand.getApplicationId(), applicationDraftResultCommand.getHearingId(),
+                            applicationDraftResultCommand.getDraftResult(), applicationDraftResultCommand.getApplicationOutcomeType(), applicationDraftResultCommand.getApplicationOutcomeDate() ));
     }
 
     @Handles("hearing.command.share-results")

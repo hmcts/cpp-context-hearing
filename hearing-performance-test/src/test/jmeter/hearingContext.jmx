@@ -202,7 +202,7 @@
                     <elementProp name="" elementType="HTTPArgument">
                       <boolProp name="HTTPArgument.always_encode">false</boolProp>
                       <stringProp name="Argument.value">{&#xd;
-  &quot;caseId&quot;: &quot;${caseId}&quot;,&#xd;
+  &quot;applicationId&quot;: &quot;${applicationId}&quot;,&#xd;
   &quot;defendants&quot;: [&#xd;
     {&#xd;
       &quot;id&quot;: &quot;${defendantIds_1}&quot;,&#xd;

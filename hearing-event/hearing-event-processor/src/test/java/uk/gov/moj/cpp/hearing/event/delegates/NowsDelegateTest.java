@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static io.github.benas.randombeans.FieldDefinitionBuilder.field;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -21,7 +22,7 @@ import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.generateNowsRequestTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.generateFullNowsRequestTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
@@ -35,14 +36,18 @@ import uk.gov.justice.core.courts.NowType;
 import uk.gov.justice.core.courts.NowVariant;
 import uk.gov.justice.core.courts.NowVariantKey;
 import uk.gov.justice.core.courts.NowVariantResult;
+import uk.gov.justice.core.courts.Personalisation;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.ResultPrompt;
 import uk.gov.justice.core.courts.SharedResultLine;
+import uk.gov.justice.core.courts.notification.EmailChannel;
+import uk.gov.justice.core.courts.nowdocument.NowDocumentRequest;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.NowsRequestedToDocumentConverter;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -62,6 +67,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.benas.randombeans.EnhancedRandomBuilder;
+import io.github.benas.randombeans.FieldDefinition;
+import io.github.benas.randombeans.api.EnhancedRandom;
+import io.github.benas.randombeans.api.Randomizer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,6 +98,8 @@ public class NowsDelegateTest {
     private Sender sender;
     @InjectMocks
     private NowsDelegate nowsDelegate;
+    @Mock
+    private NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter;
 
     @Before
     public void initMocks() {
@@ -100,118 +111,10 @@ public class NowsDelegateTest {
         testGenerateNows(standardNowDefinition());
     }
 
-
-    private void testGenerateNows(final NowDefinition nowDefinition) {
-
-        final ResultsSharedEventHelper sharedEventHelper = h(
-                resultsSharedTemplate());
-
-        LocalDate localDate = LocalDate.now();
-        uk.gov.justice.core.courts.Prompt datePrompt = uk.gov.justice.core.courts.Prompt.prompt()
-                .withId(UUID.randomUUID())
-                .withValue(localDate.format(DateTimeFormatter.ofPattern(NowsDelegate.INCOMING_PROMPT_DATE_FORMAT)))
-                .build();
-
-        final CommandHelpers.NowsHelper nows = h(basicNowsTemplate());
-
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(sharedEventHelper.getFirstCompletedResultLine().getResultDefinitionId())))
-                .thenReturn(new HashSet<>(asList(nowDefinition)));
-
-        final UUID resultDefinitionId = sharedEventHelper.getFirstCompletedResultLine().getResultDefinitionId();
-
-        final UUID promptId = sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getId();
-
-        sharedEventHelper.getFirstCompletedResultLine().getPrompts().add(datePrompt);
-
-        // GPE-6752 bulk input resultDefinition, add prompt references
-        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
-                .setId(resultDefinitionId)
-                .setPrompts(asList(Prompt.prompt().setId(promptId),
-                        Prompt.prompt().setId(datePrompt.getId()).setType(NowsDelegate.DATE_PROMPT_TYPE)));
-
-        when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinitionId)))
-                .thenReturn(resultDefinition);
-
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(sharedEventHelper.it()));
-
-        final List<Now> nowsList = nows.it();
-        final Now now0 = nowsList.get(0);
-        List<UUID> newPromptRefs = new ArrayList<>(now0.getRequestedMaterials().get(0).getNowResults().get(0).getPromptRefs());
-        newPromptRefs.add(datePrompt.getId());
-
-        now0.getRequestedMaterials().get(0).getNowResults().get(0).setPromptRefs(newPromptRefs);
-
-        final CreateNowsRequest nowsRequest = nowsDelegate.generateNows(event, nowsList, sharedEventHelper.it());
-
-        assertThat(nowsRequest, isBean(CreateNowsRequest.class)
-                .with(CreateNowsRequest::getHearing, isBean(Hearing.class))
-                .with(CreateNowsRequest::getCourtClerk, isBean(DelegatedPowers.class)
-                        .with(DelegatedPowers::getUserId, is(sharedEventHelper.getCourtClerk().getId()))
-                        .with(DelegatedPowers::getLastName, is(sharedEventHelper.getCourtClerk().getLastName()))
-                        .with(DelegatedPowers::getFirstName, is(sharedEventHelper.getCourtClerk().getFirstName()))
-                )
-                .withValue(req -> req.getNows().size(), 1)
-                .with(CreateNowsRequest::getNows, first(isBean(Now.class)
-                        .with(Now::getId, is(nows.getFirstNow().getId()))
-                        .with(Now::getNowsTypeId, is(nows.getFirstNow().getNowsTypeId()))
-                        .with(Now::getDefendantId, is(nows.getFirstNow().getDefendantId()))
-                        .with(Now::getRequestedMaterials, first(isBean(NowVariant.class)
-                                .with(NowVariant::getMaterialId, is(nows.getFirstMaterial().getMaterialId()))
-                                .with(NowVariant::getIsAmended, is(nows.getFirstMaterial().getIsAmended()))
-                                .with(NowVariant::getNowResults, first(isBean(NowVariantResult.class)
-                                        .with(NowVariantResult::getSharedResultId, is(nows.getFirstNowsResult().getSharedResultId()))
-                                        .with(NowVariantResult::getSequence, is(nows.getFirstNowsResult().getSequence()))
-                                        .with(nvr -> nvr.getPromptRefs().get(0), is(nows.getFirstPrompt()))
-                                ))
-                                .with(NowVariant::getKey, isBean(NowVariantKey.class)
-                                        .withValue(key -> key.getUsergroups().get(0), nows.getFirstUserGroup())
-                                )
-                        ))
-                ))
-                .with(CreateNowsRequest::getSharedResultLines, first(isBean(SharedResultLine.class)
-                        .with(SharedResultLine::getId, is(sharedEventHelper.getHearing().getTargets().get(0).getResultLines().get(0).getResultLineId()))
-                        .with(SharedResultLine::getId, is(sharedEventHelper.getFirstCompletedResultLine().getResultLineId()))
-                        .with(SharedResultLine::getDefendantId, is(sharedEventHelper.getFirstTarget().getDefendantId()))
-                        .with(SharedResultLine::getProsecutionCaseId, is(sharedEventHelper.getFirstCase().getId()))
-                        .with(SharedResultLine::getOffenceId, is(sharedEventHelper.getFirstTarget().getOffenceId()))
-                        .with(SharedResultLine::getLevel, is(sharedEventHelper.getFirstCompletedResultLine().getLevel().toString()))
-                        .with(SharedResultLine::getLabel, is(sharedEventHelper.getFirstCompletedResultLine().getResultLabel()))
-                        .with(SharedResultLine::getPrompts, first(isBean(ResultPrompt.class)
-                                .with(ResultPrompt::getId, is(sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getId()))
-                                .with(ResultPrompt::getLabel, is(sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getLabel()))
-                                .with(ResultPrompt::getValue, is(sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getValue()))
-                        ))
-                        .with(SharedResultLine::getPrompts, second(isBean(ResultPrompt.class)
-                                .withValue(ResultPrompt::getId, datePrompt.getId())
-                                .withValue(ResultPrompt::getValue, localDate.format(DateTimeFormatter.ofPattern(NowsDelegate.INCOMING_PROMPT_DATE_FORMAT)))
-                        ))
-                        .with(SharedResultLine::getLastSharedDateTime, is(sharedEventHelper.getFirstCompletedResultLineStatus().getLastSharedDateTime().toLocalDate().toString()))
-                        .with(SharedResultLine::getOrderedDate, is(sharedEventHelper.getFirstCompletedResultLine().getOrderedDate()))
-                ))
-                .with(CreateNowsRequest::getNowTypes, first(isBean(NowType.class)
-                        .with(NowType::getId, is(nowDefinition.getId()))
-                        .with(NowType::getDescription, is(nowDefinition.getName()))
-                        .with(NowType::getJurisdiction, is(nowDefinition.getJurisdiction()))
-                        .withValue(NowType::getPriority, nowDefinition.getUrgentTimeLimitInMinutes().toString())
-                        .withValue(NowType::getTemplateName, nowDefinition.getTemplateName())
-                        .withValue(NowType::getRank, nowDefinition.getRank())
-                        .withValue(NowType::getStaticText, nowDefinition.getText())
-                        //this are changing .with(NowType::getStaticText, is(exp))
-                        //this is changing .with(NowType::getWelshStaticText, is(nowDefinition.getWelshText() + "\n" + nowDefinition.getResultDefinitions().get(0).getWelshText()))
-                        //TODO GPE-6313 resolve these 2
-                        //.with(NowTypes::getWelshDescription, is(nowDefinition.getWelshName()))
-                        //.with(NowTypes::getBilingualTemplateName, is(nowDefinition.getBilingualTemplateName()))
-                        .with(NowType::getRequiresBulkPrinting, is(nowDefinition.getRemotePrintingRequired()))
-                ))
-        );
-    }
-
     @Test
     public void testGenerateNowsMultiPrimaries() {
         testGenerateNows(TestTemplates.multiPrimaryNowDefinition());
     }
-
 
     @Test
     public void testGenerateNows_withNullNowText() {
@@ -273,46 +176,19 @@ public class NowsDelegateTest {
                 )));
     }
 
-    private ResultDefinition stubResultDefinition(ResultsSharedEventHelper resultsShared) {
-        UUID resultDefinitionId = resultsShared.getFirstCompletedResultLine().getResultDefinitionId();
-        // GPE-6752 bulk input resultDefinition, add prompt references
-
-
-        final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
-            d.setText(null);
-            d.getResultDefinitions().get(0).setText(null);
-            d.setWelshText(null);
-            d.getResultDefinitions().get(0).setWelshText(null);
-        });
-
-        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
-                .setPrompts(asList(
-                        Prompt.prompt()
-                                .setId(resultsShared.getFirstCompletedResultLineFirstPrompt().getId())
-
-                ))
-                .setId(resultDefinitionId);
-
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
-                .thenReturn(new HashSet<>(asList(nowDefinition)));
-        when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinitionId)))
-                .thenReturn(resultDefinition);
-        return resultDefinition;
-
-    }
-
-
     @Test
     public void testSendNows_shouldSendProgressionGenerateNowsEvent() {
         final UUID defendantId = UUID.randomUUID();
-        final CreateNowsRequest nowsRequest = generateNowsRequestTemplate(defendantId);
+        final TestTemplates.FullNowsRequest fullNowsRequest = generateFullNowsRequestTemplate(defendantId);
+        final CreateNowsRequest nowsRequest = fullNowsRequest.getCreateNowsRequest();
+
         final JsonEnvelope envelope = envelopeFrom(
                 metadataWithRandomUUID("hearing.events.nows-requested"),
                 objectToJsonObjectConverter.convert(nowsRequest)
         );
 
 
-        final List<ResultLine> resultLines = nowsRequest.getHearing().getTargets().get(0).getResultLines();
+        final List<ResultLine> resultLines = fullNowsRequest.getTargets().get(0).getResultLines();
 
         Map<UUID, Prompt> id2PromptRef = new HashMap<>();
         Map<UUID, uk.gov.justice.core.courts.Prompt> id2Prompt = new HashMap<>();
@@ -400,23 +276,55 @@ public class NowsDelegateTest {
                 }
         );
 
-        nowsDelegate.sendNows(sender, envelope, nowsRequest);
+        final EnhancedRandomBuilder enhancedRandomBuilder = EnhancedRandomBuilder.aNewEnhancedRandomBuilder();
+
+        enhancedRandomBuilder
+                .randomize(Map.class, (Randomizer<Map>) () -> {
+                    final Map<String, String> properties = new HashMap<>();
+                    properties.put("ABC", "XYZ");
+                    return properties;
+                })
+                .collectionSizeRange(1, 1)
+                .build();
+
+        final EnhancedRandom randomEmailChannelGenerator = enhancedRandomBuilder
+                .randomize(Personalisation.class, (Randomizer<Personalisation>) () -> Personalisation.personalisation().withAdditionalProperty("ABC", "XYZ").build())
+                .collectionSizeRange(1, 1)
+                .build();
+
+        final EmailChannel emailChannel = randomEmailChannelGenerator.nextObject(EmailChannel.class);
+
+        final FieldDefinition<?, ?> emailNotifications = field().named("emailNotifications").ofType(List.class).inClass(NowDocumentRequest.class).get();
+
+        final EnhancedRandom randomGenerator = enhancedRandomBuilder
+                .randomize(emailNotifications, (Randomizer<List>) () -> {
+                    List<EmailChannel> emailChannels = new ArrayList<>();
+                    emailChannels.add(emailChannel);
+                    return emailChannels;
+                })
+                .collectionSizeRange(1, 1)
+                .build();
+
+        NowDocumentRequest nowDocumentRequest = randomGenerator.nextObject(NowDocumentRequest.class);
+
+        when(nowsRequestedToDocumentConverter.convert(envelope, nowsRequest)).thenReturn(asList(nowDocumentRequest));
+
+        nowsDelegate.sendNows(sender, envelope, nowsRequest, fullNowsRequest.getTargets());
 
         verify(sender).sendAsAdmin(envelopeArgumentCaptor.capture());
 
         final List<JsonEnvelope> outgoingMessages = envelopeArgumentCaptor.getAllValues();
 
-        final JsonEnvelope generateNowsCommandMessage = outgoingMessages.get(0);
+        final JsonEnvelope nowDocumentRequestPayload = outgoingMessages.get(0);
 
-
-        Assert.assertThat(generateNowsCommandMessage, jsonEnvelope(
-                metadata().withName("progression.generate-nows"),
+        Assert.assertThat(nowDocumentRequestPayload, jsonEnvelope(
+                metadata().withName("public.hearing.now-document-requested"),
                 payloadIsJson(allOf(
-                        withJsonPath("$.createNowsRequest.nows[0].id", equalTo(nowsRequest.getNows().get(0).getId().toString())),
-                        withJsonPath("$.createNowsRequest.hearing.id", equalTo(nowsRequest.getHearing().getId().toString())),
-                        withJsonPath("$.createNowsRequest.nowTypes[0].id", equalTo(nowsRequest.getNowTypes().get(0).getId().toString())),
-                        withJsonPath("$.createNowsRequest.sharedResultLines[0].id", equalTo(nowsRequest.getSharedResultLines().get(0).getId().toString())),
-                        withJsonPath("$.createNowsRequest.hearing.prosecutionCases[0].defendants[0]id", equalTo(defendantId.toString()))))
+                        withJsonPath("$.applicationId", equalTo(nowDocumentRequest.getApplicationId().toString())),
+                        withJsonPath("$.caseId", equalTo(nowDocumentRequest.getCaseId().toString())),
+                        withJsonPath("$.hearingId", equalTo(nowDocumentRequest.getHearingId().toString())),
+                        withJsonPath("$.materialId", equalTo(nowDocumentRequest.getMaterialId().toString())),
+                        withJsonPath("$.isRemotePrintingRequired", equalTo(nowDocumentRequest.getIsRemotePrintingRequired()))))
         ));
 
         //check that the prompts were formatted
@@ -438,6 +346,140 @@ public class NowsDelegateTest {
         );
 
 
+    }
+
+    private ResultDefinition stubResultDefinition(ResultsSharedEventHelper resultsShared) {
+        UUID resultDefinitionId = resultsShared.getFirstCompletedResultLine().getResultDefinitionId();
+        // GPE-6752 bulk input resultDefinition, add prompt references
+
+
+        final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
+            d.setText(null);
+            d.getResultDefinitions().get(0).setText(null);
+            d.setWelshText(null);
+            d.getResultDefinitions().get(0).setWelshText(null);
+        });
+
+        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
+                .setPrompts(asList(
+                        Prompt.prompt()
+                                .setId(resultsShared.getFirstCompletedResultLineFirstPrompt().getId())
+
+                ))
+                .setId(resultDefinitionId);
+
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
+                .thenReturn(new HashSet<>(asList(nowDefinition)));
+        when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinitionId)))
+                .thenReturn(resultDefinition);
+        return resultDefinition;
+
+    }
+
+    private void testGenerateNows(final NowDefinition nowDefinition) {
+
+        final ResultsSharedEventHelper sharedEventHelper = h(
+                resultsSharedTemplate());
+
+        LocalDate localDate = LocalDate.now();
+        uk.gov.justice.core.courts.Prompt datePrompt = uk.gov.justice.core.courts.Prompt.prompt()
+                .withId(UUID.randomUUID())
+                .withValue(localDate.format(DateTimeFormatter.ofPattern(NowsDelegate.INCOMING_PROMPT_DATE_FORMAT)))
+                .build();
+
+        final CommandHelpers.NowsHelper nows = h(basicNowsTemplate());
+
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(sharedEventHelper.getFirstCompletedResultLine().getResultDefinitionId())))
+                .thenReturn(new HashSet<>(asList(nowDefinition)));
+
+        final UUID resultDefinitionId = sharedEventHelper.getFirstCompletedResultLine().getResultDefinitionId();
+
+        final UUID promptId = sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getId();
+
+        sharedEventHelper.getFirstCompletedResultLine().getPrompts().add(datePrompt);
+
+        // GPE-6752 bulk input resultDefinition, add prompt references
+        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
+                .setId(resultDefinitionId)
+                .setPrompts(asList(Prompt.prompt().setId(promptId),
+                        Prompt.prompt().setId(datePrompt.getId()).setType(NowsDelegate.DATE_PROMPT_TYPE)));
+
+        when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinitionId)))
+                .thenReturn(resultDefinition);
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(sharedEventHelper.it()));
+
+        final List<Now> nowsList = nows.it();
+        final Now now0 = nowsList.get(0);
+        List<UUID> newPromptRefs = new ArrayList<>(now0.getRequestedMaterials().get(0).getNowResults().get(0).getPromptRefs());
+        newPromptRefs.add(datePrompt.getId());
+
+        now0.getRequestedMaterials().get(0).getNowResults().get(0).setPromptRefs(newPromptRefs);
+
+        final CreateNowsRequest nowsRequest = nowsDelegate.generateNows(event, nowsList, sharedEventHelper.it());
+
+        assertThat(nowsRequest, isBean(CreateNowsRequest.class)
+                .with(CreateNowsRequest::getHearing, isBean(Hearing.class))
+                .with(CreateNowsRequest::getCourtClerk, isBean(DelegatedPowers.class)
+                        .with(DelegatedPowers::getUserId, is(sharedEventHelper.getCourtClerk().getUserId()))
+                        .with(DelegatedPowers::getLastName, is(sharedEventHelper.getCourtClerk().getLastName()))
+                        .with(DelegatedPowers::getFirstName, is(sharedEventHelper.getCourtClerk().getFirstName()))
+                )
+                .withValue(req -> req.getNows().size(), 1)
+                .with(CreateNowsRequest::getNows, first(isBean(Now.class)
+                        .with(Now::getId, is(nows.getFirstNow().getId()))
+                        .with(Now::getNowsTypeId, is(nows.getFirstNow().getNowsTypeId()))
+                        .with(Now::getDefendantId, is(nows.getFirstNow().getDefendantId()))
+                        .with(Now::getRequestedMaterials, first(isBean(NowVariant.class)
+                                .with(NowVariant::getMaterialId, is(nows.getFirstMaterial().getMaterialId()))
+                                .with(NowVariant::getIsAmended, is(nows.getFirstMaterial().getIsAmended()))
+                                .with(NowVariant::getNowResults, first(isBean(NowVariantResult.class)
+                                        .with(NowVariantResult::getSharedResultId, is(nows.getFirstNowsResult().getSharedResultId()))
+                                        .with(NowVariantResult::getSequence, is(nows.getFirstNowsResult().getSequence()))
+                                        .with(nvr -> nvr.getPromptRefs().get(0), is(nows.getFirstPrompt()))
+                                ))
+                                .with(NowVariant::getKey, isBean(NowVariantKey.class)
+                                        .withValue(key -> key.getUsergroups().get(0), nows.getFirstUserGroup())
+                                )
+                        ))
+                ))
+                .with(CreateNowsRequest::getSharedResultLines, first(isBean(SharedResultLine.class)
+                        .with(SharedResultLine::getId, is(sharedEventHelper.getFirstTarget().getResultLines().get(0).getResultLineId()))
+                        .with(SharedResultLine::getId, is(sharedEventHelper.getFirstCompletedResultLine().getResultLineId()))
+                        .with(SharedResultLine::getDefendantId, is(sharedEventHelper.getFirstTarget().getDefendantId()))
+                        .with(SharedResultLine::getProsecutionCaseId, is(sharedEventHelper.getFirstCase().getId()))
+                        .with(SharedResultLine::getOffenceId, is(sharedEventHelper.getFirstTarget().getOffenceId()))
+                        .with(SharedResultLine::getLevel, is(sharedEventHelper.getFirstCompletedResultLine().getLevel().toString()))
+                        .with(SharedResultLine::getLabel, is(sharedEventHelper.getFirstCompletedResultLine().getResultLabel()))
+                        .with(SharedResultLine::getPrompts, first(isBean(ResultPrompt.class)
+                                .with(ResultPrompt::getId, is(sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getId()))
+                                .with(ResultPrompt::getLabel, is(sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getLabel()))
+                                .with(ResultPrompt::getValue, is(sharedEventHelper.getFirstCompletedResultLineFirstPrompt().getValue()))
+                        ))
+                        .with(SharedResultLine::getPrompts, second(isBean(ResultPrompt.class)
+                                .withValue(ResultPrompt::getId, datePrompt.getId())
+                                .withValue(ResultPrompt::getValue, localDate.format(DateTimeFormatter.ofPattern(NowsDelegate.INCOMING_PROMPT_DATE_FORMAT)))
+                        ))
+                        .with(SharedResultLine::getLastSharedDateTime, is(sharedEventHelper.getFirstCompletedResultLineStatus().getLastSharedDateTime().toLocalDate().toString()))
+                        .with(SharedResultLine::getOrderedDate, is(sharedEventHelper.getFirstCompletedResultLine().getOrderedDate()))
+                ))
+                .with(CreateNowsRequest::getNowTypes, first(isBean(NowType.class)
+                        .with(NowType::getId, is(nowDefinition.getId()))
+                        .with(NowType::getDescription, is(nowDefinition.getName()))
+                        .with(NowType::getJurisdiction, is(nowDefinition.getJurisdiction()))
+                        .withValue(NowType::getPriority, nowDefinition.getUrgentTimeLimitInMinutes().toString())
+                        .withValue(NowType::getTemplateName, nowDefinition.getTemplateName())
+                        .withValue(NowType::getRank, nowDefinition.getRank())
+                        .withValue(NowType::getStaticText, nowDefinition.getText())
+                        //this are changing .with(NowType::getStaticText, is(exp))
+                        //this is changing .with(NowType::getWelshStaticText, is(nowDefinition.getWelshText() + "\n" + nowDefinition.getResultDefinitions().get(0).getWelshText()))
+                        //TODO GPE-6313 resolve these 2
+                        //.with(NowTypes::getWelshDescription, is(nowDefinition.getWelshName()))
+                        //.with(NowTypes::getBilingualTemplateName, is(nowDefinition.getBilingualTemplateName()))
+                        .with(NowType::getRequiresBulkPrinting, is(nowDefinition.getRemotePrintingRequired()))
+                ))
+        );
     }
 
 

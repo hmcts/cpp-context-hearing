@@ -98,7 +98,7 @@ public class ProsecutionCounselEventListenerTest {
         hearingProsecutionCounsel.setPayload(getEntityPayload(prosecutionCounsel));
 
         when(this.hearingRepository.findBy(prosecutionCounselAdded.getHearingId())).thenReturn(hearing);
-        when(this.hearingProsecutionCounselJPAMapper.toJPA(hearing,prosecutionCounsel)).thenReturn(hearingProsecutionCounsel);
+        when(this.hearingProsecutionCounselJPAMapper.toJPA(hearing, prosecutionCounsel)).thenReturn(hearingProsecutionCounsel);
 
         //When
         this.prosecutionCounselEventListener.prosecutionCounselAdded(envelopeFrom(metadataWithRandomUUID("hearing.prosecution-counsel-added"),
@@ -138,7 +138,7 @@ public class ProsecutionCounselEventListenerTest {
         hearingProsecutionCounsel.setPayload(getEntityPayload(prosecutionCounsel));
 
         when(this.hearingRepository.findBy(prosecutionCounselUpdated.getHearingId())).thenReturn(hearing);
-        when(this.hearingProsecutionCounselJPAMapper.toJPA(hearing,prosecutionCounsel)).thenReturn(hearingProsecutionCounsel);
+        when(this.hearingProsecutionCounselJPAMapper.toJPA(hearing, prosecutionCounsel)).thenReturn(hearingProsecutionCounsel);
 
         //When
         this.prosecutionCounselEventListener.prosecutionCounselUpdated(envelopeFrom(metadataWithRandomUUID("hearing.defence-counsel-updated"),
@@ -167,7 +167,7 @@ public class ProsecutionCounselEventListenerTest {
                 STRING.next()
         );
 
-        final ProsecutionCounselRemoved prosecutionCounselRemoved = new ProsecutionCounselRemoved(randomUUID(),prosecutionCounsel.getId());
+        final ProsecutionCounselRemoved prosecutionCounselRemoved = new ProsecutionCounselRemoved(randomUUID(), prosecutionCounsel.getId());
 
         final Hearing hearing = new Hearing();
         hearing.setId(prosecutionCounselRemoved.getHearingId());
@@ -192,7 +192,7 @@ public class ProsecutionCounselEventListenerTest {
 
     }
 
-    private JsonNode getEntityPayload(ProsecutionCounsel prosecutionCounsel){
+    private JsonNode getEntityPayload(ProsecutionCounsel prosecutionCounsel) {
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 

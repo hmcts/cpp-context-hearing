@@ -21,13 +21,24 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.hearing.courts.AddApplicantCounsel;
+import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
+import uk.gov.justice.hearing.courts.AddRespondentCounsel;
+import uk.gov.justice.hearing.courts.RemoveApplicantCounsel;
+import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
 import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
 import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
+import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
+import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
+import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
-import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -93,6 +104,20 @@ public class UseCases {
         publicEventTopic.waitFor();
 
         return initiateHearing;
+    }
+
+    public static void verifyIgnoreInitiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
+
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiate-ignored")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString()))));
+
+        makeCommand(requestSpec, "hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearing)
+                .executeSuccessfully();
+
+        publicEventTopic.waitFor();
+
     }
 
     public static UpdatePleaCommand updatePlea(final RequestSpecification requestSpec, final UUID hearingId, final UUID offenceId,
@@ -353,6 +378,12 @@ public class UseCases {
         return saveDraftResultCommand;
     }
 
+    public static SaveDraftResultCommand saveDraftResultsApplication(final RequestSpecification requestSpec, SaveDraftResultCommand saveDraftResultCommand) {
+        //dummy save draft to use existing pattern
+
+        return saveDraftResultCommand;
+    }
+
     private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target) {
         return target.getResultLines().stream().map(resultLineIn ->
                 new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
@@ -368,8 +399,14 @@ public class UseCases {
                         resultLineIn.getResultLabel(),
                         resultLineIn.getLevel().name(),
                         resultLineIn.getIsModified(),
-                        resultLineIn.getIsComplete()
-                ));
+                        resultLineIn.getIsComplete(),
+                        target.getApplicationId(),
+                        resultLineIn.getAmendmentReasonId(),
+                        resultLineIn.getAmendmentReason(),
+                        resultLineIn.getAmendmentDate(),
+                        resultLineIn.getFourEyesApproval(),
+                        resultLineIn.getApprovedDate(),
+                        resultLineIn.getIsDeleted(),null));
     }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
@@ -409,6 +446,40 @@ public class UseCases {
                 .executeSuccessfully();
 
         return addDefenceCounsel;
+    }
+
+    public static AddCompanyRepresentative addCompanyRepresentative(final RequestSpecification requestSpec, final UUID hearingId,
+                                                                    final AddCompanyRepresentative addCompanyRepresentative) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.add-company-representative+json")
+                .withArgs(hearingId)
+                .withPayload(addCompanyRepresentative)
+                .executeSuccessfully();
+
+        return addCompanyRepresentative;
+    }
+
+    public static UpdateCompanyRepresentative updateCompanyRepresentative(final RequestSpecification requestSpec, final UUID hearingId, final UpdateCompanyRepresentative updateCompanyRepresentative) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.update-company-representative+json")
+                .withArgs(hearingId)
+                .withPayload(updateCompanyRepresentative)
+                .executeSuccessfully();
+
+        return updateCompanyRepresentative;
+    }
+
+    public static RemoveCompanyRepresentative removeCompanyRepresentative(final RequestSpecification requestSpec, final UUID hearingId, final RemoveCompanyRepresentative removeCompanyRepresentative) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.remove-company-representative+json")
+                .withArgs(hearingId)
+                .withPayload(removeCompanyRepresentative)
+                .executeSuccessfully();
+
+        return removeCompanyRepresentative;
     }
 
     public static AddProsecutionCounsel addProsecutionCounsel(final RequestSpecification requestSpec, final UUID hearingId,
@@ -535,7 +606,7 @@ public class UseCases {
                 .withPayload(updateDefenceCounselCommandTemplate)
                 .executeSuccessfully();
 
-        return updateDefenceCounselCommandTemplate ;
+        return updateDefenceCounselCommandTemplate;
     }
 
     public static UpdateProsecutionCounsel updateProsecutionCounsel(final RequestSpecification requestSpec, final UUID hearingId, final UpdateProsecutionCounsel updateProsecutionCounselCommandTemplate) {
@@ -546,6 +617,112 @@ public class UseCases {
                 .withPayload(updateProsecutionCounselCommandTemplate)
                 .executeSuccessfully();
 
-        return updateProsecutionCounselCommandTemplate ;
+        return updateProsecutionCounselCommandTemplate;
+    }
+
+    public static AddRespondentCounsel addRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId,
+                                                            final AddRespondentCounsel addRespondentCounsel) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.add-respondent-counsel+json")
+                .withArgs(hearingId)
+                .withPayload(addRespondentCounsel)
+                .executeSuccessfully();
+
+        return addRespondentCounsel;
+    }
+
+    public static UpdateRespondentCounsel updateRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId, final UpdateRespondentCounsel updateRespondentCounselCommandTemplate) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.update-respondent-counsel+json")
+                .withArgs(hearingId)
+                .withPayload(updateRespondentCounselCommandTemplate)
+                .executeSuccessfully();
+
+        return updateRespondentCounselCommandTemplate;
+    }
+
+    public static RemoveRespondentCounsel removeRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId,
+                                                                  final RemoveRespondentCounsel removeRespondentCounsel) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.remove-respondent-counsel+json")
+                .withArgs(hearingId)
+                .withPayload(removeRespondentCounsel)
+                .executeSuccessfully();
+
+        return removeRespondentCounsel;
+    }
+
+    public static AddApplicantCounsel addApplicantCounsel(final RequestSpecification requestSpec, final UUID hearingId,
+                                                          final AddApplicantCounsel addApplicantCounsel) {
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.add-applicant-counsel+json")
+                .withArgs(hearingId)
+                .withPayload(addApplicantCounsel)
+                .executeSuccessfully();
+
+        return addApplicantCounsel;
+    }
+
+    public static UpdateApplicantCounsel updateApplicantCounsel(final RequestSpecification requestSpec, final UUID hearingId, final UpdateApplicantCounsel updateApplicantCounselCommandTemplate) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.update-applicant-counsel+json")
+                .withArgs(hearingId)
+                .withPayload(updateApplicantCounselCommandTemplate)
+                .executeSuccessfully();
+
+        return updateApplicantCounselCommandTemplate;
+    }
+
+    public static RemoveApplicantCounsel removeApplicantCounsel(final RequestSpecification requestSpec, final UUID hearingId,
+                                                                final RemoveApplicantCounsel removeApplicantCounsel) {
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.remove-applicant-counsel+json")
+                .withArgs(hearingId)
+                .withPayload(removeApplicantCounsel)
+                .executeSuccessfully();
+
+        return removeApplicantCounsel;
+    }
+
+    public static void addDefendant(final Defendant defendant) throws Exception {
+
+        final String eventName = "public.progression.defendants-added-to-court-proceedings";
+
+        final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
+        String payloadAsString = mapper.writeValueAsString(defendant);
+
+        final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
+
+        sendMessage(
+                publicEvents.createProducer(),
+                eventName,
+                createObjectBuilder()
+                        .add("foooo", "to test additional properties")
+                        .add("defendants", Json.createArrayBuilder().add(uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build()))
+                        .build(),
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+    }
+
+    public static void sendPublicApplicationChangedMessage(final CourtApplication courtApplication) throws Exception {
+
+        final String eventName = "public.progression.court-application-updated";
+
+        final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
+        String payloadAsString = mapper.writeValueAsString(courtApplication);
+
+        final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
+
+        sendMessage(
+                publicEvents.createProducer(),
+                eventName,
+                createObjectBuilder()
+                        .add("courtApplication", uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build())
+                        .build(),
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
     }
 }

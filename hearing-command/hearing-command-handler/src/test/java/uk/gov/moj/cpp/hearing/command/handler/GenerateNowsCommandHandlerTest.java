@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -23,6 +24,7 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.generateNowsRequestTemplate;
 
 import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -52,7 +54,6 @@ import uk.gov.moj.cpp.systemidmapper.client.SystemIdMapperClient;
 import uk.gov.moj.cpp.systemidmapper.client.SystemIdMapping;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -169,7 +170,9 @@ public class GenerateNowsCommandHandlerTest {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
-        hearingAggregate.apply(new PendingNowsRequested(nowsRequest));
+        final List<Target> targets = asList();
+
+        hearingAggregate.apply(new PendingNowsRequested(nowsRequest, targets));
 
         final UUID contextSystemUserId = randomUUID();
 
@@ -238,7 +241,6 @@ public class GenerateNowsCommandHandlerTest {
 
     }
 
-
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
         Class<T> clz = (Class<T>) aggregate.getClass();
@@ -268,21 +270,21 @@ public class GenerateNowsCommandHandlerTest {
         return SaveNowsVariantsCommand.saveNowsVariantsCommand()
                 .setHearingId(hearingId)
                 .setVariants(
-                        Arrays.asList(
+                        asList(
                                 Variant.variant()
                                         .setKey(
                                                 VariantKey.variantKey()
                                                         .setHearingId(hearingId)
                                                         .setDefendantId(defendantId)
                                                         .setNowsTypeId(nowsTypeId)
-                                                        .setUsergroups(Arrays.asList("Listings Officers", "Court Clerks"))
+                                                        .setUsergroups(asList("Listings Officers", "Court Clerks"))
                                         )
                                         .setValue(
                                                 VariantValue.variantValue()
                                                         .setMaterialId(UUID.randomUUID())
                                                         .setStatus(VariantStatus.BUILDING)
                                                         .setResultLines(
-                                                                Arrays.asList(
+                                                                asList(
                                                                         ResultLineReference.resultLineReference()
                                                                                 .setLastSharedTime(ZonedDateTime.now())
                                                                                 .setResultLineId(UUID.randomUUID()),
@@ -298,14 +300,14 @@ public class GenerateNowsCommandHandlerTest {
                                                         .setHearingId(hearingId)
                                                         .setDefendantId(defendantId)
                                                         .setNowsTypeId(nowsTypeId)
-                                                        .setUsergroups(Arrays.asList("System Users"))
+                                                        .setUsergroups(asList("System Users"))
                                         )
                                         .setValue(
                                                 VariantValue.variantValue()
                                                         .setMaterialId(UUID.randomUUID())
                                                         .setStatus(VariantStatus.BUILDING)
                                                         .setResultLines(
-                                                                Arrays.asList(
+                                                                asList(
                                                                         ResultLineReference.resultLineReference()
                                                                                 .setLastSharedTime(null)
                                                                                 .setResultLineId(UUID.randomUUID()),

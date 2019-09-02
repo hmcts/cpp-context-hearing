@@ -60,7 +60,8 @@ public class OffenceRepositoryTest {
             hearingEntity.getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().forEach(defendant -> {
                 defendant.getOffences().forEach(offences::add);
             }));
-
+            // because h2 incorrectly maps column type TEXT to VARCHAR(255)
+            hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
             hearingRepository.save(hearingEntity);
         });
     }

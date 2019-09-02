@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/hearing/courts/save-draft-result.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved.json",
   "type": "object",
   "properties": {
     "target": {

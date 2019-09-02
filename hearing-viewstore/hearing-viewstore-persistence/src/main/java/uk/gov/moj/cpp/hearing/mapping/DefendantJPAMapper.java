@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -73,6 +72,7 @@ public class DefendantJPAMapper {
         defendant.setProsecutionAuthorityReference(pojo.getProsecutionAuthorityReference());
         defendant.setWitnessStatement(pojo.getWitnessStatement());
         defendant.setWitnessStatementWelsh(pojo.getWitnessStatementWelsh());
+        defendant.setPncId(pojo.getPncId());
         return defendant;
     }
 
@@ -91,9 +91,9 @@ public class DefendantJPAMapper {
                 .withId(pojo.getId().getId())
                 .withAssociatedPersons(associatedPersonJPAMapper.fromJPA(pojo.getAssociatedPersons()))
                 .withDefenceOrganisation(organisationJPAMapper.fromJPA(pojo.getDefenceOrganisation()))
-                .withLegalEntityDefendant(LegalEntityDefendant.legalEntityDefendant()
-                        .withOrganisation(organisationJPAMapper.fromJPA(pojo.getLegalEntityOrganisation()))
-                        .build())
+                .withLegalEntityDefendant(pojo.getLegalEntityOrganisation() != null ? LegalEntityDefendant.legalEntityDefendant()
+                       .withOrganisation(organisationJPAMapper.fromJPA(pojo.getLegalEntityOrganisation()))
+                       .build() : null)
                 .withMitigation(pojo.getMitigation())
                 .withMitigationWelsh(pojo.getMitigationWelsh())
                 .withNumberOfPreviousConvictionsCited(pojo.getNumberOfPreviousConvictionsCited())
@@ -101,6 +101,7 @@ public class DefendantJPAMapper {
                 .withPersonDefendant(personDefendantJPAMapper.fromJPA(pojo.getPersonDefendant()))
                 .withProsecutionAuthorityReference(pojo.getProsecutionAuthorityReference())
                 .withWitnessStatement(pojo.getWitnessStatement())
+                .withPncId(pojo.getPncId())
                 .withWitnessStatementWelsh(pojo.getWitnessStatementWelsh())
                 .withProsecutionCaseId(pojo.getProsecutionCaseId())
                 .build();
