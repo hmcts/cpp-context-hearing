@@ -91,6 +91,15 @@ public class UseCases {
         };
     }
 
+    public static void initiateHearingWithoutWaitingFotEvent(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
+
+        makeCommand(requestSpec, "hearing.initiate")
+                .ofType("application/vnd.hearing.initiate+json")
+                .withPayload(initiateHearing)
+                .executeSuccessfully();
+
+    }
+
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
