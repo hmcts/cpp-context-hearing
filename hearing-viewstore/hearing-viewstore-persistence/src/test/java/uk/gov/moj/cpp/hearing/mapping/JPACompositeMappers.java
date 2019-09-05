@@ -2,13 +2,15 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 final class JPACompositeMappers {
 
-    public static final IndicatedPleaJPAMapper INDICATED_PLEA_JPA_MAPPER = new IndicatedPleaJPAMapper(
-            new AllocationDecisionJPAMapper());
+    public static final IndicatedPleaJPAMapper INDICATED_PLEA_JPA_MAPPER = new IndicatedPleaJPAMapper();
+    public static final CourtIndicatedSentenceJPAMapper COURT_INDICATED_SENTENCE_JPA_MAPPER = new CourtIndicatedSentenceJPAMapper();
+    public static final AllocationDecisionJPAMapper ALLOCATION_DECISION_JPA_MAPPER = new AllocationDecisionJPAMapper(
+            COURT_INDICATED_SENTENCE_JPA_MAPPER);
     public static final PleaJPAMapper PLEA_JPA_MAPPER = new PleaJPAMapper(new DelegatedPowersJPAMapper());
     public static final VerdictJPAMapper VERDICT_JPA_MAPPER = new VerdictJPAMapper(new JurorsJPAMapper(),
             new LesserOrAlternativeOffenceJPAMapper(), new VerdictTypeJPAMapper());
     public static final OffenceJPAMapper OFFENCE_JPA_MAPPER = new OffenceJPAMapper(new NotifiedPleaJPAMapper(),
-            INDICATED_PLEA_JPA_MAPPER, PLEA_JPA_MAPPER, new OffenceFactsJPAMapper(), VERDICT_JPA_MAPPER);
+            INDICATED_PLEA_JPA_MAPPER, PLEA_JPA_MAPPER, new OffenceFactsJPAMapper(), VERDICT_JPA_MAPPER, ALLOCATION_DECISION_JPA_MAPPER);
     public static final OrganisationJPAMapper ORGANISATION_JPA_MAPPER = new OrganisationJPAMapper(
             new AddressJPAMapper(), new ContactNumberJPAMapper());
     public static final PersonJPAMapper PERSON_JPA_MAPPER = new PersonJPAMapper(new AddressJPAMapper(),

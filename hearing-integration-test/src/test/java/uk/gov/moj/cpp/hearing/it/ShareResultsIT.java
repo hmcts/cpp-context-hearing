@@ -33,12 +33,12 @@ import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenera
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
-import uk.gov.justice.core.courts.CourtApplicationResponseType;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
@@ -142,7 +142,8 @@ public class ShareResultsIT extends AbstractIT {
 
         final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                 UseCases.updatePlea(requestSpec, hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                        updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), PleaValue.GUILTY))
+                        updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), IndicatedPleaValue.INDICATED_GUILTY, PleaValue.GUILTY,
+                                false))
         );
 
         convictionDateListener.waitFor();
@@ -376,7 +377,8 @@ public class ShareResultsIT extends AbstractIT {
 
         final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                 UseCases.updatePlea(requestSpec, hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                        updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), PleaValue.GUILTY))
+                        updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), IndicatedPleaValue.INDICATED_GUILTY, PleaValue.GUILTY,
+                                false))
         );
 
         convictionDateListener.waitFor();

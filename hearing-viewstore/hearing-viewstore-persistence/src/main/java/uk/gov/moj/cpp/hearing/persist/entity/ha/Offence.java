@@ -89,6 +89,9 @@ public class Offence {
     @Embedded
     private Verdict verdict;
 
+    @Embedded
+    private AllocationDecision allocationDecision;
+
     @Column(name = "mode_of_trial")
     private String modeOfTrial;
 
@@ -282,6 +285,14 @@ public class Offence {
 
     public void setVerdict(Verdict verdict) {
         this.verdict = verdict;
+    }
+
+    public AllocationDecision getAllocationDecision() {
+        return allocationDecision;
+    }
+
+    public void setAllocationDecision(final AllocationDecision allocationDecision) {
+        this.allocationDecision = allocationDecision;
     }
 
     @Override

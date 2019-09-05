@@ -195,9 +195,9 @@ public class MagistratesCourtInitiateHearingEventProcessorTest {
                 metadata().withName("hearing.command.update-plea-against-offence"),
                 payloadIsJson(allOf(
                         withJsonPath("$.hearingId", is(magsCourtHearingRecorded.getHearingId().toString())),
-                        withJsonPath("$.plea.offenceId", is(offence.getId().toString())),
-                        withJsonPath("$.plea.pleaDate", is(offence.getPlea().getPleaDate().toString())),
-                        withJsonPath("$.plea.pleaValue", is(offence.getPlea().getValue()))
+                        withJsonPath("$.pleaModel.plea.offenceId", is(offence.getId().toString())),
+                        withJsonPath("$.pleaModel.plea.pleaDate", is(offence.getPlea().getPleaDate().toString())),
+                        withJsonPath("$.pleaModel.plea.pleaValue", is(offence.getPlea().getValue()))
                 ))
                 )
         );

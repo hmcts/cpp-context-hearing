@@ -1,13 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.justice.core.courts.Plea;
 
 import java.io.Serializable;
 import java.util.UUID;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.hearing-offence-plea-updated")
 public class PleaUpsert implements Serializable {
@@ -16,19 +15,17 @@ public class PleaUpsert implements Serializable {
 
     private UUID hearingId;
 
-    private Plea plea;
+    private PleaModel pleaModel;
 
-    public PleaUpsert() {
-
-    }
+    public PleaUpsert() {}
 
     @JsonCreator
     public PleaUpsert(@JsonProperty("hearingId") final UUID originHearingId,
-                      @JsonProperty("plea") final Plea plea) {
+                      @JsonProperty("pleaModel") final PleaModel pleaModel) {
         this.hearingId = originHearingId;
-        this.plea = plea;
-        if (this.getPlea()!=null && this.getPlea().getOriginatingHearingId()==null) {
-            this.getPlea().setOriginatingHearingId(originHearingId);
+        this.pleaModel = pleaModel;
+        if (pleaModel.getPlea() != null) {
+            pleaModel.getPlea().setOriginatingHearingId(hearingId);
         }
     }
 
@@ -45,12 +42,12 @@ public class PleaUpsert implements Serializable {
         return this;
     }
 
-    public Plea getPlea() {
-        return plea;
+    public PleaModel getPleaModel() {
+        return pleaModel;
     }
 
-    public PleaUpsert setPlea(Plea plea) {
-        this.plea = plea;
+    public PleaUpsert setPleaModel(final PleaModel pleaModel) {
+        this.pleaModel = pleaModel;
         return this;
     }
 }

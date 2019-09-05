@@ -97,9 +97,10 @@ public final class HearingJPADataTemplate {
                     final AllocationDecision allocationDecision = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision.class);
 
                     final IndicatedPlea indicatedPlea = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea.class);
-                    indicatedPlea.setAllocationDecision(allocationDecision);
 
                     offence.setIndicatedPlea(indicatedPlea);
+
+                    offence.setAllocationDecision(allocationDecision);
 
                     final Plea plea = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.Plea.class);
 

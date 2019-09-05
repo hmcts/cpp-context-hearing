@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.repository;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.justice.core.courts.PleaValue.GUILTY;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -44,7 +45,7 @@ public class OffenceRepositoryTest {
             i.getHearing().getProsecutionCases().stream()
                     .flatMap(p -> p.getDefendants().stream())
                     .flatMap(d -> d.getOffences().stream())
-                    .forEach(o -> o.setPlea(CoreTestTemplates.plea(o.getId(), o.getConvictionDate()).build()));
+                    .forEach(o -> o.setPlea(CoreTestTemplates.plea(o.getId(), o.getConvictionDate(), GUILTY).build()));
         });
 
         hearings.add(initiateHearingCommand.getHearing());

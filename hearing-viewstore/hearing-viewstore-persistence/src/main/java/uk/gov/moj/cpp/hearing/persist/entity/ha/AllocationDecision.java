@@ -1,61 +1,90 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import uk.gov.justice.core.courts.CourtDecision;
-import uk.gov.justice.core.courts.DefendantRepresentation;
-import uk.gov.justice.core.courts.ProsecutionRepresentation;
+import java.time.LocalDate;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.Embedded;
 
 @Embeddable
 public class AllocationDecision {
 
-    @Column(name = "court_decision")
-    @Enumerated(EnumType.STRING)
-    private CourtDecision courtDecision;
+    @Column(name = "ad_originating_hearing_id")
+    private UUID originatingHearingId;
 
-    @Column(name = "prosecution_representation")
-    @Enumerated(EnumType.STRING)
-    private ProsecutionRepresentation prosecutionRepresentation;
+    @Column(name = "mot_reason_id")
+    private UUID motReasonId;
 
-    @Column(name = "defendant_representation")
-    @Enumerated(EnumType.STRING)
-    private DefendantRepresentation defendantRepresentation;
+    @Column(name = "mot_reason_description")
+    private String motReasonDescription;
 
-    @Column(name = "indication_of_sentence")
-    private String indicationOfSentence;
+    @Column(name = "mot_reason_code")
+    private String motReasonCode;
 
-    public CourtDecision getCourtDecision() {
-        return courtDecision;
+    @Column(name = "allocation_decision_date")
+    private LocalDate allocationDecisionDate;
+
+    @Column(name = "sequence_number")
+    private Integer sequenceNumber;
+
+    @Embedded
+    private CourtIndicatedSentence courtIndicatedSentence;
+
+    public UUID getOriginatingHearingId() {
+        return originatingHearingId;
     }
 
-    public void setCourtDecision(CourtDecision courtDecision2) {
-        this.courtDecision = courtDecision2;
+    public void setOriginatingHearingId(final UUID originatingHearingId) {
+        this.originatingHearingId = originatingHearingId;
     }
 
-    public ProsecutionRepresentation getProsecutionRepresentation() {
-        return prosecutionRepresentation;
+    public UUID getMotReasonId() {
+        return motReasonId;
     }
 
-    public void setProsecutionRepresentation(ProsecutionRepresentation prosecutionRepresentation2) {
-        this.prosecutionRepresentation = prosecutionRepresentation2;
+    public void setMotReasonId(final UUID motReasonId) {
+        this.motReasonId = motReasonId;
     }
 
-    public DefendantRepresentation getDefendantRepresentation() {
-        return defendantRepresentation;
+    public String getMotReasonDescription() {
+        return motReasonDescription;
     }
 
-    public void setDefendantRepresentation(DefendantRepresentation defendantRepresentation2) {
-        this.defendantRepresentation = defendantRepresentation2;
+    public void setMotReasonDescription(final String motReasonDescription) {
+        this.motReasonDescription = motReasonDescription;
     }
 
-    public String getIndicationOfSentence() {
-        return indicationOfSentence;
+    public String getMotReasonCode() {
+        return motReasonCode;
     }
 
-    public void setIndicationOfSentence(String indicationOfSentence) {
-        this.indicationOfSentence = indicationOfSentence;
+    public void setMotReasonCode(final String motReasonCode) {
+        this.motReasonCode = motReasonCode;
+    }
+
+    public LocalDate getAllocationDecisionDate() {
+        return allocationDecisionDate;
+    }
+
+    public void setAllocationDecisionDate(final LocalDate allocationDecisionDate) {
+        this.allocationDecisionDate = allocationDecisionDate;
+    }
+
+
+    public CourtIndicatedSentence getCourtIndicatedSentence() {
+        return courtIndicatedSentence;
+    }
+
+    public void setCourtIndicatedSentence(final CourtIndicatedSentence courtIndicatedSentence) {
+        this.courtIndicatedSentence = courtIndicatedSentence;
+    }
+
+    public Integer getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public void setSequenceNumber(final Integer sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
     }
 }

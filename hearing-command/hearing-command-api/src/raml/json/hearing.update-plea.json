@@ -1,19 +1,31 @@
 {
-  "caseId": "bf537ed1-4648-4a68-8429-96a69d5db49d",
-  "defendants": [
+  "hearingId": "aa7d7f0f-c4ed-4423-be8e-62ae718ea3b6",
+  "pleas": [
     {
-      "id": "a6a5a1fd-67c8-42ee-9995-a10165ab3dbe",
-      "personId": "d3a0d0f9-78b0-47c6-a362-5febf0485d0f",
-      "offences": [
-        {
-          "id": "6da4527f-474a-47a8-82c5-21ea607aa9c3",
-          "plea": {
-            "id": "0baecac5-222b-402d-9047-84803679edae",
-            "value": "GUILTY",
-            "pleaDate": "2017-02-02"
-          }
-        }
-      ]
+      "allocationDecision":{
+        "allocationDecisionDate":"2017-05-06",
+        "offenceId":"577b6ca9-63cf-4202-841d-17931f461385",
+        "originatingHearingId":"aa7d7f0f-c4ed-4423-be8e-62ae718ea3b6",
+        "sentencingIndicationRequested":false,
+        "sequenceNumber": 10
+
+      },
+      "defendantId":"b288a53b-5589-4daf-9282-41c869c7f7ce",
+      "indicatedPlea":{
+        "indicatedPleaDate":"2017-05-06",
+        "indicatedPleaValue":"INDICATED_GUILTY",
+        "offenceId":"577b6ca9-63cf-4202-841d-17931f461385",
+        "source":"IN_COURT"
+      },
+      "offenceId":"577b6ca9-63cf-4202-841d-17931f461385",
+      "plea":{
+
+        "offenceId":"577b6ca9-63cf-4202-841d-17931f461385",
+        "originatingHearingId":"aa7d7f0f-c4ed-4423-be8e-62ae718ea3b6",
+        "pleaDate":"2017-05-06",
+        "pleaValue":"GUILTY"
+      },
+      "prosecutionCaseId":"adc79910-8491-4ba6-9947-a64ea0780f58"
     }
   ]
 }

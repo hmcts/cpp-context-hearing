@@ -8,6 +8,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.Plea.plea;
+import static uk.gov.justice.core.courts.PleaModel.pleaModel;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
@@ -330,12 +332,13 @@ public class InitiateHearingCommandHandlerTest {
                 .build());
 
         final OffenceAggregate offenceAggregate = new OffenceAggregate();
-        offenceAggregate.apply(new OffencePleaUpdated(originHearingId, Plea.plea()
-                .withOffenceId(offenceId)
-                .withPleaDate(pleaDate)
-                .withPleaValue(PleaValue.valueOf(value))
-                .withOriginatingHearingId(originHearingId)
-                .build()));
+        offenceAggregate.apply(new OffencePleaUpdated(originHearingId,
+                pleaModel().withPlea(plea()
+                        .withOffenceId(offenceId)
+                        .withPleaDate(pleaDate)
+                        .withPleaValue(PleaValue.valueOf(value))
+                        .withOriginatingHearingId(originHearingId)
+                        .build()).build()));
         setupMockedEventStream(offenceId, this.offenceEventStream, offenceAggregate);
 
         this.hearingCommandHandler.initiateHearingOffence(command);
@@ -375,7 +378,7 @@ public class InitiateHearingCommandHandlerTest {
 
         final UpdateHearingWithInheritedPleaCommand input = UpdateHearingWithInheritedPleaCommand.updateHearingWithInheritedPleaCommand()
                 .setHearingId(UUID.randomUUID())
-                .setPlea(Plea.plea()
+                .setPlea(plea()
                         .withOffenceId(randomUUID())
                         .withPleaDate(PAST_LOCAL_DATE.next())
                         .withPleaValue(PleaValue.GUILTY)

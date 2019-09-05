@@ -8,10 +8,15 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
+import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+
+import java.util.Objects;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -34,6 +39,12 @@ public class PleaUpdateEventListener {
     @Inject
     private PleaJPAMapper pleaJpaMapper;
 
+    @Inject
+    private IndicatedPleaJPAMapper indicatedPleaJPAMapper;
+
+    @Inject
+    private AllocationDecisionJPAMapper allocationDecisionJPAMapper;
+
     @Transactional
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdated(final JsonEnvelope envelope) {
@@ -41,12 +52,26 @@ public class PleaUpdateEventListener {
 
         final PleaUpsert event = convertToObject(envelope);
 
-        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId()));
+        final UUID offenceId = event.getPleaModel().getOffenceId();
+        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceId, event.getHearingId()));
 
         if (nonNull(offence)) {
-            offence.setPlea(pleaJpaMapper.toJPA(event.getPlea()));
+            if (Objects.nonNull(event.getPleaModel().getPlea())) {
+                offence.setPlea(pleaJpaMapper.toJPA(event.getPleaModel().getPlea()));
+            }else{
+                offence.setPlea(null);
+            }
+            if (Objects.nonNull(event.getPleaModel().getAllocationDecision())) {
+                offence.setAllocationDecision(allocationDecisionJPAMapper.toJPA(event.getPleaModel().getAllocationDecision()));
+            }
+            if (Objects.nonNull(event.getPleaModel().getIndicatedPlea())) {
+                offence.setIndicatedPlea(indicatedPleaJPAMapper.toJPA(event.getPleaModel().getIndicatedPlea()));
+            }else{
+                offence.setIndicatedPlea(null);
+            }
             offenceRepository.save(offence);
         }
+
     }
 
     private PleaUpsert convertToObject(final JsonEnvelope envelop) {

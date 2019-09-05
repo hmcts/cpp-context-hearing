@@ -1,0 +1,37 @@
+{
+  "hearingId": "6e23d5ca-3204-40e8-83d3-3c79ac54bc31",
+  "defendantId": "df629721-97ad-462e-a08f-e3277fb58e62",
+  "offence": {
+    "arrestDate": "2018-01-01",
+    "chargeDate": "2018-01-01",
+    "count": 2,
+    "endDate": "2018-07-12",
+    "id": "8162e3b9-c639-4293-a789-97a2ee6b26fc",
+    "notifiedPlea": {
+      "notifiedPleaDate": "2018-04-01",
+      "notifiedPleaValue": "NOTIFIED_GUILTY",
+      "offenceId": "8162e3b9-c639-4293-a789-97a2ee6b26fc"
+    },
+    "offenceCode": "OF61102C",
+    "offenceDefinitionId": "e29aabaa-51a5-4613-bda7-5218a94f72ba",
+    "offenceFacts": {
+      "alcoholReadingAmount": "111",
+      "alcoholReadingMethod": "2222",
+      "vehicleRegistration": "AA12345"
+    },
+    "offenceLegislation": "Contrary to sections 1,1A and 3 of the Criminal Law Act 1977.",
+    "offenceLegislationWelsh": "Yn groes i adran 1, 1A a 3 Deddf Cyfraith Trosedd 1977.",
+    "offenceTitle": "Conspire to assault a person thereby occasioning them actual bodily harm",
+    "offenceTitleWelsh": "Cynllwynio i ymosod ar unigolyn a thrwy hynny beri gwir niwed corfforol iddynt",
+    "orderIndex": 1,
+    "plea": {
+      "offenceId": "8162e3b9-c639-4293-a789-97a2ee6b26fc",
+      "originatingHearingId": "8b1a72b0-1999-434d-9ca4-f196f7b83f96",
+      "pleaDate": "2019-05-01",
+      "pleaValue": "GUILTY"
+    },
+    "startDate": "2018-07-07",
+    "wording": "Conspire to assault a person thereby occasioning them actual bodily harm",
+    "wordingWelsh": "Cynllwynio i ymosod ar unigolyn a thrwy hynny beri gwir niwed corfforol iddynt"
+  }
+}

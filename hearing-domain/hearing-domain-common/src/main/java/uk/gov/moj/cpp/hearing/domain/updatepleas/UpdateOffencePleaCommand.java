@@ -1,13 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.updatepleas;
 
-import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 
 import java.util.UUID;
 
 public class UpdateOffencePleaCommand {
 
     private UUID hearingId;
-    private Plea plea;
+    private PleaModel pleaModel;
 
     public static UpdateOffencePleaCommand updateOffencePleaCommand() {
         return new UpdateOffencePleaCommand();
@@ -22,12 +22,12 @@ public class UpdateOffencePleaCommand {
         return this;
     }
 
-    public Plea getPlea() {
-        return plea;
+    public PleaModel getPleaModel() {
+        return pleaModel;
     }
 
-    public UpdateOffencePleaCommand setPlea(Plea plea) {
-        this.plea = plea;
+    public UpdateOffencePleaCommand setPleaModel(final PleaModel pleaModel) {
+        this.pleaModel = pleaModel;
         return this;
     }
 }

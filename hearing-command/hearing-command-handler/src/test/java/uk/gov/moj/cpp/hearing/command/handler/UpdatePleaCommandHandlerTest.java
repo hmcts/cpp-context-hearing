@@ -1,22 +1,36 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static java.util.UUID.randomUUID;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
+import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
+import static uk.gov.justice.core.courts.PleaModel.pleaModel;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand.updatePleaCommand;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.PleaValue;
+import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -34,14 +48,15 @@ import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +68,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UpdatePleaCommandHandlerTest {
 
-    private static CommandHelpers.InitiateHearingCommandHelper hearing = CommandHelpers.h(standardInitiateHearingTemplate());
+    private static InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             HearingInitiated.class,
@@ -78,8 +95,9 @@ public class UpdatePleaCommandHandlerTest {
 
     @Before
     public void setup() {
-        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        setField(this.jsonObjectToObjectConverter, "mapper", objectMapper);
+        setField(this.objectToJsonObjectConverter, "mapper", objectMapper);
     }
 
     @Test
@@ -87,15 +105,14 @@ public class UpdatePleaCommandHandlerTest {
 
         final PleaValue pleaValue = PleaValue.NOT_GUILTY;
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
-        final UpdatePleaCommand updatePleaCommand = UpdatePleaCommand.updatePleaCommand()
+
+        final Plea plea = getPlea(pleaDate, pleaValue, null);
+        final IndicatedPlea indicatedPlea = getIndicatedPlea(INDICATED_NOT_GUILTY, pleaDate);
+        final AllocationDecision allocationDecision = getAllocationDecission(pleaDate);
+
+        final UpdatePleaCommand updatePleaCommand = updatePleaCommand()
                 .setHearingId(hearing.getHearingId())
-                .setPleas(asList(
-                        Plea.plea()
-                                .withOriginatingHearingId(hearing.getHearingId())
-                                .withPleaDate(pleaDate)
-                                .withPleaValue(pleaValue)
-                                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
-                                .build()));
+                .setPleas(getPleaModel(plea, indicatedPlea, allocationDecision));
 
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingInitiated(hearing.getHearing()));
@@ -113,13 +130,15 @@ public class UpdatePleaCommandHandlerTest {
         final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream)
                 .collect(Collectors.toList());
 
-        assertThat(asPojo((JsonEnvelope) events.get(0), PleaUpsert.class), isBean(PleaUpsert.class)
-                .with(PleaUpsert::getHearingId, is(hearing.getHearingId()))
-                .with(PleaUpsert::getPlea, isBean(Plea.class)
-                        .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
-                        .with(Plea::getPleaDate, is(pleaDate))
-                        .with(Plea::getPleaValue, is(pleaValue))
-                ));
+        PleaUpsert pleaUpsert = asPojo((JsonEnvelope) events.get(0), PleaUpsert.class);
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        assertThat(pleaUpsert.getPleaModel().getPlea(), isBean(Plea.class)
+                .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                .with(Plea::getPleaDate, is(pleaDate))
+                .with(Plea::getPleaValue, is(pleaValue))
+        );
 
         assertThat(((JsonEnvelope) events.get(1)).metadata().name(), is("hearing.conviction-date-removed"));
         assertThat(asPojo((JsonEnvelope) events.get(1), ConvictionDateRemoved.class), isBean(ConvictionDateRemoved.class)
@@ -134,23 +153,17 @@ public class UpdatePleaCommandHandlerTest {
         final PleaValue pleaValue = PleaValue.GUILTY;
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
         final DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
-                .withUserId(UUID.randomUUID())
+                .withUserId(randomUUID())
                 .withFirstName("David")
                 .withLastName("Bowie").build();
 
-        final UpdatePleaCommand updatePleaCommand = UpdatePleaCommand.updatePleaCommand()
+        final Plea plea = getPlea(pleaDate, pleaValue, delegatedPowers);
+        final IndicatedPlea indicatedPlea = getIndicatedPlea(INDICATED_NOT_GUILTY, pleaDate);
+        final AllocationDecision allocationDecision = getAllocationDecission(pleaDate);
+
+        final UpdatePleaCommand updatePleaCommand = updatePleaCommand()
                 .setHearingId(hearing.getHearingId())
-                .setPleas(
-                        Arrays.asList(
-                                Plea.plea()
-                                        .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
-                                        .withOriginatingHearingId(hearing.getHearingId())
-                                        .withPleaDate(pleaDate)
-                                        .withDelegatedPowers(delegatedPowers)
-                                        .withPleaValue(pleaValue)
-                                        .build()
-                        )
-                );
+                .setPleas(getPleaModel(plea, indicatedPlea, allocationDecision));
 
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingInitiated(hearing.getHearing()));
@@ -170,16 +183,19 @@ public class UpdatePleaCommandHandlerTest {
 
         assertThat(jsonEnvelope.metadata().name(), is("hearing.hearing-offence-plea-updated"));
 
-        assertThat(asPojo(events.get(0), PleaUpsert.class), isBean(PleaUpsert.class)
-                .with(PleaUpsert::getHearingId, is(hearing.getHearingId()))
-                .with(PleaUpsert::getPlea, isBean(Plea.class)
-                        .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
-                        .with(Plea::getPleaDate, is(pleaDate))
-                        .with(Plea::getPleaValue, is(pleaValue))
-                        .with(Plea::getDelegatedPowers, isBean(DelegatedPowers.class)
-                                .with(DelegatedPowers::getFirstName, is(delegatedPowers.getFirstName()))
-                                .with(DelegatedPowers::getLastName, is(delegatedPowers.getLastName()))
-                                .with(DelegatedPowers::getUserId, is(delegatedPowers.getUserId())))));
+        PleaUpsert pleaUpsert = asPojo(events.get(0), PleaUpsert.class);
+
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        assertThat(pleaUpsert.getPleaModel().getPlea(), isBean(Plea.class)
+                .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                .with(Plea::getPleaDate, is(pleaDate))
+                .with(Plea::getPleaValue, is(pleaValue))
+                .with(Plea::getDelegatedPowers, isBean(DelegatedPowers.class)
+                        .with(DelegatedPowers::getFirstName, is(delegatedPowers.getFirstName()))
+                        .with(DelegatedPowers::getLastName, is(delegatedPowers.getLastName()))
+                        .with(DelegatedPowers::getUserId, is(delegatedPowers.getUserId()))));
 
         jsonEnvelope = events.get(1);
 
@@ -202,10 +218,51 @@ public class UpdatePleaCommandHandlerTest {
         final UpdateOffencePleaCommand command = UpdateOffencePleaCommand.
                 updateOffencePleaCommand()
                 .setHearingId(hearing.getHearingId())
-                .setPlea(Plea.plea()
+                .setPleaModel(pleaModel()
                         .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
-                        .withPleaDate(pleaDate)
-                        .withPleaValue(pleaValue)
+                        .withPlea(Plea.plea()
+                                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                                .withPleaDate(pleaDate)
+                                .withPleaValue(pleaValue)
+                                .build()).build());
+
+        final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.offence-plea-updated"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateOffencePlea(jsonEnvelop);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream).collect(Collectors.toList());
+
+        final JsonEnvelope jsonEnvelope = events.get(0);
+
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.offence-plea-updated"));
+
+        PleaUpsert pleaUpsert = asPojo(events.get(0), PleaUpsert.class);
+
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        assertThat(pleaUpsert.getPleaModel().getPlea(), isBean(Plea.class)
+                .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                .with(Plea::getPleaDate, is(pleaDate))
+                .with(Plea::getPleaValue, is(pleaValue)));
+    }
+
+    @Test
+    public void testIndicatedPlea_toGuilty() throws Throwable {
+
+        final IndicatedPleaValue indicatedPleaValue = INDICATED_GUILTY;
+        final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
+
+        when(this.eventSource.getStreamById(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())).thenReturn(this.offenceAggregateEventStream);
+        when(this.aggregateService.get(this.offenceAggregateEventStream, OffenceAggregate.class)).thenReturn(new OffenceAggregate());
+
+        final UpdateOffencePleaCommand command = UpdateOffencePleaCommand.
+                updateOffencePleaCommand()
+                .setHearingId(hearing.getHearingId())
+                .setPleaModel(pleaModel()
+                        .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                        .withIndicatedPlea(getIndicatedPlea(indicatedPleaValue, indicatedPleaDate))
                         .build());
 
         final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.offence-plea-updated"),
@@ -219,12 +276,157 @@ public class UpdatePleaCommandHandlerTest {
 
         assertThat(jsonEnvelope.metadata().name(), is("hearing.offence-plea-updated"));
 
-        assertThat(asPojo(events.get(0), PleaUpsert.class), isBean(PleaUpsert.class)
-                .with(PleaUpsert::getHearingId, is(hearing.getHearingId()))
-                .with(PleaUpsert::getPlea, isBean(Plea.class)
-                        .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
-                        .with(Plea::getPleaDate, is(pleaDate))
-                        .with(Plea::getPleaValue, is(pleaValue))));
+        PleaUpsert pleaUpsert = asPojo(events.get(0), PleaUpsert.class);
+
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        final IndicatedPlea indicatedPlea = pleaUpsert.getPleaModel().getIndicatedPlea();
+        assertThat(indicatedPlea, isBean(IndicatedPlea.class)
+                .with(IndicatedPlea::getIndicatedPleaDate, is(indicatedPleaDate))
+                .with(IndicatedPlea::getIndicatedPleaValue, is(indicatedPleaValue)));
+        assertThat(pleaUpsert.getPleaModel().getPlea(), is(nullValue()));
+        assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(nullValue()));
+    }
+
+    @Test
+    public void testHearingAggregateUpdateIndicatedPlea_toGuilty_shouldHaveConvictionDateDelegated() throws Throwable {
+
+        final IndicatedPleaValue indicatedPleaValue = INDICATED_GUILTY;
+        final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
+
+        final UpdatePleaCommand command = updatePleaCommand()
+                .setHearingId(hearing.getHearingId())
+                .setPleas(asList(pleaModel()
+                        .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                        .withIndicatedPlea(getIndicatedPlea(indicatedPleaValue, indicatedPleaDate))
+                        .build()));
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingAggregateEventStream);
+        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.update-plea"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updatePlea(jsonEnvelop);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream).collect(Collectors.toList());
+
+        JsonEnvelope jsonEnvelope = events.get(0);
+
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.hearing-offence-plea-updated"));
+
+        PleaUpsert pleaUpsert = asPojo(events.get(0), PleaUpsert.class);
+
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        final IndicatedPlea indicatedPlea = pleaUpsert.getPleaModel().getIndicatedPlea();
+        assertThat(indicatedPlea, isBean(IndicatedPlea.class)
+                .with(IndicatedPlea::getIndicatedPleaDate, is(indicatedPleaDate))
+                .with(IndicatedPlea::getIndicatedPleaValue, is(indicatedPleaValue)));
+        assertThat(pleaUpsert.getPleaModel().getPlea(), is(nullValue()));
+        assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(nullValue()));
+
+        jsonEnvelope = events.get(1);
+
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.conviction-date-added"));
+        assertThat(asPojo(jsonEnvelope, ConvictionDateAdded.class), isBean(ConvictionDateAdded.class)
+                .with(ConvictionDateAdded::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                .with(ConvictionDateAdded::getConvictionDate, is(indicatedPleaDate))
+        );
+    }
+
+
+    @Test
+    public void testIndicatedPlea_toNotGuilty_WithAllocationDecision() throws Throwable {
+
+        final IndicatedPleaValue indicatedPleaValue = INDICATED_GUILTY;
+        final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
+        final UUID motReasonId = randomUUID();
+        final String motReasonDescription = STRING.next();
+
+        when(this.eventSource.getStreamById(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())).thenReturn(this.offenceAggregateEventStream);
+        when(this.aggregateService.get(this.offenceAggregateEventStream, OffenceAggregate.class)).thenReturn(new OffenceAggregate());
+
+        final UpdateOffencePleaCommand command = UpdateOffencePleaCommand.
+                updateOffencePleaCommand()
+                .setHearingId(hearing.getHearingId())
+                .setPleaModel(pleaModel()
+                        .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                        .withIndicatedPlea(getIndicatedPlea(indicatedPleaValue, indicatedPleaDate))
+                        .withAllocationDecision(AllocationDecision.allocationDecision()
+                                .withMotReasonId(motReasonId)
+                                .withMotReasonDescription(motReasonDescription)
+                                .build())
+                        .build());
+
+        final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.offence-plea-updated"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateOffencePlea(jsonEnvelop);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream).collect(Collectors.toList());
+
+        final JsonEnvelope jsonEnvelope = events.get(0);
+
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.offence-plea-updated"));
+
+        PleaUpsert pleaUpsert = asPojo(events.get(0), PleaUpsert.class);
+
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        final IndicatedPlea indicatedPlea = pleaUpsert.getPleaModel().getIndicatedPlea();
+        assertThat(indicatedPlea, isBean(IndicatedPlea.class)
+                .with(IndicatedPlea::getIndicatedPleaDate, is(indicatedPleaDate))
+                .with(IndicatedPlea::getIndicatedPleaValue, is(indicatedPleaValue)));
+        assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), isBean(AllocationDecision.class)
+                .with(AllocationDecision::getMotReasonId, is(motReasonId))
+                .with(AllocationDecision::getMotReasonDescription, is(motReasonDescription))
+        );
+        assertThat(pleaUpsert.getPleaModel().getPlea(), is(nullValue()));
+     }
+
+    @Test
+    public void testIndicatedPlea_WithAllocationDecision() throws Throwable {
+
+        when(this.eventSource.getStreamById(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())).thenReturn(this.offenceAggregateEventStream);
+        when(this.aggregateService.get(this.offenceAggregateEventStream, OffenceAggregate.class)).thenReturn(new OffenceAggregate());
+
+        final UpdateOffencePleaCommand command = UpdateOffencePleaCommand.
+                updateOffencePleaCommand()
+                .setHearingId(hearing.getHearingId())
+                .setPleaModel(pleaModel()
+                        .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                        .withAllocationDecision(AllocationDecision.allocationDecision()
+                                .build())
+                        .build());
+
+        final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.offence-plea-updated"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateOffencePlea(jsonEnvelop);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream).collect(Collectors.toList());
+
+        final JsonEnvelope jsonEnvelope = events.get(0);
+
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.offence-plea-updated"));
+
+        PleaUpsert pleaUpsert = asPojo(events.get(0), PleaUpsert.class);
+
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), isBean(AllocationDecision.class)
+        );
+        assertThat(pleaUpsert.getPleaModel().getPlea(), is(nullValue()));
+        assertThat(pleaUpsert.getPleaModel().getIndicatedPlea(), is(nullValue()));
     }
 
     @Test
@@ -241,11 +443,13 @@ public class UpdatePleaCommandHandlerTest {
         final UpdateOffencePleaCommand command = UpdateOffencePleaCommand.
                 updateOffencePleaCommand()
                 .setHearingId(hearing.getHearingId())
-                .setPlea(Plea.plea()
+                .setPleaModel(pleaModel()
                         .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
-                        .withPleaDate(pleaDate)
-                        .withPleaValue(pleaValue)
-                        .build());
+                        .withPlea(Plea.plea()
+                                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                                .withPleaDate(pleaDate)
+                                .withPleaValue(pleaValue)
+                                .build()).build());
 
         final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.offence-plea-updated"),
                 objectToJsonObjectConverter.convert(command));
@@ -254,11 +458,59 @@ public class UpdatePleaCommandHandlerTest {
 
         final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.offenceAggregateEventStream).collect(Collectors.toList());
 
-        assertThat(asPojo(events.get(0), PleaUpsert.class), isBean(PleaUpsert.class)
-                .with(PleaUpsert::getHearingId, is(hearing.getHearingId()))
-                .with(PleaUpsert::getPlea, isBean(Plea.class)
-                        .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
-                        .with(Plea::getPleaDate, is(pleaDate))
-                        .with(Plea::getPleaValue, is(pleaValue))));
+        PleaUpsert pleaUpsert = asPojo(events.get(0), PleaUpsert.class);
+
+        assertThat(pleaUpsert, isBean(PleaUpsert.class)
+                .with(PleaUpsert::getHearingId, is(hearing.getHearingId())));
+
+        assertThat(pleaUpsert.getPleaModel().getPlea(), isBean(Plea.class)
+                .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                .with(Plea::getPleaDate, is(pleaDate))
+                .with(Plea::getPleaValue, is(pleaValue)));
+
+        assertThat(pleaUpsert.getPleaModel().getIndicatedPlea(), is(nullValue()));
+        assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(nullValue()));
+
+    }
+
+    private Plea getPlea(final LocalDate pleaDate, final PleaValue pleaValue, final DelegatedPowers delegatedPowers) {
+        return Plea.plea()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withOriginatingHearingId(hearing.getHearingId())
+                .withPleaDate(pleaDate)
+                .withDelegatedPowers(delegatedPowers)
+                .withPleaValue(pleaValue)
+                .build();
+    }
+
+    private IndicatedPlea getIndicatedPlea(final IndicatedPleaValue indicatedPleaValue, final LocalDate pleaDate) {
+        return IndicatedPlea.indicatedPlea()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withOriginatingHearingId(hearing.getHearingId())
+                .withIndicatedPleaDate(pleaDate)
+                .withIndicatedPleaValue(indicatedPleaValue)
+                .withSource(Source.IN_COURT)
+                .build();
+    }
+
+    private AllocationDecision getAllocationDecission(final LocalDate decissionDate) {
+        return AllocationDecision.allocationDecision()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withOriginatingHearingId(hearing.getHearingId())
+                .withAllocationDecisionDate(decissionDate)
+                .withMotReasonCode("7")
+                .withMotReasonDescription("Reason")
+                .build();
+    }
+
+    private List<PleaModel> getPleaModel(final Plea plea, final IndicatedPlea indicatedPlea, final AllocationDecision allocationDecision) {
+        return asList(pleaModel()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withProsecutionCaseId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withPlea(plea)
+                .withIndicatedPlea(indicatedPlea)
+                .withAllocationDecision(allocationDecision)
+        );
     }
 }

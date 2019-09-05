@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
-import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
@@ -30,7 +30,7 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.hearing-offence-plea-update event received {}", envelope.toObfuscatedDebugString());
         }
         final UpdatePleaCommand command = convertToObject(envelope, UpdatePleaCommand.class);
-        for (final Plea plea : command.getPleas()) {
+        for (final PleaModel plea : command.getPleas()) {
             aggregate(HearingAggregate.class, command.getHearingId(), envelope,
                     hearingAggregate -> hearingAggregate.updatePlea(command.getHearingId(), plea));
         }
@@ -42,8 +42,9 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.update-plea-against-offence event received {}", envelope.toObfuscatedDebugString());
         }
         final UpdateOffencePleaCommand command = convertToObject(envelope, UpdateOffencePleaCommand.class);
-        aggregate(OffenceAggregate.class, command.getPlea().getOffenceId(), envelope,
-                offenceAggregate -> offenceAggregate.updatePlea(command.getHearingId(), command.getPlea()));
+        final PleaModel pleaModel = command.getPleaModel();
+        aggregate(OffenceAggregate.class, pleaModel.getOffenceId(), envelope,
+                offenceAggregate -> offenceAggregate.updatePlea(command.getHearingId(), pleaModel));
     }
 
     @Handles("hearing.command.enrich-update-plea-with-associated-hearings")

@@ -7,12 +7,12 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "$ref": "http://justice.gov.uk/core/courts/plea.json"
+        "$ref": "http://justice.gov.uk/core/courts/pleaModel.json"
       }
     }
   },
   "required": [
-    "pleas"
+     "pleas"
   ],
   "additionalProperties": false
 }

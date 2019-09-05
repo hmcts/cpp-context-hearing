@@ -5,7 +5,9 @@ import static java.util.UUID.randomUUID;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
+import static uk.gov.justice.core.courts.PleaModel.pleaModel;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -13,6 +15,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
+import static uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand.updatePleaCommand;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
@@ -29,11 +33,9 @@ import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
-import uk.gov.justice.core.courts.CourtDecision;
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAlias;
-import uk.gov.justice.core.courts.DefendantRepresentation;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.DocumentationLanguage;
 import uk.gov.justice.core.courts.FinancialOrderDetails;
@@ -53,10 +55,9 @@ import uk.gov.justice.core.courts.NowVariantResult;
 import uk.gov.justice.core.courts.NowVariantResultText;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Organisation;
-import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
-import uk.gov.justice.core.courts.ProsecutionRepresentation;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.ResultPrompt;
@@ -549,6 +550,19 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingTemplateForIndicatedPlea(
+                final IndicatedPleaValue indicatedPleaValue,
+                final boolean isAllocationDecision) {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                            .setIndicatedPleaValue(indicatedPleaValue)
+                            .setAllocationDecision(isAllocationDecision)
+                    ).build());
+        }
+
         public static InitiateHearingCommand initiateHearingTemplateForMagistrates() {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
@@ -607,20 +621,36 @@ public class TestTemplates {
         private UpdatePleaCommandTemplates() {
         }
 
-        public static UpdatePleaCommand updatePleaTemplate(final UUID originatingHearingId, final UUID offenceId, final PleaValue pleaValue) {
-            return UpdatePleaCommand.updatePleaCommand().setPleas(
-                    asList(
-                            Plea.plea()
-                                    .withOriginatingHearingId(originatingHearingId)
-                                    .withOffenceId(offenceId)
-                                    .withPleaValue(pleaValue)
-                                    .withPleaDate(PAST_LOCAL_DATE.next())
-                                    .withDelegatedPowers(DelegatedPowers.delegatedPowers()
-                                            .withFirstName(DAVID)
-                                            .withLastName(BOWIE)
-                                            .withUserId(UUID.randomUUID())
-                                            .build())
-                                    .build()));
+
+        public static UpdatePleaCommand updatePleaTemplate(final UUID originatingHearingId,
+                                                           final UUID offenceId,
+                                                           final UUID defendantId,
+                                                           final UUID prosecutionCaseId,
+                                                           final IndicatedPleaValue indicatedPleaValue,
+                                                           final PleaValue pleaValue,
+                                                           final boolean isAllocationDecision) {
+
+
+            final PleaModel.Builder pleaModel = pleaModel().withDefendantId(defendantId)
+                    .withOffenceId(offenceId)
+                    .withProsecutionCaseId(prosecutionCaseId);
+
+
+            if (indicatedPleaValue != null) {
+                pleaModel.withIndicatedPlea(CoreTestTemplates.indicatedPlea(offenceId, indicatedPleaValue).build());
+            }
+
+            if (isAllocationDecision) {
+                pleaModel.withAllocationDecision(CoreTestTemplates.allocationDecision(offenceId).build());
+            }
+
+            if (pleaValue != null) {
+                pleaModel.withPlea(CoreTestTemplates.plea(offenceId, PAST_LOCAL_DATE.next(), pleaValue).build());
+            }
+
+            return updatePleaCommand().setHearingId(originatingHearingId).setPleas(
+                    asList(pleaModel.build()));
+
         }
     }
 
@@ -920,16 +950,19 @@ public class TestTemplates {
                                     .withEndDate(PAST_LOCAL_DATE.next())
                                     .withId(offenceId)
                                     .withIndicatedPlea(uk.gov.justice.core.courts.IndicatedPlea.indicatedPlea()
-                                            .withAllocationDecision(uk.gov.justice.core.courts.AllocationDecision.allocationDecision()
-                                                    .withCourtDecision(RandomGenerator.values(CourtDecision.values()).next())
-                                                    .withDefendantRepresentation(RandomGenerator.values(DefendantRepresentation.values()).next())
-                                                    .withIndicationOfSentence(STRING.next())
-                                                    .withProsecutionRepresentation(RandomGenerator.values(ProsecutionRepresentation.values()).next())
-                                                    .build())
                                             .withIndicatedPleaDate(PAST_LOCAL_DATE.next())
                                             .withIndicatedPleaValue(RandomGenerator.values(IndicatedPleaValue.values()).next())
                                             .withOffenceId(offenceId)
                                             .withSource(RandomGenerator.values(Source.values()).next())
+                                            .build())
+                                    .withAllocationDecision(uk.gov.justice.core.courts.AllocationDecision.allocationDecision()
+                                            .withOriginatingHearingId(randomUUID())
+                                            .withOffenceId(offenceId)
+                                            .withMotReasonId(randomUUID())
+                                            .withMotReasonDescription(STRING.next())
+                                            .withMotReasonCode(STRING.next())
+                                            .withAllocationDecisionDate(FUTURE_LOCAL_DATE.next())
+                                            .withSequenceNumber(INTEGER.next())
                                             .build())
                                     .withModeOfTrial(STRING.next())
                                     .withOffenceCode(STRING.next())

@@ -3,16 +3,14 @@ package uk.gov.moj.cpp.hearing.mapping;
 import static io.github.benas.randombeans.EnhancedRandomBuilder.aNewEnhancedRandom;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapperTest.whenAllocationDecision;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.util.UUID;
 
 import org.junit.Test;
-
-import uk.gov.justice.core.courts.AllocationDecision;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 public class IndicatedPleaJPAMapperTest {
 
@@ -33,8 +31,7 @@ public class IndicatedPleaJPAMapperTest {
 
     public static BeanMatcher<IndicatedPlea> whenIndicatedPlea(final BeanMatcher<IndicatedPlea> m, final UUID offenceId,
             final uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea entity) {
-        return m.with(IndicatedPlea::getAllocationDecision, whenAllocationDecision(isBean(AllocationDecision.class), entity.getAllocationDecision()))
-        .with(IndicatedPlea::getIndicatedPleaDate, is(entity.getIndicatedPleaDate()))
+        return m.with(IndicatedPlea::getIndicatedPleaDate, is(entity.getIndicatedPleaDate()))
         .with(IndicatedPlea::getIndicatedPleaValue, is(entity.getIndicatedPleaValue()))
         .with(IndicatedPlea::getOffenceId, is(offenceId))
         .with(IndicatedPlea::getSource, is(entity.getIndicatedPleaSource()));
@@ -42,9 +39,7 @@ public class IndicatedPleaJPAMapperTest {
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea> whenIndicatedPlea(
             final BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea> m, final IndicatedPlea pojo) {
-        return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea::getAllocationDecision, whenAllocationDecision(
-                    isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision.class), pojo.getAllocationDecision()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea::getIndicatedPleaDate, is(pojo.getIndicatedPleaDate()))
+        return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea::getIndicatedPleaDate, is(pojo.getIndicatedPleaDate()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea::getIndicatedPleaValue, is(pojo.getIndicatedPleaValue()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea::getIndicatedPleaSource, is(pojo.getSource()));
     }

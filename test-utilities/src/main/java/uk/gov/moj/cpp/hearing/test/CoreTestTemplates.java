@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
+import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.NI_NUMBER;
@@ -22,9 +23,8 @@ import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.CourtDecision;
+import uk.gov.justice.core.courts.CourtIndicatedSentence;
 import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.DefendantRepresentation;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
 import uk.gov.justice.core.courts.Ethnicity;
@@ -53,7 +53,6 @@ import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
-import uk.gov.justice.core.courts.ProsecutionRepresentation;
 import uk.gov.justice.core.courts.ReferralReason;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
@@ -145,30 +144,39 @@ public class CoreTestTemplates {
                 .withNotifiedPleaDate(PAST_LOCAL_DATE.next());
     }
 
-    public static IndicatedPlea.Builder indicatedPlea(UUID offenceId) {
+    public static IndicatedPlea.Builder indicatedPlea(UUID offenceId, IndicatedPleaValue indicatedPleaValue) {
         return IndicatedPlea.indicatedPlea()
                 .withOffenceId(offenceId)
-                .withAllocationDecision(allocationDecision().build())
                 .withIndicatedPleaDate(PAST_LOCAL_DATE.next())
-                .withIndicatedPleaValue(RandomGenerator.values(IndicatedPleaValue.values()).next())
+                .withIndicatedPleaValue(indicatedPleaValue)
                 .withSource(RandomGenerator.values(Source.values()).next());
     }
 
-    public static Plea.Builder plea(UUID offenceId, LocalDate convictionDate) {
+    public static Plea.Builder plea(UUID offenceId, LocalDate convictionDate, final PleaValue pleaValue) {
         return Plea.plea()
                 .withOffenceId(offenceId)
                 .withOriginatingHearingId(randomUUID())
                 .withDelegatedPowers(delegatedPowers().build())
                 .withPleaDate(convictionDate)
-                .withPleaValue(PleaValue.GUILTY);
+                .withPleaValue(pleaValue);
     }
 
-    public static AllocationDecision.Builder allocationDecision() {
+    public static AllocationDecision.Builder allocationDecision(final UUID offenceId) {
         return AllocationDecision.allocationDecision()
-                .withCourtDecision(RandomGenerator.values(CourtDecision.values()).next())
-                .withDefendantRepresentation(RandomGenerator.values(DefendantRepresentation.values()).next())
-                .withIndicationOfSentence(STRING.next())
-                .withProsecutionRepresentation(RandomGenerator.values(ProsecutionRepresentation.values()).next());
+                .withOriginatingHearingId(randomUUID())
+                .withOffenceId(offenceId)
+                .withMotReasonId(randomUUID())
+                .withMotReasonDescription(STRING.next())
+                .withMotReasonCode(STRING.next())
+                .withSequenceNumber(INTEGER.next())
+                .withAllocationDecisionDate(LocalDate.now())
+                .withCourtIndicatedSentence(courtIndicatedSentence().build());
+    }
+
+    public static CourtIndicatedSentence.Builder courtIndicatedSentence() {
+        return CourtIndicatedSentence.courtIndicatedSentence()
+                .withCourtIndicatedSentenceDescription(STRING.next())
+                .withCourtIndicatedSentenceTypeId(randomUUID());
     }
 
     public static DelegatedPowers.Builder delegatedPowers() {
@@ -206,7 +214,7 @@ public class CoreTestTemplates {
                 .withArrestDate(PAST_LOCAL_DATE.next())
                 .withChargeDate(PAST_LOCAL_DATE.next())
 
-                .withIndicatedPlea(indicatedPlea(offenceId).build())
+                .withIndicatedPlea(indicatedPlea(offenceId, args.indicatedPlea).build())
                 .withNotifiedPlea(notifiedPlea(offenceId).build())
 
                 .withOffenceDefinitionId(randomUUID())
@@ -232,6 +240,10 @@ public class CoreTestTemplates {
         if (args.convicted) {
             final LocalDate convictionDate = PAST_LOCAL_DATE.next();
             result.withConvictionDate(convictionDate);
+        }
+
+        if (args.isAllocationDecision) {
+            result.withAllocationDecision(allocationDecision(offenceId).build());
         }
 
         return result;
@@ -493,6 +505,8 @@ public class CoreTestTemplates {
 
         private DefendantType defendantType = PERSON;
 
+        private IndicatedPleaValue indicatedPlea = INDICATED_GUILTY;
+
         private boolean minimumAssociatedPerson;
         private boolean minimumDefenceOrganisation;
         private boolean minimumPerson;
@@ -500,6 +514,7 @@ public class CoreTestTemplates {
         private boolean minimumOffence;
         private boolean convicted = false;
         private boolean isOffenceCountNull = false;
+        private boolean isAllocationDecision = true;
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
@@ -525,6 +540,11 @@ public class CoreTestTemplates {
 
         public CoreTemplateArguments setDefendantType(DefendantType defendantType) {
             this.defendantType = defendantType;
+            return this;
+        }
+
+        public CoreTemplateArguments setIndicatedPleaValue(IndicatedPleaValue indicatedPleaValue) {
+            this.indicatedPlea = indicatedPleaValue;
             return this;
         }
 
@@ -587,6 +607,12 @@ public class CoreTestTemplates {
             this.isOffenceCountNull = true;
             return this;
         }
+
+        public CoreTemplateArguments setAllocationDecision(final boolean allocationDecision) {
+            this.isAllocationDecision = allocationDecision;
+            return this;
+        }
+
     }
 
     public static Target.Builder targetForDocumentIsDeleted(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {

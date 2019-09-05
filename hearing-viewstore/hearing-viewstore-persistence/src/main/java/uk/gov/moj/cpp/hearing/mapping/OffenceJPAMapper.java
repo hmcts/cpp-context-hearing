@@ -27,15 +27,21 @@ public class OffenceJPAMapper {
 
     private VerdictJPAMapper verdictJPAMapper;
 
+    private AllocationDecisionJPAMapper allocationDecisionJPAMapper;
+
     @Inject
-    public OffenceJPAMapper(NotifiedPleaJPAMapper notifiedPleaJPAMapper, IndicatedPleaJPAMapper indicatedPleaJPAMapper,
-                            PleaJPAMapper pleaJPAMapper, OffenceFactsJPAMapper offenceFactsJPAMapper,
-                            VerdictJPAMapper verdictJPAMapper) {
+    public OffenceJPAMapper(final NotifiedPleaJPAMapper notifiedPleaJPAMapper,
+                            final IndicatedPleaJPAMapper indicatedPleaJPAMapper,
+                            final PleaJPAMapper pleaJPAMapper,
+                            final OffenceFactsJPAMapper offenceFactsJPAMapper,
+                            final VerdictJPAMapper verdictJPAMapper,
+                            final AllocationDecisionJPAMapper allocationDecisionJPAMapper) {
         this.notifiedPleaJPAMapper = notifiedPleaJPAMapper;
         this.indicatedPleaJPAMapper = indicatedPleaJPAMapper;
         this.pleaJPAMapper = pleaJPAMapper;
         this.offenceFactsJPAMapper = offenceFactsJPAMapper;
         this.verdictJPAMapper = verdictJPAMapper;
+        this.allocationDecisionJPAMapper = allocationDecisionJPAMapper;
     }
 
     //To keep cditester happy
@@ -76,6 +82,7 @@ public class OffenceJPAMapper {
         offence.setOffenceFacts(offenceFactsJPAMapper.toJPA(pojo.getOffenceFacts()));
         offence.setPlea(pleaJPAMapper.toJPA(pojo.getPlea()));
         offence.setVerdict(verdictJPAMapper.toJPA(pojo.getVerdict()));
+        offence.setAllocationDecision(allocationDecisionJPAMapper.toJPA(pojo.getAllocationDecision()));
 
         return offence;
     }
@@ -112,6 +119,7 @@ public class OffenceJPAMapper {
                 .withOffenceFacts(offenceFactsJPAMapper.fromJPA(entity.getOffenceFacts()))
                 .withPlea(pleaJPAMapper.fromJPA(offenceId, entity.getPlea()))
                 .withVerdict(verdictJPAMapper.fromJPA(offenceId, entity.getVerdict()))
+                .withAllocationDecision(allocationDecisionJPAMapper.fromJPA(offenceId, entity.getAllocationDecision()))
 
                 .build();
     }

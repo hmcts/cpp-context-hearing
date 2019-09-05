@@ -18,8 +18,10 @@ import org.slf4j.LoggerFactory;
 public class PleaUpdateEventProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PleaUpdateEventProcessor.class);
+    private static final String PLEA_MODEL = "pleaModel";
     private final Enveloper enveloper;
     private final Sender sender;
+    private static final String OFFENCE_ID = "offenceId";
 
     @Inject
     public PleaUpdateEventProcessor(final Enveloper enveloper, final Sender sender) {
@@ -38,7 +40,7 @@ public class PleaUpdateEventProcessor {
 
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.plea-updated")
                 .apply(createObjectBuilder()
-                        .add("offenceId", envelop.payloadAsJsonObject().getJsonObject("plea").getJsonString("offenceId"))
+                        .add(OFFENCE_ID, getOffenceIdFromPayload(envelop))
                         .build()));
     }
 
@@ -50,5 +52,9 @@ public class PleaUpdateEventProcessor {
         }
 
         this.sender.send(enveloper.withMetadataFrom(event, "hearing.command.enrich-update-plea-with-associated-hearings").apply(event.payloadAsJsonObject()));
+    }
+
+    private String getOffenceIdFromPayload(JsonEnvelope envelop) {
+        return envelop.payloadAsJsonObject().getJsonObject(PLEA_MODEL).getString(OFFENCE_ID);
     }
 }
