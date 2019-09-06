@@ -30,6 +30,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
 
+import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
@@ -38,6 +39,7 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
@@ -158,6 +160,11 @@ public class ShareResultsIT extends AbstractIT {
                                                 .with(Offence::getPlea, isBean(Plea.class)
                                                         .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
                                                         .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue())))
+                                                .with(Offence::getIndicatedPlea, isBean(IndicatedPlea.class)
+                                                        .with(IndicatedPlea::getIndicatedPleaValue, is(pleaOne.getFirstIndicatedPleaValue()))
+                                                        .with(IndicatedPlea::getIndicatedPleaDate, is(pleaOne.getFirstIndicatedPleaDate())))
+                                                .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
+                                                        .with(AllocationDecision::getOffenceId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
                                                 .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))))))))));
 
         SaveDraftResultCommand saveDraftResultCommand = null;

@@ -211,8 +211,14 @@ public class ResultsSharedDelegate implements Serializable {
     private void updateOffence() {
         if (this.momento.getHearing().getProsecutionCases() != null && !this.momento.getHearing().getProsecutionCases().isEmpty()) {
             this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().forEach(defendant -> defendant.getOffences().forEach(offence -> {
-                if (momento.getPleas().containsKey(offence.getId())) {
+                if (momento.getPleas() != null && momento.getPleas().containsKey(offence.getId())) {
                     offence.setPlea(momento.getPleas().get(offence.getId()));
+                }
+                if (momento.getIndicatedPlea() != null && momento.getIndicatedPlea().containsKey(offence.getId())) {
+                    offence.setIndicatedPlea(momento.getIndicatedPlea().get(offence.getId()));
+                }
+                if (momento.getAllocationDecision() != null && momento.getAllocationDecision().containsKey(offence.getId())) {
+                    offence.setAllocationDecision(momento.getAllocationDecision().get(offence.getId()));
                 }
                 if (momento.getVerdicts().containsKey(offence.getId())) {
                     offence.setVerdict(momento.getVerdicts().get(offence.getId()));
