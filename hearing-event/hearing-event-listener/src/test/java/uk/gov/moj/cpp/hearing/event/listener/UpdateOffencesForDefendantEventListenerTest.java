@@ -18,6 +18,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.CourtIndicatedSentenceJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.DelegatedPowersJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.JurorsJPAMapper;
@@ -76,8 +77,9 @@ public class UpdateOffencesForDefendantEventListenerTest {
         setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         setField(this.offenceJPAMapper, "notifiedPleaJPAMapper", new NotifiedPleaJPAMapper());
-        setField(this.offenceJPAMapper, "indicatedPleaJPAMapper", new IndicatedPleaJPAMapper(new AllocationDecisionJPAMapper()));
+        setField(this.offenceJPAMapper, "indicatedPleaJPAMapper", new IndicatedPleaJPAMapper());
         setField(this.offenceJPAMapper, "offenceFactsJPAMapper", new OffenceFactsJPAMapper());
+        setField(this.offenceJPAMapper, "allocationDecisionJPAMapper", new AllocationDecisionJPAMapper(new CourtIndicatedSentenceJPAMapper()));
         setField(this.offenceJPAMapper, "pleaJPAMapper", new PleaJPAMapper(new DelegatedPowersJPAMapper()));
         setField(this.offenceJPAMapper, "verdictJPAMapper", new VerdictJPAMapper(new JurorsJPAMapper(), new LesserOrAlternativeOffenceJPAMapper(), new VerdictTypeJPAMapper()));
     }

@@ -22,6 +22,7 @@ import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
@@ -232,7 +233,7 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.extend(hearingId, courtApplication));
     }
 
-    public Stream<Object> updatePlea(final UUID hearingId, final Plea plea) {
+    public Stream<Object> updatePlea(final UUID hearingId, final PleaModel plea) {
         return apply(pleaDelegate.updatePlea(hearingId, plea));
     }
 

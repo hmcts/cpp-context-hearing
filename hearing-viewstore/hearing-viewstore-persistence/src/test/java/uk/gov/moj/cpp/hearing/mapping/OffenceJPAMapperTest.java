@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapperTest.whenAllocationDecision;
 import static uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapperTest.whenIndicatedPlea;
 import static uk.gov.moj.cpp.hearing.mapping.NotifiedPleaJPAMapperTest.whenNotifiedPlea;
 import static uk.gov.moj.cpp.hearing.mapping.OffenceFactsJPAMapperTest.whenOffenceFacts;
@@ -12,6 +13,7 @@ import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPA
 
 import org.junit.Test;
 
+import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.NotifiedPlea;
 import uk.gov.justice.core.courts.Offence;
@@ -90,7 +92,9 @@ public class OffenceJPAMapperTest {
                 .with(Offence::getWordingWelsh, is(entity.getWordingWelsh()))
                 
                 .with(Offence::getVerdict, 
-                        whenVerdict(isBean(Verdict.class), entity.getId().getId(), entity.getVerdict()));
+                        whenVerdict(isBean(Verdict.class), entity.getId().getId(), entity.getVerdict()))
+                .with(Offence::getAllocationDecision,
+                            whenAllocationDecision(isBean(AllocationDecision.class), entity.getAllocationDecision()));
     }
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.Offence> whenOffence(

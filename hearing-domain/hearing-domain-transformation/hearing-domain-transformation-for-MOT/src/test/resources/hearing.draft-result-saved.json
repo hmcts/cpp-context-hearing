@@ -1,0 +1,10 @@
+{
+  "target": {
+    "defendantId": "d052c35a-7b6d-4f70-979c-bd7710f73408",
+    "draftResult": "{\"targetId\":\"8efae638-9baf-496f-8709-ac8f23754a15\",\"caseId\":\"9eb2ae17-fe5c-4aa7-bfb3-34ebf8b79378\",\"defendantId\":\"d052c35a-7b6d-4f70-979c-bd7710f73408\",\"offenceId\":\"b4204d1c-702a-406f-8427-2528df8b5f8a\",\"defendantFirstName\":\"Tim\",\"defendantLastName\":\"Geintner\",\"addMoreResults\":false,\"results\":[{\"resultLineId\":\"ca404c92-1313-47bc-adff-7f0467e02a19\",\"lastSharedDate\":\"2019-01-22\",\"originalText\":\"COLLO\",\"resultCode\":\"7da6c12e-6fcd-4f4a-ab6c-674025f642d7\",\"resultLevel\":\"C\",\"isCompleted\":true,\"parts\":[{\"value\":\"Collection order\",\"type\":\"RESULT\",\"state\":\"RESOLVED\",\"resultChoices\":[]}],\"choices\":[{\"code\":\"6b36e5ff-e116-4dc3-b438-8c02d493959e\",\"label\":\"Collection order type\",\"type\":\"FIXL\",\"required\":false,\"fixedList\":[\"Attachment of earnings\",\"Deductions from benefit\",\"Make payments as ordered\"]},{\"code\":\"369b6e22-4678-4b04-9fe9-5bb53bed5067\",\"label\":\"Reason for not making an attachment of earnings order or deduction from benefit application\",\"type\":\"TXT\",\"required\":false},{\"code\":\"dc44f589-6dd2-4a8d-9164-c1796c6b0e36\",\"label\":\"Reason for making an attachment of earnings order\",\"type\":\"FIXL\",\"required\":false},{\"code\":\"16ade3fb-9f0f-4ce4-a6c8-fa96277e1519\",\"label\":\"Reason for making an application for deductions from benefit\",\"type\":\"FIXL\",\"required\":false}],\"isEditing\":false,\"noResultFound\":false,\"dirty\":false,\"orderedDate\":\"f7fd01c5-d898-47fe-802c-bf3e77d153cb\"}],\"delegatedPowers\":null}",
+    "hearingId": "e8f8f622-b5e5-4a00-83da-88077e6f5873",
+    "offenceId": "b4204d1c-702a-406f-8427-2528df8b5f8a",
+    "resultLines": [],
+    "targetId": "8efae638-9baf-496f-8709-ac8f23754a15"
+  }
+}

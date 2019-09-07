@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
@@ -31,6 +33,8 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, ApplicantCounsel> applicantCounsels = new HashMap<>();
     private final Map<UUID, DefenceCounsel> defenceCounsels = new HashMap<>();
     private final Map<UUID, Plea> pleas = new HashMap<>();
+    private final Map<UUID, IndicatedPlea> indicatedPleas = new HashMap<>();
+    private final Map<UUID, AllocationDecision> allocationDecisions = new HashMap<>();
     private final Map<UUID, Verdict> verdicts = new HashMap<>();
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
     private final Map<UUID, RespondentCounsel> respondentCounsels = new HashMap<>();
@@ -58,6 +62,14 @@ public class HearingAggregateMomento implements Serializable {
 
     public Map<UUID, Plea> getPleas() {
         return pleas;
+    }
+
+    public Map<UUID, IndicatedPlea> getIndicatedPlea() {
+        return indicatedPleas;
+    }
+
+    public Map<UUID, AllocationDecision> getAllocationDecision() {
+        return allocationDecisions;
     }
 
     public Map<UUID, Verdict> getVerdicts() {

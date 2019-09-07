@@ -5,16 +5,18 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static uk.gov.justice.core.courts.Plea.plea;
+import static uk.gov.justice.core.courts.PleaModel.pleaModel;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated.builder;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
-import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -71,11 +73,11 @@ public class OffenceAggregateTest {
         offenceAggregate.apply(
                 new OffencePleaUpdated(
                         registeredHearingAgainstOffence.getHearingId(),
-                        Plea.plea()
+                        pleaModel().withPlea(plea()
                                 .withOffenceId(registeredHearingAgainstOffence.getOffenceId())
                                 .withPleaDate(pleaDate)
                                 .withPleaValue(PleaValue.GUILTY)
-                                .build()));
+                                .build()).build()));
 
         final FoundPleaForHearingToInherit foundPleaForHearingToInherit =
                 (FoundPleaForHearingToInherit) offenceAggregate.lookupOffenceForHearing(
@@ -156,34 +158,34 @@ public class OffenceAggregateTest {
     @Test
     public void updatePlea() {
 
-        UUID offenceId = randomUUID();
-        UUID hearingId = randomUUID();
-        LocalDate pleaDate = PAST_LOCAL_DATE.next();
-        String value = PleaValue.GUILTY.toString();
-        DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final String value = PleaValue.GUILTY.toString();
+        final DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
                 .withUserId(UUID.randomUUID()).build();
 
-        OffencePleaUpdated offencePleaUpdated = OffencePleaUpdated.builder()
+        final OffencePleaUpdated offencePleaUpdated = builder()
                 .withHearingId(hearingId)
-                .withPlea(Plea.plea()
+                .withPleaModel(pleaModel().withPlea(plea()
                         .withPleaValue(PleaValue.GUILTY)
                         .withPleaDate(pleaDate)
                         .withOffenceId(offenceId)
                         .withDelegatedPowers(delegatedPowers)
-                        .build())
+                        .build()).build())
                 .build();
 
-        List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated.getHearingId(), offencePleaUpdated.getPlea()).collect(Collectors.toList());
+        final List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated.getHearingId(), offencePleaUpdated.getPleaModel()).collect(Collectors.toList());
 
         assertThat(events.get(0), is(offenceAggregate.getPlea()));
 
         assertThat(offenceAggregate.getPlea().getHearingId(), is(hearingId));
-        assertThat(offenceAggregate.getPlea().getPlea().getOffenceId(), is(offenceId));
-        assertThat(offenceAggregate.getPlea().getPlea().getPleaDate(), is(pleaDate));
-        assertThat(offenceAggregate.getPlea().getPlea().getPleaValue().toString(), is(value));
-        assertThat(offenceAggregate.getPlea().getPlea().getDelegatedPowers().getLastName(), is(delegatedPowers.getLastName()));
+        assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getOffenceId(), is(offenceId));
+        assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getPleaDate(), is(pleaDate));
+        assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getPleaValue().toString(), is(value));
+        assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getDelegatedPowers().getLastName(), is(delegatedPowers.getLastName()));
     }
 
 }

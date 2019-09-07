@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.domain.annotation.Event;
-import uk.gov.justice.core.courts.Plea;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -15,22 +15,22 @@ public class OffencePleaUpdated implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private UUID hearingId;
-    private Plea plea;
+    private PleaModel pleaModel;
 
     public OffencePleaUpdated() {
     }
 
     @JsonCreator
     public OffencePleaUpdated(@JsonProperty("hearingId") final UUID originHearingId,
-                              @JsonProperty("plea") final Plea plea) {
+                              @JsonProperty("pleaModel") final PleaModel pleaModel) {
         this.hearingId = originHearingId;
-        this.plea = plea;
+        this.pleaModel = pleaModel;
     }
 
     @JsonIgnore
     private OffencePleaUpdated(final Builder builder) {
         this.hearingId = builder.hearingId;
-        this.plea = builder.plea;
+        this.pleaModel = builder.pleaModel;
     }
 
     public static Builder builder() {
@@ -41,22 +41,22 @@ public class OffencePleaUpdated implements Serializable {
         return hearingId;
     }
 
-    public Plea getPlea() {
-        return plea;
+    public PleaModel getPleaModel() {
+        return pleaModel;
     }
 
     public static final class Builder {
 
         private UUID hearingId;
-        private Plea plea;
+        private PleaModel pleaModel;
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
             return this;
         }
 
-        public Builder withPlea(final Plea plea) {
-            this.plea = plea;
+        public Builder withPleaModel(final PleaModel pleaModel) {
+            this.pleaModel = pleaModel;
             return this;
         }
 

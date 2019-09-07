@@ -6,7 +6,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
@@ -60,7 +60,7 @@ public class OffenceAggregate implements Aggregate {
         if (this.offencePleaUpdated != null) {
             streamBuilder.add(new FoundPleaForHearingToInherit(
                     hearingId,
-                    offencePleaUpdated.getPlea()
+                    offencePleaUpdated.getPleaModel().getPlea()
             ));
         }
 
@@ -74,18 +74,18 @@ public class OffenceAggregate implements Aggregate {
         return apply(streamBuilder.build());
     }
 
-    public Stream<Object> updatePlea(final UUID hearingId, final Plea plea) {
+    public Stream<Object> updatePlea(final UUID hearingId, final PleaModel pleaModel) {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        streamBuilder.add(OffencePleaUpdated.builder().withHearingId(hearingId).withPlea(plea).build());
+        streamBuilder.add(OffencePleaUpdated.builder().withHearingId(hearingId).withPleaModel(pleaModel).build());
 
         final List<UUID> connectedHearingIds = hearingIds.stream()
                 .filter(id -> !id.equals(hearingId))
                 .collect(Collectors.toList());
 
         if (!connectedHearingIds.isEmpty()) {
-            streamBuilder.add(new EnrichUpdatePleaWithAssociatedHearings(connectedHearingIds, plea));
+            streamBuilder.add(new EnrichUpdatePleaWithAssociatedHearings(connectedHearingIds, pleaModel.getPlea()));
         }
 
         return apply(streamBuilder.build());

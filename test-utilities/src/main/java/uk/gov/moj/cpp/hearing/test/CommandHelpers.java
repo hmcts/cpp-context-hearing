@@ -4,9 +4,12 @@ import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Now;
 import uk.gov.justice.core.courts.NowVariant;
 import uk.gov.justice.core.courts.NowVariantResult;
+import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
@@ -230,16 +233,37 @@ public class CommandHelpers {
         }
 
         public LocalDate getFirstPleaDate() {
-            return this.hearingUpdatePleaCommand.getPleas().get(0).getPleaDate();
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getPlea().getPleaDate();
         }
 
         public PleaValue getFirstPleaValue() {
-            return this.hearingUpdatePleaCommand.getPleas().get(0).getPleaValue();
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getPlea().getPleaValue();
         }
 
         public DelegatedPowers getFirstDelegatePowers() {
-            return this.hearingUpdatePleaCommand.getPleas().get(0).getDelegatedPowers();
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getPlea().getDelegatedPowers();
         }
+
+        public LocalDate getFirstIndicatedPleaDate() {
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getIndicatedPlea().getIndicatedPleaDate();
+        }
+
+        public IndicatedPleaValue getFirstIndicatedPleaValue() {
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getIndicatedPlea().getIndicatedPleaValue();
+        }
+
+        public UUID getFirstAllocationDecisionMotReasonId() {
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getAllocationDecision().getMotReasonId();
+        }
+
+        public Plea getPlea() {
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getPlea();
+        }
+
+        public IndicatedPlea getIndicatedPlea() {
+            return this.hearingUpdatePleaCommand.getPleas().get(0).getIndicatedPlea();
+        }
+
 
 
     }

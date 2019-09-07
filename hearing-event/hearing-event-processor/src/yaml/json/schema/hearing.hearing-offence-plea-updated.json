@@ -7,12 +7,12 @@
     "hearingId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
-    "plea": {
-      "$ref": "http://justice.gov.uk/core/courts/plea.json"
+    "pleaModel": {
+      "$ref": "http://justice.gov.uk/core/courts/pleaModel.json"
     }
   },
   "required": [
     "hearingId",
-    "plea"
+    "pleaModel"
   ]
 }

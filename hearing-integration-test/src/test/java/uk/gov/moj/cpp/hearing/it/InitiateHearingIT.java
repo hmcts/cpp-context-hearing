@@ -19,6 +19,7 @@ import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CourtIndicatedSentence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Ethnicity;
 import uk.gov.justice.core.courts.Hearing;
@@ -473,7 +474,9 @@ public class InitiateHearingIT extends AbstractIT {
 
         final IndicatedPlea indicatedPlea = offence.getIndicatedPlea();
 
-        final AllocationDecision allocationDecision = indicatedPlea.getAllocationDecision();
+        final AllocationDecision allocationDecision = offence.getAllocationDecision();
+
+        final CourtIndicatedSentence courtIndicatedSentence = allocationDecision.getCourtIndicatedSentence();
 
         final NotifiedPlea notifiedPlea = offence.getNotifiedPlea();
 
@@ -559,12 +562,17 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(IndicatedPlea::getOffenceId, is(offence.getIndicatedPlea().getOffenceId()))
                                                                 .with(IndicatedPlea::getIndicatedPleaDate, is(indicatedPlea.getIndicatedPleaDate()))
                                                                 .with(IndicatedPlea::getIndicatedPleaValue, is(indicatedPlea.getIndicatedPleaValue()))
-                                                                .with(IndicatedPlea::getSource, is(indicatedPlea.getSource()))
-                                                                .with(IndicatedPlea::getAllocationDecision, isBean(AllocationDecision.class)
-                                                                        .with(AllocationDecision::getCourtDecision, is(allocationDecision.getCourtDecision()))
-                                                                        .with(AllocationDecision::getDefendantRepresentation, is(allocationDecision.getDefendantRepresentation()))
-                                                                        .with(AllocationDecision::getProsecutionRepresentation, is(allocationDecision.getProsecutionRepresentation()))
-                                                                        .with(AllocationDecision::getIndicationOfSentence, is(allocationDecision.getIndicationOfSentence()))))))
+                                                                .with(IndicatedPlea::getSource, is(indicatedPlea.getSource())))
+                                                        .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
+                                                            .with(AllocationDecision::getOriginatingHearingId, is(allocationDecision.getOriginatingHearingId()))
+                                                            .with(AllocationDecision::getMotReasonId, is(allocationDecision.getMotReasonId()))
+                                                            .with(AllocationDecision::getMotReasonDescription, is(allocationDecision.getMotReasonDescription()))
+                                                            .with(AllocationDecision::getMotReasonCode, is(allocationDecision.getMotReasonCode()))
+                                                            .with(AllocationDecision::getSequenceNumber, is(allocationDecision.getSequenceNumber()))
+                                                            .with(AllocationDecision::getAllocationDecisionDate, is(allocationDecision.getAllocationDecisionDate()))
+                                                            .with(AllocationDecision::getCourtIndicatedSentence, isBean(CourtIndicatedSentence.class)
+                                                                .with(CourtIndicatedSentence::getCourtIndicatedSentenceTypeId, is(courtIndicatedSentence.getCourtIndicatedSentenceTypeId()))
+                                                                .with(CourtIndicatedSentence::getCourtIndicatedSentenceDescription, is(courtIndicatedSentence.getCourtIndicatedSentenceDescription()))))))
                                                 .with(Defendant::getAssociatedPersons, first(isBean(AssociatedPerson.class)
                                                         .with(AssociatedPerson::getRole, is(associatedPerson.getRole()))
                                                         .with(AssociatedPerson::getPerson, isBean(Person.class)
@@ -665,7 +673,9 @@ public class InitiateHearingIT extends AbstractIT {
 
         final IndicatedPlea indicatedPlea = offence.getIndicatedPlea();
 
-        final AllocationDecision allocationDecision = indicatedPlea.getAllocationDecision();
+        final AllocationDecision allocationDecision = offence.getAllocationDecision();
+
+        final CourtIndicatedSentence courtIndicatedSentence = allocationDecision.getCourtIndicatedSentence();
 
         final NotifiedPlea notifiedPlea = offence.getNotifiedPlea();
 
@@ -753,12 +763,17 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(IndicatedPlea::getOffenceId, is(offence.getIndicatedPlea().getOffenceId()))
                                                                 .with(IndicatedPlea::getIndicatedPleaDate, is(indicatedPlea.getIndicatedPleaDate()))
                                                                 .with(IndicatedPlea::getIndicatedPleaValue, is(indicatedPlea.getIndicatedPleaValue()))
-                                                                .with(IndicatedPlea::getSource, is(indicatedPlea.getSource()))
-                                                                .with(IndicatedPlea::getAllocationDecision, isBean(AllocationDecision.class)
-                                                                        .with(AllocationDecision::getCourtDecision, is(allocationDecision.getCourtDecision()))
-                                                                        .with(AllocationDecision::getDefendantRepresentation, is(allocationDecision.getDefendantRepresentation()))
-                                                                        .with(AllocationDecision::getProsecutionRepresentation, is(allocationDecision.getProsecutionRepresentation()))
-                                                                        .with(AllocationDecision::getIndicationOfSentence, is(allocationDecision.getIndicationOfSentence()))))
+                                                                .with(IndicatedPlea::getSource, is(indicatedPlea.getSource())))
+                                                        .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
+                                                                .with(AllocationDecision::getOriginatingHearingId, is(allocationDecision.getOriginatingHearingId()))
+                                                                .with(AllocationDecision::getMotReasonId, is(allocationDecision.getMotReasonId()))
+                                                                .with(AllocationDecision::getMotReasonDescription, is(allocationDecision.getMotReasonDescription()))
+                                                                .with(AllocationDecision::getMotReasonCode, is(allocationDecision.getMotReasonCode()))
+                                                                .with(AllocationDecision::getSequenceNumber, is(allocationDecision.getSequenceNumber()))
+                                                                .with(AllocationDecision::getAllocationDecisionDate, is(allocationDecision.getAllocationDecisionDate()))
+                                                                .with(AllocationDecision::getCourtIndicatedSentence, isBean(CourtIndicatedSentence.class)
+                                                                    .with(CourtIndicatedSentence::getCourtIndicatedSentenceTypeId, is(courtIndicatedSentence.getCourtIndicatedSentenceTypeId()))
+                                                                        .with(CourtIndicatedSentence::getCourtIndicatedSentenceDescription, is(courtIndicatedSentence.getCourtIndicatedSentenceDescription()))))
                                                         .with(Offence::getPlea, is(nullValue()))
                                                         .with(Offence::getOffenceFacts, isBean(OffenceFacts.class)
                                                                 .with(OffenceFacts::getVehicleRegistration, is(offenceFacts.getVehicleRegistration()))

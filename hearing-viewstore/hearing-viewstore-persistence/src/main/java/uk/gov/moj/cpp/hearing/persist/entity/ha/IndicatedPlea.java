@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
@@ -24,17 +23,6 @@ public class IndicatedPlea {
     @Column(name = "indicated_plea_source")
     @Enumerated(EnumType.STRING)
     private Source indicatedPleaSource;
-
-    @Embedded
-    private AllocationDecision allocationDecision;
-
-    public AllocationDecision getAllocationDecision() {
-        return allocationDecision;
-    }
-
-    public void setAllocationDecision(AllocationDecision allocationDecision) {
-        this.allocationDecision = allocationDecision;
-    }
 
     public LocalDate getIndicatedPleaDate() {
         return indicatedPleaDate;
