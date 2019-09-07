@@ -5,7 +5,7 @@ import static java.util.Optional.of;
 import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.moj.cpp.hearing.it.framework.FrameworkConstants.CONTEXT_NAME;
+import static uk.gov.moj.cpp.hearing.it.framework.ContextNameProvider.CONTEXT_NAME;
 import static uk.gov.moj.cpp.hearing.it.framework.util.CommandUtil.fireCommand;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -16,7 +16,6 @@ import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.SequenceSetter;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
-import uk.gov.moj.cpp.hearing.it.framework.util.CommandUtil;
 import uk.gov.moj.cpp.hearing.it.framework.util.ViewStoreCleaner;
 
 import java.sql.Connection;

@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static uk.gov.moj.cpp.hearing.it.framework.FrameworkConstants.CONTEXT_NAME;
+import static uk.gov.moj.cpp.hearing.it.framework.ContextNameProvider.CONTEXT_NAME;
 import static uk.gov.moj.cpp.hearing.it.framework.util.CommandUtil.fireCommand;
 
 import uk.gov.justice.services.jmx.system.command.client.SystemCommandCaller;
@@ -13,7 +13,6 @@ import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
-import uk.gov.moj.cpp.hearing.it.framework.util.CommandUtil;
 import uk.gov.moj.cpp.hearing.it.framework.util.ViewStoreCleaner;
 import uk.gov.moj.cpp.hearing.it.framework.util.ViewStoreQueryUtil;
 
@@ -23,7 +22,6 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,9 +60,9 @@ public class RunCatchupIT extends AbstractIT {
 
         assertThat(publishedEventCount.get(), greaterThanOrEqualTo(numberOfEvents));
 
-        final List<UUID> hearingIdsFromViewStore = viewStoreQueryUtil.findHearingIdsFromViewStore();
+        final List<UUID> idsFromViewStore = viewStoreQueryUtil.findIdsFromViewStore();
 
-        assertThat(hearingIdsFromViewStore.size(), is(numberOfCommands));
+        assertThat(idsFromViewStore.size(), is(numberOfCommands));
 
         viewStoreCleaner.cleanViewstoreTables();
         databaseCleaner.cleanStreamStatusTable(CONTEXT_NAME);
@@ -75,12 +73,12 @@ public class RunCatchupIT extends AbstractIT {
             fail();
         }
 
-        final List<UUID> catchupCaseIdsFromViewStore = viewStoreQueryUtil.findHearingIdsFromViewStore();
+        final List<UUID> catchupIdsFromViewStore = viewStoreQueryUtil.findIdsFromViewStore();
 
-        assertThat(catchupCaseIdsFromViewStore.size(), greaterThanOrEqualTo(numberOfCommands));
+        assertThat(catchupIdsFromViewStore.size(), greaterThanOrEqualTo(numberOfCommands));
 
-        for (int i = 0; i < catchupCaseIdsFromViewStore.size(); i++) {
-            assertThat(catchupCaseIdsFromViewStore, hasItem(hearingIdsFromViewStore.get(i)));
+        for (int i = 0; i < catchupIdsFromViewStore.size(); i++) {
+            assertThat(catchupIdsFromViewStore, hasItem(idsFromViewStore.get(i)));
         }
     }
 }

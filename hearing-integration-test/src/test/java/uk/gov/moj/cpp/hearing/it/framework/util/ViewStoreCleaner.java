@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.it.framework.util;
 
-import static uk.gov.moj.cpp.hearing.it.framework.FrameworkConstants.CONTEXT_NAME;
+import static uk.gov.moj.cpp.hearing.it.framework.ContextNameProvider.CONTEXT_NAME;
 
 import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 

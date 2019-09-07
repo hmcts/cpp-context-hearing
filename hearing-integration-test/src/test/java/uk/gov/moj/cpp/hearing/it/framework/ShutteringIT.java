@@ -6,7 +6,7 @@ import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static uk.gov.moj.cpp.hearing.it.framework.FrameworkConstants.CONTEXT_NAME;
+import static uk.gov.moj.cpp.hearing.it.framework.ContextNameProvider.CONTEXT_NAME;
 import static uk.gov.moj.cpp.hearing.it.framework.util.CommandUtil.fireCommand;
 
 import uk.gov.justice.services.jmx.system.command.client.SystemCommandCaller;
@@ -15,7 +15,6 @@ import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
-import uk.gov.moj.cpp.hearing.it.framework.util.CommandUtil;
 import uk.gov.moj.cpp.hearing.it.framework.util.ViewStoreCleaner;
 import uk.gov.moj.cpp.hearing.it.framework.util.ViewStoreQueryUtil;
 
@@ -29,7 +28,6 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -73,9 +71,9 @@ public class ShutteringIT extends AbstractIT {
 
         assertThat(viewStoreQueryUtil.countEventsProcessed(numberOfEvents), is(Optional.empty()));
 
-        final List<UUID> caseIdsFromViewStore = viewStoreQueryUtil.findHearingIdsFromViewStore();
+        final List<UUID> idsFromViewStore = viewStoreQueryUtil.findIdsFromViewStore();
 
-        assertThat(caseIdsFromViewStore.size(), is(0));
+        assertThat(idsFromViewStore.size(), is(0));
 
         systemCommandCaller.callUnshutter();
 
@@ -83,9 +81,9 @@ public class ShutteringIT extends AbstractIT {
             fail();
         }
 
-        final List<UUID> catchupCaseIdsFromViewStore = viewStoreQueryUtil.findHearingIdsFromViewStore();
+        final List<UUID> catchupIdsFromViewStore = viewStoreQueryUtil.findIdsFromViewStore();
 
-        assertThat(catchupCaseIdsFromViewStore.size(), is(numberOfCommands));
+        assertThat(catchupIdsFromViewStore.size(), is(numberOfCommands));
     }
 
     private Optional<Integer> countEventsShuttered(final int expectedNumberOfEvents) {
