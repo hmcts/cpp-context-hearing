@@ -144,4 +144,4 @@ subscriptions_descriptor:
         - name: hearing.company-representative-removed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/company-representative-removed.json
 
-      event_source_name: hearing.event.source
+      event_source_name: hearing

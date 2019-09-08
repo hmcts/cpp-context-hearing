@@ -165,9 +165,7 @@ subscriptions_descriptor:
         - name: hearing.company-representative-change-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/company-representative-change-ignored.json
 
-
-
-      event_source_name: hearing.event.source
+      event_source_name: hearing
 
     - name: public event subscription
       events:

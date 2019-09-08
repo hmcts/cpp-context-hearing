@@ -2,15 +2,12 @@ package uk.gov.moj.cpp.hearing.it.framework;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static junit.framework.TestCase.fail;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static uk.gov.moj.cpp.hearing.it.framework.ContextNameProvider.CONTEXT_NAME;
 import static uk.gov.moj.cpp.hearing.it.framework.util.CommandUtil.fireCommand;
 
 import uk.gov.justice.services.jmx.system.command.client.SystemCommandCaller;
-import uk.gov.justice.services.jmx.system.command.client.TestSystemCommanderClientFactory;
 import uk.gov.justice.services.test.utils.core.messaging.Poller;
 import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcDataSourceProvider;
@@ -38,7 +35,6 @@ public class ShutteringIT extends AbstractIT {
     private final DataSource systemDataSource = new TestJdbcDataSourceProvider().getSystemDataSource(CONTEXT_NAME);
     private final Poller poller = new Poller(10, 2000l);
 
-    private final TestSystemCommanderClientFactory testSystemCommanderClientFactory = new TestSystemCommanderClientFactory();
     private final ViewStoreCleaner viewStoreCleaner = new ViewStoreCleaner();
     private final ViewStoreQueryUtil viewStoreQueryUtil = new ViewStoreQueryUtil(viewStoreDataSource);
     private final SystemCommandCaller systemCommandCaller = new SystemCommandCaller(CONTEXT_NAME);
@@ -62,28 +58,21 @@ public class ShutteringIT extends AbstractIT {
         fireCommand(numberOfCommands, requestSpec);
 
         final Optional<Integer> shutteredEvents = poller.pollUntilFound(() -> countEventsShuttered(numberOfCommands));
+        assertThat(shutteredEvents.isPresent(), is(true));
+        assertThat(shutteredEvents.get() >= numberOfCommands, is(true));
 
-        if (!shutteredEvents.isPresent()) {
-            fail("Failed to shutter events");
-        }
+        assertThat(viewStoreQueryUtil.countEventsProcessed(numberOfCommands), is(Optional.empty()));
 
-        assertThat(shutteredEvents.get(), greaterThanOrEqualTo(numberOfCommands));
-
-        assertThat(viewStoreQueryUtil.countEventsProcessed(numberOfEvents), is(Optional.empty()));
-
-        final List<UUID> idsFromViewStore = viewStoreQueryUtil.findIdsFromViewStore();
-
-        assertThat(idsFromViewStore.size(), is(0));
+        final Optional<List<UUID>> idsFromViewStore = poller.pollUntilFound(() -> viewStoreQueryUtil.findIdsFromViewStore(numberOfCommands));
+        assertThat(idsFromViewStore, is(empty()));
 
         systemCommandCaller.callUnshutter();
 
-        if (!poller.pollUntilFound(() -> viewStoreQueryUtil.countEventsProcessed(numberOfEvents)).isPresent()) {
-            fail();
-        }
+        assertThat(poller.pollUntilFound(() -> viewStoreQueryUtil.countEventsProcessed(numberOfEvents)).isPresent(), is(true));
 
-        final List<UUID> catchupIdsFromViewStore = viewStoreQueryUtil.findIdsFromViewStore();
-
-        assertThat(catchupIdsFromViewStore.size(), is(numberOfCommands));
+        final Optional<List<UUID>> catchupIdsFromViewStore = poller.pollUntilFound(() -> viewStoreQueryUtil.findIdsFromViewStore(numberOfCommands));
+        assertThat(catchupIdsFromViewStore.isPresent(), is(true));
+        assertThat(catchupIdsFromViewStore.get().size(), is(numberOfCommands));
     }
 
     private Optional<Integer> countEventsShuttered(final int expectedNumberOfEvents) {

@@ -17,7 +17,7 @@
 #
 ##################################################################################################
 
-FRAMEWORK_JMX_COMMAND_CLIENT_VERSION=2.0.5
+FRAMEWORK_JMX_COMMAND_CLIENT_VERSION=2.0.6
 CONTEXT_NAME="hearing"
 USER_NAME="admin"
 PASSWORD="admin"

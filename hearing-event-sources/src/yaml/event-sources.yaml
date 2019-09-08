@@ -1,5 +1,5 @@
 event_sources:
-  - name: hearing.event.source
+  - name: hearing
     is_default: true
     location:
       jms_uri:  jms:topic:hearing.event

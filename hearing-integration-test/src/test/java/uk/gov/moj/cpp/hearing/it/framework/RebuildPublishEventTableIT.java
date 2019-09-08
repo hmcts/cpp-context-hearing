@@ -37,7 +37,7 @@ public class RebuildPublishEventTableIT extends AbstractIT {
     private final DatabaseCleaner databaseCleaner = new DatabaseCleaner();
     private final SequenceSetter sequenceSetter = new SequenceSetter();
     private final DataSource eventStoreDataSource = new TestJdbcDataSourceProvider().getEventStoreDataSource(CONTEXT_NAME);
-    private final Poller poller = new Poller();
+    private final Poller poller = new Poller(10, 2000l);
 
     private final ViewStoreCleaner viewStoreCleaner = new ViewStoreCleaner();
     private final SystemCommandCaller systemCommandCaller = new SystemCommandCaller(CONTEXT_NAME);
