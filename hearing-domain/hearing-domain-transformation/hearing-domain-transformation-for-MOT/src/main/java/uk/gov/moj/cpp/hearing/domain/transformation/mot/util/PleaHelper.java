@@ -1,9 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.transformation.mot.util;
 
-import uk.gov.justice.core.courts.ProsecutionCase;
-
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import java.util.Map;
 
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.DEFENDANT_ID;
@@ -18,16 +17,23 @@ public class PleaHelper {
     }
 
 
-    public static JsonObject transformPlea(final JsonObject plea, final ProsecutionCase prosecutionCase) {
+    public static JsonObject transformPlea(final JsonObject plea, final Map<String, String> valueMap) {
         //add required fields,
         final JsonObjectBuilder offenceBuilder = createObjectBuilder()
                 .add(OFFENCE_ID, plea.getString(OFFENCE_ID))
-                .add(PROSECUTION_CASE_ID, prosecutionCase.getId().toString())
-                .add(DEFENDANT_ID, prosecutionCase.getDefendants().get(0).getId().toString())
+                .add(PROSECUTION_CASE_ID, valueMap.get(PROSECUTION_CASE_ID))
+                .add(DEFENDANT_ID, valueMap.get(DEFENDANT_ID))
                 .add(PLEA, plea);
-
         return offenceBuilder.build();
 
+    }
+
+    public static JsonObject transformPlea(final JsonObject plea) {
+        //add required fields,
+        final JsonObjectBuilder offenceBuilder = createObjectBuilder()
+                .add(OFFENCE_ID, plea.getString(OFFENCE_ID))
+                .add(PLEA, plea);
+        return offenceBuilder.build();
     }
 
 }

@@ -1,10 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.transformation.mot.transform;
 
-import uk.gov.justice.core.courts.ProsecutionCase;
-
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.util.Map;
 
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.COURT_CLERK;
@@ -18,7 +15,7 @@ import static uk.gov.moj.cpp.hearing.domain.transformation.mot.util.HearingHelpe
 public class NowsRequested implements EventInstance {
 
     @Override
-    public JsonObject transform(final JsonObject nowRequested, Map<String, ProsecutionCase> hearingMap) {
+    public JsonObject transform(final JsonObject nowRequested) {
 
         final JsonObjectBuilder transformNowRequestedBuilder = createObjectBuilder()
                 .add(CREATE_NOWS_REQUEST, transformNowRequest(nowRequested.getJsonObject(CREATE_NOWS_REQUEST)));

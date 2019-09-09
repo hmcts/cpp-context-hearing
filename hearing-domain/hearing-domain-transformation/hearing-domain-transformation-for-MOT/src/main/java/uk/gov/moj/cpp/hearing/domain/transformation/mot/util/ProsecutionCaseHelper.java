@@ -72,10 +72,6 @@ public class ProsecutionCaseHelper {
             transformProsecutionCaseBuilder.add(APPEAL_PROCEEDINGS_PENDING, prosecutionCase.getBoolean(APPEAL_PROCEEDINGS_PENDING));
         }
 
-        if (prosecutionCase.containsKey(APPEAL_PROCEEDINGS_PENDING)) {
-            transformProsecutionCaseBuilder.add(APPEAL_PROCEEDINGS_PENDING, prosecutionCase.getBoolean(APPEAL_PROCEEDINGS_PENDING));
-        }
-
         if (prosecutionCase.containsKey(CASE_MARKERS)) {
             transformProsecutionCaseBuilder.add(CASE_MARKERS, prosecutionCase.getJsonArray(CASE_MARKERS));
         }

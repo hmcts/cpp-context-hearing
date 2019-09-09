@@ -139,22 +139,22 @@ public final class SchemaVariableConstants {
     public static final String CRACKED_INEFFECTIVE_TRIAL = "crackedIneffectiveTrial";
     public static final String CROWN_COURT_HEARING = "crownCourtHearing";
     public static final String SECTION = "section";
-
+    public static final String BAIL_STATUS = "bailStatus";
+    public static final String MOT_REASON_ID_1 = "4ba29b9f-9e57-32ed-b376-1840f4ba6c53";
+    public static final String MOT_REASON_ID_2 = "78efce20-8a52-3272-9d22-2e7e6e3e565e";
+    public static final String MOT_REASON_ID_3 = "b8c37e33-defd-351c-b91e-1e03e51657da";
     public static final String OFFENCE_UPDATED = "hearing.events.offence-updated";
     public static final String OFFENCE_UPDATED_FOR_HEARINGS = "hearing.events.found-hearings-for-edit-offence";
     public static final String HEARING_SENDING_SHEET_RECORDED = "hearing.sending-sheet-recorded";
     public static final String HEARING_OFFENCE_PLEA_UPDATED = "hearing.hearing-offence-plea-updated";
-
+    public static final String INDICTABLE_ONLY_OFFENCE = "Indictable-only offence";
+    public static final String SUMMARY_ONLY_OFFENCE = "Summary-only offence";
+    public static final String NO_MODE_OF_TRIAL_EITHER_WAY_OFFENCE = "No mode of Trial - Either way offence";
     public static final String HEARING_EVENTS_INITIATED = "hearing.events.initiated";
-    public static final String INHERITED_VERDICT_ADDED = "hearing.events.inherited-verdict-added";
-    public static final String DEFENDANT_DETAILS_UPDATED = "hearing.defendant-details-updated";
-    public static final String HEARING_OFFENCE_VERDICT_UPDATED = "hearing.hearing-offence-verdict-updated";
     public static final String OFFENCE_ADDED = "hearing.events.offence-added";
 
     public static final String RESULTS_SHARED = "hearing.results-shared";
-    public static final String HEARING_CASE_NOTE_SAVED = "hearing.hearing-case-note-saved";
     public static final String PENDING_NOWS_REQUESTED = "hearing.events.pending-nows-requested";
-    public static final String RESULT_LINES_STATUS_UPDATED = "hearing.result-lines-status-updated";
     public static final String NOWS_REQUESTED = "hearing.events.nows-requested";
 
     private SchemaVariableConstants() {

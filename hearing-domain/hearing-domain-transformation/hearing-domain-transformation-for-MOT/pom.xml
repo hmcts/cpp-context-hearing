@@ -10,7 +10,7 @@
     <artifactId>hearing-domain-transformation-for-MOT</artifactId>
 
     <properties>
-        <stream-transformation-tool.version>4.1.0</stream-transformation-tool.version>
+        <stream-transformation-tool.version>2.0.0</stream-transformation-tool.version>
     </properties>
 
     <dependencies>
@@ -61,5 +61,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

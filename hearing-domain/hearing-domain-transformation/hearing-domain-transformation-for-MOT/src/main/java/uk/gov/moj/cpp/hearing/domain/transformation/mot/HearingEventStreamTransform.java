@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.transformation.mot;
 
-import uk.gov.justice.core.courts.ProsecutionCase;
+import org.slf4j.Logger;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.tools.eventsourcing.transformation.api.Action;
@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Stream.of;
+import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.justice.tools.eventsourcing.transformation.api.Action.NO_ACTION;
@@ -37,14 +38,18 @@ public class HearingEventStreamTransform implements EventTransformation {
     private Enveloper enveloper;
 
     private TransformFactory factory;
-    private Map<String, ProsecutionCase> hearingMap = new HashMap<>();
+    private Map<String, String> valueMap;
+
+    private static final Logger LOGGER = getLogger(HearingEventStreamTransform.class);
 
     public HearingEventStreamTransform() {
         factory = new TransformFactory();
+        valueMap = new HashMap<>();
     }
 
-    private final List<String> eventsToTransform = newArrayList(OFFENCE_UPDATED, OFFENCE_ADDED, OFFENCE_UPDATED_FOR_HEARINGS, HEARING_EVENTS_INITIATED,
-            RESULTS_SHARED, HEARING_OFFENCE_PLEA_UPDATED, PENDING_NOWS_REQUESTED, NOWS_REQUESTED, HEARING_SENDING_SHEET_RECORDED);
+    private final List<String> eventsToTransform = newArrayList(OFFENCE_UPDATED, OFFENCE_ADDED,
+            RESULTS_SHARED, PENDING_NOWS_REQUESTED, NOWS_REQUESTED, HEARING_SENDING_SHEET_RECORDED, OFFENCE_UPDATED_FOR_HEARINGS, HEARING_EVENTS_INITIATED,
+            HEARING_OFFENCE_PLEA_UPDATED);
 
     @Override
     public Action actionFor(final JsonEnvelope event) {
@@ -60,10 +65,15 @@ public class HearingEventStreamTransform implements EventTransformation {
 
         final JsonObject payload = event.payloadAsJsonObject();
 
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("----------------------event name------------ {}", event.metadata().name());
+        }
         final EventInstance eventInstance = factory.getEventInstance(event.metadata().name());
 
-
-        final JsonObject transformedPayload = eventInstance.transform(payload, hearingMap);
+        final JsonObject transformedPayload = eventInstance.transform(payload, valueMap);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("-------------------transformedPayload---------------{}", transformedPayload);
+        }
 
         return of(envelopeFrom(metadataFrom(event.metadata()), transformedPayload));
 

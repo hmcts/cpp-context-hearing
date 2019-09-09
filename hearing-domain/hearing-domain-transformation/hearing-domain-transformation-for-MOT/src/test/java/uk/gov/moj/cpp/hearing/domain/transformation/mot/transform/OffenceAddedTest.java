@@ -28,7 +28,7 @@ public class OffenceAddedTest {
     public void transform() {
         JsonObject offenceAddedTemplate = buildTemplateFromFile("hearing.events.offence-added.json");
         assert offenceAddedTemplate != null;
-        JsonObject actual = offenceAdded.transform(offenceAddedTemplate, null);
+        JsonObject actual = offenceAdded.transform(offenceAddedTemplate);
         assertThat(actual.getString(HEARING_ID), is(offenceAddedTemplate.getString(HEARING_ID)));
         assertThat(actual.getString(PROSECUTION_CASE_ID), is(offenceAddedTemplate.getString(PROSECUTION_CASE_ID)));
         assertThat(actual.getString(DEFENDANT_ID), is(offenceAddedTemplate.getString(DEFENDANT_ID)));

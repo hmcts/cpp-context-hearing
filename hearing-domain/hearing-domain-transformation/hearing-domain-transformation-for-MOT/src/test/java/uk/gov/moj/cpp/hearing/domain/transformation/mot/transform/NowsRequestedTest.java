@@ -32,7 +32,7 @@ public class NowsRequestedTest {
     public void transform() {
         JsonObject nowsRequestedTemplate = buildTemplateFromFile("hearing.events.nows-requested.json");
         assert nowsRequestedTemplate != null;
-        JsonObject actual = nowsRequested.transform(nowsRequestedTemplate, null);
+        JsonObject actual = nowsRequested.transform(nowsRequestedTemplate);
         assertThat(actual.getJsonObject(CREATE_NOWS_REQUEST).getJsonObject(HEARING).getString(ID), is(nowsRequestedTemplate.getJsonObject(CREATE_NOWS_REQUEST).getJsonObject(HEARING).getString(ID)));
         assertThat(actual.getJsonObject(CREATE_NOWS_REQUEST).getJsonObject(COURT_CLERK).getString(USER_ID), is(nowsRequestedTemplate.getJsonObject(CREATE_NOWS_REQUEST).getJsonObject(COURT_CLERK).getString(USER_ID)));
         assertThat(actual.getJsonObject(CREATE_NOWS_REQUEST).getJsonObject(HEARING).

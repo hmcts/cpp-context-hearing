@@ -29,7 +29,7 @@ public class ResultsSharedTest {
     public void transform() {
         JsonObject resultsSharedTemplate = buildTemplateFromFile("hearing.results-shared.json");
         assert resultsSharedTemplate != null;
-        JsonObject actual = resultsShared.transform(resultsSharedTemplate, null);
+        JsonObject actual = resultsShared.transform(resultsSharedTemplate);
         assertThat(actual.getString(HEARING_ID), is(resultsSharedTemplate.getString(HEARING_ID)));
         assertThat(actual.getJsonObject(HEARING).
                 getJsonArray(PROSECUTION_CASES).getJsonObject(0).
