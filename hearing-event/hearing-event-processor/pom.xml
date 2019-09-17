@@ -15,10 +15,8 @@
         <referencedata.version>2.0.240</referencedata.version>
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
         <material.version>2.0.116</material.version>
-        <results.version>1.0.16</results.version>
         <notification.notify.version>0.0.26</notification.notify.version>
         <stagingenforcement.version>0.0.82</stagingenforcement.version>
-        <progression-version>2.0.145</progression-version>
     </properties>
 
     <build>
@@ -35,12 +33,6 @@
                         <groupId>uk.gov.moj.cpp.staging.enforcement</groupId>
                         <artifactId>stagingenforcement-command-api</artifactId>
                         <version>${stagingenforcement.version}</version>
-                        <classifier>raml</classifier>
-                    </dependency>
-                    <dependency>
-                        <groupId>uk.gov.moj.cpp.progression</groupId>
-                        <artifactId>progression-command-api</artifactId>
-                        <version>${progression-version}</version>
                         <classifier>raml</classifier>
                     </dependency>
                     <dependency>
@@ -88,18 +80,6 @@
                             <exclusion>
                                 <groupId>*</groupId>
                                 <artifactId>*</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>uk.gov.moj.cpp.results</groupId>
-                        <artifactId>results-command-api</artifactId>
-                        <version>${results.version}</version>
-                        <classifier>raml</classifier>
-                        <exclusions>
-                            <exclusion>
-                                <artifactId>*</artifactId>
-                                <groupId>*</groupId>
                             </exclusion>
                         </exclusions>
                     </dependency>

@@ -42,10 +42,9 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
 
     @Override
     public Action actionFor(JsonEnvelope event) {
-        if(isApplicable(event)) {
+        if (isApplicable(event)) {
             return new Action(true, false, false);
-        }
-        else {
+        } else {
             return Action.NO_ACTION;
         }
     }
@@ -88,11 +87,11 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
                 JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
                 for (int counter = 0; counter < jsonArray.size(); counter++) {
                     final JsonValue value = jsonArray.get(counter);
-                    if(value.getValueType().equals(JsonValue.ValueType.OBJECT)) {
+                    if (value.getValueType().equals(JsonValue.ValueType.OBJECT)) {
                         final JsonObject jsonObject = jsonArray.getJsonObject(counter);
                         jsonObjectBuilder = processJsonPayload(jsonObject, eventFieldRuleMap, jsonObjectBuilder);
                         jsonArrayBuilder.add(jsonObjectBuilder);
-                    } else if(value.getValueType().equals(JsonValue.ValueType.STRING)){
+                    } else if (value.getValueType().equals(JsonValue.ValueType.STRING)) {
                         final String fieldValue = value.toString();
                         final String rule = eventFieldRuleMap.get(fieldName);
                         setFieldValue(rule, fieldName, fieldValue, transformedPayloadObjectBuilder);
@@ -119,10 +118,9 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
     private void setFieldValue(String rule, String fieldName, String fieldValue, JsonObjectBuilder transformedPayloadObjectBuilder) {
         if (null != rule) {
             final Object replacedFieldValue = applyAnonymizationRule(rule, fieldValue);
-            if(replacedFieldValue instanceof String) {
+            if (replacedFieldValue instanceof String) {
                 transformedPayloadObjectBuilder.add(fieldName, (String) replacedFieldValue);
-            }
-            else if(replacedFieldValue instanceof BigInteger) {
+            } else if (replacedFieldValue instanceof BigInteger) {
                 transformedPayloadObjectBuilder.add(fieldName, (BigInteger) replacedFieldValue);
             }
         } else {
@@ -131,10 +129,9 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
     }
 
     private Object applyAnonymizationRule(String fieldRule, String fieldValue) {
-        if(fieldRule.startsWith(AnonymizerType.DUMMY_NUMBER_PREFIX.toString())) {
+        if (fieldRule.startsWith(AnonymizerType.DUMMY_NUMBER_PREFIX.toString())) {
             return DummyNumberReplacer.replace(fieldRule);
-        }
-        else {
+        } else {
             return anonymizeGenerator.getGenerator(fieldRule).convert(fieldValue);
         }
     }

@@ -12,6 +12,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
 import java.time.ZonedDateTime;
@@ -30,11 +32,12 @@ import org.junit.runner.RunWith;
 @RunWith(CdiTestRunner.class)
 public class HearingEventRepositoryTest extends BaseTransactionalTest {
 
-    private static final UUID HEARING_ID = randomUUID();
+    private static final UUID HEARING_ID_1 = randomUUID();
+    private static final UUID HEARING_ID_2 = randomUUID();
     private static final boolean ALTERABLE = BOOLEAN.next();
 
-    private static final UUID HEARING_EVENT_ID = randomUUID();
-    private static final UUID HEARING_EVENT_DEFINITION_ID = randomUUID();
+    private static final UUID HEARING_EVENT_ID_1 = randomUUID();
+    private static final UUID HEARING_EVENT_DEFINITION_ID_1 = randomUUID();
     private static final String RECORDED_LABEL = STRING.next();
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next();
     private static final ZonedDateTime LAST_MODIFIED_TIME = PAST_ZONED_DATE_TIME.next();
@@ -51,8 +54,14 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     private static final ZonedDateTime EVENT_TIME_3 = EVENT_TIME_2.plusMinutes(1);
     private static final ZonedDateTime LAST_MODIFIED_TIME_3 = PAST_ZONED_DATE_TIME.next();
 
+    private static final UUID COURT_CENTRE_ID = randomUUID();
+    private static final UUID COURT_ROOM_ID = randomUUID();
+
     @Inject
     private HearingEventRepository hearingEventRepository;
+
+    @Inject
+    private HearingRepository hearingRepository;
 
     @Test
     public void shouldLogAnHearingEvent() {
@@ -60,21 +69,21 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
 
         hearingEventRepository.save(
                 HearingEvent.hearingEvent()
-                        .setId(HEARING_EVENT_ID)
-                        .setHearingId(HEARING_ID)
-                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setId(HEARING_EVENT_ID_1)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
                         .setRecordedLabel(RECORDED_LABEL)
                         .setEventTime(EVENT_TIME)
                         .setLastModifiedTime(LAST_MODIFIED_TIME)
                         .setAlterable(ALTERABLE)
         );
 
-        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID);
+        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID_1);
 
         assertThat(hearingEvent.isPresent(), is(true));
-        assertThat(hearingEvent.orElse(null).getHearingId(), is(HEARING_ID));
-        assertThat(hearingEvent.orElse(null).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID));
-        assertThat(hearingEvent.orElse(null).getId(), is(HEARING_EVENT_ID));
+        assertThat(hearingEvent.orElse(null).getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvent.orElse(null).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_1));
+        assertThat(hearingEvent.orElse(null).getId(), is(HEARING_EVENT_ID_1));
         assertThat(hearingEvent.orElse(null).getRecordedLabel(), is(RECORDED_LABEL));
         assertThat(hearingEvent.orElse(null).getEventTime(), is(EVENT_TIME));
         assertThat(hearingEvent.orElse(null).getLastModifiedTime(), is(LAST_MODIFIED_TIME));
@@ -87,9 +96,9 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
 
         hearingEventRepository.save(
                 HearingEvent.hearingEvent()
-                        .setId(HEARING_EVENT_ID)
-                        .setHearingId(HEARING_ID)
-                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setId(HEARING_EVENT_ID_1)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
                         .setRecordedLabel(RECORDED_LABEL)
                         .setEventTime(EVENT_TIME)
                         .setLastModifiedTime(LAST_MODIFIED_TIME)
@@ -97,7 +106,7 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
                         .setDeleted(true)
         );
 
-        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID);
+        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID_1);
 
         assertThat(hearingEvent.isPresent(), is(false));
     }
@@ -106,18 +115,42 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     public void shouldGetHearingEventsForAHearingWhichAreNotDeleted() {
         givenHearingEventsExistWithDeletedOnes();
 
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID_1);
         assertThat(hearingEvents.size(), is(2));
 
-        assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID));
-        assertThat(hearingEvents.get(0).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID));
-        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID));
+        assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvents.get(0).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_1));
+        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID_1));
         assertThat(hearingEvents.get(0).getRecordedLabel(), is(RECORDED_LABEL));
         assertThat(hearingEvents.get(0).getEventTime(), is(EVENT_TIME));
         assertThat(hearingEvents.get(0).getLastModifiedTime(), is(LAST_MODIFIED_TIME));
         assertThat(hearingEvents.get(0).isDeleted(), is(false));
 
-        assertThat(hearingEvents.get(1).getHearingId(), is(HEARING_ID));
+        assertThat(hearingEvents.get(1).getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvents.get(1).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_2));
+        assertThat(hearingEvents.get(1).getId(), is(HEARING_EVENT_ID_2));
+        assertThat(hearingEvents.get(1).getRecordedLabel(), is(RECORDED_LABEL_2));
+        assertThat(hearingEvents.get(1).getEventTime(), is(EVENT_TIME_2));
+        assertThat(hearingEvents.get(1).getLastModifiedTime(), is(LAST_MODIFIED_TIME_2));
+        assertThat(hearingEvents.get(1).isDeleted(), is(false));
+    }
+
+    @Test
+    public void shouldGetHearingEventsForAHearing() {
+        givenHearingEventsExistWithDeletedOnes();
+
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID_1, EVENT_TIME.toLocalDate());
+        assertThat(hearingEvents.size(), is(2));
+
+        assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvents.get(0).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_1));
+        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID_1));
+        assertThat(hearingEvents.get(0).getRecordedLabel(), is(RECORDED_LABEL));
+        assertThat(hearingEvents.get(0).getEventTime(), is(EVENT_TIME));
+        assertThat(hearingEvents.get(0).getLastModifiedTime(), is(LAST_MODIFIED_TIME));
+        assertThat(hearingEvents.get(0).isDeleted(), is(false));
+
+        assertThat(hearingEvents.get(1).getHearingId(), is(HEARING_ID_1));
         assertThat(hearingEvents.get(1).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_2));
         assertThat(hearingEvents.get(1).getId(), is(HEARING_EVENT_ID_2));
         assertThat(hearingEvents.get(1).getRecordedLabel(), is(RECORDED_LABEL_2));
@@ -130,7 +163,7 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     public void shouldReturnEmptyEventsWhenNoHearingEventsExistForAHearing() {
         givenNoHearingEventsExist();
 
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID_1);
 
         assertThat(hearingEvents.size(), is(0));
     }
@@ -139,7 +172,7 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     public void shouldNotThrowExceptionWhenHearingEventIsRequestedWhichDoesNotExist() {
         givenNoHearingEventsExist();
 
-        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID);
+        final Optional<HearingEvent> hearingEvent = hearingEventRepository.findOptionalById(HEARING_EVENT_ID_1);
 
         assertThat(hearingEvent.isPresent(), is(false));
     }
@@ -148,37 +181,75 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     public void shouldGetHearingEventsInChronologicalOrderByEventTime() {
         givenHearingEventsExistInRandomOrder();
 
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID_1);
         assertThat(hearingEvents.size(), is(3));
 
-        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID));
+        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID_1));
         assertThat(hearingEvents.get(1).getId(), is(HEARING_EVENT_ID_2));
         assertThat(hearingEvents.get(2).getId(), is(HEARING_EVENT_ID_3));
+    }
+
+    @Test
+    public void shouldReturnHearingEventsForTheSameCourtRoomWhenAvailable() {
+        givenHearingExistsWithCourtCentre();
+        givenHearingEventsForDifferentHearings();
+
+        final List<HearingEvent> hearingEvents = hearingEventRepository
+                .findHearingEvents(
+                        COURT_CENTRE_ID,
+                        COURT_ROOM_ID,
+                        EVENT_TIME.toLocalDate());
+        assertThat(hearingEvents.size(), is(1));
+        assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID_1));
+    }
+
+    @Test
+    public void shouldReturnEmptyListForHearingEvents_AsNoHearingEventsRecodedForTheSameRoom() {
+        givenHearingExistsWithCourtCentre();
+        HearingEvent hearingEvent = HearingEvent.hearingEvent()
+                .setId(HEARING_EVENT_ID_1)
+                .setHearingId(HEARING_ID_1)
+                .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_3)
+                .setRecordedLabel(RECORDED_LABEL)
+                .setEventTime(EVENT_TIME)
+                .setLastModifiedTime(LAST_MODIFIED_TIME)
+                .setAlterable(ALTERABLE);
+        hearingEventRepository.save(hearingEvent);
+
+        final List<HearingEvent> hearingEvents = hearingEventRepository
+                .findHearingEvents(
+                        COURT_CENTRE_ID,
+                        COURT_ROOM_ID,
+                        EVENT_TIME.toLocalDate());
+        assertThat(hearingEvents.size(), is(0));
     }
 
     private void givenHearingEventsExistWithDeletedOnes() {
         final List<HearingEvent> hearingEvents = newArrayList(
                 HearingEvent.hearingEvent()
-                        .setId(HEARING_EVENT_ID)
-                        .setHearingId(HEARING_ID)
-                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setId(HEARING_EVENT_ID_1)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
                         .setRecordedLabel(RECORDED_LABEL)
+                        .setEventDate(EVENT_TIME.toLocalDate())
                         .setEventTime(EVENT_TIME)
                         .setLastModifiedTime(LAST_MODIFIED_TIME)
                         .setAlterable(ALTERABLE),
                 HearingEvent.hearingEvent()
                         .setId(HEARING_EVENT_ID_2)
-                        .setHearingId(HEARING_ID)
+                        .setHearingId(HEARING_ID_1)
                         .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_2)
                         .setRecordedLabel(RECORDED_LABEL_2)
+                        .setEventDate(EVENT_TIME_2.toLocalDate())
                         .setEventTime(EVENT_TIME_2)
                         .setLastModifiedTime(LAST_MODIFIED_TIME_2)
                         .setAlterable(ALTERABLE),
                 HearingEvent.hearingEvent()
                         .setId(HEARING_EVENT_ID_3)
-                        .setHearingId(HEARING_ID)
+                        .setHearingId(HEARING_ID_1)
                         .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_3)
                         .setRecordedLabel(RECORDED_LABEL_3)
+                        .setEventDate(EVENT_TIME_3.toLocalDate())
                         .setEventTime(EVENT_TIME_3)
                         .setLastModifiedTime(LAST_MODIFIED_TIME_3)
                         .setAlterable(ALTERABLE)
@@ -193,16 +264,16 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
     private void givenHearingEventsExistInRandomOrder() {
         final List<HearingEvent> hearingEvents = newArrayList(
                 HearingEvent.hearingEvent()
-                        .setId(HEARING_EVENT_ID)
-                        .setHearingId(HEARING_ID)
-                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID)
+                        .setId(HEARING_EVENT_ID_1)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
                         .setRecordedLabel(RECORDED_LABEL)
                         .setEventTime(EVENT_TIME)
                         .setLastModifiedTime(LAST_MODIFIED_TIME)
                         .setAlterable(ALTERABLE),
                 HearingEvent.hearingEvent()
                         .setId(HEARING_EVENT_ID_2)
-                        .setHearingId(HEARING_ID)
+                        .setHearingId(HEARING_ID_1)
                         .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_2)
                         .setRecordedLabel(RECORDED_LABEL_2)
                         .setEventTime(EVENT_TIME_2)
@@ -210,7 +281,7 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
                         .setAlterable(ALTERABLE),
                 HearingEvent.hearingEvent()
                         .setId(HEARING_EVENT_ID_3)
-                        .setHearingId(HEARING_ID)
+                        .setHearingId(HEARING_ID_1)
                         .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_3)
                         .setRecordedLabel(RECORDED_LABEL_3)
                         .setEventTime(EVENT_TIME_3)
@@ -230,4 +301,44 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.size(), is(0));
     }
 
+    private void givenHearingExistsWithCourtCentre() {
+        final Hearing hearing = new Hearing();
+        final CourtCentre courtCentre = new CourtCentre();
+        courtCentre.setId(COURT_CENTRE_ID);
+        courtCentre.setRoomId(COURT_ROOM_ID);
+        hearing.setId(HEARING_ID_1);
+        hearing.setCourtCentre(courtCentre);
+        hearingRepository.save(hearing);
+    }
+
+    private void givenHearingEventsForDifferentHearings() {
+        final List<HearingEvent> hearingEvents = newArrayList(
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_1)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventDate(EVENT_TIME.toLocalDate())
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setDeleted(false)
+                        .setAlterable(false),
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_2)
+                        .setHearingId(HEARING_ID_2)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_3)
+                        .setRecordedLabel(RECORDED_LABEL_2)
+                        .setEventDate(EVENT_TIME_2.toLocalDate())
+                        .setEventTime(EVENT_TIME_2)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_2)
+                        .setDeleted(false)
+                        .setAlterable(false)
+        );
+
+        shuffle(hearingEvents, new Random(LONG.next()));
+
+        hearingEvents.forEach(hearingEvent -> hearingEventRepository.save(hearingEvent));
+
+        assertThat(hearingEventRepository.findAll(), hasSize(2));
+    }
 }

@@ -385,6 +385,7 @@ public class UpdatePleaCommandHandlerTest {
         assertThat(indicatedPlea, isBean(IndicatedPlea.class)
                 .with(IndicatedPlea::getIndicatedPleaDate, is(indicatedPleaDate))
                 .with(IndicatedPlea::getIndicatedPleaValue, is(indicatedPleaValue)));
+
         assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), isBean(AllocationDecision.class)
                 .with(AllocationDecision::getMotReasonId, is(motReasonId))
                 .with(AllocationDecision::getMotReasonDescription, is(motReasonDescription))

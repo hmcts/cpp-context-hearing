@@ -95,6 +95,12 @@ protocols: [ HTTP, HTTPS ]
                 responseType: application/vnd.hearing.hearing-event-log+json
                 name: hearing.get-hearing-event-log
             ...
+        queryParameters:
+            date:
+              description: date of hearing
+              type: string
+              required: true
+
         responses:
             200:
                 description: OK
@@ -103,7 +109,28 @@ protocols: [ HTTP, HTTPS ]
                         example: !include json/hearing.hearing-event-log.json
                         schema: !include json/schema/hearing.get-hearing-event-log.json
 
-
+/hearings/{hearingId}/active-hearings-for-court-room/{eventDate}:
+    uriParameters:
+        hearingId:
+            description: ID of hearing to fetch active hearings for court room
+            type: string
+        eventDate:
+            description: ID of hearing to fetch active hearings for court room
+            type: string
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.active-hearings-for-court-room+json
+                name: hearing.get-active-hearings-for-court-room
+            ...
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.active-hearings-for-court-room+json:
+                        example: !include json/hearing.active-hearings-for-court-room.json
+                        schema: !include json/schema/hearing.get-active-hearings-for-court-room.json
 
 /hearings/{hearingId}:
   uriParameters:
@@ -226,3 +253,25 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.nows+json:
                     example:  !include json/hearing.get.nows.json
                     schema:  !include  json/schema/hearing.get.nows.json
+
+
+
+/get-cracked-ineffective-reason:
+    get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get-cracked-ineffective-reason+json
+            name: hearing.get-cracked-ineffective-reason
+        ...
+      queryParameters:
+        trialTypeId:
+          description: query
+          type: string
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get-cracked-ineffective-reason+json:
+                    example:  !include json/hearing.get-cracked-ineffective-reason.json
+                    schema:  !include json/schema/hearing.get-cracked-ineffective-reason.json

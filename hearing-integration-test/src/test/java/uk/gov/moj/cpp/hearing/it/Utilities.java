@@ -201,6 +201,8 @@ public class Utilities {
 
         public CommandBuilder withPayload(final String payload) {
             this.payloadAsString = payload;
+            System.out.println("Command Payload: ");
+            System.out.println(this.payloadAsString);
             return this;
         }
 

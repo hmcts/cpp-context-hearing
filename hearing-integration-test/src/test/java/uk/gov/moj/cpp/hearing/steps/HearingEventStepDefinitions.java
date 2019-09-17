@@ -56,14 +56,12 @@ public class HearingEventStepDefinitions extends AbstractIT {
     private static final String FIELD_EVENT_DEFINITIONS = "eventDefinitions";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_CASE_ATTRIBUTE = "caseAttribute";
-    private static final String FIELD_SEQUENCE = "sequence";
-    private static final String FIELD_SEQUENCE_TYPE = "sequenceType";
+    private static final String FIELD_ACTION_SEQUENCE = "actionSequence";
+    private static final String FIELD_GROUP_SEQUENCE = "groupSequence";
     private static final String FIELD_GROUP_LABEL = "groupLabel";
-    private static final String FIELD_ACTION_LABEL_EXTENSION = "actionLabelExtension";
     private static final String FIELD_ALTERABLE = "alterable";
     private static final String FIELD_ACTION_LABEL = "actionLabel";
 
-    private static final String SEQUENCE_TYPE_SENTENCING = "SENTENCING";
     private static final String SEQUENCE_TYPE_PAUSE_RESUME = "PAUSE_RESUME";
     private static final String SEQUENCE_TYPE_NOT_REGISTERED = "NOT_REGISTERED";
 
@@ -100,23 +98,22 @@ public class HearingEventStepDefinitions extends AbstractIT {
                     if (eventDefinition.getCaseAttribute() != null) {
                         eventDefinitionBuilder.add(FIELD_CASE_ATTRIBUTE, eventDefinition.getCaseAttribute());
                     }
-                    if (eventDefinition.getSequence() != null) {
-                        eventDefinitionBuilder.add(FIELD_SEQUENCE, eventDefinition.getSequence());
+                    if (eventDefinition.getActionLabel() != null) {
+                        eventDefinitionBuilder.add(FIELD_ACTION_LABEL, eventDefinition.getActionLabel());
                     }
-                    if (eventDefinition.getSequenceType() != null) {
-                        eventDefinitionBuilder.add(FIELD_SEQUENCE_TYPE, eventDefinition.getSequenceType());
+                    if (eventDefinition.getActionSequence() != null) {
+                        eventDefinitionBuilder.add(FIELD_ACTION_SEQUENCE, eventDefinition.getActionSequence());
                     }
                     if (eventDefinition.getGroupLabel() != null) {
                         eventDefinitionBuilder.add(FIELD_GROUP_LABEL, eventDefinition.getGroupLabel());
                     }
-                    if (eventDefinition.getActionLabelExtension() != null) {
-                        eventDefinitionBuilder.add(FIELD_ACTION_LABEL_EXTENSION, eventDefinition.getActionLabelExtension());
+                    if (eventDefinition.getGroupSequence() != null) {
+                        eventDefinitionBuilder.add(FIELD_GROUP_SEQUENCE, eventDefinition.getGroupSequence());
                     }
 
                     eventDefinitionBuilder.add(FIELD_ALTERABLE, eventDefinition.isAlterable());
 
                     eventDefinitionsArrayBuilder.add(eventDefinitionBuilder
-                            .add(FIELD_ACTION_LABEL, eventDefinition.getActionLabel())
                             .add(FIELD_RECORDED_LABEL, eventDefinition.getRecordedLabel())
                     );
                 }
@@ -148,10 +145,11 @@ public class HearingEventStepDefinitions extends AbstractIT {
     }
 
 
+
     public static void thenHearingEventDefinitionsAreRecorded(final HearingEventDefinitionData hearingEventDefinitions) {
         final List<HearingEventDefinition> eventDefinitions = newArrayList(hearingEventDefinitions.getEventDefinitions());
 
-        sortBasedOnSequenceTypeSequenceAndActionLabel(eventDefinitions);
+        sortBasedOnSequenceAndActionLabel(eventDefinitions);
 
         final List<Matcher<? super ReadContext>> conditionsOnJson = new ArrayList<>();
         conditionsOnJson.add(withJsonPath("$.eventDefinitions", hasSize(eventDefinitions.size())));
@@ -161,6 +159,9 @@ public class HearingEventStepDefinitions extends AbstractIT {
                     final HearingEventDefinition eventDefinition = eventDefinitions.get(index);
                     conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].id", index), equalTo(eventDefinition.getId().toString())));
                     conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].actionLabel", index), equalTo(eventDefinition.getActionLabel())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].actionSequence", index), equalTo(eventDefinition.getActionSequence())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].groupLabel", index), equalTo(eventDefinition.getGroupLabel())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].groupSequence", index), equalTo(eventDefinition.getGroupSequence())));
                     conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].recordedLabel", index), equalTo(eventDefinition.getRecordedLabel())));
                     conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].alterable", index), equalTo(eventDefinition.isAlterable())));
 
@@ -169,26 +170,6 @@ public class HearingEventStepDefinitions extends AbstractIT {
                     } else {
                         conditionsOnJson.add(withoutJsonPath(format("$.eventDefinitions[%s].caseAttributes", index)));
                     }
-
-                    if (eventDefinition.getSequence() != null) {
-                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].sequence.id", index), equalTo(eventDefinition.getSequence())));
-                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].sequence.type", index), equalTo(eventDefinition.getSequenceType())));
-                    } else {
-                        conditionsOnJson.add(withoutJsonPath(format("$.eventDefinitions[%s].sequence", index)));
-                    }
-
-                    if (eventDefinition.getGroupLabel() != null) {
-                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].groupLabel", index), equalTo(eventDefinition.getGroupLabel())));
-                    } else {
-                        conditionsOnJson.add(withoutJsonPath(format("$.eventDefinitions[%s].groupLabel", index)));
-                    }
-
-                    if (eventDefinition.getActionLabelExtension() != null) {
-                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].actionLabelExtension", index), equalTo(eventDefinition.getActionLabelExtension())));
-                    } else {
-                        conditionsOnJson.add(withoutJsonPath(format("$.eventDefinitions[%s].actionLabelExtension", index)));
-                    }
-
                 });
 
         poll(requestParams(getQueryEventDefinitionsUrl(), MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
@@ -198,11 +179,10 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 );
     }
 
-
-    private static void sortBasedOnSequenceTypeSequenceAndActionLabel(final List<HearingEventDefinition> eventDefinitions) {
+    private static void sortBasedOnSequenceAndActionLabel(final List<HearingEventDefinition> eventDefinitions) {
         eventDefinitions.sort((ed1, ed2) -> ComparisonChain.start()
-                .compare(ed1.getSequenceType(), ed2.getSequenceType(), Ordering.explicit(SEQUENCE_TYPE_SENTENCING, SEQUENCE_TYPE_PAUSE_RESUME, SEQUENCE_TYPE_NOT_REGISTERED).nullsLast())
-                .compare(ed1.getSequence(), ed2.getSequence(), Ordering.natural().nullsLast())
+                .compare(ed1.getGroupSequence(), ed2.getGroupSequence(), Ordering.natural().nullsLast())
+                .compare(ed1.getActionSequence(), ed2.getActionSequence(), Ordering.natural().nullsLast())
                 .compare(ed1.getActionLabel(), ed2.getActionLabel(), Ordering.from(CASE_INSENSITIVE_ORDER))
                 .result());
     }

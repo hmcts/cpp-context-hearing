@@ -18,7 +18,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 
-@SuppressWarnings({"squid:S00107","squid:S3655"})
+@SuppressWarnings({"squid:S00107", "squid:S3655"})
 @ApplicationScoped
 public class HearingJPAMapper {
 
@@ -35,6 +35,7 @@ public class HearingJPAMapper {
     private CourtApplicationsSerializer courtApplicationsSerializer;
     private HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper;
     private HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper;
+    private HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper;
     private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
 
     @Inject
@@ -51,6 +52,7 @@ public class HearingJPAMapper {
                             final CourtApplicationsSerializer courtApplicationsSerializer,
                             final HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper,
                             final HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper,
+                            final HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper,
                             final HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper) {
         this.courtCentreJPAMapper = courtCentreJPAMapper;
         this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper;
@@ -63,8 +65,9 @@ public class HearingJPAMapper {
         this.hearingProsecutionCounselJPAMapper = hearingProsecutionCounselJPAMapper;
         this.hearingTypeJPAMapper = hearingTypeJPAMapper;
         this.courtApplicationsSerializer = courtApplicationsSerializer;
-        this.hearingRespondentCounselJPAMapper=hearingRespondentCounselJPAMapper;
+        this.hearingRespondentCounselJPAMapper = hearingRespondentCounselJPAMapper;
         this.hearingApplicantCounselJPAMapper = hearingApplicantCounselJPAMapper;
+        this.hearingInterpreterIntermediaryJPAMapper = hearingInterpreterIntermediaryJPAMapper;
         this.hearingCompanyRepresentativeJPAMapper = hearingCompanyRepresentativeJPAMapper;
     }
 
@@ -100,6 +103,7 @@ public class HearingJPAMapper {
         hearing.setJurisdictionType(pojo.getJurisdictionType());
         hearing.setProsecutionCases(prosecutionCaseJPAMapper.toJPA(hearing, pojo.getProsecutionCases()));
         hearing.setProsecutionCounsels(hearingProsecutionCounselJPAMapper.toJPA(hearing, pojo.getProsecutionCounsels()));
+        hearing.setHearingInterpreterIntermediaries(hearingInterpreterIntermediaryJPAMapper.toJPA(hearing, pojo.getIntermediaries()));
         hearing.setReportingRestrictionReason(pojo.getReportingRestrictionReason());
         hearing.setHearingType(hearingTypeJPAMapper.toJPA(pojo.getType()));
         hearing.setCourtApplicationsJson(courtApplicationsSerializer.json(pojo.getCourtApplications()));
@@ -130,6 +134,7 @@ public class HearingJPAMapper {
                 .withCourtApplications(courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson()))
                 .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
                 .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
+                .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
                 .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
                 .build();
     }
@@ -158,7 +163,7 @@ public class HearingJPAMapper {
 
         if (courtApplication.isPresent()) {
             //The Admitted / denied flag should be only passed once for each application.
-            courtApplication.get().getRespondents().stream().filter( r -> r.getPartyDetails().getId().equals(applicationPartyId)).findFirst().get().setApplicationResponse(courtApplicationResponse);
+            courtApplication.get().getRespondents().stream().filter(r -> r.getPartyDetails().getId().equals(applicationPartyId)).findFirst().get().setApplicationResponse(courtApplicationResponse);
         }
         return courtApplicationsSerializer.json(courtApplications);
     }
@@ -173,9 +178,8 @@ public class HearingJPAMapper {
                 ca -> ca.getId().equals(courtApplicationOutcome.getApplicationId())
         ).findFirst();
 
-        if (courtApplication.isPresent()) {
-            courtApplication.get().setApplicationOutcome(courtApplicationOutcome);
-        }
+        courtApplication.ifPresent(application -> application.setApplicationOutcome(courtApplicationOutcome));
+
         return courtApplicationsSerializer.json(courtApplications);
     }
 

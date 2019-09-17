@@ -102,6 +102,18 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.remove-company-representative+json
             name: hearing.remove-company-representative
+        (mapping):
+            requestType: application/vnd.hearing.add-interpreter-intermediary+json
+            name: hearing.add-interpreter-intermediary
+        (mapping):
+            requestType: application/vnd.hearing.update-interpreter-intermediary+json
+            name: hearing.update-interpreter-intermediary
+        (mapping):
+            requestType: application/vnd.hearing.remove-interpreter-intermediary+json
+            name: hearing.remove-interpreter-intermediary
+        (mapping):
+            requestType: application/vnd.hearing.set-trial-type+json
+            name: hearing.set-trial-type
         ...
       body:
         application/vnd.hearing.save-draft-result+json:
@@ -182,6 +194,18 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.remove-company-representative+json:
             example: !include json/hearing.remove-company-representative.json
             schema:  !include json/schema/hearing.remove-company-representative.json
+        application/vnd.hearing.add-interpreter-intermediary+json:
+            example: !include json/hearing.add-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.add-interpreter-intermediary.json
+        application/vnd.hearing.update-interpreter-intermediary+json:
+            example: !include json/hearing.update-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.update-interpreter-intermediary.json
+        application/vnd.hearing.remove-interpreter-intermediary+json:
+            example: !include json/hearing.remove-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.remove-interpreter-intermediary.json
+        application/vnd.hearing.set-trial-type+json:
+            example: !include json/hearing.set-trial-type.json
+            schema: !include json/schema/hearing.set-trial-type.json
       responses:
             202:
                 description: OK

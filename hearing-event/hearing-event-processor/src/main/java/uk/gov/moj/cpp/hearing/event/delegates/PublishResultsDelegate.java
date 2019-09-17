@@ -321,7 +321,6 @@ public class PublishResultsDelegate {
         final Predicate<UUID> predicate = uuid -> uuid != null && uuid.equals(id);
 
         if (CASE == level || DEFENDANT == level) {
-
             resultLines = targets.stream()
                     .filter(target -> predicate.test(target.getDefendantId()))
                     .flatMap(target -> target.getResultLines().stream())
@@ -329,13 +328,11 @@ public class PublishResultsDelegate {
                     .collect(Collectors.toList());
 
         } else if (OFFENCE == level) {
-
             resultLines = targets.stream()
                     .filter(target -> predicate.test(target.getOffenceId()))
                     .flatMap(target -> target.getResultLines().stream())
                     .filter(resultLine -> resultLine.getLevel() == OFFENCE)
                     .collect(Collectors.toList());
-
         } else {
 
             resultLines = targets.stream()

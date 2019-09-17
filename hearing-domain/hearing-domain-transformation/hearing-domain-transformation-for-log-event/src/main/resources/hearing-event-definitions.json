@@ -1,0 +1,911 @@
+{
+  "id": "9a484c48-78d0-4f7f-a9e7-30084e8616c5",
+  "eventDefinitions": [
+    {
+      "actionLabel": "Start",
+      "alterable": false,
+      "id": "b71e7d2a-d3b3-4a55-a393-6d451767fc05",
+      "recordedLabel": "Hearing started",
+      "actionSequence": 1,
+      "groupLabel": "Recording",
+      "groupSequence": 1
+    },
+    {
+      "actionLabel": "End",
+      "alterable": false,
+      "id": "0df93f18-0a21-40f5-9fb3-da4749cd70fe",
+      "recordedLabel": "Hearing ended",
+      "actionSequence": 2,
+      "groupLabel": "Recording",
+      "groupSequence": 1
+    },
+    {
+      "actionLabel": "Pause",
+      "alterable": false,
+      "id": "160ecb51-29ee-4954-bbbf-daab18a24fbb",
+      "recordedLabel": "Hearing paused",
+      "actionSequence": 3,
+      "groupLabel": "Recording",
+      "groupSequence": 1
+    },
+    {
+      "actionLabel": "Resume",
+      "alterable": false,
+      "id": "64476e43-2138-46d5-b58b-848582cf9b07",
+      "recordedLabel": "Hearing resumed",
+      "actionSequence": 4,
+      "groupLabel": "Recording",
+      "groupSequence": 1
+    },
+    {
+      "actionLabel": "In chambers",
+      "alterable": true,
+      "id": "ffd6bb0d-8702-428c-a7bd-570570fa8d0a",
+      "actionSequence": 5,
+      "groupLabel": "Recording",
+      "groupSequence": 1,
+      "recordedLabel": "Proceedings in chambers"
+    },
+    {
+      "actionLabel": "Open court",
+      "recordedLabel": "Open court",
+      "alterable": true,
+      "id": "c0b15e38-52ce-4d9d-9ffa-d76c7793cff6",
+      "actionSequence": 6,
+      "groupLabel": "Recording",
+      "groupSequence": 1
+    },
+    {
+      "actionLabel": "Arraign defendant.name",
+      "alterable": true,
+      "id": "c3edf650-13c4-4ecb-9f85-6100ad8e4ffc",
+      "recordedLabel": "Defendant defendant.name arraigned",
+      "actionSequence": 1,
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Rearraign defendant.name",
+      "alterable": true,
+      "id": "75c8c5eb-c661-40be-a5bf-07b7b8c0463a",
+      "recordedLabel": "Defendant defendant.name rearraigned",
+      "actionSequence": 2,
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Put offences defendant.name",
+      "alterable": true,
+      "id": "6f189d63-f431-4c7f-a0f8-0479e142d468",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Offences put to defendant defendant.name",
+      "actionSequence": 3,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Sworn-in defendant.name",
+      "alterable": true,
+      "id": "504e16fc-6dfa-4276-9721-2b50a9646f4d",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Defendant defendant.name sworn-in",
+      "actionSequence": 4,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Examination in chief defendant.name",
+      "alterable": true,
+      "id": "34f8c553-49a2-45b6-aaad-096559d87f5f",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Defendant defendant.name examination in-chief",
+      "actionSequence": 5,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Defendant defendant.name continues",
+      "alterable": true,
+      "id": "03c0762d-9a9f-4f47-94f1-cdf4b40856dc",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Defendant defendant.name continued",
+      "actionSequence": 6,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Defendant defendant.name cross-examination by Defence counsel.name",
+      "alterable": true,
+      "id": "6b0c98a3-9b1f-4a85-8c00-5c3484566285",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Defendant defendant.name cross-examined by Defence counsel.name",
+      "actionSequence": 7,
+      "caseAttribute": "defendant.name,counsel.name"
+    },
+    {
+      "actionLabel": "Cross-examination prosecution",
+      "recordedLabel": "Cross-examination prosecution",
+      "alterable": true,
+      "id": "b51e0beb-7af5-40a6-9c37-e0c245250a89",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "actionSequence": 8
+    },
+    {
+      "actionLabel": "Defendant defendant.name re-examination",
+      "alterable": true,
+      "id": "a9e45c0d-77cf-4a2b-8a51-e1b63b4272e4",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Defendant defendant.name re-examined",
+      "actionSequence": 9,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Released defendant.name",
+      "alterable": true,
+      "id": "31c47709-e0d9-4de5-87cb-e41aa3863763",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Defendant defendant.name released",
+      "actionSequence": 10,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Recalled defendant.name",
+      "alterable": true,
+      "id": "1d098080-c422-4cff-85d1-bb1efc9a1c1c",
+      "groupLabel": "Defendant",
+      "groupSequence": 2,
+      "recordedLabel": "Defendant defendant.name recalled",
+      "actionSequence": 11,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Sworn-in witness.name",
+      "recordedLabel": "Witness witness.name sworn-in",
+      "alterable": true,
+      "id": "0b9d26d8-54d7-4e04-b3bc-be6158a06ef8",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 1,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Witness witness.name continues",
+      "recordedLabel": "Witness witness.name continued",
+      "alterable": true,
+      "id": "a7dd8f8a-1673-44e5-93fc-e740317243b0",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 2,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Witness witness.name cross-examination by Defence counsel.name",
+      "recordedLabel": "Witness witness.name cross-examined by Defence counsel.name",
+      "alterable": true,
+      "id": "a2fe7589-9682-46a0-a406-60a1d548e9cf",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 3,
+      "caseAttribute": "witness.name, counsel.name"
+    },
+    {
+      "actionLabel": "Witness witness.name cross-examination by Prosecution",
+      "alterable": true,
+      "id": "f95b1322-f0e0-4413-b1b1-11e12e78990f",
+      "recordedLabel": "Witness witness.name cross-examined by Prosecution",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 4,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Examination in chief witness.name",
+      "recordedLabel": "Witness witness.name examination in-chief",
+      "alterable": true,
+      "id": "8eb6f6f4-3d26-4780-873f-020f314a43dc",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 5,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Witness witness.name re-examination",
+      "recordedLabel": "Witness witness.name re-examined",
+      "alterable": true,
+      "id": "48ed54bd-0732-47f8-a165-2f4f0f866ec0",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 6,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Released witness.name",
+      "recordedLabel": "Witness witness.name released",
+      "alterable": true,
+      "id": "f9104401-8e05-4aa6-81f2-bb56f9a6d65b",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 7,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Recalled witness.name",
+      "recordedLabel": "Witness witness.name recalled",
+      "alterable": true,
+      "id": "17484b08-04ba-45e1-b06f-8f90735de3e4",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 8,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Pre-recorded evidence witness.name",
+      "recordedLabel": "Witness witness.name gave pre-recorded evidence",
+      "alterable": true,
+      "id": "0d395883-7fc5-4085-8130-8ab7a57bfab7",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 9,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Read witness.name",
+      "recordedLabel": "Witness witness.name read",
+      "alterable": true,
+      "id": "ac36572a-755b-45bb-89b6-e65c138028cb",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 10,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Hostile witness witness.name",
+      "recordedLabel": "Hostile witness witness.name",
+      "alterable": true,
+      "id": "0dff8fb0-c739-47d0-b38e-13b912e851b6",
+      "groupLabel": "Witness",
+      "groupSequence": 3,
+      "actionSequence": 11,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Open case prosecution",
+      "recordedLabel": "Prosecution opened case",
+      "alterable": true,
+      "id": "e9060336-4821-4f46-969c-e08b33b48071",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 1
+    },
+    {
+      "actionLabel": "Defence counsel.name opens case regarding defendant defendant.name",
+      "recordedLabel": "Defence counsel.name opened case regarding defendant defendant.name",
+      "alterable": true,
+      "id": "a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0",
+      "caseAttribute": "counsel.name, defendant.name",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 2
+    },
+    {
+      "actionLabel": "Voir dire start",
+      "recordedLabel": "Prosecution provided evidence on a voir dire",
+      "alterable": true,
+      "id": "0af37a58-10b6-4577-81ab-474c80f7ed3a",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 3
+    },
+    {
+      "actionLabel": "Voir dire end",
+      "recordedLabel": "Voir dire end",
+      "alterable": true,
+      "id": "ede4e798-3fb0-4588-a0d9-9394743cac5f",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 4
+    },
+    {
+      "actionLabel": "Close case prosecution",
+      "recordedLabel": "Prosecution closed case",
+      "alterable": true,
+      "id": "60e58491-22ad-40ce-b7ff-4662d34a5be9",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 5
+    },
+    {
+      "actionLabel": "Defence counsel.name closes case regarding defendant defendant.name",
+      "recordedLabel": "Defence counsel.name closed case regarding defendant defendant.name",
+      "alterable": true,
+      "id": "cc00cca8-39ba-431c-b08f-8c6f9be185d1",
+      "caseAttribute": "counsel.name, defendant.name",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 6
+    },
+    {
+      "actionLabel": "Closing speech prosecution",
+      "recordedLabel": "Prosecution gave closing speech",
+      "alterable": true,
+      "id": "25963c08-0277-4100-8cca-0fbfda30f0e6",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 7
+    },
+    {
+      "actionLabel": "Defence counsel.name gives closing speech regarding defendant defendant.name",
+      "recordedLabel": "Defence counsel.name gave closing speech regarding defendant defendant.name",
+      "alterable": true,
+      "id": "e85b5c05-d4cb-41b3-a2f7-08f3b0354cc1",
+      "caseAttribute": "counsel.name, defendant.name",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 8
+    },
+    {
+      "actionLabel": "Opening of facts",
+      "recordedLabel": "Opening of facts",
+      "alterable": true,
+      "id": "c8b8b0d5-a923-45be-b9a0-e28f33365fa5",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 9
+    },
+    {
+      "actionLabel": "Application by prosecution",
+      "recordedLabel": "Prosecution application",
+      "alterable": true,
+      "id": "c2689e04-11f4-4812-a9a9-67993802dea3",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 10
+    },
+    {
+      "actionLabel": "Application by defendant.name",
+      "recordedLabel": "Defence application",
+      "alterable": true,
+      "id": "9ddadcfb-f5c1-4455-9bf6-feb2619608d6",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 11
+    },
+    {
+      "actionLabel": "Prosecution response counsel.name",
+      "recordedLabel": "Prosecution challenged application: Defence counsel.name",
+      "alterable": true,
+      "id": "9e0b3bd4-0da6-4cd5-978d-e86403c33fe4",
+      "caseAttribute": "counsel.name",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 12
+    },
+    {
+      "actionLabel": "Defence response counsel.name",
+      "recordedLabel": "Defence challenged application: Defence counsel.name",
+      "alterable": true,
+      "id": "efc3ab74-fb0d-4a9e-82fb-96462b883ba7",
+      "caseAttribute": "counsel.name",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 13
+    },
+    {
+      "actionLabel": "Victim personal statement read by witness.name",
+      "alterable": true,
+      "id": "b3709436-3a57-42aa-be9b-1afca217bfb0",
+      "caseAttribute": "witness.name",
+      "recordedLabel": "Victim Personal Statement(s) read",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 14
+    },
+    {
+      "actionLabel": "Victim personal statement read on behalf of witness.name",
+      "alterable": true,
+      "id": "ee2308d7-7cad-43d0-b61c-0e8204350b20",
+      "caseAttribute": "witness.name",
+      "recordedLabel": "Victim Personal Statement(s) read",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 15
+    },
+    {
+      "actionLabel": "Mitigation by Defence counsel.name regarding defendant defendant.name",
+      "alterable": true,
+      "id": "9e7464fc-9f36-405a-9c31-80e64f2b3b2e",
+      "recordedLabel": "Mitigation by Defence counsel.name regarding defendant defendant.name",
+      "caseAttribute": "counsel.name, defendant.name",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "actionSequence": 16
+    },
+    {
+      "actionLabel": "Counsel withdraws from case defendant.name",
+      "alterable": true,
+      "id": "0a484bd5-e38e-4d90-9e0d-ba6021c79e88",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "recordedLabel": "Defendant defendant.name withdrawn by counsel",
+      "actionSequence": 17,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Defendant defendant.name cross-examination by Prosecution",
+      "alterable": true,
+      "id": "c7de19ad-969f-4aee-ae88-365d56ef1b17",
+      "groupLabel": "Representative",
+      "groupSequence": 4,
+      "recordedLabel": "Defendant defendant.name cross-examined by Prosecution",
+      "actionSequence": 18,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Ground rules discussion",
+      "alterable": true,
+      "id": "951be905-26bc-498b-b55a-401f172dae78",
+      "recordedLabel": "Discussion on ground rules",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 1
+    },
+    {
+      "actionLabel": "Basis of plea discussion",
+      "alterable": true,
+      "id": "4acc5a0e-752a-47c7-a363-f9c29232799b",
+      "recordedLabel": "Discussion on basis of plea",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 2
+    },
+    {
+      "actionLabel": "Jury directions discussion",
+      "alterable": true,
+      "id": "8f9daa48-c2bf-40bb-abc3-116f065acc14",
+      "recordedLabel": "Discussion on directions to be given to the jury",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 3
+    },
+    {
+      "actionLabel": "Juror irregularity discussion",
+      "alterable": true,
+      "id": "085d4263-3e45-453b-a17a-799a686defc5",
+      "recordedLabel": "Discussion on juror irregularity",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 4
+    },
+    {
+      "actionLabel": "Jury question/note",
+      "alterable": true,
+      "id": "5a7a478d-13f1-47db-aa79-87b51381a373",
+      "recordedLabel": "Jury question/note",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 5
+    },
+    {
+      "actionLabel": "Point of law discussion prosecution",
+      "alterable": true,
+      "id": "b335327a-7f58-4f26-a2ef-7e07134ba60b",
+      "recordedLabel": "Point of law raised",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 6
+    },
+    {
+      "actionLabel": "Point of law discussion defendant.name",
+      "alterable": true,
+      "id": "089ca562-1661-468f-a93e-8811a32e5ed3",
+      "recordedLabel": "Discussion on application: Point of law regarding defendant defendant.name",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 7
+    },
+    {
+      "actionLabel": "Recall discussion prosecution",
+      "recordedLabel": "Recall discussion prosecution",
+      "alterable": true,
+      "id": "deab4ab3-ecf7-4271-b175-f034e80cb23f",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 8
+    },
+    {
+      "actionLabel": "Recall discussion defendant.name",
+      "recordedLabel": "Recall discussion defendant.name",
+      "alterable": true,
+      "id": "10de41ed-6c5e-4c9f-8f7c-5a1bcf168f31",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 9
+    },
+    {
+      "actionLabel": "Adjourn discussion defendant.name",
+      "recordedLabel": "Adjourn discussion defendant.name",
+      "alterable": true,
+      "id": "1cb47e22-9aab-4625-9bf6-198bc2c00206",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 10
+    },
+    {
+      "actionLabel": "Disclosure discussion prosecution",
+      "recordedLabel": "Disclosure discussion prosecution",
+      "alterable": true,
+      "id": "4fffa432-44f9-4162-9302-bebdb1064425",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 11
+    },
+    {
+      "actionLabel": "Disclosure discussion defendant.name",
+      "recordedLabel": "Disclosure discussion defendant.name",
+      "alterable": true,
+      "id": "4e819f86-47b1-4397-bb67-359ebfe9f44b",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 12
+    },
+    {
+      "actionLabel": "Discharge jury discussion",
+      "recordedLabel": "Discharge jury discussion",
+      "alterable": true,
+      "id": "ef125d69-ee91-4b15-9528-435b95b5f10f",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 13
+    },
+    {
+      "actionLabel": "Application for Goodyear indication regarding defendant defendant.name",
+      "alterable": true,
+      "id": "f86227c0-7100-461c-8ec4-b3d446d766c4",
+      "recordedLabel": "Discussion on application: Goodyear indication regarding defendant defendant.name",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 14
+    },
+    {
+      "actionLabel": "No case to answer defendant.name",
+      "alterable": true,
+      "id": "4a6bb5cd-3d39-4049-80d2-e113437d2a45",
+      "recordedLabel": "Discussion on application: No case to answer regarding defendant defendant.name",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Discussion",
+      "groupSequence": 5,
+      "actionSequence": 15
+    },
+    {
+      "actionLabel": "Jury sworn-in",
+      "recordedLabel": "Jury sworn-in",
+      "alterable": true,
+      "id": "f0ecf365-a3e5-4472-8be1-fbdc31eaccc4",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 1
+    },
+    {
+      "actionLabel": "Jury in",
+      "recordedLabel": "Jury in",
+      "alterable": true,
+      "id": "22369dd1-633e-4fd0-9198-2e801c07c8cf",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 2
+    },
+    {
+      "actionLabel": "Jury out",
+      "alterable": true,
+      "id": "a7b2fa4f-fd08-4f45-be9f-1949963b76c9",
+      "recordedLabel": "Jury out",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 3
+    },
+    {
+      "actionLabel": "Jury retires",
+      "alterable": true,
+      "id": "928f8290-5e82-49fd-bd45-b12c24786eda",
+      "recordedLabel": "Jury retired",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 4
+    },
+    {
+      "actionLabel": "Jury returns",
+      "alterable": true,
+      "id": "14b7620b-360f-466a-b7ab-9939a30e2eef",
+      "recordedLabel": "Jury returned",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 5
+    },
+    {
+      "actionLabel": "Verdict",
+      "alterable": true,
+      "id": "3353768b-3b86-46d1-8e1c-3e5804a735a2",
+      "recordedLabel": "Jury gave verdict",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 6
+    },
+    {
+      "actionLabel": "Discharge juror",
+      "alterable": true,
+      "id": "d566d10a-decc-4fc0-a165-3edf226c0600",
+      "recordedLabel": "Juror discharged",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 7
+    },
+    {
+      "actionLabel": "Discharge jury",
+      "alterable": true,
+      "id": "23c18a6e-3ed4-4421-80c5-8513e32f9634",
+      "recordedLabel": "Jury discharged",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 8
+    },
+    {
+      "actionLabel": "Jury empanelment",
+      "recordedLabel": "Jury empanelment",
+      "alterable": true,
+      "id": "50bf100f-439f-40e1-8316-5c56bc231d5d",
+      "groupLabel": "Jury",
+      "groupSequence": 6,
+      "actionSequence": 9
+    },
+    {
+      "actionLabel": "Oral report",
+      "alterable": true,
+      "id": "00728d1d-5992-4a00-b8a5-89abc44cb15a",
+      "recordedLabel": "Probation gave oral PSR",
+      "groupLabel": "Report",
+      "groupSequence": 7,
+      "actionSequence": 1
+    },
+    {
+      "actionLabel": "Summing up",
+      "alterable": true,
+      "id": "174c28b9-8cb5-44ba-9c86-5932346ddac1",
+      "recordedLabel": "Judge summing-up",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 1
+    },
+    {
+      "actionLabel": "Sentence",
+      "alterable": true,
+      "id": "218087ca-e585-438d-8dc6-936d4aa37072",
+      "recordedLabel": "Judge passed sentence",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 2
+    },
+    {
+      "actionLabel": "Judge questions defendant.name",
+      "alterable": true,
+      "id": "85913bf5-d359-4b53-8a08-2ee76068271c",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "recordedLabel": "Defendant defendant.name questioned by Judge",
+      "actionSequence": 3,
+      "caseAttribute": "defendant.name"
+    },
+    {
+      "actionLabel": "Judge questions witness.name",
+      "alterable": true,
+      "id": "486da2ff-0cec-449b-a3d7-85efc509e1d4",
+      "recordedLabel": "Witness witness.name questioned by Judge",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 4,
+      "caseAttribute": "witness.name"
+    },
+    {
+      "actionLabel": "Direction defendant.name",
+      "alterable": true,
+      "id": "a0f73f1a-31c9-41d7-b113-574254cf74dc",
+      "recordedLabel": "Judge directed defendant defendant.name",
+      "caseAttribute": "defendant.name",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 5
+    },
+    {
+      "actionLabel": "Jury direction",
+      "alterable": true,
+      "id": "356673be-592e-482a-9a7d-16c98d1771c8",
+      "recordedLabel": "Judge directed jury",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 6
+    },
+    {
+      "actionLabel": "Majority verdict direction",
+      "alterable": true,
+      "id": "7164b343-7c74-4b17-8b9b-2e334df04a33",
+      "recordedLabel": "Judge directed jury to give majority verdict",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 7
+    },
+    {
+      "actionLabel": "Reporting restrictions direction",
+      "alterable": true,
+      "id": "b84d9f05-6ef7-44b0-8dff-f0d0b2689643",
+      "recordedLabel": "Judge directed on reporting restrictions",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 8
+    },
+    {
+      "actionLabel": "Interpreter/intermediary sworn-in",
+      "alterable": true,
+      "id": "ed8ec4b8-2b57-4f7a-9017-0eddcb0acb14",
+      "recordedLabel": "Interpreter/intermediary sworn-in",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 9
+    },
+    {
+      "actionLabel": "Interpreter/intermediary released",
+      "alterable": true,
+      "id": "1a4ed065-7d7a-4bc6-963d-86baeeac641e",
+      "recordedLabel": "Interpreter/intermediary released",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 10
+    },
+    {
+      "actionLabel": "Judge's ruling",
+      "alterable": true,
+      "id": "5a3932fa-0985-4321-a273-3760437945ef",
+      "recordedLabel": "Judge ruling: Contempt of court",
+      "groupLabel": "Judge",
+      "groupSequence": 8,
+      "actionSequence": 11
+    },
+    {
+      "actionLabel": "Respondant opens",
+      "recordedLabel": "Respondant opens",
+      "id": "ef369a7a-dbc4-421b-bb41-3530214643bf",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 1
+    },
+    {
+      "actionLabel": "Respondant closes",
+      "recordedLabel": "Respondant closes",
+      "id": "d60bcffe-631d-4422-88d0-317dd5207c68",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 2
+    },
+    {
+      "actionLabel": "Appellant opens",
+      "recordedLabel": "Appellant opens",
+      "id": "50fb4a64-943d-4a2a-afe6-4b5c9e99e043",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 3
+    },
+    {
+      "actionLabel": "Appellant closes",
+      "recordedLabel": "Appellant closes",
+      "id": "aebfe8d9-74b4-442b-885f-702c818bf6b5",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 4
+    },
+    {
+      "actionLabel": "Appellant submissions",
+      "recordedLabel": "Appellant submissions",
+      "id": "2ae725a8-b605-4427-aa1d-b587d5c2d716",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 5
+    },
+    {
+      "actionLabel": "Bench retires",
+      "recordedLabel": "Bench retires",
+      "id": "72a82077-7853-40cb-8ad6-c2d6d3f67a3f",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 6
+    },
+    {
+      "actionLabel": "Bench returns",
+      "recordedLabel": "Bench returns",
+      "id": "fe2ed75d-4551-4262-99b2-4aa83b70a672",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 7
+    },
+    {
+      "actionLabel": "Appellant sworn in",
+      "recordedLabel": "Appellant sworn in",
+      "id": "8b5afc76-e9fb-4e66-bbb6-f69e7e6d3b75",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 8
+    },
+    {
+      "actionLabel": "Appellant Continues",
+      "recordedLabel": "Appellant Continued",
+      "id": "4069632c-01b5-4349-ac3b-80a6fe3e6e63",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 9
+    },
+    {
+      "actionLabel": "Cross-examination",
+      "recordedLabel": "Cross-examination",
+      "id": "09a03b8c-07e9-49b9-a263-c3d3dac1a3df",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 10
+    },
+    {
+      "actionLabel": "Examination in chief",
+      "recordedLabel": "Examination in chief",
+      "id": "25cc1e32-fda9-460e-b034-6ba270e144bc",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 11
+    },
+    {
+      "actionLabel": "Re-examination",
+      "recordedLabel": "Re-examination",
+      "id": "6b7e3424-4d0b-4e59-9c5d-716570bde697",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 12
+    },
+    {
+      "actionLabel": "Released",
+      "recordedLabel": "Released",
+      "id": "b117378e-da84-4690-8fc5-d63a9a29f9e1",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 13
+    },
+    {
+      "actionLabel": "Recalled",
+      "recordedLabel": "Recalled",
+      "id": "7a24701a-0d19-490c-a6cf-5015fbcc9314",
+      "alterable": true,
+      "groupLabel": "Appeal",
+      "groupSequence": 9,
+      "actionSequence": 14
+    }
+  ]
+}

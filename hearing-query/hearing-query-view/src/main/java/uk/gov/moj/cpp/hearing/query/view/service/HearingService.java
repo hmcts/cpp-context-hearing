@@ -1,11 +1,17 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
@@ -30,13 +36,14 @@ import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -78,6 +85,8 @@ public class HearingService {
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
     @Inject
     private GetHearingsTransformer getHearingTransformer;
+    @Inject
+    private ReferenceDataService referenceDataService;
 
     private final ZoneId zid = ZoneId.of(ZoneOffset.UTC.getId());
 
@@ -113,12 +122,66 @@ public class HearingService {
         if (null == hearingId) {
             return new HearingDetailsResponse();
         }
-        return new HearingDetailsResponse(hearingJPAMapper.fromJPA(hearingRepository.findBy(hearingId)));
+
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+        final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(hearingJPAMapper.fromJPA(hearing));
+
+        if (hearing.getTrialTypeId() != null) {
+
+            final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.getCrackedIneffectiveVacatedTrialTypes();
+
+            if (isNotEmpty(crackedIneffectiveVacatedTrialTypes.getCrackedIneffectiveVacatedTrialTypes())) {
+
+                final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = crackedIneffectiveVacatedTrialTypes
+                        .getCrackedIneffectiveVacatedTrialTypes()
+                        .stream()
+                        .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(hearing.getTrialTypeId()))
+                        .findFirst();
+
+                crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
+                        trialType.getReasonCode(),
+                        trialType.getReasonFullDescription(),
+                        trialType.getId(),
+                        trialType.getTrialType()))
+                        .ifPresent(trialType -> hearingDetailsResponse
+                                .getHearing()
+                                .setCrackedIneffectiveTrial(trialType));
+
+            }
+        } else if (nonNull(hearing.getIsEffectiveTrial())) {
+            hearingDetailsResponse.getHearing().setIsEffectiveTrial(TRUE);
+        }
+
+        return hearingDetailsResponse;
+    }
+
+    @Transactional
+    public CrackedIneffectiveTrial getCrackedIneffectiveTrial(final UUID trailTypeId) {
+
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.getCrackedIneffectiveVacatedTrialTypes();
+
+        if (isNotEmpty(crackedIneffectiveVacatedTrialTypes.getCrackedIneffectiveVacatedTrialTypes())) {
+
+            final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = crackedIneffectiveVacatedTrialTypes
+                    .getCrackedIneffectiveVacatedTrialTypes()
+                    .stream()
+                    .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trailTypeId))
+                    .findFirst();
+
+            return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
+                    trialType.getReasonCode(),
+                    trialType.getReasonFullDescription(),
+                    trialType.getId(),
+                    trialType.getTrialType()))
+                    .orElse(null);
+        }
+
+        return null;
+
     }
 
     @Transactional
     public NowListResponse getNows(final UUID hearingId) {
-
         List<uk.gov.moj.cpp.hearing.persist.entity.ha.Now> nows = nowRepository.findByHearingId(hearingId);
         List<NowResponse> nowList = nows.stream()
                 .map(now -> new NowResponse(now.getId(), now.getHearingId()))
@@ -217,7 +280,7 @@ public class HearingService {
     private ZonedDateTime getDateWithTime(final LocalDate date, final String time) {
         final String[] times = time.split(":");
         final LocalTime localTime = LocalTime.of(Integer.parseInt(times[0]), Integer.parseInt(times[1]));
-        return ZonedDateTime.of(date, localTime, zid );
+        return ZonedDateTime.of(date, localTime, zid);
     }
 
     private List<Hearing> filterHearings(final List<Hearing> hearings, final ZonedDateTime from, final ZonedDateTime to) {

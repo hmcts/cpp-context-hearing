@@ -13,32 +13,29 @@ public class HearingEventDefinition implements Serializable {
 
     private final UUID id;
     private final String actionLabel;
+    private final Integer actionSequence;
     private final String recordedLabel;
-    private final Integer sequence;
-    private final String sequenceType;
     private final String caseAttribute;
     private final String groupLabel;
-    private final String actionLabelExtension;
+    private final Integer groupSequence;
     private final boolean alterable;
 
     @JsonCreator
     public HearingEventDefinition(@JsonProperty("id") final UUID id,
                                   @JsonProperty("actionLabel") final String actionLabel,
+                                  @JsonProperty("actionSequence") final Integer actionSequence,
                                   @JsonProperty("recordedLabel") final String recordedLabel,
-                                  @JsonProperty("sequence") final Integer sequence,
-                                  @JsonProperty("sequenceType") final String sequenceType,
                                   @JsonProperty("caseAttribute") final String caseAttribute,
                                   @JsonProperty("groupLabel") final String groupLabel,
-                                  @JsonProperty("actionLabelExtension") final String actionLabelExtension,
+                                  @JsonProperty("groupSequence") final Integer groupSequence,
                                   @JsonProperty("alterable") final boolean alterable) {
         this.id = id;
         this.actionLabel = actionLabel;
+        this.actionSequence = actionSequence;
         this.recordedLabel = recordedLabel;
-        this.sequence = sequence;
-        this.sequenceType = sequenceType;
         this.caseAttribute = caseAttribute;
         this.groupLabel = groupLabel;
-        this.actionLabelExtension = actionLabelExtension;
+        this.groupSequence = groupSequence;
         this.alterable = alterable;
     }
 
@@ -54,16 +51,12 @@ public class HearingEventDefinition implements Serializable {
         return actionLabel;
     }
 
+    public Integer getActionSequence() {
+        return actionSequence;
+    }
+
     public String getRecordedLabel() {
         return recordedLabel;
-    }
-
-    public Integer getSequence() {
-        return sequence;
-    }
-
-    public String getSequenceType() {
-        return sequenceType;
     }
 
     public String getCaseAttribute() {
@@ -74,8 +67,8 @@ public class HearingEventDefinition implements Serializable {
         return groupLabel;
     }
 
-    public String getActionLabelExtension() {
-        return actionLabelExtension;
+    public Integer getGroupSequence() {
+        return groupSequence;
     }
 
     public boolean isAlterable() {
@@ -93,40 +86,38 @@ public class HearingEventDefinition implements Serializable {
         final HearingEventDefinition that = (HearingEventDefinition) obj;
 
         return java.util.Objects.equals(this.actionLabel, that.actionLabel)
-                && java.util.Objects.equals(this.actionLabelExtension, that.actionLabelExtension)
+                && java.util.Objects.equals(this.actionSequence, that.actionSequence)
                 && java.util.Objects.equals(this.alterable, that.alterable)
                 && java.util.Objects.equals(this.caseAttribute, that.caseAttribute)
                 && java.util.Objects.equals(this.groupLabel, that.groupLabel)
+                && java.util.Objects.equals(this.groupSequence, that.groupSequence)
                 && java.util.Objects.equals(this.id, that.id)
-                && java.util.Objects.equals(this.recordedLabel, that.recordedLabel)
-                && java.util.Objects.equals(this.sequence, that.sequence)
-                && java.util.Objects.equals(this.sequenceType, that.sequenceType);
+                && java.util.Objects.equals(this.recordedLabel, that.recordedLabel);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(actionLabel, actionLabelExtension, alterable, caseAttribute, groupLabel, id,
-                recordedLabel, sequence, sequenceType);
+        return java.util.Objects.hash(actionLabel, actionSequence, alterable, caseAttribute, groupLabel, id,
+                recordedLabel, groupSequence);
     }
 
     @Override
     public String toString() {
-        return "HearingEventDefinition {" + "actionLabel='" + actionLabel + "'," + "actionLabelExtension='"
-                + actionLabelExtension + "'," + "alterable='" + alterable + "'," + "caseAttribute='" + caseAttribute
+        return "HearingEventDefinition {" + "actionLabel='" + actionLabel + "'," + "actionSequence='"
+                + actionSequence + "'," + "alterable='" + alterable + "'," + "caseAttribute='" + caseAttribute
                 + "'," + "groupLabel='" + groupLabel + "'," + "id='" + id + "'," + "recordedLabel='" + recordedLabel
-                + "'," + "sequence='" + sequence + "'," + "sequenceType='" + sequenceType + "'" + "}";
+                + "'," + "groupSequence='" + groupSequence + "'}";
     }
 
     public static class Builder {
 
         private UUID id;
         private String actionLabel;
+        private Integer actionSequence;
         private String recordedLabel;
-        private Integer sequence;
-        private String sequenceType;
         private String caseAttribute;
         private String groupLabel;
-        private String actionLabelExtension;
+        private Integer groupSequence;
         private boolean alterable;
 
         public Builder withId(final UUID id) {
@@ -144,13 +135,13 @@ public class HearingEventDefinition implements Serializable {
             return this;
         }
 
-        public Builder withSequence(final Integer sequence) {
-            this.sequence = sequence;
+        public Builder withActionSequence(final Integer actionSequence) {
+            this.actionSequence = actionSequence;
             return this;
         }
 
-        public Builder withSequenceType(final String sequenceType) {
-            this.sequenceType = sequenceType;
+        public Builder withGroupSequence(final Integer groupSequence) {
+            this.groupSequence = groupSequence;
             return this;
         }
 
@@ -164,10 +155,6 @@ public class HearingEventDefinition implements Serializable {
             return this;
         }
 
-        public Builder withActionLabelExtension(final String actionLabelExtension) {
-            this.actionLabelExtension = actionLabelExtension;
-            return this;
-        }
 
         public Builder withAlterable(final boolean alterable) {
             this.alterable = alterable;
@@ -175,7 +162,7 @@ public class HearingEventDefinition implements Serializable {
         }
 
         public HearingEventDefinition build() {
-            return new HearingEventDefinition(id, actionLabel, recordedLabel, sequence, sequenceType, caseAttribute, groupLabel, actionLabelExtension, alterable);
+            return new HearingEventDefinition(id, actionLabel, actionSequence, recordedLabel, caseAttribute, groupLabel, groupSequence, alterable);
         }
     }
 }

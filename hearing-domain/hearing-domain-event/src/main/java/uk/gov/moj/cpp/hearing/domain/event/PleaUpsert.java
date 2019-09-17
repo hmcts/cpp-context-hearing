@@ -1,12 +1,13 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.hearing-offence-plea-updated")
 public class PleaUpsert implements Serializable {
@@ -17,7 +18,8 @@ public class PleaUpsert implements Serializable {
 
     private PleaModel pleaModel;
 
-    public PleaUpsert() {}
+    public PleaUpsert() {
+    }
 
     @JsonCreator
     public PleaUpsert(@JsonProperty("hearingId") final UUID originHearingId,

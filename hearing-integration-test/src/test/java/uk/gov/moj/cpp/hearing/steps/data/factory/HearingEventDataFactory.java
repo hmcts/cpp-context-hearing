@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.steps.data.factory;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.values;
 
 import uk.gov.justice.services.common.util.UtcClock;
@@ -17,10 +18,6 @@ import java.util.stream.IntStream;
 
 public class HearingEventDataFactory {
 
-    private static final String SEQUENCE_TYPE_SENTENCING = "SENTENCING";
-    private static final String SEQUENCE_TYPE_PAUSE_RESUME = "PAUSE_RESUME";
-    private static final String SEQUENCE_TYPE_NOT_REGISTERED = "NOT_REGISTERED";
-
     private static HearingEventDefinition START_HEARING_EVENT_DEFINITION;
     private static HearingEventDefinition END_HEARING_EVENT_DEFINITION;
     private static HearingEventDefinition PAUSE_HEARING_EVENT_DEFINITION;
@@ -29,6 +26,30 @@ public class HearingEventDataFactory {
     private static HearingEventDefinition MITIGATION_HEARING_EVENT_DEFINITION;
 
     private static List<HearingEventDefinition> HEARING_EVENT_DEFINITIONS;
+
+    private static final String ID_1 = "b71e7d2a-d3b3-4a55-a393-6d451767fc05";
+    private static final String RECORDED_LABEL_1 = "Hearing Started";
+    private static final String ACTION_LABEL_1 = "Start";
+    private static final Integer ACTION_SEQUENCE_1 = 1;
+    private static final String GROUP_LABEL_1 = "Recording";
+    private static final Integer GROUP_SEQUENCE_1 = 1;
+
+    private static final String ID_2 = "0df93f18-0a21-40f5-9fb3-da4749cd70fe";
+    private static final String RECORDED_LABEL_2 = "Hearing Ended";
+    private static final String ACTION_LABEL_2 = "End";
+    private static final Integer ACTION_SEQUENCE_2 = 2;
+
+    private static final String ID_3 = "160ecb51-29ee-4954-bbbf-daab18a24fbb";
+    private static final String RECORDED_LABEL_3 = "Hearing Paused";
+    private static final String ACTION_LABEL_3 = "Pause";
+    private static final Integer ACTION_SEQUENCE_3 = 3;
+
+    private static final String ID_4 = "64476e43-2138-46d5-b58b-848582cf9b07";
+    private static final String RECORDED_LABEL_4 = "Hearing Resumed";
+    private static final String ACTION_LABEL_4 = "Resume";
+    private static final Integer ACTION_SEQUENCE_4 = 4;
+
+    private static final boolean ALTERABLE = BOOLEAN.next();
 
     public static HearingEvent hearingEventWithMissingEventTime(final UUID hearingId) {
         final UUID hearingEventId = randomUUID();
@@ -74,71 +95,13 @@ public class HearingEventDataFactory {
         return newHearingEvent(hearingId, hearingEventDefinition);
     }
 
-    public static HearingEventDefinitionData hearingEventDefinitionsWithOnlySequencedEvents() {
-        START_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "Start Hearing", "Call Case On", 1, SEQUENCE_TYPE_SENTENCING, null, null, null, false);
-        IDENTIFY_DEFENDANT_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "Identify defendant", "Defendant Identified", 2, SEQUENCE_TYPE_SENTENCING, null, null, null, true);
-        MITIGATION_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "<counsel.name>", "Defence <counsel.name> mitigated for <defendant.name>", 5, SEQUENCE_TYPE_SENTENCING, "defendant.name,counsel.name", "Mitigation by:", "defending <defendant.name>", true);
-        END_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "End Hearing", "Hearing Ended", 7, SEQUENCE_TYPE_SENTENCING, null, null, null, false);
-
-        final List<HearingEventDefinition> eventDefinitions = newArrayList(
-                START_HEARING_EVENT_DEFINITION,
-                IDENTIFY_DEFENDANT_HEARING_EVENT_DEFINITION,
-                new HearingEventDefinition(randomUUID(), "Take Plea", "Plea", 3, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
-                new HearingEventDefinition(randomUUID(), "Prosecution Opening", "Prosecution Opening", 4, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
-                MITIGATION_HEARING_EVENT_DEFINITION,
-                new HearingEventDefinition(randomUUID(), "Sentencing", "Sentencing", 6, SEQUENCE_TYPE_SENTENCING, null, null, null, true),
-                END_HEARING_EVENT_DEFINITION
-        );
-
-        HEARING_EVENT_DEFINITIONS = newArrayList();
-        HEARING_EVENT_DEFINITIONS.addAll(eventDefinitions);
-
-        return new HearingEventDefinitionData(randomUUID(), eventDefinitions);
-    }
-
-    public static HearingEventDefinitionData hearingEventDefinitionsWithOnlyNonSequencedEvents() {
-        final List<HearingEventDefinition> eventDefinitions = newArrayList(
-                new HearingEventDefinition(randomUUID(), "Prosecution challenges defence application", "Prosecution challenged defence application", null, null, null, null, null, true),
-                new HearingEventDefinition(randomUUID(), "Judge ruling: Contempt of court", "Judge ruling: Contempt of court", null, null, null, null, null, true)
-        );
-
-        HEARING_EVENT_DEFINITIONS = newArrayList();
-        HEARING_EVENT_DEFINITIONS.addAll(eventDefinitions);
-
-        return new HearingEventDefinitionData(randomUUID(), eventDefinitions);
-    }
-
-    public static HearingEventDefinitionData hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents() {
-        final List<HearingEventDefinition> eventDefinitions = newArrayList();
-        eventDefinitions.addAll(hearingEventDefinitionsWithOnlySequencedEvents().getEventDefinitions());
-        eventDefinitions.addAll(hearingEventDefinitionsWithOnlyNonSequencedEvents().getEventDefinitions());
-
-        HEARING_EVENT_DEFINITIONS = newArrayList();
-        HEARING_EVENT_DEFINITIONS.addAll(eventDefinitions);
-
-        return new HearingEventDefinitionData(randomUUID(), eventDefinitions);
-    }
-
     public static HearingEventDefinitionData hearingEventDefinitionsWithPauseAndResumeEvents() {
-        PAUSE_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "Pause", "Hearing paused", 1, SEQUENCE_TYPE_PAUSE_RESUME, null, null, null, false);
-        RESUME_HEARING_EVENT_DEFINITION = new HearingEventDefinition(randomUUID(), "Resume", "Hearing resumed", 2, SEQUENCE_TYPE_PAUSE_RESUME, null, null, null, false);
+        PAUSE_HEARING_EVENT_DEFINITION = new HearingEventDefinition(java.util.UUID.fromString(ID_3), ACTION_LABEL_3, ACTION_SEQUENCE_3, RECORDED_LABEL_3,  null, GROUP_LABEL_1, GROUP_SEQUENCE_1, ALTERABLE);
+        RESUME_HEARING_EVENT_DEFINITION = new HearingEventDefinition(java.util.UUID.fromString(ID_4), ACTION_LABEL_4, ACTION_SEQUENCE_4, RECORDED_LABEL_4, null, GROUP_LABEL_1, GROUP_SEQUENCE_1, ALTERABLE);
 
         final List<HearingEventDefinition> eventDefinitions = newArrayList();
-        eventDefinitions.addAll(hearingEventDefinitionsWithBothSequencedAndNonSequencedEvents().getEventDefinitions());
         eventDefinitions.add(PAUSE_HEARING_EVENT_DEFINITION);
         eventDefinitions.add(RESUME_HEARING_EVENT_DEFINITION);
-
-        HEARING_EVENT_DEFINITIONS = newArrayList();
-        HEARING_EVENT_DEFINITIONS.addAll(eventDefinitions);
-
-        return new HearingEventDefinitionData(randomUUID(), eventDefinitions);
-    }
-
-    public static HearingEventDefinitionData hearingEventDefinitionsWithNotRegisteredSequenceTypeEvents() {
-        final List<HearingEventDefinition> eventDefinitions = newArrayList();
-        eventDefinitions.addAll(hearingEventDefinitionsWithPauseAndResumeEvents().getEventDefinitions());
-        eventDefinitions.add(new HearingEventDefinition(randomUUID(), "Interpreter swears-in", "Interpreter sworn-in", 1, SEQUENCE_TYPE_NOT_REGISTERED, null, null, null, true));
-        eventDefinitions.add(new HearingEventDefinition(randomUUID(), "Probation reads oral PSR", "Probation read oral PSR", 2, SEQUENCE_TYPE_NOT_REGISTERED, null, null, null, true));
 
         HEARING_EVENT_DEFINITIONS = newArrayList();
         HEARING_EVENT_DEFINITIONS.addAll(eventDefinitions);

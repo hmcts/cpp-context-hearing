@@ -92,6 +92,7 @@ public class StagingEnforcementEventProcessor {
 
         //Only deal with hearing messages where originator is courts
         final Optional<String> originator = JsonObjects.getString(event.payloadAsJsonObject(), ORIGINATOR);
+
         if (originator.isPresent() && COURTS.equalsIgnoreCase(originator.get())) {
             Optional<String> errorCode = Optional.empty();
 
@@ -112,7 +113,6 @@ public class StagingEnforcementEventProcessor {
             if (errorCode.isPresent()) {
                 this.sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "hearing.command.enforcement-acknowledgement-error").apply(event.payloadAsJsonObject()));
             }
-
         }
     }
 

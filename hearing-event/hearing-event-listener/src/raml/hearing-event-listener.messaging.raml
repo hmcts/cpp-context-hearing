@@ -185,6 +185,25 @@ baseUri: message://event/listener/message/hearing
             schema: !include json/schema/hearing.defendant-added.json
             example: !include json/hearing.defendant-added.json
 
+# Interpreter Intermediary
+        application/vnd.hearing.interpreter-intermediary-added+json:
+            example: !include json/hearing.interpreter-intermediary-added.json
+            schema:  !include json/schema/hearing.interpreter-intermediary-added.json
+        application/vnd.hearing.interpreter-intermediary-updated+json:
+            example: !include json/hearing.interpreter-intermediary-updated.json
+            schema:  !include json/schema/hearing.interpreter-intermediary-updated.json
+        application/vnd.hearing.interpreter-intermediary-removed+json:
+            example: !include json/hearing.interpreter-intermediary-removed.json
+            schema:  !include json/schema/hearing.interpreter-intermediary-removed.json
+
+# Set Trial Type
+        application/vnd.hearing.hearing-trial-type-set+json:
+            schema: !include json/schema/hearing.hearing-trial-type-set.json
+            example: !include json/hearing.hearing-trial-type-set.json
+        application/vnd.hearing.hearing-effective-trial-set+json:
+            schema: !include json/schema/hearing.hearing-effective-trial-set.json
+            example: !include json/hearing.hearing-effective-trial-set.json
+
 # Company Representative
         application/vnd.hearing.company-representative-added+json:
             schema: !include json/schema/hearing.company-representative-added.json

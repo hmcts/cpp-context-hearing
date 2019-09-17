@@ -252,7 +252,7 @@ public class ResultsSharedDelegate implements Serializable {
     }
 
     private Stream<Object> checkAndUpdateApplicationOutcomes(final Map<UUID, CourtApplicationOutcome> courtApplicationOutcomeMap, final CourtApplication courtApplication) {
-        CourtApplicationOutcome courtApplicationOutcome = courtApplicationOutcomeMap.get(courtApplication.getId());
+        final CourtApplicationOutcome courtApplicationOutcome = courtApplicationOutcomeMap.get(courtApplication.getId());
         courtApplicationOutcome.setOriginatingHearingId(momento.getHearing().getId());
         courtApplication.setApplicationOutcome(courtApplicationOutcome);
         return Stream.of(new ApplicationDetailChanged(momento.getHearing().getId(), courtApplication));

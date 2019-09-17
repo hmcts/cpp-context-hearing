@@ -18,6 +18,8 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
+
+import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
@@ -44,6 +46,9 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingEventDelegate;
+
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingTrialTypeDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.InterpreterIntermediaryDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NowDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.OffenceDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.PleaDelegate;
@@ -68,12 +73,17 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
+import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryAdded;
+import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
@@ -139,6 +149,10 @@ public class HearingAggregate implements Aggregate {
 
     private final ApplicantCounselDelegate applicantCounselDelegate = new ApplicantCounselDelegate(momento);
 
+    private final InterpreterIntermediaryDelegate interpreterIntermediaryDelegate = new InterpreterIntermediaryDelegate(momento);
+
+    private final HearingTrialTypeDelegate hearingTrialTypeDelegate = new HearingTrialTypeDelegate(momento);
+
     private final CompanyRepresentativeDelegate companyRepresentativeDelegate = new CompanyRepresentativeDelegate(momento);
 
     @Override
@@ -181,6 +195,11 @@ public class HearingAggregate implements Aggregate {
                 when(ApplicantCounselUpdated.class).apply(applicantCounselDelegate::handleApplicantCounselUpdated),
                 when(DefendantAdded.class).apply(hearingDelegate::handleDefendantAdded),
                 when(ApplicationDetailChanged.class).apply(hearingDelegate::handleApplicationDetailChanged),
+                when(InterpreterIntermediaryAdded.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryAdded),
+                when(InterpreterIntermediaryRemoved.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryRemoved),
+                when(InterpreterIntermediaryUpdated.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryUpdated),
+                when(HearingTrialType.class).apply(hearingTrialTypeDelegate::handleTrialTypeSetForHearing),
+                when(HearingEffectiveTrial.class).apply(hearingTrialTypeDelegate::handleEffectiveTrailHearing),
                 when(CompanyRepresentativeAdded.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeAdded),
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
@@ -367,6 +386,25 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> updateCourtApplication(final UUID hearingId, final uk.gov.justice.core.courts.CourtApplication courtApplication) {
         return hearingDelegate.updateCourtApplication(hearingId, courtApplication);
+    }
+
+    public Stream<Object> addInterpreterIntermediary(final UUID hearingId, final InterpreterIntermediary interpreterIntermediary) {
+        return interpreterIntermediaryDelegate.addInterpreterIntermediary(hearingId, interpreterIntermediary);
+    }
+
+    public Stream<Object> removeInterpreterIntermediary(final UUID id, final UUID hearingId) {
+        return interpreterIntermediaryDelegate.removeInterpreterIntermediary(id, hearingId);
+    }
+
+    public Stream<Object> updateInterpreterIntermediary(final UUID hearingId, final InterpreterIntermediary interpreterIntermediary) {
+        return interpreterIntermediaryDelegate.updateInterpreterIntermediary(interpreterIntermediary, hearingId);
+    }
+    public Stream<Object> setTrialType(final HearingTrialType trialType) {
+        return apply(this.hearingTrialTypeDelegate.setTrialType(trialType));
+    }
+
+    public Stream<Object> setTrialType(final HearingEffectiveTrial hearingEffectiveTrial) {
+        return apply(this.hearingTrialTypeDelegate.setTrialType(hearingEffectiveTrial));
     }
 
     public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {

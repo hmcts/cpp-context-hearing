@@ -49,7 +49,7 @@ public class HearingEventStreamTransform implements EventTransformation {
 
     @Override
     public Action actionFor(final JsonEnvelope event) {
-        if(eventsToTransform.stream().anyMatch(eventToTransform -> event.metadata().name().equalsIgnoreCase(eventToTransform))) {
+        if (eventsToTransform.stream().anyMatch(eventToTransform -> event.metadata().name().equalsIgnoreCase(eventToTransform))) {
             return TRANSFORM;
         }
 
@@ -66,7 +66,6 @@ public class HearingEventStreamTransform implements EventTransformation {
         final JsonObject transformedPayload = eventInstance.transform(payload);
 
         return of(envelopeFrom(metadataFrom(event.metadata()), transformedPayload));
-
     }
 
     @Override

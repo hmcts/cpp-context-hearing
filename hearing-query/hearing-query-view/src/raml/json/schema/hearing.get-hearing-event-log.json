@@ -6,6 +6,9 @@
     "hearingId": {
       "$ref": "#/definitions/uuid"
     },
+    "hasActiveHearing": {
+      "type": "boolean"
+    },
     "events": {
       "type": "array",
       "items": {
@@ -15,7 +18,8 @@
   },
   "required": [
     "hearingId",
-    "events"
+    "events",
+    "hasActiveHearing"
   ],
   "additionalProperties": false,
   "definitions": {

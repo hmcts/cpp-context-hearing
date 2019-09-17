@@ -20,16 +20,13 @@
           "actionLabel": {
             "type": "string"
           },
-          "actionLabelExtension": {
-            "type": "string"
-          },
-          "recordedLabel": {
-            "type": "string"
-          },
-          "sequence": {
+          "actionSequence": {
             "type": "integer"
           },
-          "sequenceType": {
+          "groupSequence": {
+            "type": "integer"
+          },
+          "recordedLabel": {
             "type": "string"
           },
           "caseAttribute": {
@@ -43,6 +40,9 @@
           "id",
           "recordedLabel",
           "actionLabel",
+          "actionSequence",
+          "groupSequence",
+          "groupLabel",
           "alterable"
         ],
         "additionalProperties": false

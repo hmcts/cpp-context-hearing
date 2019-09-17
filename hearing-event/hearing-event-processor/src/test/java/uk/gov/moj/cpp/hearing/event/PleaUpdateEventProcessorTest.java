@@ -55,7 +55,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-
 public class PleaUpdateEventProcessorTest {
 
     @Spy

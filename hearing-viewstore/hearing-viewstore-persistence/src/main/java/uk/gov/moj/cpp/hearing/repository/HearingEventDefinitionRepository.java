@@ -14,15 +14,7 @@ import org.apache.deltaspike.data.api.Repository;
 @Repository
 public interface HearingEventDefinitionRepository extends EntityRepository<HearingEventDefinition, UUID> {
 
-    String FIND_ALL_ACTIVE_ORDER_BY_SEQUENCE_TYPE_SEQUENCE_NUMBER_AND_ACTION_LABEL =
-            "from HearingEventDefinition hed " +
-                    "where hed.deleted is false " +
-                    "order by case when hed.sequenceType = 'SENTENCING' then 1 " +
-                    "              when hed.sequenceType = 'PAUSE_RESUME' then 2 " +
-                    "              when hed.sequenceType is null then 4 " +
-                    "              else 3 " +
-                    "         end asc " +
-                    ", hed.sequenceNumber asc nulls last, lower(hed.actionLabel) asc ";
+    String FIND_ALL_ACTIVE_ORDER_BY_SEQUENCE_TYPE_SEQUENCE_NUMBER_AND_ACTION_LABEL = "SELECT hed FROM HearingEventDefinition hed WHERE hed.deleted is false ORDER BY hed.groupSequence ASC, hed.actionSequence ASC";
 
     @Query(value = FIND_ALL_ACTIVE_ORDER_BY_SEQUENCE_TYPE_SEQUENCE_NUMBER_AND_ACTION_LABEL)
     List<HearingEventDefinition> findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();

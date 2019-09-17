@@ -22,11 +22,11 @@ public class HearingEventDefinition {
     @Column(name = "action_label", nullable = false)
     private String actionLabel;
 
-    @Column(name = "sequence_number")
-    private Integer sequenceNumber;
+    @Column(name = "action_sequence")
+    private Integer actionSequence;
 
-    @Column(name = "sequence_type")
-    private String sequenceType;
+    @Column(name = "group_sequence")
+    private Integer groupSequence;
 
     // todo need to normalize case attribute as it's composed of comma separated values which
     // would force to be parsed for processing
@@ -35,9 +35,6 @@ public class HearingEventDefinition {
 
     @Column(name = "group_label")
     private String groupLabel;
-
-    @Column(name = "action_label_extension")
-    private String actionLabelExtension;
 
     @Column(name = "alterable", nullable = false)
     private boolean alterable;
@@ -49,24 +46,23 @@ public class HearingEventDefinition {
         // for JPA
     }
 
-    public HearingEventDefinition(final UUID id, final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
-                                  final String sequenceType, final String caseAttribute, final String groupLabel,
-                                  final String actionLabelExtension, final boolean alterable) {
-        this(id, recordedLabel, actionLabel, sequenceNumber, sequenceType, caseAttribute, groupLabel,
-                actionLabelExtension, alterable, false);
+    public HearingEventDefinition(final UUID id, final String recordedLabel, final String actionLabel, final Integer actionSequence,
+                                  final String caseAttribute, final String groupLabel, final Integer groupSequence,
+                                  final boolean alterable) {
+        this(id, recordedLabel, actionLabel, actionSequence, caseAttribute, groupLabel,
+                groupSequence, alterable, false);
     }
 
-    private HearingEventDefinition(final UUID id, final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
-                                   final String sequenceType, final String caseAttribute, final String groupLabel,
-                                   final String actionLabelExtension, final boolean alterable, final boolean deleted) {
+    private HearingEventDefinition(final UUID id, final String recordedLabel, final String actionLabel, final Integer actionSequence,
+                                   final String caseAttribute, final String groupLabel, final Integer groupSequence,
+                                   final boolean alterable, final boolean deleted) {
         this.id = id;
         this.recordedLabel = recordedLabel;
         this.actionLabel = actionLabel;
-        this.sequenceNumber = sequenceNumber;
-        this.sequenceType = sequenceType;
+        this.actionSequence = actionSequence;
         this.caseAttribute = caseAttribute;
         this.groupLabel = groupLabel;
-        this.actionLabelExtension = actionLabelExtension;
+        this.groupSequence = groupSequence;
         this.alterable = alterable;
         this.deleted = deleted;
     }
@@ -83,12 +79,8 @@ public class HearingEventDefinition {
         return actionLabel;
     }
 
-    public Integer getSequenceNumber() {
-        return sequenceNumber;
-    }
-
-    public String getSequenceType() {
-        return sequenceType;
+    public Integer getActionSequence() {
+        return actionSequence;
     }
 
     public String getCaseAttribute() {
@@ -99,8 +91,8 @@ public class HearingEventDefinition {
         return groupLabel;
     }
 
-    public String getActionLabelExtension() {
-        return actionLabelExtension;
+    public Integer getGroupSequence() {
+        return groupSequence;
     }
 
     public boolean isAlterable() {
@@ -111,34 +103,68 @@ public class HearingEventDefinition {
         return deleted;
     }
 
+    public void setId(final UUID id) {
+        this.id = id;
+    }
+
+    public void setRecordedLabel(final String recordedLabel) {
+        this.recordedLabel = recordedLabel;
+    }
+
+    public void setActionLabel(final String actionLabel) {
+        this.actionLabel = actionLabel;
+    }
+
+    public void setActionSequence(final Integer actionSequence) {
+        this.actionSequence = actionSequence;
+    }
+
+    public void setGroupSequence(final Integer groupSequence) {
+        this.groupSequence = groupSequence;
+    }
+
+    public void setCaseAttribute(final String caseAttribute) {
+        this.caseAttribute = caseAttribute;
+    }
+
+    public void setGroupLabel(final String groupLabel) {
+        this.groupLabel = groupLabel;
+    }
+
+    public void setAlterable(final boolean alterable) {
+        this.alterable = alterable;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public Builder builder() {
-        return new Builder(getId(), getRecordedLabel(), getActionLabel(), getSequenceNumber(), getSequenceType(),
-                getCaseAttribute(), getGroupLabel(), getActionLabelExtension(), isAlterable(), isDeleted());
+        return new Builder(getId(), getRecordedLabel(), getActionLabel(), getActionSequence(),
+                getCaseAttribute(), getGroupLabel(), getGroupSequence(), isAlterable(), isDeleted());
     }
 
     public class Builder {
         private UUID id;
         private String recordedLabel;
         private String actionLabel;
-        private Integer sequenceNumber;
-        private String sequenceType;
+        private Integer actionSequence;
         private String caseAttribute;
         private String groupLabel;
-        private String actionLabelExtension;
+        private Integer groupSequence;
         private boolean alterable;
         private boolean deleted;
 
-        Builder(final UUID id, final String recordedLabel, final String actionLabel, final Integer sequenceNumber,
-                final String sequenceType, final String caseAttribute, final String groupLabel,
-                final String actionLabelExtension, final boolean alterable, final boolean deleted) {
+        Builder(final UUID id, final String recordedLabel, final String actionLabel, final Integer actionSequence,
+                final String caseAttribute, final String groupLabel, final Integer groupSequence,
+                final boolean alterable, final boolean deleted) {
             this.id = id;
             this.recordedLabel = recordedLabel;
             this.actionLabel = actionLabel;
-            this.sequenceNumber = sequenceNumber;
-            this.sequenceType = sequenceType;
+            this.actionSequence = actionSequence;
             this.caseAttribute = caseAttribute;
             this.groupLabel = groupLabel;
-            this.actionLabelExtension = actionLabelExtension;
+            this.groupSequence = groupSequence;
             this.alterable = alterable;
             this.deleted = deleted;
         }
@@ -149,8 +175,7 @@ public class HearingEventDefinition {
         }
 
         public HearingEventDefinition build() {
-            return new HearingEventDefinition(id, recordedLabel, actionLabel, sequenceNumber, sequenceType, caseAttribute, groupLabel, actionLabelExtension, alterable, deleted);
+            return new HearingEventDefinition(id, recordedLabel, actionLabel, actionSequence, caseAttribute, groupLabel, groupSequence, alterable, deleted);
         }
     }
-
 }

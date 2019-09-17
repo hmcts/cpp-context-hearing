@@ -99,6 +99,7 @@ public class HearingLogEventListenerTest {
         assertThat(eventLogArgumentCaptor.getValue().isAlterable(), is(logEventCommand.getAlterable()));
         assertThat(eventLogArgumentCaptor.getValue().getHearingId(), is(logEventCommand.getHearingId()));
         assertThat(eventLogArgumentCaptor.getValue().getRecordedLabel(), is(logEventCommand.getRecordedLabel()));
+        assertThat(eventLogArgumentCaptor.getValue().getEventDate(), is(logEventCommand.getEventTime().toLocalDate()));
         assertThat(eventLogArgumentCaptor.getValue().getEventTime(), is(logEventCommand.getEventTime().toLocalDateTime().atZone(ZoneId.of("UTC"))));
     }
 
@@ -195,33 +196,30 @@ public class HearingLogEventListenerTest {
         assertThat(actualEntities.get(0).getId(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getId()));
         assertThat(actualEntities.get(0).getActionLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getActionLabel()));
         assertThat(actualEntities.get(0).getRecordedLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getRecordedLabel()));
-        assertThat(actualEntities.get(0).getSequenceNumber(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getSequence()));
-        assertThat(actualEntities.get(0).getSequenceType(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getSequenceType()));
+        assertThat(actualEntities.get(0).getActionSequence(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getActionSequence()));
+        assertThat(actualEntities.get(0).getGroupSequence(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getGroupSequence()));
         assertThat(actualEntities.get(0).getCaseAttribute(), is(nullValue()));
-        assertThat(actualEntities.get(0).getGroupLabel(), is(nullValue()));
-        assertThat(actualEntities.get(0).getActionLabelExtension(), is(nullValue()));
+        assertThat(actualEntities.get(0).getGroupLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).getGroupLabel()));
         assertThat(actualEntities.get(0).isAlterable(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(0).isAlterable()));
         assertThat(actualEntities.get(0).isDeleted(), is(false));
 
         assertThat(actualEntities.get(1).getId(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getId()));
         assertThat(actualEntities.get(1).getActionLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getActionLabel()));
         assertThat(actualEntities.get(1).getRecordedLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getRecordedLabel()));
-        assertThat(actualEntities.get(1).getSequenceNumber(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getSequence()));
-        assertThat(actualEntities.get(1).getSequenceType(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getSequenceType()));
+        assertThat(actualEntities.get(1).getActionSequence(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getActionSequence()));
+        assertThat(actualEntities.get(1).getGroupSequence(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getGroupSequence()));
         assertThat(actualEntities.get(1).getCaseAttribute(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getCaseAttribute()));
         assertThat(actualEntities.get(1).getGroupLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getGroupLabel()));
-        assertThat(actualEntities.get(1).getActionLabelExtension(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).getActionLabelExtension()));
         assertThat(actualEntities.get(1).isAlterable(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(1).isAlterable()));
         assertThat(actualEntities.get(1).isDeleted(), is(false));
 
         assertThat(actualEntities.get(2).getId(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getId()));
         assertThat(actualEntities.get(2).getActionLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getActionLabel()));
         assertThat(actualEntities.get(2).getRecordedLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getRecordedLabel()));
-        assertThat(actualEntities.get(2).getSequenceNumber(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getSequence()));
-        assertThat(actualEntities.get(2).getSequenceType(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getSequenceType()));
+        assertThat(actualEntities.get(2).getActionSequence(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getActionSequence()));
+        assertThat(actualEntities.get(2).getGroupSequence(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getGroupSequence()));
         assertThat(actualEntities.get(2).getCaseAttribute(), is(nullValue()));
-        assertThat(actualEntities.get(2).getGroupLabel(), is(nullValue()));
-        assertThat(actualEntities.get(2).getActionLabelExtension(), is(nullValue()));
+        assertThat(actualEntities.get(2).getGroupLabel(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).getGroupLabel()));
         assertThat(actualEntities.get(2).isAlterable(), is(createHearingEventDefinitionsCommand.getEventDefinitions().get(2).isAlterable()));
         assertThat(actualEntities.get(2).isDeleted(), is(false));
 
@@ -232,9 +230,9 @@ public class HearingLogEventListenerTest {
     public void shouldMarkAllActiveHearingEventDefinitionsAsDeleted() {
 
         final List<HearingEventDefinition> hearingEventDefinitions = Arrays.asList(
-                new HearingEventDefinition(randomUUID(), STRING.next(), STRING.next(), INTEGER.next(), STRING.next(), null, null, null, BOOLEAN.next()),
-                new HearingEventDefinition(randomUUID(), STRING.next(), STRING.next(), INTEGER.next(), STRING.next(), STRING.next(), STRING.next(), STRING.next(), BOOLEAN.next()),
-                new HearingEventDefinition(randomUUID(), STRING.next(), STRING.next(), null, null, null, null, null, BOOLEAN.next()));
+                new HearingEventDefinition(randomUUID(), STRING.next(), STRING.next(), INTEGER.next(), STRING.next(), STRING.next(), INTEGER.next(), BOOLEAN.next()),
+                new HearingEventDefinition(randomUUID(), STRING.next(), STRING.next(), INTEGER.next(), STRING.next(), STRING.next(), INTEGER.next(), BOOLEAN.next()),
+                new HearingEventDefinition(randomUUID(), STRING.next(), STRING.next(), INTEGER.next(), STRING.next(), STRING.next(), INTEGER.next(), BOOLEAN.next()));
 
         when(hearingEventDefinitionRepository.findAllActive()).thenReturn(hearingEventDefinitions);
 
@@ -251,33 +249,30 @@ public class HearingLogEventListenerTest {
         assertThat(actualEntities.get(0).getId(), is(hearingEventDefinitions.get(0).getId()));
         assertThat(actualEntities.get(0).getActionLabel(), is(hearingEventDefinitions.get(0).getActionLabel()));
         assertThat(actualEntities.get(0).getRecordedLabel(), is(hearingEventDefinitions.get(0).getRecordedLabel()));
-        assertThat(actualEntities.get(0).getSequenceNumber(), is(hearingEventDefinitions.get(0).getSequenceNumber()));
-        assertThat(actualEntities.get(0).getSequenceType(), is(hearingEventDefinitions.get(0).getSequenceType()));
-        assertThat(actualEntities.get(0).getCaseAttribute(), is(nullValue()));
-        assertThat(actualEntities.get(0).getGroupLabel(), is(nullValue()));
-        assertThat(actualEntities.get(0).getActionLabelExtension(), is(nullValue()));
+        assertThat(actualEntities.get(0).getActionSequence(), is(hearingEventDefinitions.get(0).getActionSequence()));
+        assertThat(actualEntities.get(0).getGroupSequence(), is(hearingEventDefinitions.get(0).getGroupSequence()));
+        assertThat(actualEntities.get(0).getCaseAttribute(), is(hearingEventDefinitions.get(0).getCaseAttribute()));
+        assertThat(actualEntities.get(0).getGroupLabel(), is(hearingEventDefinitions.get(0).getGroupLabel()));
         assertThat(actualEntities.get(0).isAlterable(), is(hearingEventDefinitions.get(0).isAlterable()));
         assertThat(actualEntities.get(0).isDeleted(), is(true));
 
         assertThat(actualEntities.get(1).getId(), is(hearingEventDefinitions.get(1).getId()));
         assertThat(actualEntities.get(1).getActionLabel(), is(hearingEventDefinitions.get(1).getActionLabel()));
         assertThat(actualEntities.get(1).getRecordedLabel(), is(hearingEventDefinitions.get(1).getRecordedLabel()));
-        assertThat(actualEntities.get(1).getSequenceNumber(), is(hearingEventDefinitions.get(1).getSequenceNumber()));
-        assertThat(actualEntities.get(1).getSequenceType(), is(hearingEventDefinitions.get(1).getSequenceType()));
+        assertThat(actualEntities.get(1).getActionSequence(), is(hearingEventDefinitions.get(1).getActionSequence()));
+        assertThat(actualEntities.get(1).getGroupSequence(), is(hearingEventDefinitions.get(1).getGroupSequence()));
         assertThat(actualEntities.get(1).getCaseAttribute(), is(hearingEventDefinitions.get(1).getCaseAttribute()));
         assertThat(actualEntities.get(1).getGroupLabel(), is(hearingEventDefinitions.get(1).getGroupLabel()));
-        assertThat(actualEntities.get(1).getActionLabelExtension(), is(hearingEventDefinitions.get(1).getActionLabelExtension()));
         assertThat(actualEntities.get(1).isAlterable(), is(hearingEventDefinitions.get(1).isAlterable()));
         assertThat(actualEntities.get(1).isDeleted(), is(true));
 
         assertThat(actualEntities.get(2).getId(), is(hearingEventDefinitions.get(2).getId()));
         assertThat(actualEntities.get(2).getActionLabel(), is(hearingEventDefinitions.get(2).getActionLabel()));
         assertThat(actualEntities.get(2).getRecordedLabel(), is(hearingEventDefinitions.get(2).getRecordedLabel()));
-        assertThat(actualEntities.get(2).getSequenceNumber(), is(nullValue()));
-        assertThat(actualEntities.get(2).getSequenceType(), is(nullValue()));
-        assertThat(actualEntities.get(2).getCaseAttribute(), is(nullValue()));
-        assertThat(actualEntities.get(2).getGroupLabel(), is(nullValue()));
-        assertThat(actualEntities.get(2).getActionLabelExtension(), is(nullValue()));
+        assertThat(actualEntities.get(2).getActionSequence(), is(hearingEventDefinitions.get(2).getActionSequence()));
+        assertThat(actualEntities.get(2).getGroupSequence(), is(hearingEventDefinitions.get(2).getGroupSequence()));
+        assertThat(actualEntities.get(2).getCaseAttribute(), is(hearingEventDefinitions.get(2).getCaseAttribute()));
+        assertThat(actualEntities.get(2).getGroupLabel(), is(hearingEventDefinitions.get(2).getGroupLabel()));
         assertThat(actualEntities.get(2).isAlterable(), is(hearingEventDefinitions.get(2).isAlterable()));
         assertThat(actualEntities.get(2).isDeleted(), is(true));
 

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.update-interpreter-intermediary.json",
+  "type": "object",
+  "properties": {
+    "interpreterIntermediary": {
+      "$ref": "http://justice.gov.uk/core/courts/interpreterIntermediary.json"
+    }
+  },
+  "required": [
+    "interpreterIntermediary"
+  ],
+  "additionalProperties": false
+}

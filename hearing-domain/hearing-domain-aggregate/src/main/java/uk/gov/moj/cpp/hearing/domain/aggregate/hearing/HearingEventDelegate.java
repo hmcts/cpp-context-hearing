@@ -1,6 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.domain.CourtCentre;
 import uk.gov.moj.cpp.hearing.domain.HearingType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -25,7 +30,6 @@ public class HearingEventDelegate implements Serializable {
     private static final String REASON_ONLY_CROWN_COURT_HEARINGS_CAN_LOG_EVENTS = "Only crown court hearings can log events";
     private static final String REASON_CASEURN_NOT_FOUND = "Case URN not found";
 
-
     private final HearingAggregateMomento momento;
 
     public HearingEventDelegate(final HearingAggregateMomento momento) {
@@ -46,12 +50,31 @@ public class HearingEventDelegate implements Serializable {
         if (ignoreReason.isPresent()) {
             return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
         }
-        final String caseURN = this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN();
 
-        if(caseURN == null){
+        final String reference = ofNullable(this.momento.getHearing().getProsecutionCases())
+                .map(c -> c.get(0).getProsecutionCaseIdentifier())
+                .map(ProsecutionCaseIdentifier::getCaseURN)
+                .orElse(getReferenceFromCourtApplications());
+
+        if (isNull(reference)) {
             ignoreReason = Optional.of(REASON_CASEURN_NOT_FOUND);
             return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
         }
+
+        final CourtCentre courtCentre = CourtCentre.courtCentre()
+                .withId(momento.getHearing().getCourtCentre().getId())
+                .withName(momento.getHearing().getCourtCentre().getName())
+                .withRoomId(momento.getHearing().getCourtCentre().getRoomId())
+                .withRoomName(momento.getHearing().getCourtCentre().getRoomName())
+                .withWelshName(momento.getHearing().getCourtCentre().getWelshName())
+                .withWelshRoomName(momento.getHearing().getCourtCentre().getWelshRoomName())
+                .build();
+
+        final HearingType hearingType = HearingType.hearingType()
+                .withId(momento.getHearing().getType().getId())
+                .withDescription(momento.getHearing().getType().getDescription())
+                .build();
+
         return Stream.of(new HearingEventLogged(
                 hearingEvent.getHearingEventId(),
                 null,
@@ -62,19 +85,9 @@ public class HearingEventDelegate implements Serializable {
                 hearingEvent.getEventTime(),
                 hearingEvent.getLastModifiedTime(),
                 alterable,
-                CourtCentre.courtCentre()
-                        .withId(momento.getHearing().getCourtCentre().getId())
-                        .withName(momento.getHearing().getCourtCentre().getName())
-                        .withRoomId(momento.getHearing().getCourtCentre().getRoomId())
-                        .withRoomName(momento.getHearing().getCourtCentre().getRoomName())
-                        .withWelshName(momento.getHearing().getCourtCentre().getWelshName())
-                        .withWelshRoomName(momento.getHearing().getCourtCentre().getWelshRoomName())
-                        .build(),
-                HearingType.hearingType()
-                        .withId(momento.getHearing().getType().getId())
-                        .withDescription(momento.getHearing().getType().getDescription())
-                        .build(),
-                caseURN)); //TODO: GPE-5657 Which case URN is expected to be set?
+                courtCentre,
+                hearingType,
+                reference));
     }
 
 
@@ -102,6 +115,11 @@ public class HearingEventDelegate implements Serializable {
             return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
         }
 
+        final String reference = ofNullable(this.momento.getHearing().getProsecutionCases())
+                .map(c -> c.get(0).getProsecutionCaseIdentifier())
+                .map(ProsecutionCaseIdentifier::getCaseURN)
+                .orElse(getReferenceFromCourtApplications());
+
         return Stream.of(
                 new HearingEventDeleted(hearingEvent.getHearingEventId()),
                 new HearingEventLogged(
@@ -126,7 +144,7 @@ public class HearingEventDelegate implements Serializable {
                                 .withId(momento.getHearing().getType().getId())
                                 .withDescription(momento.getHearing().getType().getDescription())
                                 .build(),
-                        this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN() //TODO: GPE-5657 Which case URN is expected to be set?
+                        reference
                 ));
     }
 
@@ -191,5 +209,11 @@ public class HearingEventDelegate implements Serializable {
         public HearingEventLogged getHearingEventLogged() {
             return hearingEventLogged;
         }
+    }
+
+    private String getReferenceFromCourtApplications() {
+        return ofNullable(this.momento.getHearing().getCourtApplications())
+                .map(courtApplications -> courtApplications.get(0))
+                .map(CourtApplication::getApplicationReference).orElse(null);
     }
 }
