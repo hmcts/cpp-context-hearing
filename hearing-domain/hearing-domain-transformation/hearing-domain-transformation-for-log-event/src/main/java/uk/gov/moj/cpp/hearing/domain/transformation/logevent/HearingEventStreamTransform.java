@@ -50,7 +50,10 @@ public class HearingEventStreamTransform implements EventTransformation {
 
     @Override
     public Stream<JsonEnvelope> apply(final JsonEnvelope event) {
-        return of(envelopeFrom(metadataFrom(event.metadata()), buildHearingEventDefinitionsPayload()));
+        LOGGER.error("Old event payload - {}", event.payloadAsJsonObject());
+        final JsonObject jsonObject = buildHearingEventDefinitionsPayload();
+        LOGGER.error("New event payload - {}", jsonObject);
+        return of(envelopeFrom(metadataFrom(event.metadata()), jsonObject));
     }
 
     @Override
