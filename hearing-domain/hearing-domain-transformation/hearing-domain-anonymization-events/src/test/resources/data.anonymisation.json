@@ -12,7 +12,8 @@
         {"address3" : "StringAnonymisedString"},
         {"address4" : "StringAnonymisedString"},
         {"postcode" : "StringAnonymisedPostcode"},
-        {"wording" : "StringAnonymisedString"}
+        {"wording" : "StringAnonymisedString"},
+        {"draftResult" : "StringAnonymisedString"},
       ]
     }
   ]

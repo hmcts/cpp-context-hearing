@@ -202,7 +202,8 @@
         {"nationality" : "StringAnonymisedString"},
         {"description" : "StringAnonymisedString"},
         {"bailStatus" : "StringAnonymisedString"},
-        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+        {"reportingRestrictionReason" :  "StringAnonymisedString"},
+        {"draftResult" :"StringAnonymisedParsedData"}
       ]
     },
     {
@@ -373,7 +374,8 @@
         {"specificRequirements" : "StringAnonymisedString"},
         {"statementOfFacts" : "StringAnonymisedString"},
         {"statementOfFactsWelsh" : "StringAnonymisedString"},
-        {"reportingRestrictionReason" : "StringAnonymisedString"}
+        {"reportingRestrictionReason" : "StringAnonymisedString"},
+        {"draftResult" :"StringAnonymisedParsedData"}
       ]
     },
     {

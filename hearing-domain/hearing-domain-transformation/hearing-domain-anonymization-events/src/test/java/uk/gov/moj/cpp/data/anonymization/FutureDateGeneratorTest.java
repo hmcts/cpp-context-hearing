@@ -15,7 +15,7 @@ public class FutureDateGeneratorTest {
     @Test
     public void shouldGenerateHostName() {
         final FutureDateGenerator futureDateGenerator = new FutureDateGenerator();
-        final String futureDate = futureDateGenerator.convert("2018-05-19");
+        final String futureDate = futureDateGenerator.convert(LocalDate.now().plusMonths(1).toString());
         LocalDate localDate = LocalDate.parse(futureDate, FORMATTER);
         assertThat(true, is(localDate.isAfter(LocalDate.now())));
     }

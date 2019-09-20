@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.data.anonymization.generator;
 
+@SuppressWarnings({"squid:S3776", "squid:S134", "squid:MethodCyclomaticComplexity"})
 public class AnonymizeGenerator implements Generator<String> {
 
     Generator<String> generator;
@@ -12,6 +13,7 @@ public class AnonymizeGenerator implements Generator<String> {
     private static final String PHONE_RULE = "StringAnonymisedPhoneNumber";
     private static final String POST_CODE_RULE = "StringAnonymisedPostcode";
     private static final String NI_RULE = "StringAnonymisedNI";
+    private static final String PARSE_DATA_RULE ="StringAnonymisedParsedData";
 
     public Generator<String> getGenerator(String rule){
         switch (rule) {
@@ -41,6 +43,9 @@ public class AnonymizeGenerator implements Generator<String> {
                 break;
             case NI_RULE:
                 generator = new NIGenerator();
+                break;
+            case PARSE_DATA_RULE:
+                generator = new ParseDataGenerator();
                 break;
             default:
                 break;
