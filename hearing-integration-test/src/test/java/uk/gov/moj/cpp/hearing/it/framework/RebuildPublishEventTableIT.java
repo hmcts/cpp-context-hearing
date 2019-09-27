@@ -60,7 +60,7 @@ public class RebuildPublishEventTableIT extends AbstractIT {
         final int numberOfCommands = 1;
         final int numberOfEvents = numberOfCommands * 5;
         fireCommand(numberOfCommands, requestSpec);
-        final Optional<List<PublishedEvent>> publishedEvents = poller.pollUntilFound(() -> findPublishedEvents(numberOfEvents));
+        final Optional<List<PublishedEvent>> publishedEvents = poller.pollUntilFound(() -> findPublishedEvents(numberOfEvents, nextEventNumber));
 
         if (publishedEvents.isPresent()) {
             final Long eventNumber = publishedEvents.get().get(0).getEventNumber().orElse(-1L);
@@ -72,7 +72,7 @@ public class RebuildPublishEventTableIT extends AbstractIT {
 
         systemCommandCaller.callRebuild();
 
-        final Optional<List<PublishedEvent>> rebuiltPublishedEvents = poller.pollUntilFound(() -> findPublishedEvents(numberOfEvents));
+        final Optional<List<PublishedEvent>> rebuiltPublishedEvents = poller.pollUntilFound(() -> findPublishedEvents(numberOfEvents, 1l));
 
         if (rebuiltPublishedEvents.isPresent()) {
             final Long eventNumber = rebuiltPublishedEvents.get().get(0).getEventNumber().orElse(-1L);
@@ -83,7 +83,7 @@ public class RebuildPublishEventTableIT extends AbstractIT {
         }
     }
 
-    private Optional<List<PublishedEvent>> findPublishedEvents(final int numberOfEvents) {
+    private Optional<List<PublishedEvent>> findPublishedEvents(final int numberOfEvents, final Long expectedEventNumber) {
 
         final List<PublishedEvent> publishedEvents = new ArrayList<>();
 
@@ -112,7 +112,7 @@ public class RebuildPublishEventTableIT extends AbstractIT {
             throw new RuntimeException("Failed to run " + sql, e);
         }
 
-        if (publishedEvents.size() >= numberOfEvents) {
+        if (publishedEvents.size() >= numberOfEvents && publishedEvents.get(0).getEventNumber().get().longValue() == expectedEventNumber) {
             return of(publishedEvents);
         }
 
