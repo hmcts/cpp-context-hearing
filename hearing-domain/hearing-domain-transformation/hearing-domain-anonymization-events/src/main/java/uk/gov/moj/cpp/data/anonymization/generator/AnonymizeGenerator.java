@@ -13,7 +13,6 @@ public class AnonymizeGenerator implements Generator<String> {
     private static final String PHONE_RULE = "StringAnonymisedPhoneNumber";
     private static final String POST_CODE_RULE = "StringAnonymisedPostcode";
     private static final String NI_RULE = "StringAnonymisedNI";
-    private static final String PARSE_DATA_RULE ="StringAnonymisedParsedData";
 
     public Generator<String> getGenerator(String rule){
         switch (rule) {
@@ -44,9 +43,6 @@ public class AnonymizeGenerator implements Generator<String> {
             case NI_RULE:
                 generator = new NIGenerator();
                 break;
-            case PARSE_DATA_RULE:
-                generator = new ParseDataGenerator();
-                break;
             default:
                 break;
         }
@@ -56,7 +52,7 @@ public class AnonymizeGenerator implements Generator<String> {
 
 
     @Override
-    public String convert(final String fieldValue) {
-        return generator.convert(fieldValue);
+    public String convert() {
+        return generator.convert();
     }
 }

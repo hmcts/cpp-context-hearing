@@ -10,6 +10,8 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
@@ -119,6 +121,8 @@ public class HearingEventListenerRamlConfigTest {
                 RespondentCounselEventListener.class,
                 ApplicantCounselEventListener.class,
                 AddDefendantEventListener.class,
+                CaseEjectedEventListener.class,
+                CourtApplicationEjectedEventListener.class,
                 InterpreterIntermediaryEventListener.class,
                 CompanyRepresentativeEventListener.class));
 

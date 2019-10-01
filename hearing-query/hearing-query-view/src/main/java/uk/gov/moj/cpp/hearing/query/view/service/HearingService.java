@@ -111,6 +111,7 @@ public class HearingService {
         return GetHearings.getHearings()
                 .withHearingSummaries(filteredHearings.stream()
                         .map(ha -> hearingJPAMapper.fromJPA(ha))
+                        .filter(ha -> isNotEmpty(ha.getProsecutionCases()) || isNotEmpty(ha.getCourtApplications()))
                         .map(h -> getHearingTransformer.summary(h).build())
                         .collect(toList()))
                 .build();

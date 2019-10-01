@@ -228,7 +228,7 @@ public class HearingJPAMapperTest {
                 .with(Hearing::getType, is(hearingTypeMock))
                 .with(Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
                 .with(Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
-                .withValue(Hearing::getCourtApplications, expectedCourtApplications)
+                .withValue(Hearing::getCourtApplications, null)
         );
     }
 

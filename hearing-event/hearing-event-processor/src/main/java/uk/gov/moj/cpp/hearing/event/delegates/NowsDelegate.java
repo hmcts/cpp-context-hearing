@@ -1,10 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import static java.util.Locale.ENGLISH;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -29,25 +26,22 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 @SuppressWarnings({"squid:S1188", "squid:S1602", "squid:S1135", "squid:S00112", "squid:S1612"})
 public class NowsDelegate {
@@ -130,23 +124,6 @@ public class NowsDelegate {
         return promptRef;
     }
 
-    private String reformatValue(String value, final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptRef) {
-        if (value == null) {
-            return null;
-        }
-        value = value.trim();
-        if (promptRef != null && DATE_PROMPT_TYPE.equals(promptRef.getType()) && value.length() > 0 && onlyIfNotEqualsToOutgoingFormat(OUTGOING_PROMPT_DATE_FORMAT, value, ENGLISH)) {
-            try {
-                final LocalDate dateValue = LocalDate.parse(value, DateTimeFormatter.ofPattern(INCOMING_PROMPT_DATE_FORMAT));
-                value = dateValue.format(DateTimeFormatter.ofPattern(OUTGOING_PROMPT_DATE_FORMAT));
-            } catch (DateTimeParseException parseException) {
-                throw new RuntimeException(String.format("invalid format for incoming date prompt id: %s value: %s", promptRef.getId(), value), parseException);
-            }
-        } else if (promptRef != null && CURRENCY_PROMPT_TYPE.equals(promptRef.getType()) && value.length() > 0 && !value.startsWith("£")) {
-            value = "£" + value;
-        }
-        return value;
-    }
 
     private ResultPrompt mapPrompt(final ResultDefinition resultDefinition, Prompt prompt) {
 
@@ -267,7 +244,7 @@ public class NowsDelegate {
                     rl.getPrompts().forEach(p -> {
                         final Optional<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> promptRef = getPrompt(rd, p.getId(), p.getLabel());
                         if (promptRef.isPresent()) {
-                            p.setValue(reformatValue(p.getValue(), promptRef.get()));
+                            p.setValue(PublishResultUtil.reformatValue(p.getValue(), promptRef.get()));
                         }
                     });
                 }
@@ -301,16 +278,4 @@ public class NowsDelegate {
                 .apply(this.objectToJsonObjectConverter.convert(pendingNowsRequestedCommand)));
     }
 
-    private boolean onlyIfNotEqualsToOutgoingFormat(final String format, final String value, final Locale locale) {
-        final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(format, locale);
-        boolean isNotEqualToOutgoingFormat = true;
-        try {
-            final LocalDate localDate = LocalDate.parse(value, dateTimeFormatter);
-            final String result = localDate.format(dateTimeFormatter);
-            isNotEqualToOutgoingFormat = !result.equals(value);
-        } catch (DateTimeParseException exp) {
-            LOGGER.error(String.format("Invalid date - %s ", value), exp);
-        }
-        return isNotEqualToOutgoingFormat;
-    }
 }

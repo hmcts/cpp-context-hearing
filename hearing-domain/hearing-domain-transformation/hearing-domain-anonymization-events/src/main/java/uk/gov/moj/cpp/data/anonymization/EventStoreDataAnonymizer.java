@@ -12,6 +12,7 @@ import uk.gov.justice.tools.eventsourcing.transformation.api.annotation.Transfor
 import uk.gov.moj.cpp.data.anonymization.generator.AnonymizeGenerator;
 import uk.gov.moj.cpp.data.anonymization.generator.AnonymizerType;
 import uk.gov.moj.cpp.data.anonymization.generator.DummyNumberReplacer;
+import uk.gov.moj.cpp.data.anonymization.generator.ParseDataGenerator;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -32,12 +33,14 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
 
     private final AnonymizeGenerator anonymizeGenerator;
     private Enveloper enveloper;
+    private final ParseDataGenerator parseDataGenerator;
 
     private final Map<String, Map<String, String>> fieldRuleMap;
 
     public EventStoreDataAnonymizer() throws IOException {
         fieldRuleMap = new RuleParser().loadAnanymisationRules("/data.anonymisation.json");
         anonymizeGenerator = new AnonymizeGenerator();
+        parseDataGenerator = new ParseDataGenerator();
     }
 
     @Override
@@ -131,8 +134,10 @@ public final class EventStoreDataAnonymizer implements EventTransformation {
     private Object applyAnonymizationRule(String fieldRule, String fieldValue) {
         if (fieldRule.startsWith(AnonymizerType.DUMMY_NUMBER_PREFIX.toString())) {
             return DummyNumberReplacer.replace(fieldRule);
+        } else if(fieldRule.startsWith(AnonymizerType.STRING_ANONYMISED_PARSED_DATA.toString())){
+            return parseDataGenerator.convert(fieldValue);
         } else {
-            return anonymizeGenerator.getGenerator(fieldRule).convert(fieldValue);
+            return anonymizeGenerator.getGenerator(fieldRule).convert();
         }
     }
 }

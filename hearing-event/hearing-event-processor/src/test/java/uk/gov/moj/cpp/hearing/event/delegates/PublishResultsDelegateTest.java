@@ -14,6 +14,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+import static uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil.POUND_CURRENCY_LABEL;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
@@ -22,6 +23,16 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.DefenceCounsel;
@@ -53,16 +64,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+
 
 public class PublishResultsDelegateTest {
 
@@ -108,11 +110,12 @@ public class PublishResultsDelegateTest {
                 uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
                         .setId(randomUUID())
                         .setLabel("promptReferenceData0")
+                        .setType("CURR")
                         .setUserGroups(Arrays.asList("usergroup0", "usergroup1"));
 
         final Prompt prompt0 = Prompt.prompt()
                 .withLabel(promptReferenceData.getLabel())
-                .withValue("promptValue0")
+                .withValue("400")
                 .withId(promptReferenceData.getId())
                 .withFixedListCode("fixedListCode0")
                 .build();
@@ -199,6 +202,10 @@ public class PublishResultsDelegateTest {
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .withValue(ProsecutionCase::getId, hearingIn.getProsecutionCases().get(0).getId())
                         ))
+                        .withValue(sh -> sh.getProsecutionCases().get(0)
+                                .getDefendants().get(0)
+                                .getJudicialResults().get(0)
+                                .getJudicialResultPrompts().get(0).getValue(), POUND_CURRENCY_LABEL + prompt0.getValue())
                         .withValue(Hearing::getCrackedIneffectiveTrial, expectedCrackedIneffectiveTrial)
                         .withValue(sh -> sh.getDefendantAttendance().size(), hearingIn.getDefendantAttendance().size())
                         .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)

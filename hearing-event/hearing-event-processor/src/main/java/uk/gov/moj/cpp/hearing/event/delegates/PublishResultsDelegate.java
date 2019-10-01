@@ -1,11 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static uk.gov.justice.core.courts.Level.CASE;
-import static uk.gov.justice.core.courts.Level.DEFENDANT;
-import static uk.gov.justice.core.courts.Level.OFFENCE;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -30,6 +26,8 @@ import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 import uk.gov.moj.cpp.hearing.event.relist.ResultsSharedFilter;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -43,11 +41,11 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static uk.gov.justice.core.courts.Level.CASE;
+import static uk.gov.justice.core.courts.Level.DEFENDANT;
+import static uk.gov.justice.core.courts.Level.OFFENCE;
 
 @SuppressWarnings({"squid:S1188", "squid:S1612"})
 public class PublishResultsDelegate {
@@ -303,7 +301,7 @@ public class PublishResultsDelegate {
                                     .withPromptReference(promptDefinition.getReference())
                                     .withPromptSequence(promptDefinition.getSequence() == null ? null : BigDecimal.valueOf(promptDefinition.getSequence()))
                                     .withUsergroups(promptDefinition.getUserGroups())
-                                    .withValue(prompt.getValue())
+                                    .withValue(PublishResultUtil.reformatValue(prompt.getValue(), promptDefinition))
                                     .withWelshLabel(prompt.getWelshValue())
                                     .build();
                         }

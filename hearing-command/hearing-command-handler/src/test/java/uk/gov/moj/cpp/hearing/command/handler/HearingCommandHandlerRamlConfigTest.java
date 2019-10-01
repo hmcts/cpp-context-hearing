@@ -55,6 +55,7 @@ public class HearingCommandHandlerRamlConfigTest {
                 ApplicantCounselCommandHandler.class,
                 AddDefendantCommandHandler.class,
                 ApplicationDetailChangeCommandHandler.class,
+                EjectCaseOrApplicationCommandHandler.class,
                 CompanyRepresentativeCommandHandler.class,
                 InterpreterIntermediaryCommandHandler.class,
                 SetTrialTypeCommandHandler.class

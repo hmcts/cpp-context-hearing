@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 import static javax.json.Json.createObjectBuilder;
 
 @SuppressWarnings({"squid:S3776", "squid:S134", "squid:MethodCyclomaticComplexity"})
-public class ParseDataGenerator  implements Generator<String> {
+public class ParseDataGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParseDataGenerator.class);
     private static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$");
@@ -31,7 +31,6 @@ public class ParseDataGenerator  implements Generator<String> {
     private final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
     private final List<String> nonAnonymisedList = Collections.unmodifiableList(Arrays.asList("resultLevel", "type", "label", "state"));
 
-    @Override
     @SuppressWarnings({"squid:S1166","squid:S2139"})
     public String convert(String data) {
 
@@ -88,7 +87,7 @@ public class ParseDataGenerator  implements Generator<String> {
         if(UUID_PATTERN.matcher(fieldValue).matches() || nonAnonymisedList.contains(fieldName)) {
             transformedPayloadObjectBuilder.add(fieldName, fieldValue);
         } else if (DATE_REGEX_PATTERN.matcher(fieldValue).matches()) {
-            transformedPayloadObjectBuilder.add(fieldName, pastDateGenerator.convert(fieldValue));
+            transformedPayloadObjectBuilder.add(fieldName, pastDateGenerator.convert());
         } else {
             transformedPayloadObjectBuilder.add(fieldName, "XXXX");
         }

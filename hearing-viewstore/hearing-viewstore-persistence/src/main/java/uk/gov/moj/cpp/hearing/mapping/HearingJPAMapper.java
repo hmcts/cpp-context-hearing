@@ -1,18 +1,21 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
+import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 
+import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.CourtApplicationResponse;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -114,6 +117,10 @@ public class HearingJPAMapper {
         if (null == entity) {
             return null;
         }
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson());
+        if(!isEmpty(courtApplications)){
+            courtApplications = courtApplications.stream().filter(ca -> !EJECTED.equals(ca.getApplicationStatus())).collect(toList());
+        }
         return uk.gov.justice.core.courts.Hearing.hearing()
                 .withId(entity.getId())
                 .withCourtCentre(courtCentreJPAMapper.fromJPA(entity.getCourtCentre()))
@@ -131,7 +138,7 @@ public class HearingJPAMapper {
                 .withReportingRestrictionReason(entity.getReportingRestrictionReason())
                 .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
                 .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
-                .withCourtApplications(courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson()))
+                .withCourtApplications(courtApplications == null || courtApplications.isEmpty() ? null : courtApplications)
                 .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
                 .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
                 .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
@@ -142,11 +149,11 @@ public class HearingJPAMapper {
     public String addOrUpdateCourtApplication(final String courtApplicationsJson, final CourtApplication courtApplicationUpdate) {
         List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
         if (courtApplications == null) {
-            courtApplications = Collections.emptyList();
+            courtApplications = emptyList();
         }
         courtApplications = courtApplications.stream().filter(
                 ca -> !ca.getId().equals(courtApplicationUpdate.getId())
-        ).collect(Collectors.toList());
+        ).collect(toList());
         courtApplications.add(courtApplicationUpdate);
         return courtApplicationsSerializer.json(courtApplications);
     }
@@ -154,7 +161,7 @@ public class HearingJPAMapper {
     public String saveApplicationResponse(final String courtApplicationsJson, final CourtApplicationResponse courtApplicationResponse, final UUID applicationPartyId) {
         List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
         if (courtApplications == null) {
-            courtApplications = Collections.emptyList();
+            courtApplications = emptyList();
         }
 
         Optional<CourtApplication> courtApplication = courtApplications.stream().filter(
@@ -171,7 +178,7 @@ public class HearingJPAMapper {
     public String saveApplicationOutcome(final String courtApplicationsJson, final CourtApplicationOutcome courtApplicationOutcome) {
         List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
         if (courtApplications == null) {
-            courtApplications = Collections.emptyList();
+            courtApplications = emptyList();
         }
 
         Optional<CourtApplication> courtApplication = courtApplications.stream().filter(
@@ -183,4 +190,24 @@ public class HearingJPAMapper {
         return courtApplicationsSerializer.json(courtApplications);
     }
 
+    public String updateLinkedApplicationStatus(final String courtApplicationsJson, final UUID prosecutionCaseId, final ApplicationStatus status) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = emptyList();
+        }
+        courtApplications.stream().filter(
+                ca -> prosecutionCaseId.equals(ca.getLinkedCaseId())).forEach(ca -> ca.setApplicationStatus(status));
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    public String updateStandaloneApplicationStatus(final String courtApplicationsJson, final UUID applicationId, final ApplicationStatus status) {
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        if (courtApplications == null) {
+            courtApplications = emptyList();
+        }
+        courtApplications.stream().filter(
+                ca -> ca.getId().equals(applicationId) ||
+                        applicationId.equals(ca.getParentApplicationId())).forEach(ca -> ca.setApplicationStatus(status));
+        return courtApplicationsSerializer.json(courtApplications);
+    }
 }

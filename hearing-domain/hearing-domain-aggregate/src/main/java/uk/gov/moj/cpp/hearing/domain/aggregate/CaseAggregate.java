@@ -6,6 +6,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
+import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -18,7 +19,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S1068", "squid:S1948"})
 public class CaseAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 100L;
 
     private Boolean sendingSheetCompleteProcessed = false;
 
@@ -47,7 +48,16 @@ public class CaseAggregate implements Aggregate {
                         .withHearingId(hearingId)
                         .build()));
     }
-
+    public Stream<Object> ejectCase(final UUID prosecutionCaseId, final List<UUID> hearingIds){
+        if(hearingIds.isEmpty() && !this.hearingIds.isEmpty()) {
+            return apply(Stream.of(CaseEjected.aCaseEjected().withHearingIds(this.hearingIds).withProsecutionCaseId(prosecutionCaseId).build()));
+        } else if(hearingIds.isEmpty() && this.hearingIds.isEmpty()) {
+            return apply(Stream.empty());
+        }
+        else {
+            return apply(Stream.of(CaseEjected.aCaseEjected().withHearingIds(hearingIds).withProsecutionCaseId(prosecutionCaseId).build()));
+        }
+    }
     public List<UUID> getHearingIds() {
         return hearingIds;
     }
