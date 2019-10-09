@@ -25,7 +25,7 @@
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
-        <criminal-court-public-model.version>1.0.47</criminal-court-public-model.version>
+        <criminal-court-public-model.version>1.0.48</criminal-court-public-model.version>
         <referencedata.version>2.0.240</referencedata.version>
     </properties>
     <modules>

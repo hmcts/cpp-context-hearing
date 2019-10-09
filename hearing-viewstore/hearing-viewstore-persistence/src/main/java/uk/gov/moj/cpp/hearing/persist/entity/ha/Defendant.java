@@ -30,7 +30,7 @@ public class Defendant {
     @JoinColumns({
             @JoinColumn(name = "prosecution_case_id", insertable = false, updatable = false, referencedColumnName = "id"),
             @JoinColumn(name = "hearing_id", insertable = false, updatable = false, referencedColumnName = "hearing_id")})
-    private ProsecutionCase prosecutionCase;
+     private ProsecutionCase prosecutionCase;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
     private Set<Offence> offences = new HashSet<>();

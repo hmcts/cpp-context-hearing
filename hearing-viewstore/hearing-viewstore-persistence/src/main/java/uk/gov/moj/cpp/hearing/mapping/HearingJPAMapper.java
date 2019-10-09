@@ -99,6 +99,7 @@ public class HearingJPAMapper {
         hearing.setDefendantAttendance(defendantAttendanceJPAMapper.toJPA(pojo.getDefendantAttendance()));
         hearing.setDefendantReferralReasons(defendantReferralReasonsJPAMapper.toJPA(hearing, pojo.getDefendantReferralReasons()));
         hearing.setHasSharedResults(pojo.getHasSharedResults());
+        hearing.setIsBoxHearing(pojo.getIsBoxHearing());
         hearing.setHearingCaseNotes(hearingCaseNoteJPAMapper.toJPA(hearing, pojo.getHearingCaseNotes()));
         hearing.setHearingDays(hearingDayJPAMapper.toJPA(hearing, pojo.getHearingDays()));
         hearing.setHearingLanguage(ofNullable(pojo.getHearingLanguage()).orElse(HearingLanguage.ENGLISH));
@@ -128,6 +129,7 @@ public class HearingJPAMapper {
                 .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
                 .withDefendantReferralReasons(defendantReferralReasonsJPAMapper.fromJPA(entity.getDefendantReferralReasons()))
                 .withHasSharedResults(entity.getHasSharedResults())
+                .withIsBoxHearing(entity.getIsBoxHearing())
                 .withHearingCaseNotes(hearingCaseNoteJPAMapper.fromJPA(entity.getHearingCaseNotes()))
                 .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
                 .withHearingLanguage(entity.getHearingLanguage())

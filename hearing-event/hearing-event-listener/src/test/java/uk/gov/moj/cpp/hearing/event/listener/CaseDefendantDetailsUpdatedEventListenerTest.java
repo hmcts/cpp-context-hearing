@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.createCourtApplications;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -15,10 +16,14 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+
 
 import java.util.UUID;
 
@@ -42,6 +47,12 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
     @Mock
     private DefendantRepository defendantRepository;
 
+    @Mock
+    HearingRepository hearingRepository;
+
+    @Mock
+    CourtApplicationsSerializer   courtApplicationsSerializer;
+
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -63,6 +74,10 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
                 .setHearingId(hearingId)
                 .setDefendant(defendantTemplate());
 
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+
         final JsonEnvelope envelope = createJsonEnvelope(defendantDetailsUpdated);
 
         final Defendant defendant = new Defendant();
@@ -76,6 +91,10 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         defendant.setProsecutionCase(prosecutionCase);
 
         when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        when(courtApplicationsSerializer.courtApplications(courtApplicationString)).thenReturn(createCourtApplications());
 
         caseDefendantDetailsUpdatedEventListener.defendantDetailsUpdated(envelope);
 
@@ -94,5 +113,10 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
         return envelopeFrom((Metadata) null, jsonObject);
     }
+
+    final String  courtApplicationString = "{\"courtApplications\":[{\"applicant\":{\"id\":\"2ad94baf-0e75-477b-b4c7-8e4b71dbdca1\",\"" +
+            "organisation\":{\"name\":\"OrganisationName\"},\"personDetails\":{\"firstName\":\"Lauren\",\"gender\":\"FEMALE\",\"lastName\":\"Michelle\",\"middleName\":\"Mia\"}},\"id\":\"84bf7fac-3189-432e-970d-de0f33b9fd29\",\"" +
+            "respondents\":[{\"partyDetails\":{\"id\":\"347b5388-6aa7-4b4c-bc07-8ce3be090a79\",\"organisation\":{\"name\":\"OrganisationName\"},\"" +
+            "personDetails\":{\"firstName\":\"Gerald\",\"gender\":\"MALE\",\"lastName\":\"Harrison\"}}}]}]}";
 
 }

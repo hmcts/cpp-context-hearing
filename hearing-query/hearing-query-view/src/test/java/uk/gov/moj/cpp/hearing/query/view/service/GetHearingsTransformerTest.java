@@ -18,6 +18,8 @@ import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.justice.hearing.courts.Respondents;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
+import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -31,8 +33,9 @@ public class GetHearingsTransformerTest {
     @Test
     public void test() {
         final Hearing hearing = CoreTestTemplates.hearing(CoreTestTemplates.defaultArguments()).build();
-        final HearingSummaries hearingSummary = target.summary(hearing).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
+        courtApplication.setParentApplicationId(UUID.randomUUID());
+        final HearingSummaries hearingSummary = target.summary(hearing).build();
         final CourtApplicationParty applicant = courtApplication.getApplicant();
         final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
         final Defendant defendant = prosecutionCase.getDefendants().get(0);

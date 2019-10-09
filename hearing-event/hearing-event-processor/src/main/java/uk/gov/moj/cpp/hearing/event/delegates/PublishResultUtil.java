@@ -51,7 +51,7 @@ public class PublishResultUtil {
             final String result = localDate.format(dateTimeFormatter);
             isNotEqualToOutgoingFormat = !result.equals(value);
         } catch (DateTimeParseException exp) {
-            LOGGER.error(String.format("Invalid date - %s ", value), exp);
+            LOGGER.error(String.format("Ignore this error (sonar forcing to log error) : Invalid date - %s ", value), exp);
         }
         return isNotEqualToOutgoingFormat;
     }

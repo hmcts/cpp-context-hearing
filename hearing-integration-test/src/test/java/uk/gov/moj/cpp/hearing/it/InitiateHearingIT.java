@@ -20,6 +20,7 @@ import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Ethnicity;
 import uk.gov.justice.core.courts.Hearing;
@@ -315,7 +316,12 @@ public class InitiateHearingIT extends AbstractIT {
                                                         .with(Offence::getWording, is(offence.getWording()))
                                                         .with(Offence::getStartDate, is(offence.getStartDate()))
                                                         .with(Offence::getOrderIndex, is(offence.getOrderIndex()))
-                                                        .with(Offence::getCount, is(offence.getCount()))))
+                                                        .with(Offence::getCount, is(offence.getCount()))
+                                                        .with(Offence::getCustodyTimeLimit, isBean(CustodyTimeLimit.class)
+                                                              .withValue(CustodyTimeLimit::getDaysSpent, offence.getCustodyTimeLimit().getDaysSpent())
+                                                              .withValue(CustodyTimeLimit::getTimeLimit, offence.getCustodyTimeLimit().getTimeLimit())
+                                                        )
+                                                ))
                                                 .with(Defendant::getAssociatedPersons, first(isBean(AssociatedPerson.class)
                                                         .with(AssociatedPerson::getRole, is(associatedPerson.getRole()))
                                                         .with(AssociatedPerson::getPerson, isBean(Person.class)

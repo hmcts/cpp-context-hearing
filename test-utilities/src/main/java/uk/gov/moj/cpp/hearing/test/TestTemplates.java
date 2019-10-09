@@ -32,7 +32,10 @@ import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.Attendant;
 import uk.gov.justice.core.courts.CompanyRepresentative;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtApplicationRespondent;
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAlias;
@@ -58,6 +61,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.PleaValue;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
@@ -2009,5 +2013,30 @@ public class TestTemplates {
         public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
             return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
         }
+    }
+
+    public static List<CourtApplication> createCourtApplications() {
+        final  List<CourtApplication> courtApplications = new ArrayList<>();
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(UUID.randomUUID())
+                .withLinkedCaseId(UUID.randomUUID())
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withId(UUID.randomUUID())
+                        .withDefendant(uk.gov.justice.core.courts.Defendant.defendant()
+                                .withId(UUID.randomUUID())
+                                .build())
+                        .build())
+                .withRespondents(Arrays.asList(CourtApplicationRespondent.courtApplicationRespondent()
+                        .withPartyDetails(CourtApplicationParty.courtApplicationParty()
+                                .withId(UUID.randomUUID())
+                                .withProsecutingAuthority(ProsecutingAuthority.prosecutingAuthority()
+                                        .withProsecutionAuthorityId(UUID.randomUUID())
+
+                                        .build())
+                                .build())
+
+                        .build()))
+                .build());
+        return courtApplications;
     }
 }

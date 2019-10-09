@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.results-shared.json",
+  "id": "http://justice.gov.uk/json/schemas/hearing.results-shared-listener.json",
   "type": "object",
   "properties": {
     "hearingId": {
@@ -119,6 +119,47 @@
         "resultDefinitionId",
         "defendantId",
         "orderedDate"
+      ]
+    },
+    "atendee": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "attendeeId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "defendantIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uuid"
+          }
+        },
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "status": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "attendeeId",
+        "firstName",
+        "hearingId",
+        "lastName",
+        "personId",
+        "status"
       ]
     },
     "uuid": {

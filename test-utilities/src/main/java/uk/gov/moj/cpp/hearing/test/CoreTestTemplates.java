@@ -4,6 +4,7 @@ package uk.gov.moj.cpp.hearing.test;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.justice.core.courts.BailStatus.bailStatus;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
@@ -24,6 +25,7 @@ import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
@@ -77,6 +79,9 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({"WeakerAccess", "squid:S1067"})
 public class CoreTestTemplates {
+
+    private static final UUID BAIL_STATUS_ID = randomUUID();
+
     public static CoreTemplateArguments defaultArguments() {
         return new CoreTemplateArguments();
     }
@@ -227,7 +232,12 @@ public class CoreTestTemplates {
                 .withWording(STRING.next())
                 .withWordingWelsh(STRING.next())
                 .withModeOfTrial(STRING.next())
-                .withOrderIndex(INTEGER.next());
+                .withOrderIndex(INTEGER.next())
+                .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
+                        .withDaysSpent(INTEGER.next())
+                        .withTimeLimit(PAST_LOCAL_DATE.next())
+                        .build())
+                ;
 
         if (!args.isOffenceCountNull) {
             result.withCount(INTEGER.next());
@@ -327,7 +337,7 @@ public class CoreTestTemplates {
         return PersonDefendant.personDefendant()
                 .withPersonDetails(person(args).build())
                 .withArrestSummonsNumber(STRING.next())
-                .withBailStatus(BailStatus.IN_CUSTODY)
+                .withBailStatus(bailStatus().withId(BAIL_STATUS_ID).withCode("C").withDescription("Remanded into Custody").build())
                 .withDriverNumber(STRING.next())
                 .withPerceivedBirthYear(INTEGER.next())
                 .withEmployerOrganisation(organisation(args).build())

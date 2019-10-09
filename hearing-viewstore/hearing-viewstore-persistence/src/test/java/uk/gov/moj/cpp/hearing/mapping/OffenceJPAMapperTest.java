@@ -14,6 +14,7 @@ import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPA
 import org.junit.Test;
 
 import uk.gov.justice.core.courts.AllocationDecision;
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.NotifiedPlea;
 import uk.gov.justice.core.courts.Offence;
@@ -94,8 +95,19 @@ public class OffenceJPAMapperTest {
                 .with(Offence::getVerdict, 
                         whenVerdict(isBean(Verdict.class), entity.getId().getId(), entity.getVerdict()))
                 .with(Offence::getAllocationDecision,
-                            whenAllocationDecision(isBean(AllocationDecision.class), entity.getAllocationDecision()));
+                            whenAllocationDecision(isBean(AllocationDecision.class), entity.getAllocationDecision()))
+                .with(Offence::getCustodyTimeLimit,
+                        whenCustodyTimeLimit(isBean(CustodyTimeLimit.class), entity))
+                ;
     }
+
+    public static BeanMatcher<CustodyTimeLimit> whenCustodyTimeLimit(final BeanMatcher<CustodyTimeLimit> m,
+                                                                     final uk.gov.moj.cpp.hearing.persist.entity.ha.Offence entity) {
+        return m.with(CustodyTimeLimit::getDaysSpent, is(entity.getCtlDaysSpent()))
+                .with(CustodyTimeLimit::getTimeLimit, is(entity.getCtlTimeLimit()));
+    }
+
+
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.Offence> whenOffence(
             final BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.Offence> m, final Offence pojo) {
@@ -134,6 +146,9 @@ public class OffenceJPAMapperTest {
 
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getStartDate, is(pojo.getStartDate()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getWording, is(pojo.getWording()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getWordingWelsh, is(pojo.getWordingWelsh()));
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getWordingWelsh, is(pojo.getWordingWelsh()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlDaysSpent, is(pojo.getCustodyTimeLimit().getDaysSpent()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlTimeLimit, is(pojo.getCustodyTimeLimit().getTimeLimit()))
+                ;
     }
 }
