@@ -1,10 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationEjected;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 
 import java.util.ArrayList;
@@ -12,10 +9,14 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+
 @SuppressWarnings({"squid:S1068", "squid:S1948"})
 public class ApplicationAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 100L;
 
     private List<UUID> hearingIds = new ArrayList<>();
 
@@ -34,6 +35,23 @@ public class ApplicationAggregate implements Aggregate {
                         .build()));
     }
 
+    public Stream<Object> ejectApplication(final UUID applicationId, final List<UUID> hearingIds) {
+        if(hearingIds.isEmpty() && !this.hearingIds.isEmpty()) {
+            return apply(Stream.of(CourtApplicationEjected.aCourtApplicationEjected().
+                    withApplicationId(applicationId)
+                    .withHearingIds(this.hearingIds)
+                    .build()));
+        } else if(hearingIds.isEmpty() && this.hearingIds.isEmpty()) {
+            return apply(Stream.empty());
+        }
+        else {
+            return apply(Stream.of(CourtApplicationEjected.aCourtApplicationEjected().
+                    withApplicationId(applicationId)
+                    .withHearingIds(hearingIds)
+                    .build()));
+        }
+
+    }
     public List<UUID> getHearingIds() {
         return hearingIds;
     }

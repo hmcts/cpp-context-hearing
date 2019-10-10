@@ -33,6 +33,15 @@ rule "Query - API - hearing.get-hearing-event-definitions"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get-active-hearings-for-court-room"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-active-hearings-for-court-room");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Query - API - hearing.get-hearing-event-definition"
   when
     $outcome: Outcome();
@@ -92,6 +101,15 @@ rule "Query - API - hearing.get.nows"
     $outcome: Outcome();
     $action: Action(name == "hearing.get.nows");
     eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get-cracked-ineffective-reason"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-cracked-ineffective-reason");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
   then
     $outcome.setSuccess(true);
 end

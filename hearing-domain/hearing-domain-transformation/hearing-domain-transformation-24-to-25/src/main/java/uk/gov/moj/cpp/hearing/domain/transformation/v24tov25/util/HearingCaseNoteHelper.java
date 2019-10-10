@@ -1,11 +1,18 @@
 package uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.util;
 
 import static javax.json.Json.createObjectBuilder;
+import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.COURT_CLERK;
+import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.ID;
+import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.NOTE;
+import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.NOTE_DATE_TIME;
+import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.NOTE_TYPE;
+import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.ORIGINATING_HEARING_ID;
+import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.PROSECUTION_CASES;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.util.CourtClerkHelper.transformCourtClerk;
-import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.*;
 
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+
 
 public class HearingCaseNoteHelper {
 

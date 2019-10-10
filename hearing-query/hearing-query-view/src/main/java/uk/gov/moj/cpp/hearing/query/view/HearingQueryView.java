@@ -97,4 +97,13 @@ public class HearingQueryView {
         return enveloper.withMetadataFrom(envelope, "hearing.get-nows")
                 .apply(nowListResponse);
     }
+
+    @Handles("hearing.get-cracked-ineffective-reason")
+    public JsonEnvelope getCrackedIneffectiveTrialReason(final JsonEnvelope envelope) {
+
+        final Optional<UUID> trialTypeId = getUUID(envelope.payloadAsJsonObject(), "trialTypeId");
+
+        return enveloper.withMetadataFrom(envelope, "hearing.get-cracked-ineffective-reason")
+                .apply(hearingService.getCrackedIneffectiveTrial(trialTypeId.get()));
+    }
 }

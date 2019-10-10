@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "properties": {
     "hearing": {
-      "$ref": "http://justice.gov.uk/core/courts/hearing"
+      "$ref": "http://justice.gov.uk/core/courts/hearing.json"
     }
   },
   "required": [

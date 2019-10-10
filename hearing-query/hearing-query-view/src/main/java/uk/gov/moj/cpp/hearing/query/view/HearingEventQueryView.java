@@ -1,10 +1,14 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.UUID.fromString;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 
+import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -17,22 +21,33 @@ import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings({"CdiInjectionPointsInspection", "WeakerAccess", "squid:S1172", "squid:CommentedOutCodeLine", "squid:S1481", "squid:S1854"})
 @ServiceComponent(QUERY_VIEW)
 public class HearingEventQueryView {
+    private static final Logger LOGGER =
+            LoggerFactory.getLogger(HearingEventQueryView.class.getName());
 
     private static final String FIELD_DEFENCE_COUNSEL_ID = "defenceCounselId";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
+    private static final String RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM = "hearing.get-active-hearings-for-court-room";
 
     private static final String FIELD_HEARING_ID = "hearingId";
 
@@ -45,15 +60,21 @@ public class HearingEventQueryView {
     private static final String FIELD_HEARING_EVENTS = "events";
     private static final String FIELD_HEARING_EVENT_DEFINITIONS = "eventDefinitions";
     private static final String FIELD_ACTION_LABEL = "actionLabel";
-    private static final String FIELD_ACTION_LABEL_EXT = "actionLabelExtension";
+    private static final String FIELD_ACTION_SEQUENCE = "actionSequence";
+    private static final String FIELD_GROUP_SEQUENCE = "groupSequence";
     private static final String FIELD_GROUP_LABEL = "groupLabel";
+    private static final String FIELD_ACTIVE_HEARINGS = "activeHearings";
+    private static final String FIELD_DATE = "date";
+    private static final String FIELD_EVENT_DATE = "eventDate";
 
     private static final String FIELD_CASE_ATTRIBUTES = "caseAttributes";
     private static final String FIELD_DEFENDANT_NAME = "defendant.name";
     private static final String FIELD_COUNSEL_NAME = "counsel.name";
-    private static final String FIELD_SEQUENCE = "sequence";
-    private static final String FIELD_SEQUENCE_TYPE = "type";
     private static final String FIELD_ALTERABLE = "alterable";
+    private static final String FIELD_HAS_ACTIVE_HEARING = "hasActiveHearing";
+    private static final String RESUME_HEARING_EVENT_DEFINITION_ID = "64476e43-2138-46d5-b58b-848582cf9b07";
+    private static final String PAUSE_HEARING_EVENT_DEFINITION_ID = "160ecb51-29ee-4954-bbbf-daab18a24fbb";
+    private static final String END_HEARING_EVENT_DEFINITION_ID = "0df93f18-0a21-40f5-9fb3-da4749cd70fe";
 
     @Inject
     private Enveloper enveloper;
@@ -95,8 +116,11 @@ public class HearingEventQueryView {
     @Handles("hearing.get-hearing-event-log")
     public JsonEnvelope getHearingEventLog(final JsonEnvelope query) {
         final String hearingId = query.payloadAsJsonObject().getString(FIELD_HEARING_ID);
+        final LocalDate date = LocalDates.from(query.payloadAsJsonObject().getString(FIELD_DATE));
 
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(fromString(hearingId));
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(fromString(hearingId), date);
+
+        final List<UUID> hearingIds = getActiveHearingsForCourtRoom(fromString(hearingId), date);
 
         final JsonArrayBuilder eventLogJsonArrayBuilder = createArrayBuilder();
 
@@ -115,17 +139,91 @@ public class HearingEventQueryView {
                                 jsonObjectBuilder.add(FIELD_DEFENCE_COUNSEL_ID,
                                         hearingEvent.getDefenceCounselId().toString());
                             }
+
                             eventLogJsonArrayBuilder.add(jsonObjectBuilder);
                         }
-
                 );
 
         return enveloper.withMetadataFrom(query, RESPONSE_NAME_HEARING_EVENT_LOG)
                 .apply(createObjectBuilder()
                         .add(FIELD_HEARING_ID, hearingId)
+                        .add(FIELD_HAS_ACTIVE_HEARING, isNotEmpty(hearingIds) ? TRUE : FALSE)
                         .add(FIELD_HEARING_EVENTS, eventLogJsonArrayBuilder)
                         .build()
                 );
+    }
+
+    @Handles("hearing.get-active-hearings-for-court-room")
+    public JsonEnvelope getActiveHearingsForCourtRoom(final JsonEnvelope query) {
+        final UUID hearingId = fromString(query.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final LocalDate eventDate = LocalDates.from(query.payloadAsJsonObject().getString(FIELD_EVENT_DATE));
+
+        final List<UUID> hearingIds = getActiveHearingsForCourtRoom(hearingId, eventDate);
+
+        final JsonArrayBuilder activeHearingIds = createArrayBuilder();
+        hearingIds.forEach(id -> activeHearingIds.add(id.toString()));
+
+        return enveloper.withMetadataFrom(query, RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM)
+                .apply(createObjectBuilder()
+                        .add(FIELD_ACTIVE_HEARINGS, activeHearingIds)
+                        .build()
+                );
+    }
+
+    private List<UUID> getActiveHearingsForCourtRoom(final UUID hearingId, final LocalDate date) {
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+
+        final List<HearingEvent> hearingEvents =
+                hearingEventRepository
+                        .findHearingEvents(
+                                hearing.getCourtCentre().getId(),
+                                hearing.getCourtCentre().getRoomId(),
+                                date);
+
+        return getActiveHearingIdsByHearingEvents(hearingEvents);
+    }
+
+    private List<UUID> getActiveHearingIdsByHearingEvents(final List<HearingEvent> hearingEvents) {
+
+        final List<UUID> activeHearings = new ArrayList<>();
+
+        final Map<UUID, Map<UUID, Long>> hearingIdsGroupByEventDefinitionId = hearingEvents.stream().collect(
+                Collectors.groupingBy(HearingEvent::getHearingId, Collectors.groupingBy(HearingEvent::getHearingEventDefinitionId, Collectors.counting())));
+
+        final List<UUID> hearingsWithStartEvents = hearingIdsGroupByEventDefinitionId.entrySet().stream()
+                .filter(h -> !h.getValue().containsKey(fromString(PAUSE_HEARING_EVENT_DEFINITION_ID)))
+                .filter(h -> !h.getValue().containsKey(fromString(RESUME_HEARING_EVENT_DEFINITION_ID)))
+                .filter(h -> !h.getValue().containsKey(fromString(END_HEARING_EVENT_DEFINITION_ID)))
+                .filter(h -> h.getValue().containsValue(1L))
+                .map(Map.Entry::getKey).distinct().collect(Collectors.toList());
+
+        final Map<UUID, Long> hearingsWithPauseEvents = getEventsByHearingDefinition(hearingIdsGroupByEventDefinitionId, PAUSE_HEARING_EVENT_DEFINITION_ID);
+
+        final Map<UUID, Long> hearingsWithResumeEvents = getEventsByHearingDefinition(hearingIdsGroupByEventDefinitionId, RESUME_HEARING_EVENT_DEFINITION_ID);
+
+        hearingsWithPauseEvents.forEach((hearingId, pauseCount) -> {
+            final Long resumeCount = hearingsWithResumeEvents.getOrDefault(hearingId, 0L);
+            if (pauseCount.equals(resumeCount)) {
+                activeHearings.add(hearingId);
+            }
+        });
+
+        activeHearings.addAll(hearingsWithStartEvents);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Active hearings received from same court room {}", activeHearings);
+        }
+
+        return activeHearings;
+    }
+
+    private Map<UUID, Long> getEventsByHearingDefinition(Map<UUID, Map<UUID, Long>> hearingIdsGroupByEventDefinitionId, String hearingEventDefinitionId) {
+        final Map<UUID, Long> hearingEvents = new HashMap<>();
+        hearingIdsGroupByEventDefinitionId.forEach((hearingId, hearingEventDefinition) -> {
+            if (hearingEventDefinition.containsKey(fromString(hearingEventDefinitionId)) && !hearingEventDefinition.containsKey(fromString(END_HEARING_EVENT_DEFINITION_ID))) {
+                hearingEvents.put(hearingId, hearingEventDefinition.get(fromString(hearingEventDefinitionId)));
+            }
+        });
+        return hearingEvents;
     }
 
     private JsonArrayBuilder defendantAndDefenceCounselAttributesFor(final UUID hearingId) {
@@ -165,15 +263,12 @@ public class HearingEventQueryView {
             eventDefinitionBuilder.add(FIELD_GROUP_LABEL, eventDefinition.getGroupLabel());
         }
 
-        if (eventDefinition.getActionLabelExtension() != null) {
-            eventDefinitionBuilder.add(FIELD_ACTION_LABEL_EXT, eventDefinition.getActionLabelExtension());
+        if (eventDefinition.getActionSequence() != null) {
+            eventDefinitionBuilder.add(FIELD_ACTION_SEQUENCE, eventDefinition.getActionSequence());
         }
 
-        if (eventDefinition.getSequenceNumber() != null) {
-            eventDefinitionBuilder.add(FIELD_SEQUENCE, createObjectBuilder()
-                    .add(FIELD_GENERIC_ID, eventDefinition.getSequenceNumber())
-                    .add(FIELD_SEQUENCE_TYPE, eventDefinition.getSequenceType())
-            );
+        if (eventDefinition.getGroupSequence() != null) {
+            eventDefinitionBuilder.add(FIELD_GROUP_SEQUENCE, eventDefinition.getActionSequence());
         }
 
         eventDefinitionBuilder
@@ -197,15 +292,12 @@ public class HearingEventQueryView {
             eventDefinitionBuilder.add(FIELD_GROUP_LABEL, eventDefinition.getGroupLabel());
         }
 
-        if (eventDefinition.getActionLabelExtension() != null) {
-            eventDefinitionBuilder.add(FIELD_ACTION_LABEL_EXT, eventDefinition.getActionLabelExtension());
+        if (eventDefinition.getActionSequence() != null) {
+            eventDefinitionBuilder.add(FIELD_ACTION_SEQUENCE, eventDefinition.getActionSequence());
         }
 
-        if (eventDefinition.getSequenceNumber() != null) {
-            eventDefinitionBuilder.add(FIELD_SEQUENCE, createObjectBuilder()
-                    .add(FIELD_GENERIC_ID, eventDefinition.getSequenceNumber())
-                    .add(FIELD_SEQUENCE_TYPE, eventDefinition.getSequenceType())
-            );
+        if (eventDefinition.getGroupSequence() != null) {
+            eventDefinitionBuilder.add(FIELD_GROUP_SEQUENCE, eventDefinition.getGroupSequence());
         }
 
         eventDefinitionBuilder

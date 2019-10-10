@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.Collections.singletonList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.times;
@@ -13,6 +14,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+import static uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil.POUND_CURRENCY_LABEL;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
@@ -21,7 +23,18 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAttendance;
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -51,18 +64,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+
 
 public class PublishResultsDelegateTest {
+
+    private static final UUID INEFFECTIVE_TRIAL_TYPE_ID = randomUUID();
+    private static final String TRIAL_TYPE_DESCRIPTION = "description";
+    private static final String TRIAL_TYPE_CODE = "V";
+    private static final String TRIAL_TYPE = "Ineffective";
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
@@ -99,24 +108,28 @@ public class PublishResultsDelegateTest {
 
         final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptReferenceData =
                 uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
-                        .setId(UUID.randomUUID())
+                        .setId(randomUUID())
                         .setLabel("promptReferenceData0")
+                        .setType("CURR")
                         .setUserGroups(Arrays.asList("usergroup0", "usergroup1"));
 
         final Prompt prompt0 = Prompt.prompt()
                 .withLabel(promptReferenceData.getLabel())
-                .withValue("promptValue0")
+                .withValue("400")
                 .withId(promptReferenceData.getId())
                 .withFixedListCode("fixedListCode0")
                 .build();
+
+        final CrackedIneffectiveTrial expectedCrackedIneffectiveTrial = new CrackedIneffectiveTrial(TRIAL_TYPE_CODE, TRIAL_TYPE_DESCRIPTION, INEFFECTIVE_TRIAL_TYPE_ID, TRIAL_TYPE);
 
         final CommandHelpers.ResultsSharedEventHelper resultsShared = h(with(resultsSharedTemplate(), r -> {
             r.getVariantDirectory().get(0).getKey().setNowsTypeId(nowDefinition.getId());
             r.getTargets().get(0).getResultLines().get(0).setPrompts(singletonList(prompt0));
             r.getHearing().setDefenceCounsels(
-                    singletonList(DefenceCounsel.defenceCounsel().withId(UUID.randomUUID()).build()));
+                    singletonList(DefenceCounsel.defenceCounsel().withId(randomUUID()).build()));
             r.getHearing().setDefendantAttendance(
-                    singletonList(DefendantAttendance.defendantAttendance().withDefendantId(UUID.randomUUID()).build()));
+                    singletonList(DefendantAttendance.defendantAttendance().withDefendantId(randomUUID()).build()));
+            r.getHearing().setCrackedIneffectiveTrial(expectedCrackedIneffectiveTrial);
         }));
 
         final List<uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant> newVariants = singletonList(
@@ -131,7 +144,7 @@ public class PublishResultsDelegateTest {
         final ResultLine resultLine = resultsShared.getFirstTarget().getResultLines().get(0);
 
         resultLine.setDelegatedPowers(
-                DelegatedPowers.delegatedPowers().withUserId(UUID.randomUUID()).build()
+                DelegatedPowers.delegatedPowers().withUserId(randomUUID()).build()
         );
 
         final ResultDefinition resultLineDefinition = ResultDefinition.resultDefinition()
@@ -189,6 +202,11 @@ public class PublishResultsDelegateTest {
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .withValue(ProsecutionCase::getId, hearingIn.getProsecutionCases().get(0).getId())
                         ))
+                        .withValue(sh -> sh.getProsecutionCases().get(0)
+                                .getDefendants().get(0)
+                                .getJudicialResults().get(0)
+                                .getJudicialResultPrompts().get(0).getValue(), POUND_CURRENCY_LABEL + prompt0.getValue())
+                        .withValue(Hearing::getCrackedIneffectiveTrial, expectedCrackedIneffectiveTrial)
                         .withValue(sh -> sh.getDefendantAttendance().size(), hearingIn.getDefendantAttendance().size())
                         .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
                                 .withValue(DefendantAttendance::getDefendantId, hearingIn.getDefendantAttendance().get(0).getDefendantId()
@@ -235,6 +253,12 @@ public class PublishResultsDelegateTest {
 
         assertThat(expected.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2017-05-20"));
 
+    }
+
+    private Hearing hearingResponseEnvelope(final UUID hearingId) {
+        return Hearing.hearing().withId(hearingId)
+                .withCrackedIneffectiveTrial(new CrackedIneffectiveTrial(TRIAL_TYPE_CODE, TRIAL_TYPE_DESCRIPTION, INEFFECTIVE_TRIAL_TYPE_ID, TRIAL_TYPE))
+                .build();
     }
 
 }

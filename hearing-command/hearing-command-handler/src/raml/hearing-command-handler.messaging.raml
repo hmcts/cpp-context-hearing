@@ -231,6 +231,12 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.update-court-application.json
             example: !include json/hearing.update-court-application.json
 
+# Eject case or application
+        application/vnd.hearing.command.eject-case-or-application+json:
+            schema: !include json/schema/hearing.command.eject-case-or-application.json
+            example: !include json/hearing.command.eject-case-or-application.json
+
+
 # Company Representative
         application/vnd.hearing.command.add-company-representative+json:
             example: !include json/hearing.command.add-company-representative.json
@@ -241,3 +247,19 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.remove-company-representative+json:
             example: !include json/hearing.command.remove-company-representative.json
             schema:  !include json/schema/hearing.command.remove-company-representative.json
+
+# Interpreter Intermediary
+        application/vnd.hearing.command.add-interpreter-intermediary+json:
+            example: !include json/hearing.command.add-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.command.add-interpreter-intermediary.json
+        application/vnd.hearing.command.update-interpreter-intermediary+json:
+            example: !include json/hearing.command.update-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.command.update-interpreter-intermediary.json
+        application/vnd.hearing.command.remove-interpreter-intermediary+json:
+            example: !include json/hearing.command.remove-interpreter-intermediary.json
+            schema:  !include json/schema/hearing.command.remove-interpreter-intermediary.json
+
+# Set Trial Type
+        application/vnd.hearing.command.set-trial-type+json:
+            schema: !include json/schema/hearing.command.set-trial-type.json
+            example: !include json/hearing.command.set-trial-type.json

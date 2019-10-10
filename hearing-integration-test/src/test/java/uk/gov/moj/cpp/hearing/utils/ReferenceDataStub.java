@@ -16,13 +16,12 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeRead
 
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
-import uk.gov.justice.hearing.courts.referencedata.OuCourtRoomsResult;
 import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.it.Utilities;
 
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -45,6 +44,7 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/organisation-units";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/enforcement-area";
 
+    private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cracked-ineffective-vacated-trial-types";
 
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-definitions+json";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_MEDIA_TYPE = "application/vnd.referencedata.get-result-definition-withdrawn+json";
@@ -55,6 +55,7 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE = "application/vnd.referencedata.get-all-now-metadata+json";
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_MEDIA_TYPE = "application/vnd.referencedata.query.organisation-unit.v2+json";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_MEDIA_TYPE = "application/vnd.referencedata.query.enforcement-area+json";
+    private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE = "application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json";
 
 
     public static void stubForReferenceDataResults() {
@@ -124,6 +125,12 @@ public class ReferenceDataStub {
 
     public static void stub(final EnforcementArea enforcementArea, String ouCode) {
         stub(enforcementArea, REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_QUERY_URL, REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_MEDIA_TYPE, "localJusticeAreaNationalCourtCode", ouCode);
+    }
+
+    public static void stubCrackedIOnEffectiveTrialTypes(CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+
+        stub(crackedIneffectiveVacatedTrialTypes, REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL,
+                REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE);
     }
 
     private static void stub(Object result, String queryUrl, String mediaType) {
@@ -246,6 +253,7 @@ public class ReferenceDataStub {
 
         waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE);
     }
+
     private static void stubDynamicPromptFixedList() {
         InternalEndpointMockUtils.stubPingFor("referencedata-service");
 

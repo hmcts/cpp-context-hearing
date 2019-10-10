@@ -1,0 +1,20 @@
+{
+  "interpreterIntermediary": {
+    "id": "fab947a3-c50c-4dbb-accf-b2758b1d2d6d",
+    "role": "INTERPRETER",
+    "firstName": "Eric",
+    "lastName": "Ormsby",
+    "attendant": {
+      "attendantType" : "WITNESS",
+      "name" : "Tomsy"
+    },
+    "attendanceDays": [
+      "2019-07-17",
+      "2019-07-18",
+      "2019-07-19",
+      "2019-07-21",
+      "2019-07-22"
+    ]
+  }
+}
+

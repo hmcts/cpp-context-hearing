@@ -16,6 +16,9 @@ import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 
 import java.util.UUID;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +27,14 @@ import org.slf4j.LoggerFactory;
 public class HearingEventCommandHandler extends AbstractCommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventCommandHandler.class.getName());
+
+    private static final String FIELD_OVERRIDE = "override";
+
+    private static final String FIELD_ACTIVE_HEARINGS = "activeHearings";
+
+    private static final String PAUSE_HEARING_EVENT_RECORDED_LABEL = "Hearing paused";
+
+    private static final UUID PAUSE_HEARING_EVENT_DEFINITION_ID = UUID.fromString("160ecb51-29ee-4954-bbbf-daab18a24fbb");
 
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope jsonEnvelope) throws EventStreamException {
@@ -54,6 +65,30 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
         final UUID hearingEventDefinitionId = logEventCommand.getHearingEventDefinitionId();
         final Boolean alterable = logEventCommand.getAlterable();
         final UUID defenceCounselId = logEventCommand.getDefenceCounselId();
+
+        final JsonObject hearingEventPayload = jsonEnvelope.payloadAsJsonObject();
+
+        if (hearingEventPayload.containsKey(FIELD_OVERRIDE) && hearingEventPayload.containsKey(FIELD_ACTIVE_HEARINGS)) {
+
+            final JsonArray activeHearings = hearingEventPayload.getJsonArray(FIELD_ACTIVE_HEARINGS);
+
+            if (activeHearings.size() > 1) {
+                LOGGER.warn("hearing.command.log-hearing-event More than one hearing is active in the same court room");
+            }
+
+            for (int index = 0; index < activeHearings.size(); index++) {
+
+                final HearingEvent pauseHearingEvent = HearingEvent.builder()
+                        .withHearingEventId(UUID.randomUUID())
+                        .withEventTime(logEventCommand.getEventTime())
+                        .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                        .withRecordedLabel(PAUSE_HEARING_EVENT_RECORDED_LABEL).build();
+
+                final UUID activeHearingId = UUID.fromString(activeHearings.getString(index));
+
+                aggregate(HearingAggregate.class, activeHearingId, jsonEnvelope, a -> a.logHearingEvent(activeHearingId, PAUSE_HEARING_EVENT_DEFINITION_ID, alterable, defenceCounselId, pauseHearingEvent));
+            }
+        }
 
         aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
     }

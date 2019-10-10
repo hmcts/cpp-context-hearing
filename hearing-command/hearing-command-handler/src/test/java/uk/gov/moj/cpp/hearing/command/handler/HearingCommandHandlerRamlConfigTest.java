@@ -5,8 +5,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +55,10 @@ public class HearingCommandHandlerRamlConfigTest {
                 ApplicantCounselCommandHandler.class,
                 AddDefendantCommandHandler.class,
                 ApplicationDetailChangeCommandHandler.class,
-                CompanyRepresentativeCommandHandler.class
+                EjectCaseOrApplicationCommandHandler.class,
+                CompanyRepresentativeCommandHandler.class,
+                InterpreterIntermediaryCommandHandler.class,
+                SetTrialTypeCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

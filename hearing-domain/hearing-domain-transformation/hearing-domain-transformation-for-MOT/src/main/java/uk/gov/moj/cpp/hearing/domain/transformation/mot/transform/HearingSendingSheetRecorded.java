@@ -1,10 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.transformation.mot.transform;
 
-import uk.gov.justice.core.courts.ProsecutionCase;
-
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import java.util.Map;
 
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.CROWN_COURT_HEARING;
@@ -14,7 +11,7 @@ import static uk.gov.moj.cpp.hearing.domain.transformation.mot.util.HearingHelpe
 public class HearingSendingSheetRecorded implements EventInstance {
 
     @Override
-    public JsonObject transform(final JsonObject jsonObject, Map<String, ProsecutionCase> hearingMap) {
+    public JsonObject transform(final JsonObject jsonObject) {
         final JsonObjectBuilder transformOffenceBuilder = createObjectBuilder()
                 .add(HEARING, transformHearingForSendingSheet(jsonObject.getJsonObject(HEARING)))
                 .add(CROWN_COURT_HEARING, jsonObject.getJsonObject(CROWN_COURT_HEARING));

@@ -60,11 +60,11 @@ public class HearingCommandApiTest {
 
     private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
-            "addProsecutionCounsel", "removeProsecutionCounsel","updateProsecutionCounsel", "removeDefenceCounsel", "updateDefenceCounsel", "initiateHearing", "saveDraftResult", "applicationDraftResult", "saveHearingCaseNote",
+            "addProsecutionCounsel", "removeProsecutionCounsel", "updateProsecutionCounsel", "removeDefenceCounsel", "updateDefenceCounsel", "initiateHearing", "saveDraftResult", "applicationDraftResult", "saveHearingCaseNote",
             "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance", "saveApplicationResponse",
-            "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel",
-            "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel",
-            "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative");
+            "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel","addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
+            "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
+            "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType");
 
     @Spy
     private final Enveloper enveloper = createEnveloper();

@@ -132,6 +132,26 @@ public class HearingCommandApi {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-applicant-counsel").apply(envelope.payloadAsJsonObject()));
     }
 
+    @Handles("hearing.add-interpreter-intermediary")
+    public void addInterpreterIntermediary(final JsonEnvelope envelope){
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-interpreter-intermediary").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.remove-interpreter-intermediary")
+    public void removeInterpreterIntermediary(final JsonEnvelope envelope){
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-interpreter-intermediary").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.update-interpreter-intermediary")
+    public void updateInterpreterIntermediary(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.update-interpreter-intermediary").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.set-trial-type")
+    public void setTrialType(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.set-trial-type").apply(envelope.payloadAsJsonObject()));
+    }
+
     @Handles("hearing.add-company-representative")
     public void addCompanyRepresentative(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-company-representative").apply(envelope.payloadAsJsonObject()));
@@ -146,5 +166,4 @@ public class HearingCommandApi {
     public void removeCompanyRepresentative(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-company-representative").apply(envelope.payloadAsJsonObject()));
     }
-
 }

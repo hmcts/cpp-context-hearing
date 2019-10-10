@@ -564,15 +564,15 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(IndicatedPlea::getIndicatedPleaValue, is(indicatedPlea.getIndicatedPleaValue()))
                                                                 .with(IndicatedPlea::getSource, is(indicatedPlea.getSource())))
                                                         .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
-                                                            .with(AllocationDecision::getOriginatingHearingId, is(allocationDecision.getOriginatingHearingId()))
-                                                            .with(AllocationDecision::getMotReasonId, is(allocationDecision.getMotReasonId()))
-                                                            .with(AllocationDecision::getMotReasonDescription, is(allocationDecision.getMotReasonDescription()))
-                                                            .with(AllocationDecision::getMotReasonCode, is(allocationDecision.getMotReasonCode()))
-                                                            .with(AllocationDecision::getSequenceNumber, is(allocationDecision.getSequenceNumber()))
-                                                            .with(AllocationDecision::getAllocationDecisionDate, is(allocationDecision.getAllocationDecisionDate()))
-                                                            .with(AllocationDecision::getCourtIndicatedSentence, isBean(CourtIndicatedSentence.class)
-                                                                .with(CourtIndicatedSentence::getCourtIndicatedSentenceTypeId, is(courtIndicatedSentence.getCourtIndicatedSentenceTypeId()))
-                                                                .with(CourtIndicatedSentence::getCourtIndicatedSentenceDescription, is(courtIndicatedSentence.getCourtIndicatedSentenceDescription()))))))
+                                                                .with(AllocationDecision::getOriginatingHearingId, is(allocationDecision.getOriginatingHearingId()))
+                                                                .with(AllocationDecision::getMotReasonId, is(allocationDecision.getMotReasonId()))
+                                                                .with(AllocationDecision::getMotReasonDescription, is(allocationDecision.getMotReasonDescription()))
+                                                                .with(AllocationDecision::getMotReasonCode, is(allocationDecision.getMotReasonCode()))
+                                                                .with(AllocationDecision::getSequenceNumber, is(allocationDecision.getSequenceNumber()))
+                                                                .with(AllocationDecision::getAllocationDecisionDate, is(allocationDecision.getAllocationDecisionDate()))
+                                                                .with(AllocationDecision::getCourtIndicatedSentence, isBean(CourtIndicatedSentence.class)
+                                                                        .with(CourtIndicatedSentence::getCourtIndicatedSentenceTypeId, is(courtIndicatedSentence.getCourtIndicatedSentenceTypeId()))
+                                                                        .with(CourtIndicatedSentence::getCourtIndicatedSentenceDescription, is(courtIndicatedSentence.getCourtIndicatedSentenceDescription()))))))
                                                 .with(Defendant::getAssociatedPersons, first(isBean(AssociatedPerson.class)
                                                         .with(AssociatedPerson::getRole, is(associatedPerson.getRole()))
                                                         .with(AssociatedPerson::getPerson, isBean(Person.class)
@@ -772,7 +772,7 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(AllocationDecision::getSequenceNumber, is(allocationDecision.getSequenceNumber()))
                                                                 .with(AllocationDecision::getAllocationDecisionDate, is(allocationDecision.getAllocationDecisionDate()))
                                                                 .with(AllocationDecision::getCourtIndicatedSentence, isBean(CourtIndicatedSentence.class)
-                                                                    .with(CourtIndicatedSentence::getCourtIndicatedSentenceTypeId, is(courtIndicatedSentence.getCourtIndicatedSentenceTypeId()))
+                                                                        .with(CourtIndicatedSentence::getCourtIndicatedSentenceTypeId, is(courtIndicatedSentence.getCourtIndicatedSentenceTypeId()))
                                                                         .with(CourtIndicatedSentence::getCourtIndicatedSentenceDescription, is(courtIndicatedSentence.getCourtIndicatedSentenceDescription()))))
                                                         .with(Offence::getPlea, is(nullValue()))
                                                         .with(Offence::getOffenceFacts, isBean(OffenceFacts.class)
@@ -793,10 +793,10 @@ public class InitiateHearingIT extends AbstractIT {
 
         UUID courtAndRoomId = UUID.randomUUID();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId,2019,7,5)));
-        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId,2019,7,4));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, 2019, 7, 5)));
+        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, 2019, 7, 4));
 
-        LocalDate localDate = LocalDate.of(2019,7,5);
+        LocalDate localDate = LocalDate.of(2019, 7, 5);
 
         Hearing hearing = hearingOne.getHearing();
         hearing.setProsecutionCases(null);

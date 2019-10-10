@@ -28,6 +28,9 @@
     },
     "alterable": {
       "type": "boolean"
+    },
+    "override": {
+      "type": "boolean"
     }
   },
   "required": [

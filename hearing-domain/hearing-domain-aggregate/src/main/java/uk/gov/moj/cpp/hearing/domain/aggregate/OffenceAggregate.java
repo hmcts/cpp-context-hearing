@@ -6,6 +6,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.core.courts.Offence;
+
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;

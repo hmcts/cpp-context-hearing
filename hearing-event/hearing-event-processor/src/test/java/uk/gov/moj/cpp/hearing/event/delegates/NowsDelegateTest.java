@@ -20,6 +20,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
+import static uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil.POUND_CURRENCY_LABEL;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.generateFullNowsRequestTemplate;
@@ -334,7 +335,7 @@ public class NowsDelegateTest {
                     Prompt promptRef = id2PromptRef.get(pid);
                     String expectedValue = null;
                     if (NowsDelegate.CURRENCY_PROMPT_TYPE.equals(promptRef.getType())) {
-                        expectedValue = "£" + currencyValue.trim();
+                        expectedValue = POUND_CURRENCY_LABEL + currencyValue.trim();
                     } else if (NowsDelegate.DATE_PROMPT_TYPE.equals(promptRef.getType())) {
                         expectedValue = localDate.format(DateTimeFormatter.ofPattern(NowsDelegate.OUTGOING_PROMPT_DATE_FORMAT));
                     } else {

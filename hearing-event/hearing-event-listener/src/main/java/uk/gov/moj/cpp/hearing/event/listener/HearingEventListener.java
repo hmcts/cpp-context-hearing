@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
@@ -8,6 +9,8 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -118,8 +121,40 @@ public class HearingEventListener {
                 hearing.setHasSharedResults(true);
                 hearingRepository.save(hearing);
             }
+        }
+    }
 
+    @Handles("hearing.hearing-trial-type-set")
+    public void setHearingTrialType(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-trial-type-set event received {}", event.toObfuscatedDebugString());
         }
 
+        final HearingTrialType hearingTrialType = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), HearingTrialType.class);
+
+        final Hearing hearing = hearingRepository.findBy(hearingTrialType.getHearingId());
+        if (nonNull(hearing)) {
+            hearing.setTrialTypeId(hearingTrialType.getTrialTypeId());
+            hearing.setIsEffectiveTrial(null);
+            hearingRepository.save(hearing);
+        }
+    }
+
+    @Handles("hearing.hearing-effective-trial-set")
+    public void setHearingEffectiveTrial(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-effective-trial-set event received {}", event.toObfuscatedDebugString());
+        }
+
+        final HearingEffectiveTrial hearingEffectiveTrial = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), HearingEffectiveTrial.class);
+
+        final Hearing hearing = hearingRepository.findBy(hearingEffectiveTrial.getHearingId());
+        if (nonNull(hearing)) {
+            hearing.setIsEffectiveTrial(true);
+            hearing.setTrialTypeId(null);
+            hearingRepository.save(hearing);
+        }
     }
 }

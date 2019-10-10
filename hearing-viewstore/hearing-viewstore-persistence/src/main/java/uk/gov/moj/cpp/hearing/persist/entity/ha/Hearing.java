@@ -90,6 +90,15 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingCompanyRepresentative> hearingCompanyRepresentatives = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingInterpreterIntermediary> hearingInterpreterIntermediaries = new HashSet<>();
+
+    @Column(name = "trial_type_id")
+    private UUID trialTypeId;
+
+    @Column(name = "is_effective_trial")
+    private Boolean isEffectiveTrial;
+
     public Hearing() {
         //For JPA
     }
@@ -270,6 +279,32 @@ public class Hearing {
 
     public void setApplicantCounsels(Set<HearingApplicantCounsel> jpa) {
         this.hearingApplicantCounsels = jpa;
+    }
+
+    public Set<HearingInterpreterIntermediary> getHearingInterpreterIntermediaries() {
+        return hearingInterpreterIntermediaries;
+    }
+
+    public void setHearingInterpreterIntermediaries(Set<HearingInterpreterIntermediary> hearingInterpreterIntermediaries) {
+        this.hearingInterpreterIntermediaries = hearingInterpreterIntermediaries;
+    }
+
+    public UUID getTrialTypeId() {
+        return trialTypeId;
+    }
+
+    public Hearing setTrialTypeId(final UUID trialTypeId) {
+        this.trialTypeId = trialTypeId;
+        return this;
+    }
+
+    public Boolean getIsEffectiveTrial() {
+        return isEffectiveTrial;
+    }
+
+    public Hearing setIsEffectiveTrial(Boolean effectiveTrial) {
+        isEffectiveTrial = effectiveTrial;
+        return this;
     }
 
     public Set<HearingCompanyRepresentative> getCompanyRepresentatives() {

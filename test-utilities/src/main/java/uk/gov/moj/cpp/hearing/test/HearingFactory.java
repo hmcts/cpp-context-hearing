@@ -26,6 +26,8 @@ import java.util.UUID;
 
 public class HearingFactory {
 
+    private static final String APPLICATION_REFERENCE = "12AA3456716";
+
     public ProsecutionCase.Builder prosecutionCase() {
         return ProsecutionCase.prosecutionCase();
     }
@@ -110,11 +112,42 @@ public class HearingFactory {
                 .withRespondents(asList(courtApplicationRespondant1().build(),
                         courtApplicationRespondant1().build()
                 ))
-                .withApplicationReference("12AA3456716")
+                .withApplicationReference(APPLICATION_REFERENCE)
                 .withApplicationStatus(ApplicationStatus.DRAFT);
 
     }
+    public CourtApplication.Builder linkedCourtApplication(final UUID linkedCaseId) {
 
+        return CourtApplication.courtApplication()
+                .withId(UUID.randomUUID())
+                .withApplicant(courtApplicationParty().build())
+                .withApplicationReceivedDate(LocalDate.now())
+                .withType(courtApplicationType()
+                        .build())
+                .withRespondents(asList(courtApplicationRespondant1().build(),
+                        courtApplicationRespondant1().build()
+                ))
+                .withApplicationReference(APPLICATION_REFERENCE)
+                .withApplicationStatus(ApplicationStatus.DRAFT)
+                .withLinkedCaseId(linkedCaseId);
+
+    }
+    public CourtApplication.Builder standAloneChildCourtApplication(final UUID parentApplicationId) {
+
+        return CourtApplication.courtApplication()
+                .withId(UUID.randomUUID())
+                .withApplicant(courtApplicationParty().build())
+                .withApplicationReceivedDate(LocalDate.now())
+                .withType(courtApplicationType()
+                        .build())
+                .withRespondents(asList(courtApplicationRespondant1().build(),
+                        courtApplicationRespondant1().build()
+                ))
+                .withApplicationReference(APPLICATION_REFERENCE)
+                .withApplicationStatus(ApplicationStatus.DRAFT)
+                .withParentApplicationId(parentApplicationId);
+
+    }
     public HearingType.Builder standaloneApplicationHearingType() {
         return HearingType.hearingType()
                 .withDescription("Application")

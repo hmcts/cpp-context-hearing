@@ -16,6 +16,7 @@ import javax.inject.Inject;
 @ApplicationScoped
 public class ProsecutionCaseJPAMapper {
 
+    private static final String CASE_STATUS_EJECTED = "EJECTED";
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
     private DefendantJPAMapper defendantJPAMapper;
 
@@ -73,7 +74,7 @@ public class ProsecutionCaseJPAMapper {
         if (null == entities) {
             return new ArrayList<>();
         }
-        return entities.stream().map(this::fromJPA).collect(Collectors.toList());
+        return entities.stream().filter(pc-> !CASE_STATUS_EJECTED.equals(pc.getCaseStatus())).map(this::fromJPA).collect(Collectors.toList());
     }
 
 }

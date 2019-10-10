@@ -49,12 +49,6 @@
                         <classifier>raml</classifier>
                     </dependency>
                     <dependency>
-                        <groupId>uk.gov.moj.cpp.progression</groupId>
-                        <artifactId>progression-command-api</artifactId>
-                        <version>${progression-version}</version>
-                        <classifier>raml</classifier>
-                    </dependency>
-                    <dependency>
                         <groupId>uk.gov.moj.cpp.notification.notify</groupId>
                         <artifactId>notificationnotify-command-api</artifactId>
                         <version>${notification.notify.version}</version>

@@ -34,7 +34,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
 
 import java.util.List;
 import java.util.UUID;
@@ -199,21 +198,7 @@ public class HearingAggregateTest {
         final HearingEventLogged hearingEventLogged = (HearingEventLogged) hearingAggregate
                 .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
 
-        assertThat(hearingEventLogged.getHearingEventId(), is(logEventCommand.getHearingEventId()));
-        assertThat(hearingEventLogged.getLastHearingEventId(), is(nullValue()));
-        assertThat(hearingEventLogged.getHearingId(), is(logEventCommand.getHearingId()));
-        assertThat(hearingEventLogged.getEventTime(), is(logEventCommand.getEventTime()));
-        assertThat(hearingEventLogged.getLastModifiedTime(), is(logEventCommand.getLastModifiedTime()));
-        assertThat(hearingEventLogged.getRecordedLabel(), is(logEventCommand.getRecordedLabel()));
-        assertThat(hearingEventLogged.getHearingEventDefinitionId(), is(logEventCommand.getHearingEventDefinitionId()));
-        assertThat(hearingEventLogged.isAlterable(), is(false));
-        assertThat(hearingEventLogged.getCourtCentre().getId(), is(initiateHearingCommand.getHearing().getCourtCentre().getId()));
-        assertThat(hearingEventLogged.getCourtCentre().getName(), is(initiateHearingCommand.getHearing().getCourtCentre().getName()));
-        assertThat(hearingEventLogged.getCourtCentre().getRoomId(), is(initiateHearingCommand.getHearing().getCourtCentre().getRoomId()));
-        assertThat(hearingEventLogged.getCourtCentre().getRoomName(), is(initiateHearingCommand.getHearing().getCourtCentre().getRoomName()));
-        assertThat(hearingEventLogged.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()));
-        assertThat(hearingEventLogged.getHearingType().getId(), is(initiateHearingCommand.getHearing().getType().getId()));
-        assertThat(hearingEventLogged.getHearingType().getDescription(), is(initiateHearingCommand.getHearing().getType().getDescription()));
+        assertHearingEventLogged(hearingEventLogged, logEventCommand, initiateHearingCommand);
     }
 
     @Test
@@ -573,4 +558,51 @@ public class HearingAggregateTest {
         assertThat(result.getHearingId(), is(updateHearingEventsCommand.getHearingId()));
     }
 
+    @Test
+    public void logHearingEvent_shouldNotLogPauseHearingEvent_IfNoActiveHearingsReturned() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel(STRING.next())
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final List<Object> events = hearingAggregate
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList());
+
+        final HearingEventLogged startHearingEventLogged = (HearingEventLogged) events.get(0);
+        assertHearingEventLogged(startHearingEventLogged, logEventCommand, initiateHearingCommand);
+    }
+
+    private void assertHearingEventLogged(final HearingEventLogged hearingEventLogged, final LogEventCommand logEventCommand, final InitiateHearingCommand initiateHearingCommand) {
+        assertThat(hearingEventLogged.getHearingEventId(), is(logEventCommand.getHearingEventId()));
+        assertThat(hearingEventLogged.getLastHearingEventId(), is(nullValue()));
+        assertThat(hearingEventLogged.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(hearingEventLogged.getEventTime(), is(logEventCommand.getEventTime()));
+        assertThat(hearingEventLogged.getLastModifiedTime(), is(logEventCommand.getLastModifiedTime()));
+        assertThat(hearingEventLogged.getRecordedLabel(), is(logEventCommand.getRecordedLabel()));
+        assertThat(hearingEventLogged.getHearingEventDefinitionId(), is(logEventCommand.getHearingEventDefinitionId()));
+        assertThat(hearingEventLogged.isAlterable(), is(false));
+        assertThat(hearingEventLogged.getCourtCentre().getId(), is(initiateHearingCommand.getHearing().getCourtCentre().getId()));
+        assertThat(hearingEventLogged.getCourtCentre().getName(), is(initiateHearingCommand.getHearing().getCourtCentre().getName()));
+        assertThat(hearingEventLogged.getCourtCentre().getRoomId(), is(initiateHearingCommand.getHearing().getCourtCentre().getRoomId()));
+        assertThat(hearingEventLogged.getCourtCentre().getRoomName(), is(initiateHearingCommand.getHearing().getCourtCentre().getRoomName()));
+        assertThat(hearingEventLogged.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()));
+        assertThat(hearingEventLogged.getHearingType().getId(), is(initiateHearingCommand.getHearing().getType().getId()));
+        assertThat(hearingEventLogged.getHearingType().getDescription(), is(initiateHearingCommand.getHearing().getType().getDescription()));
+    }
 }

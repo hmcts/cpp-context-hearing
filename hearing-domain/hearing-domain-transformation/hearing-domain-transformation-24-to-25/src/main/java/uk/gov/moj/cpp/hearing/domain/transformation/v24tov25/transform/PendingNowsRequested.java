@@ -8,7 +8,6 @@ import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaV
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.NOW_TYPES;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.SHARED_RESULT_LINES;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.core.SchemaVariableConstants.TARGETS;
-import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.util.CourtClerkHelper.transformCourtClerk;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.util.HearingHelper.transformHearing;
 import static uk.gov.moj.cpp.hearing.domain.transformation.v24tov25.util.TargetHelper.transformTargets;
 
@@ -23,7 +22,7 @@ public class PendingNowsRequested implements EventInstance {
         final JsonObjectBuilder transformNowRequestedBuilder = createObjectBuilder()
                 .add(CREATE_NOWS_REQUEST, transformNowRequest(nowRequested.getJsonObject(CREATE_NOWS_REQUEST)));
 
-        if(nowRequested.containsKey(TARGETS)) {
+        if (nowRequested.containsKey(TARGETS)) {
             transformNowRequestedBuilder.add(TARGETS, transformTargets(nowRequested.getJsonArray(TARGETS)));
         }
 

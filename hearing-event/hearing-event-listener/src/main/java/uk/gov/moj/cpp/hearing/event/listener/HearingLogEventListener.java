@@ -15,6 +15,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,8 +47,8 @@ public class HearingLogEventListener {
 
         eventDefinitionsCreated.getEventDefinitions().stream()
                 .map(e -> new HearingEventDefinition(e.getId(),
-                        e.getRecordedLabel(), e.getActionLabel(), e.getSequence(), e.getSequenceType(),
-                        e.getCaseAttribute(), e.getGroupLabel(), e.getActionLabelExtension(), e.isAlterable()))
+                        e.getRecordedLabel(), e.getActionLabel(), e.getActionSequence(),
+                        e.getCaseAttribute(), e.getGroupLabel(), e.getGroupSequence(), e.isAlterable()))
                 .forEach(hearingEventDefinitionRepository::save);
     }
 
@@ -63,11 +65,14 @@ public class HearingLogEventListener {
     public void hearingEventLogged(final JsonEnvelope event) {
         final HearingEventLogged hearingEventLogged = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventLogged.class);
 
+        final ZonedDateTime londonZoned = hearingEventLogged.getEventTime().withZoneSameInstant(ZoneId.of("Europe/London"));
+
         hearingEventRepository.save(HearingEvent.hearingEvent()
                 .setId(hearingEventLogged.getHearingEventId())
                 .setHearingId(hearingEventLogged.getHearingId())
                 .setHearingEventDefinitionId(hearingEventLogged.getHearingEventDefinitionId())
                 .setRecordedLabel(hearingEventLogged.getRecordedLabel())
+                .setEventDate(londonZoned.toLocalDate())
                 .setEventTime(hearingEventLogged.getEventTime())
                 .setLastModifiedTime(hearingEventLogged.getLastModifiedTime())
                 .setAlterable(hearingEventLogged.isAlterable())
@@ -91,7 +96,7 @@ public class HearingLogEventListener {
                 .findByHearingIdOrderByEventTimeAsc(hearingEventsUpdated.getHearingId()).stream()
                 .collect(Collectors.toMap(HearingEvent::getId, hearingEvent -> hearingEvent));
 
-        hearingEventsUpdated.getHearingEvents().stream().forEach(hearingEvent -> {
+        hearingEventsUpdated.getHearingEvents().forEach(hearingEvent -> {
 
             final HearingEvent repositoryEvent = hearingEventIdToHearingEvent.get(hearingEvent.getHearingEventId());
 

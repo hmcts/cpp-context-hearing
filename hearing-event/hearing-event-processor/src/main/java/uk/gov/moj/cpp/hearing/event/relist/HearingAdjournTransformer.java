@@ -102,9 +102,6 @@ public class HearingAdjournTransformer {
         nextHearingBuilder.withReportingRestrictionReason(resultsShared.getHearing().getReportingRestrictionReason());
         nextHearingBuilder.withEstimatedMinutes(convertDurationIntoMinutes(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HEST))));
         nextHearingBuilder.withCourtCentre(hearing.getCourtCentre());
-        if (hearing.getJudiciary() != null && !hearing.getJudiciary().isEmpty()) {
-            nextHearingBuilder.withJudiciary(hearing.getJudiciary());
-        }
         final Set<String> strEarliestStartDates = getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HDATE));
         final Set<String> strEarliestStartTimes = getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HTIME));
         final String strEarliestStartDate = strEarliestStartDates.isEmpty() ? null : strEarliestStartDates.iterator().next();

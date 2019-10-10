@@ -96,9 +96,6 @@ subscriptions_descriptor:
         - name: hearing.application-draft-resulted
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-draft-resulted.json
 
-        - name: hearing.application-response-saved
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-response-saved.json
-
       # Update Verdict
         - name: hearing.hearing-offence-verdict-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-offence-verdict-updated.json
@@ -161,6 +158,14 @@ subscriptions_descriptor:
         - name: hearing.defendant-attendance-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-attendance-updated.json
 
+      # application response
+        - name: hearing.application-response-saved
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-response-saved.json
+
+      # New Defendant added
+        - name: hearing.defendant-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-added.json
+
       # Company Representative Change Ignored
         - name: hearing.company-representative-change-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/company-representative-change-ignored.json
@@ -194,10 +199,6 @@ subscriptions_descriptor:
         - name: public.progression.events.hearing-extended
           schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-hearing-extended.json
 
-      # Offences For Defendant Updated
-        - name: public.progression.defendant-offences-changed
-          schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-defendant-offences-changed.json
-
       # Listing Hearing Detail Changed
         - name: public.hearing-detail-changed
           schema_uri: http://cpp.moj.gov.uk/listing/json/schema/event/public-hearing-detail-changed.json
@@ -205,5 +206,9 @@ subscriptions_descriptor:
       # Staging Enforcement
         - name: public.stagingenforcement.enforce-financial-imposition-acknowledgement
           schema_uri: http://cpp.moj.gov.uk/stagingenforcement/json/schema/event/public-enforce-financial-imposition-acknowledgement.json
+
+      # Progression Hearing Detail Changed
+        - name: public.progression.events.case-or-application-ejected
+          schema_uri: http://justice.gov.uk/progression/courts/case-or-application-ejected
 
       event_source_name: public.event.source

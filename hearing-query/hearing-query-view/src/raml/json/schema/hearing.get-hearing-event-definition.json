@@ -9,11 +9,14 @@
     "groupLabel": {
       "type": "string"
     },
+    "groupSequence": {
+      "type": "integer"
+    },
     "actionLabel": {
       "type": "string"
     },
-    "actionLabelExtension": {
-      "type": "string"
+    "actionSequence": {
+      "type": "integer"
     },
     "recordedLabel": {
       "type": "string"
@@ -26,22 +29,6 @@
       "items": {
         "type": "object"
       }
-    },
-    "sequence": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string"
-        },
-        "id": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "type",
-        "id"
-      ],
-      "additionalProperties": false
     }
   },
   "additionalProperties": false,
@@ -49,6 +36,9 @@
     "id",
     "recordedLabel",
     "actionLabel",
+    "groupLabel",
+    "actionSequence",
+    "groupSequence",
     "alterable"
   ],
   "definitions": {

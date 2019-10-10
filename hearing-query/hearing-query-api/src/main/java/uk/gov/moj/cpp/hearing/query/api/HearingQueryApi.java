@@ -64,4 +64,13 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.get-active-hearings-for-court-room")
+    public JsonEnvelope getActiveHearingsForCourtRoom(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
+    @Handles("hearing.get-cracked-ineffective-reason")
+    public JsonEnvelope getCrackedIneffectiveTrialReason(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
 }

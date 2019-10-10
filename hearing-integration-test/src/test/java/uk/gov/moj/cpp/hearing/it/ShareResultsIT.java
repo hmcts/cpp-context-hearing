@@ -35,6 +35,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -49,11 +50,14 @@ import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -77,6 +81,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -85,6 +90,8 @@ public class ShareResultsIT extends AbstractIT {
 
     public static final String DOCUMENT_TEXT = "someDocumentText";
     public static final String BOTH_JURISDICTIONS = "B";
+
+    private static final UUID TRAIL_TYPE_ID_1 = randomUUID();
 
     @Before
     public void begin() {
@@ -104,12 +111,12 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    public void shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows(){
+    public void shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows() {
         shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows(false);
     }
 
     @Test
-    public void shareResults_shouldPublishResults_When_Result_Is_Deleted(){
+    public void shareResults_shouldPublishResults_When_Result_Is_Deleted() {
         shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows(true);
     }
 
@@ -150,9 +157,22 @@ public class ShareResultsIT extends AbstractIT {
 
         convictionDateListener.waitFor();
 
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = buildCrackedIneffectiveVacatedTrialTypes(TRAIL_TYPE_ID_1).getCrackedIneffectiveVacatedTrialTypes().get(0);
+
+        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+
+        ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(TRAIL_TYPE_ID_1));
+        TrialType addTrialType = TrialType.builder()
+                .withHearingId(hearingOne.getHearingId())
+                .withTrialTypeId(TRAIL_TYPE_ID_1)
+                .build();
+
+        UseCases.setTrialType(requestSpec, hearingOne.getHearingId(), addTrialType);
+
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getCrackedIneffectiveTrial, Matchers.is(expectedTrialType))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                         .with(Defendant::getOffences, first(isBean(Offence.class)
@@ -262,6 +282,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearingOne.getHearingId()))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
                                 .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
                                         .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))));
 
@@ -275,6 +296,7 @@ public class ShareResultsIT extends AbstractIT {
         Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
                         .with(Hearing::getHasSharedResults, is(true))));
     }
 
@@ -328,8 +350,8 @@ public class ShareResultsIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
         final UUID applicationId = hearingOne.getHearing().getCourtApplications().get(0).getId();
         final CourtApplicationOutcomeType applicationOutcome = CourtApplicationOutcomeType.courtApplicationOutcomeType().withDescription("Granted")
-                        .withId(UUID.randomUUID())
-                        .withSequence(1).build();
+                .withId(UUID.randomUUID())
+                .withSequence(1).build();
         final uk.gov.justice.core.courts.Hearing hearing = hearingOne.getHearing();
         final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultWithOutcomeCommandTemplate(hearingOne.getHearingId(), applicationId, applicationOutcome);
 
@@ -649,5 +671,12 @@ public class ShareResultsIT extends AbstractIT {
                 .executeSuccessfully();
 
         publicEvent.waitFor();
+    }
+
+    private CrackedIneffectiveVacatedTrialTypes buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
+        List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
+        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
+
+        return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
 }

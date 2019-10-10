@@ -293,3 +293,39 @@ rule "Command - API - Action - hearing.remove-company-representative"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.add-interpreter-intermediary"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-interpreter-intermediary");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.update-interpreter-intermediary"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-interpreter-intermediary");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.remove-interpreter-intermediary"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.remove-interpreter-intermediary");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.set-trial-type"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.set-trial-type");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end

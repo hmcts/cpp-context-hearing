@@ -168,9 +168,6 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
                                         .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
                                         .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_A_ID))
-                                .with(NextHearing::getJudiciary, first(isBean(JudicialRole.class)
-                                        .with(JudicialRole::getJudicialId, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialId()))
-                                        .with(JudicialRole::getJudicialRoleType, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialRoleType()))))
                                 .with(NextHearing::getNextHearingProsecutionCases, first(isBean(NextHearingProsecutionCase.class)
                                         .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
                                         .with(NextHearingProsecutionCase::getDefendants, first(isBean(NextHearingDefendant.class)
@@ -251,9 +248,6 @@ public class HearingAdjournIT extends AbstractIT {
                                          )*/
                                 )
 
-                                .with(NextHearing::getJudiciary, first(isBean(JudicialRole.class)
-                                        .with(JudicialRole::getJudicialId, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialId()))
-                                        .with(JudicialRole::getJudicialRoleType, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialRoleType()))))
                                 .with(NextHearing::getNextHearingProsecutionCases, first(isBean(NextHearingProsecutionCase.class)
                                         .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
                                         .with(NextHearingProsecutionCase::getDefendants, first(isBean(NextHearingDefendant.class)
@@ -354,9 +348,7 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
                                         .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
                                         .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_A_ID))
-                                .with(NextHearing::getJudiciary, first(isBean(JudicialRole.class)
-                                        .with(JudicialRole::getJudicialId, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialId()))
-                                        .with(JudicialRole::getJudicialRoleType, is(hearingOne.getHearing().getJudiciary().get(0).getJudicialRoleType()))))
+
                         ))
                 ));
 

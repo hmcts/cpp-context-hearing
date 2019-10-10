@@ -11,6 +11,7 @@ import static javax.json.Json.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.ADDRESS;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.ALIASES;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.ASSOCIATED_PERSONS;
+import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.BAIL_STATUS;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.CRO_NUMBER;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.DATE_OF_BIRTH;
 import static uk.gov.moj.cpp.hearing.domain.transformation.mot.core.SchemaVariableConstants.DEFENCE_ORGANISATION;
@@ -130,7 +131,7 @@ public class DefendantHelper {
 
     private static JsonObjectBuilder transformDefendantForSendingSheet(final JsonObject defendant) {
 
-        return createObjectBuilder()
+        final JsonObjectBuilder transformDefendantBuilder = createObjectBuilder()
                 .add(ID, defendant.getJsonString(ID))
                 .add(PERSON_ID, defendant.getJsonString(PERSON_ID))
                 .add(FIRST_NAME, defendant.getJsonString(FIRST_NAME))
@@ -139,8 +140,19 @@ public class DefendantHelper {
                 .add(GENDER, defendant.getJsonString(GENDER))
                 .add(ADDRESS, defendant.getJsonObject(ADDRESS))
                 .add(DATE_OF_BIRTH, defendant.getJsonString(DATE_OF_BIRTH))
-                .add(INTERPRETER, defendant.getJsonString(INTERPRETER))
+                .add(INTERPRETER, defendant.getJsonObject(INTERPRETER))
                 .add(OFFENCES, transformOffencesForSendingSheet(defendant.getJsonArray(OFFENCES)));
+
+
+        if (defendant.containsKey(BAIL_STATUS)) {
+            transformDefendantBuilder.add(BAIL_STATUS, defendant.getString(BAIL_STATUS));
+        }
+
+        if (defendant.containsKey(DEFENCE_ORGANISATION)) {
+            transformDefendantBuilder.add(DEFENCE_ORGANISATION, defendant.getString(DEFENCE_ORGANISATION));
+        }
+
+        return transformDefendantBuilder;
 
     }
 }

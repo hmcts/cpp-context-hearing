@@ -21,7 +21,7 @@ public class RegexGeneratorTest {
     @Test
     public void shouldGenerateARandomStringFromARegularExpression() {
 
-        final String randomString = regexGenerator.convert("test");
+        final String randomString = regexGenerator.convert();
 
         final RegexValidator regexValidator = new RegexValidator(UUID_PATTERN);
 
@@ -31,7 +31,7 @@ public class RegexGeneratorTest {
 
         assertThat(uuid, is(notNullValue()));
 
-        assertThat(regexGenerator.convert("test"), is(not(equalTo(randomString))));
+        assertThat(regexGenerator.convert(), is(not(equalTo(randomString))));
 
     }
 

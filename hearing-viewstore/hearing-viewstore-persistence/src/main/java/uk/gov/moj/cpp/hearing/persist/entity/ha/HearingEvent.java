@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,6 +40,9 @@ public class HearingEvent {
 
     @Column(name = "defence_counsel_id")
     private UUID defenceCounselId;
+
+    @Column(name = "event_date")
+    private LocalDate eventDate;
 
     public HearingEvent() {
         // for JPA
@@ -126,6 +130,15 @@ public class HearingEvent {
 
     public HearingEvent setDefenceCounselId(final UUID counselId) {
         this.defenceCounselId = counselId;
+        return this;
+    }
+
+    public LocalDate getEventDate() {
+        return eventDate;
+    }
+
+    public HearingEvent setEventDate(LocalDate eventDate) {
+        this.eventDate = eventDate;
         return this;
     }
 

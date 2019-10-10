@@ -28,10 +28,15 @@ public class HearingEventDefinitionAggregateTest {
 
 
     private final static String ACTION_LABEL_0 = "Start Hearing";
+    private final static String GROUP_LABEL_0 = "RECORDING";
+    private final static Integer ACTION_SEQUENCE_0 = 1;
+    private final static Integer GROUP_SEQUENCE_0 = 1;
     private final static String ACTION_LABEL_1 = "Identify defendant";
+    private final static String GROUP_LABEL_1 = "DEFENDANT";
+    private final static Integer ACTION_SEQUENCE_1 = 2;
+    private final static Integer GROUP_SEQUENCE_1 = 2;
     private final static String RECORDED_LABEL_0 = "Call Case On";
     private final static String RECORDED_LABEL_1 = "Defendant Identified";
-    private final static String SEQUENCE_TYPE = "SENTENCING";
 
     @InjectMocks
     private HearingEventDefinitionAggregate hearingEventDefinitionAggregate;
@@ -68,14 +73,14 @@ public class HearingEventDefinitionAggregateTest {
 
         Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getActionLabel(), hearingDefinitions().get(0).getActionLabel());
         Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getRecordedLabel(), hearingDefinitions().get(0).getRecordedLabel());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getSequenceType(), hearingDefinitions().get(0).getSequenceType());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getSequence(), hearingDefinitions().get(0).getSequence());
+        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getActionSequence(), hearingDefinitions().get(0).getActionSequence());
+        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).getGroupSequence(), hearingDefinitions().get(0).getGroupSequence());
         Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(0).isAlterable(), hearingDefinitions().get(0).isAlterable());
 
         Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getActionLabel(), hearingDefinitions().get(1).getActionLabel());
         Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getRecordedLabel(), hearingDefinitions().get(1).getRecordedLabel());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getSequenceType(), hearingDefinitions().get(1).getSequenceType());
-        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getSequence(), hearingDefinitions().get(1).getSequence());
+        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getActionSequence(), hearingDefinitions().get(1).getActionSequence());
+        Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).getGroupSequence(), hearingDefinitions().get(1).getGroupSequence());
         Assert.assertEquals(hearingEventDefinitionsCreated.getEventDefinitions().get(1).isAlterable(), hearingDefinitions().get(1).isAlterable());
 
     }
@@ -84,8 +89,8 @@ public class HearingEventDefinitionAggregateTest {
     private List<HearingEventDefinition> hearingDefinitions() {
 
         return asList(
-                new HearingEventDefinition(randomUUID(), ACTION_LABEL_0, RECORDED_LABEL_0, 1, SEQUENCE_TYPE, null, null, null, false),
-                new HearingEventDefinition(randomUUID(), ACTION_LABEL_1, RECORDED_LABEL_1, 2, SEQUENCE_TYPE, null, null, null, true)
+                new HearingEventDefinition(randomUUID(), ACTION_LABEL_0, ACTION_SEQUENCE_0, RECORDED_LABEL_0, null, GROUP_LABEL_0, GROUP_SEQUENCE_0, false),
+                new HearingEventDefinition(randomUUID(), ACTION_LABEL_1, ACTION_SEQUENCE_1, RECORDED_LABEL_1, null, GROUP_LABEL_1, GROUP_SEQUENCE_1, true)
 
         );
     }

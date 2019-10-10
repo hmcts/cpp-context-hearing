@@ -21,14 +21,16 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
@@ -53,6 +55,7 @@ import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +70,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -103,6 +107,9 @@ public class HearingServiceTest {
 
     @Mock
     private GetHearingsTransformer getHearingsTransformer;
+
+    @Mock
+    private ReferenceDataService referenceDataService;
 
     @InjectMocks
     private HearingService hearingService;
@@ -165,7 +172,7 @@ public class HearingServiceTest {
         LocalDate startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate();
         final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
         final Hearing hearingEntity = hearingHelper.it();
-        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().build();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())). build();
         final UUID hearingSummaryId = UUID.randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
 
@@ -403,11 +410,11 @@ public class HearingServiceTest {
                 .withListingSequence(5)
                 .build();
 
-        LocalDate startDateStartOfDay =  LocalDate.of(2019, 7, 4);
+        LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
         //  final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
         final Hearing hearingEntity = HearingTestUtils.buildHearing();
-        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().build();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
         final UUID hearingSummaryId = UUID.randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
 
@@ -420,6 +427,50 @@ public class HearingServiceTest {
                 "09:00", "17:00", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId());
         assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
         assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
+    }
+
+    @Test
+    public void shouldFindHearingWithInEffectiveTrailType() {
+
+        Hearing entity = mock(Hearing.class);
+
+        uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
+        entity.setTrialTypeId(trialTypeId);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(referenceDataService.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
+
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+
+        HearingDetailsResponse response = hearingService.getHearingById(hearingId);
+
+        assertThat(response, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, is(pojo))
+        );
+    }
+
+    @Test
+    public void shouldFindHearingWithEffectiveTrailType() {
+
+        Hearing entity = mock(Hearing.class);
+
+        uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        UUID hearingId = randomUUID();
+        entity.setIsEffectiveTrial(true);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+
+        HearingDetailsResponse response = hearingService.getHearingById(hearingId);
+
+        assertThat(response, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, is(pojo))
+        );
     }
 
     private Document buildDocument() {
@@ -450,5 +501,12 @@ public class HearingServiceTest {
         subscription.setCourtCentreIds(asList(randomUUID(), randomUUID()));
 
         return subscription;
+    }
+
+    private CrackedIneffectiveVacatedTrialTypes buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
+        List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
+        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
+
+        return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
 }

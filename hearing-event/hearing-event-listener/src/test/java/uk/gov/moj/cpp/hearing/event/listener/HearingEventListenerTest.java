@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -30,6 +31,8 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
@@ -310,6 +313,51 @@ public class HearingEventListenerTest {
                 .with(Hearing::getApplicationDraftResults, hasSize(1))
                 .with(Hearing::getApplicationDraftResults, first(is(applicationDraftResult)))
                 .with(Hearing::getCourtApplicationsJson, is(applicationJson))
+        );
+    }
+
+    @Test
+    public void setInEffectiveTrialType_shouldPersist_with_hearing() {
+
+        final UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
+        final Hearing hearingEntity = new Hearing()
+                .setId(hearingId);
+        final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "A", "Effective", "full description");
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
+
+        hearingEventListener.setHearingTrialType(envelopeFrom(metadataWithRandomUUID("hearing.hearing-trial-type-set"),
+                objectToJsonObjectConverter.convert(hearingTrialType)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getTrialTypeId, is(trialTypeId))
+        );
+    }
+
+    @Test
+    public void setEffectiveTrialType_shouldPersist_with_hearing() {
+
+        final UUID hearingId = randomUUID();
+        Hearing hearingEntity = new Hearing()
+                .setId(hearingId);
+
+        final HearingEffectiveTrial hearingEffectiveTrial = new HearingEffectiveTrial(hearingId, TRUE);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
+
+        hearingEventListener.setHearingEffectiveTrial(envelopeFrom(metadataWithRandomUUID("hearing.hearing-effective-trial-set"),
+                objectToJsonObjectConverter.convert(hearingEffectiveTrial)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getIsEffectiveTrial, is(true))
         );
     }
 }

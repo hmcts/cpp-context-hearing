@@ -23,6 +23,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingCaseNote;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
@@ -80,6 +81,8 @@ public class HearingJPAMapperTest {
     private HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper;
     @Mock
     private HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper;
+    @Mock
+    private HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper;
     @Mock
     private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
 
@@ -202,6 +205,9 @@ public class HearingJPAMapperTest {
         DefenceCounsel defenceCounselMock = mock(DefenceCounsel.class);
         when(defenceCounselJPAMapper.fromJPA(hearingEntity.getDefenceCounsels())).thenReturn(asList(defenceCounselMock));
 
+        InterpreterIntermediary interpreterIntermediaryMock = mock(InterpreterIntermediary.class);
+        when(hearingInterpreterIntermediaryJPAMapper.fromJPA(hearingEntity.getHearingInterpreterIntermediaries())).thenReturn(asList(interpreterIntermediaryMock));
+
         CompanyRepresentative companyRepresentativeMock = mock(CompanyRepresentative.class);
         when(hearingCompanyRepresentativeJPAMapper.fromJPA(hearingEntity.getCompanyRepresentatives())).thenReturn(asList(companyRepresentativeMock));
 
@@ -222,7 +228,7 @@ public class HearingJPAMapperTest {
                 .with(Hearing::getType, is(hearingTypeMock))
                 .with(Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
                 .with(Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
-                .withValue(Hearing::getCourtApplications, expectedCourtApplications)
+                .withValue(Hearing::getCourtApplications, null)
         );
     }
 

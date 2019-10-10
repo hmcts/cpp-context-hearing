@@ -6,6 +6,7 @@ import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
@@ -39,6 +40,8 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
     private final Map<UUID, RespondentCounsel> respondentCounsels = new HashMap<>();
     private final Map<UUID, CompanyRepresentative> companyRepresentatives = new HashMap<>();
+    private final Map<UUID, InterpreterIntermediary> interpreterIntermediary = new HashMap<>();
+
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
     private List<UUID> adjournedHearingIds = new ArrayList<>();
@@ -58,6 +61,10 @@ public class HearingAggregateMomento implements Serializable {
 
     public Map<UUID, DefenceCounsel> getDefenceCounsels() {
         return defenceCounsels;
+    }
+
+    public Map<UUID, InterpreterIntermediary> getInterpreterIntermediary() {
+        return interpreterIntermediary;
     }
 
     public Map<UUID, Plea> getPleas() {

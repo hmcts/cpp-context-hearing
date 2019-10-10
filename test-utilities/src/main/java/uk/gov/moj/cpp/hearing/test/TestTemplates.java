@@ -17,7 +17,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.int
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 import static uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand.updatePleaCommand;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
@@ -31,6 +30,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.Attendant;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CreateNowsRequest;
@@ -41,6 +41,7 @@ import uk.gov.justice.core.courts.DocumentationLanguage;
 import uk.gov.justice.core.courts.FinancialOrderDetails;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
@@ -71,10 +72,13 @@ import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.hearing.courts.AddRespondentCounsel;
+import uk.gov.justice.hearing.courts.AttendantType;
 import uk.gov.justice.hearing.courts.Position;
+import uk.gov.justice.hearing.courts.Role;
 import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
 import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
+import uk.gov.justice.hearing.courts.UpdateInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
@@ -138,6 +142,40 @@ public class TestTemplates {
     private static final String OFFENCE = "Offence";
 
     private TestTemplates() {
+    }
+
+    public static InterpreterIntermediary addInterpreterIntermediaryCommandTemplate(final Attendant attendant) {
+        return new InterpreterIntermediary(
+                Arrays.asList(LocalDate.now()),
+                attendant,
+                STRING.next(),
+                randomUUID(),
+                STRING.next(),
+                Role.INTERMEDIARY);
+    }
+
+    public static class UpdateInterpreterIntermediaryCommandTemplates {
+        private UpdateInterpreterIntermediaryCommandTemplates() {
+        }
+
+        public static UpdateInterpreterIntermediary updateInterpreterIntermediaryCommandTemplate(final UUID hearingId) {
+
+            final Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());
+            final InterpreterIntermediary interpreterIntermediary = new InterpreterIntermediary(
+                    Arrays.asList(LocalDate.now()),
+                    attendant,
+                    STRING.next(),
+                    randomUUID(),
+                    STRING.next(),
+                    Role.INTERMEDIARY
+            );
+
+            return new UpdateInterpreterIntermediary(hearingId, interpreterIntermediary);
+        }
+
+        public static UpdateInterpreterIntermediary updateInterpreterIntermediaryCommandTemplate(final UUID hearingId, InterpreterIntermediary interpreterIntermediary) {
+            return new UpdateInterpreterIntermediary(hearingId, interpreterIntermediary);
+        }
     }
 
     public static Target targetTemplate() {
@@ -443,7 +481,6 @@ public class TestTemplates {
     }
 
     public static CaseDefendantDetailsWithHearingCommand initiateDefendantCommandTemplate(final UUID hearingId) {
-
         return CaseDefendantDetailsWithHearingCommand.caseDefendantDetailsWithHearingCommand()
                 .setHearingId(hearingId)
                 .setDefendant(defendantTemplate());
@@ -580,7 +617,7 @@ public class TestTemplates {
                                     .setJurisdictionType(CROWN)
                                     .setMinimumAssociatedPerson(true)
                                     .setMinimumDefenceOrganisation(true)
-                            ,courtAndRoomId, year, month, day).build());
+                            , courtAndRoomId, year, month, day).build());
         }
 
         public static InitiateHearingCommand initiateHearingTemplateForDefendantTypeOrganisation() {
@@ -1393,8 +1430,8 @@ public class TestTemplates {
                                     .withId(randomUUID())
                                     .withActionLabel(STRING.next())
                                     .withRecordedLabel(STRING.next())
-                                    .withSequence(INTEGER.next())
-                                    .withSequenceType(STRING.next())
+                                    .withActionSequence(INTEGER.next())
+                                    .withGroupSequence(INTEGER.next())
                                     .withAlterable(BOOLEAN.next())
                                     .build(),
                             HearingEventDefinition.builder()
@@ -1402,8 +1439,8 @@ public class TestTemplates {
                                     .withGroupLabel(STRING.next())
                                     .withActionLabel(STRING.next())
                                     .withRecordedLabel(STRING.next())
-                                    .withSequence(INTEGER.next())
-                                    .withSequenceType(STRING.next())
+                                    .withActionSequence(INTEGER.next())
+                                    .withGroupSequence(INTEGER.next())
                                     .withCaseAttribute(STRING.next())
                                     .withAlterable(BOOLEAN.next())
                                     .build(),
@@ -1411,8 +1448,8 @@ public class TestTemplates {
                                     withId(randomUUID())
                                     .withActionLabel(STRING.next())
                                     .withRecordedLabel(STRING.next())
-                                    .withSequence(INTEGER.next())
-                                    .withSequenceType(STRING.next())
+                                    .withActionSequence(INTEGER.next())
+                                    .withGroupSequence(INTEGER.next())
                                     .withAlterable(BOOLEAN.next())
                                     .build()))
                     .build();
@@ -1973,5 +2010,4 @@ public class TestTemplates {
             return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
         }
     }
-
 }
