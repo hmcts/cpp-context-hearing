@@ -26,6 +26,7 @@ public class ViewStoreCleaner {
                 "ha_hearing_defence_counsel",
                 "ha_hearing_prosecution_counsel",
                 "ha_hearing_respondent_counsel",
+                "ha_hearing_interpreter_intermediary",
                 "ha_hearing_event",
                 "ha_judicial_role",
                 "ha_now",
