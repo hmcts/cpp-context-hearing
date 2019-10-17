@@ -6,7 +6,6 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.moj.cpp.hearing.Utilities.with;
 
 import uk.gov.justice.core.courts.ContactNumber;
-import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -18,14 +17,11 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,13 +34,8 @@ public class CaseDefendantDetailsUpdatedEventListener {
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Inject
     private DefendantRepository defendantRepository;
-
-    @Inject
-    HearingRepository hearingRepository;
-
     @Inject
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
@@ -60,11 +51,6 @@ public class CaseDefendantDetailsUpdatedEventListener {
         final UUID hearingId = defendantDetailsToBeUpdated.getHearingId();
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantIn.getId(), hearingId));
-
-        final Hearing hearing = hearingRepository.findBy(hearingId);
-
-        final String  courtApplicationsJson =  hearing.getCourtApplicationsJson();
-
 
 
         if (defendant.getProsecutionCase().getId().getId().equals(defendantIn.getProsecutionCaseId())) {
@@ -102,33 +88,6 @@ public class CaseDefendantDetailsUpdatedEventListener {
 
             defendantRepository.save(defendant);
         }
-
-        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
-
-        final List<uk.gov.justice.core.courts.Person> respondentPersonToUpdate = courtApplications.stream()
-                .flatMap(ca->ca.getRespondents().stream()).map(resp->resp.getPartyDetails().getPersonDetails()).collect(Collectors.toList());
-
-        if (!respondentPersonToUpdate.isEmpty()){
-            respondentPersonToUpdate.forEach(p->{
-                p.setFirstName(defendant.getPersonDefendant().getPersonDetails().getFirstName());
-                p.setLastName(defendant.getPersonDefendant().getPersonDetails().getLastName());
-                p.setMiddleName(defendant.getPersonDefendant().getPersonDetails().getMiddleName());
-                p.setDateOfBirth(defendant.getPersonDefendant().getPersonDetails().getDateOfBirth());
-                p.setTitle(defendant.getPersonDefendant().getPersonDetails().getTitle());
-                p.setNationalInsuranceNumber(defendant.getPersonDefendant().getPersonDetails().getNationalInsuranceNumber());
-                p.setAdditionalNationalityCode(defendant.getPersonDefendant().getPersonDetails().getAdditionalNationalityCode());
-                p.setAdditionalNationalityId(defendant.getPersonDefendant().getPersonDetails().getAdditionalNationalityId());
-                p.setDisabilityStatus(defendant.getPersonDefendant().getPersonDetails().getDisabilityStatus());
-                p.setDocumentationLanguageNeeds(defendant.getPersonDefendant().getPersonDetails().getDocumentationLanguageNeeds());
-                p.setGender(defendant.getPersonDefendant().getPersonDetails().getGender());
-                p.setOccupation(defendant.getPersonDefendant().getPersonDetails().getOccupation());
-                p.setOccupationCode(defendant.getPersonDefendant().getPersonDetails().getOccupationCode());
-                p.setSpecificRequirements(defendant.getPersonDefendant().getPersonDetails().getSpecificRequirements());
-            });
-            hearing.setCourtApplicationsJson(courtApplicationsSerializer.json(courtApplications));
-            hearingRepository.save(hearing);
-        }
-
 
     }
 
